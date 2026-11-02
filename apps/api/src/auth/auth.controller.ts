@@ -27,7 +27,7 @@ export class AuthController {
 
   /** Envoie un code de connexion à 6 chiffres par SMS (A1). */
   @Post('otp')
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @ApiZodBody(RequestOtpBody)
   @ApiZodResponse(OtpChallengeDto, HttpStatus.CREATED)
   request(
@@ -41,7 +41,7 @@ export class AuthController {
   /** Vérifie le code ; crée le compte au premier passage (conditions acceptées obligatoires). */
   @Post('otp/verify')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @ApiZodBody(VerifyOtpBody)
   @ApiZodResponse(AuthSessionDto)
   verify(

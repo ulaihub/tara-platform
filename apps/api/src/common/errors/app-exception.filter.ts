@@ -13,7 +13,7 @@ import { ERROR_MESSAGES, type ErrorCode } from './error-codes.js';
 import type { AuthenticatedRequest } from '../../auth/auth.types.js';
 
 export interface ErrorBody {
-  error: { code: ErrorCode; message: string; details?: unknown };
+  error: { code: ErrorCode; message: string; details?: unknown; requestId?: string };
 }
 
 const HTTP_STATUS_CODES: Partial<Record<number, ErrorCode>> = {
@@ -39,6 +39,7 @@ export class AppExceptionFilter implements ExceptionFilter {
     const response = http.getResponse<Response>();
     const locale = resolveLocale(request.headers['accept-language'], request.user?.locale);
 
+    const requestId = (request as { id?: string }).id;
     let status: number;
     let code: ErrorCode;
     let params: Record<string, string | number> = {};
@@ -56,7 +57,7 @@ export class AppExceptionFilter implements ExceptionFilter {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       code = 'INTERNAL_ERROR';
       this.logger.error(
-        `${request.method} ${request.url}`,
+        `${request.method} ${request.url} [${requestId ?? '-'}]`,
         exception instanceof Error ? exception.stack : String(exception),
       );
     }
@@ -66,6 +67,7 @@ export class AppExceptionFilter implements ExceptionFilter {
         code,
         message: interpolate(ERROR_MESSAGES[code][locale], params),
         ...(details === undefined ? {} : { details }),
+        ...(requestId ? { requestId } : {}),
       },
     };
     response.status(status).json(body);

@@ -26,11 +26,31 @@ const envSchema = z
     DEFAULT_CITY: z.string().min(1).default('Douala'),
 
     JWT_SECRET: z.string().min(32, 'doit contenir au moins 32 caractères'),
+    /** Ancien secret, encore accepté en vérification pendant une rotation de clé. */
+    JWT_SECRET_PREVIOUS: z.string().min(32, 'doit contenir au moins 32 caractères').optional(),
     JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(900),
     REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(30),
     /** Secret mélangé aux codes courts (SMS, enlèvement, livraison) avant hachage. */
     CODE_HASH_SECRET: z.string().min(32, 'doit contenir au moins 32 caractères'),
     OTP_TTL_SECONDS: z.coerce.number().int().min(60).max(900).default(300),
+    /**
+     * Plafonds d'envoi de codes SMS contre le « pompage » (envois massifs pour faire payer
+     * les SMS). Les limites par IP restent larges : au Cameroun, beaucoup d'abonnés
+     * mobiles partagent la même adresse IP publique (CGNAT des opérateurs).
+     */
+    OTP_MAX_PER_IP_PER_HOUR: z.coerce.number().int().min(1).default(300),
+    OTP_DAILY_GLOBAL_LIMIT: z.coerce.number().int().min(1).default(5000),
+    /** Durée de validité de la double authentification de l'équipe, en heures. */
+    MFA_SESSION_HOURS: z.coerce.number().int().min(1).max(24).default(12),
+
+    /**
+     * Relais de confiance devant l'API, pour lire la vraie adresse IP du client
+     * (réglage « trust proxy » d'Express) : « loopback », un nombre de relais ou des plages
+     * CIDR séparées par des virgules. Jamais « true » en production (adresse falsifiable).
+     */
+    TRUST_PROXY: z.string().min(1).default('loopback'),
+    /** Origines web autorisées (back-office, page de suivi), séparées par des virgules. */
+    CORS_ORIGINS: z.string().default(''),
 
     STORAGE_DRIVER: z.enum(['local']).default('local'),
     STORAGE_LOCAL_DIR: z.string().min(1).default('./var/storage'),
@@ -49,6 +69,13 @@ const envSchema = z
         code: 'custom',
         path: ['SMS_PROVIDER'],
         message: 'le fournisseur SMS factice est interdit en production',
+      });
+    }
+    if (env.TRUST_PROXY.trim() === 'true') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['TRUST_PROXY'],
+        message: 'interdit en production : préciser le nombre de relais ou leurs adresses',
       });
     }
     if (env.STORAGE_DRIVER === 'local') {

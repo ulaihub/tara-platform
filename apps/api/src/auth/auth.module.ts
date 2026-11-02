@@ -1,13 +1,16 @@
 import { Global, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller.js';
 import { AuthGuard } from './auth.guard.js';
+import { AdminSecurityController, MfaController } from './mfa.controller.js';
+import { MfaService } from './mfa.service.js';
 import { OtpService } from './otp.service.js';
 import { TokenService } from './token.service.js';
+import { UserAwareThrottlerGuard } from './user-aware-throttler.guard.js';
 
 @Global()
 @Module({
-  controllers: [AuthController],
-  providers: [TokenService, OtpService, AuthGuard],
-  exports: [TokenService, AuthGuard],
+  controllers: [AuthController, MfaController, AdminSecurityController],
+  providers: [TokenService, OtpService, MfaService, AuthGuard, UserAwareThrottlerGuard],
+  exports: [TokenService, OtpService, AuthGuard, UserAwareThrottlerGuard],
 })
 export class AuthModule {}

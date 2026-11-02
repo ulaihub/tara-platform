@@ -1,0 +1,24 @@
+# Mises à jour automatiques des dépendances : une pull request par semaine et par groupe,
+# validée par la CI comme toute autre modification. Les alertes de sécurité sont traitées
+# en priorité par GitHub, en dehors de ce calendrier.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      production:
+        dependency-type: production
+        update-types: [minor, patch]
+      developpement:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday

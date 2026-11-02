@@ -9,6 +9,7 @@ Lancement prévu à Douala (Cameroun) : réseau 2G/3G instable, téléphones And
 - [Cahier des charges technique](docs/CAHIER_DES_CHARGES.md) : exigences A1 à H10, exigences non fonctionnelles, critères de recette.
 - [Architecture](docs/ARCHITECTURE.md) : composants, versions, décisions de conception, développement local.
 - [Plan des phases](docs/PLAN_DES_PHASES.md) : phases 0 à 7, exigences couvertes, estimations.
+- [Sécurité](docs/SECURITE.md) : menaces, protections, gestion des clés, procédures et réponse aux incidents.
 - [Guide de l'API](docs/API.md) : conventions, connexion par SMS, routes par exigence ; contrat complet dans `apps/api/openapi.json`.
 
 ## Démarrage rapide

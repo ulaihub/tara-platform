@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { writeFile } from 'node:fs/promises';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 
 /**
  * Écrit le contrat OpenAPI de l'API dans un fichier versionné (apps/api/openapi.json),
@@ -21,7 +22,7 @@ const { AppModule } = await import('../app.module.js');
 const { configureApp } = await import('../app.setup.js');
 const { buildOpenApiDocument } = await import('./openapi.js');
 
-const app = await NestFactory.create(AppModule, { logger: false });
+const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger: false });
 configureApp(app);
 const document = buildOpenApiDocument(app);
 const target = process.argv[2] ?? 'openapi.json';

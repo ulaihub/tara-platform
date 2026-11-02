@@ -12,6 +12,10 @@ const ErrorBody = z
         .string()
         .meta({ description: 'Message prêt à afficher, en français ou en anglais' }),
       details: z.unknown().optional(),
+      requestId: z
+        .string()
+        .optional()
+        .meta({ description: 'À communiquer au support : retrouve la requête dans les journaux' }),
     }),
   })
   .meta({ id: 'ErrorBody', description: 'Format unique des erreurs de l’API' });

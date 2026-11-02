@@ -9,6 +9,18 @@ const TEMPLATES = {
     fr: 'Tara : votre code de connexion est {code}. Il expire dans {minutes} min. Ne le partagez avec personne.',
     en: 'Tara: your sign-in code is {code}. It expires in {minutes} min. Do not share it with anyone.',
   },
+  ACCOUNT_DELETION_OTP: {
+    fr: 'Tara : code de confirmation de SUPPRESSION de votre compte : {code}. Si vous n avez rien demande, ignorez ce message.',
+    en: 'Tara: confirmation code to DELETE your account: {code}. If you did not request this, ignore this message.',
+  },
+  MFA_ENABLED: {
+    fr: 'Tara : la double authentification vient d etre activee sur votre compte. Si ce n est pas vous, prevenez immediatement un administrateur.',
+    en: 'Tara: two-factor authentication was just enabled on your account. If this was not you, alert an administrator immediately.',
+  },
+  MFA_RESET: {
+    fr: 'Tara : la double authentification de votre compte a ete reinitialisee par un administrateur. Configurez-la a nouveau.',
+    en: 'Tara: your two-factor authentication was reset by an administrator. Please set it up again.',
+  },
   RECIPIENT_CONFIRMATION: {
     fr: '{sender} vous envoie un colis avec Tara (ref {reference}). Confirmez adresse et disponibilite : {url}',
     en: '{sender} is sending you a parcel with Tara (ref {reference}). Confirm address and availability: {url}',
