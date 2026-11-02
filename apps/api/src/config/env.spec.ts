@@ -3,6 +3,7 @@ import { InvalidEnvironmentError, parseEnv } from './env.js';
 describe('parseEnv', () => {
   const valid = {
     DATABASE_URL: 'postgresql://tara:tara@localhost:5432/tara',
+    REDIS_URL: 'redis://localhost:6379',
     JWT_SECRET: 'x'.repeat(32),
     CODE_HASH_SECRET: 'y'.repeat(32),
     STORAGE_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString('base64'),
@@ -46,7 +47,7 @@ describe('parseEnv', () => {
 
   it('interdit le SMS factice et le stockage local en production', () => {
     expect(() => parseEnv({ ...valid, NODE_ENV: 'production' })).toThrow(
-      /SMS_PROVIDER[\s\S]*STORAGE_DRIVER/,
+      /SMS_PROVIDER[\s\S]*PUSH_PROVIDER[\s\S]*STORAGE_DRIVER/,
     );
   });
 });

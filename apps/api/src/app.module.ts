@@ -15,6 +15,8 @@ import { OrdersModule } from './orders/orders.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrivacyModule } from './privacy/privacy.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { RedisModule } from './redis/redis.module.js';
+import { RedisThrottlerStorage } from './redis/redis-throttler.storage.js';
 import { RidersModule } from './riders/riders.module.js';
 import { SmsModule } from './sms/sms.module.js';
 import { StorageModule } from './storage/storage.module.js';
@@ -24,10 +26,13 @@ import { UsersModule } from './users/users.module.js';
   imports: [
     ConfigModule,
     PrismaModule,
+    RedisModule,
     ThrottlerModule.forRootAsync({
-      inject: [ENV],
-      useFactory: (env: Env) => ({
+      inject: [ENV, RedisThrottlerStorage],
+      useFactory: (env: Env, storage: RedisThrottlerStorage) => ({
         throttlers: [{ name: 'default', ttl: 60_000, limit: 120 }],
+        // Compteurs partagés entre les instances de l'API.
+        storage,
         skipIf: () => env.NODE_ENV === 'test',
       }),
     }),

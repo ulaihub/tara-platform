@@ -4,6 +4,7 @@ import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { ENV } from './config/config.module.js';
 import type { Env } from './config/env.js';
+import { RedisIoAdapter } from './realtime/redis-io.adapter.js';
 
 /** Valeur Express de « trust proxy » à partir de TRUST_PROXY. */
 export function parseTrustProxy(value: string): boolean | number | string[] {
@@ -83,4 +84,7 @@ export function configureApp(app: NestExpressApplication): void {
 
   app.use('/v1', noStore);
   app.setGlobalPrefix('v1', { exclude: ['health'] });
+
+  // Temps réel : les événements circulent entre les instances de l'API par Redis.
+  app.useWebSocketAdapter(new RedisIoAdapter(app, env.REDIS_URL, env.QUEUE_PREFIX));
 }
