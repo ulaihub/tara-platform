@@ -161,9 +161,9 @@ pnpm dev                              # API sur http://localhost:3000/health
 
 ## Questions ouvertes
 
-| Sujet                                          | Options                                                                                            | Quand trancher   |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------- |
-| Agrégateur Mobile Money                        | Comparer les devis de 3 agrégateurs camerounais (frais de collecte et de reversement, API, délais) | Avant phase 3    |
-| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                | Avant phase 3    |
-| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                     | Avant phase 7    |
-| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel  | Après le pilote  |
+| Sujet                                          | Options                                                                                            | Quand trancher  |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------- |
+| Agrégateur Mobile Money                        | Comparer les devis de 3 agrégateurs camerounais (frais de collecte et de reversement, API, délais) | Avant phase 3   |
+| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                | Avant phase 3   |
+| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                     | Avant phase 7   |
+| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel  | Après le pilote |
