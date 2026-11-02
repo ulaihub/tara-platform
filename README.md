@@ -9,6 +9,7 @@ Lancement prévu à Douala (Cameroun) : réseau 2G/3G instable, téléphones And
 - [Cahier des charges technique](docs/CAHIER_DES_CHARGES.md) : exigences A1 à H10, exigences non fonctionnelles, critères de recette.
 - [Architecture](docs/ARCHITECTURE.md) : composants, versions, décisions de conception, développement local.
 - [Plan des phases](docs/PLAN_DES_PHASES.md) : phases 0 à 7, exigences couvertes, estimations.
+- [Guide de l'API](docs/API.md) : conventions, connexion par SMS, routes par exigence ; contrat complet dans `apps/api/openapi.json`.
 
 ## Démarrage rapide
 
@@ -19,6 +20,7 @@ pnpm install
 pnpm infra:up
 cp apps/api/.env.example apps/api/.env
 pnpm db:migrate
+pnpm --filter @tara/api db:seed   # zone de Douala, tarif de lancement, offre BIENVENUE
 pnpm dev
 ```
 
@@ -28,8 +30,8 @@ L'API répond alors sur <http://localhost:3000/health>.
 
 | Phase                              | État     |
 | ---------------------------------- | -------- |
-| 0. Fondations et schéma de données | En cours |
-| 1. Back-end cœur                   | À faire  |
+| 0. Fondations et schéma de données | Terminée |
+| 1. Back-end cœur                   | Terminée |
 | 2. Attribution et temps réel       | À faire  |
 | 3. Argent                          | À faire  |
 | 4. App livreur                     | À faire  |

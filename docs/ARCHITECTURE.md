@@ -101,6 +101,25 @@ tara-platform/
 11. **Nommage.** Identifiants de code en anglais ; tables et colonnes en snake_case ;
     documentation, commentaires et messages d'erreur en français.
 
+12. **Zod, source unique des contrats.** Chaque entrée est validée par un schéma Zod, et les
+    mêmes schémas produisent le contrat OpenAPI versionné (`apps/api/openapi.json`) dont on génère
+    le client Flutter. La CI échoue si le contrat n'est pas à jour.
+13. **Connexion sans mot de passe.** Code SMS à 6 chiffres haché, 5 essais ; jeton d'accès JWT de
+    15 minutes ; jeton de rafraîchissement opaque à usage unique, dont la réutilisation ferme
+    toutes les sessions. L'utilisateur est relu en base à chaque requête : une suspension prend
+    effet immédiatement.
+14. **Prix toujours recalculé côté serveur.** Le calcul est une fonction pure testée
+    (`pricing.engine.ts`). Les grilles sont versionnées : en activer une archive la précédente,
+    et chaque commande garde la grille qui l'a tarifée. Distance par OSRM, avec repli sur une
+    estimation à vol d'oiseau × 1,3 si OSRM ne répond pas en 2,5 s.
+15. **Fichiers rattachés à leur propriétaire.** Une adresse ne peut référencer que les photos de
+    son auteur ; le type réel des images et PDF est vérifié. Les pièces d'identité sont chiffrées
+    (AES-256-GCM) et chaque consultation par l'équipe est auditée.
+16. **Provisoire en phase 1** : SMS factice (journal), stockage sur disque, limitation de débit en
+    mémoire, langue des SMS au destinataire en français. Remplacés par l'agrégateur SMS et Redis
+    (phase 2) puis par un stockage objet (phase 7) ; la configuration refuse de démarrer en
+    production tant que c'est le cas.
+
 ## Cycle de vie d'une commande
 
 Statuts définis dans le schéma ; les transitions seront implémentées et testées en phase 1.

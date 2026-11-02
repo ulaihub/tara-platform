@@ -69,3 +69,8 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Contrat OpenAPI à jour
+        run: |
+          pnpm --filter @tara/api openapi
+          git diff --exit-code apps/api/openapi.json

@@ -1,0 +1,639 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type { Request } from 'express';
+import type { z } from 'zod';
+import { AuditService } from '../audit/audit.service.js';
+import type { AuthUser } from '../auth/auth.types.js';
+import { ENV } from '../config/config.module.js';
+import type { Env } from '../config/env.js';
+import { AppError } from '../common/errors/app-error.js';
+import { hashCode, randomDigits, randomReadableId, randomToken } from '../common/crypto.js';
+import { pageOf } from '../common/pagination.js';
+import { Prisma, type Order, type OrderEvent } from '../generated/prisma/client.js';
+import type { ActorRole } from '../generated/prisma/enums.js';
+import { AddressesService } from '../geo/addresses.service.js';
+import { type FullQuote, PricingService } from '../pricing/pricing.service.js';
+import { PromoService } from '../pricing/promo.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { BEFORE_PICKUP } from './order-state-machine.js';
+import { OrderTransitionsService } from './order-transitions.service.js';
+import {
+  type AdminTransitionBody,
+  type CreateBatchBody,
+  type CreatedBatchDto,
+  type CreatedOrderDto,
+  type CreateOrderBody,
+  type DeliveryItem,
+  MAX_COD_AMOUNT,
+  type OrderDto,
+  type OrderListQuery,
+  type OrderSummaryDto,
+  type PublicTrackingDto,
+  type RecipientDto,
+  type RecipientResponseBody,
+} from './orders.schemas.js';
+import { RecipientNotifier } from './recipient-notifier.js';
+
+const ADDRESS_INCLUDE = {
+  include: { neighborhood: { select: { id: true, name: true } } },
+} as const;
+const ORDER_INCLUDE = {
+  pickupAddress: ADDRESS_INCLUDE,
+  dropoffAddress: ADDRESS_INCLUDE,
+  events: { orderBy: { recordedAt: 'asc' } },
+} as const satisfies Prisma.OrderInclude;
+
+type OrderFull = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
+
+interface Shared {
+  pickupAddressId: string;
+  isExpress: boolean;
+  scheduledFor?: string | undefined;
+  feePayer: 'SENDER' | 'RECIPIENT';
+  feePaymentMethod: 'MOMO_MTN' | 'MOMO_ORANGE' | 'CASH' | 'WALLET';
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
+}
+
+/**
+ * Une commande part tout de suite à la recherche d'un livreur si rien ne doit être payé
+ * d'avance (paiement en espèces ou par le destinataire) et si elle n'est pas programmée.
+ * Sinon elle attend le paiement Mobile Money (phase 3) ou son créneau (phase 2).
+ */
+function dispatchesImmediately(order: Order): boolean {
+  return (
+    !order.scheduledFor && (order.feePayer === 'RECIPIENT' || order.feePaymentMethod === 'CASH')
+  );
+}
+
+@Injectable()
+export class OrdersService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly pricing: PricingService,
+    private readonly promos: PromoService,
+    private readonly addresses: AddressesService,
+    private readonly transitions: OrderTransitionsService,
+    private readonly notifier: RecipientNotifier,
+    private readonly audit: AuditService,
+    @Inject(ENV) private readonly env: Env,
+  ) {}
+
+  // --- Lecture ---------------------------------------------------------------------------
+
+  async toDtos(orders: OrderFull[]): Promise<z.output<typeof OrderDto>[]> {
+    const unique = new Map(
+      orders.flatMap((o) => [o.pickupAddress, o.dropoffAddress]).map((a) => [a.id, a] as const),
+    );
+    const dtos = await this.addresses.toDtos([...unique.values()]);
+    const byId = new Map(dtos.map((dto) => [dto.id, dto]));
+    return orders.map((order) => this.toDto(order, byId));
+  }
+
+  private toDto(
+    order: OrderFull,
+    addresses: Map<string, z.output<typeof OrderDto>['pickup']>,
+  ): z.output<typeof OrderDto> {
+    const pickup = addresses.get(order.pickupAddressId);
+    const dropoff = addresses.get(order.dropoffAddressId);
+    if (!pickup || !dropoff) throw new Error(`Adresses manquantes pour ${order.reference}`);
+    return {
+      id: order.id,
+      reference: order.reference,
+      status: order.status,
+      trackingUrl: this.notifier.trackingUrl(order.trackingToken),
+      batchId: order.batchId,
+      isExpress: order.isExpress,
+      scheduledFor: order.scheduledFor?.toISOString() ?? null,
+      packageSize: order.packageSize,
+      isFragile: order.isFragile,
+      declaredValue: order.declaredValue,
+      instructions: order.instructions,
+      pickup,
+      dropoff,
+      recipient: {
+        name: order.recipientName,
+        phone: order.recipientPhone,
+        confirmedAt: order.recipientConfirmedAt?.toISOString() ?? null,
+        available: order.recipientAvailable,
+        note: order.recipientNote,
+      },
+      pricing: {
+        currency: 'XAF',
+        distanceMeters: order.distanceMeters,
+        basePrice: order.basePrice,
+        surchargesTotal: order.surchargesTotal,
+        discountTotal: order.discountTotal,
+        totalPrice: order.totalPrice,
+        feePayer: order.feePayer,
+        feePaymentMethod: order.feePaymentMethod,
+        codAmount: order.codAmount,
+      },
+      riderId: order.riderId,
+      attemptCount: order.attemptCount,
+      cancelReason: order.cancelReason,
+      timeline: order.events.map((event: OrderEvent) => ({
+        status: event.toStatus,
+        at: event.occurredAt.toISOString(),
+        actorRole: event.actorRole,
+        failureReason: event.failureReason,
+        note: event.note,
+      })),
+      createdAt: order.createdAt.toISOString(),
+    };
+  }
+
+  private async loadFull(id: string): Promise<OrderFull> {
+    const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
+    if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
+    return order;
+  }
+
+  private async dtoOf(id: string): Promise<z.output<typeof OrderDto>> {
+    const [dto] = await this.toDtos([await this.loadFull(id)]);
+    return dto as z.output<typeof OrderDto>;
+  }
+
+  /** Rôle de l'utilisateur vis-à-vis de la commande, ou null s'il n'y a pas accès. */
+  private async roleOn(user: AuthUser, order: Order): Promise<ActorRole | null> {
+    if (order.senderId === user.id) return 'SENDER';
+    if (user.roles.includes('DISPATCHER') || user.roles.includes('ADMIN')) return 'DISPATCHER';
+    if (user.roles.includes('SUPPORT')) return 'SUPPORT';
+    if (order.riderId) {
+      const rider = await this.prisma.riderProfile.findUnique({ where: { userId: user.id } });
+      if (rider?.id === order.riderId) return 'RIDER';
+    }
+    return null;
+  }
+
+  async get(user: AuthUser, id: string): Promise<z.output<typeof OrderDto>> {
+    const order = await this.loadFull(id);
+    if (!(await this.roleOn(user, order))) throw AppError.notFound('ORDER_NOT_FOUND');
+    const [dto] = await this.toDtos([order]);
+    return dto as z.output<typeof OrderDto>;
+  }
+
+  async list(
+    user: AuthUser,
+    query: z.output<typeof OrderListQuery>,
+  ): Promise<{ items: z.output<typeof OrderSummaryDto>[]; nextCursor: string | null }> {
+    const rows = await this.prisma.order.findMany({
+      where: {
+        senderId: user.id,
+        ...(query.status ? { status: query.status } : {}),
+        ...(query.cursor ? { id: { lt: query.cursor } } : {}),
+      },
+      orderBy: { id: 'desc' },
+      take: query.limit + 1,
+      include: { dropoffAddress: { select: { landmark: true } } },
+    });
+    const page = pageOf(rows, query.limit);
+    return {
+      items: page.items.map((order) => ({
+        id: order.id,
+        reference: order.reference,
+        status: order.status,
+        recipientName: order.recipientName,
+        dropoffLandmark: order.dropoffAddress.landmark,
+        totalPrice: order.totalPrice,
+        codAmount: order.codAmount,
+        scheduledFor: order.scheduledFor?.toISOString() ?? null,
+        createdAt: order.createdAt.toISOString(),
+      })),
+      nextCursor: page.nextCursor,
+    };
+  }
+
+  // --- Création (C1, C3, C4) -------------------------------------------------------------
+
+  private async checkCommercialRules(
+    user: AuthUser,
+    shared: Shared,
+    items: z.output<typeof DeliveryItem>[],
+  ): Promise<{ merchantId: string | null; senderName: string }> {
+    const sender = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.id },
+      include: { merchant: true },
+    });
+    for (const item of items) {
+      if (item.codAmount > 0 && !sender.merchant)
+        throw AppError.unprocessable('MERCHANT_REQUIRED_FOR_COD');
+      if (item.codAmount > MAX_COD_AMOUNT) {
+        throw AppError.unprocessable('COD_AMOUNT_TOO_HIGH', {
+          max: MAX_COD_AMOUNT.toLocaleString('fr-FR'),
+        });
+      }
+    }
+    if (shared.feePayer === 'RECIPIENT' && shared.feePaymentMethod === 'WALLET') {
+      throw AppError.unprocessable('PAYMENT_METHOD_NOT_ALLOWED');
+    }
+    return {
+      merchantId: sender.merchant?.id ?? null,
+      senderName: sender.merchant?.shopName ?? sender.fullName ?? 'Un expéditeur',
+    };
+  }
+
+  private orderData(
+    user: AuthUser,
+    shared: Shared,
+    item: z.output<typeof DeliveryItem>,
+    quote: FullQuote,
+    context: {
+      merchantId: string | null;
+      reference: string;
+      pickupCode: string;
+      batchId?: string;
+      idempotencyKey?: string | undefined;
+    },
+  ): Prisma.OrderUncheckedCreateInput {
+    return {
+      reference: context.reference,
+      trackingToken: randomToken(16),
+      senderId: user.id,
+      merchantId: context.merchantId,
+      batchId: context.batchId ?? null,
+      pickupAddressId: shared.pickupAddressId,
+      dropoffAddressId: item.dropoffAddressId,
+      recipientName: item.recipientName,
+      recipientPhone: item.recipientPhone,
+      packageSize: item.packageSize,
+      isFragile: item.isFragile,
+      declaredValue: item.declaredValue ?? null,
+      instructions: item.instructions ?? null,
+      isExpress: shared.isExpress,
+      scheduledFor: quote.scheduledFor,
+      pricingGridId: quote.grid.id,
+      distanceMeters: quote.route.meters,
+      basePrice: quote.price.basePrice,
+      surchargesTotal: quote.price.surchargesTotal,
+      discountTotal: quote.price.discountTotal,
+      totalPrice: quote.price.totalPrice,
+      riderEarning: quote.price.riderEarning,
+      platformFee: quote.price.platformFee,
+      feePayer: shared.feePayer,
+      feePaymentMethod: shared.feePaymentMethod,
+      codAmount: item.codAmount,
+      pickupCodeHash: hashCode(
+        this.env.CODE_HASH_SECRET,
+        `pickup:${context.reference}`,
+        context.pickupCode,
+      ),
+      idempotencyKey: context.idempotencyKey ?? null,
+    };
+  }
+
+  /** Crée la commande, son historique et, si possible, la lance tout de suite. */
+  private async insert(
+    tx: Prisma.TransactionClient,
+    user: AuthUser,
+    data: Prisma.OrderUncheckedCreateInput,
+  ): Promise<Order> {
+    const created = await tx.order.create({ data });
+    await tx.orderEvent.create({
+      data: {
+        orderId: created.id,
+        toStatus: 'CREATED',
+        actorId: user.id,
+        actorRole: 'SENDER',
+        occurredAt: created.createdAt,
+      },
+    });
+    if (!dispatchesImmediately(created)) return created;
+    const { order } = await this.transitions.applyIn(tx, created, 'SEARCHING_RIDER', {
+      id: null,
+      role: 'SYSTEM',
+    });
+    return order;
+  }
+
+  async create(
+    user: AuthUser,
+    body: z.output<typeof CreateOrderBody>,
+    idempotencyKey: string | undefined,
+  ): Promise<z.output<typeof CreatedOrderDto>> {
+    const replay = await this.replay(user, idempotencyKey);
+    if (replay) return replay;
+
+    const context = await this.checkCommercialRules(user, body, [body]);
+    const quote = await this.pricing.quote(user, {
+      pickup: { addressId: body.pickupAddressId },
+      dropoff: { addressId: body.dropoffAddressId },
+      packageSize: body.packageSize,
+      isExpress: body.isExpress,
+      scheduledFor: body.scheduledFor,
+      promoCode: body.promoCode,
+    });
+    const pickupCode = randomDigits(4);
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const reference = `TR-${randomReadableId(6)}`;
+      try {
+        const order = await this.prisma.$transaction(async (tx) => {
+          if (quote.promo) {
+            // Verrou puis nouvelle vérification : le quota ne peut pas être dépassé en parallèle.
+            await this.promos.lock(quote.promo.code, tx);
+            await this.promos.validate(quote.promo.code, user.id, new Date(), tx);
+          }
+          const created = await this.insert(
+            tx,
+            user,
+            this.orderData(user, body, body, quote, {
+              ...context,
+              reference,
+              pickupCode,
+              idempotencyKey,
+            }),
+          );
+          if (quote.promo) {
+            await tx.promoRedemption.create({
+              data: {
+                promoId: quote.promo.id,
+                userId: user.id,
+                orderId: created.id,
+                discount: quote.price.discountTotal,
+              },
+            });
+          }
+          return created;
+        });
+        await this.notifier.confirmation(order, context.senderName);
+        return { order: await this.dtoOf(order.id), pickupCode, replayed: false };
+      } catch (error) {
+        if (!isUniqueViolation(error)) throw error;
+        const concurrent = await this.replay(user, idempotencyKey);
+        if (concurrent) return concurrent;
+        // Sinon : collision de référence, on retente avec une autre.
+      }
+    }
+    throw new Error('Impossible de générer une référence de commande unique');
+  }
+
+  private async replay(
+    user: AuthUser,
+    idempotencyKey: string | undefined,
+  ): Promise<z.output<typeof CreatedOrderDto> | null> {
+    if (!idempotencyKey) return null;
+    const existing = await this.prisma.order.findUnique({ where: { idempotencyKey } });
+    if (!existing) return null;
+    if (existing.senderId !== user.id) throw AppError.conflict('IDEMPOTENCY_CONFLICT');
+    return { order: await this.dtoOf(existing.id), pickupCode: null, replayed: true };
+  }
+
+  /** Lot de 1 à 10 livraisons depuis un même point, avec un seul code d'enlèvement (C4). */
+  async createBatch(
+    user: AuthUser,
+    body: z.output<typeof CreateBatchBody>,
+    idempotencyKey: string | undefined,
+  ): Promise<z.output<typeof CreatedBatchDto>> {
+    if (idempotencyKey) {
+      const existing = await this.prisma.orderBatch.findUnique({
+        where: { idempotencyKey },
+        include: { orders: true },
+      });
+      if (existing) {
+        if (existing.senderId !== user.id) throw AppError.conflict('IDEMPOTENCY_CONFLICT');
+        return this.batchDto(existing.id, null, true);
+      }
+    }
+
+    const context = await this.checkCommercialRules(user, body, body.items);
+    const quotes = await Promise.all(
+      body.items.map((item) =>
+        this.pricing.quote(user, {
+          pickup: { addressId: body.pickupAddressId },
+          dropoff: { addressId: item.dropoffAddressId },
+          packageSize: item.packageSize,
+          isExpress: body.isExpress,
+          scheduledFor: body.scheduledFor,
+        }),
+      ),
+    );
+    const pickupCode = randomDigits(4);
+
+    let batchId: string;
+    try {
+      const { batch, orders } = await this.prisma.$transaction(async (tx) => {
+        const batch = await tx.orderBatch.create({
+          data: {
+            senderId: user.id,
+            pickupAddressId: body.pickupAddressId,
+            idempotencyKey: idempotencyKey ?? null,
+          },
+        });
+        const orders: Order[] = [];
+        for (const [index, item] of body.items.entries()) {
+          const quote = quotes[index] as FullQuote;
+          const reference = `TR-${randomReadableId(6)}`;
+          orders.push(
+            await this.insert(
+              tx,
+              user,
+              this.orderData(user, body, item, quote, {
+                ...context,
+                reference,
+                pickupCode,
+                batchId: batch.id,
+              }),
+            ),
+          );
+        }
+        return { batch, orders };
+      });
+      batchId = batch.id;
+      for (const order of orders) await this.notifier.confirmation(order, context.senderName);
+    } catch (error) {
+      if (idempotencyKey && isUniqueViolation(error)) {
+        const existing = await this.prisma.orderBatch.findUnique({ where: { idempotencyKey } });
+        if (existing?.senderId === user.id) return this.batchDto(existing.id, null, true);
+      }
+      throw error;
+    }
+    return this.batchDto(batchId, pickupCode, false);
+  }
+
+  private async batchDto(
+    batchId: string,
+    pickupCode: string | null,
+    replayed: boolean,
+  ): Promise<z.output<typeof CreatedBatchDto>> {
+    const orders = await this.prisma.order.findMany({
+      where: { batchId },
+      orderBy: { createdAt: 'asc' },
+      include: ORDER_INCLUDE,
+    });
+    return { batchId, pickupCode, replayed, orders: await this.toDtos(orders) };
+  }
+
+  // --- Actions sur une commande -----------------------------------------------------------
+
+  async cancel(user: AuthUser, id: string, reason: string): Promise<z.output<typeof OrderDto>> {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
+    const role = await this.roleOn(user, order);
+    if (!role || role === 'RIDER') throw AppError.notFound('ORDER_NOT_FOUND');
+    await this.transitions.apply(id, 'CANCELLED', { id: user.id, role }, { note: reason });
+    return this.dtoOf(id);
+  }
+
+  /** Nouveau code d'enlèvement (code perdu) ; pour un lot, le même code pour tout le lot. */
+  async regeneratePickupCode(user: AuthUser, id: string): Promise<{ pickupCode: string }> {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order || order.senderId !== user.id) throw AppError.notFound('ORDER_NOT_FOUND');
+    if (!BEFORE_PICKUP.includes(order.status)) throw AppError.conflict('PICKUP_ALREADY_DONE');
+    const siblings = order.batchId
+      ? await this.prisma.order.findMany({
+          where: { batchId: order.batchId, status: { in: BEFORE_PICKUP } },
+        })
+      : [order];
+    const pickupCode = randomDigits(4);
+    await this.prisma.$transaction(
+      siblings.map((sibling) =>
+        this.prisma.order.update({
+          where: { id: sibling.id },
+          data: {
+            pickupCodeHash: hashCode(
+              this.env.CODE_HASH_SECRET,
+              `pickup:${sibling.reference}`,
+              pickupCode,
+            ),
+          },
+        }),
+      ),
+    );
+    return { pickupCode };
+  }
+
+  /** Changement de statut forcé par les opérations (D3 manuel, incidents), tracé. */
+  async adminTransition(
+    user: AuthUser,
+    id: string,
+    body: z.output<typeof AdminTransitionBody>,
+    request: Request,
+  ): Promise<z.output<typeof OrderDto>> {
+    // Sans livreur, la machine à états renvoie l'erreur de validation adaptée.
+    if (body.to === 'ASSIGNED' && body.riderId) {
+      const rider = await this.prisma.riderProfile.findUnique({ where: { id: body.riderId } });
+      if (!rider || rider.status !== 'ACTIVE') throw AppError.unprocessable('RIDER_NOT_FOUND');
+    }
+    const before = await this.prisma.order.findUnique({ where: { id } });
+    const order = await this.transitions.apply(
+      id,
+      body.to,
+      { id: user.id, role: 'DISPATCHER' },
+      { riderId: body.riderId, failureReason: body.failureReason, note: body.note },
+    );
+    await this.audit.record({
+      actor: user,
+      action: 'order.transition',
+      entityType: 'order',
+      entityId: id,
+      before: { status: before?.status },
+      after: { status: order.status, ...body },
+      request,
+    });
+    return this.dtoOf(id);
+  }
+
+  // --- Destinataires (B4, B5) -------------------------------------------------------------
+
+  async recipients(
+    user: AuthUser,
+    q: string | undefined,
+  ): Promise<z.output<typeof RecipientDto>[]> {
+    const search = q ?? '';
+    const rows = await this.prisma.$queryRaw<
+      { phone: string; name: string; addressId: string; lastOrderAt: Date; ordersCount: bigint }[]
+    >`
+      SELECT DISTINCT ON (o.recipient_phone)
+             o.recipient_phone AS phone,
+             o.recipient_name AS name,
+             o.dropoff_address_id AS "addressId",
+             o.created_at AS "lastOrderAt",
+             COUNT(*) OVER (PARTITION BY o.recipient_phone) AS "ordersCount"
+        FROM orders o
+       WHERE o.sender_id = ${user.id}::uuid
+         AND o.status <> 'CANCELLED'
+         AND (${search} = '' OR o.recipient_name ILIKE '%' || ${search} || '%' OR o.recipient_phone LIKE '%' || ${search} || '%')
+       ORDER BY o.recipient_phone, o.created_at DESC
+       LIMIT 50`;
+    const addresses = await this.prisma.address.findMany({
+      where: { id: { in: rows.map((row) => row.addressId) } },
+      ...ADDRESS_INCLUDE,
+    });
+    const byId = new Map((await this.addresses.toDtos(addresses)).map((dto) => [dto.id, dto]));
+    return rows
+      .sort((a, b) => b.lastOrderAt.getTime() - a.lastOrderAt.getTime())
+      .flatMap((row) => {
+        const lastAddress = byId.get(row.addressId);
+        return lastAddress
+          ? [
+              {
+                phone: row.phone,
+                name: row.name,
+                ordersCount: Number(row.ordersCount),
+                lastOrderAt: row.lastOrderAt.toISOString(),
+                lastAddress,
+              },
+            ]
+          : [];
+      });
+  }
+
+  // --- Page de suivi publique (C5, F2) -----------------------------------------------------
+
+  private async byTrackingToken(token: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { trackingToken: token },
+      include: {
+        dropoffAddress: { select: { landmark: true } },
+        merchant: { select: { shopName: true } },
+        sender: { select: { fullName: true } },
+        events: { orderBy: { recordedAt: 'asc' } },
+      },
+    });
+    if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
+    return order;
+  }
+
+  async publicTracking(token: string): Promise<z.output<typeof PublicTrackingDto>> {
+    const order = await this.byTrackingToken(token);
+    return {
+      reference: order.reference,
+      status: order.status,
+      senderName: order.merchant?.shopName ?? order.sender.fullName ?? null,
+      recipientName: order.recipientName,
+      dropoffLandmark: order.dropoffAddress.landmark,
+      scheduledFor: order.scheduledFor?.toISOString() ?? null,
+      recipientConfirmedAt: order.recipientConfirmedAt?.toISOString() ?? null,
+      recipientAvailable: order.recipientAvailable,
+      canRespond: BEFORE_PICKUP.includes(order.status) && !order.recipientConfirmedAt,
+      timeline: order.events.map((event) => ({
+        status: event.toStatus,
+        at: event.occurredAt.toISOString(),
+      })),
+    };
+  }
+
+  /** Réponse du destinataire au message de confirmation (C5). */
+  async recipientResponse(
+    token: string,
+    body: z.output<typeof RecipientResponseBody>,
+  ): Promise<z.output<typeof PublicTrackingDto>> {
+    const order = await this.byTrackingToken(token);
+    const { count } = await this.prisma.order.updateMany({
+      where: { id: order.id, recipientConfirmedAt: null, status: { in: BEFORE_PICKUP } },
+      data: {
+        recipientConfirmedAt: new Date(),
+        recipientAvailable: body.available,
+        recipientNote: body.note ?? null,
+      },
+    });
+    if (count !== 1) {
+      throw AppError.conflict(
+        order.recipientConfirmedAt ? 'RECIPIENT_ALREADY_RESPONDED' : 'PICKUP_ALREADY_DONE',
+      );
+    }
+    return this.publicTracking(token);
+  }
+}

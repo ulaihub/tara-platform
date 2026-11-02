@@ -1,0 +1,3178 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/media": {
+      "post": {
+        "operationId": "Media_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "kind"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "ADDRESS_PHOTO",
+                      "VOICE_NOTE"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Media"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Fichiers"
+        ]
+      }
+    },
+    "/v1/auth/otp": {
+      "post": {
+        "operationId": "Auth_request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "locale": {
+                    "type": "string",
+                    "enum": [
+                      "fr",
+                      "en"
+                    ]
+                  }
+                },
+                "required": [
+                  "phone"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpChallenge"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentification"
+        ]
+      }
+    },
+    "/v1/auth/otp/verify": {
+      "post": {
+        "operationId": "Auth_verify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challengeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "device": {
+                    "$ref": "#/components/schemas/DeviceInput"
+                  },
+                  "termsVersion": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  },
+                  "referralCode": {
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "locale": {
+                    "type": "string",
+                    "enum": [
+                      "fr",
+                      "en"
+                    ]
+                  }
+                },
+                "required": [
+                  "challengeId",
+                  "code",
+                  "device"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSession"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentification"
+        ]
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "operationId": "Auth_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "refreshToken"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionTokens"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentification"
+        ]
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "operationId": "Auth_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "refreshToken"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Authentification"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "Health_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "operationId": "Me_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
+        ]
+      },
+      "patch": {
+        "operationId": "Me_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "locale": {
+                    "type": "string",
+                    "enum": [
+                      "FR",
+                      "EN"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
+        ]
+      }
+    },
+    "/v1/me/merchant": {
+      "put": {
+        "operationId": "Me_upsertMerchant",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "shopName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "category": {
+                    "type": "string",
+                    "maxLength": 60
+                  },
+                  "payoutPhone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "payoutOperator": {
+                    "$ref": "#/components/schemas/MobileMoneyOperator"
+                  },
+                  "payoutSchedule": {
+                    "type": "string",
+                    "enum": [
+                      "DAILY",
+                      "ON_DEMAND"
+                    ]
+                  },
+                  "rccm": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "niu": {
+                    "type": "string",
+                    "maxLength": 40
+                  }
+                },
+                "required": [
+                  "shopName",
+                  "payoutPhone",
+                  "payoutOperator"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Merchant"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
+        ]
+      }
+    },
+    "/v1/me/consents": {
+      "get": {
+        "operationId": "Me_consents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Consent"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
+        ]
+      },
+      "post": {
+        "operationId": "Me_recordConsent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "TERMS",
+                      "PRIVACY",
+                      "LOCATION",
+                      "MARKETING"
+                    ]
+                  },
+                  "version": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  },
+                  "granted": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "version",
+                  "granted"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Consent"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
+        ]
+      }
+    },
+    "/v1/riders/apply": {
+      "post": {
+        "operationId": "Riders_apply",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "vehicleType": {
+                    "default": "MOTORBIKE",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/VehicleType"
+                      }
+                    ]
+                  },
+                  "plateNumber": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20
+                  },
+                  "guarantorName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "guarantorPhone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  }
+                },
+                "required": [
+                  "guarantorName",
+                  "guarantorPhone"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderProfile"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreurs"
+        ]
+      }
+    },
+    "/v1/riders/me": {
+      "get": {
+        "operationId": "Riders_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderProfile"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreurs"
+        ]
+      }
+    },
+    "/v1/riders/me/documents": {
+      "post": {
+        "operationId": "Riders_uploadDocument",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "type"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "type": {
+                    "$ref": "#/components/schemas/KycDocumentType"
+                  },
+                  "expiresOn": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KycDocument"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreurs"
+        ]
+      }
+    },
+    "/v1/admin/riders": {
+      "get": {
+        "operationId": "AdminRiders_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/RiderStatus"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AdminRider"
+                      }
+                    },
+                    "nextCursor": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "nextCursor"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · livreurs"
+        ]
+      }
+    },
+    "/v1/admin/riders/{riderId}": {
+      "get": {
+        "operationId": "AdminRiders_get",
+        "parameters": [
+          {
+            "name": "riderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRider"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · livreurs"
+        ]
+      }
+    },
+    "/v1/admin/riders/{riderId}/decision": {
+      "post": {
+        "operationId": "AdminRiders_decide",
+        "parameters": [
+          {
+            "name": "riderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "APPROVE",
+                      "REJECT",
+                      "SUSPEND",
+                      "REACTIVATE"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "decision"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRider"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · livreurs"
+        ]
+      }
+    },
+    "/v1/admin/kyc-documents/{documentId}/file": {
+      "get": {
+        "operationId": "AdminRiders_documentFile",
+        "parameters": [
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · livreurs"
+        ]
+      }
+    },
+    "/v1/admin/kyc-documents/{documentId}/review": {
+      "post": {
+        "operationId": "AdminRiders_review",
+        "parameters": [
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "APPROVED",
+                      "REJECTED"
+                    ]
+                  },
+                  "rejectionReason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  },
+                  "expiresOn": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "required": [
+                  "decision"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KycDocument"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · livreurs"
+        ]
+      }
+    },
+    "/v1/zones": {
+      "get": {
+        "operationId": "Addresses_zones",
+        "parameters": [
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ZoneKind"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Zone"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Adresses"
+        ]
+      }
+    },
+    "/v1/addresses": {
+      "post": {
+        "operationId": "Addresses_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "maxLength": 60
+                  },
+                  "contactName": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "contactPhone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "landmark": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300,
+                    "description": "Repère écrit, ex. « Portail bleu après la pharmacie du carrefour »"
+                  },
+                  "neighborhoodId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "photoKey": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 200
+                  },
+                  "voiceNoteKey": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude",
+                  "landmark"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Adresses"
+        ]
+      },
+      "get": {
+        "operationId": "Addresses_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Address"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Adresses"
+        ]
+      }
+    },
+    "/v1/addresses/{id}": {
+      "get": {
+        "operationId": "Addresses_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Adresses"
+        ]
+      },
+      "delete": {
+        "operationId": "Addresses_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Adresses"
+        ]
+      }
+    },
+    "/v1/location-links": {
+      "post": {
+        "operationId": "LocationLinks_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "recipientName": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "recipientPhone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "ttlHours": {
+                    "default": 72,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 168
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationLink"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Lien de localisation"
+        ]
+      },
+      "get": {
+        "operationId": "LocationLinks_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/LocationLinkStatus"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LocationLink"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Lien de localisation"
+        ]
+      }
+    },
+    "/v1/location-links/{id}": {
+      "get": {
+        "operationId": "LocationLinks_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationLink"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Lien de localisation"
+        ]
+      }
+    },
+    "/v1/public/location-links/{token}": {
+      "get": {
+        "operationId": "PublicLocationLinks_view",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicLocationLink"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Public"
+        ]
+      },
+      "post": {
+        "operationId": "PublicLocationLinks_submit",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "landmark": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300,
+                    "description": "Repère écrit, ex. « Portail bleu après la pharmacie du carrefour »"
+                  },
+                  "contactName": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "contactPhone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude",
+                  "landmark"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicLocationLink"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/v1/admin/zones": {
+      "post": {
+        "operationId": "AdminZones_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "city": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 60
+                  },
+                  "kind": {
+                    "$ref": "#/components/schemas/ZoneKind"
+                  },
+                  "geometry": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "Polygon",
+                          "MultiPolygon"
+                        ]
+                      },
+                      "coordinates": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {}
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "coordinates"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "city",
+                  "kind",
+                  "geometry"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Zone"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · zones"
+        ]
+      }
+    },
+    "/v1/admin/zones/{id}": {
+      "patch": {
+        "operationId": "AdminZones_patch",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "active"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Zone"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · zones"
+        ]
+      }
+    },
+    "/v1/orders/quote": {
+      "post": {
+        "operationId": "Quote_quote",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pickup": {
+                    "$ref": "#/components/schemas/PointRef"
+                  },
+                  "dropoff": {
+                    "$ref": "#/components/schemas/PointRef"
+                  },
+                  "packageSize": {
+                    "$ref": "#/components/schemas/PackageSize"
+                  },
+                  "isExpress": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "scheduledFor": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "promoCode": {
+                    "type": "string",
+                    "maxLength": 32
+                  }
+                },
+                "required": [
+                  "pickup",
+                  "dropoff",
+                  "packageSize"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Quote"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/admin/pricing-grids": {
+      "get": {
+        "operationId": "AdminPricing_list",
+        "parameters": [
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PricingGrid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      },
+      "post": {
+        "operationId": "AdminPricing_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "city": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 60
+                  },
+                  "vehicleType": {
+                    "default": "MOTORBIKE",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/VehicleType"
+                      }
+                    ]
+                  },
+                  "riderShareBps": {
+                    "default": 8000,
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "perKmBeyondLastTier": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000
+                  },
+                  "tiers": {
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "upToMeters": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200000
+                        },
+                        "price": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000000
+                        }
+                      },
+                      "required": [
+                        "upToMeters",
+                        "price"
+                      ]
+                    }
+                  },
+                  "surcharges": {
+                    "default": [],
+                    "maxItems": 6,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "$ref": "#/components/schemas/SurchargeCode"
+                        },
+                        "amount": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000000
+                        },
+                        "percentBps": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000
+                        },
+                        "active": {
+                          "default": true,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  },
+                  "activate": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "city",
+                  "perKmBeyondLastTier",
+                  "tiers"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingGrid"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
+    "/v1/admin/pricing-grids/{id}/activate": {
+      "post": {
+        "operationId": "AdminPricing_activate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingGrid"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
+    "/v1/admin/pricing-grids/{id}/surcharges/{code}": {
+      "patch": {
+        "operationId": "AdminPricing_toggleSurcharge",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "active"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingGrid"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
+    "/v1/admin/promo-codes": {
+      "get": {
+        "operationId": "AdminPricing_promos",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PromoCode"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      },
+      "post": {
+        "operationId": "AdminPricing_createPromo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[A-Z0-9-]{3,32}$"
+                  },
+                  "kind": {
+                    "$ref": "#/components/schemas/PromoKind"
+                  },
+                  "value": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10000000
+                  },
+                  "maxRedemptions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "perUserLimit": {
+                    "default": 1,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "newCustomersOnly": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "validFrom": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "validTo": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "code",
+                  "kind",
+                  "value"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoCode"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
+    "/v1/admin/promo-codes/{id}": {
+      "patch": {
+        "operationId": "AdminPricing_patchPromo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "active"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoCode"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
+    "/v1/orders": {
+      "post": {
+        "operationId": "Orders_create",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Identifiant unique généré par l’app (UUID conseillé). Renvoyer la même requête après une coupure réseau renvoie la commande déjà créée.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dropoffAddressId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "recipientName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "recipientPhone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "packageSize": {
+                    "$ref": "#/components/schemas/PackageSize"
+                  },
+                  "isFragile": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "declaredValue": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000
+                  },
+                  "codAmount": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000
+                  },
+                  "instructions": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "pickupAddressId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "isExpress": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "scheduledFor": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "feePayer": {
+                    "default": "SENDER",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FeePayer"
+                      }
+                    ]
+                  },
+                  "feePaymentMethod": {
+                    "$ref": "#/components/schemas/PaymentMethod"
+                  },
+                  "promoCode": {
+                    "type": "string",
+                    "maxLength": 32
+                  }
+                },
+                "required": [
+                  "dropoffAddressId",
+                  "recipientName",
+                  "recipientPhone",
+                  "packageSize",
+                  "pickupAddressId",
+                  "feePaymentMethod"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      },
+      "get": {
+        "operationId": "Orders_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/OrderStatus"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OrderSummary"
+                      }
+                    },
+                    "nextCursor": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "nextCursor"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/batch": {
+      "post": {
+        "operationId": "Orders_createBatch",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Identifiant unique généré par l’app (UUID conseillé). Renvoyer la même requête après une coupure réseau renvoie la commande déjà créée.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pickupAddressId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "isExpress": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "scheduledFor": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "feePayer": {
+                    "default": "SENDER",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FeePayer"
+                      }
+                    ]
+                  },
+                  "feePaymentMethod": {
+                    "$ref": "#/components/schemas/PaymentMethod"
+                  },
+                  "items": {
+                    "minItems": 1,
+                    "maxItems": 10,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dropoffAddressId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "recipientName": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 80
+                        },
+                        "recipientPhone": {
+                          "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                          "example": "+237690000000",
+                          "type": "string",
+                          "maxLength": 32
+                        },
+                        "packageSize": {
+                          "$ref": "#/components/schemas/PackageSize"
+                        },
+                        "isFragile": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "declaredValue": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000000
+                        },
+                        "codAmount": {
+                          "default": 0,
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000000
+                        },
+                        "instructions": {
+                          "type": "string",
+                          "maxLength": 300
+                        }
+                      },
+                      "required": [
+                        "dropoffAddressId",
+                        "recipientName",
+                        "recipientPhone",
+                        "packageSize"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "pickupAddressId",
+                  "feePaymentMethod",
+                  "items"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedBatch"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/{id}": {
+      "get": {
+        "operationId": "Orders_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/{id}/cancel": {
+      "post": {
+        "operationId": "Orders_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/{id}/pickup-code": {
+      "post": {
+        "operationId": "Orders_regeneratePickupCode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupCode"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/recipients": {
+      "get": {
+        "operationId": "Recipients_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Recipient"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/public/tracking/{token}": {
+      "get": {
+        "operationId": "PublicTracking_view",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicTracking"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/v1/public/tracking/{token}/response": {
+      "post": {
+        "operationId": "PublicTracking_respond",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "available": {
+                    "type": "boolean"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "available"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicTracking"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/v1/admin/orders/{id}/transition": {
+      "post": {
+        "operationId": "AdminOrders_transition",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "to": {
+                    "$ref": "#/components/schemas/OrderStatus"
+                  },
+                  "riderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "failureReason": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FailureReason"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "to"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · commandes"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "API Tara",
+    "description": "Plateforme de livraison urbaine. Les erreurs suivent le schéma ErrorBody ; la langue des messages suit Accept-Language (fr par défaut).",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "ActorRole": {
+        "type": "string",
+        "enum": [
+          "SENDER",
+          "RECIPIENT",
+          "RIDER",
+          "DISPATCHER",
+          "SUPPORT",
+          "SYSTEM"
+        ]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "contactName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "contactPhone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "neighborhood": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "landmark": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "photoKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "voiceNoteKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "SENDER",
+              "LOCATION_LINK",
+              "DELIVERY_CONFIRMED",
+              "BACKOFFICE"
+            ]
+          },
+          "verifiedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "motorbikeRestricted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "contactName",
+          "contactPhone",
+          "city",
+          "neighborhood",
+          "landmark",
+          "latitude",
+          "longitude",
+          "photoKey",
+          "voiceNoteKey",
+          "source",
+          "verifiedAt",
+          "motorbikeRestricted",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "AdminRider": {
+        "$ref": "#/components/schemas/AdminRider"
+      },
+      "AuthSession": {
+        "$ref": "#/components/schemas/AuthSession"
+      },
+      "Consent": {
+        "$ref": "#/components/schemas/Consent"
+      },
+      "CreatedBatch": {
+        "$ref": "#/components/schemas/CreatedBatch"
+      },
+      "CreatedOrder": {
+        "$ref": "#/components/schemas/CreatedOrder"
+      },
+      "DeviceInput": {
+        "type": "object",
+        "properties": {
+          "installationId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "ANDROID",
+              "IOS",
+              "WEB"
+            ]
+          },
+          "appVersion": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "installationId",
+          "platform"
+        ]
+      },
+      "ErrorBody": {
+        "$ref": "#/components/schemas/ErrorBody"
+      },
+      "FailureReason": {
+        "type": "string",
+        "enum": [
+          "RECIPIENT_ABSENT",
+          "RECIPIENT_UNREACHABLE",
+          "REFUSED",
+          "ADDRESS_NOT_FOUND",
+          "OTHER"
+        ]
+      },
+      "FeePayer": {
+        "type": "string",
+        "enum": [
+          "SENDER",
+          "RECIPIENT"
+        ]
+      },
+      "KycDocument": {
+        "$ref": "#/components/schemas/KycDocument"
+      },
+      "KycDocumentType": {
+        "type": "string",
+        "enum": [
+          "NATIONAL_ID_FRONT",
+          "NATIONAL_ID_BACK",
+          "DRIVING_LICENSE",
+          "VEHICLE_REGISTRATION",
+          "VEHICLE_RENTAL_CONTRACT",
+          "INSURANCE",
+          "SELFIE",
+          "CRIMINAL_RECORD",
+          "GUARANTOR_ID"
+        ]
+      },
+      "LocationLink": {
+        "$ref": "#/components/schemas/LocationLink"
+      },
+      "LocationLinkStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "SUBMITTED",
+          "EXPIRED"
+        ]
+      },
+      "Me": {
+        "$ref": "#/components/schemas/Me"
+      },
+      "Media": {
+        "$ref": "#/components/schemas/Media"
+      },
+      "Merchant": {
+        "$ref": "#/components/schemas/Merchant"
+      },
+      "MobileMoneyOperator": {
+        "type": "string",
+        "enum": [
+          "MTN",
+          "ORANGE"
+        ]
+      },
+      "Order": {
+        "$ref": "#/components/schemas/Order"
+      },
+      "OrderEvent": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorRole": {
+            "$ref": "#/components/schemas/ActorRole"
+          },
+          "failureReason": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FailureReason"
+              }
+            ]
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "at",
+          "actorRole",
+          "failureReason",
+          "note"
+        ],
+        "additionalProperties": false
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "CREATED",
+          "SEARCHING_RIDER",
+          "ASSIGNED",
+          "PICKED_UP",
+          "IN_DELIVERY",
+          "DELIVERED",
+          "DELIVERY_FAILED",
+          "RETURNED",
+          "CANCELLED"
+        ]
+      },
+      "OrderSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "recipientName": {
+            "type": "string"
+          },
+          "dropoffLandmark": {
+            "type": "string"
+          },
+          "totalPrice": {
+            "type": "integer"
+          },
+          "codAmount": {
+            "type": "integer"
+          },
+          "scheduledFor": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "recipientName",
+          "dropoffLandmark",
+          "totalPrice",
+          "codAmount",
+          "scheduledFor",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "OtpChallenge": {
+        "$ref": "#/components/schemas/OtpChallenge"
+      },
+      "PackageSize": {
+        "type": "string",
+        "enum": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "description": "S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg"
+      },
+      "PaymentMethod": {
+        "type": "string",
+        "enum": [
+          "MOMO_MTN",
+          "MOMO_ORANGE",
+          "CASH",
+          "WALLET"
+        ]
+      },
+      "PickupCode": {
+        "$ref": "#/components/schemas/PickupCode"
+      },
+      "PointRef": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "addressId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "addressId"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "longitude": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude"
+            ]
+          }
+        ]
+      },
+      "PricingGrid": {
+        "$ref": "#/components/schemas/PricingGrid"
+      },
+      "PromoCode": {
+        "$ref": "#/components/schemas/PromoCode"
+      },
+      "PromoKind": {
+        "type": "string",
+        "enum": [
+          "FIXED_AMOUNT",
+          "PERCENT",
+          "FIXED_PRICE"
+        ]
+      },
+      "PublicLocationLink": {
+        "$ref": "#/components/schemas/PublicLocationLink"
+      },
+      "PublicTracking": {
+        "$ref": "#/components/schemas/PublicTracking"
+      },
+      "Quote": {
+        "$ref": "#/components/schemas/Quote"
+      },
+      "Recipient": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ordersCount": {
+            "type": "integer"
+          },
+          "lastOrderAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastAddress": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        "required": [
+          "phone",
+          "name",
+          "ordersCount",
+          "lastOrderAt",
+          "lastAddress"
+        ],
+        "additionalProperties": false
+      },
+      "RiderProfile": {
+        "$ref": "#/components/schemas/RiderProfile"
+      },
+      "RiderStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "ACTIVE",
+          "SUSPENDED",
+          "REJECTED"
+        ]
+      },
+      "SessionTokens": {
+        "$ref": "#/components/schemas/SessionTokens"
+      },
+      "SessionUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "fullName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CUSTOMER",
+                "MERCHANT",
+                "RIDER",
+                "DISPATCHER",
+                "SUPPORT",
+                "FINANCE",
+                "ADMIN"
+              ]
+            }
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "FR",
+              "EN"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "phone",
+          "fullName",
+          "roles",
+          "locale"
+        ],
+        "additionalProperties": false
+      },
+      "SurchargeCode": {
+        "type": "string",
+        "enum": [
+          "EXPRESS",
+          "HEAVY_PARCEL",
+          "NIGHT",
+          "FAILED_ATTEMPT",
+          "RETURN",
+          "WEATHER"
+        ]
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "CUSTOMER",
+          "MERCHANT",
+          "RIDER",
+          "DISPATCHER",
+          "SUPPORT",
+          "FINANCE",
+          "ADMIN"
+        ]
+      },
+      "VehicleType": {
+        "type": "string",
+        "enum": [
+          "MOTORBIKE",
+          "TRICYCLE",
+          "CAR"
+        ]
+      },
+      "Zone": {
+        "$ref": "#/components/schemas/Zone"
+      },
+      "ZoneKind": {
+        "type": "string",
+        "enum": [
+          "SERVICE_AREA",
+          "NEIGHBORHOOD",
+          "NO_MOTORBIKE"
+        ]
+      }
+    }
+  }
+}
