@@ -230,6 +230,14 @@ enum FailureReason {
   @@map("failure_reason")
 }
 
+/// Choix de l'expéditeur après un échec de livraison.
+enum FailureDecision {
+  RETRY
+  RETURN
+
+  @@map("failure_decision")
+}
+
 enum ProofKind {
   PICKUP
   DELIVERY
@@ -441,6 +449,7 @@ model User {
   ticketsAssigned      Ticket[]          @relation("TicketAssignee")
   ticketMessages       TicketMessage[]
   mediaFiles           MediaFile[]
+  safetyAlertsHandled  SafetyAlert[]
 
   @@map("users")
 }
@@ -573,6 +582,7 @@ model RiderProfile {
   codCollections CodCollection[]
   payments       Payment[]
   payouts        Payout[]
+  safetyAlerts   SafetyAlert[]
 
   @@index([status])
   @@map("rider_profiles")
@@ -840,27 +850,35 @@ model Order {
   /// Montant à encaisser auprès du destinataire, 0 si aucun (C1, E5).
   codAmount        Int           @default(0) @map("cod_amount")
 
-  riderId              String?   @map("rider_id") @db.Uuid
+  riderId              String?          @map("rider_id") @db.Uuid
   /// Codes à 4 chiffres : seul le hachage est stocké (E3, E4).
-  pickupCodeHash       String    @map("pickup_code_hash")
+  pickupCodeHash       String           @map("pickup_code_hash")
   /// Généré à l'enlèvement et envoyé au destinataire à ce moment-là.
-  deliveryCodeHash     String?   @map("delivery_code_hash")
+  deliveryCodeHash     String?          @map("delivery_code_hash")
   /// Clé envoyée par l'app : renvoyer la même requête ne crée pas une seconde commande.
-  idempotencyKey       String?   @unique @map("idempotency_key")
+  idempotencyKey       String?          @unique @map("idempotency_key")
   /// Réponse du destinataire au message de confirmation (C5).
-  recipientConfirmedAt DateTime? @map("recipient_confirmed_at") @db.Timestamptz(3)
-  recipientAvailable   Boolean?  @map("recipient_available")
-  recipientNote        String?   @map("recipient_note")
+  recipientConfirmedAt DateTime?        @map("recipient_confirmed_at") @db.Timestamptz(3)
+  recipientAvailable   Boolean?         @map("recipient_available")
+  recipientNote        String?          @map("recipient_note")
   /// Coordonnées du destinataire masquées 30 jours après la fin de la commande.
-  piiMaskedAt          DateTime? @map("pii_masked_at") @db.Timestamptz(3)
-  attemptCount         Int       @default(0) @map("attempt_count")
-  cancelReason         String?   @map("cancel_reason")
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  assignedAt           DateTime? @map("assigned_at") @db.Timestamptz(3)
-  pickedUpAt           DateTime? @map("picked_up_at") @db.Timestamptz(3)
-  deliveredAt          DateTime? @map("delivered_at") @db.Timestamptz(3)
-  cancelledAt          DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  piiMaskedAt          DateTime?        @map("pii_masked_at") @db.Timestamptz(3)
+  attemptCount         Int              @default(0) @map("attempt_count")
+  /// Codes incorrects saisis par le livreur : au-delà de 5, le code est bloqué (E3, E4).
+  pickupCodeFailures   Int              @default(0) @map("pickup_code_failures")
+  deliveryCodeFailures Int              @default(0) @map("delivery_code_failures")
+  /// Début de la recherche de livreur en cours (D2) ; l'alerte part après 5 min.
+  searchingSince       DateTime?        @map("searching_since") @db.Timestamptz(3)
+  dispatchAlertedAt    DateTime?        @map("dispatch_alerted_at") @db.Timestamptz(3)
+  /// Choix de l'expéditeur après un échec : nouvelle tentative ou retour (E6).
+  failureDecision      FailureDecision? @map("failure_decision")
+  cancelReason         String?          @map("cancel_reason")
+  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  assignedAt           DateTime?        @map("assigned_at") @db.Timestamptz(3)
+  pickedUpAt           DateTime?        @map("picked_up_at") @db.Timestamptz(3)
+  deliveredAt          DateTime?        @map("delivered_at") @db.Timestamptz(3)
+  cancelledAt          DateTime?        @map("cancelled_at") @db.Timestamptz(3)
 
   sender          User             @relation(fields: [senderId], references: [id])
   merchant        MerchantProfile? @relation(fields: [merchantId], references: [id])
@@ -879,6 +897,7 @@ model Order {
   journalEntries  JournalEntry[]
   notifications   Notification[]
   tickets         Ticket[]
+  safetyAlerts    SafetyAlert[]
 
   @@index([status, scheduledFor])
   @@index([riderId, status])
@@ -955,6 +974,29 @@ model DispatchOffer {
   @@index([orderId, round])
   @@index([riderId, outcome])
   @@map("dispatch_offers")
+}
+
+/// Alerte de sécurité déclenchée par un livreur (E8) : sa position part au dispatch.
+model SafetyAlert {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  riderId        String    @map("rider_id") @db.Uuid
+  orderId        String?   @map("order_id") @db.Uuid
+  latitude       Float
+  longitude      Float
+  note           String?
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  acknowledgedAt DateTime? @map("acknowledged_at") @db.Timestamptz(3)
+  resolvedAt     DateTime? @map("resolved_at") @db.Timestamptz(3)
+  handledById    String?   @map("handled_by_id") @db.Uuid
+  resolution     String?
+
+  rider     RiderProfile @relation(fields: [riderId], references: [id])
+  order     Order?       @relation(fields: [orderId], references: [id])
+  handledBy User?        @relation(fields: [handledById], references: [id])
+
+  @@index([resolvedAt, createdAt])
+  @@index([riderId, createdAt])
+  @@map("safety_alerts")
 }
 
 /// Notation réciproque expéditeur ↔ livreur (F4).
@@ -1166,6 +1208,7 @@ model Notification {
 
   @@index([status, createdAt])
   @@index([orderId])
+  @@index([provider, providerReference])
   @@map("notifications")
 }
 

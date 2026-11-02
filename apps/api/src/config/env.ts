@@ -73,6 +73,10 @@ const envSchema = z
       .string()
       .regex(/^v\d+\.\d+$/)
       .optional(),
+    /** Secret de l'app Meta : vérifie la signature des accusés de remise (webhook). */
+    WHATSAPP_APP_SECRET: z.string().min(16).optional(),
+    /** Jeton choisi par Tara, demandé par Meta à l'enregistrement du webhook. */
+    WHATSAPP_VERIFY_TOKEN: z.string().min(16).optional(),
     /** Numéros de l'équipe prévenus par SMS en cas d'alerte de sécurité d'un livreur (SOS). */
     OPS_ALERT_PHONES: z.string().default(''),
 
@@ -104,6 +108,8 @@ const envSchema = z
         'WHATSAPP_PHONE_NUMBER_ID',
         'WHATSAPP_ACCESS_TOKEN',
         'WHATSAPP_API_VERSION',
+        'WHATSAPP_APP_SECRET',
+        'WHATSAPP_VERIFY_TOKEN',
       ] as const) {
         if (!env[key])
           ctx.addIssue({

@@ -211,6 +211,62 @@ export const ERROR_MESSAGES = {
     fr: 'Vous avez déjà répondu pour cette livraison.',
     en: 'You have already responded for this delivery.',
   },
+
+  // Attribution et exécution des courses (D, E)
+  RIDER_NOT_ACTIVE: {
+    fr: 'Votre compte livreur n’est pas actif.',
+    en: 'Your rider account is not active.',
+  },
+  RIDER_NOT_ELIGIBLE: {
+    fr: 'Vous ne pouvez pas recevoir de courses pour le moment : {reasons}.',
+    en: 'You cannot receive jobs for now: {reasons}.',
+  },
+  OFFER_NOT_FOUND: { fr: 'Proposition introuvable.', en: 'Job offer not found.' },
+  OFFER_NO_LONGER_AVAILABLE: {
+    fr: 'Cette course n’est plus disponible.',
+    en: 'This job is no longer available.',
+  },
+  OFFER_EXPIRED: {
+    fr: 'Le délai pour accepter cette course est dépassé.',
+    en: 'The time to accept this job has passed.',
+  },
+  ORDER_ALREADY_ASSIGNED_TO_RIDER: {
+    fr: 'La course est déjà confiée à ce livreur.',
+    en: 'The job is already assigned to this rider.',
+  },
+  ACTION_TIME_INVALID: {
+    fr: 'Heure de l’action invalide : vérifiez l’heure du téléphone.',
+    en: 'Invalid action time: check the phone clock.',
+  },
+  PICKUP_CODE_INVALID: {
+    fr: 'Code de l’expéditeur incorrect. Essais restants : {remaining}.',
+    en: 'Incorrect sender code. Attempts left: {remaining}.',
+  },
+  PICKUP_CODE_LOCKED: {
+    fr: 'Trop de codes incorrects. L’expéditeur doit générer un nouveau code.',
+    en: 'Too many incorrect codes. The sender must generate a new code.',
+  },
+  DELIVERY_CODE_INVALID: {
+    fr: 'Code du destinataire incorrect. Essais restants : {remaining}.',
+    en: 'Incorrect recipient code. Attempts left: {remaining}.',
+  },
+  DELIVERY_CODE_LOCKED: {
+    fr: 'Trop de codes incorrects. Demandez la validation du support.',
+    en: 'Too many incorrect codes. Ask support to validate.',
+  },
+  NO_DELIVERY_VALIDATION_REQUEST: {
+    fr: 'Aucune demande de validation de livraison en attente pour cette commande.',
+    en: 'No pending delivery validation request for this order.',
+  },
+  DELIVERY_VALIDATION_ADMIN_REQUIRED: {
+    fr: 'Au-delà de {limit} FCFA à encaisser, la validation revient à un administrateur.',
+    en: 'Above {limit} XAF to collect, validation requires an administrator.',
+  },
+  FAILURE_DECISION_NOT_EXPECTED: {
+    fr: 'Aucune décision n’est attendue pour cette commande.',
+    en: 'No decision is expected for this order.',
+  },
+  SAFETY_ALERT_NOT_FOUND: { fr: 'Alerte introuvable.', en: 'Alert not found.' },
 } as const satisfies Record<string, { fr: string; en: string }>;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

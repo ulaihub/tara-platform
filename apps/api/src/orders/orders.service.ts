@@ -10,6 +10,7 @@ import { hashCode, randomDigits, randomReadableId, randomToken } from '../common
 import { pageOf } from '../common/pagination.js';
 import { Prisma, type Order, type OrderEvent } from '../generated/prisma/client.js';
 import type { ActorRole } from '../generated/prisma/enums.js';
+import { OrderEventsBus, type OrderChange } from '../events/order-events.bus.js';
 import { AddressesService } from '../geo/addresses.service.js';
 import { type FullQuote, PricingService } from '../pricing/pricing.service.js';
 import { PromoService } from '../pricing/promo.service.js';
@@ -31,7 +32,7 @@ import {
   type RecipientDto,
   type RecipientResponseBody,
 } from './orders.schemas.js';
-import { RecipientNotifier } from './recipient-notifier.js';
+import { trackingUrl } from './tracking-url.js';
 
 const ADDRESS_INCLUDE = {
   include: { neighborhood: { select: { id: true, name: true } } },
@@ -75,7 +76,7 @@ export class OrdersService {
     private readonly promos: PromoService,
     private readonly addresses: AddressesService,
     private readonly transitions: OrderTransitionsService,
-    private readonly notifier: RecipientNotifier,
+    private readonly events: OrderEventsBus,
     private readonly audit: AuditService,
     @Inject(ENV) private readonly env: Env,
   ) {}
@@ -102,7 +103,7 @@ export class OrdersService {
       id: order.id,
       reference: order.reference,
       status: order.status,
-      trackingUrl: this.notifier.trackingUrl(order.trackingToken),
+      trackingUrl: trackingUrl(this.env, order.trackingToken),
       batchId: order.batchId,
       isExpress: order.isExpress,
       scheduledFor: order.scheduledFor?.toISOString() ?? null,
@@ -288,7 +289,7 @@ export class OrdersService {
     tx: Prisma.TransactionClient,
     user: AuthUser,
     data: Prisma.OrderUncheckedCreateInput,
-  ): Promise<Order> {
+  ): Promise<{ order: Order; changes: OrderChange[] }> {
     const created = await tx.order.create({ data });
     await tx.orderEvent.create({
       data: {
@@ -299,12 +300,18 @@ export class OrdersService {
         occurredAt: created.createdAt,
       },
     });
-    if (!dispatchesImmediately(created)) return created;
-    const { order } = await this.transitions.applyIn(tx, created, 'SEARCHING_RIDER', {
+    const creation: OrderChange = {
+      order: created,
+      from: null,
+      to: 'CREATED',
+      actor: { id: user.id, role: 'SENDER' },
+    };
+    if (!dispatchesImmediately(created)) return { order: created, changes: [creation] };
+    const { order, change } = await this.transitions.applyIn(tx, created, 'SEARCHING_RIDER', {
       id: null,
       role: 'SYSTEM',
     });
-    return order;
+    return { order, changes: [creation, change] };
   }
 
   async create(
@@ -329,7 +336,7 @@ export class OrdersService {
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const reference = `TR-${randomReadableId(6)}`;
       try {
-        const order = await this.prisma.$transaction(async (tx) => {
+        const { order, changes } = await this.prisma.$transaction(async (tx) => {
           if (quote.promo) {
             // Verrou puis nouvelle vérification : le quota ne peut pas être dépassé en parallèle.
             await this.promos.lock(quote.promo.code, tx);
@@ -350,14 +357,15 @@ export class OrdersService {
               data: {
                 promoId: quote.promo.id,
                 userId: user.id,
-                orderId: created.id,
+                orderId: created.order.id,
                 discount: quote.price.discountTotal,
               },
             });
           }
           return created;
         });
-        await this.notifier.confirmation(order, context.senderName);
+        // Message au destinataire, recherche de livreur, temps réel : après validation.
+        await this.events.publishAll(changes);
         return { order: await this.dtoOf(order.id), pickupCode, replayed: false };
       } catch (error) {
         if (!isUniqueViolation(error)) throw error;
@@ -413,7 +421,7 @@ export class OrdersService {
 
     let batchId: string;
     try {
-      const { batch, orders } = await this.prisma.$transaction(async (tx) => {
+      const { batch, changes } = await this.prisma.$transaction(async (tx) => {
         const batch = await tx.orderBatch.create({
           data: {
             senderId: user.id,
@@ -421,12 +429,11 @@ export class OrdersService {
             idempotencyKey: idempotencyKey ?? null,
           },
         });
-        const orders: Order[] = [];
+        const changes: OrderChange[] = [];
         for (const [index, item] of body.items.entries()) {
           const quote = quotes[index] as FullQuote;
           const reference = `TR-${randomReadableId(6)}`;
-          orders.push(
-            await this.insert(
+          const inserted = await this.insert(
               tx,
               user,
               this.orderData(user, body, item, quote, {
@@ -435,13 +442,13 @@ export class OrdersService {
                 pickupCode,
                 batchId: batch.id,
               }),
-            ),
-          );
+            );
+          changes.push(...inserted.changes);
         }
-        return { batch, orders };
+        return { batch, changes };
       });
       batchId = batch.id;
-      for (const order of orders) await this.notifier.confirmation(order, context.senderName);
+      await this.events.publishAll(changes);
     } catch (error) {
       if (idempotencyKey && isUniqueViolation(error)) {
         const existing = await this.prisma.orderBatch.findUnique({ where: { idempotencyKey } });
@@ -497,6 +504,8 @@ export class OrdersService {
               `pickup:${sibling.reference}`,
               pickupCode,
             ),
+            // Nouveau code : le compteur d'erreurs du livreur repart de zéro (E3).
+            pickupCodeFailures: 0,
           },
         }),
       ),

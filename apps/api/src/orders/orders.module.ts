@@ -9,7 +9,6 @@ import {
   RecipientsController,
 } from './orders.controller.js';
 import { OrdersService } from './orders.service.js';
-import { RecipientNotifier } from './recipient-notifier.js';
 
 @Module({
   imports: [GeoModule, PricingModule],
@@ -19,7 +18,7 @@ import { RecipientNotifier } from './recipient-notifier.js';
     PublicTrackingController,
     AdminOrdersController,
   ],
-  providers: [OrdersService, OrderTransitionsService, RecipientNotifier],
+  providers: [OrdersService, OrderTransitionsService],
   exports: [OrdersService, OrderTransitionsService],
 })
 export class OrdersModule {}

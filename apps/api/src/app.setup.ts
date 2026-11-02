@@ -86,5 +86,5 @@ export function configureApp(app: NestExpressApplication): void {
   app.setGlobalPrefix('v1', { exclude: ['health'] });
 
   // Temps réel : les événements circulent entre les instances de l'API par Redis.
-  app.useWebSocketAdapter(new RedisIoAdapter(app, env.REDIS_URL, env.QUEUE_PREFIX));
+  app.useWebSocketAdapter(new RedisIoAdapter(app, env.REDIS_URL, env.QUEUE_PREFIX, origins));
 }

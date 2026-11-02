@@ -32,7 +32,10 @@ export async function createTestApp(env: Record<string, string> = {}): Promise<T
   let app: NestExpressApplication;
   try {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication<NestExpressApplication>({ logger: ['error'] });
+    app = moduleRef.createNestApplication<NestExpressApplication>({
+      logger: ['error'],
+      rawBody: true,
+    });
     configureApp(app);
     await app.init();
   } finally {

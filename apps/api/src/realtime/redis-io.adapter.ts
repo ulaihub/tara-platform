@@ -16,12 +16,17 @@ export class RedisIoAdapter extends IoAdapter {
     app: INestApplicationContext,
     private readonly redisUrl: string,
     private readonly channelPrefix: string,
+    /** Origines web autorisées (back-office, suivi) ; les apps mobiles n'en envoient pas. */
+    private readonly corsOrigins: string[] = [],
   ) {
     super(app);
   }
 
   override createIOServer(port: number, options?: ServerOptions): Server {
-    const server = super.createIOServer(port, options) as Server;
+    const server = super.createIOServer(port, {
+      ...options,
+      cors: this.corsOrigins.length > 0 ? { origin: this.corsOrigins } : { origin: false },
+    } as ServerOptions) as Server;
     const pub = new Redis(this.redisUrl, { maxRetriesPerRequest: null });
     const sub = pub.duplicate();
     this.connections.push(pub, sub);
