@@ -35,6 +35,15 @@ export class PrivacyService {
         rider: {
           include: {
             documents: { select: { type: true, status: true, expiresOn: true, createdAt: true } },
+            safetyAlerts: {
+              select: {
+                latitude: true,
+                longitude: true,
+                note: true,
+                createdAt: true,
+                resolvedAt: true,
+              },
+            },
           },
         },
         consents: { orderBy: { createdAt: 'asc' } },
@@ -85,6 +94,7 @@ export class PrivacyService {
             guarantorName: user.rider.guarantorName,
             guarantorPhone: user.rider.guarantorPhone,
             documents: user.rider.documents,
+            safetyAlerts: user.rider.safetyAlerts,
           }
         : null,
       consents: user.consents.map(({ kind, version, granted, createdAt }) => ({

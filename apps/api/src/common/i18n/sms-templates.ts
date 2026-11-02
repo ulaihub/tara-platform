@@ -29,6 +29,10 @@ const TEMPLATES = {
     fr: 'Tara : votre colis {reference} est en route. Code a donner au livreur : {code}. Suivi : {url}',
     en: 'Tara: your parcel {reference} is on its way. Code to give the rider: {code}. Tracking: {url}',
   },
+  RETURN_CODE: {
+    fr: 'Tara : la livraison {reference} a echoue. En cas de retour, donnez ce code au livreur seulement quand il vous rend le colis : {code}.',
+    en: 'Tara: delivery {reference} failed. If it is returned, give this code to the rider only when they hand the parcel back to you: {code}.',
+  },
   DELIVERY_RECEIPT: {
     fr: 'Tara : votre colis {reference} a ete livre. Merci de votre confiance !',
     en: 'Tara: your parcel {reference} has been delivered. Thank you!',

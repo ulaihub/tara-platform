@@ -250,16 +250,26 @@ describe('Actions du livreur (E2 à E9)', () => {
     expect(seen.body).toMatchObject({ failureDecision: 'RETURN' });
     expect(seen.body.navigation.waze).toContain(`${seen.body.pickup.latitude}`);
 
-    const wrong = await request(ctx.http)
+    // Le code d'enlèvement, connu du livreur, ne vaut pas pour le retour : un code neuf
+    // est envoyé à l'expéditeur seul.
+    const reused = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/return`)
       .set(rider.auth)
-      .send({ senderCode: order.pickupCode === '0000' ? '1111' : '0000', ...HERE })
-      .expect(422);
-    expect(wrong.body.error.code).toBe('PICKUP_CODE_INVALID');
+      .send({ senderCode: order.pickupCode, ...HERE });
+    const returnCode = /colis : (\d{4})/.exec(ctx.sms.lastTo(shop.phone)?.text ?? '')?.[1];
+    expect(returnCode).toMatch(/^\d{4}$/);
+    if (returnCode !== order.pickupCode) {
+      expect(reused.status).toBe(422);
+      expect(reused.body.error.code).toBe('PICKUP_CODE_INVALID');
+    }
+    const stored = await ctx.prisma.notification.findFirstOrThrow({
+      where: { orderId: order.id, template: 'RETURN_CODE' },
+    });
+    expect(JSON.stringify(stored.payload)).not.toContain(returnCode);
     const returned = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/return`)
       .set(rider.auth)
-      .send({ senderCode: order.pickupCode, ...HERE })
+      .send({ senderCode: returnCode, ...HERE })
       .expect(200);
     expect(returned.body.status).toBe('RETURNED');
   });

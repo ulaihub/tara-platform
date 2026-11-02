@@ -11,6 +11,8 @@ export interface OrderChange {
   actor: { id: string | null; role: ActorRole };
   /** Code de livraison en clair, présent seulement à l'enlèvement (jamais enregistré). */
   deliveryCode?: string | null;
+  /** Code de retour en clair, présent seulement à l'échec de livraison (jamais enregistré). */
+  returnCode?: string | null;
 }
 
 type Listener = (change: OrderChange) => Promise<void>;

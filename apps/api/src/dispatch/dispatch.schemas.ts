@@ -9,7 +9,18 @@ const Place = z.object({
   longitude: z.number(),
 });
 
-/** Proposition de course affichée au livreur (D1, E1). Sans données du destinataire. */
+/** Zone de livraison approximative (à 1 km près) : l'adresse exacte n'est donnée qu'au livreur retenu. */
+const Area = z.object({
+  city: z.string(),
+  neighborhood: z.string().nullable(),
+  latitude: z.number(),
+  longitude: z.number(),
+});
+
+/**
+ * Proposition de course affichée au livreur (D1, E1). Aucune donnée du destinataire, et
+ * seulement la zone de livraison : un livreur qui refuse n'apprend pas où il habite.
+ */
 export const OfferDto = z
   .object({
     id: z.uuid(),
@@ -19,7 +30,7 @@ export const OfferDto = z
     /** Distance à vol d'oiseau jusqu'au point d'enlèvement. */
     approachMeters: z.int().nullable(),
     pickup: Place,
-    dropoff: Place,
+    dropoff: Area,
     distanceMeters: z.int(),
     riderEarning: z.int(),
     /** Montant à encaisser auprès du destinataire. */

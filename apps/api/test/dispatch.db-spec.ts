@@ -85,6 +85,9 @@ describe('Attribution des courses (D1 à D4)', () => {
     expect(listed.body).toHaveLength(1);
     expect(listed.body[0]).toMatchObject({ orderId: order.id, riderEarning: expect.any(Number) });
     expect(JSON.stringify(listed.body)).not.toContain(order.recipientPhone);
+    // Zone de livraison seulement : ni repère ni coordonnées exactes du destinataire.
+    expect(listed.body[0].dropoff).not.toHaveProperty('landmark');
+    expect(listed.body[0].dropoff.latitude).toBe(Math.round(4.095 * 100) / 100);
 
     const accepted = await request(ctx.http)
       .post(`/v1/rider/offers/${offer?.id}/accept`)
@@ -241,6 +244,15 @@ describe('Attribution des courses (D1 à D4)', () => {
     expect(
       await ctx.prisma.auditLog.count({ where: { entityId: order.id, action: 'order.assign' } }),
     ).toBe(1);
+
+    // Jamais un livreur aux pièces expirées, même à la main.
+    const expired = await activeRider(ctx, { expiredDocuments: true });
+    const refused = await request(ctx.http)
+      .post(`/v1/admin/orders/${order.id}/assign`)
+      .set(ops.auth)
+      .send({ riderId: expired.riderId })
+      .expect(422);
+    expect(refused.body.error.code).toBe('RIDER_NOT_ELIGIBLE');
 
     // Le livreur n'est pas du back-office.
     await request(ctx.http)

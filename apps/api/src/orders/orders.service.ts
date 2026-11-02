@@ -483,16 +483,23 @@ export class OrdersService {
     return this.dtoOf(id);
   }
 
-  /** Nouveau code d'enlèvement (code perdu) ; pour un lot, le même code pour tout le lot. */
+  /**
+   * Nouveau code d'enlèvement (code perdu) ; pour un lot, le même code pour tout le lot.
+   * Après un échec de livraison, c'est le code de retour de cette commande qui est refait.
+   */
   async regeneratePickupCode(user: AuthUser, id: string): Promise<{ pickupCode: string }> {
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order || order.senderId !== user.id) throw AppError.notFound('ORDER_NOT_FOUND');
-    if (!BEFORE_PICKUP.includes(order.status)) throw AppError.conflict('PICKUP_ALREADY_DONE');
-    const siblings = order.batchId
-      ? await this.prisma.order.findMany({
-          where: { batchId: order.batchId, status: { in: BEFORE_PICKUP } },
-        })
-      : [order];
+    const returning = order.status === 'DELIVERY_FAILED';
+    if (!returning && !BEFORE_PICKUP.includes(order.status)) {
+      throw AppError.conflict('PICKUP_ALREADY_DONE');
+    }
+    const siblings =
+      order.batchId && !returning
+        ? await this.prisma.order.findMany({
+            where: { batchId: order.batchId, status: { in: BEFORE_PICKUP } },
+          })
+        : [order];
     const pickupCode = randomDigits(4);
     await this.prisma.$transaction(
       siblings.map((sibling) =>

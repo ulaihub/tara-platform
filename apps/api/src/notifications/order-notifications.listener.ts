@@ -34,7 +34,14 @@ export class OrderNotificationsListener implements OnModuleInit {
     this.bus.subscribe('notifications', (change) => this.handle(change));
   }
 
-  private async handle({ order, from, to, actor, deliveryCode }: OrderChange): Promise<void> {
+  private async handle({
+    order,
+    from,
+    to,
+    actor,
+    deliveryCode,
+    returnCode,
+  }: OrderChange): Promise<void> {
     if (to === 'SEARCHING_RIDER') return;
     const full = await this.prisma.order.findUniqueOrThrow({
       where: { id: order.id },
@@ -71,6 +78,20 @@ export class OrderNotificationsListener implements OnModuleInit {
             template: 'DELIVERY_CODE',
             params: { reference: order.reference, url },
             secretParams: { code: deliveryCode },
+          });
+        }
+        break;
+      case 'DELIVERY_FAILED':
+        if (returnCode) {
+          await this.notifications.toPhone({
+            phone: full.sender.phone,
+            locale: full.sender.locale === 'EN' ? 'en' : 'fr',
+            userId: order.senderId,
+            orderId: order.id,
+            template: 'RETURN_CODE',
+            params: { reference: order.reference },
+            secretParams: { code: returnCode },
+            smsOnly: true,
           });
         }
         break;

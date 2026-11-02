@@ -435,8 +435,17 @@ export class DispatchService implements OnModuleInit {
     actorId: string,
     note: string | undefined,
   ): Promise<{ order: Order; previousRiderUserId: string | null }> {
-    const rider = await this.prisma.riderProfile.findUnique({ where: { id: riderId } });
+    const rider = await this.prisma.riderProfile.findUnique({
+      where: { id: riderId },
+      include: { documents: true },
+    });
     if (rider?.status !== 'ACTIVE') throw AppError.unprocessable('RIDER_NOT_FOUND');
+    // Le dispatcheur peut passer outre le plafond d'espèces ou la charge, jamais une pièce
+    // manquante ou expirée (permis, assurance) : le livreur ne doit pas rouler (D4).
+    const missing = uncoveredDocuments(rider.documents, ['APPROVED'], cameroonDate(new Date()));
+    if (missing.length > 0) {
+      throw AppError.unprocessable('RIDER_NOT_ELIGIBLE', { reasons: missing.join(', ') });
+    }
     const actor = { id: actorId, role: 'DISPATCHER' as const };
     const { changes, withdrawn, previousRiderUserId } = await this.prisma.$transaction(
       async (tx) => {
@@ -623,7 +632,7 @@ export class DispatchService implements OnModuleInit {
         template: 'OFFER_NEW',
         params: {
           pickup: dto.pickup.neighborhood ?? dto.pickup.landmark,
-          dropoff: dto.dropoff.neighborhood ?? dto.dropoff.landmark,
+          dropoff: dto.dropoff.neighborhood ?? dto.dropoff.city,
           earning: dto.riderEarning,
         },
         data: { type: 'offer.new', offerId: offer.id, orderId: order.id, expiresAt: dto.expiresAt },
@@ -685,6 +694,8 @@ export function toOfferDto(
     latitude: address.latitude,
     longitude: address.longitude,
   });
+  // Deux décimales : environ 1,1 km, assez pour juger la course, pas pour trouver la porte.
+  const approximate = (value: number): number => Math.round(value * 100) / 100;
   return {
     id: offer.id,
     orderId: order.id,
@@ -692,7 +703,12 @@ export function toOfferDto(
     expiresAt: offer.expiresAt.toISOString(),
     approachMeters: offer.approachMeters,
     pickup: place(order.pickupAddress),
-    dropoff: place(order.dropoffAddress),
+    dropoff: {
+      city: order.dropoffAddress.city,
+      neighborhood: order.dropoffAddress.neighborhood?.name ?? null,
+      latitude: approximate(order.dropoffAddress.latitude),
+      longitude: approximate(order.dropoffAddress.longitude),
+    },
     distanceMeters: order.distanceMeters,
     riderEarning: order.riderEarning,
     codAmount: order.codAmount,

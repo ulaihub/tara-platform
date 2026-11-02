@@ -31,6 +31,8 @@ export interface TransitionResult {
   order: Order;
   /** Code de livraison en clair, généré à l'enlèvement, à envoyer après validation. */
   deliveryCode: string | null;
+  /** Code de retour en clair, généré à l'échec, à envoyer à l'expéditeur. */
+  returnCode: string | null;
   /** À publier une fois la transaction validée (voir OrderEventsBus). */
   change: OrderChange;
 }
@@ -116,6 +118,7 @@ export class OrderTransitionsService {
 
     const now = new Date();
     let deliveryCode: string | null = null;
+    let returnCode: string | null = null;
     const data: Prisma.OrderUpdateManyMutationInput & { riderId?: string | null } = { status: to };
     switch (to) {
       case 'ASSIGNED':
@@ -140,6 +143,15 @@ export class OrderTransitionsService {
       case 'DELIVERY_FAILED':
         data.attemptCount = { increment: 1 };
         data.failureDecision = null;
+        // Le livreur connaît le code d'enlèvement : un retour se valide avec un code neuf,
+        // envoyé à l'expéditeur seul (sinon le livreur pourrait déclarer un retour fictif).
+        returnCode = randomDigits(4);
+        data.pickupCodeHash = hashCode(
+          this.env.CODE_HASH_SECRET,
+          `pickup:${order.reference}`,
+          returnCode,
+        );
+        data.pickupCodeFailures = 0;
         break;
       case 'DELIVERED':
         data.deliveredAt = now;
@@ -188,7 +200,8 @@ export class OrderTransitionsService {
     return {
       order: updated,
       deliveryCode,
-      change: { order: updated, from: order.status, to, actor, deliveryCode },
+      returnCode,
+      change: { order: updated, from: order.status, to, actor, deliveryCode, returnCode },
     };
   }
 

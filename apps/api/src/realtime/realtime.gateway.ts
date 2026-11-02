@@ -26,6 +26,8 @@ interface SocketData {
   expiresAt: Date;
   lastLocationAt: number;
   subscriptions: number;
+  /** Fenêtre de limitation des abonnements (début, nombre). */
+  window: { start: number; count: number };
 }
 
 type Ack = { ok: true; [key: string]: unknown } | { ok: false; error: string };
@@ -35,6 +37,16 @@ const OrderRef = z.object({ orderId: z.uuid() });
 const MIN_LOCATION_INTERVAL_MS = 2_000;
 /** Abonnements à des commandes par connexion. */
 const MAX_SUBSCRIPTIONS = 50;
+/** Demandes d'abonnement ou de désabonnement par minute et par connexion. */
+const MAX_SUBSCRIBE_PER_MINUTE = 30;
+
+/** Limite simple par connexion : chaque demande coûte une lecture en base. */
+function allow(data: SocketData): boolean {
+  const now = Date.now();
+  if (now - data.window.start >= 60_000) data.window = { start: now, count: 0 };
+  data.window.count += 1;
+  return data.window.count <= MAX_SUBSCRIBE_PER_MINUTE;
+}
 
 const OPS_ROLES = ['ADMIN', 'DISPATCHER', 'SUPPORT'] as const;
 
@@ -99,6 +111,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
       expiresAt: session.expiresAt,
       lastLocationAt: 0,
       subscriptions: 0,
+      window: { start: Date.now(), count: 0 },
     };
     socket.data = data;
   }
@@ -125,6 +138,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('order.subscribe')
   async subscribe(@ConnectedSocket() socket: Socket, @MessageBody() body: unknown): Promise<Ack> {
     const data = socket.data as SocketData;
+    if (!allow(data)) return { ok: false, error: 'RATE_LIMITED' };
     const parsed = OrderRef.safeParse(body);
     if (!parsed.success) return { ok: false, error: 'VALIDATION_FAILED' };
     if (data.subscriptions >= MAX_SUBSCRIPTIONS) return { ok: false, error: 'RATE_LIMITED' };
@@ -156,6 +170,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
 
   @SubscribeMessage('order.unsubscribe')
   async unsubscribe(@ConnectedSocket() socket: Socket, @MessageBody() body: unknown): Promise<Ack> {
+    if (!allow(socket.data as SocketData)) return { ok: false, error: 'RATE_LIMITED' };
     const parsed = OrderRef.safeParse(body);
     if (!parsed.success) return { ok: false, error: 'VALIDATION_FAILED' };
     await socket.leave(orderRoom(parsed.data.orderId));
