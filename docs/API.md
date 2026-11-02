@@ -10,19 +10,19 @@ npx @openapitools/openapi-generator-cli generate -i apps/api/openapi.json -g dar
 
 ## Conventions
 
-| Sujet       | Règle                                                                                                                                                                                                                |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Adresse     | Toutes les routes sont sous `/v1`, sauf `/health`.                                                                                                                                                                   |
-| Connexion   | `Authorization: Bearer <accessToken>` sur toutes les routes, sauf `auth/*`, `public/*` et `/health`.                                                                                                                 |
-| Langue      | `Accept-Language: fr` ou `en`. Pour un utilisateur connecté, la langue de son compte prime.                                                                                                                          |
-| Erreurs     | Toujours `{ "error": { "code", "message", "details?", "requestId?" } }`. L'app se fie à `code` (liste fermée dans le schéma `ErrorBody`) ; `message` est prêt à afficher ; `requestId` est à communiquer au support. |
-| Argent      | Montants en FCFA entiers, devise `XAF`. Jamais de décimales.                                                                                                                                                         |
-| Dates       | ISO 8601 en UTC (`2026-11-03T09:00:00.000Z`). L'app affiche l'heure du Cameroun (UTC+1).                                                                                                                             |
-| Téléphones  | Toutes les écritures courantes sont acceptées (`690 00 00 00`, `+237690000000`…) et renvoyées au format `+2376XXXXXXXX`.                                                                                             |
-| Pagination  | `?limit=20&cursor=<nextCursor>` ; la réponse contient `items` et `nextCursor` (`null` à la fin).                                                                                                                     |
-| Idempotence | En-tête `Idempotency-Key` (UUID) sur `POST /v1/orders` et `POST /v1/orders/batch` : en cas de coupure réseau, renvoyer la même requête avec la même clé renvoie la commande déjà créée (`replayed: true`).           |
-| Fichiers    | `multipart/form-data`, champ `file`. Photos et notes vocales : 1 Mo au plus (compresser côté app, viser moins de 150 Ko). Pièces KYC : 5 Mo, JPEG, PNG, WebP ou PDF ; le contenu réel est vérifié.                   |
-| Limitation  | 120 requêtes par minute et par compte connecté ; sur les routes publiques, par adresse IP avec des seuils larges (les opérateurs partagent une même IP entre abonnés). Au-delà : `429` avec le code `RATE_LIMITED`.  |
+| Sujet       | Règle                                                                                                                                                                                                                                                                            |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adresse     | Toutes les routes sont sous `/v1`, sauf `/health`.                                                                                                                                                                                                                               |
+| Connexion   | `Authorization: Bearer <accessToken>` sur toutes les routes, sauf `auth/*`, `public/*` et `/health`.                                                                                                                                                                             |
+| Langue      | `Accept-Language: fr` ou `en`. Pour un utilisateur connecté, la langue de son compte prime.                                                                                                                                                                                      |
+| Erreurs     | Toujours `{ "error": { "code", "message", "details?", "requestId?" } }`. L'app se fie à `code` (liste fermée dans le schéma `ErrorBody`) ; `message` est prêt à afficher ; `requestId` est à communiquer au support.                                                             |
+| Argent      | Montants en FCFA entiers, devise `XAF`. Jamais de décimales.                                                                                                                                                                                                                     |
+| Dates       | ISO 8601 en UTC (`2026-11-03T09:00:00.000Z`). L'app affiche l'heure du Cameroun (UTC+1).                                                                                                                                                                                         |
+| Téléphones  | Toutes les écritures courantes sont acceptées (`690 00 00 00`, `+237690000000`…) et renvoyées au format `+2376XXXXXXXX`.                                                                                                                                                         |
+| Pagination  | `?limit=20&cursor=<nextCursor>` ; la réponse contient `items` et `nextCursor` (`null` à la fin).                                                                                                                                                                                 |
+| Idempotence | En-tête `Idempotency-Key` (UUID) : facultatif sur `POST /v1/orders` et `POST /v1/orders/batch`, **obligatoire** sur toute opération qui déplace de l'argent (recharge, retrait, dépôt, reversement, avoir). Renvoyer la même requête avec la même clé ne refait pas l'opération. |
+| Fichiers    | `multipart/form-data`, champ `file`. Photos et notes vocales : 1 Mo au plus (compresser côté app, viser moins de 150 Ko). Pièces KYC : 5 Mo, JPEG, PNG, WebP ou PDF ; le contenu réel est vérifié.                                                                               |
+| Limitation  | 120 requêtes par minute et par compte connecté ; sur les routes publiques, par adresse IP avec des seuils larges (les opérateurs partagent une même IP entre abonnés). Au-delà : `429` avec le code `RATE_LIMITED`.                                                              |
 
 ## Connexion par code SMS (A1)
 
@@ -135,6 +135,8 @@ Jeton absent ou invalide : erreur de connexion `UNAUTHENTICATED`. À l'expiratio
 | serveur → app | `rider.position`    | `{ orderId, latitude, longitude, heading, speed, at }`                                      | Abonnés de la commande                      |
 | serveur → app | `offer.new`         | Schéma `DispatchOffer`                                                                      | Livreur sollicité                           |
 | serveur → app | `offer.closed`      | `{ offerId, orderId, outcome }`                                                             | Livreur sollicité                           |
+| serveur → app | `payment.status`    | `{ paymentId, purpose, status, amount, orderId }`                                           | Payeur connecté, abonnés de la commande     |
+| serveur → app | `payout.status`     | `{ payoutId, status, amount }`                                                              | Bénéficiaire                                |
 | serveur → app | `ops.*`             | `dispatch-alert`, `safety-alert`, `delivery-validation`, `rider-position` (toutes les 10 s) | Équipe (`ADMIN`, `DISPATCHER`, `SUPPORT`)   |
 
 Les événements servent à rafraîchir l'écran ; l'état qui fait foi reste celui de l'API REST (à relire après une reconnexion).
@@ -144,6 +146,53 @@ Les événements servent à rafraîchir l'écran ; l'état qui fait foi reste ce
 - **Push** (Firebase Cloud Messaging) : l'app envoie son jeton après la connexion et à chaque renouvellement, `PUT /v1/me/devices/{installationId}/push-token` (`null` pour arrêter). Les propositions de course sont en priorité haute sur le canal Android `offers` (son et réveil écran verrouillé) ; les autres sur le canal `orders`. `data.type` indique l'écran à ouvrir.
 - **Destinataire** (sans compte) : WhatsApp d'abord, avec des modèles approuvés par Meta nommés `tara_<modèle>` ; SMS si WhatsApp refuse le message ou signale plus tard un échec (webhook `POST /v1/webhooks/whatsapp`, signé).
 - Messages par statut : confirmation au destinataire à la création ; push à l'expéditeur à l'attribution, à l'enlèvement, au départ, à la livraison, à l'échec, au retour et à l'annulation ; code de livraison puis reçu au destinataire ; au livreur, annulation ou retrait de sa course.
+
+## Argent (G1 à G8, E5)
+
+Montants en FCFA entiers. Chaque mouvement est une écriture du grand livre ; les soldes affichés en sont tirés.
+
+**Paiement des frais d'une commande (G1).**
+
+| `feePaymentMethod` (payé par l'expéditeur) | Ce qui se passe                                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `CASH`                                     | Payé au livreur à l'enlèvement ; la commande part tout de suite.                                                    |
+| `WALLET`                                   | Débité du solde Tara à la création (`INSUFFICIENT_BALANCE` sinon) ; pour un marchand, de son portefeuille.          |
+| `MOMO_MTN`, `MOMO_ORANGE`                  | La commande reste `CREATED` ; `POST /orders/{id}/pay` envoie la demande au téléphone ; elle part à la confirmation. |
+
+Avec `feePayer: RECIPIENT`, le destinataire paie à la porte. Une commande annulée avant l'enlèvement rend ses frais au solde (avoir). Un retour que le destinataire devait payer est facturé à l'expéditeur. Un client dont le solde est négatif doit le régler avant de commander (`WALLET_IN_DEBT`).
+
+**Encaissement à la porte (E5).** `GET /rider/orders/{id}/collection` donne ce qui reste dû (frais du destinataire et contre-remboursement). `POST /rider/orders/{id}/collect` avec `{ "method": "CASH" }` l'enregistre tout de suite ; avec `{ "method": "MOBILE_MONEY", "phone", "operator" }`, une demande part au téléphone du destinataire et la confirmation arrive par l'événement `payment.status` (ou `GET /payments/{id}`). La livraison est refusée (`COLLECTION_REQUIRED`) tant que tout n'est pas encaissé. Frais d'encaissement : 2 %, minimum 250 FCFA, déduits du montant reversé au marchand.
+
+**Portefeuilles.**
+
+| Qui      | Routes                                                                                                                                                                              |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Client   | `GET /me/wallet`, `GET /me/wallet/transactions`, `POST /me/wallet/topup`, `POST /me/wallet/refund` (vers Mobile Money)                                                              |
+| Marchand | Idem avec `account=merchant` ; `POST /me/merchant/payouts` (à la demande, offres Pro et Business) ; `GET /me/payouts` ; `GET /me/merchant/statements/{AAAA-MM}` (PDF)               |
+| Livreur  | `GET /rider/wallet` (gains, espèces détenues, plafond, disponible), `GET /rider/wallet/transactions?account=earnings\|cash`, `POST /rider/withdrawals`, `POST /rider/cash-deposits` |
+
+Le livreur garde sa part sur les espèces qu'il encaisse : son disponible au retrait vaut ses gains moins les espèces qu'il détient. Au-delà de son plafond d'espèces, il ne reçoit plus de courses tant qu'il n'a pas déposé.
+
+**Reversements (G3).** Chaque jour à 18 h (heure du Cameroun), le portefeuille de chaque marchand en reversement quotidien part vers son numéro Mobile Money (500 FCFA minimum). Au-delà de 200 000 FCFA, un responsable financier valide d'abord. Un reversement échoué rend le montant au portefeuille.
+
+**Back-office finance** (`ADMIN`, `FINANCE`, double authentification) : `GET /admin/finance/overview`, `GET /admin/finance/payouts`, `POST /admin/finance/payouts/{id}/approve` et `/reject`, `POST /admin/finance/riders/{riderId}/cash-deposits` (dépôt au bureau), `POST /admin/finance/users/{userId}/credits` (avoir), `POST /admin/finance/treasury-transfers`, `GET /admin/finance/reconciliations`, `POST /admin/finance/reconciliations/{jour}/run`, `GET /admin/finance/journal.csv?from&to` (export comptable, séparateur point-virgule), `GET /admin/finance/merchants/{merchantId}/statements/{AAAA-MM}`.
+
+Notifications de l'agrégateur : `GET` ou `POST /v1/webhooks/payments/{prestataire}`, signées.
+
+## Couverture des exigences de la phase 3
+
+| Exigence | Réalisation                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| G1       | Espèces, Mobile Money (CamPay), solde Tara, destinataire payeur                                       |
+| G2       | Portefeuille marchand ligne par ligne                                                                 |
+| G3       | Reversement quotidien à 18 h, à la demande pour Pro et Business, validation au-delà d'un seuil        |
+| G4       | Portefeuille livreur : gains, espèces détenues, retrait                                               |
+| G5       | Plafond d'espèces appliqué à l'attribution, dépôt par Mobile Money ou au bureau                       |
+| G6       | Rapprochement chaque nuit à 1 h 30, relance manuelle, liste des écarts                                |
+| G7       | Relevé mensuel PDF                                                                                    |
+| G8       | Avoirs automatiques (annulation) ou accordés par la finance, remboursement du solde vers Mobile Money |
+| E5       | Encaissement espèces ou Mobile Money à la porte, livraison bloquée tant que ce n'est pas fait         |
+| H5       | Validation des reversements, rapprochement, export comptable CSV                                      |
 
 ## Couverture des exigences de la phase 2
 
