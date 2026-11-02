@@ -4187,6 +4187,42 @@
         ]
       }
     },
+    "/v1/me/merchant/statements/{month}": {
+      "get": {
+        "operationId": "Wallet_statement",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relevé PDF",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Portefeuille"
+        ]
+      }
+    },
     "/v1/me/wallet": {
       "get": {
         "operationId": "Wallet_wallet",
@@ -4991,6 +5027,157 @@
         ],
         "tags": [
           "Livreur"
+        ]
+      }
+    },
+    "/v1/admin/finance/reconciliations": {
+      "get": {
+        "operationId": "AdminFinance_reconciliations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reconciliation"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · finance"
+        ]
+      }
+    },
+    "/v1/admin/finance/reconciliations/{day}/run": {
+      "post": {
+        "operationId": "AdminFinance_runReconciliation",
+        "parameters": [
+          {
+            "name": "day",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reconciliation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · finance"
+        ]
+      }
+    },
+    "/v1/admin/finance/journal.csv": {
+      "get": {
+        "operationId": "AdminFinance_journalCsv",
+        "parameters": [
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "2026-11-30"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "2026-11-01"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journal au format CSV (séparateur point-virgule)",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · finance"
+        ]
+      }
+    },
+    "/v1/admin/finance/merchants/{merchantId}/statements/{month}": {
+      "get": {
+        "operationId": "AdminFinance_merchantStatement",
+        "parameters": [
+          {
+            "name": "merchantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relevé PDF",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · finance"
         ]
       }
     },
@@ -6125,6 +6312,9 @@
           "lastAddress"
         ],
         "additionalProperties": false
+      },
+      "Reconciliation": {
+        "$ref": "#/components/schemas/Reconciliation"
       },
       "RiderEarnings": {
         "$ref": "#/components/schemas/RiderEarnings"

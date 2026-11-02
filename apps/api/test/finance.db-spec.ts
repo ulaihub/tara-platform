@@ -8,6 +8,7 @@ import {
   riderPayable,
 } from '../src/finance/ledger.accounts.js';
 import { LedgerService } from '../src/finance/ledger.service.js';
+import { PaymentsService } from '../src/payments/payments.service.js';
 import { PayoutsService } from '../src/finance/payouts.service.js';
 import { type FakePaymentProvider, PAYMENT_PROVIDER } from '../src/payments/payment.provider.js';
 import {
@@ -63,7 +64,7 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
 
   /** Le prestataire confirme : notification signée envoyée au webhook. */
   async function settle(providerReference: string, status: 'SUCCEEDED' | 'FAILED') {
-    const { body, signature } = provider.settle(providerReference, status);
+    const { body, signature } = await provider.settle(providerReference, status);
     await request(ctx.http)
       .post('/v1/webhooks/payments/fake')
       .set('Content-Type', 'application/json')
@@ -220,6 +221,15 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       (await ctx.prisma.payment.findUniqueOrThrow({ where: { id: pay.body.id } })).status,
     ).toBe('PENDING');
     expect((await order(placed.id)).status).toBe('CREATED');
+    // L'interrogation régulière contrôle aussi le montant…
+    const payments = ctx.app.get(PaymentsService);
+    await payments.refreshPending(new Date(Date.now() + 60_000));
+    expect((await order(placed.id)).status).toBe('CREATED');
+    // …et applique le paiement une fois le bon montant confirmé par le prestataire.
+    operation.amount += 100;
+    await provider.settle(operation.providerReference, 'SUCCEEDED');
+    await payments.refreshPending(new Date(Date.now() + 60_000));
+    expect((await order(placed.id)).status).toBe('SEARCHING_RIDER');
   });
 
   it('Mobile Money à la porte : frais du destinataire et contre-remboursement en une demande (E5)', async () => {

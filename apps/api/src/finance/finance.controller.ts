@@ -7,9 +7,15 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiProduces, ApiQuery, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
+import { AuditService } from '../audit/audit.service.js';
+import { cameroonDate } from '../common/time.js';
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { z } from 'zod';
@@ -54,12 +60,57 @@ import {
   riderCashHeld,
   riderPayable,
 } from './ledger.accounts.js';
+import { JournalExportService } from './journal-export.service.js';
 import { LedgerService } from './ledger.service.js';
 import { OrderFinanceService } from './order-finance.service.js';
+import { ReconciliationService } from './reconciliation.service.js';
+import { StatementsService } from './statements.service.js';
 import { PayoutsService } from './payouts.service.js';
 import { WalletsService } from './wallets.service.js';
 
 type Out<T extends z.ZodType> = Promise<z.output<T>>;
+
+const ReconciliationDto = z
+  .object({
+    day: z.iso.date(),
+    status: z.enum(['BALANCED', 'DISCREPANCIES']),
+    totals: z.record(z.string(), z.number()),
+    discrepancies: z.array(
+      z.object({
+        type: z.string(),
+        reference: z.string(),
+        detail: z.string(),
+        expected: z.number().optional(),
+        actual: z.number().optional(),
+      }),
+    ),
+    updatedAt: z.iso.datetime(),
+  })
+  .meta({ id: 'Reconciliation' });
+
+function toReconciliationDto(report: {
+  day: Date;
+  status: 'BALANCED' | 'DISCREPANCIES';
+  totals: unknown;
+  discrepancies: unknown;
+  updatedAt: Date;
+}): z.output<typeof ReconciliationDto> {
+  return {
+    day: report.day.toISOString().slice(0, 10),
+    status: report.status,
+    totals: report.totals as Record<string, number>,
+    discrepancies: report.discrepancies as z.output<typeof ReconciliationDto>['discrepancies'],
+    updatedAt: report.updatedAt.toISOString(),
+  };
+}
+
+const DayParam = z.iso.date();
+
+function pdfResponse(response: Response, file: { filename: string; pdf: Buffer }): StreamableFile {
+  response.setHeader('Content-Type', 'application/pdf');
+  response.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
+  return new StreamableFile(file.pdf);
+}
 
 const MONEY_HEADER = IdempotencyHeader(
   true,
@@ -103,7 +154,22 @@ export class WalletController {
     private readonly payouts: PayoutsService,
     private readonly finance: OrderFinanceService,
     private readonly prisma: PrismaService,
+    private readonly statements: StatementsService,
   ) {}
+
+  /** Relevé mensuel PDF du portefeuille marchand (G7), mois au format AAAA-MM. */
+  @Get('me/merchant/statements/:month')
+  @ApiProduces('application/pdf')
+  @ApiOkResponse({ description: 'Relevé PDF', schema: { type: 'string', format: 'binary' } })
+  async statement(
+    @CurrentUser() user: AuthUser,
+    @Param('month') month: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    const merchant = await this.prisma.merchantProfile.findUnique({ where: { userId: user.id } });
+    if (!merchant) throw AppError.notFound();
+    return pdfResponse(response, await this.statements.merchantStatement(merchant.id, month));
+  }
 
   @Get('me/wallet')
   @ApiZodResponse(WalletDto)
@@ -373,7 +439,82 @@ export class AdminFinanceController {
     private readonly payouts: PayoutsService,
     private readonly ledger: LedgerService,
     private readonly prisma: PrismaService,
+    private readonly reconciliation: ReconciliationService,
+    private readonly journal: JournalExportService,
+    private readonly statements: StatementsService,
+    private readonly audit: AuditService,
   ) {}
+
+  /** Rapprochements quotidiens, du plus récent au plus ancien (G6). */
+  @Get('reconciliations')
+  @ApiZodResponse(z.array(ReconciliationDto))
+  async reconciliations(): Out<z.ZodArray<typeof ReconciliationDto>> {
+    const reports = await this.prisma.reconciliationReport.findMany({
+      orderBy: { day: 'desc' },
+      take: 60,
+    });
+    return reports.map(toReconciliationDto);
+  }
+
+  /** Relance le rapprochement d'une journée (après correction d'un écart). */
+  @Post('reconciliations/:day/run')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodResponse(ReconciliationDto)
+  async runReconciliation(
+    @CurrentUser() user: AuthUser,
+    @Param('day') day: string,
+  ): Out<typeof ReconciliationDto> {
+    if (!DayParam.safeParse(day).success || day > cameroonDate(new Date())) {
+      throw AppError.badRequest('VALIDATION_FAILED', {}, [
+        { path: 'day', message: 'AAAA-MM-JJ passé attendu' },
+      ]);
+    }
+    return toReconciliationDto(await this.reconciliation.run(day, user.id));
+  }
+
+  /** Export comptable du journal, CSV (H5). */
+  @Get('journal.csv')
+  @ApiProduces('text/csv')
+  @ApiQuery({ name: 'from', example: '2026-11-01' })
+  @ApiQuery({ name: 'to', example: '2026-11-30' })
+  @ApiOkResponse({
+    description: 'Journal au format CSV (séparateur point-virgule)',
+    schema: { type: 'string' },
+  })
+  async journalCsv(
+    @CurrentUser() user: AuthUser,
+    @Query('from') from: string | undefined,
+    @Query('to') to: string | undefined,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<string> {
+    const csv = await this.journal.csv(from ?? '', to ?? '');
+    await this.audit.record({
+      actor: user,
+      action: 'finance.journal_exported',
+      entityType: 'journal',
+      entityId: `${from}..${to}`,
+      request,
+    });
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename="tara-journal-${from}-${to}.csv"`,
+    );
+    return csv;
+  }
+
+  /** Relevé mensuel PDF d'un marchand, pour le support et la finance. */
+  @Get('merchants/:merchantId/statements/:month')
+  @ApiProduces('application/pdf')
+  @ApiOkResponse({ description: 'Relevé PDF', schema: { type: 'string', format: 'binary' } })
+  async merchantStatement(
+    @Param('merchantId', ParseUUIDPipe) merchantId: string,
+    @Param('month') month: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    return pdfResponse(response, await this.statements.merchantStatement(merchantId, month));
+  }
 
   @Get('overview')
   @ApiZodResponse(FinanceOverviewDto)

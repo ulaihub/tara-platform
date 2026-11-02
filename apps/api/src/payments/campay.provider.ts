@@ -131,7 +131,11 @@ export class CamPayPaymentProvider implements PaymentProvider {
       'GET',
       `/transaction/${encodeURIComponent(providerReference)}/`,
     );
-    return { providerReference, status: mapStatus(body.status) };
+    return {
+      providerReference,
+      status: mapStatus(body.status),
+      ...(body.amount !== undefined ? { amount: Number(body.amount) } : {}),
+    };
   }
 
   async disburseStatus(reference: string): Promise<ProviderOperation | null> {

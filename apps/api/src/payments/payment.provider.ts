@@ -1,4 +1,5 @@
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import type { Redis } from 'ioredis';
 
 export const PAYMENT_PROVIDER = Symbol('PAYMENT_PROVIDER');
 
@@ -25,6 +26,8 @@ export interface DisburseRequest {
 export interface ProviderOperation {
   providerReference: string;
   status: ProviderStatus;
+  /** Montant réellement traité, quand le prestataire le donne (contrôlé à la confirmation). */
+  amount?: number;
   /** Frais retenus par le prestataire, s'il les communique. */
   fee?: number;
   failureReason?: string;
@@ -93,6 +96,7 @@ interface FakeOperation extends ProviderTransaction {
 }
 
 const FAKE_SECRET = 'tara-fake-payment-webhook';
+const STORE_KEY = 'fake-payment-provider:operations';
 
 /**
  * Prestataire factice pour le développement, les tests et le simulateur. Il garde ses
@@ -101,6 +105,12 @@ const FAKE_SECRET = 'tara-fake-payment-webhook';
  */
 export class FakePaymentProvider implements PaymentProvider {
   readonly name = 'fake';
+  /**
+   * Relevé du prestataire factice, gardé aussi dans Redis quand il est fourni : comme chez un
+   * vrai prestataire, il survit au redémarrage de l'API (rapprochement, simulateur).
+   */
+  constructor(private readonly store: Redis | null = null) {}
+
   readonly operations = new Map<string, FakeOperation>();
   /** Payeurs qui refusent ou n'ont pas assez d'argent. */
   readonly decliningPhones = new Set<string>();
@@ -133,45 +143,74 @@ export class FakePaymentProvider implements PaymentProvider {
     return operation;
   }
 
-  collect(request: CollectRequest): Promise<ProviderOperation> {
+  private async persist(operation: FakeOperation): Promise<void> {
+    await this.store?.hset(STORE_KEY, operation.providerReference, JSON.stringify(operation));
+  }
+
+  private async load(providerReference: string): Promise<FakeOperation | undefined> {
+    const local = this.operations.get(providerReference);
+    if (local || !this.store) return local;
+    const raw = await this.store.hget(STORE_KEY, providerReference);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as FakeOperation;
+    const operation: FakeOperation = { ...parsed, at: new Date(parsed.at) };
+    this.operations.set(providerReference, operation);
+    return operation;
+  }
+
+  private async all(): Promise<FakeOperation[]> {
+    const merged = new Map<string, FakeOperation>();
+    for (const raw of this.store ? await this.store.hvals(STORE_KEY) : []) {
+      const parsed = JSON.parse(raw) as FakeOperation;
+      merged.set(parsed.providerReference, { ...parsed, at: new Date(parsed.at) });
+    }
+    for (const operation of this.operations.values())
+      merged.set(operation.providerReference, operation);
+    return [...merged.values()];
+  }
+
+  async collect(request: CollectRequest): Promise<ProviderOperation> {
     const operation = this.record('COLLECT', request.reference, request.amount, request.phone);
     if (this.decliningPhones.has(request.phone)) {
       operation.status = 'FAILED';
       operation.failureReason = 'Solde insuffisant';
     }
-    return Promise.resolve(this.view(operation));
+    await this.persist(operation);
+    return this.view(operation);
   }
 
-  disburse(request: DisburseRequest): Promise<ProviderOperation> {
+  async disburse(request: DisburseRequest): Promise<ProviderOperation> {
     const operation = this.record('DISBURSE', request.reference, request.amount, request.phone);
     operation.status = 'SUCCEEDED';
+    await this.persist(operation);
     if (this.loseResponseOnce.delete(request.reference)) {
-      return Promise.reject(new ProviderUnavailableError('Délai dépassé (réponse perdue)'));
+      throw new ProviderUnavailableError('Délai dépassé (réponse perdue)');
     }
-    return Promise.resolve(this.view(operation));
+    return this.view(operation);
   }
 
-  collectStatus(providerReference: string): Promise<ProviderOperation> {
-    const operation = this.operations.get(providerReference);
-    if (!operation) return Promise.reject(new Error('Opération inconnue'));
-    return Promise.resolve(this.view(operation));
+  async collectStatus(providerReference: string): Promise<ProviderOperation> {
+    const operation = await this.load(providerReference);
+    if (!operation) throw new Error('Opération inconnue');
+    return this.view(operation);
   }
 
-  disburseStatus(reference: string): Promise<ProviderOperation | null> {
-    const operation = [...this.operations.values()].find(
+  async disburseStatus(reference: string): Promise<ProviderOperation | null> {
+    const operation = (await this.all()).find(
       (candidate) => candidate.kind === 'DISBURSE' && candidate.reference === reference,
     );
-    return Promise.resolve(operation ? this.view(operation) : null);
+    return operation ? this.view(operation) : null;
   }
 
   /** Le payeur valide (ou refuse) sur son téléphone : renvoie la notification signée. */
-  settle(
+  async settle(
     providerReference: string,
     status: 'SUCCEEDED' | 'FAILED',
-  ): { body: string; signature: string } {
-    const operation = this.operations.get(providerReference);
+  ): Promise<{ body: string; signature: string }> {
+    const operation = await this.load(providerReference);
     if (!operation) throw new Error(`Opération inconnue : ${providerReference}`);
     operation.status = status;
+    await this.persist(operation);
     return this.webhookFor(operation);
   }
 
@@ -208,18 +247,17 @@ export class FakePaymentProvider implements PaymentProvider {
     return Promise.resolve(JSON.parse(raw) as ProviderEvent);
   }
 
-  transactions(from: Date, to: Date): Promise<ProviderTransaction[]> {
-    return Promise.resolve(
-      [...this.operations.values()]
-        .filter((operation) => operation.at >= from && operation.at < to)
-        .map(({ phone: _phone, failureReason: _reason, ...transaction }) => ({ ...transaction })),
-    );
+  async transactions(from: Date, to: Date): Promise<ProviderTransaction[]> {
+    return (await this.all())
+      .filter((operation) => operation.at >= from && operation.at < to)
+      .map(({ phone: _phone, failureReason: _reason, ...transaction }) => ({ ...transaction }));
   }
 
   private view(operation: FakeOperation): ProviderOperation {
     return {
       providerReference: operation.providerReference,
       status: operation.status,
+      amount: operation.amount,
       fee: operation.fee,
       ...(operation.failureReason ? { failureReason: operation.failureReason } : {}),
     };
