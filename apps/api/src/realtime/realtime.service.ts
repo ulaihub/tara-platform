@@ -16,6 +16,7 @@ export type RealtimeEvent =
   | 'ops.safety-alert'
   | 'ops.delivery-validation'
   | 'ops.rider-position'
+  | 'ops.sms-volume'
   | 'session.expired';
 
 /**

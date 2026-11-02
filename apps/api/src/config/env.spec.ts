@@ -35,6 +35,26 @@ describe('parseEnv', () => {
     );
   });
 
+  it('exige les identifiants du fournisseur SMS choisi et un secours distinct', () => {
+    expect(() => parseEnv({ ...valid, SMS_PROVIDER: 'orange' })).toThrow(
+      /ORANGE_SMS_CLIENT_ID[\s\S]*ORANGE_SMS_SENDER_PHONE/,
+    );
+    const orange = {
+      ...valid,
+      SMS_PROVIDER: 'orange',
+      ORANGE_SMS_CLIENT_ID: 'client-orange',
+      ORANGE_SMS_CLIENT_SECRET: 'secret-orange',
+      ORANGE_SMS_SENDER_PHONE: '+237690000000',
+    };
+    expect(parseEnv(orange).SMS_FALLBACK_PROVIDER).toBe('none');
+    expect(() => parseEnv({ ...orange, SMS_FALLBACK_PROVIDER: 'orange' })).toThrow(
+      /SMS_FALLBACK_PROVIDER/,
+    );
+    expect(() => parseEnv({ ...orange, SMS_FALLBACK_PROVIDER: 'twilio' })).toThrow(
+      /TWILIO_ACCOUNT_SID/,
+    );
+  });
+
   it('refuse un secret JWT trop court', () => {
     expect(() => parseEnv({ ...valid, JWT_SECRET: 'court' })).toThrow(/JWT_SECRET/);
   });

@@ -130,7 +130,8 @@ describe('Notifications push, WhatsApp et SMS (F3)', () => {
     });
 
     it('refuse un accusé non signé et bascule sur SMS à l’accusé « failed »', async () => {
-      const phone = '+237655000333';
+      const phone = `+2376${String(Date.now()).slice(-8)}`;
+      const reference = `wamid.TEST-${Date.now()}`;
       const original = await ctx.prisma.notification.create({
         data: {
           recipientPhone: phone,
@@ -139,7 +140,7 @@ describe('Notifications push, WhatsApp et SMS (F3)', () => {
           payload: { params: { reference: 'TR-WEBHK1' } },
           status: 'SENT',
           provider: 'whatsapp-meta',
-          providerReference: 'wamid.TEST-FAILED-1',
+          providerReference: reference,
         },
       });
       const body = {
@@ -150,7 +151,7 @@ describe('Notifications push, WhatsApp et SMS (F3)', () => {
                 value: {
                   statuses: [
                     {
-                      id: 'wamid.TEST-FAILED-1',
+                      id: reference,
                       status: 'failed',
                       errors: [{ code: 131026, title: 'Message undeliverable' }],
                     },

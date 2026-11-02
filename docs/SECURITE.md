@@ -78,7 +78,7 @@ Les secrets vivent dans le gestionnaire de secrets de l'hébergeur, jamais dans 
 
 | Phase | Mesure                                                                                                                                                 |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2     | Fait : limitation de débit partagée (Redis), temps réel authentifié, webhook signé. Reste : vrai fournisseur SMS avec alertes de coût                  |
+| 2     | Fait : limitation de débit partagée (Redis), temps réel authentifié, webhook signé, SMS Orange avec secours Twilio et alertes de volume                |
 | 3     | Signature des webhooks Mobile Money ; plafonds et détection de fraude sur les encaissements et reversements                                            |
 | 4, 5  | Apps : sessions dans le stockage chiffré du téléphone, vérification de l'intégrité de l'appareil, détection des téléphones modifiés, code obscurci     |
 | 7     | HTTPS partout, protection anti-DDoS, sauvegardes chiffrées, outil de rotation de `STORAGE_ENCRYPTION_KEY`, test d'intrusion par un prestataire externe |

@@ -21,7 +21,7 @@ flowchart TB
   end
   subgraph Prestataires
     momo[Agrégateur Mobile Money<br/>MTN MoMo, Orange Money]
-    sms[SMS · agrégateur local]
+    sms[SMS · Orange, secours Twilio]
     wa[WhatsApp Cloud API]
     fcm[Firebase Cloud Messaging]
   end
@@ -115,9 +115,13 @@ tara-platform/
 15. **Fichiers rattachés à leur propriétaire.** Une adresse ne peut référencer que les photos de
     son auteur ; le type réel des images et PDF est vérifié. Les pièces d'identité sont chiffrées
     (AES-256-GCM) et chaque consultation par l'équipe est auditée.
-16. **Provisoire** : SMS factice (journal) en attendant le choix de l'agrégateur, stockage sur
-    disque jusqu'au stockage objet (phase 7), langue des messages au destinataire en français. La
-    configuration refuse de démarrer en production avec un fournisseur factice.
+16. **SMS sans point unique de défaillance.** Orange Cameroun (API officielle « SMS Cameroon »,
+    tous opérateurs, prix locaux en FCFA, nom d'expéditeur validé par Orange) en principal ;
+    Twilio en secours, utilisé automatiquement si Orange échoue (panne, solde épuisé). La
+    connexion par code SMS ne dépend donc d'aucun fournisseur unique. Le volume quotidien est
+    compté et l'équipe alertée à 80 % puis 100 % d'un seuil. Restent provisoires : stockage sur
+    disque jusqu'au stockage objet (phase 7), langue des messages au destinataire en français.
+    La configuration refuse de démarrer en production avec un fournisseur factice.
 
 17. **Sécurité en profondeur.** Détail des menaces, des protections et des procédures dans
     [`SECURITE.md`](SECURITE.md) : second facteur obligatoire pour l'équipe, plafonds anti-pompage

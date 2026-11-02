@@ -60,7 +60,30 @@ const envSchema = z
     /** Clé de chiffrement des pièces d'identité (AES-256-GCM). */
     STORAGE_ENCRYPTION_KEY: base64Key32,
 
-    SMS_PROVIDER: z.enum(['fake']).default('fake'),
+    /**
+     * SMS : Orange Cameroun (API officielle, tous opérateurs) en principal et Twilio en
+     * secours, utilisé seulement si le principal échoue. « fake » écrit dans le journal.
+     */
+    SMS_PROVIDER: z.enum(['fake', 'orange', 'twilio']).default('fake'),
+    SMS_FALLBACK_PROVIDER: z.enum(['none', 'orange', 'twilio']).default('none'),
+    ORANGE_SMS_CLIENT_ID: z.string().min(8).optional(),
+    ORANGE_SMS_CLIENT_SECRET: z.string().min(8).optional(),
+    /** Numéro du compte Orange émetteur, au format +2376XXXXXXXX. */
+    ORANGE_SMS_SENDER_PHONE: z
+      .string()
+      .regex(/^\+2376\d{8}$/)
+      .optional(),
+    /** Nom d'expéditeur validé par Orange (11 caractères au plus), ex. « TARA ». */
+    ORANGE_SMS_SENDER_NAME: z.string().min(1).max(11).optional(),
+    TWILIO_ACCOUNT_SID: z
+      .string()
+      .regex(/^AC[0-9a-f]{32}$/)
+      .optional(),
+    TWILIO_AUTH_TOKEN: z.string().min(16).optional(),
+    /** Expéditeur Twilio : nom alphanumérique enregistré (ex. TARA) ou numéro E.164. */
+    TWILIO_FROM: z.string().min(1).max(16).optional(),
+    /** Au-delà de ce nombre de SMS dans la journée, l'équipe est alertée (80 % puis 100 %). */
+    SMS_DAILY_ALERT_COUNT: z.coerce.number().int().min(1).default(3000),
     /** Notifications push (Firebase Cloud Messaging) : compte de service JSON encodé en base64. */
     PUSH_PROVIDER: z.enum(['fake', 'fcm']).default('fake'),
     FCM_SERVICE_ACCOUNT_BASE64: z.string().optional(),
@@ -118,6 +141,29 @@ const envSchema = z
             message: 'requis avec WHATSAPP_PROVIDER=meta',
           });
       }
+    }
+    const required: Record<'orange' | 'twilio', (keyof typeof env)[]> = {
+      orange: ['ORANGE_SMS_CLIENT_ID', 'ORANGE_SMS_CLIENT_SECRET', 'ORANGE_SMS_SENDER_PHONE'],
+      twilio: ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_FROM'],
+    };
+    for (const provider of [env.SMS_PROVIDER, env.SMS_FALLBACK_PROVIDER]) {
+      if (provider !== 'orange' && provider !== 'twilio') continue;
+      for (const key of required[provider]) {
+        if (!env[key]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `requis avec le fournisseur SMS ${provider}`,
+          });
+        }
+      }
+    }
+    if (env.SMS_FALLBACK_PROVIDER !== 'none' && env.SMS_FALLBACK_PROVIDER === env.SMS_PROVIDER) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SMS_FALLBACK_PROVIDER'],
+        message: 'le secours doit être un autre fournisseur que le principal',
+      });
     }
     const radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
     if (radii.some((r) => !Number.isInteger(r) || r <= 0)) {

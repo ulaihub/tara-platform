@@ -230,7 +230,10 @@ export class NotificationService implements OnModuleInit {
         if (!notification.recipientPhone) throw new Error('Numéro effacé');
         const text = renderSms(notification.template as SmsTemplate, locale, params);
         const sent = await this.sms.send(notification.recipientPhone, text);
-        return { provider: this.sms.name, providerReference: sent.providerReference };
+        return {
+          provider: sent.provider ?? this.sms.name,
+          providerReference: sent.providerReference,
+        };
       }
       case 'WHATSAPP': {
         if (!this.whatsapp) throw new Error('WhatsApp désactivé');

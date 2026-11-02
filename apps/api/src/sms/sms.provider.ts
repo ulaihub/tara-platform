@@ -2,10 +2,16 @@ import { Logger } from '@nestjs/common';
 
 export const SMS_PROVIDER = Symbol('SMS_PROVIDER');
 
-/** Envoi de SMS. Le fournisseur réel (agrégateur local) arrive avec les notifications (phase 2). */
+/** Résultat d'un envoi : `provider` indique le fournisseur réellement utilisé (secours). */
+export interface SmsSendResult {
+  providerReference: string;
+  provider?: string;
+}
+
+/** Envoi de SMS (Orange Cameroun, Twilio, ou factice en développement). */
 export interface SmsProvider {
   readonly name: string;
-  send(to: string, text: string): Promise<{ providerReference: string }>;
+  send(to: string, text: string): Promise<SmsSendResult>;
 }
 
 export interface SentSms {
@@ -25,7 +31,7 @@ export class FakeSmsProvider implements SmsProvider {
   private readonly logger = new Logger('FakeSms');
   private counter = 0;
 
-  send(to: string, text: string): Promise<{ providerReference: string }> {
+  send(to: string, text: string): Promise<SmsSendResult> {
     this.outbox.push({ to, text, at: new Date() });
     if (this.outbox.length > 2_000) this.outbox.shift();
     this.logger.log(`→ ${to} : ${text}`);
