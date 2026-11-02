@@ -1,0 +1,1196 @@
+// =============================================================================
+// Tara — schéma de données (phase 0)
+// =============================================================================
+// Conventions (voir docs/ARCHITECTURE.md) :
+// - Identifiants UUID v7 : uniques et triables dans le temps.
+// - Montants en FCFA entiers (Int). Jamais de nombres à virgule pour l'argent.
+// - Dates en timestamptz, précision milliseconde.
+// - Tables et colonnes en snake_case côté base, pour le SQL brut (PostGIS, triggers).
+// - Coordonnées : latitude/longitude en double précision, saisies par l'application.
+//   La colonne PostGIS `location` est calculée par un trigger (migration 0002)
+//   et ne sert qu'aux requêtes spatiales, isolées dans des repositories.
+// - Le grand livre (journal_entries, ledger_postings) et le journal d'audit sont
+//   protégés en base : écritures équilibrées, aucune modification ni suppression.
+// =============================================================================
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+// -----------------------------------------------------------------------------
+// Énumérations
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  CUSTOMER
+  MERCHANT
+  RIDER
+  DISPATCHER
+  SUPPORT
+  FINANCE
+  ADMIN
+
+  @@map("user_role")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+
+  @@map("user_status")
+}
+
+enum Locale {
+  FR
+  EN
+
+  @@map("locale")
+}
+
+enum OtpPurpose {
+  LOGIN
+  PHONE_CHANGE
+
+  @@map("otp_purpose")
+}
+
+enum DevicePlatform {
+  ANDROID
+  IOS
+  WEB
+
+  @@map("device_platform")
+}
+
+enum ConsentKind {
+  TERMS
+  PRIVACY
+  LOCATION
+  MARKETING
+
+  @@map("consent_kind")
+}
+
+enum MobileMoneyOperator {
+  MTN
+  ORANGE
+
+  @@map("mobile_money_operator")
+}
+
+enum MerchantPlan {
+  FREE
+  PRO
+  BUSINESS
+
+  @@map("merchant_plan")
+}
+
+enum PayoutSchedule {
+  DAILY
+  ON_DEMAND
+
+  @@map("payout_schedule")
+}
+
+enum RiderStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+
+  @@map("rider_status")
+}
+
+enum VehicleType {
+  MOTORBIKE
+  TRICYCLE
+  CAR
+
+  @@map("vehicle_type")
+}
+
+enum KycDocumentType {
+  NATIONAL_ID_FRONT
+  NATIONAL_ID_BACK
+  DRIVING_LICENSE
+  VEHICLE_REGISTRATION
+  VEHICLE_RENTAL_CONTRACT
+  INSURANCE
+  SELFIE
+  CRIMINAL_RECORD
+  GUARANTOR_ID
+
+  @@map("kyc_document_type")
+}
+
+enum KycDocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+
+  @@map("kyc_document_status")
+}
+
+enum ZoneKind {
+  SERVICE_AREA
+  NEIGHBORHOOD
+  NO_MOTORBIKE
+
+  @@map("zone_kind")
+}
+
+enum AddressSource {
+  SENDER
+  LOCATION_LINK
+  DELIVERY_CONFIRMED
+  BACKOFFICE
+
+  @@map("address_source")
+}
+
+enum SurchargeCode {
+  EXPRESS
+  HEAVY_PARCEL
+  NIGHT
+  FAILED_ATTEMPT
+  RETURN
+  WEATHER
+
+  @@map("surcharge_code")
+}
+
+enum PromoKind {
+  FIXED_AMOUNT
+  PERCENT
+  FIXED_PRICE
+
+  @@map("promo_kind")
+}
+
+enum ReferralStatus {
+  PENDING
+  QUALIFIED
+  REWARDED
+
+  @@map("referral_status")
+}
+
+enum PackageSize {
+  S
+  M
+  L
+  XL
+
+  @@map("package_size")
+}
+
+enum OrderStatus {
+  CREATED
+  SEARCHING_RIDER
+  ASSIGNED
+  PICKED_UP
+  IN_DELIVERY
+  DELIVERED
+  DELIVERY_FAILED
+  RETURNED
+  CANCELLED
+
+  @@map("order_status")
+}
+
+enum ActorRole {
+  SENDER
+  RECIPIENT
+  RIDER
+  DISPATCHER
+  SUPPORT
+  SYSTEM
+
+  @@map("actor_role")
+}
+
+enum FailureReason {
+  RECIPIENT_ABSENT
+  RECIPIENT_UNREACHABLE
+  REFUSED
+  ADDRESS_NOT_FOUND
+  OTHER
+
+  @@map("failure_reason")
+}
+
+enum ProofKind {
+  PICKUP
+  DELIVERY
+  FAILED_ATTEMPT
+  RETURN
+
+  @@map("proof_kind")
+}
+
+enum DispatchOfferOutcome {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  WITHDRAWN
+
+  @@map("dispatch_offer_outcome")
+}
+
+enum PaymentMethod {
+  MOMO_MTN
+  MOMO_ORANGE
+  CASH
+  WALLET
+
+  @@map("payment_method")
+}
+
+enum FeePayer {
+  SENDER
+  RECIPIENT
+
+  @@map("fee_payer")
+}
+
+enum PaymentPurpose {
+  DELIVERY_FEE
+  COD
+  RIDER_CASH_DEPOSIT
+  SUBSCRIPTION
+  WALLET_TOPUP
+
+  @@map("payment_purpose")
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+
+  @@map("payment_status")
+}
+
+enum PayoutBeneficiary {
+  MERCHANT
+  RIDER
+
+  @@map("payout_beneficiary")
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+
+  @@map("payout_status")
+}
+
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  REVENUE
+  EXPENSE
+
+  @@map("ledger_account_type")
+}
+
+enum LedgerOwnerType {
+  PLATFORM
+  MERCHANT
+  RIDER
+  CUSTOMER
+
+  @@map("ledger_owner_type")
+}
+
+enum JournalEntryKind {
+  PAYMENT_RECEIVED
+  DELIVERY_COMPLETED
+  COD_COLLECTED
+  CASH_DEPOSITED
+  PAYOUT_SENT
+  PAYOUT_FAILED
+  REFUND
+  SUBSCRIPTION
+  ADJUSTMENT
+
+  @@map("journal_entry_kind")
+}
+
+enum NotificationChannel {
+  PUSH
+  SMS
+  WHATSAPP
+
+  @@map("notification_channel")
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+
+  @@map("notification_status")
+}
+
+enum TicketCategory {
+  LOST_PARCEL
+  DAMAGED_PARCEL
+  LATE_DELIVERY
+  PAYMENT
+  RIDER_BEHAVIOR
+  APP_BUG
+  OTHER
+
+  @@map("ticket_category")
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+
+  @@map("ticket_priority")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+
+  @@map("ticket_status")
+}
+
+// -----------------------------------------------------------------------------
+// Comptes, authentification, consentements (A1, A2, A4)
+// -----------------------------------------------------------------------------
+
+model User {
+  id        String     @id @default(uuid(7)) @db.Uuid
+  /// Numéro au format E.164, ex. +237690000000 (A1).
+  phone     String     @unique
+  fullName  String?    @map("full_name")
+  locale    Locale     @default(FR)
+  roles     UserRole[] @default([CUSTOMER])
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  /// Renseigné à l'anonymisation (droit à l'effacement, loi n° 2024/017).
+  deletedAt DateTime?  @map("deleted_at") @db.Timestamptz(3)
+
+  merchant             MerchantProfile?
+  rider                RiderProfile?     @relation("RiderUser")
+  devices              Device[]
+  refreshTokens        RefreshToken[]
+  consents             Consent[]
+  addresses            Address[]
+  locationLinks        LocationLink[]
+  orderBatches         OrderBatch[]
+  sentOrders           Order[]
+  orderEvents          OrderEvent[]
+  validatedProofs      DeliveryProof[]
+  ratingsGiven         Rating[]          @relation("RatingsGiven")
+  ratingsReceived      Rating[]          @relation("RatingsReceived")
+  payments             Payment[]
+  promoRedemptions     PromoRedemption[]
+  referralsMade        Referral[]        @relation("Referrer")
+  referredBy           Referral?         @relation("Referee")
+  ridersApproved       RiderProfile[]    @relation("RiderApprovedBy")
+  kycReviews           KycDocument[]
+  pricingGridsCreated  PricingGrid[]
+  journalEntriesPosted JournalEntry[]
+  notifications        Notification[]
+  ticketsOpened        Ticket[]          @relation("TicketOpenedBy")
+  ticketsAssigned      Ticket[]          @relation("TicketAssignee")
+  ticketMessages       TicketMessage[]
+
+  @@map("users")
+}
+
+/// Code SMS à usage unique (A1). Seul le hachage du code est stocké.
+model OtpChallenge {
+  id         String     @id @default(uuid(7)) @db.Uuid
+  phone      String
+  purpose    OtpPurpose @default(LOGIN)
+  codeHash   String     @map("code_hash")
+  attempts   Int        @default(0)
+  expiresAt  DateTime   @map("expires_at") @db.Timestamptz(3)
+  consumedAt DateTime?  @map("consumed_at") @db.Timestamptz(3)
+  ip         String?
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([phone, createdAt])
+  @@map("otp_challenges")
+}
+
+/// Jeton de rafraîchissement à rotation : chaque usage crée un nouveau jeton.
+model RefreshToken {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  deviceId     String?   @map("device_id") @db.Uuid
+  tokenHash    String    @unique @map("token_hash")
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
+  replacedById String?   @unique @map("replaced_by_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device     Device?       @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  replacedBy RefreshToken? @relation("TokenRotation", fields: [replacedById], references: [id])
+  replaces   RefreshToken? @relation("TokenRotation")
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Device {
+  id             String         @id @default(uuid(7)) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  /// Identifiant d'installation généré par l'application.
+  installationId String         @map("installation_id")
+  platform       DevicePlatform
+  pushToken      String?        @map("push_token")
+  appVersion     String?        @map("app_version")
+  model          String?
+  lastSeenAt     DateTime       @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@unique([userId, installationId])
+  @@map("devices")
+}
+
+/// Consentements horodatés et versionnés (loi n° 2024/017).
+model Consent {
+  id        String      @id @default(uuid(7)) @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  kind      ConsentKind
+  version   String
+  granted   Boolean
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind, createdAt])
+  @@map("consents")
+}
+
+// -----------------------------------------------------------------------------
+// Profils marchand et livreur, vérification d'identité (A2, A3, A5)
+// -----------------------------------------------------------------------------
+
+model MerchantProfile {
+  id             String              @id @default(uuid(7)) @db.Uuid
+  userId         String              @unique @map("user_id") @db.Uuid
+  shopName       String              @map("shop_name")
+  category       String?
+  /// Numéro Mobile Money de reversement (G3).
+  payoutPhone    String              @map("payout_phone")
+  payoutOperator MobileMoneyOperator @map("payout_operator")
+  payoutSchedule PayoutSchedule      @default(DAILY) @map("payout_schedule")
+  plan           MerchantPlan        @default(FREE)
+  planRenewsAt   DateTime?           @map("plan_renews_at") @db.Timestamptz(3)
+  rccm           String?
+  niu            String?
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user          User           @relation(fields: [userId], references: [id])
+  orders        Order[]
+  payouts       Payout[]
+  locationLinks LocationLink[]
+
+  @@map("merchant_profiles")
+}
+
+model RiderProfile {
+  id              String      @id @default(uuid(7)) @db.Uuid
+  userId          String      @unique @map("user_id") @db.Uuid
+  status          RiderStatus @default(PENDING)
+  vehicleType     VehicleType @default(MOTORBIKE) @map("vehicle_type")
+  plateNumber     String?     @map("plate_number")
+  /// Plafond d'espèces détenues, en FCFA (G5, D4).
+  cashLimit       Int         @default(50000) @map("cash_limit")
+  /// Caution exigée pour le kit, en FCFA.
+  depositRequired Int         @default(15000) @map("deposit_required")
+  ratingSum       Int         @default(0) @map("rating_sum")
+  ratingCount     Int         @default(0) @map("rating_count")
+  guarantorName   String?     @map("guarantor_name")
+  guarantorPhone  String?     @map("guarantor_phone")
+  approvedAt      DateTime?   @map("approved_at") @db.Timestamptz(3)
+  approvedById    String?     @map("approved_by_id") @db.Uuid
+  suspendedReason String?     @map("suspended_reason")
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user           User            @relation("RiderUser", fields: [userId], references: [id])
+  approvedBy     User?           @relation("RiderApprovedBy", fields: [approvedById], references: [id])
+  documents      KycDocument[]
+  orders         Order[]
+  offers         DispatchOffer[]
+  codCollections CodCollection[]
+  payments       Payment[]
+  payouts        Payout[]
+
+  @@index([status])
+  @@map("rider_profiles")
+}
+
+/// Pièce justificative d'un livreur. Le fichier est chiffré dans le stockage objet.
+model KycDocument {
+  id              String            @id @default(uuid(7)) @db.Uuid
+  riderId         String            @map("rider_id") @db.Uuid
+  type            KycDocumentType
+  storageKey      String            @map("storage_key")
+  status          KycDocumentStatus @default(PENDING)
+  /// Date d'expiration du document (A5).
+  expiresOn       DateTime?         @map("expires_on") @db.Date
+  reviewedById    String?           @map("reviewed_by_id") @db.Uuid
+  reviewedAt      DateTime?         @map("reviewed_at") @db.Timestamptz(3)
+  rejectionReason String?           @map("rejection_reason")
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  rider      RiderProfile @relation(fields: [riderId], references: [id])
+  reviewedBy User?        @relation(fields: [reviewedById], references: [id])
+
+  @@index([riderId, type])
+  @@index([status, expiresOn])
+  @@map("kyc_documents")
+}
+
+// -----------------------------------------------------------------------------
+// Adresses, repères et zones (B1 à B6)
+// -----------------------------------------------------------------------------
+
+/// Zone géographique : zone desservie, quartier ou zone interdite aux motos (B6).
+/// Le polygone est écrit en SQL brut (import GeoJSON) : création via repository.
+model Zone {
+  id        String                                       @id @default(uuid(7)) @db.Uuid
+  name      String
+  city      String
+  kind      ZoneKind
+  active    Boolean                                      @default(true)
+  area      Unsupported("geography(MultiPolygon, 4326)")
+  createdAt DateTime                                     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime                                     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  addresses Address[]
+
+  @@unique([city, kind, name])
+  @@index([area], type: Gist)
+  @@map("zones")
+}
+
+/// Adresse = point GPS + quartier + repère écrit obligatoire (B1),
+/// photo de façade et note vocale facultatives (B2).
+model Address {
+  id             String                                 @id @default(uuid(7)) @db.Uuid
+  ownerId        String?                                @map("owner_id") @db.Uuid
+  label          String?
+  contactName    String?                                @map("contact_name")
+  contactPhone   String?                                @map("contact_phone")
+  city           String                                 @default("Douala")
+  neighborhoodId String?                                @map("neighborhood_id") @db.Uuid
+  landmark       String
+  latitude       Float
+  longitude      Float
+  /// Calculée par trigger à partir de latitude/longitude. Ne pas écrire.
+  location       Unsupported("geography(Point, 4326)")?
+  photoKey       String?                                @map("photo_key")
+  voiceNoteKey   String?                                @map("voice_note_key")
+  source         AddressSource
+  /// Point confirmé par une livraison réussie : réutilisable pour ce destinataire (B4).
+  verifiedAt     DateTime?                              @map("verified_at") @db.Timestamptz(3)
+  createdAt      DateTime                               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime                               @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  owner         User?          @relation(fields: [ownerId], references: [id])
+  neighborhood  Zone?          @relation(fields: [neighborhoodId], references: [id])
+  pickupOrders  Order[]        @relation("OrderPickup")
+  dropoffOrders Order[]        @relation("OrderDropoff")
+  orderBatches  OrderBatch[]
+  locationLinks LocationLink[]
+
+  @@index([ownerId])
+  @@index([contactPhone])
+  @@index([location], type: Gist)
+  @@map("addresses")
+}
+
+/// Lien de localisation (B3) : le destinataire place lui-même son point.
+model LocationLink {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  token          String    @unique
+  createdById    String    @map("created_by_id") @db.Uuid
+  merchantId     String?   @map("merchant_id") @db.Uuid
+  recipientName  String?   @map("recipient_name")
+  recipientPhone String?   @map("recipient_phone")
+  addressId      String?   @map("address_id") @db.Uuid
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(3)
+  submittedAt    DateTime? @map("submitted_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  createdBy User             @relation(fields: [createdById], references: [id])
+  merchant  MerchantProfile? @relation(fields: [merchantId], references: [id])
+  address   Address?         @relation(fields: [addressId], references: [id])
+
+  @@map("location_links")
+}
+
+// -----------------------------------------------------------------------------
+// Tarification, promotions, parrainage (C2, C6, C7)
+// -----------------------------------------------------------------------------
+
+model PricingGrid {
+  id                  String      @id @default(uuid(7)) @db.Uuid
+  name                String
+  city                String
+  vehicleType         VehicleType @map("vehicle_type")
+  /// Part du livreur en points de base : 8000 = 80 %.
+  riderShareBps       Int         @default(8000) @map("rider_share_bps")
+  /// Prix par km au-delà du dernier palier, en FCFA.
+  perKmBeyondLastTier Int         @map("per_km_beyond_last_tier")
+  active              Boolean     @default(false)
+  validFrom           DateTime    @map("valid_from") @db.Timestamptz(3)
+  validTo             DateTime?   @map("valid_to") @db.Timestamptz(3)
+  createdById         String?     @map("created_by_id") @db.Uuid
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  createdBy  User?              @relation(fields: [createdById], references: [id])
+  tiers      PricingTier[]
+  surcharges PricingSurcharge[]
+  orders     Order[]
+
+  @@index([city, vehicleType, active])
+  @@map("pricing_grids")
+}
+
+/// Palier de distance : prix fixe jusqu'à `upToMeters`.
+model PricingTier {
+  id         String @id @default(uuid(7)) @db.Uuid
+  gridId     String @map("grid_id") @db.Uuid
+  upToMeters Int    @map("up_to_meters")
+  price      Int
+
+  grid PricingGrid @relation(fields: [gridId], references: [id], onDelete: Cascade)
+
+  @@unique([gridId, upToMeters])
+  @@map("pricing_tiers")
+}
+
+/// Supplément : montant fixe en FCFA ou pourcentage du prix de base en points de base.
+model PricingSurcharge {
+  id         String        @id @default(uuid(7)) @db.Uuid
+  gridId     String        @map("grid_id") @db.Uuid
+  code       SurchargeCode
+  amount     Int?
+  percentBps Int?          @map("percent_bps")
+  active     Boolean       @default(true)
+
+  grid PricingGrid @relation(fields: [gridId], references: [id], onDelete: Cascade)
+
+  @@unique([gridId, code])
+  @@map("pricing_surcharges")
+}
+
+model PromoCode {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  code             String    @unique
+  kind             PromoKind
+  /// FCFA pour FIXED_AMOUNT et FIXED_PRICE, points de base pour PERCENT.
+  value            Int
+  maxRedemptions   Int?      @map("max_redemptions")
+  perUserLimit     Int       @default(1) @map("per_user_limit")
+  newCustomersOnly Boolean   @default(false) @map("new_customers_only")
+  validFrom        DateTime  @map("valid_from") @db.Timestamptz(3)
+  validTo          DateTime? @map("valid_to") @db.Timestamptz(3)
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  redemptions PromoRedemption[]
+
+  @@map("promo_codes")
+}
+
+model PromoRedemption {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  promoId   String   @map("promo_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  orderId   String   @unique @map("order_id") @db.Uuid
+  discount  Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  promo PromoCode @relation(fields: [promoId], references: [id])
+  user  User      @relation(fields: [userId], references: [id])
+  order Order     @relation(fields: [orderId], references: [id])
+
+  @@index([promoId, userId])
+  @@map("promo_redemptions")
+}
+
+model Referral {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  referrerId String         @map("referrer_id") @db.Uuid
+  refereeId  String         @unique @map("referee_id") @db.Uuid
+  status     ReferralStatus @default(PENDING)
+  rewardedAt DateTime?      @map("rewarded_at") @db.Timestamptz(3)
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  referrer User @relation("Referrer", fields: [referrerId], references: [id])
+  referee  User @relation("Referee", fields: [refereeId], references: [id])
+
+  @@index([referrerId])
+  @@map("referrals")
+}
+
+// -----------------------------------------------------------------------------
+// Commandes, attribution, preuves, notation (C1 à C5, D1 à D4, E3 à E7, F4)
+// -----------------------------------------------------------------------------
+
+/// Jusqu'à 10 livraisons saisies en une fois depuis un même point d'enlèvement (C4).
+model OrderBatch {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  senderId        String   @map("sender_id") @db.Uuid
+  pickupAddressId String   @map("pickup_address_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  sender        User    @relation(fields: [senderId], references: [id])
+  pickupAddress Address @relation(fields: [pickupAddressId], references: [id])
+  orders        Order[]
+
+  @@map("order_batches")
+}
+
+model Order {
+  id               String      @id @default(uuid(7)) @db.Uuid
+  /// Référence lisible communiquée au client, ex. TR-7K3P9Q.
+  reference        String      @unique
+  /// Jeton du lien de suivi public (F2).
+  trackingToken    String      @unique @map("tracking_token")
+  senderId         String      @map("sender_id") @db.Uuid
+  merchantId       String?     @map("merchant_id") @db.Uuid
+  batchId          String?     @map("batch_id") @db.Uuid
+  pickupAddressId  String      @map("pickup_address_id") @db.Uuid
+  dropoffAddressId String      @map("dropoff_address_id") @db.Uuid
+  recipientName    String      @map("recipient_name")
+  recipientPhone   String      @map("recipient_phone")
+  packageSize      PackageSize @map("package_size")
+  isFragile        Boolean     @default(false) @map("is_fragile")
+  declaredValue    Int?        @map("declared_value")
+  instructions     String?
+  isExpress        Boolean     @default(false) @map("is_express")
+  scheduledFor     DateTime?   @map("scheduled_for") @db.Timestamptz(3)
+  status           OrderStatus @default(CREATED)
+
+  // Prix figé à la création (C2) : total = base + suppléments − remises.
+  pricingGridId    String        @map("pricing_grid_id") @db.Uuid
+  distanceMeters   Int           @map("distance_meters")
+  basePrice        Int           @map("base_price")
+  surchargesTotal  Int           @default(0) @map("surcharges_total")
+  discountTotal    Int           @default(0) @map("discount_total")
+  totalPrice       Int           @map("total_price")
+  riderEarning     Int           @map("rider_earning")
+  platformFee      Int           @map("platform_fee")
+  feePayer         FeePayer      @default(SENDER) @map("fee_payer")
+  feePaymentMethod PaymentMethod @map("fee_payment_method")
+  /// Montant à encaisser auprès du destinataire, 0 si aucun (C1, E5).
+  codAmount        Int           @default(0) @map("cod_amount")
+
+  riderId          String?   @map("rider_id") @db.Uuid
+  /// Codes à 4 chiffres : seul le hachage est stocké (E3, E4).
+  pickupCodeHash   String    @map("pickup_code_hash")
+  deliveryCodeHash String    @map("delivery_code_hash")
+  attemptCount     Int       @default(0) @map("attempt_count")
+  cancelReason     String?   @map("cancel_reason")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  assignedAt       DateTime? @map("assigned_at") @db.Timestamptz(3)
+  pickedUpAt       DateTime? @map("picked_up_at") @db.Timestamptz(3)
+  deliveredAt      DateTime? @map("delivered_at") @db.Timestamptz(3)
+  cancelledAt      DateTime? @map("cancelled_at") @db.Timestamptz(3)
+
+  sender          User             @relation(fields: [senderId], references: [id])
+  merchant        MerchantProfile? @relation(fields: [merchantId], references: [id])
+  batch           OrderBatch?      @relation(fields: [batchId], references: [id])
+  pickupAddress   Address          @relation("OrderPickup", fields: [pickupAddressId], references: [id])
+  dropoffAddress  Address          @relation("OrderDropoff", fields: [dropoffAddressId], references: [id])
+  pricingGrid     PricingGrid      @relation(fields: [pricingGridId], references: [id])
+  rider           RiderProfile?    @relation(fields: [riderId], references: [id])
+  events          OrderEvent[]
+  proofs          DeliveryProof[]
+  offers          DispatchOffer[]
+  ratings         Rating[]
+  codCollection   CodCollection?
+  payments        Payment[]
+  promoRedemption PromoRedemption?
+  journalEntries  JournalEntry[]
+  notifications   Notification[]
+  tickets         Ticket[]
+
+  @@index([status, scheduledFor])
+  @@index([riderId, status])
+  @@index([senderId, createdAt])
+  @@index([merchantId, createdAt])
+  @@index([recipientPhone])
+  @@map("orders")
+}
+
+/// Historique horodaté des changements de statut. Non modifiable (trigger).
+model OrderEvent {
+  id            String         @id @default(uuid(7)) @db.Uuid
+  orderId       String         @map("order_id") @db.Uuid
+  fromStatus    OrderStatus?   @map("from_status")
+  toStatus      OrderStatus    @map("to_status")
+  actorId       String?        @map("actor_id") @db.Uuid
+  actorRole     ActorRole      @map("actor_role")
+  failureReason FailureReason? @map("failure_reason")
+  note          String?
+  latitude      Float?
+  longitude     Float?
+  /// Heure de l'action sur le téléphone (peut précéder la synchronisation, E7).
+  occurredAt    DateTime       @map("occurred_at") @db.Timestamptz(3)
+  recordedAt    DateTime       @default(now()) @map("recorded_at") @db.Timestamptz(3)
+  /// Identifiant généré hors ligne par l'app : rejouer une synchronisation ne crée pas de doublon.
+  clientEventId String?        @unique @map("client_event_id")
+
+  order Order @relation(fields: [orderId], references: [id])
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([orderId, recordedAt])
+  @@map("order_events")
+}
+
+/// Preuve d'enlèvement, de livraison, d'échec ou de retour (E3, E4, E6).
+model DeliveryProof {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  orderId            String    @map("order_id") @db.Uuid
+  kind               ProofKind
+  photoKey           String?   @map("photo_key")
+  codeVerified       Boolean   @default(false) @map("code_verified")
+  /// Agent de support ayant validé une livraison sans code (E4).
+  supportValidatorId String?   @map("support_validator_id") @db.Uuid
+  /// Journal d'appels joint à un échec de livraison (E6).
+  callLog            Json?     @map("call_log")
+  latitude           Float
+  longitude          Float
+  occurredAt         DateTime  @map("occurred_at") @db.Timestamptz(3)
+  recordedAt         DateTime  @default(now()) @map("recorded_at") @db.Timestamptz(3)
+  clientEventId      String?   @unique @map("client_event_id")
+
+  order            Order @relation(fields: [orderId], references: [id])
+  supportValidator User? @relation(fields: [supportValidatorId], references: [id])
+
+  @@index([orderId])
+  @@map("delivery_proofs")
+}
+
+/// Proposition de course à un livreur (D1, D2).
+model DispatchOffer {
+  id             String               @id @default(uuid(7)) @db.Uuid
+  orderId        String               @map("order_id") @db.Uuid
+  riderId        String               @map("rider_id") @db.Uuid
+  round          Int
+  approachMeters Int?                 @map("approach_meters")
+  offeredAt      DateTime             @default(now()) @map("offered_at") @db.Timestamptz(3)
+  expiresAt      DateTime             @map("expires_at") @db.Timestamptz(3)
+  respondedAt    DateTime?            @map("responded_at") @db.Timestamptz(3)
+  outcome        DispatchOfferOutcome @default(PENDING)
+
+  order Order        @relation(fields: [orderId], references: [id])
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+
+  @@index([orderId, round])
+  @@index([riderId, outcome])
+  @@map("dispatch_offers")
+}
+
+/// Notation réciproque expéditeur ↔ livreur (F4).
+model Rating {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  raterId   String   @map("rater_id") @db.Uuid
+  rateeId   String   @map("ratee_id") @db.Uuid
+  score     Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order Order @relation(fields: [orderId], references: [id])
+  rater User  @relation("RatingsGiven", fields: [raterId], references: [id])
+  ratee User  @relation("RatingsReceived", fields: [rateeId], references: [id])
+
+  @@unique([orderId, raterId])
+  @@index([rateeId])
+  @@map("ratings")
+}
+
+// -----------------------------------------------------------------------------
+// Argent : paiements, encaissements, reversements, grand livre (G1 à G8)
+// -----------------------------------------------------------------------------
+
+/// Encaissement entrant (Mobile Money ou espèces) suivi auprès d'un prestataire.
+model Payment {
+  id                String         @id @default(uuid(7)) @db.Uuid
+  purpose           PaymentPurpose
+  method            PaymentMethod
+  amount            Int
+  payerPhone        String?        @map("payer_phone")
+  payerId           String?        @map("payer_id") @db.Uuid
+  orderId           String?        @map("order_id") @db.Uuid
+  riderId           String?        @map("rider_id") @db.Uuid
+  /// Code du prestataire : "fake", "aggregator", "mtn_momo", "orange_money", "cash".
+  provider          String
+  providerReference String?        @map("provider_reference")
+  idempotencyKey    String         @unique @map("idempotency_key")
+  status            PaymentStatus  @default(PENDING)
+  failureReason     String?        @map("failure_reason")
+  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  confirmedAt       DateTime?      @map("confirmed_at") @db.Timestamptz(3)
+
+  payer          User?          @relation(fields: [payerId], references: [id])
+  order          Order?         @relation(fields: [orderId], references: [id])
+  rider          RiderProfile?  @relation(fields: [riderId], references: [id])
+  codCollection  CodCollection?
+  journalEntries JournalEntry[]
+
+  @@unique([provider, providerReference])
+  @@index([status, createdAt])
+  @@map("payments")
+}
+
+/// Encaissement à la livraison réalisé par le livreur (E5).
+model CodCollection {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  orderId         String        @unique @map("order_id") @db.Uuid
+  riderId         String        @map("rider_id") @db.Uuid
+  expectedAmount  Int           @map("expected_amount")
+  collectedAmount Int           @map("collected_amount")
+  method          PaymentMethod
+  paymentId       String?       @unique @map("payment_id") @db.Uuid
+  /// Frais facturés au marchand : 2 %, minimum 250 FCFA.
+  feeAmount       Int           @map("fee_amount")
+  collectedAt     DateTime      @map("collected_at") @db.Timestamptz(3)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order   Order        @relation(fields: [orderId], references: [id])
+  rider   RiderProfile @relation(fields: [riderId], references: [id])
+  payment Payment?     @relation(fields: [paymentId], references: [id])
+
+  @@index([riderId, collectedAt])
+  @@map("cod_collections")
+}
+
+/// Reversement sortant vers un marchand ou un livreur (G3, G4).
+model Payout {
+  id                String              @id @default(uuid(7)) @db.Uuid
+  beneficiary       PayoutBeneficiary
+  merchantId        String?             @map("merchant_id") @db.Uuid
+  riderId           String?             @map("rider_id") @db.Uuid
+  amount            Int
+  fee               Int                 @default(0)
+  phone             String
+  operator          MobileMoneyOperator
+  provider          String
+  providerReference String?             @map("provider_reference")
+  idempotencyKey    String              @unique @map("idempotency_key")
+  status            PayoutStatus        @default(PENDING)
+  failureReason     String?             @map("failure_reason")
+  requestedAt       DateTime            @default(now()) @map("requested_at") @db.Timestamptz(3)
+  completedAt       DateTime?           @map("completed_at") @db.Timestamptz(3)
+
+  merchant       MerchantProfile? @relation(fields: [merchantId], references: [id])
+  rider          RiderProfile?    @relation(fields: [riderId], references: [id])
+  journalEntries JournalEntry[]
+
+  @@unique([provider, providerReference])
+  @@index([status, requestedAt])
+  @@map("payouts")
+}
+
+/// Webhook reçu d'un prestataire. L'unicité (provider, event_id) garantit l'idempotence.
+model ProviderWebhookEvent {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  provider       String
+  eventId        String    @map("event_id")
+  signatureValid Boolean   @map("signature_valid")
+  payload        Json
+  receivedAt     DateTime  @default(now()) @map("received_at") @db.Timestamptz(3)
+  processedAt    DateTime? @map("processed_at") @db.Timestamptz(3)
+  error          String?
+
+  @@unique([provider, eventId])
+  @@map("provider_webhook_events")
+}
+
+/// Compte du grand livre. Le solde = somme des écritures (pas de colonne de solde).
+/// Codes : "platform:cash_in_transit", "merchant:<id>:payable", "rider:<id>:cash_held"…
+model LedgerAccount {
+  id        String            @id @default(uuid(7)) @db.Uuid
+  code      String            @unique
+  name      String
+  type      LedgerAccountType
+  ownerType LedgerOwnerType   @map("owner_type")
+  ownerId   String?           @map("owner_id") @db.Uuid
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  postings LedgerPosting[]
+
+  @@index([ownerType, ownerId])
+  @@map("ledger_accounts")
+}
+
+/// Écriture comptable. Ses lignes doivent s'équilibrer (somme = 0), contrôle en base.
+/// Une erreur se corrige par une écriture inverse (`reversesEntryId`), jamais par modification.
+model JournalEntry {
+  id              String           @id @default(uuid(7)) @db.Uuid
+  kind            JournalEntryKind
+  description     String
+  idempotencyKey  String           @unique @map("idempotency_key")
+  orderId         String?          @map("order_id") @db.Uuid
+  paymentId       String?          @map("payment_id") @db.Uuid
+  payoutId        String?          @map("payout_id") @db.Uuid
+  reversesEntryId String?          @unique @map("reverses_entry_id") @db.Uuid
+  postedById      String?          @map("posted_by_id") @db.Uuid
+  postedAt        DateTime         @default(now()) @map("posted_at") @db.Timestamptz(3)
+
+  order      Order?          @relation(fields: [orderId], references: [id])
+  payment    Payment?        @relation(fields: [paymentId], references: [id])
+  payout     Payout?         @relation(fields: [payoutId], references: [id])
+  reverses   JournalEntry?   @relation("Reversal", fields: [reversesEntryId], references: [id])
+  reversedBy JournalEntry?   @relation("Reversal")
+  postedBy   User?           @relation(fields: [postedById], references: [id])
+  postings   LedgerPosting[]
+
+  @@index([orderId])
+  @@index([postedAt])
+  @@map("journal_entries")
+}
+
+/// Ligne d'écriture. Montant signé en FCFA : positif = débit, négatif = crédit.
+model LedgerPosting {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  entryId   String   @map("entry_id") @db.Uuid
+  accountId String   @map("account_id") @db.Uuid
+  amount    Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  entry   JournalEntry  @relation(fields: [entryId], references: [id])
+  account LedgerAccount @relation(fields: [accountId], references: [id])
+
+  @@index([accountId, createdAt])
+  @@index([entryId])
+  @@map("ledger_postings")
+}
+
+// -----------------------------------------------------------------------------
+// Notifications, support, audit (F3, H6, H8)
+// -----------------------------------------------------------------------------
+
+model Notification {
+  id                String              @id @default(uuid(7)) @db.Uuid
+  userId            String?             @map("user_id") @db.Uuid
+  recipientPhone    String?             @map("recipient_phone")
+  channel           NotificationChannel
+  template          String
+  locale            Locale              @default(FR)
+  payload           Json
+  status            NotificationStatus  @default(QUEUED)
+  provider          String?
+  providerReference String?             @map("provider_reference")
+  attempts          Int                 @default(0)
+  lastError         String?             @map("last_error")
+  orderId           String?             @map("order_id") @db.Uuid
+  /// Notification de repli (ex. SMS après échec WhatsApp, F3).
+  fallbackForId     String?             @unique @map("fallback_for_id") @db.Uuid
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  sentAt            DateTime?           @map("sent_at") @db.Timestamptz(3)
+  deliveredAt       DateTime?           @map("delivered_at") @db.Timestamptz(3)
+
+  user        User?         @relation(fields: [userId], references: [id])
+  order       Order?        @relation(fields: [orderId], references: [id])
+  fallbackFor Notification? @relation("NotificationFallback", fields: [fallbackForId], references: [id])
+  fallback    Notification? @relation("NotificationFallback")
+
+  @@index([status, createdAt])
+  @@index([orderId])
+  @@map("notifications")
+}
+
+model Ticket {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  orderId    String?        @map("order_id") @db.Uuid
+  openedById String         @map("opened_by_id") @db.Uuid
+  assigneeId String?        @map("assignee_id") @db.Uuid
+  category   TicketCategory
+  priority   TicketPriority @default(NORMAL)
+  status     TicketStatus   @default(OPEN)
+  subject    String
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  resolvedAt DateTime?      @map("resolved_at") @db.Timestamptz(3)
+
+  order    Order?          @relation(fields: [orderId], references: [id])
+  openedBy User            @relation("TicketOpenedBy", fields: [openedById], references: [id])
+  assignee User?           @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  messages TicketMessage[]
+
+  @@index([status, priority])
+  @@index([orderId])
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  ticketId       String   @map("ticket_id") @db.Uuid
+  authorId       String   @map("author_id") @db.Uuid
+  body           String
+  attachmentKeys String[] @map("attachment_keys")
+  /// Note interne visible seulement par l'équipe Tara.
+  isInternal     Boolean  @default(false) @map("is_internal")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_messages")
+}
+
+/// Journal d'audit des actions sensibles (H8). Non modifiable (trigger).
+/// Pas de clé étrangère vers users : le journal survit à l'anonymisation d'un compte.
+model AuditLog {
+  id         String     @id @default(uuid(7)) @db.Uuid
+  actorId    String?    @map("actor_id") @db.Uuid
+  actorRoles UserRole[] @map("actor_roles")
+  action     String
+  entityType String     @map("entity_type")
+  entityId   String     @map("entity_id")
+  before     Json?
+  after      Json?
+  ip         String?
+  userAgent  String?    @map("user_agent")
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+  @@map("audit_logs")
+}
