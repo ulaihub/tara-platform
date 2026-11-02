@@ -16,7 +16,7 @@ export interface SentSms {
 
 /**
  * Fournisseur factice pour le développement et les tests : n'envoie rien, garde les
- * 200 derniers messages en mémoire et les écrit dans le journal. Interdit en production
+ * 2 000 derniers messages en mémoire et les écrit dans le journal. Interdit en production
  * (contrôlé au démarrage par la validation de la configuration).
  */
 export class FakeSmsProvider implements SmsProvider {
@@ -27,7 +27,7 @@ export class FakeSmsProvider implements SmsProvider {
 
   send(to: string, text: string): Promise<{ providerReference: string }> {
     this.outbox.push({ to, text, at: new Date() });
-    if (this.outbox.length > 200) this.outbox.shift();
+    if (this.outbox.length > 2_000) this.outbox.shift();
     this.logger.log(`→ ${to} : ${text}`);
     this.counter += 1;
     return Promise.resolve({ providerReference: `fake-${this.counter}` });

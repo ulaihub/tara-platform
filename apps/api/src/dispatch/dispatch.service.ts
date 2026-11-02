@@ -173,7 +173,7 @@ export class DispatchService implements OnModuleInit {
         this.env.DISPATCH_BROADCAST_SIZE,
       );
 
-      const candidates = await this.findCandidates(tx, order, excluded, silent, size);
+      const candidates = await this.findCandidates(order, excluded, silent, size);
       if (candidates.length === 0) return { kind: 'none', closed, order } as const;
 
       const expiresAt = new Date(now.getTime() + this.env.DISPATCH_OFFER_TIMEOUT_SECONDS * 1000);
@@ -225,7 +225,6 @@ export class DispatchService implements OnModuleInit {
   }
 
   private async findCandidates(
-    tx: Prisma.TransactionClient,
     order: OrderWithPlaces,
     excluded: Set<string>,
     silent: Set<string>,
@@ -245,7 +244,9 @@ export class DispatchService implements OnModuleInit {
         (rider) => !excluded.has(rider.riderId) && !seen.has(rider.riderId),
       );
       fresh.forEach((rider) => seen.add(rider.riderId));
-      const snapshots = await this.snapshots(tx, fresh);
+      // Lu hors de la transaction : le verrou de la commande reste court, et l'index unique
+      // « une offre en attente par livreur » tranche si un livreur est sollicité entre-temps.
+      const snapshots = await this.snapshots(this.prisma, fresh);
       eligible = eligible.concat(
         snapshots.filter((rider) => ineligibilities(rider, orderCash).length === 0),
       );

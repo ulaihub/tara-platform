@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:db": "vitest run --config ./vitest.config.db.ts",
+    "simulate": "tsx test/simulator/run.ts",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma migrate reset --force",

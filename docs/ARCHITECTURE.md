@@ -62,7 +62,7 @@ tara-platform/
 | NestJS               | 12       | Modules ES, Vitest et oxlint par défaut                                                                                 |
 | Prisma               | 7.10     | Client généré dans `src/generated`, connexion via `@prisma/adapter-pg`, configuration dans `prisma.config.ts`           |
 | PostgreSQL / PostGIS | 16 / 3.4 | Image `postgis/postgis:16-3.4`                                                                                          |
-| Redis                | 7        | Positions des livreurs et files de tâches, à partir de la phase 2                                                       |
+| Redis                | 7        | Positions des livreurs (GEO), files BullMQ, Socket.IO entre instances, limitation de débit                              |
 | OSRM                 | 6.0.0    | Image `ghcr.io/project-osrm/osrm-backend`                                                                               |
 
 ## Décisions de conception
@@ -115,14 +115,31 @@ tara-platform/
 15. **Fichiers rattachés à leur propriétaire.** Une adresse ne peut référencer que les photos de
     son auteur ; le type réel des images et PDF est vérifié. Les pièces d'identité sont chiffrées
     (AES-256-GCM) et chaque consultation par l'équipe est auditée.
-16. **Provisoire en phase 1** : SMS factice (journal), stockage sur disque, limitation de débit en
-    mémoire, langue des SMS au destinataire en français. Remplacés par l'agrégateur SMS et Redis
-    (phase 2) puis par un stockage objet (phase 7) ; la configuration refuse de démarrer en
-    production tant que c'est le cas.
+16. **Provisoire** : SMS factice (journal) en attendant le choix de l'agrégateur, stockage sur
+    disque jusqu'au stockage objet (phase 7), langue des messages au destinataire en français. La
+    configuration refuse de démarrer en production avec un fournisseur factice.
 
 17. **Sécurité en profondeur.** Détail des menaces, des protections et des procédures dans
     [`SECURITE.md`](SECURITE.md) : second facteur obligatoire pour l'équipe, plafonds anti-pompage
     de SMS, compte de base restreint, minimisation des données, journaux masqués.
+18. **Événements après validation.** Tout changement de statut passe par
+    `OrderTransitionsService` puis est publié sur `OrderEventsBus` une fois la transaction
+    validée : attribution, temps réel et notifications s'y abonnent sans dépendre les uns des
+    autres, et ne voient jamais un changement annulé. Un abonné en échec ne bloque pas l'action.
+19. **Attribution par tours, sous verrou.** Chaque tour d'attribution d'une commande s'exécute
+    sous un verrou PostgreSQL propre à la commande (`pg_advisory_xact_lock`) : expiration d'une
+    offre, refus et acceptation ne se croisent pas, même sur plusieurs instances. Un index unique
+    partiel garantit une seule offre en attente par livreur. Les échéances passent par des tâches
+    différées BullMQ ; un balayage toutes les 15 s rattrape ce qu'une panne aurait laissé.
+20. **Positions hors de PostgreSQL.** Les positions (toutes les 10 à 15 s) ne vont que dans Redis :
+    index GEO des livreurs en ligne, dernière position avec durée de vie. Seules les positions
+    des preuves (enlèvement, livraison, échec) et des alertes sont gardées en base.
+21. **Temps réel sans état.** Socket.IO avec l'adaptateur Redis : n'importe quelle instance peut
+    émettre vers n'importe quel client. Les événements rafraîchissent les écrans ; l'API REST
+    reste la référence (rien n'est perdu si un événement l'est).
+22. **Notifications tracées et rejouables.** Chaque message est une ligne de `notifications`
+    (statut, fournisseur, essais, repli). Les envois passent par une file (3 essais) ; un code de
+    livraison n'y figure que chiffré, et seulement le temps d'un éventuel repli SMS.
 
 ## Cycle de vie d'une commande
 
@@ -173,14 +190,15 @@ pnpm db:migrate                       # applique les migrations
 pnpm dev                              # API sur http://localhost:3000/health
 ```
 
-| Commande         | Rôle                                        |
-| ---------------- | ------------------------------------------- |
-| `pnpm lint`      | oxlint avec règles typées                   |
-| `pnpm typecheck` | Vérification TypeScript stricte             |
-| `pnpm test`      | Tests unitaires (sans base)                 |
-| `pnpm test:db`   | Tests d'intégration contre PostgreSQL migré |
-| `pnpm format`    | Formatage Prettier                          |
-| `pnpm db:studio` | Explorateur de données Prisma               |
+| Commande                           | Rôle                                            |
+| ---------------------------------- | ----------------------------------------------- |
+| `pnpm lint`                        | oxlint avec règles typées                       |
+| `pnpm typecheck`                   | Vérification TypeScript stricte                 |
+| `pnpm test`                        | Tests unitaires (sans base)                     |
+| `pnpm test:db`                     | Tests d'intégration contre PostgreSQL migré     |
+| `pnpm --filter @tara/api simulate` | Simulateur d'attribution (50 livreurs virtuels) |
+| `pnpm format`                      | Formatage Prettier                              |
+| `pnpm db:studio`                   | Explorateur de données Prisma                   |
 
 ## Questions ouvertes
 

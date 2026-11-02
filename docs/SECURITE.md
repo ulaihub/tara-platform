@@ -14,6 +14,9 @@ Principes : défense en profondeur (chaque risque est couvert par au moins deux 
 | Compromission de l'API        | Faille exploitée dans le code                                | Compte de base restreint : pas de modification de structure, pas de désactivation des protections, pas d'accès à l'historique des migrations ; en-têtes de sécurité ; CORS fermé par défaut ; refus de démarrer avec une configuration dangereuse |
 | Chaîne d'approvisionnement    | Dépendance piégée ou vulnérable                              | Versions verrouillées ; scripts d'installation des dépendances bloqués ; audit en CI ; Dependabot ; outils de CI épinglés et vérifiés par empreinte                                                                                               |
 | Attaques web classiques       | Injection SQL, fichier piégé, énumération                    | Requêtes paramétrées ; validation de chaque entrée ; type réel des fichiers contrôlé ; jetons publics aléatoires de 128 bits ; « introuvable » pour les ressources d'autrui                                                                       |
+| Fraude à la livraison         | Livreur qui devine un code, livraison déclarée sans remise   | Codes à 4 chiffres hachés et bloqués après 5 erreurs (0,05 % de chances de deviner) ; photo et position GPS obligatoires ; livraison sans code validée par le support après appel, par un administrateur au-delà d'un montant ; audit             |
+| Détournement du temps réel    | Écouter la position d'un livreur, se faire passer pour lui   | Connexion Socket.IO authentifiée par le même jeton que l'API, coupée à son expiration ; suivi d'une commande réservé à l'expéditeur, au livreur et à l'équipe ; débit limité par connexion                                                        |
+| Faux accusés de remise        | Webhook WhatsApp forgé pour déclencher des SMS               | Signature HMAC-SHA256 du corps brut vérifiée en temps constant ; un seul repli par message ; route désactivée sans configuration                                                                                                                  |
 
 ## Contrôles automatiques à chaque pull request
 
@@ -75,7 +78,7 @@ Les secrets vivent dans le gestionnaire de secrets de l'hébergeur, jamais dans 
 
 | Phase | Mesure                                                                                                                                                 |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2     | Limitation de débit partagée entre instances (Redis) ; vrai fournisseur SMS avec alertes de coût                                                       |
+| 2     | Fait : limitation de débit partagée (Redis), temps réel authentifié, webhook signé. Reste : vrai fournisseur SMS avec alertes de coût                  |
 | 3     | Signature des webhooks Mobile Money ; plafonds et détection de fraude sur les encaissements et reversements                                            |
 | 4, 5  | Apps : sessions dans le stockage chiffré du téléphone, vérification de l'intégrité de l'appareil, détection des téléphones modifiés, code obscurci     |
 | 7     | HTTPS partout, protection anti-DDoS, sauvegardes chiffrées, outil de rotation de `STORAGE_ENCRYPTION_KEY`, test d'intrusion par un prestataire externe |

@@ -61,10 +61,11 @@ export async function goOnline(
     .expect(200);
 }
 
-/** Vide la base Redis des tests : aucun livreur d'un autre test ne reste « en ligne ». */
+/** Efface la présence des livreurs : aucun livreur d'un autre test ne reste « en ligne ». */
 export async function resetPresence(): Promise<void> {
   const redis = new Redis(process.env['REDIS_URL'] ?? 'redis://localhost:6379/1');
-  await redis.flushdb();
+  const keys = await redis.keys('tara:rider*');
+  if (keys.length > 0) await redis.del(...keys);
   await redis.quit();
 }
 
