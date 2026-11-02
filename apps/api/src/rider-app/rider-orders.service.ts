@@ -12,7 +12,10 @@ import type { Order, Prisma, RiderProfile } from '../generated/prisma/client.js'
 import type { OrderStatus, ProofKind } from '../generated/prisma/enums.js';
 import { AddressesService } from '../geo/addresses.service.js';
 import { checkTransition } from '../orders/order-state-machine.js';
-import { OrderTransitionsService, type TransitionOptions } from '../orders/order-transitions.service.js';
+import {
+  OrderTransitionsService,
+  type TransitionOptions,
+} from '../orders/order-transitions.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { MediaService } from '../storage/media.service.js';
@@ -69,9 +72,15 @@ export class RiderOrdersService {
     return rider;
   }
 
-  private async load(userId: string, orderId: string): Promise<{ rider: RiderProfile; order: RiderOrder }> {
+  private async load(
+    userId: string,
+    orderId: string,
+  ): Promise<{ rider: RiderProfile; order: RiderOrder }> {
     const rider = await this.riderOf(userId);
-    const order = await this.prisma.order.findUnique({ where: { id: orderId }, include: ORDER_INCLUDE });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: ORDER_INCLUDE,
+    });
     // Une course d'un autre livreur est introuvable, pas interdite : rien n'est révélé.
     if (order?.riderId !== rider.id) throw AppError.notFound('ORDER_NOT_FOUND');
     return { rider, order };
@@ -131,7 +140,8 @@ export class RiderOrdersService {
         dropoff,
         // Contacts visibles seulement pendant la course (données personnelles).
         sender: {
-          name: order.merchant?.shopName ?? order.sender.merchant?.shopName ?? order.sender.fullName,
+          name:
+            order.merchant?.shopName ?? order.sender.merchant?.shopName ?? order.sender.fullName,
           phone: inProgress ? (order.pickupAddress.contactPhone ?? order.sender.phone) : null,
         },
         recipient: {
@@ -141,7 +151,8 @@ export class RiderOrdersService {
         riderEarning: order.riderEarning,
         collectAtPickup:
           order.feePayer === 'SENDER' && order.feePaymentMethod === 'CASH' ? order.totalPrice : 0,
-        collectAtDelivery: order.codAmount + (order.feePayer === 'RECIPIENT' ? order.totalPrice : 0),
+        collectAtDelivery:
+          order.codAmount + (order.feePayer === 'RECIPIENT' ? order.totalPrice : 0),
         navigation:
           inProgress && target
             ? {
@@ -187,7 +198,11 @@ export class RiderOrdersService {
     assertTransition(order, 'PICKED_UP');
     await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
     await this.checkCode(order, 'pickup', body.pickupCode);
-    await this.act(userId, order, 'PICKED_UP', body, { kind: 'PICKUP', photoKey: body.photoKey, codeVerified: true });
+    await this.act(userId, order, 'PICKED_UP', body, {
+      kind: 'PICKUP',
+      photoKey: body.photoKey,
+      codeVerified: true,
+    });
     return this.get(userId, orderId);
   }
 
@@ -218,7 +233,10 @@ export class RiderOrdersService {
     await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
     if (body.deliveryCode === undefined) {
       if (order.status !== 'IN_DELIVERY') {
-        throw AppError.conflict('ORDER_TRANSITION_INVALID', { from: order.status, to: 'DELIVERED' });
+        throw AppError.conflict('ORDER_TRANSITION_INVALID', {
+          from: order.status,
+          to: 'DELIVERED',
+        });
       }
       const proof = await this.prisma.deliveryProof.create({
         data: {
@@ -237,7 +255,8 @@ export class RiderOrdersService {
         reference: order.reference,
         riderId: rider.id,
         proofId: proof.id,
-        collectAtDelivery: order.codAmount + (order.feePayer === 'RECIPIENT' ? order.totalPrice : 0),
+        collectAtDelivery:
+          order.codAmount + (order.feePayer === 'RECIPIENT' ? order.totalPrice : 0),
         at: proof.occurredAt.toISOString(),
       });
       return this.get(userId, orderId);
@@ -266,7 +285,12 @@ export class RiderOrdersService {
       order,
       'DELIVERY_FAILED',
       body,
-      { kind: 'FAILED_ATTEMPT', photoKey: body.photoKey, codeVerified: false, callLog: body.callLog },
+      {
+        kind: 'FAILED_ATTEMPT',
+        photoKey: body.photoKey,
+        codeVerified: false,
+        callLog: body.callLog,
+      },
       { failureReason: body.reason, note: body.note },
     );
     return this.get(userId, orderId);
@@ -306,12 +330,21 @@ export class RiderOrdersService {
   /** Le livreur rend une course pas encore enlevée : elle repart en recherche sans lui. */
   async release(userId: string, orderId: string, reason: string): Promise<void> {
     await this.load(userId, orderId);
-    await this.transitions.apply(orderId, 'SEARCHING_RIDER', { id: userId, role: 'RIDER' }, { note: reason });
+    await this.transitions.apply(
+      orderId,
+      'SEARCHING_RIDER',
+      { id: userId, role: 'RIDER' },
+      { note: reason },
+    );
   }
 
   // --- Gains (E9) ---------------------------------------------------------------------------
 
-  async earnings(userId: string, period: 'day' | 'week' | 'month', now = new Date()): Promise<z.output<typeof EarningsDto>> {
+  async earnings(
+    userId: string,
+    period: 'day' | 'week' | 'month',
+    now = new Date(),
+  ): Promise<z.output<typeof EarningsDto>> {
     const rider = await this.riderOf(userId);
     const from = periodStart(period, now);
     const [delivered, failed, returned, cash] = await Promise.all([
@@ -321,7 +354,11 @@ export class RiderOrdersService {
         _sum: { riderEarning: true },
       }),
       this.prisma.orderEvent.count({
-        where: { actorId: userId, toStatus: 'DELIVERY_FAILED', occurredAt: { gte: from, lte: now } },
+        where: {
+          actorId: userId,
+          toStatus: 'DELIVERY_FAILED',
+          occurredAt: { gte: from, lte: now },
+        },
       }),
       this.prisma.orderEvent.count({
         where: { actorId: userId, toStatus: 'RETURNED', occurredAt: { gte: from, lte: now } },
@@ -390,9 +427,12 @@ export class RiderOrdersService {
     const count = kind === 'pickup' ? updated.pickupCodeFailures : updated.deliveryCodeFailures;
     const remaining = MAX_CODE_FAILURES - count;
     if (remaining <= 0) throw AppError.unprocessable(locked);
-    throw AppError.unprocessable(kind === 'pickup' ? 'PICKUP_CODE_INVALID' : 'DELIVERY_CODE_INVALID', {
-      remaining,
-    });
+    throw AppError.unprocessable(
+      kind === 'pickup' ? 'PICKUP_CODE_INVALID' : 'DELIVERY_CODE_INVALID',
+      {
+        remaining,
+      },
+    );
   }
 
   /** Preuve éventuelle et changement de statut dans une même transaction, puis diffusion. */
@@ -427,13 +467,19 @@ export class RiderOrdersService {
           },
         });
       }
-      const result = await this.transitions.applyIn(tx, order, to, { id: userId, role: 'RIDER' }, {
-        ...extra,
-        latitude: context.latitude,
-        longitude: context.longitude,
-        occurredAt,
-        clientEventId: context.clientEventId,
-      });
+      const result = await this.transitions.applyIn(
+        tx,
+        order,
+        to,
+        { id: userId, role: 'RIDER' },
+        {
+          ...extra,
+          latitude: context.latitude,
+          longitude: context.longitude,
+          occurredAt,
+          clientEventId: context.clientEventId,
+        },
+      );
       return result.change;
     });
     await this.bus.publish(change);
@@ -477,7 +523,8 @@ export function periodStart(period: 'day' | 'week' | 'month', now: Date): Date {
   const day = Number(get('day'));
   const weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(get('weekday'));
   // Le Cameroun est à UTC+1 toute l'année (pas d'heure d'été).
-  const localMidnight = (y: number, m: number, d: number): Date => new Date(Date.UTC(y, m - 1, d) - 3_600_000);
+  const localMidnight = (y: number, m: number, d: number): Date =>
+    new Date(Date.UTC(y, m - 1, d) - 3_600_000);
   switch (period) {
     case 'day':
       return localMidnight(year, month, day);

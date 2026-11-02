@@ -3,7 +3,10 @@ import { type AppLocale, interpolate } from '../common/i18n/locale.js';
 /** Titres et textes des notifications push, en français et en anglais. */
 const TEMPLATES = {
   OFFER_NEW: {
-    fr: { title: 'Nouvelle course', body: '{pickup} → {dropoff} · {earning} FCFA. Répondez vite !' },
+    fr: {
+      title: 'Nouvelle course',
+      body: '{pickup} → {dropoff} · {earning} FCFA. Répondez vite !',
+    },
     en: { title: 'New job', body: '{pickup} → {dropoff} · {earning} FCFA. Answer quickly!' },
   },
   ORDER_ASSIGNED: {
@@ -41,11 +44,17 @@ const TEMPLATES = {
     en: { title: 'Order cancelled', body: 'Order {reference} has been cancelled.' },
   },
   RIDER_ORDER_CANCELLED: {
-    fr: { title: 'Course annulée', body: 'La course {reference} a été annulée. Ne vous déplacez pas.' },
+    fr: {
+      title: 'Course annulée',
+      body: 'La course {reference} a été annulée. Ne vous déplacez pas.',
+    },
     en: { title: 'Job cancelled', body: 'Job {reference} has been cancelled. Do not go.' },
   },
   RIDER_ORDER_REASSIGNED: {
-    fr: { title: 'Course retirée', body: 'La course {reference} a été confiée à un autre livreur.' },
+    fr: {
+      title: 'Course retirée',
+      body: 'La course {reference} a été confiée à un autre livreur.',
+    },
     en: { title: 'Job withdrawn', body: 'Job {reference} has been given to another rider.' },
   },
   RIDER_FAILURE_DECISION: {

@@ -56,8 +56,12 @@ export const CandidateDto = z
     activeOrders: z.int(),
     rating: z.number().nullable(),
     /** Vide si le livreur peut recevoir la course. */
-    ineligibleBecause: z.array(z.enum(['DOCUMENTS', 'CASH_LIMIT', 'TOO_MANY_ORDERS', 'PENDING_OFFER'])),
-    position: z.object({ latitude: Latitude, longitude: Longitude, at: z.iso.datetime() }).nullable(),
+    ineligibleBecause: z.array(
+      z.enum(['DOCUMENTS', 'CASH_LIMIT', 'TOO_MANY_ORDERS', 'PENDING_OFFER']),
+    ),
+    position: z
+      .object({ latitude: Latitude, longitude: Longitude, at: z.iso.datetime() })
+      .nullable(),
   })
   .meta({ id: 'DispatchCandidate' });
 

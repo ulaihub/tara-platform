@@ -30,11 +30,7 @@ export interface RiderSnapshot {
   ratingCount: number;
 }
 
-export type Ineligibility =
-  | 'DOCUMENTS'
-  | 'CASH_LIMIT'
-  | 'TOO_MANY_ORDERS'
-  | 'PENDING_OFFER';
+export type Ineligibility = 'DOCUMENTS' | 'CASH_LIMIT' | 'TOO_MANY_ORDERS' | 'PENDING_OFFER';
 
 /** Raisons pour lesquelles le livreur ne peut pas recevoir cette course (vide si éligible). */
 export function ineligibilities(rider: RiderSnapshot, orderCash: number): Ineligibility[] {
@@ -67,6 +63,10 @@ export function cashCarried(order: {
 }
 
 /** Nombre de livreurs sollicités à un tour : un seul, puis plusieurs après N refus (D2). */
-export function offersForRound(searchRound: number, singleRounds: number, broadcast: number): number {
+export function offersForRound(
+  searchRound: number,
+  singleRounds: number,
+  broadcast: number,
+): number {
   return searchRound <= singleRounds ? 1 : broadcast;
 }

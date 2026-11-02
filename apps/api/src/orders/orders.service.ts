@@ -434,15 +434,15 @@ export class OrdersService {
           const quote = quotes[index] as FullQuote;
           const reference = `TR-${randomReadableId(6)}`;
           const inserted = await this.insert(
-              tx,
-              user,
-              this.orderData(user, body, item, quote, {
-                ...context,
-                reference,
-                pickupCode,
-                batchId: batch.id,
-              }),
-            );
+            tx,
+            user,
+            this.orderData(user, body, item, quote, {
+              ...context,
+              reference,
+              pickupCode,
+              batchId: batch.id,
+            }),
+          );
           changes.push(...inserted.changes);
         }
         return { batch, changes };

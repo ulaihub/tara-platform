@@ -84,7 +84,9 @@ export class MetaWhatsAppProvider implements WhatsAppProvider {
       },
     );
     if (!response.ok) {
-      throw new Error(`Envoi WhatsApp refusé (${response.status}) : ${(await response.text()).slice(0, 200)}`);
+      throw new Error(
+        `Envoi WhatsApp refusé (${response.status}) : ${(await response.text()).slice(0, 200)}`,
+      );
     }
     const body = (await response.json()) as { messages?: { id: string }[] };
     const id = body.messages?.[0]?.id;

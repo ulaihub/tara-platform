@@ -1,4 +1,14 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Req,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
@@ -131,7 +141,10 @@ export class RiderAppController {
 
   @Post('offers/:id/decline')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async decline(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async decline(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
     await this.dispatch.decline(id, user.id);
   }
 
@@ -148,7 +161,10 @@ export class RiderAppController {
 
   @Get('orders/:id')
   @ApiZodResponse(RiderOrderDto)
-  get(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Out<typeof RiderOrderDto> {
+  get(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Out<typeof RiderOrderDto> {
     return this.orders.get(user.id, id);
   }
 

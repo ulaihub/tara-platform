@@ -145,7 +145,8 @@ export class DispatchService implements OnModuleInit {
         where: { orderId, outcome: 'PENDING' },
         orderBy: { expiresAt: 'asc' },
       });
-      if (pending) return { kind: 'waiting', nextExpiry: pending.expiresAt, closed, order } as const;
+      if (pending)
+        return { kind: 'waiting', nextExpiry: pending.expiresAt, closed, order } as const;
 
       const history = await tx.dispatchOffer.findMany({
         where: { orderId },
@@ -295,7 +296,10 @@ export class DispatchService implements OnModuleInit {
    * phase 3, ce sont les encaissements en espèces enregistrés ; la phase 3 y retranchera
    * les dépôts et lira le solde du compte « espèces détenues ».
    */
-  private async cashHeld(tx: Prisma.TransactionClient, riderIds: string[]): Promise<Map<string, number>> {
+  private async cashHeld(
+    tx: Prisma.TransactionClient,
+    riderIds: string[],
+  ): Promise<Map<string, number>> {
     const rows = await tx.codCollection.groupBy({
       by: ['riderId'],
       where: { riderId: { in: riderIds }, method: 'CASH' },
@@ -304,7 +308,11 @@ export class DispatchService implements OnModuleInit {
     return new Map(rows.map((row) => [row.riderId, row._sum.collectedAmount ?? 0]));
   }
 
-  private async schedule(orderId: string, delayMs: number, kind: 'expiry' | 'retry'): Promise<void> {
+  private async schedule(
+    orderId: string,
+    delayMs: number,
+    kind: 'expiry' | 'retry',
+  ): Promise<void> {
     if (!this.queue.workersEnabled) return; // Tests : le balayage fait avancer les tours.
     const at = Date.now() + Math.max(0, delayMs);
     await this.queue.add(
@@ -602,7 +610,11 @@ export class DispatchService implements OnModuleInit {
 
   // --- Annonces -----------------------------------------------------------------------------
 
-  private async announceOffer(order: OrderWithPlaces, offer: DispatchOffer, userId: string): Promise<void> {
+  private async announceOffer(
+    order: OrderWithPlaces,
+    offer: DispatchOffer,
+    userId: string,
+  ): Promise<void> {
     const dto = toOfferDto(order, offer);
     this.realtime.toUser(userId, 'offer.new', dto);
     await this.notifications
@@ -662,7 +674,10 @@ async function lockOrder(tx: Prisma.TransactionClient, orderId: string): Promise
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`dispatch:${orderId}`}, 0))`;
 }
 
-export function toOfferDto(order: OrderWithPlaces, offer: DispatchOffer): z.output<typeof OfferDto> {
+export function toOfferDto(
+  order: OrderWithPlaces,
+  offer: DispatchOffer,
+): z.output<typeof OfferDto> {
   const place = (address: OrderWithPlaces['pickupAddress']) => ({
     landmark: address.landmark,
     neighborhood: address.neighborhood?.name ?? null,

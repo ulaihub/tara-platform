@@ -100,11 +100,16 @@ export class RiderLocationService {
     const now = Date.now();
     if ((this.lastOpsEmit.get(id) ?? 0) + OPS_POSITION_INTERVAL_MS <= now) {
       this.lastOpsEmit.set(id, now);
-      this.realtime.toOps('ops.rider-position', { riderId: id, activeOrders: active.length, ...payload });
+      this.realtime.toOps('ops.rider-position', {
+        riderId: id,
+        activeOrders: active.length,
+        ...payload,
+      });
     }
   }
 }
 
 function checkClock(at: Date): void {
-  if (at.getTime() > Date.now() + MAX_CLOCK_SKEW_MS) throw AppError.badRequest('ACTION_TIME_INVALID');
+  if (at.getTime() > Date.now() + MAX_CLOCK_SKEW_MS)
+    throw AppError.badRequest('ACTION_TIME_INVALID');
 }

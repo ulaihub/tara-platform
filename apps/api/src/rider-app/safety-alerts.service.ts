@@ -43,7 +43,10 @@ export class SafetyAlertsService {
     private readonly notifications: NotificationService,
   ) {}
 
-  async raise(user: AuthUser, body: z.output<typeof SafetyAlertBody>): Promise<z.output<typeof SafetyAlertDto>> {
+  async raise(
+    user: AuthUser,
+    body: z.output<typeof SafetyAlertBody>,
+  ): Promise<z.output<typeof SafetyAlertDto>> {
     const rider = await this.prisma.riderProfile.findUnique({ where: { userId: user.id } });
     if (!rider) throw AppError.forbidden();
     // Une course citée doit être la sienne ; sinon l'alerte part quand même, sans course.
@@ -93,7 +96,11 @@ export class SafetyAlertsService {
     return dto;
   }
 
-  async resolve(id: string, user: AuthUser, resolution: string): Promise<z.output<typeof SafetyAlertDto>> {
+  async resolve(
+    id: string,
+    user: AuthUser,
+    resolution: string,
+  ): Promise<z.output<typeof SafetyAlertDto>> {
     const alert = await this.prisma.safetyAlert.findUnique({ where: { id } });
     if (!alert) throw AppError.notFound('SAFETY_ALERT_NOT_FOUND');
     const now = new Date();

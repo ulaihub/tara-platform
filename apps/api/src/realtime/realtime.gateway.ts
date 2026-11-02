@@ -166,11 +166,15 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
 
   /** Position du livreur (F1), même contenu que POST /v1/rider/location. */
   @SubscribeMessage('rider.location')
-  async riderLocation(@ConnectedSocket() socket: Socket, @MessageBody() body: unknown): Promise<Ack> {
+  async riderLocation(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: unknown,
+  ): Promise<Ack> {
     const data = socket.data as SocketData;
     if (!data.riderId) return { ok: false, error: 'FORBIDDEN' };
     const now = Date.now();
-    if (now - data.lastLocationAt < MIN_LOCATION_INTERVAL_MS) return { ok: false, error: 'RATE_LIMITED' };
+    if (now - data.lastLocationAt < MIN_LOCATION_INTERVAL_MS)
+      return { ok: false, error: 'RATE_LIMITED' };
     const parsed = PositionBody.safeParse(body);
     if (!parsed.success) return { ok: false, error: 'VALIDATION_FAILED' };
     data.lastLocationAt = now;

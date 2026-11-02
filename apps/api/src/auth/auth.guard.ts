@@ -24,6 +24,8 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Temps réel : la connexion est authentifiée une fois, à l'ouverture (RealtimeGateway).
+    if (context.getType() !== 'http') return true;
     const targets = [context.getHandler(), context.getClass()];
     if (this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, targets)) return true;
 

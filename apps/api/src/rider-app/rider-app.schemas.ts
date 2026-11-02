@@ -18,7 +18,10 @@ const ActionContext = {
   /** Heure de l'action sur le téléphone, si elle a été faite hors ligne. */
   occurredAt: z.iso.datetime().optional(),
   /** Identifiant unique de l'action généré par l'app (UUID conseillé). */
-  clientEventId: z.string().regex(/^[A-Za-z0-9_-]{8,100}$/).optional(),
+  clientEventId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{8,100}$/)
+    .optional(),
 };
 
 export const PositionBody = z.object({
@@ -113,9 +116,7 @@ export const RiderOrderDto = z
     /** Espèces ou Mobile Money à encaisser à la livraison (frais du destinataire + COD). */
     collectAtDelivery: z.int(),
     /** Liens d'itinéraire vers la prochaine étape (E2). */
-    navigation: z
-      .object({ googleMaps: z.url(), waze: z.url() })
-      .nullable(),
+    navigation: z.object({ googleMaps: z.url(), waze: z.url() }).nullable(),
     failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
     /** Livraison sans code déclarée, en attente de la validation du support (E4). */
     awaitingSupportValidation: z.boolean(),

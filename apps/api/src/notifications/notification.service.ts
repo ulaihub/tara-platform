@@ -10,11 +10,7 @@ import type { Notification, Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../redis/queue.service.js';
 import { SMS_PROVIDER, type SmsProvider } from '../sms/sms.provider.js';
-import {
-  PUSH_PROVIDER,
-  type PushProvider,
-  PushTokenInvalidError,
-} from './push.provider.js';
+import { PUSH_PROVIDER, type PushProvider, PushTokenInvalidError } from './push.provider.js';
 import { type PushTemplate, renderPush } from './push-templates.js';
 import { WHATSAPP_PROVIDER, type WhatsAppProvider } from './whatsapp.provider.js';
 
@@ -122,7 +118,10 @@ export class NotificationService implements OnModuleInit {
   async toUser(userId: string, message: PushNotification): Promise<boolean> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { locale: true, devices: { where: { pushToken: { not: null } }, select: { id: true } } },
+      select: {
+        locale: true,
+        devices: { where: { pushToken: { not: null } }, select: { id: true } },
+      },
     });
     if (!user || user.devices.length === 0) return false;
     const payload: StoredPayload = { params: message.params, data: message.data };
@@ -258,7 +257,11 @@ export class NotificationService implements OnModuleInit {
     const devices = await this.prisma.device.findMany({
       where: { userId: notification.userId, pushToken: { not: null } },
     });
-    const { title, body } = renderPush(notification.template as PushTemplate, locale, payload.params);
+    const { title, body } = renderPush(
+      notification.template as PushTemplate,
+      locale,
+      payload.params,
+    );
     const references: string[] = [];
     let lastError: unknown = new Error('Aucun appareil enregistré');
     for (const device of devices) {
@@ -349,10 +352,9 @@ export class NotificationService implements OnModuleInit {
 
   private unseal(sealed: string | undefined): Record<string, string> {
     if (!sealed) return {};
-    return JSON.parse(decrypt(this.secretKey, Buffer.from(sealed, 'base64')).toString('utf8')) as Record<
-      string,
-      string
-    >;
+    return JSON.parse(
+      decrypt(this.secretKey, Buffer.from(sealed, 'base64')).toString('utf8'),
+    ) as Record<string, string>;
   }
 }
 

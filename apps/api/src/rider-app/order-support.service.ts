@@ -33,7 +33,12 @@ export class OrderSupportService {
    * Le support a appelé le destinataire et confirme la remise. Au-delà de
    * SUPPORT_VALIDATION_LIMIT à encaisser, seul un administrateur peut valider.
    */
-  async validateDelivery(user: AuthUser, orderId: string, note: string, request: Request): Promise<void> {
+  async validateDelivery(
+    user: AuthUser,
+    orderId: string,
+    note: string,
+    request: Request,
+  ): Promise<void> {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
     const awaiting = await this.riderOrders.awaitingValidation([orderId]);
@@ -47,13 +52,21 @@ export class OrderSupportService {
         where: { orderId, kind: 'DELIVERY', codeVerified: false, supportValidatorId: null },
         orderBy: { recordedAt: 'desc' },
       });
-      await tx.deliveryProof.update({ where: { id: proof.id }, data: { supportValidatorId: user.id } });
+      await tx.deliveryProof.update({
+        where: { id: proof.id },
+        data: { supportValidatorId: user.id },
+      });
       const result = await this.transitions.applyIn(
         tx,
         order,
         'DELIVERED',
         { id: user.id, role: 'SUPPORT' },
-        { note, latitude: proof.latitude, longitude: proof.longitude, occurredAt: proof.occurredAt },
+        {
+          note,
+          latitude: proof.latitude,
+          longitude: proof.longitude,
+          occurredAt: proof.occurredAt,
+        },
       );
       await this.audit.record(
         {
@@ -73,7 +86,11 @@ export class OrderSupportService {
   }
 
   /** L'expéditeur choisit, après un échec : nouvelle tentative ou retour du colis. */
-  async failureDecision(user: AuthUser, orderId: string, decision: 'RETRY' | 'RETURN'): Promise<void> {
+  async failureDecision(
+    user: AuthUser,
+    orderId: string,
+    decision: 'RETRY' | 'RETURN',
+  ): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: { rider: { select: { userId: true } } },
