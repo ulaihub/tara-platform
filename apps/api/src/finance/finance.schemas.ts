@@ -132,6 +132,13 @@ export const CreditBody = z.object({
   reason: z.string().trim().min(3).max(300),
 });
 
+export const TreasuryTransferBody = z.object({
+  /** Sens du virement entre les espèces du bureau et le compte de l'agrégateur. */
+  direction: z.enum(['OFFICE_TO_MOBILE_MONEY', 'MOBILE_MONEY_TO_OFFICE']),
+  amount: z.int().min(1).max(50_000_000),
+  note: z.string().trim().min(3).max(300),
+});
+
 export const FinanceOverviewDto = z
   .object({
     currency: z.literal('XAF'),

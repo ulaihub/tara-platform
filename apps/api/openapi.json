@@ -5462,6 +5462,86 @@
         ]
       }
     },
+    "/v1/admin/finance/treasury-transfers": {
+      "post": {
+        "operationId": "AdminFinance_treasuryTransfer",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Identifiant unique de l’opération (UUID). Renvoyer la même requête après une coupure réseau ne refait pas l’opération.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "OFFICE_TO_MOBILE_MONEY",
+                      "MOBILE_MONEY_TO_OFFICE"
+                    ]
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50000000
+                  },
+                  "note": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "direction",
+                  "amount",
+                  "note"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entryId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "entryId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · finance"
+        ]
+      }
+    },
     "/v1/admin/finance/users/{userId}/credits": {
       "post": {
         "operationId": "AdminFinance_credit",

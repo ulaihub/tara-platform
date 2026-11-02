@@ -252,6 +252,50 @@ export class WalletsService implements OnModuleInit {
     return { entryId: entry.entryId, cashHeld: await this.ledger.balance(account) };
   }
 
+  // --- Trésorerie ---------------------------------------------------------------------------
+
+  /**
+   * Virement entre les espèces du bureau et le compte de l'agrégateur (alimentation avant
+   * les reversements, ou retrait). Tracé et rejouable sans double écriture.
+   */
+  async treasuryTransfer(
+    staff: AuthUser,
+    direction: 'OFFICE_TO_MOBILE_MONEY' | 'MOBILE_MONEY_TO_OFFICE',
+    amount: number,
+    note: string,
+    key: string,
+    request: Request,
+  ): Promise<{ entryId: string }> {
+    const toMobileMoney = direction === 'OFFICE_TO_MOBILE_MONEY';
+    const posted = await this.prisma.$transaction(async (tx) => {
+      const entry = await this.ledger.post(tx, {
+        kind: 'ADJUSTMENT',
+        description: `Virement de trésorerie ${toMobileMoney ? 'bureau → Mobile Money' : 'Mobile Money → bureau'} : ${note}`,
+        idempotencyKey: `treasury:${key}`,
+        postedById: staff.id,
+        postings: [
+          { account: PLATFORM_ACCOUNTS.mobileMoney, amount: toMobileMoney ? amount : -amount },
+          { account: PLATFORM_ACCOUNTS.officeCash, amount: toMobileMoney ? -amount : amount },
+        ],
+      });
+      if (entry.created) {
+        await this.audit.record(
+          {
+            actor: staff,
+            action: 'finance.treasury_transfer',
+            entityType: 'journal',
+            entityId: entry.entryId,
+            after: { direction, amount, note },
+            request,
+          },
+          tx,
+        );
+      }
+      return entry;
+    });
+    return { entryId: posted.entryId };
+  }
+
   // --- Avoirs (G8) --------------------------------------------------------------------------
 
   /** Avoir accordé par l'équipe (geste commercial, litige), crédité sur le solde. */

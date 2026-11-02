@@ -503,6 +503,29 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     expect(blocked.body.error.code).toBe('WALLET_IN_DEBT');
   });
 
+  it('vire de la trésorerie du bureau vers l’agrégateur, une seule fois par clé', async () => {
+    const before = await ledger.balance(PLATFORM_ACCOUNTS.mobileMoney);
+    const transferKey = key();
+    for (let i = 0; i < 2; i += 1) {
+      await request(ctx.http)
+        .post('/v1/admin/finance/treasury-transfers')
+        .set(finance.auth)
+        .set('Idempotency-Key', transferKey)
+        .send({
+          direction: 'OFFICE_TO_MOBILE_MONEY',
+          amount: 100_000,
+          note: 'Alimentation avant reversements',
+        })
+        .expect(201);
+    }
+    expect(await ledger.balance(PLATFORM_ACCOUNTS.mobileMoney)).toBe(before + 100_000);
+    await request(ctx.http)
+      .post('/v1/admin/finance/treasury-transfers')
+      .set(finance.auth)
+      .send({ direction: 'OFFICE_TO_MOBILE_MONEY', amount: 100, note: 'Sans clé' })
+      .expect(400);
+  });
+
   it('expose les soldes de la plateforme à la finance seulement', async () => {
     const overview = await request(ctx.http)
       .get('/v1/admin/finance/overview')

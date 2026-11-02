@@ -41,6 +41,7 @@ import {
   FinanceOverviewDto,
   MobileMoneyPayer,
   OfficeDepositBody,
+  TreasuryTransferBody,
   PaymentDto,
   PayoutBody,
   PayoutDto,
@@ -592,6 +593,27 @@ export class AdminFinanceController {
     return this.wallets.depositAtOffice(
       user,
       riderId,
+      body.amount,
+      body.note,
+      requiredIdempotencyKey(key),
+      request,
+    );
+  }
+
+  /** Virement de trésorerie entre le bureau et le compte de l'agrégateur. */
+  @Post('treasury-transfers')
+  @MONEY_HEADER
+  @ApiZodBody(TreasuryTransferBody)
+  @ApiZodResponse(z.object({ entryId: z.uuid() }), HttpStatus.CREATED)
+  treasuryTransfer(
+    @CurrentUser() user: AuthUser,
+    @ValidBody(TreasuryTransferBody) body: z.output<typeof TreasuryTransferBody>,
+    @Headers('idempotency-key') key: string | undefined,
+    @Req() request: Request,
+  ): Promise<{ entryId: string }> {
+    return this.wallets.treasuryTransfer(
+      user,
+      body.direction,
       body.amount,
       body.note,
       requiredIdempotencyKey(key),
