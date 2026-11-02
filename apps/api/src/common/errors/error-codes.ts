@@ -267,6 +267,62 @@ export const ERROR_MESSAGES = {
     en: 'No decision is expected for this order.',
   },
   SAFETY_ALERT_NOT_FOUND: { fr: 'Alerte introuvable.', en: 'Alert not found.' },
+
+  // Argent (G)
+  PAYMENT_ALREADY_PENDING: {
+    fr: 'Une demande de paiement attend déjà la validation sur le téléphone.',
+    en: 'A payment request is already waiting for approval on the phone.',
+  },
+  PAYMENT_NOT_FOUND: { fr: 'Paiement introuvable.', en: 'Payment not found.' },
+  PAYMENT_NOT_EXPECTED: {
+    fr: 'Aucun paiement n’est attendu pour cette commande.',
+    en: 'No payment is expected for this order.',
+  },
+  INSUFFICIENT_BALANCE: {
+    fr: 'Solde insuffisant ({balance} FCFA disponibles).',
+    en: 'Insufficient balance ({balance} XAF available).',
+  },
+  WALLET_IN_DEBT: {
+    fr: 'Votre solde Tara est négatif : réglez-le avant une nouvelle commande.',
+    en: 'Your Tara balance is negative: settle it before placing a new order.',
+  },
+  COLLECTION_REQUIRED: {
+    fr: 'Encaissez d’abord {amount} FCFA auprès du destinataire.',
+    en: 'Collect {amount} XAF from the recipient first.',
+  },
+  COLLECTION_NOT_EXPECTED: {
+    fr: 'Rien à encaisser pour cette commande.',
+    en: 'Nothing to collect for this order.',
+  },
+  ALREADY_COLLECTED: {
+    fr: 'Le montant a déjà été encaissé.',
+    en: 'The amount has already been collected.',
+  },
+  PAYOUT_TOO_SMALL: {
+    fr: 'Montant minimal d’un reversement : {min} FCFA.',
+    en: 'Minimum payout amount: {min} XAF.',
+  },
+  PAYOUT_IN_PROGRESS: {
+    fr: 'Un reversement est déjà en cours.',
+    en: 'A payout is already in progress.',
+  },
+  PAYOUT_NOT_ALLOWED: {
+    fr: 'Le reversement à la demande est réservé aux offres Pro et Business.',
+    en: 'On-demand payouts are for Pro and Business plans.',
+  },
+  PAYOUT_NOT_FOUND: { fr: 'Reversement introuvable.', en: 'Payout not found.' },
+  PAYOUT_NOT_AWAITING_APPROVAL: {
+    fr: 'Ce reversement n’attend pas de validation.',
+    en: 'This payout is not awaiting approval.',
+  },
+  DEPOSIT_TOO_LARGE: {
+    fr: 'Vous ne détenez que {cashHeld} FCFA d’espèces.',
+    en: 'You only hold {cashHeld} XAF in cash.',
+  },
+  STATEMENT_PERIOD_INVALID: {
+    fr: 'Mois invalide : utilisez le format AAAA-MM, mois terminé ou en cours.',
+    en: 'Invalid month: use YYYY-MM, past or current month.',
+  },
 } as const satisfies Record<string, { fr: string; en: string }>;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

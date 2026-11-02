@@ -67,7 +67,7 @@ describe('parseEnv', () => {
 
   it('interdit le SMS factice et le stockage local en production', () => {
     expect(() => parseEnv({ ...valid, NODE_ENV: 'production' })).toThrow(
-      /SMS_PROVIDER[\s\S]*PUSH_PROVIDER[\s\S]*STORAGE_DRIVER/,
+      /SMS_PROVIDER[\s\S]*PUSH_PROVIDER[\s\S]*PAYMENT_PROVIDER[\s\S]*STORAGE_DRIVER/,
     );
   });
 });

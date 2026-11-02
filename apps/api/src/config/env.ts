@@ -115,6 +115,23 @@ const envSchema = z
     /** Au-delà de ce montant à encaisser, une livraison sans code exige un administrateur. */
     SUPPORT_VALIDATION_LIMIT: z.coerce.number().int().min(0).default(50000),
 
+    /**
+     * Agrégateur Mobile Money (G1, G3). « fake » simule les paiements (interdit en
+     * production) ; « campay » : MTN MoMo et Orange Money par CamPay.
+     */
+    PAYMENT_PROVIDER: z.enum(['fake', 'campay']).default('fake'),
+    CAMPAY_BASE_URL: z.url({ protocol: /^https$/ }).default('https://demo.campay.net/api'),
+    CAMPAY_USERNAME: z.string().min(1).optional(),
+    CAMPAY_PASSWORD: z.string().min(1).optional(),
+    CAMPAY_WEBHOOK_KEY: z.string().min(16).optional(),
+    /** Une demande de paiement sans réponse est abandonnée après ce délai. */
+    PAYMENT_REQUEST_TIMEOUT_MINUTES: z.coerce.number().int().min(1).max(60).default(10),
+    /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */
+    PAYOUT_MIN_AMOUNT: z.coerce.number().int().min(1).default(500),
+    PAYOUT_APPROVAL_THRESHOLD: z.coerce.number().int().min(1).default(200_000),
+    /** Heure du reversement quotidien des marchands, heure du Cameroun (G3). */
+    PAYOUT_DAILY_HOUR: z.coerce.number().int().min(0).max(23).default(18),
+
     /** Tâches planifiées (expiration des pièces KYC…). Désactivées dans les tests. */
     JOBS_ENABLED: booleanFlag.default(true),
   })
@@ -165,6 +182,16 @@ const envSchema = z
         message: 'le secours doit être un autre fournisseur que le principal',
       });
     }
+    if (env.PAYMENT_PROVIDER === 'campay') {
+      for (const key of ['CAMPAY_USERNAME', 'CAMPAY_PASSWORD', 'CAMPAY_WEBHOOK_KEY'] as const) {
+        if (!env[key])
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: 'requis avec PAYMENT_PROVIDER=campay',
+          });
+      }
+    }
     const radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
     if (radii.some((r) => !Number.isInteger(r) || r <= 0)) {
       ctx.addIssue({
@@ -193,6 +220,13 @@ const envSchema = z
         code: 'custom',
         path: ['PUSH_PROVIDER'],
         message: 'le fournisseur de notifications push factice est interdit en production',
+      });
+    }
+    if (env.PAYMENT_PROVIDER === 'fake') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['PAYMENT_PROVIDER'],
+        message: 'le prestataire de paiement factice est interdit en production',
       });
     }
     if (env.STORAGE_DRIVER === 'local') {

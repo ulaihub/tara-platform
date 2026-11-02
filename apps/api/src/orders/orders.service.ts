@@ -11,6 +11,7 @@ import { pageOf } from '../common/pagination.js';
 import { Prisma, type Order, type OrderEvent } from '../generated/prisma/client.js';
 import type { ActorRole } from '../generated/prisma/enums.js';
 import { OrderEventsBus, type OrderChange } from '../events/order-events.bus.js';
+import { OrderTransitionHooks } from '../events/order-transition.hooks.js';
 import { AddressesService } from '../geo/addresses.service.js';
 import { type FullQuote, PricingService } from '../pricing/pricing.service.js';
 import { PromoService } from '../pricing/promo.service.js';
@@ -58,13 +59,23 @@ function isUniqueViolation(error: unknown): boolean {
 }
 
 /**
- * Une commande part tout de suite à la recherche d'un livreur si rien ne doit être payé
- * d'avance (paiement en espèces ou par le destinataire) et si elle n'est pas programmée.
- * Sinon elle attend le paiement Mobile Money (phase 3) ou son créneau (phase 2).
+ * Une commande part tout de suite à la recherche d'un livreur si elle n'est pas programmée
+ * et que ses frais sont réglés ou le seront à l'enlèvement ou à la livraison. Sinon elle
+ * attend le paiement Mobile Money (POST /orders/{id}/pay) ou son créneau.
  */
 function dispatchesImmediately(order: Order): boolean {
+  return !order.scheduledFor && readyForDispatch(order);
+}
+
+/**
+ * Une commande peut partir en recherche de livreur si ses frais sont réglés (prépaiement
+ * Mobile Money ou solde Tara) ou le seront en espèces ou par le destinataire.
+ */
+export function readyForDispatch(
+  order: Pick<Order, 'feePayer' | 'feePaymentMethod' | 'feePaidAt'>,
+): boolean {
   return (
-    !order.scheduledFor && (order.feePayer === 'RECIPIENT' || order.feePaymentMethod === 'CASH')
+    order.feePayer === 'RECIPIENT' || order.feePaymentMethod === 'CASH' || order.feePaidAt !== null
   );
 }
 
@@ -77,6 +88,7 @@ export class OrdersService {
     private readonly addresses: AddressesService,
     private readonly transitions: OrderTransitionsService,
     private readonly events: OrderEventsBus,
+    private readonly hooks: OrderTransitionHooks,
     private readonly audit: AuditService,
     @Inject(ENV) private readonly env: Env,
   ) {}
@@ -290,7 +302,7 @@ export class OrdersService {
     user: AuthUser,
     data: Prisma.OrderUncheckedCreateInput,
   ): Promise<{ order: Order; changes: OrderChange[] }> {
-    const created = await tx.order.create({ data });
+    let created = await tx.order.create({ data });
     await tx.orderEvent.create({
       data: {
         orderId: created.id,
@@ -300,6 +312,15 @@ export class OrdersService {
         occurredAt: created.createdAt,
       },
     });
+    // Prépaiement par le solde Tara, contrôles financiers (voir OrderFinanceService).
+    await this.hooks.run({
+      tx,
+      before: null,
+      after: created,
+      to: 'CREATED',
+      actor: { id: user.id, role: 'SENDER' },
+    });
+    created = await tx.order.findUniqueOrThrow({ where: { id: created.id } });
     const creation: OrderChange = {
       order: created,
       from: null,

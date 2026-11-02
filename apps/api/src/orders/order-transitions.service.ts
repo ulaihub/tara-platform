@@ -6,6 +6,7 @@ import { hashCode, randomDigits } from '../common/crypto.js';
 import type { Order, Prisma } from '../generated/prisma/client.js';
 import type { ActorRole, FailureReason, OrderStatus } from '../generated/prisma/enums.js';
 import { OrderEventsBus, type OrderChange } from '../events/order-events.bus.js';
+import { OrderTransitionHooks } from '../events/order-transition.hooks.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { checkTransition } from './order-state-machine.js';
 
@@ -47,6 +48,7 @@ export class OrderTransitionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: OrderEventsBus,
+    private readonly hooks: OrderTransitionHooks,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -196,6 +198,14 @@ export class OrderTransitionsService {
       await tx.address.update({ where: { id: order.dropoffAddressId }, data: { verifiedAt: now } });
     }
 
+    // Effets comptables dans la même transaction (voir OrderTransitionHooks).
+    await this.hooks.run({
+      tx,
+      before: order,
+      after: await tx.order.findUniqueOrThrow({ where: { id: order.id } }),
+      to,
+      actor,
+    });
     const updated = await tx.order.findUniqueOrThrow({ where: { id: order.id } });
     return {
       order: updated,

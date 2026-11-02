@@ -182,6 +182,17 @@ describe('Actions du livreur (E2 à E9)', () => {
     const { rider, order } = await assigned({ codAmount: 5_000 });
     await pickUp(rider, order);
     const photoKey = await proofPhoto(ctx, rider);
+    const unpaid = await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/deliver`)
+      .set(rider.auth)
+      .send({ photoKey, ...HERE })
+      .expect(409);
+    expect(unpaid.body.error.code).toBe('COLLECTION_REQUIRED');
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/collect`)
+      .set(rider.auth)
+      .send({ method: 'CASH' })
+      .expect(200);
     const pending = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/deliver`)
       .set(rider.auth)

@@ -16,6 +16,7 @@ import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
 import { CurrentUser, Public, Roles } from '../auth/decorators.js';
 import { AppError } from '../common/errors/app-error.js';
+import { idempotencyKey } from '../common/idempotency.js';
 import { pageSchema } from '../common/pagination.js';
 import {
   ApiZodBody,
@@ -41,18 +42,6 @@ import {
   RecipientResponseBody,
 } from './orders.schemas.js';
 import { OrdersService } from './orders.service.js';
-
-const IdempotencyKey = z.string().regex(/^[A-Za-z0-9_-]{8,100}$/);
-
-function idempotencyKey(value: string | undefined): string | undefined {
-  if (value === undefined) return undefined;
-  if (!IdempotencyKey.safeParse(value).success) {
-    throw AppError.badRequest('VALIDATION_FAILED', {}, [
-      { path: 'Idempotency-Key', message: 'format invalide' },
-    ]);
-  }
-  return value;
-}
 
 const IDEMPOTENCY_HEADER = ApiHeader({
   name: 'Idempotency-Key',
