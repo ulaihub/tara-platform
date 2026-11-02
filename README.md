@@ -36,3 +36,7 @@ L'API répond alors sur <http://localhost:3000/health>.
 | 5. App expéditeur et page de suivi | À faire  |
 | 6. Back-office                     | À faire  |
 | 7. Préparation du pilote           | À faire  |
+
+## Licence
+
+Logiciel propriétaire de Ulai Hub, tous droits réservés. Voir [LICENSE](LICENSE).

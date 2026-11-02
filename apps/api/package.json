@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "description": "API Tara : NestJS, PostgreSQL + PostGIS, Prisma.",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "generate": "prisma generate",

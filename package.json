@@ -2,7 +2,7 @@
   "name": "tara-platform",
   "private": true,
   "description": "Plateforme de livraison urbaine à la demande (Douala, Cameroun).",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22"
