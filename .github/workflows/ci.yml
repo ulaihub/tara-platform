@@ -110,7 +110,7 @@ jobs:
       run:
         working-directory: apps/rider
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # Java 21 : exigé par le module MapLibre, pris en charge par le plugin Android
       # Gradle 9. Dépendances Gradle en cache : la construction ne dépend plus de la
@@ -194,10 +194,10 @@ jobs:
     # Dépend d'un serveur de tuiles public : un aperçu manqué ne bloque pas la PR.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # Pas de pnpm dans ce job : le cache automatique de setup-node est désactivé.
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
