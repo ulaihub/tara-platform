@@ -44,6 +44,7 @@ class PrimaryButton extends StatelessWidget {
     this.height = 58,
     this.strong = false,
     this.sheenPeriod = const Duration(milliseconds: 3600),
+    this.loading = false,
   });
 
   final String label;
@@ -55,6 +56,9 @@ class PrimaryButton extends StatelessWidget {
   final bool strong;
   final Duration sheenPeriod;
 
+  /// Requête en cours : le bouton reste plein mais ne réagit plus, une icône tourne.
+  final bool loading;
+
   @override
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
@@ -62,9 +66,9 @@ class PrimaryButton extends StatelessWidget {
     final style = (strong ? TaraText.buttonStrong : TaraText.button).copyWith(color: TaraBrand.onBrand);
     return Semantics(
       button: true,
-      enabled: enabled,
+      enabled: enabled && !loading,
       child: GestureDetector(
-        onTap: enabled
+        onTap: enabled && !loading
             ? () {
                 HapticFeedback.selectionClick();
                 onPressed!();
@@ -103,7 +107,13 @@ class PrimaryButton extends StatelessWidget {
                         Flexible(
                           child: Text(label, style: style, textAlign: TextAlign.center),
                         ),
-                        if (icon != null) ...[
+                        if (loading) ...[
+                          const SizedBox(width: 10),
+                          const Spin(
+                            period: Duration(milliseconds: 900),
+                            child: TaraIcon(TaraIcons.refresh, size: 20, strokeWidth: 2.2, color: TaraBrand.onBrand),
+                          ),
+                        ] else if (icon != null) ...[
                           const SizedBox(width: 10),
                           TaraIcon(icon!, size: 20, strokeWidth: 2.2, color: TaraBrand.onBrand),
                         ],
@@ -161,11 +171,17 @@ class GlassButton extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (icon != null) ...[TaraIcon(icon!, size: 20, color: fg), const SizedBox(width: 8)],
+                    // Une ligne : avec le texte agrandi, le libellé rétrécit au lieu d'être
+                    // coupé au milieu d'un mot.
                     Flexible(
-                      child: Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: TaraText.buttonSecondary.copyWith(color: fg),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: TaraText.buttonSecondary.copyWith(color: fg),
+                        ),
                       ),
                     ),
                   ],

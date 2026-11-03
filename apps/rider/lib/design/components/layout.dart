@@ -535,3 +535,33 @@ class SectionHeader extends StatelessWidget {
     );
   }
 }
+
+/// Formulaire : contenu qui défile, actions fixées en bas de l'écran et au-dessus du
+/// clavier. Le bouton principal reste visible même sur un petit écran avec texte agrandi.
+class ScrollWithFooter extends StatelessWidget {
+  const ScrollWithFooter({super.key, required this.content, required this.footer, this.horizontal = 24, this.top = 16});
+
+  /// Contenu qui défile, de haut en bas.
+  final List<Widget> content;
+  final Widget footer;
+  final double horizontal;
+  final double top;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(horizontal, top, horizontal, 16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: content),
+            ),
+          ),
+          Padding(padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16), child: footer),
+        ],
+      ),
+    );
+  }
+}

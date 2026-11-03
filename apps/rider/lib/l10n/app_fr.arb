@@ -7,9 +7,21 @@
   "recenterMap": "Recentrer la carte",
   "safetyAlert": "Alerte de sécurité",
   "callPerson": "Appeler {name}",
-  "@callPerson": { "placeholders": { "name": { "type": "String" } } },
+  "@callPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "digitLabel": "Chiffre {index}",
-  "@digitLabel": { "placeholders": { "index": { "type": "int" } } },
+  "@digitLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "currencyFcfa": "FCFA",
   "tabHome": "Accueil",
   "tabActivity": "Activité",
@@ -20,16 +32,34 @@
   "goOfflineLabel": "Vous êtes en ligne. Passer hors ligne",
   "goOnline": "Passer en ligne",
   "secondsRemaining": "Temps restant pour accepter : {seconds} secondes",
-  "@secondsRemaining": { "placeholders": { "seconds": { "type": "int" } } },
+  "@secondsRemaining": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "seconds": "secondes",
   "sosHoldLabel": "Maintenir 3 secondes pour envoyer une alerte",
   "sosHold": "Maintenir 3 s",
   "sosHoldRemaining": "Encore {seconds} s…",
-  "@sosHoldRemaining": { "placeholders": { "seconds": { "type": "int" } } },
+  "@sosHoldRemaining": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "sosSent": "Envoyée",
   "offlineBannerTitle": "Hors connexion",
   "offlineBannerPending": "{count, plural, =0{Aucune action en attente} =1{1 action en attente} other{{count} actions en attente}} · enregistrées sur le téléphone",
-  "@offlineBannerPending": { "placeholders": { "count": { "type": "int" } } },
+  "@offlineBannerPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "catalogTitle": "Catalogue des composants",
   "stepPickup": "Enlèvement",
   "stepCollect": "Encaissement",
@@ -43,5 +73,144 @@
   "searchingJobsHint": "Restez dans la zone, les propositions arrivent ici.",
   "stepDone": "terminée",
   "stepActive": "en cours",
-  "stepUpcoming": "à venir"
+  "stepUpcoming": "à venir",
+  "riderSpace": "ESPACE LIVREUR",
+  "signInTitle": "Prêt à prendre la route ?",
+  "signInBody": "Connectez-vous avec votre numéro. Nous vous envoyons un code par SMS.",
+  "phoneLabel": "Numéro de téléphone",
+  "phoneHint": "6XX XX XX XX",
+  "countryCodeLabel": "Indicatif du pays {code}",
+  "@countryCodeLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneHelp": "Utilisez le numéro lié à votre compte Mobile Money : vos gains y seront versés.",
+  "phoneInvalid": "Numéro de mobile camerounais à 9 chiffres, commençant par 6.",
+  "getCode": "Recevoir le code",
+  "legalPrefix": "En continuant, vous acceptez les ",
+  "terms": "conditions d’utilisation",
+  "legalAnd": " et la ",
+  "privacy": "politique de confidentialité",
+  "codeTitle": "Entrez le code reçu",
+  "codeSentTo": "Envoyé par SMS au {phone}",
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "change": "Modifier",
+  "resendIn": "Renvoyer le code dans {time}",
+  "@resendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resendNow": "Vous n’avez rien reçu ?",
+  "resend": "Renvoyer",
+  "validate": "Valider",
+  "noSms": "Pas reçu de SMS ? Contacter le support",
+  "continueLabel": "Continuer",
+  "stepOf": "Étape {step} sur {total} · {name}",
+  "@stepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "stepProfile": "Profil",
+  "stepDocuments": "Pièces",
+  "becomeRider": "Devenez livreur Tara",
+  "becomeRiderBody": "Quelques infos pour créer votre profil. Tout est vérifié avant votre première course.",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "vehicle": "Véhicule",
+  "vehicleMotorbike": "Moto",
+  "vehicleCar": "Voiture",
+  "vehicleTricycle": "Tricycle",
+  "plateNumber": "Immatriculation",
+  "plateHint": "Ex. LT 123 AB",
+  "guarantor": "Garant",
+  "guarantorHelp": "Une personne de confiance qui se porte garante de vous. Sa pièce d’identité sera demandée.",
+  "guarantorName": "Nom du garant",
+  "guarantorPhone": "Téléphone du garant",
+  "emergencyContact": "Contact d’urgence (facultatif)",
+  "emergencyHelp": "Prévenu automatiquement si vous déclenchez une alerte.",
+  "emergencyName": "Nom du contact",
+  "emergencyPhone": "Téléphone du contact",
+  "requiredField": "Obligatoire",
+  "documentsTitle": "Vos pièces justificatives",
+  "documentsBody": "Prenez chaque pièce en photo, bien à plat et lisible.",
+  "docSent": "Envoyée",
+  "docToDo": "À envoyer",
+  "docUploading": "Envoi en cours… {percent} %",
+  "@docUploading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "docRejected": "Refusée",
+  "docApproved": "Validée",
+  "docExpired": "Expirée",
+  "takePhoto": "Prendre",
+  "sendAgain": "Renvoyer",
+  "docAlternative": "ou {name}",
+  "@docAlternative": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsNote": "Vos documents sont chiffrés et vérifiés par l’équipe Tara. Vous êtes prévenu par SMS à la validation.",
+  "sendFile": "Envoyer mon dossier",
+  "progressCount": "{done} / {total}",
+  "@progressCount": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingTitle": "Dossier en cours de vérification",
+  "pendingBody": "Nous vérifions vos pièces, en général sous 48 h. Vous recevrez un SMS dès que vous pourrez prendre des courses.",
+  "goodMorning": "Bonjour,",
+  "goodEvening": "Bonsoir,",
+  "todayEarnings": "Gains du jour",
+  "details": "Détails",
+  "jobsCount": "{count, plural, =0{Aucune course} =1{1 course} other{{count} courses}}",
+  "@jobsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onlineTime": "En ligne",
+  "cashInHand": "Espèces en main",
+  "youAreOffline": "Vous êtes hors ligne",
+  "offlineHint": "Passez en ligne pour recevoir les propositions de course autour de vous.",
+  "locationNeeded": "Activez la localisation pour passer en ligne.",
+  "blockersTitle": "Pièces à renouveler avant de passer en ligne",
+  "retry": "Réessayer",
+  "genericError": "Une erreur est survenue. Réessayez.",
+  "networkError": "Pas de connexion internet. Vérifiez le réseau et réessayez."
 }

@@ -325,6 +325,450 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'à venir'**
   String get stepUpcoming;
+
+  /// No description provided for @riderSpace.
+  ///
+  /// In fr, this message translates to:
+  /// **'ESPACE LIVREUR'**
+  String get riderSpace;
+
+  /// No description provided for @signInTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêt à prendre la route ?'**
+  String get signInTitle;
+
+  /// No description provided for @signInBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connectez-vous avec votre numéro. Nous vous envoyons un code par SMS.'**
+  String get signInBody;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone'**
+  String get phoneLabel;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'6XX XX XX XX'**
+  String get phoneHint;
+
+  /// No description provided for @countryCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indicatif du pays {code}'**
+  String countryCodeLabel(String code);
+
+  /// No description provided for @phoneHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisez le numéro lié à votre compte Mobile Money : vos gains y seront versés.'**
+  String get phoneHelp;
+
+  /// No description provided for @phoneInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de mobile camerounais à 9 chiffres, commençant par 6.'**
+  String get phoneInvalid;
+
+  /// No description provided for @getCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir le code'**
+  String get getCode;
+
+  /// No description provided for @legalPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'En continuant, vous acceptez les '**
+  String get legalPrefix;
+
+  /// No description provided for @terms.
+  ///
+  /// In fr, this message translates to:
+  /// **'conditions d’utilisation'**
+  String get terms;
+
+  /// No description provided for @legalAnd.
+  ///
+  /// In fr, this message translates to:
+  /// **' et la '**
+  String get legalAnd;
+
+  /// No description provided for @privacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'politique de confidentialité'**
+  String get privacy;
+
+  /// No description provided for @codeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code reçu'**
+  String get codeTitle;
+
+  /// No description provided for @codeSentTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé par SMS au {phone}'**
+  String codeSentTo(String phone);
+
+  /// No description provided for @change.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get change;
+
+  /// No description provided for @resendIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le code dans {time}'**
+  String resendIn(String time);
+
+  /// No description provided for @resendNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous n’avez rien reçu ?'**
+  String get resendNow;
+
+  /// No description provided for @resend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer'**
+  String get resend;
+
+  /// No description provided for @validate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get validate;
+
+  /// No description provided for @noSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas reçu de SMS ? Contacter le support'**
+  String get noSms;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get continueLabel;
+
+  /// No description provided for @stepOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étape {step} sur {total} · {name}'**
+  String stepOf(int step, int total, String name);
+
+  /// No description provided for @stepProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get stepProfile;
+
+  /// No description provided for @stepDocuments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pièces'**
+  String get stepDocuments;
+
+  /// No description provided for @becomeRider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devenez livreur Tara'**
+  String get becomeRider;
+
+  /// No description provided for @becomeRiderBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelques infos pour créer votre profil. Tout est vérifié avant votre première course.'**
+  String get becomeRiderBody;
+
+  /// No description provided for @firstName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prénom'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get lastName;
+
+  /// No description provided for @vehicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Véhicule'**
+  String get vehicle;
+
+  /// No description provided for @vehicleMotorbike.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moto'**
+  String get vehicleMotorbike;
+
+  /// No description provided for @vehicleCar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voiture'**
+  String get vehicleCar;
+
+  /// No description provided for @vehicleTricycle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tricycle'**
+  String get vehicleTricycle;
+
+  /// No description provided for @plateNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Immatriculation'**
+  String get plateNumber;
+
+  /// No description provided for @plateHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. LT 123 AB'**
+  String get plateHint;
+
+  /// No description provided for @guarantor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garant'**
+  String get guarantor;
+
+  /// No description provided for @guarantorHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une personne de confiance qui se porte garante de vous. Sa pièce d’identité sera demandée.'**
+  String get guarantorHelp;
+
+  /// No description provided for @guarantorName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du garant'**
+  String get guarantorName;
+
+  /// No description provided for @guarantorPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone du garant'**
+  String get guarantorPhone;
+
+  /// No description provided for @emergencyContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contact d’urgence (facultatif)'**
+  String get emergencyContact;
+
+  /// No description provided for @emergencyHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévenu automatiquement si vous déclenchez une alerte.'**
+  String get emergencyHelp;
+
+  /// No description provided for @emergencyName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du contact'**
+  String get emergencyName;
+
+  /// No description provided for @emergencyPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone du contact'**
+  String get emergencyPhone;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Obligatoire'**
+  String get requiredField;
+
+  /// No description provided for @documentsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos pièces justificatives'**
+  String get documentsTitle;
+
+  /// No description provided for @documentsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prenez chaque pièce en photo, bien à plat et lisible.'**
+  String get documentsBody;
+
+  /// No description provided for @docSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyée'**
+  String get docSent;
+
+  /// No description provided for @docToDo.
+  ///
+  /// In fr, this message translates to:
+  /// **'À envoyer'**
+  String get docToDo;
+
+  /// No description provided for @docUploading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi en cours… {percent} %'**
+  String docUploading(int percent);
+
+  /// No description provided for @docRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée'**
+  String get docRejected;
+
+  /// No description provided for @docApproved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validée'**
+  String get docApproved;
+
+  /// No description provided for @docExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expirée'**
+  String get docExpired;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre'**
+  String get takePhoto;
+
+  /// No description provided for @sendAgain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer'**
+  String get sendAgain;
+
+  /// No description provided for @docAlternative.
+  ///
+  /// In fr, this message translates to:
+  /// **'ou {name}'**
+  String docAlternative(String name);
+
+  /// No description provided for @documentsNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos documents sont chiffrés et vérifiés par l’équipe Tara. Vous êtes prévenu par SMS à la validation.'**
+  String get documentsNote;
+
+  /// No description provided for @sendFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer mon dossier'**
+  String get sendFile;
+
+  /// No description provided for @progressCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} / {total}'**
+  String progressCount(int done, int total);
+
+  /// No description provided for @pendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier en cours de vérification'**
+  String get pendingTitle;
+
+  /// No description provided for @pendingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous vérifions vos pièces, en général sous 48 h. Vous recevrez un SMS dès que vous pourrez prendre des courses.'**
+  String get pendingBody;
+
+  /// No description provided for @goodMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour,'**
+  String get goodMorning;
+
+  /// No description provided for @goodEvening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonsoir,'**
+  String get goodEvening;
+
+  /// No description provided for @todayEarnings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains du jour'**
+  String get todayEarnings;
+
+  /// No description provided for @details.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détails'**
+  String get details;
+
+  /// No description provided for @jobsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune course} =1{1 course} other{{count} courses}}'**
+  String jobsCount(int count);
+
+  /// No description provided for @onlineTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'En ligne'**
+  String get onlineTime;
+
+  /// No description provided for @cashInHand.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces en main'**
+  String get cashInHand;
+
+  /// No description provided for @youAreOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes hors ligne'**
+  String get youAreOffline;
+
+  /// No description provided for @offlineHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passez en ligne pour recevoir les propositions de course autour de vous.'**
+  String get offlineHint;
+
+  /// No description provided for @locationNeeded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez la localisation pour passer en ligne.'**
+  String get locationNeeded;
+
+  /// No description provided for @blockersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pièces à renouveler avant de passer en ligne'**
+  String get blockersTitle;
+
+  /// No description provided for @retry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get retry;
+
+  /// No description provided for @genericError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Réessayez.'**
+  String get genericError;
+
+  /// No description provided for @networkError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion internet. Vérifiez le réseau et réessayez.'**
+  String get networkError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
