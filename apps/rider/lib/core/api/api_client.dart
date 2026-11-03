@@ -39,8 +39,13 @@ class ApiClient {
   Future<Object?> get(String path, {Map<String, Object?>? query, bool auth = true}) =>
       send('GET', path, query: query, auth: auth);
 
-  Future<Object?> post(String path, {Object? body, bool auth = true, Map<String, String>? headers}) =>
-      send('POST', path, body: body, auth: auth, headers: headers);
+  Future<Object?> post(
+    String path, {
+    Object? body,
+    bool auth = true,
+    Map<String, String>? headers,
+    void Function(int sent, int total)? onSendProgress,
+  }) => send('POST', path, body: body, auth: auth, headers: headers, onSendProgress: onSendProgress);
 
   Future<Object?> put(String path, {Object? body}) => send('PUT', path, body: body);
 
@@ -53,20 +58,21 @@ class ApiClient {
     Map<String, Object?>? query,
     bool auth = true,
     Map<String, String>? headers,
+    void Function(int sent, int total)? onSendProgress,
   }) async {
     var session = auth ? await store.read() : null;
     if (session != null && session.accessExpiresAt.isBefore(DateTime.now().add(_refreshMargin))) {
       session = await _refresh(session);
     }
     try {
-      return await _request(method, path, body, query, session, headers);
+      return await _request(method, path, body, query, session, headers, onSendProgress);
     } on ApiException catch (error) {
       if (error.status != 401 || session == null) rethrow;
       // Jeton refusé (révoqué, horloge du téléphone décalée) : un renouvellement, un essai.
       session = await _refresh(session);
       // Un formulaire (photo) ne s'envoie qu'une fois : on en rejoue une copie.
       final retryBody = body is FormData ? body.clone() : body;
-      return _request(method, path, retryBody, query, session, headers);
+      return _request(method, path, retryBody, query, session, headers, onSendProgress);
     }
   }
 
@@ -76,13 +82,15 @@ class ApiClient {
     Object? body,
     Map<String, Object?>? query,
     StoredSession? session,
-    Map<String, String>? headers,
-  ) async {
+    Map<String, String>? headers, [
+    void Function(int sent, int total)? onSendProgress,
+  ]) async {
     try {
       final response = await dio.request<Object?>(
         path,
         data: body,
         queryParameters: query,
+        onSendProgress: onSendProgress,
         options: Options(
           method: method,
           headers: {

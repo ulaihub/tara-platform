@@ -46,9 +46,15 @@ class RiderApi {
   );
 
   /// Pièce justificative (photo compressée ou PDF, 5 Mo au plus côté serveur).
-  Future<void> uploadDocument({required String type, required String filePath, DateTime? expiresOn}) async {
+  Future<void> uploadDocument({
+    required String type,
+    required String filePath,
+    DateTime? expiresOn,
+    void Function(double progress)? onProgress,
+  }) async {
     await _api.post(
       '/riders/me/documents',
+      onSendProgress: onProgress == null ? null : (sent, total) => onProgress(total <= 0 ? 0 : sent / total),
       body: FormData.fromMap({
         'type': type,
         if (expiresOn != null) 'expiresOn': expiresOn.toIso8601String().substring(0, 10),

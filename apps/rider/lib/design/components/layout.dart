@@ -559,7 +559,10 @@ class ScrollWithFooter extends StatelessWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: content),
             ),
           ),
-          Padding(padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16), child: footer),
+          Padding(
+            padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16),
+            child: SizedBox(width: double.infinity, child: footer),
+          ),
         ],
       ),
     );
