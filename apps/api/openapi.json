@@ -3374,6 +3374,61 @@
         ]
       }
     },
+    "/v1/rider/orders/{id}/route": {
+      "get": {
+        "operationId": "RiderApp_route",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "latitude",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "longitude",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderRoute"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/rider/orders/{id}/pickup": {
       "post": {
         "operationId": "RiderApp_pickup",
@@ -6794,6 +6849,7 @@
                   "PROMO_NOT_ELIGIBLE",
                   "PROMO_ALREADY_EXISTS",
                   "ORDER_NOT_FOUND",
+                  "ORDER_NOT_IN_PROGRESS",
                   "ORDER_TRANSITION_INVALID",
                   "ORDER_CONFLICT",
                   "ORDER_NOT_CANCELLABLE",
@@ -8665,6 +8721,59 @@
           "suspendedReason",
           "documents",
           "missingDocuments"
+        ],
+        "additionalProperties": false
+      },
+      "RiderRoute": {
+        "type": "object",
+        "properties": {
+          "stop": {
+            "type": "string",
+            "enum": [
+              "PICKUP",
+              "DROPOFF"
+            ]
+          },
+          "meters": {
+            "type": "integer"
+          },
+          "seconds": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "osrm",
+              "estimate"
+            ]
+          },
+          "path": {
+            "minItems": 2,
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "required": [
+          "stop",
+          "meters",
+          "seconds",
+          "source",
+          "path"
         ],
         "additionalProperties": false
       },

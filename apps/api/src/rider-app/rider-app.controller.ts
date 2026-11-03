@@ -57,6 +57,8 @@ import {
   ReturnBody,
   RiderOrderDto,
   RiderOrdersQuery,
+  RiderRouteDto,
+  RouteQuery,
   SafetyAlertBody,
   SafetyAlertDto,
   SafetyAlertListQuery,
@@ -190,6 +192,22 @@ export class RiderAppController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Out<typeof RiderOrderDto> {
     return this.orders.get(user.id, id);
+  }
+
+  /**
+   * Itinéraire de la position du livreur à la prochaine étape (E2) : tracé routier (OSRM)
+   * ou ligne droite estimée. L'app le redemande quand le livreur s'est déplacé.
+   */
+  @Get('orders/:id/route')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @ApiZodQuery(RouteQuery)
+  @ApiZodResponse(RiderRouteDto)
+  route(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidQuery(RouteQuery) query: z.output<typeof RouteQuery>,
+  ): Out<typeof RiderRouteDto> {
+    return this.orders.route(user.id, id, query);
   }
 
   /** Enlèvement : code de l'expéditeur et photo du colis (E3). */

@@ -171,6 +171,10 @@ export const ERROR_MESSAGES = {
 
   // Commandes (C1 à C5)
   ORDER_NOT_FOUND: { fr: 'Commande introuvable.', en: 'Order not found.' },
+  ORDER_NOT_IN_PROGRESS: {
+    fr: 'Cette course n’est plus en cours.',
+    en: 'This job is no longer in progress.',
+  },
   ORDER_TRANSITION_INVALID: {
     fr: 'Passage de « {from} » à « {to} » impossible.',
     en: 'Cannot move from "{from}" to "{to}".',

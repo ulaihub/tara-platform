@@ -333,6 +333,48 @@ describe('Actions du livreur (E2 à E9)', () => {
     expect(event.occurredAt.toISOString()).toBe(offlineAt.toISOString());
   });
 
+  it('trace l’itinéraire vers la prochaine étape, sans révéler la course aux autres (E2)', async () => {
+    const { rider, order } = await assigned();
+    const position = { latitude: HERE.latitude, longitude: HERE.longitude };
+    const toPickup = await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}/route`)
+      .query(position)
+      .set(rider.auth)
+      .expect(200);
+    const detail = await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}`)
+      .set(rider.auth)
+      .expect(200);
+    const pickup = detail.body.pickup as { latitude: number; longitude: number };
+    // Sans OSRM en test : ligne droite de la position du livreur au vendeur.
+    expect(toPickup.body).toMatchObject({ stop: 'PICKUP', source: 'estimate' });
+    expect(toPickup.body.path).toEqual([
+      [position.longitude, position.latitude],
+      [pickup.longitude, pickup.latitude],
+    ]);
+    expect(toPickup.body.meters).toBeGreaterThan(0);
+
+    await pickUp(rider, order);
+    const toDropoff = await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}/route`)
+      .query(position)
+      .set(rider.auth)
+      .expect(200);
+    expect(toDropoff.body.stop).toBe('DROPOFF');
+
+    const other = await activeRider(ctx);
+    await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}/route`)
+      .query(position)
+      .set(other.auth)
+      .expect(404);
+    await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}/route`)
+      .query({ latitude: 'abc', longitude: 9.7 })
+      .set(rider.auth)
+      .expect(400);
+  });
+
   it('cache les courses des autres livreurs et réserve les photos de preuve aux livreurs', async () => {
     const { order } = await assigned();
     const other = await activeRider(ctx);

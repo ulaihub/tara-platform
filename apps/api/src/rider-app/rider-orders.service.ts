@@ -20,6 +20,7 @@ import {
 } from '../orders/order-transitions.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
+import { DistanceService, type GeoPoint } from '../routing/distance.service.js';
 import { MediaService } from '../storage/media.service.js';
 import type {
   DeliverBody,
@@ -30,6 +31,7 @@ import type {
   ReturnBody,
   RiderOrderDto,
   RiderOrdersQuery,
+  RiderRouteDto,
 } from './rider-app.schemas.js';
 
 /** Codes à 4 chiffres : au-delà de ce nombre d'erreurs, le code est bloqué (E3, E4). */
@@ -65,6 +67,7 @@ export class RiderOrdersService {
     private readonly realtime: RealtimeService,
     private readonly finance: OrderFinanceService,
     private readonly onlineTime: OnlineTimeService,
+    private readonly distance: DistanceService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -116,6 +119,25 @@ export class RiderOrdersService {
     const { order } = await this.load(userId, orderId);
     const [dto] = await this.toDtos([order]);
     return dto as z.output<typeof RiderOrderDto>;
+  }
+
+  /** Itinéraire de la position du livreur à la prochaine étape de sa course (E2). */
+  async route(
+    userId: string,
+    orderId: string,
+    from: GeoPoint,
+  ): Promise<z.output<typeof RiderRouteDto>> {
+    const { order } = await this.load(userId, orderId);
+    const target = navigationTarget(order);
+    if (!target) throw AppError.conflict('ORDER_NOT_IN_PROGRESS', { status: order.status });
+    const route = await this.distance.path(from, target);
+    return {
+      stop: target === order.pickupAddress ? 'PICKUP' : 'DROPOFF',
+      meters: route.meters,
+      seconds: route.seconds,
+      source: route.source,
+      path: route.path,
+    };
   }
 
   private async toDtos(orders: RiderOrder[]): Promise<z.output<typeof RiderOrderDto>[]> {

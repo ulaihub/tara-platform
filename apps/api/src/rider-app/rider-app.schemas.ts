@@ -90,6 +90,26 @@ export const SafetyAlertBody = z.object({
   note: z.string().trim().max(300).optional(),
 });
 
+/** Position actuelle du livreur, d'où part l'itinéraire. */
+export const RouteQuery = z.object({
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
+});
+
+/** Itinéraire vers la prochaine étape de la course (E2), à dessiner sur la carte. */
+export const RiderRouteDto = z
+  .object({
+    /** Étape visée : le vendeur (enlèvement ou retour) ou le destinataire. */
+    stop: z.enum(['PICKUP', 'DROPOFF']),
+    meters: z.int(),
+    seconds: z.int().nullable(),
+    /** « osrm » : tracé routier ; « estimate » : ligne droite, distance estimée. */
+    source: z.enum(['osrm', 'estimate']),
+    /** Tracé en paires [longitude, latitude] (ordre GeoJSON). */
+    path: z.array(z.tuple([z.number(), z.number()])).min(2),
+  })
+  .meta({ id: 'RiderRoute' });
+
 export const RiderOrdersQuery = PageQuery.extend({
   scope: z.enum(['active', 'history']).default('active'),
 });
