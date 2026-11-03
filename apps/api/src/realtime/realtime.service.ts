@@ -17,6 +17,9 @@ export type RealtimeEvent =
   | 'ops.delivery-validation'
   | 'ops.rider-position'
   | 'ops.sms-volume'
+  | 'ops.finance-alert'
+  | 'payment.status'
+  | 'payout.status'
   | 'session.expired';
 
 /**

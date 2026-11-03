@@ -295,15 +295,21 @@ enum PaymentStatus {
 enum PayoutBeneficiary {
   MERCHANT
   RIDER
+  /// Remboursement du solde d'un client vers son Mobile Money (G8).
+  CUSTOMER
 
   @@map("payout_beneficiary")
 }
 
 enum PayoutStatus {
   PENDING
+  /// Au-delà du seuil, un responsable financier valide avant l'envoi.
+  AWAITING_APPROVAL
   PROCESSING
   SUCCEEDED
   FAILED
+  /// Refusé par la finance : le montant revient au portefeuille.
+  CANCELLED
 
   @@map("payout_status")
 }
@@ -327,6 +333,15 @@ enum LedgerOwnerType {
 }
 
 enum JournalEntryKind {
+  /// Frais de livraison payés d'avance par le solde Tara.
+  ORDER_CHARGED
+  /// Commande annulée : frais rendus au solde (avoir).
+  ORDER_RELEASED
+  PAYOUT_REQUESTED
+  /// Le livreur garde sa part sur les espèces qu'il détient.
+  CASH_COMPENSATED
+  /// Avoir accordé par l'équipe.
+  CREDIT_GRANTED
   PAYMENT_RECEIVED
   DELIVERY_COMPLETED
   COD_COLLECTED
@@ -424,7 +439,7 @@ model User {
   totpLockedUntil    DateTime? @map("totp_locked_until") @db.Timestamptz(3)
 
   merchant             MerchantProfile?
-  rider                RiderProfile?     @relation("RiderUser")
+  rider                RiderProfile?          @relation("RiderUser")
   devices              Device[]
   refreshTokens        RefreshToken[]
   consents             Consent[]
@@ -434,22 +449,25 @@ model User {
   sentOrders           Order[]
   orderEvents          OrderEvent[]
   validatedProofs      DeliveryProof[]
-  ratingsGiven         Rating[]          @relation("RatingsGiven")
-  ratingsReceived      Rating[]          @relation("RatingsReceived")
+  ratingsGiven         Rating[]               @relation("RatingsGiven")
+  ratingsReceived      Rating[]               @relation("RatingsReceived")
   payments             Payment[]
   promoRedemptions     PromoRedemption[]
-  referralsMade        Referral[]        @relation("Referrer")
-  referredBy           Referral?         @relation("Referee")
-  ridersApproved       RiderProfile[]    @relation("RiderApprovedBy")
+  referralsMade        Referral[]             @relation("Referrer")
+  referredBy           Referral?              @relation("Referee")
+  ridersApproved       RiderProfile[]         @relation("RiderApprovedBy")
   kycReviews           KycDocument[]
   pricingGridsCreated  PricingGrid[]
   journalEntriesPosted JournalEntry[]
   notifications        Notification[]
-  ticketsOpened        Ticket[]          @relation("TicketOpenedBy")
-  ticketsAssigned      Ticket[]          @relation("TicketAssignee")
+  ticketsOpened        Ticket[]               @relation("TicketOpenedBy")
+  ticketsAssigned      Ticket[]               @relation("TicketAssignee")
   ticketMessages       TicketMessage[]
   mediaFiles           MediaFile[]
   safetyAlertsHandled  SafetyAlert[]
+  payoutsReceived      Payout[]               @relation("PayoutUser")
+  payoutsApproved      Payout[]               @relation("PayoutApprover")
+  reconciliationsRun   ReconciliationReport[]
 
   @@map("users")
 }
@@ -539,6 +557,8 @@ model MerchantProfile {
   payoutPhone    String              @map("payout_phone")
   payoutOperator MobileMoneyOperator @map("payout_operator")
   payoutSchedule PayoutSchedule      @default(DAILY) @map("payout_schedule")
+  /// Dernier changement du numéro de reversement : reversements gelés pendant PAYOUT_HOLD_HOURS.
+  payoutPhoneChangedAt DateTime?     @map("payout_phone_changed_at") @db.Timestamptz(3)
   plan           MerchantPlan        @default(FREE)
   planRenewsAt   DateTime?           @map("plan_renews_at") @db.Timestamptz(3)
   rccm           String?
@@ -872,6 +892,8 @@ model Order {
   dispatchAlertedAt    DateTime?        @map("dispatch_alerted_at") @db.Timestamptz(3)
   /// Choix de l'expéditeur après un échec : nouvelle tentative ou retour (E6).
   failureDecision      FailureDecision? @map("failure_decision")
+  /// Frais de livraison réglés (prépaiement, espèces ou Mobile Money).
+  feePaidAt            DateTime?        @map("fee_paid_at") @db.Timestamptz(3)
   cancelReason         String?          @map("cancel_reason")
   createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -976,6 +998,30 @@ model DispatchOffer {
   @@map("dispatch_offers")
 }
 
+enum ReconciliationStatus {
+  BALANCED
+  DISCREPANCIES
+
+  @@map("reconciliation_status")
+}
+
+/// Rapprochement quotidien (G6) : totaux du jour et écarts constatés.
+model ReconciliationReport {
+  id            String               @id @default(uuid(7)) @db.Uuid
+  /// Journée rapprochée, à l'heure du Cameroun.
+  day           DateTime             @unique @db.Date
+  status        ReconciliationStatus
+  totals        Json
+  discrepancies Json
+  ranById       String?              @map("ran_by_id") @db.Uuid
+  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  ranBy User? @relation(fields: [ranById], references: [id])
+
+  @@map("reconciliation_reports")
+}
+
 /// Alerte de sécurité déclenchée par un livreur (E8) : sa position part au dispatch.
 model SafetyAlert {
   id             String    @id @default(uuid(7)) @db.Uuid
@@ -1041,6 +1087,10 @@ model Payment {
   createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
   confirmedAt       DateTime?      @map("confirmed_at") @db.Timestamptz(3)
+  /// Frais retenus par le prestataire Mobile Money, s'il les communique.
+  fee               Int            @default(0)
+  /// Dernière interrogation du prestataire (paiement en attente).
+  lastCheckedAt     DateTime?      @map("last_checked_at") @db.Timestamptz(3)
 
   payer          User?          @relation(fields: [payerId], references: [id])
   order          Order?         @relation(fields: [orderId], references: [id])
@@ -1093,8 +1143,17 @@ model Payout {
   requestedAt       DateTime            @default(now()) @map("requested_at") @db.Timestamptz(3)
   completedAt       DateTime?           @map("completed_at") @db.Timestamptz(3)
 
+  /// Client remboursé (bénéficiaire CUSTOMER).
+  userId        String?   @map("user_id") @db.Uuid
+  approvedById  String?   @map("approved_by_id") @db.Uuid
+  approvedAt    DateTime? @map("approved_at") @db.Timestamptz(3)
+  /// Dernière interrogation du prestataire (reversement au statut incertain).
+  lastCheckedAt DateTime? @map("last_checked_at") @db.Timestamptz(3)
+
   merchant       MerchantProfile? @relation(fields: [merchantId], references: [id])
   rider          RiderProfile?    @relation(fields: [riderId], references: [id])
+  user           User?            @relation("PayoutUser", fields: [userId], references: [id])
+  approvedBy     User?            @relation("PayoutApprover", fields: [approvedById], references: [id])
   journalEntries JournalEntry[]
 
   @@unique([provider, providerReference])

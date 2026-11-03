@@ -7,6 +7,7 @@ import { AppError } from '../common/errors/app-error.js';
 import { pageOf } from '../common/pagination.js';
 import { CAMEROON_TIME_ZONE } from '../common/time.js';
 import { ACTIVE_RIDER_STATUSES } from '../dispatch/dispatch.service.js';
+import { OrderFinanceService } from '../finance/order-finance.service.js';
 import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js';
 import type { Order, Prisma, RiderProfile } from '../generated/prisma/client.js';
 import type { OrderStatus, ProofKind } from '../generated/prisma/enums.js';
@@ -61,6 +62,7 @@ export class RiderOrdersService {
     private readonly addresses: AddressesService,
     private readonly media: MediaService,
     private readonly realtime: RealtimeService,
+    private readonly finance: OrderFinanceService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -231,6 +233,11 @@ export class RiderOrdersService {
     if (await this.replayed(orderId, body.clientEventId)) return this.get(userId, orderId);
     const { rider, order } = await this.load(userId, orderId);
     await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
+    // L'argent d'abord (E5) : le colis n'est remis qu'une fois tout encaissé.
+    const collection = await this.finance.collectionState(order);
+    if (!collection.complete) {
+      throw AppError.conflict('COLLECTION_REQUIRED', { amount: collection.due.total });
+    }
     if (body.deliveryCode === undefined) {
       if (order.status !== 'IN_DELIVERY') {
         throw AppError.conflict('ORDER_TRANSITION_INVALID', {

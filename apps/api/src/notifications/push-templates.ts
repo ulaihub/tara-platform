@@ -57,6 +57,20 @@ const TEMPLATES = {
     },
     en: { title: 'Job withdrawn', body: 'Job {reference} has been given to another rider.' },
   },
+  PAYOUT_SENT: {
+    fr: { title: 'Argent envoyé', body: '{amount} FCFA envoyés sur votre Mobile Money.' },
+    en: { title: 'Money sent', body: '{amount} XAF sent to your Mobile Money.' },
+  },
+  PAYOUT_FAILED: {
+    fr: {
+      title: 'Envoi impossible',
+      body: 'L’envoi de {amount} FCFA a échoué : le montant reste sur votre solde Tara.',
+    },
+    en: {
+      title: 'Payout failed',
+      body: 'Sending {amount} XAF failed: the amount stays on your Tara balance.',
+    },
+  },
   RIDER_FAILURE_DECISION: {
     fr: { title: 'Décision de l’expéditeur', body: '{reference} : {decision}.' },
     en: { title: 'Sender decision', body: '{reference}: {decision}.' },

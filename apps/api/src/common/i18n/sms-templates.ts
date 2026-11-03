@@ -49,6 +49,10 @@ const TEMPLATES = {
     fr: 'Tara OPS ALERTE : le livreur {rider} ({phone}) a declenche une alerte. Position : {map}',
     en: 'Tara OPS ALERT: rider {rider} ({phone}) triggered an alert. Location: {map}',
   },
+  PAYOUT_PHONE_CHANGED: {
+    fr: 'Tara : le numero de reversement de {shop} vient d etre change. Reversements suspendus {hours} h. Si ce n est pas vous, contactez vite le support.',
+    en: 'Tara: the payout number of {shop} was just changed. Payouts paused for {hours} h. If this was not you, contact support right away.',
+  },
   KYC_DOCUMENT_EXPIRING: {
     fr: 'Tara : votre piece "{document}" expire le {date}. Envoyez la nouvelle dans l app pour continuer a recevoir des courses.',
     en: 'Tara: your document "{document}" expires on {date}. Upload the new one in the app to keep receiving jobs.',

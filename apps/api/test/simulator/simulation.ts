@@ -69,7 +69,7 @@ export interface SimulationReport {
 }
 
 /** Générateur pseudo-aléatoire reproductible (mulberry32). */
-function random(seed: number): () => number {
+export function random(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
     state = (state + 0x6d2b79f5) >>> 0;

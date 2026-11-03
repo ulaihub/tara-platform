@@ -9,8 +9,11 @@ import { addMinutes, cameroonDate } from '../common/time.js';
 import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js';
 import type { DispatchOffer, Order, Prisma } from '../generated/prisma/client.js';
 import type { DispatchOfferOutcome } from '../generated/prisma/enums.js';
+import { riderCashHeld } from '../finance/ledger.accounts.js';
+import { LedgerService } from '../finance/ledger.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
 import { OrderTransitionsService } from '../orders/order-transitions.service.js';
+import { readyForDispatch } from '../orders/orders.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { QueueService } from '../redis/queue.service.js';
@@ -64,11 +67,6 @@ type RoundResult =
       offers: { offer: DispatchOffer; userId: string }[];
     };
 
-/** Une commande commandée, payée d'avance ou réglée à la livraison, peut partir. */
-function readyForDispatch(order: Pick<Order, 'feePayer' | 'feePaymentMethod'>): boolean {
-  return order.feePayer === 'RECIPIENT' || order.feePaymentMethod === 'CASH';
-}
-
 /**
  * Attribution automatique des courses (D1, D2, D4) et manuelle (D3).
  *
@@ -97,6 +95,7 @@ export class DispatchService implements OnModuleInit {
     private readonly queue: QueueService,
     private readonly bus: OrderEventsBus,
     private readonly transitions: OrderTransitionsService,
+    private readonly ledger: LedgerService,
     @Inject(ENV) private readonly env: Env,
   ) {
     this.radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
@@ -273,7 +272,7 @@ export class DispatchService implements OnModuleInit {
         offers: { where: { outcome: 'PENDING' }, select: { id: true } },
       },
     });
-    const cash = await this.cashHeld(tx, ids);
+    const cash = await this.cashHeld(ids);
     const distance = new Map(nearby.map((rider) => [rider.riderId, rider.distanceMeters]));
     const today = cameroonDate(new Date());
     return riders.map((rider) => {
@@ -292,21 +291,10 @@ export class DispatchService implements OnModuleInit {
     });
   }
 
-  /**
-   * Espèces détenues par chaque livreur (D4, G5). En attendant le grand livre de la
-   * phase 3, ce sont les encaissements en espèces enregistrés ; la phase 3 y retranchera
-   * les dépôts et lira le solde du compte « espèces détenues ».
-   */
-  private async cashHeld(
-    tx: Prisma.TransactionClient,
-    riderIds: string[],
-  ): Promise<Map<string, number>> {
-    const rows = await tx.codCollection.groupBy({
-      by: ['riderId'],
-      where: { riderId: { in: riderIds }, method: 'CASH' },
-      _sum: { collectedAmount: true },
-    });
-    return new Map(rows.map((row) => [row.riderId, row._sum.collectedAmount ?? 0]));
+  /** Espèces détenues par chaque livreur (D4, G5), lues dans le grand livre. */
+  private async cashHeld(riderIds: string[]): Promise<Map<string, number>> {
+    const balances = await this.ledger.balances(riderIds.map(riderCashHeld));
+    return new Map(riderIds.map((id) => [id, balances.get(riderCashHeld(id).code) ?? 0]));
   }
 
   private async schedule(

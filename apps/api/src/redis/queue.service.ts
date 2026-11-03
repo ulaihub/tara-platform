@@ -10,7 +10,7 @@ import { Redis } from 'ioredis';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 
-export type QueueName = 'dispatch' | 'notifications';
+export type QueueName = 'dispatch' | 'notifications' | 'payouts';
 
 type Processor = (job: Job) => Promise<void>;
 

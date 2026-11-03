@@ -144,6 +144,22 @@ tara-platform/
 22. **Notifications tracées et rejouables.** Chaque message est une ligne de `notifications`
     (statut, fournisseur, essais, repli). Les envois passent par une file (3 essais) ; un code de
     livraison n'y figure que chiffré, et seulement le temps d'un éventuel repli SMS.
+23. **Argent dans la transaction du statut.** Les écritures d'une commande sont passées par
+    `OrderTransitionHooks`, dans la transaction qui change son statut : statut et argent
+    changent ensemble ou pas du tout. Une livraison est refusée tant que l'encaissement dû n'est
+    pas fait, même forcée par le back-office.
+24. **Paiements Mobile Money derrière `PaymentProvider`.** Prestataire factice capable de simuler
+    les incidents (refus, notification perdue ou répétée, réponse perdue après un envoi) et
+    adaptateur CamPay. Une notification n'est crue qu'après vérification de sa signature, n'est
+    traitée qu'une fois, et son montant doit être celui demandé ; un paiement confirmé après son
+    abandon est tout de même enregistré.
+25. **Aucun reversement en double.** Une seule demande en cours par bénéficiaire (index unique),
+    montant retiré du portefeuille sous verrou à la demande, passage « en cours → envoyé »
+    conditionnel. Si la réponse du prestataire se perd, on lui redemande le statut par notre
+    référence ; on ne renvoie que s'il n'a jamais reçu la demande. Au-delà d'un seuil, la finance
+    valide avant l'envoi.
+26. **Rapprochement chaque nuit.** Grand livre, paiements, reversements, relevé du prestataire et
+    contre-remboursements comparés pour la veille ; écarts listés et alerte à la finance.
 
 ## Cycle de vie d'une commande
 
@@ -169,18 +185,39 @@ stateDiagram-v2
   CANCELLED --> [*]
 ```
 
-## Plan de comptes proposé (à valider en phase 3)
+## Plan de comptes
 
-| Code                             | Type    | Sens                                                     |
-| -------------------------------- | ------- | -------------------------------------------------------- |
-| `platform:mobile_money`          | Actif   | Argent détenu chez l'agrégateur Mobile Money             |
-| `rider:<id>:cash_held`           | Actif   | Espèces encaissées par le livreur et pas encore déposées |
-| `merchant:<id>:payable`          | Passif  | Encaissements dus au marchand                            |
-| `rider:<id>:payable`             | Passif  | Gains dus au livreur                                     |
-| `platform:revenue:commission`    | Produit | Commission de 20 % sur les livraisons                    |
-| `platform:revenue:cod_fees`      | Produit | Frais d'encaissement (2 %, minimum 250 FCFA)             |
-| `platform:expense:provider_fees` | Charge  | Frais Mobile Money                                       |
-| `platform:expense:promotions`    | Charge  | Remises financées par Tara                               |
+Montant positif = débit, négatif = crédit. Les soldes se calculent toujours à partir des lignes.
+
+| Code                             | Type    | Sens                                                                   |
+| -------------------------------- | ------- | ---------------------------------------------------------------------- |
+| `platform:mobile_money`          | Actif   | Argent détenu chez l'agrégateur Mobile Money                           |
+| `platform:office_cash`           | Actif   | Espèces déposées au bureau                                             |
+| `rider:<id>:cash_held`           | Actif   | Espèces encaissées par le livreur et pas encore déposées (dues à Tara) |
+| `platform:orders_prepaid`        | Passif  | Frais de livraison payés, course pas encore terminée                   |
+| `platform:payouts_in_transit`    | Passif  | Reversements demandés, pas encore confirmés                            |
+| `platform:unallocated`           | Passif  | Paiements reçus sans emploi, à rembourser ou affecter                  |
+| `merchant:<id>:payable`          | Passif  | Portefeuille du marchand (encaissements nets, avoirs)                  |
+| `rider:<id>:payable`             | Passif  | Gains dus au livreur                                                   |
+| `customer:<id>:wallet`           | Passif  | Solde Tara d'un client (recharges, avoirs)                             |
+| `platform:revenue:commission`    | Produit | Commission sur les livraisons                                          |
+| `platform:revenue:cod_fees`      | Produit | Frais d'encaissement (2 %, minimum 250 FCFA)                           |
+| `platform:expense:provider_fees` | Charge  | Frais Mobile Money                                                     |
+| `platform:expense:promotions`    | Charge  | Remises financées par Tara                                             |
+| `platform:expense:goodwill`      | Charge  | Avoirs commerciaux                                                     |
+
+### Écritures d'une commande
+
+| Moment                              | Écriture                                                                                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Prépaiement Mobile Money            | Mobile Money ↑ / livraisons payées ↑                                                                                                  |
+| Prépaiement par le solde            | Solde de l'expéditeur ↓ / livraisons payées ↑                                                                                         |
+| Frais en espèces à l'enlèvement     | Espèces du livreur ↑ / livraisons payées ↑                                                                                            |
+| Encaissement à la porte             | Espèces du livreur ou Mobile Money ↑ / livraisons payées ↑ (frais du destinataire), marchand ↑ (COD − frais), frais d'encaissement ↑  |
+| Livraison ou retour                 | Livraisons payées ↓ / gains du livreur ↑, commission ↑ (ou promotions ↓) ; puis le livreur garde sa part sur les espèces de la course |
+| Annulation après prépaiement        | Livraisons payées ↓ / solde de l'expéditeur ↑ (avoir)                                                                                 |
+| Retour non payé par le destinataire | Solde de l'expéditeur ↓ (au besoin négatif) / livraisons payées ↑                                                                     |
+| Reversement demandé, envoyé, échoué | Portefeuille ↓ / en cours ↑ ; puis en cours ↓ / Mobile Money ↓ ; ou en cours ↓ / portefeuille ↑                                       |
 
 ## Développement local
 
@@ -206,9 +243,9 @@ pnpm dev                              # API sur http://localhost:3000/health
 
 ## Questions ouvertes
 
-| Sujet                                          | Options                                                                                            | Quand trancher  |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------- |
-| Agrégateur Mobile Money                        | Comparer les devis de 3 agrégateurs camerounais (frais de collecte et de reversement, API, délais) | Avant phase 3   |
-| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                | Avant phase 3   |
-| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                     | Avant phase 7   |
-| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel  | Après le pilote |
+| Sujet                                          | Options                                                                                                                     | Quand trancher  |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Agrégateur Mobile Money                        | Adaptateur CamPay prêt (à valider sur son bac à sable) ; comparer les devis d'au moins 2 autres agrégateurs avant de signer | Avant le pilote |
+| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                                         | Avant le pilote |
+| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                                              | Avant phase 7   |
+| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel                           | Après le pilote |
