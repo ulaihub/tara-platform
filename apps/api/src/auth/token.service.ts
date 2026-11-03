@@ -1,0 +1,134 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { jwtVerify, SignJWT } from 'jose';
+import { ENV } from '../config/config.module.js';
+import type { Env } from '../config/env.js';
+import { AppError } from '../common/errors/app-error.js';
+import { randomToken, sha256 } from '../common/crypto.js';
+import { addDays } from '../common/time.js';
+import type { Prisma } from '../generated/prisma/client.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+
+const ISSUER = 'tara-api';
+const AUDIENCE = 'tara-apps';
+
+export interface SessionTokens {
+  accessToken: string;
+  refreshToken: string;
+  /** Durée de validité du jeton d'accès, en secondes. */
+  expiresIn: number;
+}
+
+/**
+ * Jetons de session : jeton d'accès JWT court (15 min par défaut) et jeton de
+ * rafraîchissement opaque (30 jours) à usage unique. Chaque rafraîchissement remplace le
+ * jeton ; réutiliser un jeton déjà remplacé révoque toutes les sessions du compte
+ * (signe d'un vol de jeton).
+ */
+@Injectable()
+export class TokenService {
+  private readonly key: Uint8Array;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(ENV) private readonly env: Env,
+  ) {
+    this.key = new TextEncoder().encode(env.JWT_SECRET);
+  }
+
+  async signAccess(userId: string): Promise<string> {
+    return new SignJWT({})
+      .setProtectedHeader({ alg: 'HS256' })
+      .setSubject(userId)
+      .setIssuer(ISSUER)
+      .setAudience(AUDIENCE)
+      .setIssuedAt()
+      .setExpirationTime(`${this.env.JWT_ACCESS_TTL_SECONDS}s`)
+      .sign(this.key);
+  }
+
+  /** Identifiant de l'utilisateur, ou exception si le jeton est invalide ou expiré. */
+  async verifyAccess(token: string): Promise<string> {
+    const { payload } = await jwtVerify(token, this.key, {
+      issuer: ISSUER,
+      audience: AUDIENCE,
+      algorithms: ['HS256'],
+    });
+    if (!payload.sub) throw new Error('Jeton sans sujet');
+    return payload.sub;
+  }
+
+  async issueSession(
+    userId: string,
+    deviceId: string | null,
+    tx?: Prisma.TransactionClient,
+  ): Promise<SessionTokens> {
+    const refreshToken = await this.createRefreshToken(userId, deviceId, tx ?? this.prisma);
+    return {
+      accessToken: await this.signAccess(userId),
+      refreshToken: refreshToken.token,
+      expiresIn: this.env.JWT_ACCESS_TTL_SECONDS,
+    };
+  }
+
+  async rotate(refreshToken: string): Promise<SessionTokens> {
+    const now = new Date();
+    const current = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash: sha256(refreshToken) },
+    });
+    if (!current || current.expiresAt <= now) throw AppError.unauthorized('REFRESH_TOKEN_INVALID');
+    if (current.revokedAt) {
+      await this.revokeAll(current.userId);
+      throw AppError.unauthorized('REFRESH_TOKEN_INVALID');
+    }
+
+    const next = await this.prisma.$transaction(async (tx) => {
+      const created = await this.createRefreshToken(current.userId, current.deviceId, tx);
+      const { count } = await tx.refreshToken.updateMany({
+        where: { id: current.id, revokedAt: null },
+        data: { revokedAt: now, replacedById: created.id },
+      });
+      return count === 1 ? created : null;
+    });
+    // Deux rafraîchissements simultanés avec le même jeton : on traite comme une réutilisation.
+    if (!next) {
+      await this.revokeAll(current.userId);
+      throw AppError.unauthorized('REFRESH_TOKEN_INVALID');
+    }
+    return {
+      accessToken: await this.signAccess(current.userId),
+      refreshToken: next.token,
+      expiresIn: this.env.JWT_ACCESS_TTL_SECONDS,
+    };
+  }
+
+  async revoke(refreshToken: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { tokenHash: sha256(refreshToken), revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  async revokeAll(userId: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  private async createRefreshToken(
+    userId: string,
+    deviceId: string | null,
+    client: Prisma.TransactionClient,
+  ): Promise<{ id: string; token: string }> {
+    const token = randomToken();
+    const created = await client.refreshToken.create({
+      data: {
+        userId,
+        deviceId,
+        tokenHash: sha256(token),
+        expiresAt: addDays(new Date(), this.env.REFRESH_TOKEN_TTL_DAYS),
+      },
+    });
+    return { id: created.id, token };
+  }
+}

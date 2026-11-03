@@ -5,3 +5,4 @@ pnpm-lock.yaml
 **/prisma/migrations
 infra/osrm/data
 docs/CAHIER_DES_CHARGES.md
+apps/api/openapi.json

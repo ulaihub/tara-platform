@@ -369,6 +369,15 @@ enum TicketPriority {
   @@map("ticket_priority")
 }
 
+enum MediaKind {
+  ADDRESS_PHOTO
+  VOICE_NOTE
+  KYC_DOCUMENT
+  PROOF_PHOTO
+
+  @@map("media_kind")
+}
+
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -383,17 +392,19 @@ enum TicketStatus {
 // -----------------------------------------------------------------------------
 
 model User {
-  id        String     @id @default(uuid(7)) @db.Uuid
+  id           String     @id @default(uuid(7)) @db.Uuid
   /// Numéro au format E.164, ex. +237690000000 (A1).
-  phone     String     @unique
-  fullName  String?    @map("full_name")
-  locale    Locale     @default(FR)
-  roles     UserRole[] @default([CUSTOMER])
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  phone        String     @unique
+  fullName     String?    @map("full_name")
+  locale       Locale     @default(FR)
+  roles        UserRole[] @default([CUSTOMER])
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
   /// Renseigné à l'anonymisation (droit à l'effacement, loi n° 2024/017).
-  deletedAt DateTime?  @map("deleted_at") @db.Timestamptz(3)
+  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz(3)
+  /// Code de parrainage personnel, ex. TARA-7K3P9Q (C6).
+  referralCode String?    @unique @map("referral_code")
 
   merchant             MerchantProfile?
   rider                RiderProfile?     @relation("RiderUser")
@@ -420,6 +431,7 @@ model User {
   ticketsOpened        Ticket[]          @relation("TicketOpenedBy")
   ticketsAssigned      Ticket[]          @relation("TicketAssignee")
   ticketMessages       TicketMessage[]
+  mediaFiles           MediaFile[]
 
   @@map("users")
 }
@@ -771,6 +783,8 @@ model OrderBatch {
   id              String   @id @default(uuid(7)) @db.Uuid
   senderId        String   @map("sender_id") @db.Uuid
   pickupAddressId String   @map("pickup_address_id") @db.Uuid
+  /// Clé envoyée par l'app : renvoyer la même requête ne crée pas un second lot.
+  idempotencyKey  String?  @unique @map("idempotency_key")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   sender        User    @relation(fields: [senderId], references: [id])
@@ -815,18 +829,25 @@ model Order {
   /// Montant à encaisser auprès du destinataire, 0 si aucun (C1, E5).
   codAmount        Int           @default(0) @map("cod_amount")
 
-  riderId          String?   @map("rider_id") @db.Uuid
+  riderId              String?   @map("rider_id") @db.Uuid
   /// Codes à 4 chiffres : seul le hachage est stocké (E3, E4).
-  pickupCodeHash   String    @map("pickup_code_hash")
-  deliveryCodeHash String    @map("delivery_code_hash")
-  attemptCount     Int       @default(0) @map("attempt_count")
-  cancelReason     String?   @map("cancel_reason")
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  assignedAt       DateTime? @map("assigned_at") @db.Timestamptz(3)
-  pickedUpAt       DateTime? @map("picked_up_at") @db.Timestamptz(3)
-  deliveredAt      DateTime? @map("delivered_at") @db.Timestamptz(3)
-  cancelledAt      DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  pickupCodeHash       String    @map("pickup_code_hash")
+  /// Généré à l'enlèvement et envoyé au destinataire à ce moment-là.
+  deliveryCodeHash     String?   @map("delivery_code_hash")
+  /// Clé envoyée par l'app : renvoyer la même requête ne crée pas une seconde commande.
+  idempotencyKey       String?   @unique @map("idempotency_key")
+  /// Réponse du destinataire au message de confirmation (C5).
+  recipientConfirmedAt DateTime? @map("recipient_confirmed_at") @db.Timestamptz(3)
+  recipientAvailable   Boolean?  @map("recipient_available")
+  recipientNote        String?   @map("recipient_note")
+  attemptCount         Int       @default(0) @map("attempt_count")
+  cancelReason         String?   @map("cancel_reason")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  assignedAt           DateTime? @map("assigned_at") @db.Timestamptz(3)
+  pickedUpAt           DateTime? @map("picked_up_at") @db.Timestamptz(3)
+  deliveredAt          DateTime? @map("delivered_at") @db.Timestamptz(3)
+  cancelledAt          DateTime? @map("cancelled_at") @db.Timestamptz(3)
 
   sender          User             @relation(fields: [senderId], references: [id])
   merchant        MerchantProfile? @relation(fields: [merchantId], references: [id])
@@ -1173,6 +1194,24 @@ model TicketMessage {
 
   @@index([ticketId, createdAt])
   @@map("ticket_messages")
+}
+
+/// Fichier déposé par un utilisateur. Rattaché à son propriétaire : on ne peut
+/// référencer que ses propres fichiers. Les pièces KYC sont chiffrées (AES-256-GCM).
+model MediaFile {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  ownerId    String    @map("owner_id") @db.Uuid
+  kind       MediaKind
+  storageKey String    @unique @map("storage_key")
+  mimeType   String    @map("mime_type")
+  sizeBytes  Int       @map("size_bytes")
+  encrypted  Boolean   @default(false)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  owner User @relation(fields: [ownerId], references: [id])
+
+  @@index([ownerId, kind])
+  @@map("media_files")
 }
 
 /// Journal d'audit des actions sensibles (H8). Non modifiable (trigger).

@@ -1,0 +1,157 @@
+import { basePriceFor, computePrice, discountFor, type GridRules } from './pricing.engine.js';
+
+/** Grille de Douala du business plan. */
+const DOUALA: GridRules = {
+  riderShareBps: 8000,
+  perKmBeyondLastTier: 150,
+  tiers: [
+    { upToMeters: 10_000, price: 1500 },
+    { upToMeters: 5_000, price: 1000 },
+    { upToMeters: 15_000, price: 2000 },
+  ],
+  surcharges: [
+    { code: 'EXPRESS', amount: 500, percentBps: null, active: true },
+    { code: 'HEAVY_PARCEL', amount: 1000, percentBps: null, active: true },
+    { code: 'NIGHT', amount: 500, percentBps: null, active: true },
+    { code: 'WEATHER', amount: 300, percentBps: null, active: false },
+    { code: 'FAILED_ATTEMPT', amount: null, percentBps: 5000, active: true },
+    { code: 'RETURN', amount: null, percentBps: 5000, active: true },
+  ],
+};
+
+/** 10 h à Douala (UTC+1). */
+const DAY = new Date('2026-11-02T09:00:00Z');
+
+describe('prix de base par paliers', () => {
+  it.each([
+    [0, 1000],
+    [5_000, 1000],
+    [5_001, 1500],
+    [10_000, 1500],
+    [14_999, 2000],
+    [15_000, 2000],
+    [15_001, 2150],
+    [16_000, 2150],
+    [16_001, 2300],
+    [22_500, 3200],
+  ])('%i m → %i FCFA', (meters, price) => {
+    expect(basePriceFor(DOUALA, meters)).toBe(price);
+  });
+
+  it('refuse une grille sans palier', () => {
+    expect(() => basePriceFor({ tiers: [], perKmBeyondLastTier: 100 }, 1000)).toThrow();
+  });
+});
+
+describe('prix complet', () => {
+  it('livraison simple de 7 km : 1 500 FCFA, 1 200 pour le livreur, 300 pour Tara', () => {
+    expect(
+      computePrice(DOUALA, { distanceMeters: 7_000, packageSize: 'M', isExpress: false, at: DAY }),
+    ).toEqual({
+      basePrice: 1500,
+      surcharges: [],
+      surchargesTotal: 0,
+      subtotal: 1500,
+      discountTotal: 0,
+      totalPrice: 1500,
+      riderEarning: 1200,
+      platformFee: 300,
+    });
+  });
+
+  it('cumule express et colis XL', () => {
+    const price = computePrice(DOUALA, {
+      distanceMeters: 3_000,
+      packageSize: 'XL',
+      isExpress: true,
+      at: DAY,
+    });
+    expect(price.surcharges).toEqual([
+      { code: 'EXPRESS', amount: 500 },
+      { code: 'HEAVY_PARCEL', amount: 1000 },
+    ]);
+    expect(price).toMatchObject({ subtotal: 2500, riderEarning: 2000, platformFee: 500 });
+  });
+
+  it.each([
+    ['2026-11-02T18:59:00Z', false], // 19 h 59 à Douala
+    ['2026-11-02T19:00:00Z', true], // 20 h 00
+    ['2026-11-03T04:59:00Z', true], // 5 h 59
+    ['2026-11-03T05:00:00Z', false], // 6 h 00
+  ])('supplément de nuit à %s (UTC) : %s', (iso, night) => {
+    const price = computePrice(DOUALA, {
+      distanceMeters: 1_000,
+      packageSize: 'S',
+      isExpress: false,
+      at: new Date(iso),
+    });
+    expect(price.surcharges.some((s) => s.code === 'NIGHT')).toBe(night);
+  });
+
+  it('applique le supplément météo seulement quand l’équipe l’active', () => {
+    const rainy: GridRules = {
+      ...DOUALA,
+      surcharges: DOUALA.surcharges.map((s) => (s.code === 'WEATHER' ? { ...s, active: true } : s)),
+    };
+    const price = computePrice(rainy, {
+      distanceMeters: 1_000,
+      packageSize: 'S',
+      isExpress: false,
+      at: DAY,
+    });
+    expect(price.surcharges).toEqual([{ code: 'WEATHER', amount: 300 }]);
+  });
+
+  it('n’applique jamais au devis les frais d’échec et de retour', () => {
+    const price = computePrice(DOUALA, {
+      distanceMeters: 1_000,
+      packageSize: 'S',
+      isExpress: false,
+      at: DAY,
+    });
+    expect(price.surcharges).toEqual([]);
+  });
+
+  it('calcule un supplément en pourcentage du prix de base', () => {
+    const grid: GridRules = {
+      ...DOUALA,
+      surcharges: [{ code: 'EXPRESS', amount: null, percentBps: 2500, active: true }],
+    };
+    const price = computePrice(grid, {
+      distanceMeters: 7_000,
+      packageSize: 'S',
+      isExpress: true,
+      at: DAY,
+    });
+    expect(price.surcharges).toEqual([{ code: 'EXPRESS', amount: 375 }]);
+  });
+
+  it('fait financer la promotion par Tara : la part du livreur ne baisse pas', () => {
+    const price = computePrice(DOUALA, {
+      distanceMeters: 7_000,
+      packageSize: 'M',
+      isExpress: false,
+      at: DAY,
+      promo: { kind: 'FIXED_PRICE', value: 500 },
+    });
+    expect(price).toMatchObject({
+      discountTotal: 1000,
+      totalPrice: 500,
+      riderEarning: 1200,
+      platformFee: -700,
+    });
+  });
+});
+
+describe('remises', () => {
+  it.each([
+    ['FIXED_AMOUNT', 300, 1500, 300],
+    ['FIXED_AMOUNT', 3000, 1500, 1500],
+    ['PERCENT', 2000, 1500, 300],
+    ['PERCENT', 15_000, 1500, 1500],
+    ['FIXED_PRICE', 500, 1500, 1000],
+    ['FIXED_PRICE', 2000, 1500, 0],
+  ] as const)('%s %i sur %i FCFA → %i FCFA de remise', (kind, value, subtotal, discount) => {
+    expect(discountFor({ kind, value }, subtotal)).toBe(discount);
+  });
+});
