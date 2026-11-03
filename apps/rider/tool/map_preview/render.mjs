@@ -56,8 +56,12 @@ for (const theme of ['dark', 'light']) {
       { style, view },
     );
     await page.screenshot({ path: `${out}/${theme}-${view.name}.png` });
+    // Copie JPEG légère dans le journal : relecture possible sans télécharger l'artefact.
+    const jpeg = await page.screenshot({ type: 'jpeg', quality: 70, scale: 'css' });
+    console.log(`PREVIEW-BEGIN ${theme}-${view.name}.jpg`);
+    for (const line of jpeg.toString('base64').match(/.{1,4000}/g)) console.log(line);
+    console.log('PREVIEW-END');
     await page.close();
-    console.log(`${theme}-${view.name}.png`);
   }
 }
 await browser.close();
