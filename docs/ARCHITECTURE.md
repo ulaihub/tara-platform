@@ -17,6 +17,7 @@ flowchart TB
     pg[(PostgreSQL 16 + PostGIS)]
     redis[(Redis 7)]
     osrm[OSRM · carte OSM du Cameroun]
+    tiles[Tuiles vectorielles<br/>OSM du Cameroun]
     s3[(Stockage objet<br/>photos, pièces KYC chiffrées)]
   end
   subgraph Prestataires
@@ -27,6 +28,7 @@ flowchart TB
   end
   client & rider & tracking & backoffice <--> api
   api <--> pg & redis & osrm & s3
+  rider & client & tracking --> tiles
   api <--> momo & sms & wa & fcm
 ```
 
@@ -54,16 +56,18 @@ tara-platform/
 
 ## Versions retenues
 
-| Outil                | Version  | Remarque                                                                                                                |
-| -------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Node.js              | 22 LTS   | `.nvmrc`                                                                                                                |
-| pnpm                 | 10.28    | Workspaces ; Turborepo 2.11 orchestre les tâches                                                                        |
-| TypeScript           | 6.0      | La 7.0 (compilateur natif) n'est pas encore prise en charge par tout l'outillage ; 6.0 est celle que NestJS 12 installe |
-| NestJS               | 12       | Modules ES, Vitest et oxlint par défaut                                                                                 |
-| Prisma               | 7.10     | Client généré dans `src/generated`, connexion via `@prisma/adapter-pg`, configuration dans `prisma.config.ts`           |
-| PostgreSQL / PostGIS | 16 / 3.4 | Image `postgis/postgis:16-3.4`                                                                                          |
-| Redis                | 7        | Positions des livreurs (GEO), files BullMQ, Socket.IO entre instances, limitation de débit                              |
-| OSRM                 | 6.0.0    | Image `ghcr.io/project-osrm/osrm-backend`                                                                               |
+| Outil                | Version              | Remarque                                                                                                                |
+| -------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Node.js              | 22 LTS               | `.nvmrc`                                                                                                                |
+| pnpm                 | 10.28                | Workspaces ; Turborepo 2.11 orchestre les tâches                                                                        |
+| TypeScript           | 6.0                  | La 7.0 (compilateur natif) n'est pas encore prise en charge par tout l'outillage ; 6.0 est celle que NestJS 12 installe |
+| NestJS               | 12                   | Modules ES, Vitest et oxlint par défaut                                                                                 |
+| Prisma               | 7.10                 | Client généré dans `src/generated`, connexion via `@prisma/adapter-pg`, configuration dans `prisma.config.ts`           |
+| PostgreSQL / PostGIS | 16 / 3.4             | Image `postgis/postgis:16-3.4`                                                                                          |
+| Redis                | 7                    | Positions des livreurs (GEO), files BullMQ, Socket.IO entre instances, limitation de débit                              |
+| OSRM                 | 6.0.0                | Image `ghcr.io/project-osrm/osrm-backend`                                                                               |
+| Flutter / Dart       | 3.47 / 3.13          | App livreur `apps/rider` ; version épinglée en CI (les captures de référence en dépendent)                              |
+| MapLibre             | Native (via Flutter) | Rendu des tuiles vectorielles, styles Tara sombre et clair, régions hors connexion                                      |
 
 ## Décisions de conception
 
@@ -160,6 +164,18 @@ tara-platform/
     valide avant l'envoi.
 26. **Rapprochement chaque nuit.** Grand livre, paiements, reversements, relevé du prestataire et
     contre-remboursements comparés pour la veille ; écarts listés et alerte à la finance.
+27. **Cartographie maîtrisée.** Comme les grands acteurs du transport, Tara a sa propre pile
+    cartographique, assemblée à partir de briques ouvertes plutôt que louée : extrait
+    OpenStreetMap du Cameroun (Geofabrik), tuiles vectorielles générées chaque mois (Planetiler,
+    fichier PMTiles servi par Martin derrière le CDN), rendu MapLibre avec nos styles sombre et
+    clair, OSRM pour les distances et les itinéraires. Ni clé ni facturation à l'usage ; les
+    zones de travail du livreur restent lisibles hors connexion. Seule la navigation pas à pas
+    part vers Google Maps ou Waze, par un simple lien.
+28. **App livreur : un socle visuel unique.** Couleurs des deux thèmes dans une
+    `ThemeExtension`, polices embarquées, un seul `Ticker` par écran pour le décor, mode effets
+    réduits (sans flou, formes figées) sur les téléphones de 3 Go de RAM ou moins, arrêt des
+    animations décoratives si le téléphone le demande. Chaque écran a ses captures de référence
+    (deux thèmes, 390 × 844 et 360 × 640, texte à 100 % et 130 %) vérifiées en CI.
 
 ## Cycle de vie d'une commande
 

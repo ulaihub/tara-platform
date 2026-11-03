@@ -6,3 +6,5 @@ pnpm-lock.yaml
 infra/osrm/data
 docs/CAHIER_DES_CHARGES.md
 apps/api/openapi.json
+docs/design
+apps/rider

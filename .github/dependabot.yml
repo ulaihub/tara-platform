@@ -22,3 +22,10 @@ updates:
     schedule:
       interval: weekly
       day: monday
+
+  - package-ecosystem: pub
+    directory: /apps/rider
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
