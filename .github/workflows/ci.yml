@@ -112,12 +112,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Java 17 pour le plugin Android Gradle 9. Dépendances Gradle en cache : la
-      # construction ne dépend plus de la disponibilité de Maven Central à chaque fois.
+      # Java 21 : exigé par le module MapLibre, pris en charge par le plugin Android
+      # Gradle 9. Dépendances Gradle en cache : la construction ne dépend plus de la
+      # disponibilité de Maven Central à chaque fois.
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
           cache: gradle
           cache-dependency-path: |
             apps/rider/android/*.gradle*
