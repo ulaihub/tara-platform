@@ -137,7 +137,6 @@
   "offerTaken": "Job given to another rider",
   "offerExpired": "Time is up: the job goes to another rider",
   "vehicleShort": "Motorbike",
-  "courseRef": "Job {reference}",
   "toPickup": "To pickup",
   "toPickupMinutes": "To pickup · {minutes} min",
   "directions": "Directions",
@@ -159,5 +158,6 @@
   "courseInProgress": "Job {reference} in progress",
   "courseResume": "Resume",
   "parcelOnBoard": "Parcel on board",
-  "parcelOnBoardBody": "Reference {reference}. Heading to the recipient: the delivery screen comes in the next batch."
+  "parcelOnBoardBody": "Reference {reference}. Heading to the recipient: the delivery screen comes in the next batch.",
+  "courseRefRecorded": "Job {reference} · route recorded"
 }

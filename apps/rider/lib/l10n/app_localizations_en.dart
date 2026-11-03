@@ -472,11 +472,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vehicleShort => 'Motorbike';
 
   @override
-  String courseRef(String reference) {
-    return 'Job $reference';
-  }
-
-  @override
   String get toPickup => 'To pickup';
 
   @override
@@ -548,5 +543,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String parcelOnBoardBody(String reference) {
     return 'Reference $reference. Heading to the recipient: the delivery screen comes in the next batch.';
+  }
+
+  @override
+  String courseRefRecorded(String reference) {
+    return 'Job $reference · route recorded';
   }
 }

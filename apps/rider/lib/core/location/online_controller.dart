@@ -16,6 +16,8 @@ class OnlineController extends ChangeNotifier {
     required this.positions,
     required this.setPresence,
     required this.sendPosition,
+    this.onUnsent,
+    this.onSent,
     this.interval = const Duration(seconds: 10),
     this.notificationTitle = 'Tara Livreur',
     this.notificationText = 'En ligne : votre position est partagée',
@@ -24,6 +26,12 @@ class OnlineController extends ChangeNotifier {
   final PositionSource positions;
   final Future<Presence> Function({required bool online, required GeoPoint position}) setPresence;
   final SendPosition sendPosition;
+
+  /// Position non envoyée (sans réseau) : gardée pour le trajet de la course en cours.
+  final void Function(GeoPoint position)? onUnsent;
+
+  /// Position envoyée : le réseau est là, les positions gardées peuvent partir.
+  final VoidCallback? onSent;
   final Duration interval;
   final String notificationTitle;
   final String notificationText;
@@ -86,8 +94,11 @@ class OnlineController extends ChangeNotifier {
     _lastSent = now;
     try {
       await sendPosition(position);
+      onSent?.call();
     } on ApiException {
-      // Sans réseau, la position suivante partira ; le serveur garde la plus récente.
+      // Sans réseau : la position suivante partira ; pendant une course, celle-ci est
+      // gardée pour le trajet et envoyée au retour du réseau.
+      onUnsent?.call(position);
     }
   }
 

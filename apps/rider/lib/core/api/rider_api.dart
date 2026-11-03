@@ -102,6 +102,10 @@ class RiderApi {
 
   Future<RiderOrder> riderOrder(String id) async => RiderOrder.fromJson(await order(id));
 
+  /// Positions de la course prises sans réseau, envoyées en lot.
+  Future<void> uploadTrack(String orderId, List<Json> points) =>
+      _api.post('/rider/orders/$orderId/track', body: {'points': points});
+
   /// Itinéraire de la position du livreur à la prochaine étape de la course.
   Future<RiderRoute> route(String orderId, GeoPoint from) async => RiderRoute.fromJson(
     await _api.get(

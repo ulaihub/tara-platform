@@ -286,6 +286,7 @@ class GeoPoint {
     this.heading,
     this.speed,
     this.accuracy,
+    this.mocked = false,
   });
 
   final double latitude;
@@ -295,6 +296,9 @@ class GeoPoint {
   final double? speed;
   final double? accuracy;
 
+  /// Position simulée par une application (signalée par Android) : le support est alerté.
+  final bool mocked;
+
   Json toJson() => {
     'latitude': latitude,
     'longitude': longitude,
@@ -302,6 +306,17 @@ class GeoPoint {
     if (speed != null) 'speed': speed,
     if (accuracy != null) 'accuracy': accuracy,
     'recordedAt': isoUtc(recordedAt),
+    if (mocked) 'mocked': true,
+  };
+
+  /// Point de trajet gardé sur le téléphone sans réseau (POST /rider/orders/{id}/track).
+  Json toTrackJson() => {
+    'latitude': latitude,
+    'longitude': longitude,
+    'recordedAt': isoUtc(recordedAt),
+    if (accuracy != null) 'accuracy': accuracy,
+    if (speed != null) 'speed': speed,
+    if (mocked) 'mocked': true,
   };
 }
 

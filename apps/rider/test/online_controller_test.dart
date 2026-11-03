@@ -61,6 +61,33 @@ void main() {
     expect(presence, [true, false]);
   });
 
+  test('position non envoyée (sans réseau) : remise au trajet ; envoyée : signal du réseau', () async {
+    final positions = FakePositions();
+    addTearDown(positions.stream.close);
+    final unsent = <GeoPoint>[];
+    var sentSignals = 0;
+    var networkUp = false;
+    final controller = OnlineController(
+      positions: positions,
+      interval: Duration.zero,
+      setPresence: ({required online, required position}) async => Presence(online: online, blockers: const []),
+      sendPosition: (p) async {
+        if (!networkUp) throw const ApiException(code: ApiException.network, message: 'hors ligne');
+      },
+      onUnsent: unsent.add,
+      onSent: () => sentSignals++,
+    );
+    await controller.goOnline();
+    positions.stream.add(point(10));
+    await Future<void>.delayed(Duration.zero);
+    expect(unsent.map((p) => p.recordedAt.second), [10]);
+    networkUp = true;
+    positions.stream.add(point(20));
+    await Future<void>.delayed(Duration.zero);
+    expect(sentSignals, 1);
+    expect(unsent, hasLength(1));
+  });
+
   test('pièces expirées : le serveur refuse, la liste est rendue à l’écran', () async {
     final controller = OnlineController(
       positions: FakePositions(),

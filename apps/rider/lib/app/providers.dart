@@ -12,6 +12,7 @@ import '../core/api/models.dart';
 import '../core/api/rider_api.dart';
 import '../core/course/active_order.dart';
 import '../core/course/course_actions.dart';
+import '../core/course/track_buffer.dart';
 import '../core/env.dart';
 import '../core/location/location_tracker.dart';
 import '../core/location/online_controller.dart';
@@ -91,6 +92,15 @@ final activeOrderProvider = Provider<ActiveOrderController>((ref) {
   return controller;
 });
 
+/// Positions de la course prises sans réseau (trajet enregistré).
+final trackBufferProvider = Provider<TrackBuffer>(
+  (ref) => TrackBuffer(
+    store: ref.watch(keyValueStoreProvider),
+    upload: ref.watch(riderApiProvider).uploadTrack,
+    activeOrderId: () => ref.read(activeOrderProvider).order?.id,
+  ),
+);
+
 /// Actions de course (enlèvement, livraison…) passées par la file hors connexion.
 final courseActionsProvider = Provider<CourseActions>(
   (ref) => CourseActions(queue: ref.watch(actionQueueProvider), activeOrder: ref.watch(activeOrderProvider)),
@@ -124,8 +134,9 @@ class AuthController extends AsyncNotifier<AuthStatus> {
     try {
       await ref.read(authApiProvider).logout();
     } finally {
-      // Adresses et contacts de la course : rien ne reste sur le téléphone.
+      // Adresses, contacts et trajet de la course : rien ne reste sur le téléphone.
       await ref.read(activeOrderProvider).clear();
+      await ref.read(trackBufferProvider).clear();
       state = const AsyncData(AuthStatus.signedOut);
     }
   }
@@ -195,12 +206,16 @@ final realtimeProvider = Provider<RealtimeClient>((ref) {
 final onlineControllerProvider = Provider<OnlineController>((ref) {
   final rider = ref.watch(riderApiProvider);
   final realtime = ref.watch(realtimeProvider);
+  final track = ref.watch(trackBufferProvider);
   final controller = OnlineController(
     positions: ref.watch(positionSourceProvider),
     setPresence: rider.setPresence,
     sendPosition: (position) async {
       if (!realtime.sendLocation(position)) await rider.sendLocation(position);
     },
+    // Trajet de la course : positions sans réseau gardées, envoyées au retour du réseau.
+    onUnsent: (position) => unawaited(track.add(position)),
+    onSent: () => unawaited(track.flush()),
   );
   ref.onDispose(controller.dispose);
   return controller;
@@ -227,8 +242,12 @@ final riderRuntimeProvider = Provider<void>((ref) {
   final activeOrder = ref.watch(activeOrderProvider);
   unawaited(push.start().catchError((Object _) {}));
   unawaited(activeOrder.restore());
+  final track = ref.watch(trackBufferProvider);
+  unawaited(track.flush());
   final connectivity = Connectivity().onConnectivityChanged.listen((results) {
-    if (!results.contains(ConnectivityResult.none)) unawaited(queue.flush());
+    if (results.contains(ConnectivityResult.none)) return;
+    unawaited(queue.flush());
+    unawaited(track.flush());
   });
   // Reconnexion du temps réel : souvent le signe que le réseau est revenu.
   void onRealtime() {
@@ -240,6 +259,7 @@ final riderRuntimeProvider = Provider<void>((ref) {
   final lifecycle = AppLifecycleListener(
     onResume: () {
       unawaited(queue.flush());
+      unawaited(track.flush());
       unawaited(activeOrder.refresh());
       unawaited(ref.read(riderConfigProvider.notifier).refresh());
     },

@@ -268,7 +268,6 @@
       }
     }
   },
-  "courseRef": "Course {reference}",
   "toPickup": "Vers l’enlèvement",
   "toPickupMinutes": "Vers l’enlèvement · {minutes} min",
   "directions": "Itinéraire",
@@ -291,13 +290,6 @@
   "courseResume": "Reprendre",
   "parcelOnBoard": "Colis à bord",
   "parcelOnBoardBody": "Référence {reference}. Direction le destinataire : l’écran de livraison arrive au prochain lot.",
-  "@courseRef": {
-    "placeholders": {
-      "reference": {
-        "type": "String"
-      }
-    }
-  },
   "@toPickupMinutes": {
     "placeholders": {
       "minutes": {
@@ -320,6 +312,15 @@
     }
   },
   "@parcelOnBoardBody": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "courseRefRecorded": "Course {reference} · trajet enregistré",
+  "@courseRefRecorded": {
+    "description": "En-tête des écrans de course : le livreur sait que son trajet est enregistré pendant la course.",
     "placeholders": {
       "reference": {
         "type": "String"

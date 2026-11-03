@@ -914,12 +914,6 @@ abstract class AppLocalizations {
   /// **'Moto'**
   String get vehicleShort;
 
-  /// No description provided for @courseRef.
-  ///
-  /// In fr, this message translates to:
-  /// **'Course {reference}'**
-  String courseRef(String reference);
-
   /// No description provided for @toPickup.
   ///
   /// In fr, this message translates to:
@@ -1051,6 +1045,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Référence {reference}. Direction le destinataire : l’écran de livraison arrive au prochain lot.'**
   String parcelOnBoardBody(String reference);
+
+  /// En-tête des écrans de course : le livreur sait que son trajet est enregistré pendant la course.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course {reference} · trajet enregistré'**
+  String courseRefRecorded(String reference);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

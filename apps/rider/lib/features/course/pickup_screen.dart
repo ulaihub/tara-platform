@@ -266,7 +266,7 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
             right: 16,
             top: insets.top + 8,
             child: CourseHeader(
-              reference: l.courseRef(order.reference),
+              reference: l.courseRefRecorded(order.reference),
               title: minutes == null ? l.toPickup : l.toPickupMinutes(minutes),
               onBack: widget.onBack,
               onSos: widget.onSos,

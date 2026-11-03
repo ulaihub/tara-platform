@@ -78,5 +78,6 @@ class DevicePositionSource implements PositionSource {
     heading: position.heading >= 0 ? position.heading : null,
     speed: position.speed >= 0 ? position.speed : null,
     accuracy: position.accuracy,
+    mocked: position.isMocked,
   );
 }
