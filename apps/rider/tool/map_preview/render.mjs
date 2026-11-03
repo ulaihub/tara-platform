@@ -15,7 +15,25 @@ const views = [
   { name: 'zone-bord-z16_5', center: [9.6985, 4.0455], zoom: 16.5 },
   { name: 'bonapriso-z15', center: [9.6935, 4.0335], zoom: 15 },
   { name: 'douala-z12_5', center: [9.715, 4.05], zoom: 12.5 },
+  // Écran 08 : livreur, vendeur et itinéraire de repli (ligne droite estimée, sans OSRM).
+  { name: 'course-z15_8', center: [9.6987, 4.0477], zoom: 15.8, course: true },
 ];
+const rider = [9.7012, 4.0442];
+const pickup = [9.6962, 4.0512];
+const demoCourse = {
+  rider: { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: rider } }] },
+  stop: {
+    type: 'FeatureCollection',
+    features: [{ type: 'Feature', properties: { kind: 'pickup' }, geometry: { type: 'Point', coordinates: pickup } }],
+  },
+  route: {
+    type: 'FeatureCollection',
+    features: [
+      { type: 'Feature', properties: { estimate: true }, geometry: { type: 'LineString', coordinates: [rider, pickup] } },
+    ],
+  },
+};
+const empty = { type: 'FeatureCollection', features: [] };
 const demoZone = {
   type: 'FeatureCollection',
   features: [
@@ -39,6 +57,9 @@ for (const theme of ['dark', 'light']) {
   );
   style.sources['tara-zones'].data = demoZone;
   for (const view of views) {
+    style.sources['tara-rider'].data = view.course ? demoCourse.rider : empty;
+    style.sources['tara-stop'].data = view.course ? demoCourse.stop : empty;
+    style.sources['tara-route'].data = view.course ? demoCourse.route : empty;
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
     await page.setContent(`<!doctype html><html><head>
       <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
