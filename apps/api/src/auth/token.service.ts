@@ -139,10 +139,24 @@ export class TokenService {
     };
   }
 
+  /**
+   * Déconnexion d'un appareil : la session est révoquée et l'appareil ne reçoit plus les
+   * notifications de ce compte (propositions, adresses, montants).
+   */
   async revoke(refreshToken: string): Promise<void> {
-    await this.prisma.refreshToken.updateMany({
-      where: { tokenHash: sha256(refreshToken), revokedAt: null },
-      data: { revokedAt: new Date() },
+    const tokenHash = sha256(refreshToken);
+    const token = await this.prisma.refreshToken.findUnique({ where: { tokenHash } });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.refreshToken.updateMany({
+        where: { tokenHash, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      if (token?.deviceId) {
+        await tx.device.updateMany({
+          where: { id: token.deviceId, userId: token.userId },
+          data: { pushToken: null },
+        });
+      }
     });
   }
 

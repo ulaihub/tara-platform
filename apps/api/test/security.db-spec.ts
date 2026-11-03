@@ -347,4 +347,26 @@ describe('Sécurité', () => {
       expect(file.headers['content-disposition']).toMatch(/^attachment;/);
     });
   });
+
+  it('déconnexion : l’appareil ne reçoit plus les notifications du compte', async () => {
+    const user = await signIn(ctx);
+    const pushToken = `push-${randomUUID()}-${randomUUID()}`;
+    await request(ctx.http)
+      .put(`/v1/me/devices/${user.installationId}/push-token`)
+      .set(user.auth)
+      .send({ pushToken })
+      .expect(204);
+    await request(ctx.http)
+      .post('/v1/auth/logout')
+      .send({ refreshToken: user.refreshToken })
+      .expect(204);
+    const device = await ctx.prisma.device.findFirstOrThrow({
+      where: { userId: user.userId, installationId: user.installationId },
+    });
+    expect(device.pushToken).toBeNull();
+    await request(ctx.http)
+      .post('/v1/auth/refresh')
+      .send({ refreshToken: user.refreshToken })
+      .expect(401);
+  });
 });
