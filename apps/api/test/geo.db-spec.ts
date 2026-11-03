@@ -238,4 +238,44 @@ describe('Adresses, zones et lien de localisation (B1 à B6)', () => {
     expect(res.body.error.code).toBe('LOCATION_LINK_EXPIRED');
     await request(ctx.http).get('/v1/public/location-links/inconnu-inconnu-inconnu').expect(404);
   });
+
+  it('donne à l’app les contours des zones interdites aux motos, en GeoJSON (B6)', async () => {
+    const suffix = randomUUID().slice(0, 8);
+    const created = await request(ctx.http)
+      .post('/v1/admin/zones')
+      .set(admin.auth)
+      .send({
+        name: `Interdite ${suffix}`,
+        city: 'Douala',
+        kind: 'NO_MOTORBIKE',
+        geometry: square(PLACES.akwa, 0.003),
+      })
+      .expect(201);
+    const rider = await signIn(ctx);
+    const map = await request(ctx.http)
+      .get('/v1/map/zones?city=Douala')
+      .set(rider.auth)
+      .expect(200);
+    expect(map.body.type).toBe('FeatureCollection');
+    const feature = map.body.features.find(
+      (item: { properties: { id: string } }) => item.properties.id === created.body.id,
+    );
+    expect(feature.properties).toMatchObject({ kind: 'NO_MOTORBIKE', name: `Interdite ${suffix}` });
+    expect(['Polygon', 'MultiPolygon']).toContain(feature.geometry.type);
+    // Quartiers exclus : seules la zone de service et les zones interdites sont dessinées.
+    expect(
+      map.body.features.every((item: { properties: { kind: string } }) =>
+        ['SERVICE_AREA', 'NO_MOTORBIKE'].includes(item.properties.kind),
+      ),
+    ).toBe(true);
+    const before = map.body.version;
+    await request(ctx.http)
+      .patch(`/v1/admin/zones/${created.body.id}`)
+      .set(admin.auth)
+      .send({ active: false })
+      .expect(200);
+    const after = await request(ctx.http).get('/v1/map/zones').set(rider.auth).expect(200);
+    expect(after.body.version).not.toBe(before);
+    await request(ctx.http).get('/v1/map/zones').expect(401);
+  });
 });

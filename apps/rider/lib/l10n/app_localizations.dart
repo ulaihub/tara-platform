@@ -805,6 +805,114 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Appeler le support'**
   String get callSupport;
+
+  /// No description provided for @noMotoZone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Interdit aux motos'**
+  String get noMotoZone;
+
+  /// No description provided for @searchingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche de courses…'**
+  String get searchingTitle;
+
+  /// No description provided for @todayPill.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd’hui {amount}'**
+  String todayPill(String amount);
+
+  /// No description provided for @newJob.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle course'**
+  String get newJob;
+
+  /// No description provided for @yourEarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre gain'**
+  String get yourEarning;
+
+  /// No description provided for @pickupLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'ENLÈVEMENT · {distance}'**
+  String pickupLabel(String distance);
+
+  /// No description provided for @dropoffLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'LIVRAISON · {distance} · ~{minutes} min'**
+  String dropoffLabel(String distance, int minutes);
+
+  /// No description provided for @toCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser : {amount}'**
+  String toCollect(String amount);
+
+  /// No description provided for @decline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get decline;
+
+  /// No description provided for @accept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get accept;
+
+  /// No description provided for @packageSmall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Petit colis'**
+  String get packageSmall;
+
+  /// No description provided for @packageMedium.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis moyen'**
+  String get packageMedium;
+
+  /// No description provided for @packageLarge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grand colis'**
+  String get packageLarge;
+
+  /// No description provided for @fragile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fragile'**
+  String get fragile;
+
+  /// No description provided for @express.
+  ///
+  /// In fr, this message translates to:
+  /// **'Express'**
+  String get express;
+
+  /// No description provided for @offerTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course attribuée à un autre livreur'**
+  String get offerTaken;
+
+  /// No description provided for @offerExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Temps écoulé : la course est proposée à un autre livreur'**
+  String get offerExpired;
+
+  /// No description provided for @vehicleShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moto'**
+  String get vehicleShort;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

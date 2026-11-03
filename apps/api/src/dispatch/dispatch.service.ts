@@ -48,6 +48,7 @@ type OrderWithPlaces = Prisma.OrderGetPayload<{
   include: {
     pickupAddress: { include: { neighborhood: true } };
     dropoffAddress: { include: { neighborhood: true } };
+    merchant: { select: { shopName: true } };
   };
 }>;
 
@@ -131,6 +132,7 @@ export class DispatchService implements OnModuleInit {
         where: { id: orderId },
         include: {
           pickupAddress: { include: { neighborhood: true } },
+          merchant: { select: { shopName: true } },
           dropoffAddress: { include: { neighborhood: true } },
         },
       });
@@ -329,6 +331,7 @@ export class DispatchService implements OnModuleInit {
         order: {
           include: {
             pickupAddress: { include: { neighborhood: true } },
+            merchant: { select: { shopName: true } },
             dropoffAddress: { include: { neighborhood: true } },
           },
         },
@@ -672,6 +675,11 @@ async function lockOrder(tx: Prisma.TransactionClient, orderId: string): Promise
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`dispatch:${orderId}`}, 0))`;
 }
 
+/** Durée estimée d'une course en moto en ville : 20 km/h de moyenne, arrondie à la minute. */
+export function estimatedMinutes(distanceMeters: number): number {
+  return Math.max(5, Math.round(distanceMeters / ((20 * 1000) / 60)));
+}
+
 export function toOfferDto(
   order: OrderWithPlaces,
   offer: DispatchOffer,
@@ -690,7 +698,8 @@ export function toOfferDto(
     reference: order.reference,
     expiresAt: offer.expiresAt.toISOString(),
     approachMeters: offer.approachMeters,
-    pickup: place(order.pickupAddress),
+    // Nom de la boutique d'un commerçant ; jamais le nom d'un particulier avant acceptation.
+    pickup: { ...place(order.pickupAddress), shopName: order.merchant?.shopName ?? null },
     dropoff: {
       city: order.dropoffAddress.city,
       neighborhood: order.dropoffAddress.neighborhood?.name ?? null,
@@ -698,6 +707,7 @@ export function toOfferDto(
       longitude: approximate(order.dropoffAddress.longitude),
     },
     distanceMeters: order.distanceMeters,
+    estimatedMinutes: estimatedMinutes(order.distanceMeters),
     riderEarning: order.riderEarning,
     codAmount: order.codAmount,
     cashFee: order.feePaymentMethod === 'CASH' ? order.totalPrice : 0,

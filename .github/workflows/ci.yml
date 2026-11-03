@@ -193,6 +193,32 @@ jobs:
           path: apps/rider/build/symbols/
           retention-days: 90
 
+  map-preview:
+    name: Aperçus de la carte (Douala)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # Dépend d'un serveur de tuiles public : un aperçu manqué ne bloque pas la PR.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: Rendu des styles sombre et clair
+        working-directory: apps/rider/tool/map_preview
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.48.2
+          npx playwright install --with-deps chromium
+          node render.mjs ../../build/map-preview
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: carte-apercus
+          path: apps/rider/build/map-preview/
+          retention-days: 14
+
   secrets:
     name: Secrets oubliés dans le code
     runs-on: ubuntu-24.04

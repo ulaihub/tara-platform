@@ -79,6 +79,8 @@ class OnlineController extends ChangeNotifier {
 
   Future<void> _onPosition(GeoPoint position) async {
     _last = position;
+    // La carte suit la position (écran en ligne).
+    notifyListeners();
     final now = DateTime.now();
     if (_lastSent != null && now.difference(_lastSent!) < interval * 0.8) return;
     _lastSent = now;

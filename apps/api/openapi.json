@@ -1230,6 +1230,43 @@
         ]
       }
     },
+    "/v1/map/zones": {
+      "get": {
+        "operationId": "Addresses_mapZones",
+        "parameters": [
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapZones"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Adresses"
+        ]
+      }
+    },
     "/v1/zones": {
       "get": {
         "operationId": "Addresses_zones",
@@ -6484,13 +6521,18 @@
               },
               "longitude": {
                 "type": "number"
+              },
+              "shopName": {
+                "nullable": true,
+                "type": "string"
               }
             },
             "required": [
               "landmark",
               "neighborhood",
               "latitude",
-              "longitude"
+              "longitude",
+              "shopName"
             ],
             "additionalProperties": false
           },
@@ -6522,6 +6564,9 @@
           "distanceMeters": {
             "type": "integer"
           },
+          "estimatedMinutes": {
+            "type": "integer"
+          },
           "riderEarning": {
             "type": "integer"
           },
@@ -6550,6 +6595,7 @@
           "pickup",
           "dropoff",
           "distanceMeters",
+          "estimatedMinutes",
           "riderEarning",
           "codAmount",
           "cashFee",
@@ -7005,6 +7051,92 @@
           "SUBMITTED",
           "EXPIRED"
         ]
+      },
+      "MapZones": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FeatureCollection"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Feature"
+                  ]
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "SERVICE_AREA",
+                        "NO_MOTORBIKE"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "kind"
+                  ],
+                  "additionalProperties": false
+                },
+                "geometry": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "Polygon",
+                        "MultiPolygon"
+                      ]
+                    },
+                    "coordinates": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "coordinates"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "type",
+                "properties",
+                "geometry"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "type",
+          "version",
+          "features"
+        ],
+        "additionalProperties": false
       },
       "Me": {
         "type": "object",

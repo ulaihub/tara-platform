@@ -412,4 +412,66 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get callSupport => 'Appeler le support';
+
+  @override
+  String get noMotoZone => 'Interdit aux motos';
+
+  @override
+  String get searchingTitle => 'Recherche de courses…';
+
+  @override
+  String todayPill(String amount) {
+    return 'Aujourd’hui $amount';
+  }
+
+  @override
+  String get newJob => 'Nouvelle course';
+
+  @override
+  String get yourEarning => 'Votre gain';
+
+  @override
+  String pickupLabel(String distance) {
+    return 'ENLÈVEMENT · $distance';
+  }
+
+  @override
+  String dropoffLabel(String distance, int minutes) {
+    return 'LIVRAISON · $distance · ~$minutes min';
+  }
+
+  @override
+  String toCollect(String amount) {
+    return 'À encaisser : $amount';
+  }
+
+  @override
+  String get decline => 'Refuser';
+
+  @override
+  String get accept => 'Accepter';
+
+  @override
+  String get packageSmall => 'Petit colis';
+
+  @override
+  String get packageMedium => 'Colis moyen';
+
+  @override
+  String get packageLarge => 'Grand colis';
+
+  @override
+  String get fragile => 'Fragile';
+
+  @override
+  String get express => 'Express';
+
+  @override
+  String get offerTaken => 'Course attribuée à un autre livreur';
+
+  @override
+  String get offerExpired => 'Temps écoulé : la course est proposée à un autre livreur';
+
+  @override
+  String get vehicleShort => 'Moto';
 }

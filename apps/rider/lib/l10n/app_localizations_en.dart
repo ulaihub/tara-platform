@@ -410,4 +410,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get callSupport => 'Call support';
+
+  @override
+  String get noMotoZone => 'No motorbikes';
+
+  @override
+  String get searchingTitle => 'Looking for jobs…';
+
+  @override
+  String todayPill(String amount) {
+    return 'Today $amount';
+  }
+
+  @override
+  String get newJob => 'New job';
+
+  @override
+  String get yourEarning => 'Your earning';
+
+  @override
+  String pickupLabel(String distance) {
+    return 'PICKUP · $distance';
+  }
+
+  @override
+  String dropoffLabel(String distance, int minutes) {
+    return 'DELIVERY · $distance · ~$minutes min';
+  }
+
+  @override
+  String toCollect(String amount) {
+    return 'To collect: $amount';
+  }
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get packageSmall => 'Small parcel';
+
+  @override
+  String get packageMedium => 'Medium parcel';
+
+  @override
+  String get packageLarge => 'Large parcel';
+
+  @override
+  String get fragile => 'Fragile';
+
+  @override
+  String get express => 'Express';
+
+  @override
+  String get offerTaken => 'Job given to another rider';
+
+  @override
+  String get offerExpired => 'Time is up: the job goes to another rider';
+
+  @override
+  String get vehicleShort => 'Motorbike';
 }

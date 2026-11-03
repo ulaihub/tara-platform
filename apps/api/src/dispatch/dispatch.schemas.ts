@@ -29,9 +29,11 @@ export const OfferDto = z
     expiresAt: z.iso.datetime(),
     /** Distance à vol d'oiseau jusqu'au point d'enlèvement. */
     approachMeters: z.int().nullable(),
-    pickup: Place,
+    pickup: Place.extend({ shopName: z.string().nullable() }),
     dropoff: Area,
     distanceMeters: z.int(),
+    /** Durée estimée du trajet enlèvement → livraison, en minutes. */
+    estimatedMinutes: z.int(),
     riderEarning: z.int(),
     /** Montant à encaisser auprès du destinataire. */
     codAmount: z.int(),

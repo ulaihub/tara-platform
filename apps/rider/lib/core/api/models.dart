@@ -304,3 +304,87 @@ class GeoPoint {
     'recordedAt': isoUtc(recordedAt),
   };
 }
+
+/// Proposition de course (D1, E1) : zone de livraison approximative seulement.
+@immutable
+class Offer {
+  const Offer({
+    required this.id,
+    required this.orderId,
+    required this.expiresAt,
+    required this.approachMeters,
+    required this.pickupName,
+    required this.pickupNeighborhood,
+    required this.dropoffNeighborhood,
+    required this.dropoffCity,
+    required this.distanceMeters,
+    required this.estimatedMinutes,
+    required this.riderEarning,
+    required this.codAmount,
+    required this.cashFee,
+    required this.packageSize,
+    required this.isFragile,
+    required this.isExpress,
+  });
+
+  factory Offer.fromJson(Json json) {
+    final pickup = _field<Json>(json, 'pickup');
+    final dropoff = _field<Json>(json, 'dropoff');
+    return Offer(
+      id: _field(json, 'id'),
+      orderId: _field(json, 'orderId'),
+      expiresAt: DateTime.parse(_field(json, 'expiresAt')),
+      approachMeters: (json['approachMeters'] as num?)?.toInt(),
+      pickupName: (pickup['shopName'] as String?) ?? _field<String>(pickup, 'landmark'),
+      pickupNeighborhood: pickup['neighborhood'] as String?,
+      dropoffNeighborhood: dropoff['neighborhood'] as String?,
+      dropoffCity: _field(dropoff, 'city'),
+      distanceMeters: _field<num>(json, 'distanceMeters').toInt(),
+      estimatedMinutes: _field<num>(json, 'estimatedMinutes').toInt(),
+      riderEarning: _field<num>(json, 'riderEarning').toInt(),
+      codAmount: _field<num>(json, 'codAmount').toInt(),
+      cashFee: _field<num>(json, 'cashFee').toInt(),
+      packageSize: _field(json, 'packageSize'),
+      isFragile: _field(json, 'isFragile'),
+      isExpress: _field(json, 'isExpress'),
+    );
+  }
+  static const fields = [
+    'id',
+    'orderId',
+    'expiresAt',
+    'approachMeters',
+    'pickup',
+    'dropoff',
+    'distanceMeters',
+    'estimatedMinutes',
+    'riderEarning',
+    'codAmount',
+    'cashFee',
+    'packageSize',
+    'isFragile',
+    'isExpress',
+  ];
+
+  final String id;
+  final String orderId;
+  final DateTime expiresAt;
+  final int? approachMeters;
+
+  /// Nom de la boutique (commerçant) ou repère du lieu d'enlèvement.
+  final String pickupName;
+  final String? pickupNeighborhood;
+  final String? dropoffNeighborhood;
+  final String dropoffCity;
+  final int distanceMeters;
+  final int estimatedMinutes;
+  final int riderEarning;
+  final int codAmount;
+  final int cashFee;
+  final String packageSize;
+  final bool isFragile;
+  final bool isExpress;
+
+  /// Espèces que le livreur aura à encaisser (montant du colis et frais réglés en espèces).
+  int get cashToCollect => codAmount + cashFee;
+}

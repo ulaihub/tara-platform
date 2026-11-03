@@ -9,4 +9,15 @@ abstract final class Env {
 
   /// Version des conditions acceptées à la création du compte (consentement enregistré).
   static const termsVersion = '2026-11';
+
+  /// Tuiles vectorielles (TileJSON, schéma OpenMapTiles) et polices des libellés. Par défaut,
+  /// OpenFreeMap (même schéma) en attendant les tuiles Tara auto-hébergées.
+  static const tilesUrl = String.fromEnvironment(
+    'TARA_TILES_URL',
+    defaultValue: 'https://tiles.openfreemap.org/planet',
+  );
+  static const glyphsUrl = String.fromEnvironment(
+    'TARA_GLYPHS_URL',
+    defaultValue: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+  );
 }

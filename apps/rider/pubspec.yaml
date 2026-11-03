@@ -25,6 +25,7 @@ dependencies:
   connectivity_plus: ^7.3.2
   url_launcher: ^6.3.3
   image_picker: ^1.2.4
+  maplibre_gl: ^0.28.0
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +35,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+
+  assets:
+    - assets/map/
 
   # Polices embarquées (licence OFL) : l'app fonctionne sans connexion.
   fonts:

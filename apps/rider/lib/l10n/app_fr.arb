@@ -225,5 +225,54 @@
   "suspendedTitle": "Compte suspendu",
   "suspendedBody": "Votre compte ne peut pas prendre de courses pour le moment. Contactez le support Tara pour en savoir plus.",
   "goOffline": "Passer hors ligne",
-  "callSupport": "Appeler le support"
+  "callSupport": "Appeler le support",
+  "noMotoZone": "Interdit aux motos",
+  "searchingTitle": "Recherche de courses…",
+  "todayPill": "Aujourd’hui {amount}",
+  "newJob": "Nouvelle course",
+  "yourEarning": "Votre gain",
+  "pickupLabel": "ENLÈVEMENT · {distance}",
+  "dropoffLabel": "LIVRAISON · {distance} · ~{minutes} min",
+  "toCollect": "À encaisser : {amount}",
+  "decline": "Refuser",
+  "accept": "Accepter",
+  "packageSmall": "Petit colis",
+  "packageMedium": "Colis moyen",
+  "packageLarge": "Grand colis",
+  "fragile": "Fragile",
+  "express": "Express",
+  "offerTaken": "Course attribuée à un autre livreur",
+  "offerExpired": "Temps écoulé : la course est proposée à un autre livreur",
+  "vehicleShort": "Moto",
+  "@todayPill": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@pickupLabel": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "@dropoffLabel": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@toCollect": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }
