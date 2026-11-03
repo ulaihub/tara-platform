@@ -140,7 +140,12 @@ export class AdminRidersController {
     const file = await this.riders.documentFile(user, documentId, request);
     response
       .status(HttpStatus.OK)
-      .set({ 'Content-Type': file.mimeType, 'Cache-Control': 'no-store' })
+      .set({
+        'Content-Type': file.mimeType,
+        'Cache-Control': 'no-store',
+        // Jamais affiché dans la page du back-office : téléchargé comme pièce jointe.
+        'Content-Disposition': `attachment; filename="piece-${documentId}"`,
+      })
       .send(file.buffer);
   }
 

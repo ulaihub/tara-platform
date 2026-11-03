@@ -58,6 +58,7 @@ enum Locale {
 enum OtpPurpose {
   LOGIN
   PHONE_CHANGE
+  ACCOUNT_DELETION
 
   @@map("otp_purpose")
 }
@@ -406,6 +407,14 @@ model User {
   /// Code de parrainage personnel, ex. TARA-7K3P9Q (C6).
   referralCode String?    @unique @map("referral_code")
 
+  /// Double authentification de l'équipe : secret TOTP chiffré (AES-256-GCM, base64).
+  totpSecretEnc      String?   @map("totp_secret_enc")
+  totpEnabledAt      DateTime? @map("totp_enabled_at") @db.Timestamptz(3)
+  /// Dernier pas de 30 s accepté : un même code ne sert jamais deux fois.
+  totpLastUsedStep   Int?      @map("totp_last_used_step")
+  totpFailedAttempts Int       @default(0) @map("totp_failed_attempts")
+  totpLockedUntil    DateTime? @map("totp_locked_until") @db.Timestamptz(3)
+
   merchant             MerchantProfile?
   rider                RiderProfile?     @relation("RiderUser")
   devices              Device[]
@@ -461,6 +470,8 @@ model RefreshToken {
   expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
   revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
   replacedById String?   @unique @map("replaced_by_id") @db.Uuid
+  /// Heure de la dernière vérification du second facteur, conservée à chaque rotation.
+  mfaAt        DateTime? @map("mfa_at") @db.Timestamptz(3)
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -840,6 +851,8 @@ model Order {
   recipientConfirmedAt DateTime? @map("recipient_confirmed_at") @db.Timestamptz(3)
   recipientAvailable   Boolean?  @map("recipient_available")
   recipientNote        String?   @map("recipient_note")
+  /// Coordonnées du destinataire masquées 30 jours après la fin de la commande.
+  piiMaskedAt          DateTime? @map("pii_masked_at") @db.Timestamptz(3)
   attemptCount         Int       @default(0) @map("attempt_count")
   cancelReason         String?   @map("cancel_reason")
   createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)

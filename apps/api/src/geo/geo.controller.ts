@@ -145,7 +145,7 @@ const TokenParam = z.string().regex(/^[A-Za-z0-9_-]{16,64}$/);
 /** Page publique ouverte par le destinataire depuis le lien reçu. */
 @ApiTags('Public')
 @Public()
-@Throttle({ default: { limit: 20, ttl: 60_000 } })
+@Throttle({ default: { limit: 120, ttl: 60_000 } })
 @Controller('public/location-links')
 export class PublicLocationLinksController {
   constructor(private readonly links: LocationLinksService) {}

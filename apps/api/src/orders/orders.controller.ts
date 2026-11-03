@@ -159,7 +159,7 @@ const TrackingToken = z.string().regex(/^[A-Za-z0-9_-]{16,64}$/);
 /** Page de suivi ouverte par le destinataire depuis le SMS, sans compte. */
 @ApiTags('Public')
 @Public()
-@Throttle({ default: { limit: 30, ttl: 60_000 } })
+@Throttle({ default: { limit: 120, ttl: 60_000 } })
 @Controller('public/tracking')
 export class PublicTrackingController {
   constructor(private readonly orders: OrdersService) {}

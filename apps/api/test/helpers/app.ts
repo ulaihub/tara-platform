@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { randomInt, randomUUID } from 'node:crypto';
-import type { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
@@ -15,18 +15,32 @@ import { type FakeSmsProvider, SMS_PROVIDER } from '../../src/sms/sms.provider.j
 delete process.env['OSRM_URL'];
 
 export interface TestContext {
-  app: INestApplication<App>;
+  app: NestExpressApplication;
   http: App;
   prisma: PrismaService;
   sms: FakeSmsProvider;
   tokens: TokenService;
 }
 
-export async function createTestApp(): Promise<TestContext> {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-  const app = moduleRef.createNestApplication<INestApplication<App>>({ logger: ['error'] });
-  configureApp(app);
-  await app.init();
+/**
+ * Application complète pour les tests. `env` remplace des variables de configuration pour
+ * cette instance seulement (ex. plafonds bas pour tester les limites).
+ */
+export async function createTestApp(env: Record<string, string> = {}): Promise<TestContext> {
+  const saved = Object.fromEntries(Object.keys(env).map((key) => [key, process.env[key]]));
+  Object.assign(process.env, env);
+  let app: NestExpressApplication;
+  try {
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    app = moduleRef.createNestApplication<NestExpressApplication>({ logger: ['error'] });
+    configureApp(app);
+    await app.init();
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
   return {
     app,
     http: app.getHttpServer(),
@@ -77,11 +91,22 @@ export async function signIn(ctx: TestContext, phone = randomPhone()): Promise<S
   };
 }
 
-/** Compte de l'équipe Tara, créé directement en base. */
+/**
+ * Compte de l'équipe Tara, créé directement en base, déjà enrôlé en double authentification,
+ * avec une session dont le second facteur vient d'être vérifié.
+ */
 export async function staffUser(ctx: TestContext, roles: UserRole[]): Promise<SignedIn> {
   const phone = randomPhone();
-  const user = await ctx.prisma.user.create({ data: { phone, roles } });
-  const session = await ctx.tokens.issueSession(user.id, null);
+  const now = new Date();
+  const user = await ctx.prisma.user.create({
+    data: {
+      phone,
+      roles,
+      totpEnabledAt: new Date(now.getTime() - 60_000),
+      totpSecretEnc: 'non-utilise',
+    },
+  });
+  const session = await ctx.tokens.issueSession(user.id, null, undefined, now);
   return {
     userId: user.id,
     phone,

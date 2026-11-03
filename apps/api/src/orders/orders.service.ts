@@ -554,6 +554,7 @@ export class OrdersService {
         FROM orders o
        WHERE o.sender_id = ${user.id}::uuid
          AND o.status <> 'CANCELLED'
+         AND o.pii_masked_at IS NULL
          AND (${search} = '' OR o.recipient_name ILIKE '%' || ${search} || '%' OR o.recipient_phone LIKE '%' || ${search} || '%')
        ORDER BY o.recipient_phone, o.created_at DESC
        LIMIT 50`;

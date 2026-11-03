@@ -47,6 +47,39 @@ export const ERROR_MESSAGES = {
     fr: 'Trop d’essais. Demandez un nouveau code.',
     en: 'Too many attempts. Please request a new code.',
   },
+  OTP_LOCKED: {
+    fr: 'Trop de codes incorrects pour ce numéro. Réessayez demain ou contactez le support.',
+    en: 'Too many incorrect codes for this number. Try again tomorrow or contact support.',
+  },
+  SMS_TEMPORARILY_UNAVAILABLE: {
+    fr: 'Les inscriptions sont momentanément suspendues. Réessayez plus tard.',
+    en: 'Sign-ups are temporarily suspended. Please try again later.',
+  },
+  MFA_REQUIRED: {
+    fr: 'Confirmez votre identité avec votre application d’authentification.',
+    en: 'Confirm your identity with your authenticator app.',
+  },
+  MFA_NOT_SET_UP: {
+    fr: 'La double authentification n’est pas encore configurée.',
+    en: 'Two-factor authentication is not set up yet.',
+  },
+  MFA_ALREADY_ENABLED: {
+    fr: 'La double authentification est déjà active sur ce compte.',
+    en: 'Two-factor authentication is already enabled on this account.',
+  },
+  MFA_INVALID: { fr: 'Code d’authentification incorrect.', en: 'Incorrect authentication code.' },
+  MFA_LOCKED: {
+    fr: 'Trop d’essais. Réessayez dans 15 minutes.',
+    en: 'Too many attempts. Try again in 15 minutes.',
+  },
+  ACCOUNT_HAS_ACTIVE_ORDERS: {
+    fr: 'Des commandes sont en cours : attendez leur fin pour supprimer le compte.',
+    en: 'Some orders are in progress: wait until they are finished to delete the account.',
+  },
+  ACCOUNT_DELETION_NOT_ALLOWED: {
+    fr: 'Ce compte ne peut pas être supprimé depuis l’application. Contactez le support.',
+    en: 'This account cannot be deleted from the app. Please contact support.',
+  },
   SMS_SEND_FAILED: {
     fr: 'Le SMS n’a pas pu être envoyé. Réessayez.',
     en: 'The SMS could not be sent. Please try again.',

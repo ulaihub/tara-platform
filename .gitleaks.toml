@@ -1,0 +1,19 @@
+# Détection de secrets (gitleaks) : règles par défaut, plus les exceptions ci-dessous.
+# Seules sont exclues des valeurs FACTICES, documentées comme telles et inutilisables en
+# production (la configuration de l'API refuse de démarrer en production avec ces réglages).
+title = "Tara"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Valeurs factices de développement et de test, empreintes de dépendances"
+paths = [
+  '''apps/api/\.env\.example''',
+  '''apps/api/vitest\.config\.db\.ts''',
+  '''apps/api/test/''',
+  '''apps/api/src/.*\.spec\.ts''',
+  '''apps/api/src/openapi/generate\.ts''',
+  '''pnpm-lock\.yaml''',
+  '''apps/api/openapi\.json''',
+]

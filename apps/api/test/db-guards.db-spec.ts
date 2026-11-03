@@ -11,6 +11,9 @@ const pool = new pg.Pool({ connectionString: process.env['DATABASE_URL'] });
 
 const PG_CHECK_VIOLATION = '23514';
 const PG_RESTRICT_VIOLATION = '23001';
+const PG_INSUFFICIENT_PRIVILEGE = '42501';
+/** Refus par le trigger (compte propriétaire) ou par les droits (compte de l'API). */
+const APPEND_ONLY = [PG_RESTRICT_VIOLATION, PG_INSUFFICIENT_PRIVILEGE];
 
 async function pgErrorCode(run: () => Promise<unknown>): Promise<string | undefined> {
   try {
@@ -122,15 +125,32 @@ describe('grand livre', () => {
       await pgErrorCode(() =>
         pool.query('UPDATE ledger_postings SET amount = amount + 1 WHERE entry_id = $1', [entryId]),
       ),
-    ).toBe(PG_RESTRICT_VIOLATION);
+    ).toBeOneOf(APPEND_ONLY);
     expect(
       await pgErrorCode(() =>
         pool.query('DELETE FROM ledger_postings WHERE entry_id = $1', [entryId]),
       ),
-    ).toBe(PG_RESTRICT_VIOLATION);
+    ).toBeOneOf(APPEND_ONLY);
     expect(
       await pgErrorCode(() => pool.query('DELETE FROM journal_entries WHERE id = $1', [entryId])),
-    ).toBe(PG_RESTRICT_VIOLATION);
+    ).toBeOneOf(APPEND_ONLY);
+  });
+});
+
+describe('compte de l’API', () => {
+  it('ne peut pas désactiver les protections du grand livre', async () => {
+    const { rows } = await pool.query<{ super: boolean }>(
+      'SELECT rolsuper AS super FROM pg_roles WHERE rolname = current_user',
+    );
+    // En développement, le compte local est administrateur : vérification faite en CI.
+    if (rows[0]?.super) return;
+    const code = await pgErrorCode(() =>
+      pool.query('ALTER TABLE ledger_postings DISABLE TRIGGER ALL'),
+    );
+    expect(code).toBe(PG_INSUFFICIENT_PRIVILEGE);
+    expect(await pgErrorCode(() => pool.query('SELECT * FROM _prisma_migrations LIMIT 1'))).toBe(
+      PG_INSUFFICIENT_PRIVILEGE,
+    );
   });
 });
 
@@ -146,7 +166,7 @@ describe('journal d’audit', () => {
       await pgErrorCode(() =>
         pool.query(`UPDATE audit_logs SET action = 'falsifié' WHERE id = $1`, [id]),
       ),
-    ).toBe(PG_RESTRICT_VIOLATION);
+    ).toBeOneOf(APPEND_ONLY);
   });
 });
 

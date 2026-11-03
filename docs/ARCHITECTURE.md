@@ -120,6 +120,10 @@ tara-platform/
     (phase 2) puis par un stockage objet (phase 7) ; la configuration refuse de démarrer en
     production tant que c'est le cas.
 
+17. **Sécurité en profondeur.** Détail des menaces, des protections et des procédures dans
+    [`SECURITE.md`](SECURITE.md) : second facteur obligatoire pour l'équipe, plafonds anti-pompage
+    de SMS, compte de base restreint, minimisation des données, journaux masqués.
+
 ## Cycle de vie d'une commande
 
 Statuts définis dans le schéma ; les transitions seront implémentées et testées en phase 1.

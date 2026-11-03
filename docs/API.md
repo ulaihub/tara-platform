@@ -10,19 +10,19 @@ npx @openapitools/openapi-generator-cli generate -i apps/api/openapi.json -g dar
 
 ## Conventions
 
-| Sujet       | Règle                                                                                                                                                                                                      |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Adresse     | Toutes les routes sont sous `/v1`, sauf `/health`.                                                                                                                                                         |
-| Connexion   | `Authorization: Bearer <accessToken>` sur toutes les routes, sauf `auth/*`, `public/*` et `/health`.                                                                                                       |
-| Langue      | `Accept-Language: fr` ou `en`. Pour un utilisateur connecté, la langue de son compte prime.                                                                                                                |
-| Erreurs     | Toujours `{ "error": { "code", "message", "details?" } }`. L'app se fie à `code` (liste fermée dans le schéma `ErrorBody`) ; `message` est prêt à afficher.                                                |
-| Argent      | Montants en FCFA entiers, devise `XAF`. Jamais de décimales.                                                                                                                                               |
-| Dates       | ISO 8601 en UTC (`2026-11-03T09:00:00.000Z`). L'app affiche l'heure du Cameroun (UTC+1).                                                                                                                   |
-| Téléphones  | Toutes les écritures courantes sont acceptées (`690 00 00 00`, `+237690000000`…) et renvoyées au format `+2376XXXXXXXX`.                                                                                   |
-| Pagination  | `?limit=20&cursor=<nextCursor>` ; la réponse contient `items` et `nextCursor` (`null` à la fin).                                                                                                           |
-| Idempotence | En-tête `Idempotency-Key` (UUID) sur `POST /v1/orders` et `POST /v1/orders/batch` : en cas de coupure réseau, renvoyer la même requête avec la même clé renvoie la commande déjà créée (`replayed: true`). |
-| Fichiers    | `multipart/form-data`, champ `file`. Photos et notes vocales : 1 Mo au plus (compresser côté app, viser moins de 150 Ko). Pièces KYC : 5 Mo, JPEG, PNG, WebP ou PDF ; le contenu réel est vérifié.         |
-| Limitation  | 120 requêtes par minute et par adresse IP ; 5 demandes de code SMS par minute. Au-delà : `429` avec le code `RATE_LIMITED`.                                                                                |
+| Sujet       | Règle                                                                                                                                                                                                                |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adresse     | Toutes les routes sont sous `/v1`, sauf `/health`.                                                                                                                                                                   |
+| Connexion   | `Authorization: Bearer <accessToken>` sur toutes les routes, sauf `auth/*`, `public/*` et `/health`.                                                                                                                 |
+| Langue      | `Accept-Language: fr` ou `en`. Pour un utilisateur connecté, la langue de son compte prime.                                                                                                                          |
+| Erreurs     | Toujours `{ "error": { "code", "message", "details?", "requestId?" } }`. L'app se fie à `code` (liste fermée dans le schéma `ErrorBody`) ; `message` est prêt à afficher ; `requestId` est à communiquer au support. |
+| Argent      | Montants en FCFA entiers, devise `XAF`. Jamais de décimales.                                                                                                                                                         |
+| Dates       | ISO 8601 en UTC (`2026-11-03T09:00:00.000Z`). L'app affiche l'heure du Cameroun (UTC+1).                                                                                                                             |
+| Téléphones  | Toutes les écritures courantes sont acceptées (`690 00 00 00`, `+237690000000`…) et renvoyées au format `+2376XXXXXXXX`.                                                                                             |
+| Pagination  | `?limit=20&cursor=<nextCursor>` ; la réponse contient `items` et `nextCursor` (`null` à la fin).                                                                                                                     |
+| Idempotence | En-tête `Idempotency-Key` (UUID) sur `POST /v1/orders` et `POST /v1/orders/batch` : en cas de coupure réseau, renvoyer la même requête avec la même clé renvoie la commande déjà créée (`replayed: true`).           |
+| Fichiers    | `multipart/form-data`, champ `file`. Photos et notes vocales : 1 Mo au plus (compresser côté app, viser moins de 150 Ko). Pièces KYC : 5 Mo, JPEG, PNG, WebP ou PDF ; le contenu réel est vérifié.                   |
+| Limitation  | 120 requêtes par minute et par compte connecté ; sur les routes publiques, par adresse IP avec des seuils larges (les opérateurs partagent une même IP entre abonnés). Au-delà : `429` avec le code `RATE_LIMITED`.  |
 
 ## Connexion par code SMS (A1)
 
@@ -31,6 +31,22 @@ npx @openapitools/openapi-generator-cli generate -i apps/api/openapi.json -g dar
 3. La réponse contient `accessToken` (15 minutes), `refreshToken` (30 jours) et `isNewUser`.
 4. `POST /v1/auth/refresh` remplace la paire de jetons. Un jeton de rafraîchissement ne sert qu'une fois : le réutiliser ferme toutes les sessions du compte. Stocker le nouveau jeton avant toute autre action.
 5. `POST /v1/auth/logout` ferme la session de l'appareil.
+
+## Double authentification de l’équipe
+
+Les comptes ayant un rôle d’équipe (`DISPATCHER`, `SUPPORT`, `FINANCE`, `ADMIN`) doivent confirmer un code TOTP (Google Authenticator, Microsoft Authenticator, Aegis…). Sans vérification depuis moins de 12 heures, l’API répond `403 MFA_REQUIRED` sur le back-office, avec `details.enrolled`, et le compte n’a aucun droit d’équipe ailleurs.
+
+1. Premier passage (`enrolled: false`) : `POST /v1/auth/mfa/setup` renvoie `otpauthUrl`, à afficher en QR code, puis `POST /v1/auth/mfa/activate` avec `{ code, refreshToken }`.
+2. Ensuite (`enrolled: true`) : `POST /v1/auth/mfa/verify` avec `{ code, refreshToken }`.
+3. Les deux renvoient une nouvelle paire de jetons, à utiliser à la place de l’ancienne.
+
+Après 5 codes faux, le second facteur est bloqué 15 minutes (`MFA_LOCKED`). Téléphone perdu : un administrateur appelle `POST /v1/admin/users/{id}/mfa/reset`.
+
+## Données personnelles (loi n° 2024/017)
+
+- `GET /v1/me/export` : toutes les données du compte, en fichier JSON (3 fois par heure au plus).
+- Suppression du compte : `POST /v1/me/deletion/code` envoie un code SMS dédié, puis `POST /v1/me/deletion` avec `{ challengeId, code }`. Refusée pour un livreur ou l’équipe (passer par le support), et tant qu’une commande est en cours.
+- Les coordonnées des destinataires sont masquées 30 jours après la fin de la commande.
 
 ## Couverture des exigences de la phase 1
 

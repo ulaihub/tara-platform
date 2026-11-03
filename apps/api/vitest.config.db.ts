@@ -24,6 +24,9 @@ export default defineConfig({
       JOBS_ENABLED: 'false',
       PUBLIC_WEB_URL: 'https://tara.test',
       OSRM_URL: '',
+      // Plafonds anti-pompage relevés : les tests envoient beaucoup de codes depuis 127.0.0.1.
+      OTP_MAX_PER_IP_PER_HOUR: '1000000',
+      OTP_DAILY_GLOBAL_LIMIT: '1000000',
     },
   },
 });

@@ -3,6 +3,7 @@ import {
   createDecipheriv,
   createHash,
   createHmac,
+  hkdfSync,
   randomBytes,
   randomInt,
   timingSafeEqual,
@@ -83,4 +84,12 @@ export function uuidv7(now = Date.now()): string {
   bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80;
   const hex = bytes.toString('hex');
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+/**
+ * Clé dérivée d'une clé maîtresse pour un usage précis (HKDF-SHA256) : chaque usage a sa
+ * propre clé, et la compromission de l'une ne donne pas les autres.
+ */
+export function deriveKey(master: Buffer, purpose: string): Buffer {
+  return Buffer.from(hkdfSync('sha256', master, Buffer.alloc(0), purpose, 32));
 }
