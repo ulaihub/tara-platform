@@ -16,7 +16,7 @@ const views = [
   { name: 'bonapriso-z15', center: [9.6935, 4.0335], zoom: 15 },
   { name: 'douala-z12_5', center: [9.715, 4.05], zoom: 12.5 },
   // Écran 08 : livreur, vendeur et itinéraire de repli (ligne droite estimée, sans OSRM).
-  { name: 'course-z15_8', center: [9.6987, 4.0477], zoom: 15.8, course: true },
+  { name: 'course-z15', center: [9.6987, 4.0477], zoom: 15, course: true },
 ];
 const rider = [9.7012, 4.0442];
 const pickup = [9.6962, 4.0512];
