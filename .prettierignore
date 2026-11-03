@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+**/dist
+**/coverage
+**/src/generated
+**/prisma/migrations
+infra/osrm/data
+docs/CAHIER_DES_CHARGES.md

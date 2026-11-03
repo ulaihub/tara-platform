@@ -1,0 +1,38 @@
+# Dépendances et caches
+node_modules/
+.pnpm-store/
+.turbo/
+*.tsbuildinfo
+
+# Builds
+dist/
+build/
+coverage/
+
+# Code généré (Prisma Client)
+apps/api/src/generated/
+
+# Secrets : seul .env.example est versionné
+.env
+.env.*
+!.env.example
+
+# Données locales (cartes OSRM, volumes)
+infra/osrm/data/
+
+# Flutter (phases 4 et 5)
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+
+# Next.js (phase 6)
+.next/
+next-env.d.ts
+
+# Divers
+.DS_Store
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json

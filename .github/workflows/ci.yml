@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Qualité, tests et build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: tara
+          POSTGRES_PASSWORD: tara
+          POSTGRES_DB: tara
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tara -d tara"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://tara:tara@localhost:5432/tara
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Installation
+        run: pnpm install --frozen-lockfile
+
+      - name: Formatage
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typage
+        run: pnpm typecheck
+
+      - name: Tests unitaires
+        run: pnpm test
+
+      - name: Migrations
+        run: pnpm db:deploy
+
+      - name: Schéma Prisma aligné sur les migrations
+        run: pnpm --filter @tara/api db:check
+
+      - name: Tests d'intégration (base de données)
+        run: pnpm test:db
+
+      - name: Build
+        run: pnpm build
