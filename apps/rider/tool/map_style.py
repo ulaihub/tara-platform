@@ -182,6 +182,12 @@ def style(name, t):
                    "circle-stroke-color": ["case", ["==", ["get", "kind"], "dropoff"], "#FF6A00", "#FFFFFF"],
                    "circle-stroke-width": ["case", ["==", ["get", "kind"], "dropoff"], 5, 3]}},
     ]
+    # Nom du vendeur ou du client au-dessus de son point : rien à confondre avec le livreur.
+    layers.append({"id": "tara-stop-label", "type": "symbol", "source": "tara-stop",
+                   "layout": {"text-field": ["get", "label"], "text-font": FONT_BOLD, "text-size": 13,
+                              "text-anchor": "bottom", "text-offset": [0, -1.3], "text-max-width": 12,
+                              "text-allow-overlap": True},
+                   "paint": text(13, t["text"], 2)})
     # Position du livreur, au-dessus de tout : halo puis point (mise à jour par l'app).
     layers += [
         {"id": "tara-rider-halo", "type": "circle", "source": "tara-rider",

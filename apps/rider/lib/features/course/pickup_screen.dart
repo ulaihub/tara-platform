@@ -235,7 +235,7 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           builder: (context, _) => TaraMap(
             rider: online.lastPosition,
             handle: _map,
-            stop: MapStop(latitude: order.pickup.latitude, longitude: order.pickup.longitude),
+            stop: MapStop(latitude: order.pickup.latitude, longitude: order.pickup.longitude, label: senderName),
             route: _route,
             framePadding: EdgeInsets.fromLTRB(48, insets.top + 96, 48, panelHeight + 64),
             onFollowChanged: (value) => setState(() => _following = value),

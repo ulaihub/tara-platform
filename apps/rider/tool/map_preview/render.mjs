@@ -24,7 +24,7 @@ const demoCourse = {
   rider: { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: rider } }] },
   stop: {
     type: 'FeatureCollection',
-    features: [{ type: 'Feature', properties: { kind: 'pickup' }, geometry: { type: 'Point', coordinates: pickup } }],
+    features: [{ type: 'Feature', properties: { kind: 'pickup', label: 'Boutique Mama Ngo' }, geometry: { type: 'Point', coordinates: pickup } }],
   },
   route: {
     type: 'FeatureCollection',

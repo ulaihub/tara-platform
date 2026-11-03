@@ -32,17 +32,24 @@ class TaraMapHandle {
 /// Étape visée pendant une course : le vendeur (enlèvement, retour) ou le destinataire.
 @immutable
 class MapStop {
-  const MapStop({required this.latitude, required this.longitude, this.dropoff = false});
+  const MapStop({required this.latitude, required this.longitude, this.dropoff = false, this.label = ''});
   final double latitude;
   final double longitude;
   final bool dropoff;
 
-  @override
-  bool operator ==(Object other) =>
-      other is MapStop && other.latitude == latitude && other.longitude == longitude && other.dropoff == dropoff;
+  /// Nom affiché au-dessus du point (vendeur ou client).
+  final String label;
 
   @override
-  int get hashCode => Object.hash(latitude, longitude, dropoff);
+  bool operator ==(Object other) =>
+      other is MapStop &&
+      other.latitude == latitude &&
+      other.longitude == longitude &&
+      other.dropoff == dropoff &&
+      other.label == label;
+
+  @override
+  int get hashCode => Object.hash(latitude, longitude, dropoff, label);
 }
 
 /// Carte Tara : style sombre ou clair, rues et lieux détaillés, zones interdites aux motos,
@@ -132,7 +139,7 @@ class _TaraMapState extends ConsumerState<TaraMap> {
         if (stop != null)
           {
             'type': 'Feature',
-            'properties': {'kind': stop.dropoff ? 'dropoff' : 'pickup'},
+            'properties': {'kind': stop.dropoff ? 'dropoff' : 'pickup', 'label': stop.label},
             'geometry': {
               'type': 'Point',
               'coordinates': [stop.longitude, stop.latitude],
