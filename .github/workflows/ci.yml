@@ -112,9 +112,11 @@ jobs:
           fetch-depth: 0
 
       # Binaire officiel, version épinglée, empreinte SHA-256 vérifiée avant exécution.
-      - name: Gitleaks sur tout l'historique Git
+      # Historique complet de la branche testée seulement (HEAD) : sans cela, gitleaks lit
+      # aussi les autres branches récupérées, avec une configuration qui n'est pas la leur.
+      - name: Gitleaks sur tout l'historique de la branche
         run: |
           curl -sSfL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz
           echo "9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c  gitleaks.tgz" | sha256sum --check
           tar xzf gitleaks.tgz gitleaks
-          ./gitleaks git --config .gitleaks.toml --redact --no-banner --verbose .
+          ./gitleaks git --config .gitleaks.toml --redact --no-banner --verbose --log-opts="--full-history HEAD" .
