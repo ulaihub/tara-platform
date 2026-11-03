@@ -26,9 +26,6 @@ flutter:
   uses-material-design: true
   generate: true
 
-  assets:
-    - assets/brand/
-
   # Polices embarquées (licence OFL) : l'app fonctionne sans connexion.
   fonts:
     - family: Sora

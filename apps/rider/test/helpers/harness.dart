@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_rider/app/app_settings.dart';
-import 'package:tara_rider/design/components/brand.dart';
 import 'package:tara_rider/design/tara_effects.dart';
 import 'package:tara_rider/design/tara_theme.dart';
 import 'package:tara_rider/l10n/app_localizations.dart';
@@ -86,13 +85,6 @@ Future<void> pumpVariant(
       ),
     ),
   );
-  // Les logos sont décodés hors de l'horloge de test.
-  await tester.runAsync(() async {
-    final context = tester.element(find.byKey(const ValueKey('capture')));
-    for (final brightness in Brightness.values) {
-      await precacheImage(AssetImage(TaraLogo.assetFor(brightness)), context);
-    }
-  });
   await tester.pump();
 }
 

@@ -1,16 +1,25 @@
-# Logo Tara — version vectorielle
+# Logo Tara — version vectorielle validée
 
 Redessiné en vectoriel à partir des PNG détourés de la passation
-(`docs/design/tara-livreur/assets/`), le fichier fourni ne contenant qu'une image JPEG.
-Proposition à valider avant usage dans les apps.
+(`docs/design/tara-livreur/assets/`), le fichier SVG fourni ne contenant qu'une image JPEG.
+Validé par le porteur du projet le 3 novembre 2026.
 
 | Fichier | Contenu |
 | --- | --- |
-| `tara-mark-light.svg` | pictogramme seul, encre foncée (fond clair) |
-| `tara-mark-dark.svg` | pictogramme seul, encre blanche (fond sombre) |
-| `tara-logo-light.svg` | logo complet avec « Tara » et « Livraison à la demande », fond clair |
-| `tara-logo-dark.svg` | logo complet, fond sombre |
+| `tara-logo-clair.svg` / `tara-logo-sombre.svg` | logo complet (« Tara », « Livraison à la demande ») |
+| `tara-pictogramme-clair.svg` / `tara-pictogramme-sombre.svg` | pictogramme seul |
+| `tara-icone-sombre.svg` / `tara-icone-clair.svg` | icône d'app carrée 1024 × 1024, pleine (les systèmes arrondissent) |
+| `*.png` | exports prêts à l'emploi (logo 2000 px, pictogramme 1000 px, icônes 512 et 1024 px) |
 
-Couleurs : dégradé de marque `#FFB000 → #FF6A00 → #FF3D00`, encre `#16120E` ou blanc.
-Le pli ombré de l'original est simplifié en aplat dégradé, plus lisible en petite taille
-(icône de l'app, notifications).
+Couleurs : dégradé `#FFB000 → #FF6A00 → #FF3D00` ; encre `#16120E` (fond clair) ou blanc.
+L'app livreur utilise l'icône sombre.
+
+## Régénérer les ressources des apps
+
+`source/paths.json` contient les tracés ; `source/build_brand.py` en produit les SVG, les
+icônes vectorielles Android (`res/drawable/ic_launcher_*.xml`, `splash_*.xml`) et
+`lib/design/brand_paths.dart` :
+
+```sh
+python3 docs/design/brand/source/build_brand.py docs/design/brand/source apps/rider /tmp/kit
+```
