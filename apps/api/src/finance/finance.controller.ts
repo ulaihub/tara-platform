@@ -107,6 +107,14 @@ function toReconciliationDto(report: {
 
 const DayParam = z.iso.date();
 
+/**
+ * L'argent d'un client ou d'un livreur ne part que vers le numéro de son compte (vérifié par
+ * code SMS) : un compte détourné ne peut pas être vidé vers un autre numéro.
+ */
+function assertOwnPhone(user: AuthUser, phone: string): void {
+  if (phone !== user.phone) throw AppError.unprocessable('PAYOUT_PHONE_NOT_ALLOWED');
+}
+
 function pdfResponse(response: Response, file: { filename: string; pdf: Buffer }): StreamableFile {
   response.setHeader('Content-Type', 'application/pdf');
   response.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
@@ -224,6 +232,7 @@ export class WalletController {
     @ValidBody(PayoutBody) body: z.output<typeof PayoutBody>,
     @Headers('idempotency-key') key: string | undefined,
   ): Out<typeof PayoutDto> {
+    assertOwnPhone(user, body.phone);
     const payout = await this.payouts.request({
       beneficiary: 'CUSTOMER',
       ownerId: user.id,
@@ -360,6 +369,7 @@ export class RiderFinanceController {
     @ValidBody(PayoutBody) body: z.output<typeof PayoutBody>,
     @Headers('idempotency-key') key: string | undefined,
   ): Out<typeof PayoutDto> {
+    assertOwnPhone(user, body.phone);
     const riderId = await this.riderId(user.id);
     const payout = await this.payouts.request({
       beneficiary: 'RIDER',

@@ -215,6 +215,7 @@ export class WalletsService implements OnModuleInit {
   ) {
     const rider = await this.prisma.riderProfile.findUnique({ where: { id: riderId } });
     if (!rider) throw AppError.notFound('RIDER_NOT_FOUND');
+    if (rider.userId === staff.id) throw AppError.forbidden('SELF_APPROVAL_FORBIDDEN');
     const account = riderCashHeld(riderId);
     // Requête rejouée (double clic, coupure) : on renvoie le premier résultat, sans contrôle.
     const replay = await this.prisma.journalEntry.findUnique({
@@ -309,6 +310,7 @@ export class WalletsService implements OnModuleInit {
   ) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw AppError.notFound();
+    if (userId === staff.id) throw AppError.forbidden('SELF_APPROVAL_FORBIDDEN');
     const account = await this.spendingAccount(userId);
     const replay = await this.prisma.journalEntry.findUnique({
       where: { idempotencyKey: `credit:${userId}:${key}` },

@@ -319,6 +319,18 @@ export const ERROR_MESSAGES = {
     fr: 'Vous ne détenez que {cashHeld} FCFA d’espèces.',
     en: 'You only hold {cashHeld} XAF in cash.',
   },
+  PAYOUT_ON_HOLD: {
+    fr: 'Numéro de reversement modifié récemment : reversements possibles à partir du {until}.',
+    en: 'Payout number changed recently: payouts possible from {until}.',
+  },
+  PAYOUT_PHONE_NOT_ALLOWED: {
+    fr: 'L’argent ne peut partir que vers le numéro de votre compte. Pour un autre numéro, contactez le support.',
+    en: 'Money can only be sent to your account number. For another number, contact support.',
+  },
+  SELF_APPROVAL_FORBIDDEN: {
+    fr: 'Opération interdite sur votre propre compte : un autre membre de l’équipe doit la faire.',
+    en: 'Not allowed on your own account: another team member must do it.',
+  },
   STATEMENT_PERIOD_INVALID: {
     fr: 'Mois invalide : utilisez le format AAAA-MM, mois terminé ou en cours.',
     en: 'Invalid month: use YYYY-MM, past or current month.',

@@ -172,6 +172,23 @@ export class CamPayPaymentProvider implements PaymentProvider {
     };
   }
 
+  /**
+   * La signature CamPay authentifie l'appel mais ne couvre pas forcément chaque champ :
+   * statut et montant sont relus par l'API avant d'être crus.
+   */
+  async confirmEvent(event: ProviderEvent): Promise<ProviderEvent> {
+    const body = await this.call<CamPayTransaction>(
+      'GET',
+      `/transaction/${encodeURIComponent(event.providerReference)}/`,
+    );
+    return {
+      ...event,
+      status: mapStatus(body.status),
+      amount: body.amount === undefined ? null : Number(body.amount),
+      reference: body.external_reference ?? event.reference,
+    };
+  }
+
   private async history(from: Date, to: Date): Promise<CamPayTransaction[]> {
     const day = (date: Date): string => date.toISOString().slice(0, 10);
     const body = await this.call<CamPayTransaction[] | { data?: CamPayTransaction[] }>(

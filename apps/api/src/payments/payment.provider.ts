@@ -84,6 +84,11 @@ export interface PaymentProvider {
   disburseStatus(reference: string): Promise<ProviderOperation | null>;
   /** Vérifie la signature d'une notification et en extrait l'événement. */
   parseWebhook(input: WebhookInput): Promise<ProviderEvent>;
+  /**
+   * Revérifie une notification auprès du prestataire (statut et montant lus par son API)
+   * quand la signature n'engage pas le contenu de la notification.
+   */
+  confirmEvent?(event: ProviderEvent): Promise<ProviderEvent>;
   /** Relevé du prestataire sur une période (rapprochement). */
   transactions(from: Date, to: Date): Promise<ProviderTransaction[]>;
 }

@@ -110,6 +110,7 @@ export class PayoutsService implements OnModuleInit {
       where: { idempotencyKey: input.idempotencyKey },
     });
     if (replay) return replay;
+    if (input.beneficiary === 'MERCHANT') await this.assertNotOnHold(input.ownerId);
     const account = this.account(input.beneficiary, input.ownerId);
     let payout: Payout;
     try {
@@ -412,7 +413,30 @@ export class PayoutsService implements OnModuleInit {
 
   // --- Validation par la finance ------------------------------------------------------------
 
+  /** Reversements gelés après un changement du numéro de reversement. */
+  private async assertNotOnHold(merchantId: string): Promise<void> {
+    const merchant = await this.prisma.merchantProfile.findUnique({ where: { id: merchantId } });
+    if (!merchant?.payoutPhoneChangedAt) return;
+    const until = new Date(
+      merchant.payoutPhoneChangedAt.getTime() + this.env.PAYOUT_HOLD_HOURS * 3_600_000,
+    );
+    if (until > new Date()) {
+      throw AppError.unprocessable('PAYOUT_ON_HOLD', {
+        until: until.toLocaleString('fr-FR', { timeZone: CAMEROON_TIME_ZONE }),
+      });
+    }
+  }
+
+  /** Un membre de l'équipe ne valide jamais un reversement qui lui revient. */
+  private async assertNotOwn(id: string, staff: AuthUser): Promise<void> {
+    const payout = await this.prisma.payout.findUnique({ where: { id } });
+    if (!payout) throw AppError.notFound('PAYOUT_NOT_FOUND');
+    if ((await this.ownerUserId(payout)) === staff.id)
+      throw AppError.forbidden('SELF_APPROVAL_FORBIDDEN');
+  }
+
   async approve(id: string, staff: AuthUser, request: Request): Promise<Payout> {
+    await this.assertNotOwn(id, staff);
     const { count } = await this.prisma.payout.updateMany({
       where: { id, status: 'AWAITING_APPROVAL' },
       data: { status: 'PENDING', approvedById: staff.id, approvedAt: new Date() },
@@ -430,6 +454,7 @@ export class PayoutsService implements OnModuleInit {
   }
 
   async reject(id: string, staff: AuthUser, reason: string, request: Request): Promise<Payout> {
+    await this.assertNotOwn(id, staff);
     const payout = await this.prisma.$transaction(async (tx) => {
       const current = await tx.payout.findUnique({ where: { id } });
       const { count } = await tx.payout.updateMany({

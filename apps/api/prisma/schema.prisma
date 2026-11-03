@@ -557,6 +557,8 @@ model MerchantProfile {
   payoutPhone    String              @map("payout_phone")
   payoutOperator MobileMoneyOperator @map("payout_operator")
   payoutSchedule PayoutSchedule      @default(DAILY) @map("payout_schedule")
+  /// Dernier changement du numéro de reversement : reversements gelés pendant PAYOUT_HOLD_HOURS.
+  payoutPhoneChangedAt DateTime?     @map("payout_phone_changed_at") @db.Timestamptz(3)
   plan           MerchantPlan        @default(FREE)
   planRenewsAt   DateTime?           @map("plan_renews_at") @db.Timestamptz(3)
   rccm           String?

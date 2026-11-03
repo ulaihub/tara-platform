@@ -43,6 +43,10 @@ export interface CollectionInput {
   method?: 'MOMO_MTN' | 'MOMO_ORANGE';
 }
 
+/** Invites sans succès vers un même numéro sur la fenêtre, avant blocage. */
+const MAX_UNANSWERED_PROMPTS = 5;
+const UNANSWERED_WINDOW_MS = 10 * 60_000;
+
 const isUniqueViolation = (error: unknown): boolean =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
 
@@ -100,6 +104,16 @@ export class PaymentsService {
       }
       return existing;
     }
+    // Invites restées sans réponse ou refusées vers ce numéro : au-delà, on arrête de le
+    // solliciter (une personne malveillante ne peut pas faire sonner le téléphone d'autrui).
+    const unanswered = await this.prisma.payment.count({
+      where: {
+        payerPhone: input.phone,
+        status: { in: ['PENDING', 'FAILED'] },
+        createdAt: { gt: new Date(Date.now() - UNANSWERED_WINDOW_MS) },
+      },
+    });
+    if (unanswered >= MAX_UNANSWERED_PROMPTS) throw AppError.tooMany('RATE_LIMITED');
     let payment: Payment;
     try {
       payment = await this.prisma.payment.create({
@@ -285,6 +299,8 @@ export class PaymentsService {
     let handled = false;
     let failure: string | null = null;
     try {
+      // Le statut est redemandé au prestataire quand sa signature ne garantit pas le contenu.
+      if (this.provider.confirmEvent) event = await this.provider.confirmEvent(event);
       const payment = await this.findPayment(event);
       if (payment) {
         await this.applyStatus(payment.id, event.status, {

@@ -144,12 +144,19 @@ export async function runFinanceSimulation(
       if (stored.status === 'PENDING') await payments.refreshPending(new Date(Date.now() + 60_000));
     };
 
-    const transition = (orderId: string, to: string, extra: Record<string, unknown> = {}) =>
-      request(ctx.http)
+    const transition = async (orderId: string, to: string, extra: Record<string, unknown> = {}) => {
+      const res = await request(ctx.http)
         .post(`/v1/admin/orders/${orderId}/transition`)
         .set(ops.auth)
-        .send({ to, ...extra })
-        .expect(200);
+        .send({ to, ...extra });
+      if (res.status !== 200) {
+        const order = await ctx.prisma.order.findUnique({ where: { id: orderId } });
+        throw new Error(
+          `${to} refusé (${res.status}) : ${JSON.stringify(res.body)} ; commande ${order?.status}, ${order?.feePaymentMethod}, payée ${String(order?.feePaidAt)}`,
+        );
+      }
+      return res;
+    };
 
     const processOrder = async (): Promise<void> => {
       const shop = pick(shops);
@@ -184,14 +191,18 @@ export async function runFinanceSimulation(
       count(`method:${feePayer === 'RECIPIENT' ? 'RECIPIENT' : method}`);
 
       if (method.startsWith('MOMO_')) {
-        await payUntilDone(async (phone) => {
-          const res = await request(ctx.http)
-            .post(`/v1/orders/${orderId}/pay`)
-            .set(shop.auth)
-            .send({ phone, operator: method === 'MOMO_ORANGE' ? 'ORANGE' : 'MTN' })
-            .expect(201);
-          return res.body as { id: string; status: string };
-        }, shop.phone);
+        await payUntilDone(
+          async (phone) => {
+            const res = await request(ctx.http)
+              .post(`/v1/orders/${orderId}/pay`)
+              .set(shop.auth)
+              .send({ phone, operator: method === 'MOMO_ORANGE' ? 'ORANGE' : 'MTN' })
+              .expect(201);
+            return res.body as { id: string; status: string };
+            // Un payeur par commande : les refus simulés ne débordent pas sur une autre commande.
+          },
+          `+2376${String(Math.floor(rng() * 1e8)).padStart(8, '0')}`,
+        );
       }
 
       const outcome = rng();

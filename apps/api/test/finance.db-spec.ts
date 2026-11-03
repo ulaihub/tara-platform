@@ -526,6 +526,87 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       .expect(400);
   });
 
+  it('gèle les reversements après un changement de numéro et prévient l’ancien numéro', async () => {
+    const shop = await merchant(ctx);
+    await ctx.prisma.merchantProfile.update({
+      where: { userId: shop.userId },
+      data: { plan: 'PRO' },
+    });
+    await request(ctx.http)
+      .post(`/v1/admin/finance/users/${shop.userId}/credits`)
+      .set(finance.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: 5_000, reason: 'Solde de test' })
+      .expect(201);
+    const profile = await ctx.prisma.merchantProfile.findUniqueOrThrow({
+      where: { userId: shop.userId },
+    });
+    await request(ctx.http)
+      .put('/v1/me/merchant')
+      .set(shop.auth)
+      .send({ shopName: profile.shopName, payoutPhone: '699 11 22 33', payoutOperator: 'ORANGE' })
+      .expect(200);
+    expect(ctx.sms.lastTo(profile.payoutPhone)?.text).toContain('numero de reversement');
+    const held = await request(ctx.http)
+      .post('/v1/me/merchant/payouts')
+      .set(shop.auth)
+      .set('Idempotency-Key', key())
+      .expect(422);
+    expect(held.body.error.code).toBe('PAYOUT_ON_HOLD');
+    const daily = await ctx.app.get(PayoutsService).dailyMerchantPayouts();
+    expect(daily.skipped).toBeGreaterThanOrEqual(1);
+    expect(await ctx.prisma.payout.count({ where: { merchantId: profile.id } })).toBe(0);
+  });
+
+  it('n’envoie l’argent d’un client ou d’un livreur que vers le numéro de son compte', async () => {
+    const customer = await signIn(ctx);
+    await request(ctx.http)
+      .post(`/v1/admin/finance/users/${customer.userId}/credits`)
+      .set(finance.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: 3_000, reason: 'Solde de test' })
+      .expect(201);
+    const elsewhere = await request(ctx.http)
+      .post('/v1/me/wallet/refund')
+      .set(customer.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: 1_000, phone: '+237699000999', operator: 'ORANGE' })
+      .expect(422);
+    expect(elsewhere.body.error.code).toBe('PAYOUT_PHONE_NOT_ALLOWED');
+  });
+
+  it('interdit à l’équipe de se servir elle-même', async () => {
+    const self = await request(ctx.http)
+      .post(`/v1/admin/finance/users/${finance.userId}/credits`)
+      .set(finance.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: 10_000, reason: 'Essai' })
+      .expect(403);
+    expect(self.body.error.code).toBe('SELF_APPROVAL_FORBIDDEN');
+  });
+
+  it('cesse de solliciter un numéro qui ne répond pas aux demandes de paiement', async () => {
+    const customer = await signIn(ctx);
+    const target = `+2376${String(Math.floor(Math.random() * 1e8)).padStart(8, '0')}`;
+    for (let i = 0; i < 5; i += 1) {
+      await request(ctx.http)
+        .post('/v1/me/wallet/topup')
+        .set(customer.auth)
+        .set('Idempotency-Key', key())
+        .send({ amount: 1_000, phone: target, operator: 'MTN' })
+        .expect(201);
+    }
+    const blocked = await request(ctx.http)
+      .post('/v1/me/wallet/topup')
+      .set(customer.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: 1_000, phone: target, operator: 'MTN' })
+      .expect(429);
+    expect(blocked.body.error.code).toBe('RATE_LIMITED');
+    // Les demandes restées sans réponse sont abandonnées : le rapprochement reste juste.
+    await ctx.app.get(PaymentsService).refreshPending(new Date(Date.now() + 3_600_000));
+  });
+
   it('expose les soldes de la plateforme à la finance seulement', async () => {
     const overview = await request(ctx.http)
       .get('/v1/admin/finance/overview')

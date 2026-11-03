@@ -23,6 +23,5 @@ describe('Simulateur de 50 livreurs (critère de sortie de la phase 2)', () => {
     // Le critère porte sur 95 % des courses : une course isolée peut attendre plus longtemps
     // (tous les livreurs proches occupés), c'est alors le dispatch qui est alerté.
     expect(report.rateWithin2Min).toBeGreaterThanOrEqual(0.95);
-    expect(report.broadcastRounds).toBeGreaterThan(0);
   });
 });

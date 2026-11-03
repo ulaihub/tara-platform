@@ -131,6 +131,11 @@ const envSchema = z
     PAYOUT_APPROVAL_THRESHOLD: z.coerce.number().int().min(1).default(200_000),
     /** Heure du reversement quotidien des marchands, heure du Cameroun (G3). */
     PAYOUT_DAILY_HOUR: z.coerce.number().int().min(0).max(23).default(18),
+    /**
+     * Après un changement du numéro de reversement d'un marchand, les reversements attendent
+     * ce délai : un compte pris par détournement de carte SIM ne peut pas vider le portefeuille.
+     */
+    PAYOUT_HOLD_HOURS: z.coerce.number().int().min(0).max(240).default(48),
 
     /** Tâches planifiées (expiration des pièces KYC…). Désactivées dans les tests. */
     JOBS_ENABLED: booleanFlag.default(true),
