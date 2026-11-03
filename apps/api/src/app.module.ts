@@ -9,12 +9,20 @@ import { UserAwareThrottlerGuard } from './auth/user-aware-throttler.guard.js';
 import { AppExceptionFilter } from './common/errors/app-exception.filter.js';
 import { ConfigModule, ENV } from './config/config.module.js';
 import type { Env } from './config/env.js';
+import { EventsModule } from './events/events.module.js';
+import { FinanceModule } from './finance/finance.module.js';
 import { GeoModule } from './geo/geo.module.js';
 import { HealthModule } from './health/health.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrivacyModule } from './privacy/privacy.module.js';
+import { PaymentsModule } from './payments/payments.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { RealtimeModule } from './realtime/realtime.module.js';
+import { RedisModule } from './redis/redis.module.js';
+import { RedisThrottlerStorage } from './redis/redis-throttler.storage.js';
+import { RiderAppModule } from './rider-app/rider-app.module.js';
 import { RidersModule } from './riders/riders.module.js';
 import { SmsModule } from './sms/sms.module.js';
 import { StorageModule } from './storage/storage.module.js';
@@ -24,16 +32,23 @@ import { UsersModule } from './users/users.module.js';
   imports: [
     ConfigModule,
     PrismaModule,
+    RedisModule,
     ThrottlerModule.forRootAsync({
-      inject: [ENV],
-      useFactory: (env: Env) => ({
+      inject: [ENV, RedisThrottlerStorage],
+      useFactory: (env: Env, storage: RedisThrottlerStorage) => ({
         throttlers: [{ name: 'default', ttl: 60_000, limit: 120 }],
+        // Compteurs partagés entre les instances de l'API.
+        storage,
         skipIf: () => env.NODE_ENV === 'test',
       }),
     }),
     ScheduleModule.forRoot(),
+    EventsModule,
+    RealtimeModule,
     AuditModule,
     SmsModule,
+    NotificationsModule,
+    PaymentsModule,
     StorageModule,
     AuthModule,
     HealthModule,
@@ -42,6 +57,8 @@ import { UsersModule } from './users/users.module.js';
     GeoModule,
     PricingModule,
     OrdersModule,
+    RiderAppModule,
+    FinanceModule,
     PrivacyModule,
   ],
   providers: [

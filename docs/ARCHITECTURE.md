@@ -21,7 +21,7 @@ flowchart TB
   end
   subgraph Prestataires
     momo[Agrégateur Mobile Money<br/>MTN MoMo, Orange Money]
-    sms[SMS · agrégateur local]
+    sms[SMS · Orange, secours Twilio]
     wa[WhatsApp Cloud API]
     fcm[Firebase Cloud Messaging]
   end
@@ -62,7 +62,7 @@ tara-platform/
 | NestJS               | 12       | Modules ES, Vitest et oxlint par défaut                                                                                 |
 | Prisma               | 7.10     | Client généré dans `src/generated`, connexion via `@prisma/adapter-pg`, configuration dans `prisma.config.ts`           |
 | PostgreSQL / PostGIS | 16 / 3.4 | Image `postgis/postgis:16-3.4`                                                                                          |
-| Redis                | 7        | Positions des livreurs et files de tâches, à partir de la phase 2                                                       |
+| Redis                | 7        | Positions des livreurs (GEO), files BullMQ, Socket.IO entre instances, limitation de débit                              |
 | OSRM                 | 6.0.0    | Image `ghcr.io/project-osrm/osrm-backend`                                                                               |
 
 ## Décisions de conception
@@ -115,14 +115,51 @@ tara-platform/
 15. **Fichiers rattachés à leur propriétaire.** Une adresse ne peut référencer que les photos de
     son auteur ; le type réel des images et PDF est vérifié. Les pièces d'identité sont chiffrées
     (AES-256-GCM) et chaque consultation par l'équipe est auditée.
-16. **Provisoire en phase 1** : SMS factice (journal), stockage sur disque, limitation de débit en
-    mémoire, langue des SMS au destinataire en français. Remplacés par l'agrégateur SMS et Redis
-    (phase 2) puis par un stockage objet (phase 7) ; la configuration refuse de démarrer en
-    production tant que c'est le cas.
+16. **SMS sans point unique de défaillance.** Orange Cameroun (API officielle « SMS Cameroon »,
+    tous opérateurs, prix locaux en FCFA, nom d'expéditeur validé par Orange) en principal ;
+    Twilio en secours, utilisé automatiquement si Orange échoue (panne, solde épuisé). La
+    connexion par code SMS ne dépend donc d'aucun fournisseur unique. Le volume quotidien est
+    compté et l'équipe alertée à 80 % puis 100 % d'un seuil. Restent provisoires : stockage sur
+    disque jusqu'au stockage objet (phase 7), langue des messages au destinataire en français.
+    La configuration refuse de démarrer en production avec un fournisseur factice.
 
 17. **Sécurité en profondeur.** Détail des menaces, des protections et des procédures dans
     [`SECURITE.md`](SECURITE.md) : second facteur obligatoire pour l'équipe, plafonds anti-pompage
     de SMS, compte de base restreint, minimisation des données, journaux masqués.
+18. **Événements après validation.** Tout changement de statut passe par
+    `OrderTransitionsService` puis est publié sur `OrderEventsBus` une fois la transaction
+    validée : attribution, temps réel et notifications s'y abonnent sans dépendre les uns des
+    autres, et ne voient jamais un changement annulé. Un abonné en échec ne bloque pas l'action.
+19. **Attribution par tours, sous verrou.** Chaque tour d'attribution d'une commande s'exécute
+    sous un verrou PostgreSQL propre à la commande (`pg_advisory_xact_lock`) : expiration d'une
+    offre, refus et acceptation ne se croisent pas, même sur plusieurs instances. Un index unique
+    partiel garantit une seule offre en attente par livreur. Les échéances passent par des tâches
+    différées BullMQ ; un balayage toutes les 15 s rattrape ce qu'une panne aurait laissé.
+20. **Positions hors de PostgreSQL.** Les positions (toutes les 10 à 15 s) ne vont que dans Redis :
+    index GEO des livreurs en ligne, dernière position avec durée de vie. Seules les positions
+    des preuves (enlèvement, livraison, échec) et des alertes sont gardées en base.
+21. **Temps réel sans état.** Socket.IO avec l'adaptateur Redis : n'importe quelle instance peut
+    émettre vers n'importe quel client. Les événements rafraîchissent les écrans ; l'API REST
+    reste la référence (rien n'est perdu si un événement l'est).
+22. **Notifications tracées et rejouables.** Chaque message est une ligne de `notifications`
+    (statut, fournisseur, essais, repli). Les envois passent par une file (3 essais) ; un code de
+    livraison n'y figure que chiffré, et seulement le temps d'un éventuel repli SMS.
+23. **Argent dans la transaction du statut.** Les écritures d'une commande sont passées par
+    `OrderTransitionHooks`, dans la transaction qui change son statut : statut et argent
+    changent ensemble ou pas du tout. Une livraison est refusée tant que l'encaissement dû n'est
+    pas fait, même forcée par le back-office.
+24. **Paiements Mobile Money derrière `PaymentProvider`.** Prestataire factice capable de simuler
+    les incidents (refus, notification perdue ou répétée, réponse perdue après un envoi) et
+    adaptateur CamPay. Une notification n'est crue qu'après vérification de sa signature, n'est
+    traitée qu'une fois, et son montant doit être celui demandé ; un paiement confirmé après son
+    abandon est tout de même enregistré.
+25. **Aucun reversement en double.** Une seule demande en cours par bénéficiaire (index unique),
+    montant retiré du portefeuille sous verrou à la demande, passage « en cours → envoyé »
+    conditionnel. Si la réponse du prestataire se perd, on lui redemande le statut par notre
+    référence ; on ne renvoie que s'il n'a jamais reçu la demande. Au-delà d'un seuil, la finance
+    valide avant l'envoi.
+26. **Rapprochement chaque nuit.** Grand livre, paiements, reversements, relevé du prestataire et
+    contre-remboursements comparés pour la veille ; écarts listés et alerte à la finance.
 
 ## Cycle de vie d'une commande
 
@@ -148,18 +185,39 @@ stateDiagram-v2
   CANCELLED --> [*]
 ```
 
-## Plan de comptes proposé (à valider en phase 3)
+## Plan de comptes
 
-| Code                             | Type    | Sens                                                     |
-| -------------------------------- | ------- | -------------------------------------------------------- |
-| `platform:mobile_money`          | Actif   | Argent détenu chez l'agrégateur Mobile Money             |
-| `rider:<id>:cash_held`           | Actif   | Espèces encaissées par le livreur et pas encore déposées |
-| `merchant:<id>:payable`          | Passif  | Encaissements dus au marchand                            |
-| `rider:<id>:payable`             | Passif  | Gains dus au livreur                                     |
-| `platform:revenue:commission`    | Produit | Commission de 20 % sur les livraisons                    |
-| `platform:revenue:cod_fees`      | Produit | Frais d'encaissement (2 %, minimum 250 FCFA)             |
-| `platform:expense:provider_fees` | Charge  | Frais Mobile Money                                       |
-| `platform:expense:promotions`    | Charge  | Remises financées par Tara                               |
+Montant positif = débit, négatif = crédit. Les soldes se calculent toujours à partir des lignes.
+
+| Code                             | Type    | Sens                                                                   |
+| -------------------------------- | ------- | ---------------------------------------------------------------------- |
+| `platform:mobile_money`          | Actif   | Argent détenu chez l'agrégateur Mobile Money                           |
+| `platform:office_cash`           | Actif   | Espèces déposées au bureau                                             |
+| `rider:<id>:cash_held`           | Actif   | Espèces encaissées par le livreur et pas encore déposées (dues à Tara) |
+| `platform:orders_prepaid`        | Passif  | Frais de livraison payés, course pas encore terminée                   |
+| `platform:payouts_in_transit`    | Passif  | Reversements demandés, pas encore confirmés                            |
+| `platform:unallocated`           | Passif  | Paiements reçus sans emploi, à rembourser ou affecter                  |
+| `merchant:<id>:payable`          | Passif  | Portefeuille du marchand (encaissements nets, avoirs)                  |
+| `rider:<id>:payable`             | Passif  | Gains dus au livreur                                                   |
+| `customer:<id>:wallet`           | Passif  | Solde Tara d'un client (recharges, avoirs)                             |
+| `platform:revenue:commission`    | Produit | Commission sur les livraisons                                          |
+| `platform:revenue:cod_fees`      | Produit | Frais d'encaissement (2 %, minimum 250 FCFA)                           |
+| `platform:expense:provider_fees` | Charge  | Frais Mobile Money                                                     |
+| `platform:expense:promotions`    | Charge  | Remises financées par Tara                                             |
+| `platform:expense:goodwill`      | Charge  | Avoirs commerciaux                                                     |
+
+### Écritures d'une commande
+
+| Moment                              | Écriture                                                                                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Prépaiement Mobile Money            | Mobile Money ↑ / livraisons payées ↑                                                                                                  |
+| Prépaiement par le solde            | Solde de l'expéditeur ↓ / livraisons payées ↑                                                                                         |
+| Frais en espèces à l'enlèvement     | Espèces du livreur ↑ / livraisons payées ↑                                                                                            |
+| Encaissement à la porte             | Espèces du livreur ou Mobile Money ↑ / livraisons payées ↑ (frais du destinataire), marchand ↑ (COD − frais), frais d'encaissement ↑  |
+| Livraison ou retour                 | Livraisons payées ↓ / gains du livreur ↑, commission ↑ (ou promotions ↓) ; puis le livreur garde sa part sur les espèces de la course |
+| Annulation après prépaiement        | Livraisons payées ↓ / solde de l'expéditeur ↑ (avoir)                                                                                 |
+| Retour non payé par le destinataire | Solde de l'expéditeur ↓ (au besoin négatif) / livraisons payées ↑                                                                     |
+| Reversement demandé, envoyé, échoué | Portefeuille ↓ / en cours ↑ ; puis en cours ↓ / Mobile Money ↓ ; ou en cours ↓ / portefeuille ↑                                       |
 
 ## Développement local
 
@@ -173,20 +231,21 @@ pnpm db:migrate                       # applique les migrations
 pnpm dev                              # API sur http://localhost:3000/health
 ```
 
-| Commande         | Rôle                                        |
-| ---------------- | ------------------------------------------- |
-| `pnpm lint`      | oxlint avec règles typées                   |
-| `pnpm typecheck` | Vérification TypeScript stricte             |
-| `pnpm test`      | Tests unitaires (sans base)                 |
-| `pnpm test:db`   | Tests d'intégration contre PostgreSQL migré |
-| `pnpm format`    | Formatage Prettier                          |
-| `pnpm db:studio` | Explorateur de données Prisma               |
+| Commande                           | Rôle                                            |
+| ---------------------------------- | ----------------------------------------------- |
+| `pnpm lint`                        | oxlint avec règles typées                       |
+| `pnpm typecheck`                   | Vérification TypeScript stricte                 |
+| `pnpm test`                        | Tests unitaires (sans base)                     |
+| `pnpm test:db`                     | Tests d'intégration contre PostgreSQL migré     |
+| `pnpm --filter @tara/api simulate` | Simulateur d'attribution (50 livreurs virtuels) |
+| `pnpm format`                      | Formatage Prettier                              |
+| `pnpm db:studio`                   | Explorateur de données Prisma                   |
 
 ## Questions ouvertes
 
-| Sujet                                          | Options                                                                                            | Quand trancher  |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------- |
-| Agrégateur Mobile Money                        | Comparer les devis de 3 agrégateurs camerounais (frais de collecte et de reversement, API, délais) | Avant phase 3   |
-| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                | Avant phase 3   |
-| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                     | Avant phase 7   |
-| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel  | Après le pilote |
+| Sujet                                          | Options                                                                                                                     | Quand trancher  |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Agrégateur Mobile Money                        | Adaptateur CamPay prêt (à valider sur son bac à sable) ; comparer les devis d'au moins 2 autres agrégateurs avant de signer | Avant le pilote |
+| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                                         | Avant le pilote |
+| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                                              | Avant phase 7   |
+| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel                           | Après le pilote |

@@ -13,6 +13,7 @@ export const RETENTION_DAYS = 30;
 export interface RetentionReport {
   ordersMasked: number;
   notificationsMasked: number;
+  notificationSecretsPurged: number;
   locationLinksMasked: number;
   otpChallengesDeleted: number;
   refreshTokensDeleted: number;
@@ -50,6 +51,10 @@ export class RetentionService {
     const notificationsMasked = await this.prisma.$executeRaw`
       UPDATE notifications SET recipient_phone = NULL
        WHERE recipient_phone IS NOT NULL AND created_at < ${cutoff}`;
+    // Codes de livraison gardés chiffrés pour un éventuel repli SMS : effacés après un jour.
+    const notificationSecretsPurged = await this.prisma.$executeRaw`
+      UPDATE notifications SET payload = payload - 'sealed'
+       WHERE payload ? 'sealed' AND created_at < ${addDays(now, -1)}`;
     const locationLinksMasked = await this.prisma.$executeRaw`
       UPDATE location_links SET recipient_name = NULL, recipient_phone = NULL
        WHERE created_at < ${cutoff} AND (recipient_name IS NOT NULL OR recipient_phone IS NOT NULL)`;
@@ -60,6 +65,7 @@ export class RetentionService {
     return {
       ordersMasked,
       notificationsMasked,
+      notificationSecretsPurged,
       locationLinksMasked,
       otpChallengesDeleted,
       refreshTokensDeleted,

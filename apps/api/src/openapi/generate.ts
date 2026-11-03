@@ -15,6 +15,7 @@ const PLACEHOLDERS: Record<string, string> = {
   CODE_HASH_SECRET: 'openapi-generation-only-0000000000000000',
   STORAGE_ENCRYPTION_KEY: Buffer.alloc(32).toString('base64'),
   JOBS_ENABLED: 'false',
+  REDIS_URL: 'redis://localhost:6379',
 };
 for (const [key, value] of Object.entries(PLACEHOLDERS)) process.env[key] ??= value;
 

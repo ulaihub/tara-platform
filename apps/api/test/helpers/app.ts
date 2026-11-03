@@ -32,7 +32,10 @@ export async function createTestApp(env: Record<string, string> = {}): Promise<T
   let app: NestExpressApplication;
   try {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication<NestExpressApplication>({ logger: ['error'] });
+    app = moduleRef.createNestApplication<NestExpressApplication>({
+      logger: ['error'],
+      rawBody: true,
+    });
     configureApp(app);
     await app.init();
   } finally {
@@ -68,17 +71,20 @@ export interface SignedIn {
   accessToken: string;
   refreshToken: string;
   auth: { Authorization: string };
+  /** Appareil de la session (connexion par SMS uniquement). */
+  installationId?: string;
 }
 
 /** Parcours complet de connexion par SMS, création du compte comprise. */
 export async function signIn(ctx: TestContext, phone = randomPhone()): Promise<SignedIn> {
   const challenge = await request(ctx.http).post('/v1/auth/otp').send({ phone }).expect(201);
+  const installationId = randomUUID();
   const session = await request(ctx.http)
     .post('/v1/auth/otp/verify')
     .send({
       challengeId: challenge.body.challengeId,
       code: otpFrom(ctx.sms, phone),
-      device: { installationId: randomUUID(), platform: 'ANDROID' },
+      device: { installationId, platform: 'ANDROID' },
       termsVersion: '2026-11',
     })
     .expect(200);
@@ -88,6 +94,7 @@ export async function signIn(ctx: TestContext, phone = randomPhone()): Promise<S
     accessToken: session.body.accessToken,
     refreshToken: session.body.refreshToken,
     auth: { Authorization: `Bearer ${session.body.accessToken}` },
+    installationId,
   };
 }
 

@@ -22,6 +22,8 @@ export interface AccessClaims {
   userId: string;
   /** Heure de la dernière vérification du second facteur, si elle a eu lieu. */
   mfaAt: Date | null;
+  /** Fin de validité du jeton (les connexions temps réel sont coupées à cette heure). */
+  expiresAt: Date;
 }
 
 /**
@@ -71,7 +73,8 @@ export class TokenService {
         });
         if (!payload.sub) throw new Error('Jeton sans sujet');
         const mfa = typeof payload['mfa'] === 'number' ? new Date(payload['mfa'] * 1000) : null;
-        return { userId: payload.sub, mfaAt: mfa };
+        const expiresAt = new Date((payload.exp ?? 0) * 1000);
+        return { userId: payload.sub, mfaAt: mfa, expiresAt };
       } catch (error) {
         lastError = error;
       }
