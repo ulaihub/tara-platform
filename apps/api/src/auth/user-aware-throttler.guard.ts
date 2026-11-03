@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { type ExecutionContext, Injectable } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 /**
@@ -9,6 +9,12 @@ import { ThrottlerGuard } from '@nestjs/throttler';
  */
 @Injectable()
 export class UserAwareThrottlerGuard extends ThrottlerGuard {
+  /** Temps réel : débit limité par connexion dans RealtimeGateway. */
+  override canActivate(context: ExecutionContext): Promise<boolean> {
+    if (context.getType() !== 'http') return Promise.resolve(true);
+    return super.canActivate(context);
+  }
+
   protected override getTracker(request: Record<string, unknown>): Promise<string> {
     const user = request['user'] as { id?: string } | undefined;
     if (user?.id) return Promise.resolve(`user:${user.id}`);

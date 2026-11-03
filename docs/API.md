@@ -68,12 +68,91 @@ Après 5 codes faux, le second facteur est bloqué 15 minutes (`MFA_LOCKED`). T�
 | C6       | `promoCode` dans le devis et la commande, `referralCode` à l'inscription ; back-office : `/admin/promo-codes`                                                                                                              |
 | C7       | Back-office : `GET` et `POST /admin/pricing-grids`, `POST /admin/pricing-grids/{id}/activate`, `PATCH /admin/pricing-grids/{id}/surcharges/{code}`                                                                         |
 
-`POST /admin/orders/{id}/transition` permet aux opérations de faire avancer une commande à la main, en attendant l'attribution automatique (phase 2) et l'app livreur (phase 4).
+`POST /admin/orders/{id}/transition` permet aux opérations de forcer un statut en cas d'incident (tracé dans le journal d'audit).
 
 ## Cycle de vie d'une commande à sa création
 
 - Paiement en espèces ou par le destinataire, sans créneau : la commande passe aussitôt en `SEARCHING_RIDER`.
 - Prépaiement Mobile Money ou portefeuille : elle reste en `CREATED` jusqu'au paiement (phase 3).
-- Créneau programmé : elle reste en `CREATED` jusqu'à son lancement automatique (phase 2).
+- Créneau programmé : elle reste en `CREATED` et part en recherche de livreur 20 minutes avant le créneau.
 
-Le code d'enlèvement (4 chiffres) n'est renvoyé qu'une fois, à la création ; s'il est perdu, `POST /orders/{id}/pickup-code` en génère un nouveau. Le code de livraison est créé à l'enlèvement et envoyé par SMS au destinataire.
+Le code d'enlèvement (4 chiffres) n'est renvoyé qu'une fois, à la création ; s'il est perdu, `POST /orders/{id}/pickup-code` en génère un nouveau. Le code de livraison est créé à l'enlèvement et envoyé au destinataire (WhatsApp, ou SMS en repli). Après 5 codes faux saisis par le livreur, le code est bloqué : nouveau code d'enlèvement par l'expéditeur, validation de la livraison par le support.
+
+## Attribution des courses (D1 à D4)
+
+1. Dès qu'une commande passe en `SEARCHING_RIDER`, elle est proposée au livreur en ligne le mieux placé : distance d'approche, courses en cours, espèces détenues et note.
+2. Il a 30 secondes pour répondre. Refus ou silence : la course part au suivant. Après 3 tours sans preneur, elle est diffusée à 5 livreurs à la fois ; le premier qui accepte l'emporte.
+3. Le rayon de recherche s'élargit (3, 5, 8 puis 12 km). Sans livreur, nouvelle tentative toutes les 20 secondes ; après 5 minutes, le dispatch est alerté (temps réel et SMS d'astreinte), une seule fois.
+4. Sont exclus : pièces manquantes ou expirées, plafond d'espèces atteint (en comptant les espèces de la course), 2 courses déjà en cours, une autre proposition en attente. Un livreur qui a refusé ou rendu la course ne la revoit pas.
+
+Le dispatcheur voit les livreurs proches et la raison de chaque exclusion (`GET /admin/orders/{id}/candidates`), l'historique des propositions (`GET /admin/orders/{id}/dispatch`), et peut attribuer ou réattribuer à la main (`POST /admin/orders/{id}/assign`) ; le livreur retiré est prévenu.
+
+Tous les délais sont réglables par variables d'environnement (`DISPATCH_*`, voir `.env.example`).
+
+## Application livreur (E1 à E9)
+
+Toutes les routes sont sous `/v1/rider` et réservées au rôle `RIDER`.
+
+| Étape                 | Route                                                                  | Points d'attention                                                                                                                                              |
+| --------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| En ligne / hors ligne | `PUT /presence`, `GET /presence`                                       | Passage en ligne refusé (`RIDER_NOT_ELIGIBLE`) si une pièce manque ou a expiré ; `blockers` dit laquelle. Hors ligne : les propositions en cours sont refusées. |
+| Position              | `POST /location` ou événement `rider.location`                         | Toutes les 10 à 15 s. Sans position depuis 90 s, le livreur ne reçoit plus de propositions.                                                                     |
+| Propositions          | `GET /offers`, `POST /offers/{id}/accept`, `POST /offers/{id}/decline` | `OFFER_EXPIRED` ou `OFFER_NO_LONGER_AVAILABLE` si un autre a été plus rapide. La proposition ne contient aucune donnée du destinataire.                         |
+| Courses               | `GET /orders?scope=active\|history`, `GET /orders/{id}`                | Contacts et liens Google Maps / Waze visibles seulement pendant la course.                                                                                      |
+| Enlèvement (E3)       | `POST /orders/{id}/pickup`                                             | Code de l'expéditeur + `photoKey` (photo envoyée avant par `POST /media` avec `kind=PROOF_PHOTO`).                                                              |
+| Départ                | `POST /orders/{id}/depart`                                             |                                                                                                                                                                 |
+| Livraison (E4)        | `POST /orders/{id}/deliver`                                            | Code du destinataire + photo. Sans code : `awaitingSupportValidation: true`, le support appelle le destinataire puis valide.                                    |
+| Échec (E6)            | `POST /orders/{id}/fail`                                               | Motif, photo du lieu et journal d'appels (au moins un). L'expéditeur choisit ensuite : `POST /v1/orders/{id}/failure-decision` (`RETRY` ou `RETURN`).           |
+| Nouvelle tentative    | `POST /orders/{id}/retry`                                              |                                                                                                                                                                 |
+| Retour                | `POST /orders/{id}/return`                                             | Code de l'expéditeur (celui de l'enlèvement).                                                                                                                   |
+| Rendre une course     | `POST /orders/{id}/release`                                            | Avant l'enlèvement seulement ; motif obligatoire.                                                                                                               |
+| Gains (E9)            | `GET /earnings?period=day\|week\|month`                                | Périodes à l'heure du Cameroun, la semaine commence le lundi.                                                                                                   |
+| Alerte (E8)           | `POST /alerts`                                                         | Position envoyée au dispatch (temps réel) et par SMS aux numéros d'astreinte.                                                                                   |
+
+**Hors ligne (E7).** Chaque action accepte `latitude`, `longitude`, `occurredAt` (heure de l'action sur le téléphone, 72 h au plus) et `clientEventId` (identifiant unique généré par l'app). L'app met les actions en file sans réseau et les renvoie au retour du réseau : une action déjà reçue n'est pas refaite et la réponse donne l'état actuel de la course.
+
+Back-office : `POST /admin/orders/{id}/validate-delivery` (support ; au-delà de `SUPPORT_VALIDATION_LIMIT` FCFA à encaisser, administrateur), `GET /admin/safety-alerts`, `POST /admin/safety-alerts/{id}/acknowledge`, `POST /admin/safety-alerts/{id}/resolve`.
+
+## Temps réel (F1)
+
+Connexion Socket.IO sur l'espace `/realtime` (même hôte que l'API), avec le jeton d'accès :
+
+```js
+const socket = io('https://api.tara.cm/realtime', {
+  auth: { token: accessToken },
+  transports: ['websocket'],
+});
+```
+
+Jeton absent ou invalide : erreur de connexion `UNAUTHENTICATED`. À l'expiration du jeton, le serveur envoie `session.expired` puis coupe : se reconnecter avec un jeton renouvelé.
+
+| Sens          | Événement           | Contenu                                                                                     | Destinataires                               |
+| ------------- | ------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| app → serveur | `order.subscribe`   | `{ orderId }` ; accusé `{ ok, status, position }` (dernière position connue)                | Expéditeur, livreur de la course, équipe    |
+| app → serveur | `order.unsubscribe` | `{ orderId }`                                                                               |                                             |
+| app → serveur | `rider.location`    | Comme `POST /v1/rider/location` ; une toutes les 2 s au plus                                | Livreurs                                    |
+| serveur → app | `order.status`      | `{ orderId, reference, status, riderId, failureDecision, at }`                              | Abonnés de la commande, expéditeur, livreur |
+| serveur → app | `rider.position`    | `{ orderId, latitude, longitude, heading, speed, at }`                                      | Abonnés de la commande                      |
+| serveur → app | `offer.new`         | Schéma `DispatchOffer`                                                                      | Livreur sollicité                           |
+| serveur → app | `offer.closed`      | `{ offerId, orderId, outcome }`                                                             | Livreur sollicité                           |
+| serveur → app | `ops.*`             | `dispatch-alert`, `safety-alert`, `delivery-validation`, `rider-position` (toutes les 10 s) | Équipe (`ADMIN`, `DISPATCHER`, `SUPPORT`)   |
+
+Les événements servent à rafraîchir l'écran ; l'état qui fait foi reste celui de l'API REST (à relire après une reconnexion).
+
+## Notifications (F3)
+
+- **Push** (Firebase Cloud Messaging) : l'app envoie son jeton après la connexion et à chaque renouvellement, `PUT /v1/me/devices/{installationId}/push-token` (`null` pour arrêter). Les propositions de course sont en priorité haute sur le canal Android `offers` (son et réveil écran verrouillé) ; les autres sur le canal `orders`. `data.type` indique l'écran à ouvrir.
+- **Destinataire** (sans compte) : WhatsApp d'abord, avec des modèles approuvés par Meta nommés `tara_<modèle>` ; SMS si WhatsApp refuse le message ou signale plus tard un échec (webhook `POST /v1/webhooks/whatsapp`, signé).
+- Messages par statut : confirmation au destinataire à la création ; push à l'expéditeur à l'attribution, à l'enlèvement, au départ, à la livraison, à l'échec, au retour et à l'annulation ; code de livraison puis reçu au destinataire ; au livreur, annulation ou retrait de sa course.
+
+## Couverture des exigences de la phase 2
+
+| Exigence | Réalisation                                                                                                                               |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| D1       | Score du livreur (`rider-scoring.ts`), positions Redis GEO                                                                                |
+| D2       | Tours de proposition, diffusion, élargissement du rayon, alerte après 5 min (`dispatch.service.ts`) ; simulateur : 95 % en moins de 2 min |
+| D3       | `GET /admin/orders/{id}/candidates`, `GET /admin/orders/{id}/dispatch`, `POST /admin/orders/{id}/assign`                                  |
+| D4       | Pièces, plafond d'espèces, courses en cours, au passage en ligne et à chaque proposition                                                  |
+| E1 à E9  | Côté serveur : routes `/v1/rider/*` ci-dessus (l'app livreur arrive en phase 4)                                                           |
+| F1       | Socket.IO `/realtime` partagé entre instances par Redis                                                                                   |
+| F3       | Push, WhatsApp, SMS avec repli et nouvelles tentatives (file BullMQ)                                                                      |

@@ -11,6 +11,8 @@ import { setupOpenApiUi } from './openapi/openapi.js';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    // Corps brut conservé pour vérifier la signature des webhooks (WhatsApp, paiements).
+    rawBody: true,
     // Journaux JSON en production (collecte), lisibles en développement ; données masquées.
     logger: new RedactingLogger({ json: process.env['NODE_ENV'] === 'production' }),
   });

@@ -18,7 +18,10 @@ const envSchema = z
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
     DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
-    REDIS_URL: z.url({ protocol: /^rediss?$/ }).optional(),
+    /** Redis 7 : positions des livreurs, files de tâches, limitation de débit, temps réel. */
+    REDIS_URL: z.url({ protocol: /^rediss?$/ }),
+    /** Préfixe des files de tâches (une valeur par environnement partageant un même Redis). */
+    QUEUE_PREFIX: z.string().min(1).default('tara'),
     OSRM_URL: z.url().optional(),
 
     /** Adresse publique des pages web (suivi, lien de localisation). */
@@ -57,12 +60,119 @@ const envSchema = z
     /** Clé de chiffrement des pièces d'identité (AES-256-GCM). */
     STORAGE_ENCRYPTION_KEY: base64Key32,
 
-    SMS_PROVIDER: z.enum(['fake']).default('fake'),
+    /**
+     * SMS : Orange Cameroun (API officielle, tous opérateurs) en principal et Twilio en
+     * secours, utilisé seulement si le principal échoue. « fake » écrit dans le journal.
+     */
+    SMS_PROVIDER: z.enum(['fake', 'orange', 'twilio']).default('fake'),
+    SMS_FALLBACK_PROVIDER: z.enum(['none', 'orange', 'twilio']).default('none'),
+    ORANGE_SMS_CLIENT_ID: z.string().min(8).optional(),
+    ORANGE_SMS_CLIENT_SECRET: z.string().min(8).optional(),
+    /** Numéro du compte Orange émetteur, au format +2376XXXXXXXX. */
+    ORANGE_SMS_SENDER_PHONE: z
+      .string()
+      .regex(/^\+2376\d{8}$/)
+      .optional(),
+    /** Nom d'expéditeur validé par Orange (11 caractères au plus), ex. « TARA ». */
+    ORANGE_SMS_SENDER_NAME: z.string().min(1).max(11).optional(),
+    TWILIO_ACCOUNT_SID: z
+      .string()
+      .regex(/^AC[0-9a-f]{32}$/)
+      .optional(),
+    TWILIO_AUTH_TOKEN: z.string().min(16).optional(),
+    /** Expéditeur Twilio : nom alphanumérique enregistré (ex. TARA) ou numéro E.164. */
+    TWILIO_FROM: z.string().min(1).max(16).optional(),
+    /** Au-delà de ce nombre de SMS dans la journée, l'équipe est alertée (80 % puis 100 %). */
+    SMS_DAILY_ALERT_COUNT: z.coerce.number().int().min(1).default(3000),
+    /** Notifications push (Firebase Cloud Messaging) : compte de service JSON encodé en base64. */
+    PUSH_PROVIDER: z.enum(['fake', 'fcm']).default('fake'),
+    FCM_SERVICE_ACCOUNT_BASE64: z.string().optional(),
+    /** WhatsApp Cloud API (Meta) : désactivé par défaut, les messages partent alors par SMS. */
+    WHATSAPP_PROVIDER: z.enum(['none', 'fake', 'meta']).default('none'),
+    WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+    WHATSAPP_ACCESS_TOKEN: z.string().optional(),
+    /** Version de l'API Graph, ex. « v23.0 » : prendre celle indiquée dans le tableau de bord Meta. */
+    WHATSAPP_API_VERSION: z
+      .string()
+      .regex(/^v\d+\.\d+$/)
+      .optional(),
+    /** Secret de l'app Meta : vérifie la signature des accusés de remise (webhook). */
+    WHATSAPP_APP_SECRET: z.string().min(16).optional(),
+    /** Jeton choisi par Tara, demandé par Meta à l'enregistrement du webhook. */
+    WHATSAPP_VERIFY_TOKEN: z.string().min(16).optional(),
+    /** Numéros de l'équipe prévenus par SMS en cas d'alerte de sécurité d'un livreur (SOS). */
+    OPS_ALERT_PHONES: z.string().default(''),
+
+    /** Attribution des courses (D1, D2). Valeurs réduites par le simulateur. */
+    DISPATCH_OFFER_TIMEOUT_SECONDS: z.coerce.number().min(0.2).max(300).default(30),
+    DISPATCH_SINGLE_OFFER_ROUNDS: z.coerce.number().int().min(1).max(10).default(3),
+    DISPATCH_BROADCAST_SIZE: z.coerce.number().int().min(2).max(20).default(5),
+    DISPATCH_RADII_METERS: z.string().default('3000,5000,8000,12000'),
+    DISPATCH_RETRY_SECONDS: z.coerce.number().min(0.2).max(300).default(20),
+    DISPATCH_ALERT_AFTER_SECONDS: z.coerce.number().min(1).max(3600).default(300),
+    /** Position considérée comme périmée au-delà de ce délai (livreur hors ligne de fait). */
+    RIDER_POSITION_TTL_SECONDS: z.coerce.number().int().min(10).max(600).default(90),
+    /** Au-delà de ce montant à encaisser, une livraison sans code exige un administrateur. */
+    SUPPORT_VALIDATION_LIMIT: z.coerce.number().int().min(0).default(50000),
 
     /** Tâches planifiées (expiration des pièces KYC…). Désactivées dans les tests. */
     JOBS_ENABLED: booleanFlag.default(true),
   })
   .superRefine((env, ctx) => {
+    if (env.PUSH_PROVIDER === 'fcm' && !env.FCM_SERVICE_ACCOUNT_BASE64) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['FCM_SERVICE_ACCOUNT_BASE64'],
+        message: 'requis avec PUSH_PROVIDER=fcm',
+      });
+    }
+    if (env.WHATSAPP_PROVIDER === 'meta') {
+      for (const key of [
+        'WHATSAPP_PHONE_NUMBER_ID',
+        'WHATSAPP_ACCESS_TOKEN',
+        'WHATSAPP_API_VERSION',
+        'WHATSAPP_APP_SECRET',
+        'WHATSAPP_VERIFY_TOKEN',
+      ] as const) {
+        if (!env[key])
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: 'requis avec WHATSAPP_PROVIDER=meta',
+          });
+      }
+    }
+    const required: Record<'orange' | 'twilio', (keyof typeof env)[]> = {
+      orange: ['ORANGE_SMS_CLIENT_ID', 'ORANGE_SMS_CLIENT_SECRET', 'ORANGE_SMS_SENDER_PHONE'],
+      twilio: ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_FROM'],
+    };
+    for (const provider of [env.SMS_PROVIDER, env.SMS_FALLBACK_PROVIDER]) {
+      if (provider !== 'orange' && provider !== 'twilio') continue;
+      for (const key of required[provider]) {
+        if (!env[key]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `requis avec le fournisseur SMS ${provider}`,
+          });
+        }
+      }
+    }
+    if (env.SMS_FALLBACK_PROVIDER !== 'none' && env.SMS_FALLBACK_PROVIDER === env.SMS_PROVIDER) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SMS_FALLBACK_PROVIDER'],
+        message: 'le secours doit être un autre fournisseur que le principal',
+      });
+    }
+    const radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
+    if (radii.some((r) => !Number.isInteger(r) || r <= 0)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['DISPATCH_RADII_METERS'],
+        message: 'liste de rayons en mètres attendue',
+      });
+    }
     if (env.NODE_ENV !== 'production') return;
     if (env.SMS_PROVIDER === 'fake') {
       ctx.addIssue({
@@ -76,6 +186,13 @@ const envSchema = z
         code: 'custom',
         path: ['TRUST_PROXY'],
         message: 'interdit en production : préciser le nombre de relais ou leurs adresses',
+      });
+    }
+    if (env.PUSH_PROVIDER === 'fake') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['PUSH_PROVIDER'],
+        message: 'le fournisseur de notifications push factice est interdit en production',
       });
     }
     if (env.STORAGE_DRIVER === 'local') {

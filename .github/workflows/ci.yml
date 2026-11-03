@@ -33,6 +33,15 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
 
     # Comme en production : migrations par le compte propriétaire, API et tests par le
     # compte restreint (voir infra/postgres/roles.sql). Mots de passe propres à la CI.
@@ -40,6 +49,7 @@ jobs:
       ADMIN_DATABASE_URL: postgresql://tara:tara@localhost:5432/tara
       MIGRATION_DATABASE_URL: postgresql://tara_migrator:migrator-ci@localhost:5432/tara
       DATABASE_URL: postgresql://tara_app:app-ci@localhost:5432/tara
+      TEST_REDIS_URL: redis://localhost:6379/1
 
     steps:
       - uses: actions/checkout@v5

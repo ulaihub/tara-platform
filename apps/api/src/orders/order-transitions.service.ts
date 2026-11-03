@@ -5,9 +5,9 @@ import { AppError } from '../common/errors/app-error.js';
 import { hashCode, randomDigits } from '../common/crypto.js';
 import type { Order, Prisma } from '../generated/prisma/client.js';
 import type { ActorRole, FailureReason, OrderStatus } from '../generated/prisma/enums.js';
+import { OrderEventsBus, type OrderChange } from '../events/order-events.bus.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { checkTransition } from './order-state-machine.js';
-import { RecipientNotifier } from './recipient-notifier.js';
 
 export interface TransitionActor {
   /** Utilisateur à l'origine de l'action ; null pour le système. */
@@ -27,10 +27,14 @@ export interface TransitionOptions {
   clientEventId?: string | undefined;
 }
 
-interface TransitionResult {
+export interface TransitionResult {
   order: Order;
   /** Code de livraison en clair, généré à l'enlèvement, à envoyer après validation. */
   deliveryCode: string | null;
+  /** Code de retour en clair, généré à l'échec, à envoyer à l'expéditeur. */
+  returnCode: string | null;
+  /** À publier une fois la transaction validée (voir OrderEventsBus). */
+  change: OrderChange;
 }
 
 /**
@@ -42,7 +46,7 @@ interface TransitionResult {
 export class OrderTransitionsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly notifier: RecipientNotifier,
+    private readonly events: OrderEventsBus,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -70,11 +74,14 @@ export class OrderTransitionsService {
       if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
       return this.applyIn(tx, order, to, actor, options);
     });
-    if (result.deliveryCode) await this.notifier.deliveryCode(result.order, result.deliveryCode);
+    await this.events.publish(result.change);
     return result.order;
   }
 
-  /** Variante utilisable dans une transaction existante (création de commande). */
+  /**
+   * Variante utilisable dans une transaction existante. L'appelant publie `change` une fois
+   * la transaction validée : un abonné ne doit jamais voir un changement annulé ensuite.
+   */
   async applyIn(
     tx: Prisma.TransactionClient,
     order: Order,
@@ -104,21 +111,29 @@ export class OrderTransitionsService {
           ]);
       }
     }
-    if (actor.role === 'RIDER') await this.assertAssignedRider(tx, order, actor.id);
+    if (actor.role === 'RIDER') {
+      // Le livreur agit sur une course qui lui est attribuée, ou accepte celle qu'on lui propose.
+      await this.assertRider(tx, to === 'ASSIGNED' ? options.riderId : order.riderId, actor.id);
+    }
 
     const now = new Date();
     let deliveryCode: string | null = null;
+    let returnCode: string | null = null;
     const data: Prisma.OrderUpdateManyMutationInput & { riderId?: string | null } = { status: to };
     switch (to) {
       case 'ASSIGNED':
         data.riderId = options.riderId ?? null;
         data.assignedAt = now;
+        data.searchingSince = null;
         break;
       case 'SEARCHING_RIDER':
         if (order.status === 'ASSIGNED') {
           data.riderId = null;
           data.assignedAt = null;
         }
+        // Nouvelle recherche : le délai d'alerte au dispatch repart de zéro (D2).
+        data.searchingSince = now;
+        data.dispatchAlertedAt = null;
         break;
       case 'PICKED_UP':
         deliveryCode = randomDigits(4);
@@ -127,6 +142,16 @@ export class OrderTransitionsService {
         break;
       case 'DELIVERY_FAILED':
         data.attemptCount = { increment: 1 };
+        data.failureDecision = null;
+        // Le livreur connaît le code d'enlèvement : un retour se valide avec un code neuf,
+        // envoyé à l'expéditeur seul (sinon le livreur pourrait déclarer un retour fictif).
+        returnCode = randomDigits(4);
+        data.pickupCodeHash = hashCode(
+          this.env.CODE_HASH_SECRET,
+          `pickup:${order.reference}`,
+          returnCode,
+        );
+        data.pickupCodeFailures = 0;
         break;
       case 'DELIVERED':
         data.deliveredAt = now;
@@ -134,6 +159,7 @@ export class OrderTransitionsService {
       case 'CANCELLED':
         data.cancelledAt = now;
         data.cancelReason = options.note ?? null;
+        data.searchingSince = null;
         break;
       default:
         break;
@@ -170,15 +196,23 @@ export class OrderTransitionsService {
       await tx.address.update({ where: { id: order.dropoffAddressId }, data: { verifiedAt: now } });
     }
 
-    return { order: await tx.order.findUniqueOrThrow({ where: { id: order.id } }), deliveryCode };
+    const updated = await tx.order.findUniqueOrThrow({ where: { id: order.id } });
+    return {
+      order: updated,
+      deliveryCode,
+      returnCode,
+      change: { order: updated, from: order.status, to, actor, deliveryCode, returnCode },
+    };
   }
 
-  private async assertAssignedRider(
+  private async assertRider(
     tx: Prisma.TransactionClient,
-    order: Order,
+    riderId: string | null | undefined,
     userId: string | null,
   ): Promise<void> {
     const rider = userId ? await tx.riderProfile.findUnique({ where: { userId } }) : null;
-    if (!rider || rider.id !== order.riderId) throw new AppError('FORBIDDEN', HttpStatus.FORBIDDEN);
+    if (!rider || !riderId || rider.id !== riderId) {
+      throw new AppError('FORBIDDEN', HttpStatus.FORBIDDEN);
+    }
   }
 }
