@@ -193,6 +193,15 @@ tara-platform/
     le poids au téléchargement (25 Mo au plus) et une fois installée (32 Mo au plus). La CI
     contrôle les deux sur les APK ARM (`tool/apk_report.py`). Google Maps aurait allégé l'app
     de 11 Mo, mais au prix d'une clé tierce, sans carte hors connexion ni maîtrise des styles.
+32. **Trajet des courses enregistré.** Sécurité du livreur et des colis, preuves en cas de
+    litige, détection des fraudes : chaque position reçue pendant une course (de
+    l'acceptation à la fin, jamais en dehors) est gardée, un point toutes les ~10 s ; les
+    positions prises sans réseau arrivent en lot au retour du réseau. Les points ne sont
+    jamais modifiés (droit retiré au compte de l'API) et sont effacés après 90 jours, sauf
+    litige ou incident ouvert ; le résumé reste avec la commande. Consultation par l'équipe
+    seulement (support, dispatch, administrateur), chaque consultation tracée. Alertes au
+    support : action validée loin de l'adresse, long arrêt avec le colis, position simulée,
+    trajet coupé.
 
 ## Cycle de vie d'une commande
 
@@ -276,11 +285,12 @@ pnpm dev                              # API sur http://localhost:3000/health
 
 ## Questions ouvertes
 
-| Sujet                                          | Options                                                                                                                                       | Quand trancher       |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| Agrégateur Mobile Money                        | Adaptateur CamPay prêt (à valider sur son bac à sable) ; comparer les devis d'au moins 2 autres agrégateurs avant de signer                   | Avant le pilote      |
-| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                                                           | Avant le pilote      |
-| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                                                                | Avant phase 7        |
-| Déclarations Google Play                       | Service au premier plan « position » et données de localisation à déclarer dans la Play Console (formulaire et courte vidéo)                  | Avant la publication |
-| Notifications FCM                              | Jeton classique utilisé ; passer à l'identifiant d'installation (nouvelle API Firebase) quand l'envoi côté serveur aura été adapté et vérifié | Après le pilote      |
-| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel                                             | Après le pilote      |
+| Sujet                                          | Options                                                                                                                                                            | Quand trancher       |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| Agrégateur Mobile Money                        | Adaptateur CamPay prêt (à valider sur son bac à sable) ; comparer les devis d'au moins 2 autres agrégateurs avant de signer                                        | Avant le pilote      |
+| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                                                                                | Avant le pilote      |
+| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                                                                                     | Avant phase 7        |
+| Déclarations Google Play                       | Service au premier plan « position » et données de localisation à déclarer dans la Play Console (formulaire et courte vidéo)                                       | Avant la publication |
+| Notifications FCM                              | Jeton classique utilisé ; passer à l'identifiant d'installation (nouvelle API Firebase) quand l'envoi côté serveur aura été adapté et vérifié                      | Après le pilote      |
+| Information des livreurs sur le trajet         | Mention du trajet enregistré dans les conditions d'utilisation livreur et la déclaration du traitement à l'APDP (finalités, 90 jours, accès de l'équipe seulement) | Avant le pilote      |
+| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel                                                                  | Après le pilote      |

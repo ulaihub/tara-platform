@@ -67,6 +67,22 @@ export class PrivacyService {
         dropoffAddress: { select: { landmark: true } },
       },
     });
+    // Trajets de ses courses (droit d'accès du livreur ; consultation réservée à l'équipe).
+    const trackPoints = user.rider
+      ? await this.prisma.courseTrackPoint.findMany({
+          where: { riderId: user.rider.id },
+          orderBy: { recordedAt: 'asc' },
+          select: {
+            recordedAt: true,
+            latitude: true,
+            longitude: true,
+            accuracy: true,
+            speed: true,
+            mocked: true,
+            order: { select: { reference: true } },
+          },
+        })
+      : [];
     await this.audit.record({
       actor,
       action: 'user.data_exported',
@@ -95,6 +111,10 @@ export class PrivacyService {
             guarantorPhone: user.rider.guarantorPhone,
             documents: user.rider.documents,
             safetyAlerts: user.rider.safetyAlerts,
+            courseTracks: trackPoints.map(({ order, ...point }) => ({
+              reference: order.reference,
+              ...point,
+            })),
           }
         : null,
       consents: user.consents.map(({ kind, version, granted, createdAt }) => ({

@@ -32,6 +32,8 @@ export const PositionBody = z.object({
   speed: z.number().min(0).max(100).optional(),
   accuracy: z.number().min(0).max(10_000).optional(),
   recordedAt: z.iso.datetime().optional(),
+  /** Position simulée signalée par le téléphone (application de fausse position). */
+  mocked: z.boolean().optional(),
 });
 
 export const PresenceBody = PositionBody.extend({ online: z.boolean() });

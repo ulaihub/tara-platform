@@ -18,6 +18,7 @@ export type RealtimeEvent =
   | 'ops.rider-position'
   | 'ops.sms-volume'
   | 'ops.finance-alert'
+  | 'ops.course-alert'
   | 'payment.status'
   | 'payout.status'
   | 'session.expired';

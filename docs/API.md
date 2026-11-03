@@ -47,6 +47,17 @@ Après 5 codes faux, le second facteur est bloqué 15 minutes (`MFA_LOCKED`). T�
 - `GET /v1/me/export` : toutes les données du compte, en fichier JSON (3 fois par heure au plus).
 - Suppression du compte : `POST /v1/me/deletion/code` envoie un code SMS dédié, puis `POST /v1/me/deletion` avec `{ challengeId, code }`. Refusée pour un livreur ou l’équipe (passer par le support), et tant qu’une commande est en cours.
 - Les coordonnées des destinataires sont masquées 30 jours après la fin de la commande.
+- Trajet des courses : points détaillés effacés 90 jours après la course, sauf litige (ticket ouvert) ou incident (alerte non traitée) ; le résumé (distance, durées, arrêts) reste avec la commande. Le livreur retrouve ses trajets dans `GET /v1/me/export`.
+
+## Trajet des courses (sécurité, litiges, fraude)
+
+Chaque position reçue pendant une course (de l'acceptation à la livraison, au retour ou à l'annulation) est enregistrée, un point toutes les ~10 s ; jamais en dehors d'une course. Les points ne sont jamais modifiés (le compte de l'API n'en a pas le droit).
+
+| Qui     | Route                                                                                                              | Points d'attention                                                                                                                                                                                                                                                                                                                                |
+| ------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Livreur | `POST /v1/rider/orders/{id}/track` `{ points: [{ latitude, longitude, recordedAt, accuracy?, speed?, mocked? }] }` | Positions gardées sur le téléphone sans réseau (720 au plus par envoi). Seuls les points de la course sont gardés (`ignored` pour les autres) ; un renvoi est sans effet. `mocked` : position simulée signalée par Android.                                                                                                                       |
+| Équipe  | `GET /v1/admin/orders/{id}/track`                                                                                  | Support, dispatch, administrateur : points, résumé et alertes. Chaque consultation est tracée dans le journal d'audit.                                                                                                                                                                                                                            |
+| Équipe  | `GET /v1/admin/course-alerts?status=open\|all`, `POST /v1/admin/course-alerts/{id}/acknowledge`                    | Alertes (une par sujet et par course, aussi en temps réel : `ops.course-alert`) : `ACTION_FAR` (enlèvement, livraison ou retour validé à plus de 200 m de l'adresse), `LONG_STOP` (plus de 15 min au même endroit avec le colis, loin du vendeur et du client), `MOCK_LOCATION` (position simulée), `TRACK_GAP` (aucune position pendant 20 min). |
 
 ## Couverture des exigences de la phase 1
 

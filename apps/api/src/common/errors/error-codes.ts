@@ -171,6 +171,7 @@ export const ERROR_MESSAGES = {
 
   // Commandes (C1 à C5)
   ORDER_NOT_FOUND: { fr: 'Commande introuvable.', en: 'Order not found.' },
+  COURSE_ALERT_NOT_FOUND: { fr: 'Alerte introuvable.', en: 'Alert not found.' },
   ORDER_NOT_IN_PROGRESS: {
     fr: 'Cette course n’est plus en cours.',
     en: 'This job is no longer in progress.',

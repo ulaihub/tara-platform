@@ -21,6 +21,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { DistanceService, type GeoPoint } from '../routing/distance.service.js';
+import { CourseTrackService } from '../tracking/course-track.service.js';
 import { MediaService } from '../storage/media.service.js';
 import type {
   DeliverBody,
@@ -68,6 +69,7 @@ export class RiderOrdersService {
     private readonly finance: OrderFinanceService,
     private readonly onlineTime: OnlineTimeService,
     private readonly distance: DistanceService,
+    private readonly tracks: CourseTrackService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -229,6 +231,7 @@ export class RiderOrdersService {
       photoKey: body.photoKey,
       codeVerified: true,
     });
+    await this.tracks.checkAction(order, 'PICKUP', body, order.pickupAddress);
     return this.get(userId, orderId);
   }
 
@@ -290,6 +293,7 @@ export class RiderOrdersService {
           order.codAmount + (order.feePayer === 'RECIPIENT' ? order.totalPrice : 0),
         at: proof.occurredAt.toISOString(),
       });
+      await this.tracks.checkAction(order, 'DELIVERY', body, order.dropoffAddress);
       return this.get(userId, orderId);
     }
     assertTransition(order, 'DELIVERED');
@@ -299,6 +303,7 @@ export class RiderOrdersService {
       photoKey: body.photoKey,
       codeVerified: true,
     });
+    await this.tracks.checkAction(order, 'DELIVERY', body, order.dropoffAddress);
     return this.get(userId, orderId);
   }
 
@@ -355,6 +360,7 @@ export class RiderOrdersService {
       photoKey: body.photoKey ?? null,
       codeVerified: true,
     });
+    await this.tracks.checkAction(order, 'RETURN', body, order.pickupAddress);
     return this.get(userId, orderId);
   }
 

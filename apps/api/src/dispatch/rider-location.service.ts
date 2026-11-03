@@ -3,6 +3,7 @@ import { AppError } from '../common/errors/app-error.js';
 import { cameroonDate } from '../common/time.js';
 import type { RiderProfile } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { CourseTrackService } from '../tracking/course-track.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { uncoveredDocuments } from '../riders/riders.service.js';
 import { ACTIVE_RIDER_STATUSES, DispatchService } from './dispatch.service.js';
@@ -28,6 +29,7 @@ export class RiderLocationService {
     private readonly dispatch: DispatchService,
     private readonly realtime: RealtimeService,
     private readonly onlineTime: OnlineTimeService,
+    private readonly tracks: CourseTrackService,
   ) {}
 
   async riderOf(userId: string): Promise<RiderProfile & { documents: { id: string }[] }> {
@@ -101,6 +103,14 @@ export class RiderLocationService {
     });
     for (const order of active) {
       this.realtime.toOrder(order.id, 'rider.position', { orderId: order.id, ...payload });
+    }
+    // Trajet de la course enregistré pendant la course seulement (sécurité, litiges).
+    if (active.length > 0) {
+      await this.tracks.record(
+        id,
+        active.map((order) => order.id),
+        position,
+      );
     }
     const now = Date.now();
     if ((this.lastOpsEmit.get(id) ?? 0) + OPS_POSITION_INTERVAL_MS <= now) {

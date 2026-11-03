@@ -76,6 +76,7 @@ function position(body: z.output<typeof PositionBody>) {
     heading: body.heading,
     speed: body.speed,
     accuracy: body.accuracy,
+    mocked: body.mocked,
     at: body.recordedAt ? new Date(body.recordedAt) : new Date(),
   };
 }

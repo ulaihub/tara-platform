@@ -440,36 +440,37 @@ model User {
   totpFailedAttempts Int       @default(0) @map("totp_failed_attempts")
   totpLockedUntil    DateTime? @map("totp_locked_until") @db.Timestamptz(3)
 
-  merchant             MerchantProfile?
-  rider                RiderProfile?          @relation("RiderUser")
-  devices              Device[]
-  refreshTokens        RefreshToken[]
-  consents             Consent[]
-  addresses            Address[]
-  locationLinks        LocationLink[]
-  orderBatches         OrderBatch[]
-  sentOrders           Order[]
-  orderEvents          OrderEvent[]
-  validatedProofs      DeliveryProof[]
-  ratingsGiven         Rating[]               @relation("RatingsGiven")
-  ratingsReceived      Rating[]               @relation("RatingsReceived")
-  payments             Payment[]
-  promoRedemptions     PromoRedemption[]
-  referralsMade        Referral[]             @relation("Referrer")
-  referredBy           Referral?              @relation("Referee")
-  ridersApproved       RiderProfile[]         @relation("RiderApprovedBy")
-  kycReviews           KycDocument[]
-  pricingGridsCreated  PricingGrid[]
-  journalEntriesPosted JournalEntry[]
-  notifications        Notification[]
-  ticketsOpened        Ticket[]               @relation("TicketOpenedBy")
-  ticketsAssigned      Ticket[]               @relation("TicketAssignee")
-  ticketMessages       TicketMessage[]
-  mediaFiles           MediaFile[]
-  safetyAlertsHandled  SafetyAlert[]
-  payoutsReceived      Payout[]               @relation("PayoutUser")
-  payoutsApproved      Payout[]               @relation("PayoutApprover")
-  reconciliationsRun   ReconciliationReport[]
+  merchant                 MerchantProfile?
+  rider                    RiderProfile?          @relation("RiderUser")
+  devices                  Device[]
+  refreshTokens            RefreshToken[]
+  consents                 Consent[]
+  addresses                Address[]
+  locationLinks            LocationLink[]
+  orderBatches             OrderBatch[]
+  sentOrders               Order[]
+  orderEvents              OrderEvent[]
+  validatedProofs          DeliveryProof[]
+  ratingsGiven             Rating[]               @relation("RatingsGiven")
+  ratingsReceived          Rating[]               @relation("RatingsReceived")
+  payments                 Payment[]
+  promoRedemptions         PromoRedemption[]
+  referralsMade            Referral[]             @relation("Referrer")
+  referredBy               Referral?              @relation("Referee")
+  ridersApproved           RiderProfile[]         @relation("RiderApprovedBy")
+  kycReviews               KycDocument[]
+  pricingGridsCreated      PricingGrid[]
+  journalEntriesPosted     JournalEntry[]
+  notifications            Notification[]
+  ticketsOpened            Ticket[]               @relation("TicketOpenedBy")
+  ticketsAssigned          Ticket[]               @relation("TicketAssignee")
+  ticketMessages           TicketMessage[]
+  mediaFiles               MediaFile[]
+  safetyAlertsHandled      SafetyAlert[]
+  payoutsReceived          Payout[]               @relation("PayoutUser")
+  payoutsApproved          Payout[]               @relation("PayoutApprover")
+  courseAlertsAcknowledged CourseAlert[]          @relation("CourseAlertAcknowledgedBy")
+  reconciliationsRun       ReconciliationReport[]
 
   @@map("users")
 }
@@ -551,22 +552,22 @@ model Consent {
 // -----------------------------------------------------------------------------
 
 model MerchantProfile {
-  id             String              @id @default(uuid(7)) @db.Uuid
-  userId         String              @unique @map("user_id") @db.Uuid
-  shopName       String              @map("shop_name")
-  category       String?
+  id                   String              @id @default(uuid(7)) @db.Uuid
+  userId               String              @unique @map("user_id") @db.Uuid
+  shopName             String              @map("shop_name")
+  category             String?
   /// Numéro Mobile Money de reversement (G3).
-  payoutPhone    String              @map("payout_phone")
-  payoutOperator MobileMoneyOperator @map("payout_operator")
-  payoutSchedule PayoutSchedule      @default(DAILY) @map("payout_schedule")
+  payoutPhone          String              @map("payout_phone")
+  payoutOperator       MobileMoneyOperator @map("payout_operator")
+  payoutSchedule       PayoutSchedule      @default(DAILY) @map("payout_schedule")
   /// Dernier changement du numéro de reversement : reversements gelés pendant PAYOUT_HOLD_HOURS.
-  payoutPhoneChangedAt DateTime?     @map("payout_phone_changed_at") @db.Timestamptz(3)
-  plan           MerchantPlan        @default(FREE)
-  planRenewsAt   DateTime?           @map("plan_renews_at") @db.Timestamptz(3)
-  rccm           String?
-  niu            String?
-  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  payoutPhoneChangedAt DateTime?           @map("payout_phone_changed_at") @db.Timestamptz(3)
+  plan                 MerchantPlan        @default(FREE)
+  planRenewsAt         DateTime?           @map("plan_renews_at") @db.Timestamptz(3)
+  rccm                 String?
+  niu                  String?
+  createdAt            DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user          User           @relation(fields: [userId], references: [id])
   orders        Order[]
@@ -577,30 +578,30 @@ model MerchantProfile {
 }
 
 model RiderProfile {
-  id              String      @id @default(uuid(7)) @db.Uuid
-  userId          String      @unique @map("user_id") @db.Uuid
-  status          RiderStatus @default(PENDING)
-  vehicleType     VehicleType @default(MOTORBIKE) @map("vehicle_type")
-  plateNumber     String?     @map("plate_number")
+  id                    String      @id @default(uuid(7)) @db.Uuid
+  userId                String      @unique @map("user_id") @db.Uuid
+  status                RiderStatus @default(PENDING)
+  vehicleType           VehicleType @default(MOTORBIKE) @map("vehicle_type")
+  plateNumber           String?     @map("plate_number")
   /// Plafond d'espèces détenues, en FCFA (G5, D4).
-  cashLimit       Int         @default(50000) @map("cash_limit")
+  cashLimit             Int         @default(50000) @map("cash_limit")
   /// Caution exigée pour le kit, en FCFA.
-  depositRequired Int         @default(15000) @map("deposit_required")
-  ratingSum       Int         @default(0) @map("rating_sum")
-  ratingCount     Int         @default(0) @map("rating_count")
-  guarantorName   String?     @map("guarantor_name")
-  guarantorPhone  String?     @map("guarantor_phone")
+  depositRequired       Int         @default(15000) @map("deposit_required")
+  ratingSum             Int         @default(0) @map("rating_sum")
+  ratingCount           Int         @default(0) @map("rating_count")
+  guarantorName         String?     @map("guarantor_name")
+  guarantorPhone        String?     @map("guarantor_phone")
   /// Proche prévenu par SMS si le livreur déclenche une alerte de sécurité (facultatif).
-  emergencyContactName  String? @map("emergency_contact_name")
-  emergencyContactPhone String? @map("emergency_contact_phone")
-  approvedAt      DateTime?   @map("approved_at") @db.Timestamptz(3)
-  approvedById    String?     @map("approved_by_id") @db.Uuid
-  suspendedReason String?     @map("suspended_reason")
-  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  emergencyContactName  String?     @map("emergency_contact_name")
+  emergencyContactPhone String?     @map("emergency_contact_phone")
+  approvedAt            DateTime?   @map("approved_at") @db.Timestamptz(3)
+  approvedById          String?     @map("approved_by_id") @db.Uuid
+  suspendedReason       String?     @map("suspended_reason")
+  createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user           User            @relation("RiderUser", fields: [userId], references: [id])
-  approvedBy     User?           @relation("RiderApprovedBy", fields: [approvedById], references: [id])
+  user           User                 @relation("RiderUser", fields: [userId], references: [id])
+  approvedBy     User?                @relation("RiderApprovedBy", fields: [approvedById], references: [id])
   documents      KycDocument[]
   orders         Order[]
   offers         DispatchOffer[]
@@ -609,6 +610,9 @@ model RiderProfile {
   payouts        Payout[]
   safetyAlerts   SafetyAlert[]
   onlineSessions RiderOnlineSession[]
+  trackPoints    CourseTrackPoint[]
+  courseTracks   CourseTrack[]
+  courseAlerts   CourseAlert[]
 
   @@index([status])
   @@map("rider_profiles")
@@ -908,13 +912,13 @@ model Order {
   deliveredAt          DateTime?        @map("delivered_at") @db.Timestamptz(3)
   cancelledAt          DateTime?        @map("cancelled_at") @db.Timestamptz(3)
 
-  sender          User             @relation(fields: [senderId], references: [id])
-  merchant        MerchantProfile? @relation(fields: [merchantId], references: [id])
-  batch           OrderBatch?      @relation(fields: [batchId], references: [id])
-  pickupAddress   Address          @relation("OrderPickup", fields: [pickupAddressId], references: [id])
-  dropoffAddress  Address          @relation("OrderDropoff", fields: [dropoffAddressId], references: [id])
-  pricingGrid     PricingGrid      @relation(fields: [pricingGridId], references: [id])
-  rider           RiderProfile?    @relation(fields: [riderId], references: [id])
+  sender          User               @relation(fields: [senderId], references: [id])
+  merchant        MerchantProfile?   @relation(fields: [merchantId], references: [id])
+  batch           OrderBatch?        @relation(fields: [batchId], references: [id])
+  pickupAddress   Address            @relation("OrderPickup", fields: [pickupAddressId], references: [id])
+  dropoffAddress  Address            @relation("OrderDropoff", fields: [dropoffAddressId], references: [id])
+  pricingGrid     PricingGrid        @relation(fields: [pricingGridId], references: [id])
+  rider           RiderProfile?      @relation(fields: [riderId], references: [id])
   events          OrderEvent[]
   proofs          DeliveryProof[]
   offers          DispatchOffer[]
@@ -926,6 +930,9 @@ model Order {
   notifications   Notification[]
   tickets         Ticket[]
   safetyAlerts    SafetyAlert[]
+  trackPoints     CourseTrackPoint[]
+  tracks          CourseTrack[]
+  courseAlerts    CourseAlert[]
 
   @@index([status, scheduledFor])
   @@index([riderId, status])
@@ -1067,6 +1074,91 @@ model RiderOnlineSession {
 
   @@index([riderId, startedAt])
   @@map("rider_online_sessions")
+}
+
+/// Point du trajet d'une course : enregistré de l'acceptation à la fin de la course, jamais
+/// en dehors. Consultable par l'équipe seulement (consultations tracées), effacé après
+/// 90 jours sauf litige ou incident encore ouvert. Jamais modifié (droits de l'API).
+model CourseTrackPoint {
+  id         BigInt   @id @default(autoincrement())
+  orderId    String   @map("order_id") @db.Uuid
+  riderId    String   @map("rider_id") @db.Uuid
+  recordedAt DateTime @map("recorded_at") @db.Timestamptz(3)
+  latitude   Float
+  longitude  Float
+  accuracy   Float?
+  speed      Float?
+  /// Position simulée signalée par le téléphone (application de fausse position).
+  mocked     Boolean  @default(false)
+  /// Reçue en différé : gardée sur le téléphone faute de réseau.
+  late       Boolean  @default(false)
+  receivedAt DateTime @default(now()) @map("received_at") @db.Timestamptz(3)
+
+  order Order        @relation(fields: [orderId], references: [id])
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+
+  @@unique([orderId, riderId, recordedAt])
+  @@index([recordedAt])
+  @@map("course_track_points")
+}
+
+/// Résumé du trajet d'un livreur sur une course, calculé à la fin et gardé avec la commande.
+model CourseTrack {
+  orderId            String    @map("order_id") @db.Uuid
+  riderId            String    @map("rider_id") @db.Uuid
+  pointCount         Int       @map("point_count")
+  distanceMeters     Int       @map("distance_meters")
+  startedAt          DateTime? @map("started_at") @db.Timestamptz(3)
+  endedAt            DateTime? @map("ended_at") @db.Timestamptz(3)
+  longestGapSeconds  Int       @map("longest_gap_seconds")
+  longestStopSeconds Int       @map("longest_stop_seconds")
+  mockedPoints       Int       @map("mocked_points")
+  computedAt         DateTime  @map("computed_at") @db.Timestamptz(3)
+  /// Points détaillés effacés (fin de la conservation de 90 jours).
+  pointsPurgedAt     DateTime? @map("points_purged_at") @db.Timestamptz(3)
+
+  order Order        @relation(fields: [orderId], references: [id])
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+
+  /// Une course réattribuée a un trajet par livreur.
+  @@id([orderId, riderId])
+  @@map("course_tracks")
+}
+
+enum CourseAlertKind {
+  /// Enlèvement, livraison ou retour validé loin de l'adresse.
+  ACTION_FAR
+  /// Arrêt prolongé avec le colis à bord, loin du vendeur et du client.
+  LONG_STOP
+  /// Position simulée par une application.
+  MOCK_LOCATION
+  /// Plus aucune position reçue pendant longtemps.
+  TRACK_GAP
+
+  @@map("course_alert_kind")
+}
+
+/// Alerte du support née du trajet d'une course (une par sujet et par course).
+model CourseAlert {
+  id               String          @id @default(uuid(7)) @db.Uuid
+  orderId          String          @map("order_id") @db.Uuid
+  riderId          String          @map("rider_id") @db.Uuid
+  kind             CourseAlertKind
+  /// Sujet unique dans la course (ex. « ACTION_FAR:DELIVERY ») : pas de doublon.
+  dedupeKey        String          @map("dedupe_key")
+  details          Json
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  acknowledgedAt   DateTime?       @map("acknowledged_at") @db.Timestamptz(3)
+  acknowledgedById String?         @map("acknowledged_by_id") @db.Uuid
+  note             String?
+
+  order          Order        @relation(fields: [orderId], references: [id])
+  rider          RiderProfile @relation(fields: [riderId], references: [id])
+  acknowledgedBy User?        @relation("CourseAlertAcknowledgedBy", fields: [acknowledgedById], references: [id])
+
+  @@unique([orderId, dedupeKey])
+  @@index([acknowledgedAt, createdAt])
+  @@map("course_alerts")
 }
 
 /// Notation réciproque expéditeur ↔ livreur (F4).

@@ -3046,6 +3046,9 @@
                     "type": "string",
                     "format": "date-time"
                   },
+                  "mocked": {
+                    "type": "boolean"
+                  },
                   "online": {
                     "type": "boolean"
                   }
@@ -3144,6 +3147,9 @@
                   "recordedAt": {
                     "type": "string",
                     "format": "date-time"
+                  },
+                  "mocked": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -4451,6 +4457,227 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SafetyAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/track": {
+      "post": {
+        "operationId": "RiderTrack_batch",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "points": {
+                    "minItems": 1,
+                    "maxItems": 720,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "latitude": {
+                          "type": "number",
+                          "minimum": -90,
+                          "maximum": 90
+                        },
+                        "longitude": {
+                          "type": "number",
+                          "minimum": -180,
+                          "maximum": 180
+                        },
+                        "accuracy": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 10000
+                        },
+                        "speed": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        "recordedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "mocked": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "latitude",
+                        "longitude",
+                        "recordedAt"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "points"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackBatchResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/admin/orders/{id}/track": {
+      "get": {
+        "operationId": "AdminTrack_view",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseTrack"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/course-alerts": {
+      "get": {
+        "operationId": "AdminTrack_alerts",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "open",
+              "type": "string",
+              "enum": [
+                "open",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CourseAlert"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/course-alerts/{id}/acknowledge": {
+      "post": {
+        "operationId": "AdminTrack_acknowledge",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseAlert"
                 }
               }
             }
@@ -6366,6 +6593,198 @@
         ],
         "additionalProperties": false
       },
+      "CourseAlert": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "riderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CourseAlertKind"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "orderId",
+          "reference",
+          "riderId",
+          "kind",
+          "details",
+          "createdAt",
+          "acknowledgedAt",
+          "note"
+        ],
+        "additionalProperties": false
+      },
+      "CourseAlertKind": {
+        "type": "string",
+        "enum": [
+          "ACTION_FAR",
+          "LONG_STOP",
+          "MOCK_LOCATION",
+          "TRACK_GAP"
+        ]
+      },
+      "CourseTrack": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "summaries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "riderId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "pointCount": {
+                  "type": "integer"
+                },
+                "distanceMeters": {
+                  "type": "integer"
+                },
+                "startedAt": {
+                  "nullable": true,
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "endedAt": {
+                  "nullable": true,
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "longestGapSeconds": {
+                  "type": "integer"
+                },
+                "longestStopSeconds": {
+                  "type": "integer"
+                },
+                "mockedPoints": {
+                  "type": "integer"
+                },
+                "pointsPurgedAt": {
+                  "nullable": true,
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "riderId",
+                "pointCount",
+                "distanceMeters",
+                "startedAt",
+                "endedAt",
+                "longestGapSeconds",
+                "longestStopSeconds",
+                "mockedPoints",
+                "pointsPurgedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "riderId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "latitude": {
+                  "type": "number"
+                },
+                "longitude": {
+                  "type": "number"
+                },
+                "accuracy": {
+                  "nullable": true,
+                  "type": "number"
+                },
+                "speed": {
+                  "nullable": true,
+                  "type": "number"
+                },
+                "mocked": {
+                  "type": "boolean"
+                },
+                "late": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "riderId",
+                "at",
+                "latitude",
+                "longitude",
+                "accuracy",
+                "speed",
+                "mocked",
+                "late"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CourseAlert"
+            }
+          }
+        },
+        "required": [
+          "orderId",
+          "reference",
+          "status",
+          "summaries",
+          "points",
+          "alerts"
+        ],
+        "additionalProperties": false
+      },
       "CreatedBatch": {
         "type": "object",
         "properties": {
@@ -6849,6 +7268,7 @@
                   "PROMO_NOT_ELIGIBLE",
                   "PROMO_ALREADY_EXISTS",
                   "ORDER_NOT_FOUND",
+                  "COURSE_ALERT_NOT_FOUND",
                   "ORDER_NOT_IN_PROGRESS",
                   "ORDER_TRANSITION_INVALID",
                   "ORDER_CONFLICT",
@@ -8991,6 +9411,22 @@
           "RETURN",
           "WEATHER"
         ]
+      },
+      "TrackBatchResult": {
+        "type": "object",
+        "properties": {
+          "accepted": {
+            "type": "integer"
+          },
+          "ignored": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accepted",
+          "ignored"
+        ],
+        "additionalProperties": false
       },
       "UserRole": {
         "type": "string",
