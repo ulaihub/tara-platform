@@ -112,11 +112,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Java 17 pour le plugin Android Gradle 9.
+      # Java 17 pour le plugin Android Gradle 9. Dépendances Gradle en cache : la
+      # construction ne dépend plus de la disponibilité de Maven Central à chaque fois.
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
+          cache-dependency-path: |
+            apps/rider/android/*.gradle*
+            apps/rider/android/app/*.gradle*
+            apps/rider/android/gradle/wrapper/gradle-wrapper.properties
+            apps/rider/pubspec.lock
 
       # Version de Flutter épinglée : les captures de référence en dépendent.
       - uses: subosito/flutter-action@v2
