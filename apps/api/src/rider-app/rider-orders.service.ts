@@ -278,6 +278,7 @@ export class RiderOrdersService {
           kind: 'DELIVERY',
           photoKey: body.photoKey,
           codeVerified: false,
+          receivedBy: body.receivedBy ?? null,
           latitude: body.latitude,
           longitude: body.longitude,
           occurredAt: this.occurredAt(body),
@@ -289,6 +290,7 @@ export class RiderOrdersService {
         reference: order.reference,
         riderId: rider.id,
         proofId: proof.id,
+        receivedBy: proof.receivedBy,
         collectAtDelivery:
           order.codAmount + (order.feePayer === 'RECIPIENT' ? order.totalPrice : 0),
         at: proof.occurredAt.toISOString(),

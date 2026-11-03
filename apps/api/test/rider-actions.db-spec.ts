@@ -214,7 +214,7 @@ describe('Actions du livreur (E2 à E9)', () => {
     const pending = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/deliver`)
       .set(rider.auth)
-      .send({ photoKey, ...HERE })
+      .send({ photoKey, receivedBy: 'Sa sœur, Brigitte', ...HERE })
       .expect(200);
     expect(pending.body).toMatchObject({ status: 'IN_DELIVERY', awaitingSupportValidation: true });
 
@@ -232,7 +232,11 @@ describe('Actions du livreur (E2 à E9)', () => {
     const proof = await ctx.prisma.deliveryProof.findFirstOrThrow({
       where: { orderId: order.id, kind: 'DELIVERY' },
     });
-    expect(proof).toMatchObject({ codeVerified: false, supportValidatorId: admin.userId });
+    expect(proof).toMatchObject({
+      codeVerified: false,
+      supportValidatorId: admin.userId,
+      receivedBy: 'Sa sœur, Brigitte',
+    });
     expect((await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } })).status).toBe(
       'DELIVERED',
     );

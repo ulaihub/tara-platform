@@ -978,6 +978,8 @@ model DeliveryProof {
   supportValidatorId String?   @map("support_validator_id") @db.Uuid
   /// Journal d'appels joint à un échec de livraison (E6).
   callLog            Json?     @map("call_log")
+  /// Livraison sans code : nom de la personne qui a reçu le colis (E4).
+  receivedBy         String?   @map("received_by")
   latitude           Float
   longitude          Float
   occurredAt         DateTime  @map("occurred_at") @db.Timestamptz(3)

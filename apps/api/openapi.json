@@ -3608,6 +3608,11 @@
                     "type": "string",
                     "pattern": "^\\d{4}$"
                   },
+                  "receivedBy": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
                   "photoKey": {
                     "type": "string",
                     "minLength": 1,

@@ -57,6 +57,8 @@ export const PositionActionBody = z.object({ ...ActionContext });
 export const DeliverBody = z.object({
   /** Code donné par le destinataire. Sans code, la livraison attend la validation du support. */
   deliveryCode: Code4.optional(),
+  /** Sans code : nom de la personne qui reçoit (sa sœur, le gardien…), pour le support. */
+  receivedBy: z.string().trim().min(2).max(80).optional(),
   photoKey: MediaKey,
   ...ActionContext,
 });
