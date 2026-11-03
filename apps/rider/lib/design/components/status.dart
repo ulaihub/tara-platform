@@ -191,14 +191,16 @@ class PowerButton extends StatelessWidget {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TaraIcon(TaraIcons.power, size: 40, strokeWidth: 2.2, color: c.textPrimary),
-                      const SizedBox(height: 8),
+                      // Icône et libellé suivent la taille du bouton (réduit sur petit écran).
+                      TaraIcon(TaraIcons.power, size: 40 * size / 210, strokeWidth: 2.2, color: c.textPrimary),
+                      SizedBox(height: 8 * size / 210),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: EdgeInsets.symmetric(horizontal: 24 * size / 210),
                         child: Text(
                           label,
                           textAlign: TextAlign.center,
-                          style: TaraText.cardTitle.copyWith(fontSize: 18, color: c.textPrimary),
+                          maxLines: 2,
+                          style: TaraText.cardTitle.copyWith(fontSize: 18 * size / 210, color: c.textPrimary),
                         ),
                       ),
                     ],

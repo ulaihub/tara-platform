@@ -22,5 +22,7 @@ void main() {
     expect(formatMinutes(const Duration(seconds: 20)), '1 min');
     expect(formatCountdown(const Duration(seconds: 42)), '0:42');
     expect(formatCountdown(const Duration(minutes: 2, seconds: 5)), '2:05');
+    expect(formatOnline(45 * 60), '45\u00A0min');
+    expect(formatOnline(2 * 3600 + 5 * 60), '2\u00A0h\u00A005');
   });
 }

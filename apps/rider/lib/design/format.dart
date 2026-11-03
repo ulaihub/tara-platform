@@ -28,3 +28,10 @@ String formatDistance(int meters, {String decimalSeparator = ','}) {
 
 /// Durée en minutes, nombre et unité insécables : « 12 min ».
 String formatMinutes(Duration duration) => '${duration.inMinutes.clamp(1, 999)}\u00A0min';
+
+/// Temps en ligne : « 45 min », « 2 h 05 ».
+String formatOnline(int seconds) {
+  final minutes = seconds ~/ 60;
+  if (minutes < 60) return '$minutes\u00A0min';
+  return '${minutes ~/ 60}\u00A0h\u00A0${(minutes % 60).toString().padLeft(2, '0')}';
+}

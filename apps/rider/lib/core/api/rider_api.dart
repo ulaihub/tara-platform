@@ -12,6 +12,9 @@ class RiderApi {
 
   Future<RiderConfig> config() async => RiderConfig.fromJson(await _api.get('/rider/config') as Json);
 
+  /// Compte : nom, téléphone, langue.
+  Future<Json> me() async => await _api.get('/me') as Json;
+
   /// Nom affiché du livreur (PATCH /me).
   Future<void> updateName(String fullName) => _api.send('PATCH', '/me', body: {'fullName': fullName});
 

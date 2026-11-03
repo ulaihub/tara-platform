@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app/app_settings.dart';
+import 'app/root.dart';
 import 'design/tara_effects.dart';
 import 'design/tara_theme.dart';
 import 'features/catalog/catalog_screen.dart';
@@ -32,7 +33,8 @@ class TaraApp extends StatelessWidget {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) => TaraEffects(controller: settings.effects, child: child!),
-          home: home ?? const CatalogScreen(),
+          // Catalogue des composants : --dart-define=TARA_CATALOG=true (développement).
+          home: home ?? (const bool.fromEnvironment('TARA_CATALOG') ? const CatalogScreen() : const RootGate()),
         ),
       ),
     );

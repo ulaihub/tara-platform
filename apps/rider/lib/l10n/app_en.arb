@@ -112,5 +112,11 @@
   "blockersTitle": "Documents to renew before going online",
   "retry": "Retry",
   "genericError": "Something went wrong. Please try again.",
-  "networkError": "No internet connection. Check the network and try again."
+  "networkError": "No internet connection. Check the network and try again.",
+  "jobsWord": "{count, plural, =1{job} other{jobs}}",
+  "logout": "Sign out",
+  "suspendedTitle": "Account suspended",
+  "suspendedBody": "Your account cannot take jobs right now. Contact Tara support to learn more.",
+  "goOffline": "Go offline",
+  "callSupport": "Call support"
 }

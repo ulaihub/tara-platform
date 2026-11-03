@@ -390,4 +390,26 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networkError => 'Pas de connexion internet. Vérifiez le réseau et réessayez.';
+
+  @override
+  String jobsWord(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'courses', one: 'course', zero: 'course');
+    return '$_temp0';
+  }
+
+  @override
+  String get logout => 'Se déconnecter';
+
+  @override
+  String get suspendedTitle => 'Compte suspendu';
+
+  @override
+  String get suspendedBody =>
+      'Votre compte ne peut pas prendre de courses pour le moment. Contactez le support Tara pour en savoir plus.';
+
+  @override
+  String get goOffline => 'Passer hors ligne';
+
+  @override
+  String get callSupport => 'Appeler le support';
 }

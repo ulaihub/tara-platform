@@ -24,8 +24,10 @@ final keyValueStoreProvider = Provider<KeyValueStore>((ref) => const SecureKeyVa
 /// Adresse de l'API (remplaçable dans les tests).
 final apiUrlProvider = Provider<String>((ref) => Env.apiUrl);
 
-/// Langue des messages du serveur : celle choisie dans l'app.
-final languageCodeProvider = Provider<String>((ref) => 'fr');
+/// Langue des messages du serveur : anglais si le téléphone est en anglais, sinon français.
+final languageCodeProvider = Provider<String>(
+  (ref) => PlatformDispatcher.instance.locale.languageCode == 'en' ? 'en' : 'fr',
+);
 
 final sessionStoreProvider = Provider<SessionStore>((ref) => SessionStore(ref.watch(keyValueStoreProvider)));
 

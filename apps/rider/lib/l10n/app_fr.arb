@@ -212,5 +212,18 @@
   "blockersTitle": "Pièces à renouveler avant de passer en ligne",
   "retry": "Réessayer",
   "genericError": "Une erreur est survenue. Réessayez.",
-  "networkError": "Pas de connexion internet. Vérifiez le réseau et réessayez."
+  "networkError": "Pas de connexion internet. Vérifiez le réseau et réessayez.",
+  "jobsWord": "{count, plural, =0{course} =1{course} other{courses}}",
+  "@jobsWord": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logout": "Se déconnecter",
+  "suspendedTitle": "Compte suspendu",
+  "suspendedBody": "Votre compte ne peut pas prendre de courses pour le moment. Contactez le support Tara pour en savoir plus.",
+  "goOffline": "Passer hors ligne",
+  "callSupport": "Appeler le support"
 }

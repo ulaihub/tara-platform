@@ -389,4 +389,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networkError => 'No internet connection. Check the network and try again.';
+
+  @override
+  String jobsWord(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'jobs', one: 'job');
+    return '$_temp0';
+  }
+
+  @override
+  String get logout => 'Sign out';
+
+  @override
+  String get suspendedTitle => 'Account suspended';
+
+  @override
+  String get suspendedBody => 'Your account cannot take jobs right now. Contact Tara support to learn more.';
+
+  @override
+  String get goOffline => 'Go offline';
+
+  @override
+  String get callSupport => 'Call support';
 }

@@ -769,6 +769,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pas de connexion internet. Vérifiez le réseau et réessayez.'**
   String get networkError;
+
+  /// No description provided for @jobsWord.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{course} =1{course} other{courses}}'**
+  String jobsWord(int count);
+
+  /// No description provided for @logout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter'**
+  String get logout;
+
+  /// No description provided for @suspendedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte suspendu'**
+  String get suspendedTitle;
+
+  /// No description provided for @suspendedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte ne peut pas prendre de courses pour le moment. Contactez le support Tara pour en savoir plus.'**
+  String get suspendedBody;
+
+  /// No description provided for @goOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer hors ligne'**
+  String get goOffline;
+
+  /// No description provided for @callSupport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler le support'**
+  String get callSupport;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
