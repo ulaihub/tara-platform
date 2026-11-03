@@ -47,3 +47,7 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 test/**/failures/
+
+# Fichier de configuration Firebase brut : repris dans lib/firebase_options.dart.
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CameroonMobile } from '../common/phone.js';
 
 /**
  * Variables d'environnement de l'API, validées au démarrage.
@@ -102,6 +103,10 @@ const envSchema = z
     WHATSAPP_VERIFY_TOKEN: z.string().min(16).optional(),
     /** Numéros de l'équipe prévenus par SMS en cas d'alerte de sécurité d'un livreur (SOS). */
     OPS_ALERT_PHONES: z.string().default(''),
+    /** Ligne de secours Tara (24 h/24), affichée sur l'écran d'alerte de l'app livreur. */
+    SAFETY_HOTLINE_PHONE: CameroonMobile.default('+237640114064'),
+    /** Ligne du support Tara, affichée dans l'app livreur ; sans valeur, le bouton est masqué. */
+    SUPPORT_PHONE: CameroonMobile.optional(),
 
     /** Attribution des courses (D1, D2). Valeurs réduites par le simulateur. */
     DISPATCH_OFFER_TIMEOUT_SECONDS: z.coerce.number().min(0.2).max(300).default(30),

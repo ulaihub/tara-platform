@@ -2817,6 +2817,32 @@
         ]
       }
     },
+    "/v1/rider/config": {
+      "get": {
+        "operationId": "RiderApp_config",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderConfig"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/rider/presence": {
       "put": {
         "operationId": "RiderApp_presence",
@@ -6395,6 +6421,9 @@
       },
       "Reconciliation": {
         "$ref": "#/components/schemas/Reconciliation"
+      },
+      "RiderConfig": {
+        "$ref": "#/components/schemas/RiderConfig"
       },
       "RiderEarnings": {
         "$ref": "#/components/schemas/RiderEarnings"

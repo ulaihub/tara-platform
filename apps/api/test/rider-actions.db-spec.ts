@@ -334,6 +334,25 @@ describe('Actions du livreur (E2 à E9)', () => {
       .expect(403);
   });
 
+  it('donne à l’app ses réglages : ligne de secours, opérateurs, délai des propositions', async () => {
+    const rider = await activeRider(ctx);
+    const res = await request(ctx.app.getHttpServer())
+      .get('/v1/rider/config')
+      .set(rider.auth)
+      .expect(200);
+    expect(res.body).toEqual({
+      country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
+      safetyHotline: '+237640114064',
+      supportPhone: null,
+      mobileMoneyOperators: [
+        { code: 'MTN', name: 'MTN Mobile Money' },
+        { code: 'ORANGE', name: 'Orange Money' },
+      ],
+      offerTimeoutSeconds: 30,
+    });
+    await request(ctx.app.getHttpServer()).get('/v1/rider/config').expect(401);
+  });
+
   it('envoie l’alerte de sécurité au dispatch et aux numéros d’astreinte (E8)', async () => {
     const { rider, order } = await assigned();
     const res = await request(ctx.http)

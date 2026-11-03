@@ -164,3 +164,18 @@ export const SafetyAlertListQuery = z.object({ status: z.enum(['open', 'all']).d
 export const ResolveAlertBody = z.object({ resolution: z.string().trim().min(3).max(500) });
 export const ValidateDeliveryBody = z.object({ note: z.string().trim().min(3).max(300) });
 export const FailureDecisionBody = z.object({ decision: z.enum(['RETRY', 'RETURN']) });
+
+/** Réglages de l'app livreur venant du serveur : rien de propre au pays n'est codé dans l'app. */
+export const RiderConfigDto = z
+  .object({
+    country: z.object({
+      code: z.string().length(2),
+      dialCode: z.string(),
+      currency: z.string(),
+    }),
+    safetyHotline: z.string(),
+    supportPhone: z.string().nullable(),
+    mobileMoneyOperators: z.array(z.object({ code: z.string(), name: z.string() })),
+    offerTimeoutSeconds: z.number(),
+  })
+  .meta({ id: 'RiderConfig' });

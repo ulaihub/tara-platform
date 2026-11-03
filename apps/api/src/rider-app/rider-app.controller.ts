@@ -3,6 +3,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Post,
@@ -14,6 +15,8 @@ import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
+import { ENV } from '../config/config.module.js';
+import type { Env } from '../config/env.js';
 import { CurrentUser, Roles } from '../auth/decorators.js';
 import { pageSchema } from '../common/pagination.js';
 import {
@@ -49,6 +52,7 @@ import {
   PresenceBody,
   PresenceDto,
   ReleaseBody,
+  RiderConfigDto,
   ResolveAlertBody,
   ReturnBody,
   RiderOrderDto,
@@ -85,7 +89,27 @@ export class RiderAppController {
     private readonly dispatch: DispatchService,
     private readonly orders: RiderOrdersService,
     private readonly alerts: SafetyAlertsService,
+    @Inject(ENV) private readonly env: Env,
   ) {}
+
+  /**
+   * Réglages de l'app : pays, devise, opérateurs, ligne de secours et du support.
+   * Lus au démarrage et gardés sur le téléphone pour l'usage hors connexion.
+   */
+  @Get('config')
+  @ApiZodResponse(RiderConfigDto)
+  config(): z.output<typeof RiderConfigDto> {
+    return {
+      country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
+      safetyHotline: this.env.SAFETY_HOTLINE_PHONE,
+      supportPhone: this.env.SUPPORT_PHONE ?? null,
+      mobileMoneyOperators: [
+        { code: 'MTN', name: 'MTN Mobile Money' },
+        { code: 'ORANGE', name: 'Orange Money' },
+      ],
+      offerTimeoutSeconds: this.env.DISPATCH_OFFER_TIMEOUT_SECONDS,
+    };
+  }
 
   /** Passage en ligne ou hors ligne (E1). En ligne : pièces valides exigées (D4). */
   @Put('presence')
