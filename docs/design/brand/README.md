@@ -22,4 +22,5 @@ icônes vectorielles Android (`res/drawable/ic_launcher_*.xml`, `splash_*.xml`) 
 
 ```sh
 python3 docs/design/brand/source/build_brand.py docs/design/brand/source apps/rider /tmp/kit
+(cd apps/rider && dart format lib/design/brand_paths.dart)
 ```
