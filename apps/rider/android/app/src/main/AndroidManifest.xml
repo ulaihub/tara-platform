@@ -1,5 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Position pendant que le livreur est en ligne (service au premier plan, notification
+         permanente) : pas d'autorisation « toujours ». -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+    <!-- Notifications des propositions (Android 13 et plus). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <!-- Pas de sauvegarde Android des données de l'app (session, file d'actions hors
          connexion) ; trafic chiffré uniquement, y compris sur Android 8 et 8.1. -->

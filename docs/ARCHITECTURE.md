@@ -177,6 +177,17 @@ tara-platform/
     animations décoratives si le téléphone le demande. Chaque écran a ses captures de référence
     (deux thèmes, 390 × 844 et 360 × 640, texte à 100 % et 130 %) vérifiées en CI.
 
+29. **App livreur : hors connexion d'abord.** Les actions de course (enlèvement, encaissement
+    en espèces, livraison, échec, retour) passent par une file persistante dans le stockage
+    chiffré du téléphone : ordre et heure réelle conservés, identifiant `clientEventId` qui
+    rend tout renvoi sans effet, photo envoyée une seule fois, et une action refusée ne bloque
+    que sa propre course. La file repart au retour du réseau, au retour dans l'app et toutes
+    les 30 s. Le temps réel accélère l'affichage ; l'API REST reste la référence.
+30. **Position du livreur.** En ligne, une position toutes les 10 s (le serveur le considère
+    hors ligne après 90 s sans nouvelles), par le temps réel ou à défaut en HTTP. Android
+    garde une notification permanente (service au premier plan de type « position ») : pas
+    d'autorisation de localisation « toujours ». Hors ligne, aucune position n'est envoyée.
+
 ## Cycle de vie d'une commande
 
 Statuts définis dans le schéma ; les transitions seront implémentées et testées en phase 1.
@@ -259,9 +270,11 @@ pnpm dev                              # API sur http://localhost:3000/health
 
 ## Questions ouvertes
 
-| Sujet                                          | Options                                                                                                                     | Quand trancher  |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| Agrégateur Mobile Money                        | Adaptateur CamPay prêt (à valider sur son bac à sable) ; comparer les devis d'au moins 2 autres agrégateurs avant de signer | Avant le pilote |
-| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                                         | Avant le pilote |
-| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                                              | Avant phase 7   |
-| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel                           | Après le pilote |
+| Sujet                                          | Options                                                                                                                                       | Quand trancher       |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| Agrégateur Mobile Money                        | Adaptateur CamPay prêt (à valider sur son bac à sable) ; comparer les devis d'au moins 2 autres agrégateurs avant de signer                   | Avant le pilote      |
+| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                                                           | Avant le pilote      |
+| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                                                                | Avant phase 7        |
+| Déclarations Google Play                       | Service au premier plan « position » et données de localisation à déclarer dans la Play Console (formulaire et courte vidéo)                  | Avant la publication |
+| Notifications FCM                              | Jeton classique utilisé ; passer à l'identifiant d'installation (nouvelle API Firebase) quand l'envoi côté serveur aura été adapté et vérifié | Après le pilote      |
+| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel                                             | Après le pilote      |

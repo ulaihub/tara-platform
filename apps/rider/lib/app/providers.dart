@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/api/api_client.dart';
@@ -9,7 +11,11 @@ import '../core/api/auth_api.dart';
 import '../core/api/models.dart';
 import '../core/api/rider_api.dart';
 import '../core/env.dart';
+import '../core/location/location_tracker.dart';
+import '../core/location/online_controller.dart';
 import '../core/offline/action_queue.dart';
+import '../core/push/push_service.dart';
+import '../core/realtime/realtime_client.dart';
 import '../core/session/session_store.dart';
 
 /// Stockage chiffré du téléphone (remplacé par un stockage en mémoire dans les tests).
@@ -135,3 +141,79 @@ class RiderConfigController extends AsyncNotifier<RiderConfig> {
 }
 
 final riderConfigProvider = AsyncNotifierProvider<RiderConfigController, RiderConfig>(RiderConfigController.new);
+
+/// Connexion temps réel du livreur connecté. Jeton refusé : une requête REST le renouvelle.
+final realtimeProvider = Provider<RealtimeClient>((ref) {
+  final api = ref.watch(apiClientProvider);
+  final client = RealtimeClient(
+    baseUrl: ref.watch(apiUrlProvider),
+    store: ref.watch(sessionStoreProvider),
+    onTokenRejected: () async {
+      try {
+        await api.get('/rider/presence');
+      } catch (_) {
+        // Session refusée : AuthController repasse à la connexion.
+      }
+    },
+  );
+  ref.onDispose(() => unawaited(client.dispose()));
+  return client;
+});
+
+/// Passage en ligne et envoi des positions (temps réel, sinon requête HTTP).
+final onlineControllerProvider = Provider<OnlineController>((ref) {
+  final rider = ref.watch(riderApiProvider);
+  final realtime = ref.watch(realtimeProvider);
+  final controller = OnlineController(
+    positions: ref.watch(positionSourceProvider),
+    setPresence: rider.setPresence,
+    sendPosition: (position) async {
+      if (!realtime.sendLocation(position)) await rider.sendLocation(position);
+    },
+  );
+  ref.onDispose(controller.dispose);
+  return controller;
+});
+
+final positionSourceProvider = Provider<PositionSource>((ref) => DevicePositionSource());
+
+final pushServiceProvider = Provider<PushService>((ref) {
+  final rider = ref.watch(riderApiProvider);
+  final store = ref.watch(sessionStoreProvider);
+  final push = PushService(register: (token) async => rider.registerPushToken(await store.installationId(), token));
+  ref.onDispose(() => unawaited(push.dispose()));
+  return push;
+});
+
+/// Services actifs tant que le livreur est connecté : temps réel, notifications, file des
+/// actions relancée au retour du réseau. Arrêtés à la déconnexion.
+final riderRuntimeProvider = Provider<void>((ref) {
+  final signedIn = ref.watch(authControllerProvider).value == AuthStatus.signedIn;
+  if (!signedIn) return;
+  final realtime = ref.watch(realtimeProvider)..connect();
+  final queue = ref.watch(actionQueueProvider);
+  final push = ref.watch(pushServiceProvider);
+  unawaited(push.start().catchError((Object _) {}));
+  final connectivity = Connectivity().onConnectivityChanged.listen((results) {
+    if (!results.contains(ConnectivityResult.none)) unawaited(queue.flush());
+  });
+  // Reconnexion du temps réel : souvent le signe que le réseau est revenu.
+  void onRealtime() {
+    if (realtime.connected.value) unawaited(queue.flush());
+  }
+
+  realtime.connected.addListener(onRealtime);
+  // Retour dans l'app : file relancée, réglages rafraîchis.
+  final lifecycle = AppLifecycleListener(
+    onResume: () {
+      unawaited(queue.flush());
+      unawaited(ref.read(riderConfigProvider.notifier).refresh());
+    },
+  );
+  ref.onDispose(() {
+    lifecycle.dispose();
+    unawaited(connectivity.cancel());
+    realtime.connected.removeListener(onRealtime);
+    realtime.disconnect();
+  });
+});
