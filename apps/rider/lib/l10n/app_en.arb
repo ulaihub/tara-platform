@@ -121,7 +121,7 @@
   "callSupport": "Call support",
   "noMotoZone": "No motorbikes",
   "searchingTitle": "Looking for jobs…",
-  "todayPill": "Today {amount}",
+  "today": "Today",
   "newJob": "New job",
   "yourEarning": "Your earning",
   "pickupLabel": "PICKUP · {distance}",

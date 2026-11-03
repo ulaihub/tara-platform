@@ -109,12 +109,26 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     final total = ref.watch(riderConfigProvider).value?.offerTimeoutSeconds ?? 30;
     final remaining = _remaining;
     // Tout doit tenir sur un écran : 30 s pour décider, pas le temps de faire défiler.
-    final compact = MediaQuery.sizeOf(context).height < 720 || MediaQuery.textScalerOf(context).scale(1) > 1.15;
+    final height = MediaQuery.sizeOf(context).height;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final compact = height < 720 || textScale > 1.15;
+    // Petit écran et texte agrandi : anneau et gain côte à côte, pour garder l'argent
+    // à encaisser et le colis visibles au-dessus des boutons.
+    final tight = height / textScale < 560;
     final package = switch (offer.packageSize) {
       'SMALL' => l.packageSmall,
       'LARGE' => l.packageLarge,
       _ => l.packageMedium,
     };
+    final ring = CountdownRing(
+      remaining: remaining,
+      total: total,
+      unitLabel: l.seconds,
+      semanticLabel: l.secondsRemaining(remaining),
+      size: tight ? 112 : (compact ? 136 : 200),
+    );
+    final earningLabel = Text(l.yourEarning, style: TaraText.label.copyWith(color: c.textSecondary));
+    final earning = AmountText(offer.riderEarning, style: TaraText.amountXL.copyWith(fontSize: 40));
     return TaraScreen(
       blobs: _blobs,
       child: ScrollWithFooter(
@@ -125,25 +139,33 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
             child: InfoPill(label: '${l.newJob} · ${l.vehicleShort}', dot: TaraBrand.orange, blinkDot: true),
           ),
           SizedBox(height: compact ? 8 : 16),
-          Center(
-            child: CountdownRing(
-              remaining: remaining,
-              total: total,
-              unitLabel: l.seconds,
-              semanticLabel: l.secondsRemaining(remaining),
-              size: compact ? 136 : 200,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(l.yourEarning, style: TaraText.label.copyWith(color: c.textSecondary)),
-          ),
-          Center(child: AmountText(offer.riderEarning, style: TaraText.amountXL.copyWith(fontSize: 40))),
-          const SizedBox(height: 16),
+          if (tight)
+            Row(
+              children: [
+                ring,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      earningLabel,
+                      FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: earning),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          else ...[
+            Center(child: ring),
+            const SizedBox(height: 16),
+            Center(child: earningLabel),
+            Center(child: earning),
+          ],
+          SizedBox(height: tight ? 12 : 16),
           GlassCard(
             radius: 24,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            child: _Trip(offer: offer),
+            padding: EdgeInsets.all(tight ? 14 : 16),
+            child: _Trip(offer: offer, tight: tight),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -190,9 +212,12 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
 
 /// Trajet : point dégradé (enlèvement) → tirets → anneau (livraison).
 class _Trip extends StatelessWidget {
-  const _Trip({required this.offer});
+  const _Trip({required this.offer, this.tight = false});
 
   final Offer offer;
+
+  /// Petit écran : liaison en tirets plus courte.
+  final bool tight;
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +260,7 @@ class _Trip extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: CustomPaint(
-              size: const Size(2, 26),
+              size: Size(2, tight ? 14 : 26),
               painter: _Dashes(color: c.textTertiary),
             ),
           ),

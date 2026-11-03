@@ -818,11 +818,11 @@ abstract class AppLocalizations {
   /// **'Recherche de courses…'**
   String get searchingTitle;
 
-  /// No description provided for @todayPill.
+  /// No description provided for @today.
   ///
   /// In fr, this message translates to:
-  /// **'Aujourd’hui {amount}'**
-  String todayPill(String amount);
+  /// **'Aujourd’hui'**
+  String get today;
 
   /// No description provided for @newJob.
   ///

@@ -418,9 +418,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchingTitle => 'Looking for jobs…';
 
   @override
-  String todayPill(String amount) {
-    return 'Today $amount';
-  }
+  String get today => 'Today';
 
   @override
   String get newJob => 'New job';

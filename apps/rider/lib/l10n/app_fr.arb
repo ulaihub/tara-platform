@@ -228,7 +228,7 @@
   "callSupport": "Appeler le support",
   "noMotoZone": "Interdit aux motos",
   "searchingTitle": "Recherche de courses…",
-  "todayPill": "Aujourd’hui {amount}",
+  "today": "Aujourd’hui",
   "newJob": "Nouvelle course",
   "yourEarning": "Votre gain",
   "pickupLabel": "ENLÈVEMENT · {distance}",
@@ -244,13 +244,6 @@
   "offerTaken": "Course attribuée à un autre livreur",
   "offerExpired": "Temps écoulé : la course est proposée à un autre livreur",
   "vehicleShort": "Moto",
-  "@todayPill": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "@pickupLabel": {
     "placeholders": {
       "distance": {

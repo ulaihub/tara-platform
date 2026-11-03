@@ -108,35 +108,35 @@ class _HomeOnlineScreenState extends ConsumerState<HomeOnlineScreen> {
                   Row(
                     children: [
                       OnlineToggle(label: l.online, semanticLabel: l.goOfflineLabel, onToggle: _goOffline),
-                      const Spacer(),
-                      Flexible(
-                        child: GestureDetector(
-                          onTap: widget.onDetails,
-                          child: InfoPill(
-                            label: l.todayPill('${formatAmount(summary?.earnings ?? 0)} F'),
-                            tone: TintTone.accent,
-                          ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: _TodayCard(amount: summary?.earnings ?? 0, onTap: widget.onDetails),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const Spacer(),
+                  // Comme sur la maquette : SOS et recentrer à droite, au-dessus du bandeau.
                   Align(
                     alignment: Alignment.centerRight,
                     child: Column(
                       children: [
-                        SosButton(label: l.safetyAlert, onPressed: widget.onSos),
-                        const SizedBox(height: 12),
+                        SosButton(label: l.safetyAlert, onPressed: widget.onSos, size: 52),
+                        const SizedBox(height: 10),
                         GlassIconButton(
                           icon: TaraIcons.navigation,
                           label: l.recenterMap,
                           badge: !_following,
+                          size: 52,
+                          radius: 18,
                           onPressed: _map.recenter,
                         ),
                       ],
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 16),
                   GlassCard(
                     radius: 24,
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -172,6 +172,60 @@ class _HomeOnlineScreenState extends ConsumerState<HomeOnlineScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Gains du jour, en verre, sur deux lignes : mène au détail des gains.
+class _TodayCard extends StatelessWidget {
+  const _TodayCard({required this.amount, required this.onTap});
+
+  final int amount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final value = '${formatAmount(amount)} F';
+    // Une ligne chacun : avec le texte agrandi, ils rétrécissent au lieu d'être coupés.
+    Widget line(String text, TextStyle style) => FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Text(text, maxLines: 1, softWrap: false, style: style),
+    );
+    return Semantics(
+      button: true,
+      label: '${l.todayEarnings} : $value',
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
+          child: GlassCard(
+            radius: 22,
+            shadow: false,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                line(l.today, TaraText.small.copyWith(fontSize: 11, color: c.textSecondary)),
+                line(
+                  value,
+                  TaraText.cardTitle.copyWith(
+                    fontSize: 15,
+                    height: 1.3,
+                    color: c.textPrimary,
+                    fontFeatures: TaraText.tabular,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

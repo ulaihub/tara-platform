@@ -70,6 +70,11 @@ void main() {
       );
       await settle(tester);
       expect(tester.takeException(), isNull);
+      // 30 s pour décider : l'argent à encaisser et le colis se lisent sans faire défiler.
+      final buttonsTop = tester.getRect(find.text('Accepter')).top - 20;
+      for (final detail in ['À encaisser', 'Colis moyen', 'Fragile']) {
+        expect(tester.getRect(find.textContaining(detail)).bottom, lessThan(buttonsTop), reason: detail);
+      }
       await expectLater(capture, matchesGoldenFile('goldens/07_proposition/${variant.name}.png'));
     });
   }

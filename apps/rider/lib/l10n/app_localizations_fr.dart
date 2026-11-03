@@ -420,9 +420,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchingTitle => 'Recherche de courses…';
 
   @override
-  String todayPill(String amount) {
-    return 'Aujourd’hui $amount';
-  }
+  String get today => 'Aujourd’hui';
 
   @override
   String get newJob => 'Nouvelle course';
