@@ -108,6 +108,8 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     final offer = widget.offer;
     final total = ref.watch(riderConfigProvider).value?.offerTimeoutSeconds ?? 30;
     final remaining = _remaining;
+    // Tout doit tenir sur un écran : 30 s pour décider, pas le temps de faire défiler.
+    final compact = MediaQuery.sizeOf(context).height < 720 || MediaQuery.textScalerOf(context).scale(1) > 1.15;
     final package = switch (offer.packageSize) {
       'SMALL' => l.packageSmall,
       'LARGE' => l.packageLarge,
@@ -122,14 +124,14 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
           Center(
             child: InfoPill(label: '${l.newJob} · ${l.vehicleShort}', dot: TaraBrand.orange, blinkDot: true),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: compact ? 8 : 16),
           Center(
             child: CountdownRing(
               remaining: remaining,
               total: total,
               unitLabel: l.seconds,
               semanticLabel: l.secondsRemaining(remaining),
-              size: 200,
+              size: compact ? 136 : 200,
             ),
           ),
           const SizedBox(height: 16),
@@ -149,15 +151,16 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
             runSpacing: 8,
             alignment: WrapAlignment.center,
             children: [
-              InfoPill(label: package, icon: TaraIcons.package),
-              if (offer.isFragile) InfoPill(label: l.fragile, icon: TaraIcons.alertCircle),
-              if (offer.isExpress) InfoPill(label: l.express, icon: TaraIcons.clock),
+              // L'argent à encaisser d'abord : c'est souvent ce qui décide.
               if (offer.cashToCollect > 0)
                 InfoPill(
                   label: l.toCollect('${formatAmount(offer.cashToCollect)} F'),
                   icon: TaraIcons.cash,
                   tone: TintTone.accent,
                 ),
+              InfoPill(label: package, icon: TaraIcons.package),
+              if (offer.isFragile) InfoPill(label: l.fragile, icon: TaraIcons.alertCircle),
+              if (offer.isExpress) InfoPill(label: l.express, icon: TaraIcons.clock),
             ],
           ),
           if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],

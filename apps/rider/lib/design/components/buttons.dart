@@ -160,8 +160,9 @@ class GlassButton extends StatelessWidget {
         onTap: onPressed,
         child: Opacity(
           opacity: onPressed == null ? .5 : 1,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: height < 48 ? 48 : height),
+          // Hauteur fixe : libellé centré, aligné sur le bouton principal voisin.
+          child: SizedBox(
+            height: height < 48 ? 48 : height,
             child: GlassCard(
               radius: radius,
               shadow: false,

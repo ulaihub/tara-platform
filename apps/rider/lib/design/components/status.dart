@@ -295,7 +295,10 @@ class CountdownRing extends StatelessWidget {
                       children: [
                         Text(
                           '$remaining',
+                          // Chiffre proportionnel à l'anneau (236 px dans la maquette).
+                          textScaler: TextScaler.noScaling,
                           style: TaraText.giantNumber.copyWith(
+                            fontSize: 72 * size / 236,
                             color: c.textPrimary,
                             shadows: [
                               c.isDark
@@ -308,7 +311,10 @@ class CountdownRing extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Text(unitLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
+                        Text(
+                          unitLabel,
+                          style: TaraText.label.copyWith(color: c.textSecondary, fontSize: 13 * size / 236),
+                        ),
                       ],
                     ),
                   ],

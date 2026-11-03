@@ -9,7 +9,7 @@ import '../features/auth/sign_in_screen.dart';
 import '../features/common/error_text.dart';
 import '../features/common/splash_screen.dart';
 import '../features/common/status_screen.dart';
-import '../features/home/home_offline_screen.dart';
+import '../features/home/home_flow.dart';
 import '../features/onboarding/documents_controller.dart';
 import '../features/onboarding/documents_screen.dart';
 import '../features/onboarding/profile_screen.dart';
@@ -130,7 +130,7 @@ class _RiderGateState extends ConsumerState<_RiderGate> {
           : ProfileScreen(onDone: () => setState(() => _profileStepDone = true), onBack: logout);
     }
     return switch (rider.status) {
-      'ACTIVE' => HomeOfflineScreen(onWentOnline: () {}, onDetails: () {}),
+      'ACTIVE' => const HomeFlow(),
       'PENDING' when rider.missingDocuments.isNotEmpty => DocumentsScreen(onDone: _reload),
       'PENDING' => StatusScreen(
         title: l.pendingTitle,

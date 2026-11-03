@@ -474,4 +474,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get vehicleShort => 'Moto';
+
+  @override
+  String get jobAccepted => 'Course acceptée';
+
+  @override
+  String jobAcceptedBody(String reference) {
+    return 'Référence $reference. Rendez-vous au point d’enlèvement.';
+  }
 }

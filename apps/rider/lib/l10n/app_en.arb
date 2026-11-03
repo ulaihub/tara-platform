@@ -136,5 +136,7 @@
   "express": "Express",
   "offerTaken": "Job given to another rider",
   "offerExpired": "Time is up: the job goes to another rider",
-  "vehicleShort": "Motorbike"
+  "vehicleShort": "Motorbike",
+  "jobAccepted": "Job accepted",
+  "jobAcceptedBody": "Reference {reference}. Head to the pickup point."
 }

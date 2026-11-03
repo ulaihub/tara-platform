@@ -274,5 +274,14 @@
         "type": "String"
       }
     }
+  },
+  "jobAccepted": "Course acceptée",
+  "jobAcceptedBody": "Référence {reference}. Rendez-vous au point d’enlèvement.",
+  "@jobAcceptedBody": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -913,6 +913,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Moto'**
   String get vehicleShort;
+
+  /// No description provided for @jobAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course acceptée'**
+  String get jobAccepted;
+
+  /// No description provided for @jobAcceptedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence {reference}. Rendez-vous au point d’enlèvement.'**
+  String jobAcceptedBody(String reference);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
