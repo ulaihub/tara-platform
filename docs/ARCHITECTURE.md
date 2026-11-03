@@ -187,6 +187,12 @@ tara-platform/
     hors ligne après 90 s sans nouvelles), par le temps réel ou à défaut en HTTP. Android
     garde une notification permanente (service au premier plan de type « position ») : pas
     d'autorisation de localisation « toujours ». Hors ligne, aucune position n'est envoyée.
+31. **Carte gardée malgré son poids.** Le moteur MapLibre ajoute 10,8 Mo à l'app installée
+    (APK arm64 : 18,6 → 30,2 Mo) mais seulement 3,7 Mo au téléchargement (≈ 13 Mo au total,
+    le Play Store compressant ce qu'il envoie). Choix validé : garder notre carte, et mesurer
+    le poids au téléchargement (25 Mo au plus) et une fois installée (32 Mo au plus). La CI
+    contrôle les deux sur les APK ARM (`tool/apk_report.py`). Google Maps aurait allégé l'app
+    de 11 Mo, mais au prix d'une clé tierce, sans carte hors connexion ni maîtrise des styles.
 
 ## Cycle de vie d'une commande
 

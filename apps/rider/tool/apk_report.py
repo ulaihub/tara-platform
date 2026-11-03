@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Ce qui pèse dans un APK : plus gros fichiers, poids par famille, poids à télécharger.
+"""Ce qui pèse dans un APK : poids par famille, poids à télécharger, et contrôle des plafonds.
 
-Usage : python3 tool/apk_report.py app-arm64-v8a-release.apk [...]
+Usage : python3 tool/apk_report.py [--download-max-mo 25] [--installed-max-mo 32] app-*.apk
+
+Plafonds (cahier des charges) contrôlés sur les APK ARM, ceux des téléphones ; l'APK x86_64
+(émulateurs) est seulement décrit.
 
 « Téléchargement estimé » : chaque fichier recompressé (zlib 9), comme le Play Store
 compresse ce qu'il envoie au téléphone ; les bibliothèques natives sont stockées sans
 compression dans l'APK pour être chargées sans extraction.
 """
 
+import argparse
+import os
 import struct
 import sys
 import zipfile
@@ -64,7 +69,8 @@ def elf_debug_bytes(data: bytes) -> int:
         return 0
 
 
-def report(path: str) -> None:
+def report(path: str) -> tuple[int, int]:
+    """Affiche le détail et renvoie (poids installé, téléchargement estimé) en octets."""
     with zipfile.ZipFile(path) as apk:
         rows = []
         for info in apk.infolist():
@@ -89,8 +95,30 @@ def report(path: str) -> None:
             debug = elf_debug_bytes(data)
             if debug:
                 print(f"  {name} : sections de débogage {ko(debug)}")
+    return os.path.getsize(path), download
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--download-max-mo", type=float)
+    parser.add_argument("--installed-max-mo", type=float)
+    parser.add_argument("apks", nargs="+")
+    args = parser.parse_args()
+    mo = 1024 * 1024
+    failed = False
+    for apk_path in args.apks:
+        installed, download = report(apk_path)
+        name = os.path.basename(apk_path)
+        if "x86" in name:
+            continue
+        if args.installed_max_mo and installed > args.installed_max_mo * mo:
+            print(f"::error::{name} : {installed / mo:.1f} Mo installée, plafond {args.installed_max_mo:g} Mo")
+            failed = True
+        if args.download_max_mo and download > args.download_max_mo * mo:
+            print(f"::error::{name} : {download / mo:.1f} Mo à télécharger, plafond {args.download_max_mo:g} Mo")
+            failed = True
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    for apk_path in sys.argv[1:]:
-        report(apk_path)
+    sys.exit(main())

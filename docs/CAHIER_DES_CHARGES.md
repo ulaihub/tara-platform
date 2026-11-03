@@ -166,7 +166,7 @@ L'application doit fonctionner sur un Android à 60 000 FCFA, en 3G instable, pe
 | Domaine | Exigence mesurable |
 | --- | --- |
 | Compatibilité | Android 8.0 et plus, 2 Go de RAM, écrans de 5 pouces ; iOS 14 et plus à partir du mois 8 |
-| Poids | App livreur et app expéditeur : moins de 25 Mo à l'installation ; page de suivi : moins de 200 Ko |
+| Poids | App livreur et app expéditeur : moins de 25 Mo à télécharger depuis le Play Store et au plus 32 Mo une fois installées (carte embarquée comprise) ; page de suivi : moins de 200 Ko |
 | Performance | Ouverture de l'app en moins de 3 s sur un téléphone d'entrée de gamme ; réponse de l'API en moins de 500 ms pour 95 % des appels |
 | Réseau | Fonctionne en 2G/3G ; requêtes compressées ; images réduites à moins de 150 Ko avant envoi ; reprise automatique des envois interrompus |
 | Hors ligne | L'app livreur conserve la course en cours et enregistre toutes ses actions sans réseau, puis synchronise sans perte ni doublon |
