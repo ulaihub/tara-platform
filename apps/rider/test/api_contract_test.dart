@@ -27,6 +27,9 @@ void main() {
     'RiderProfile': RiderProfile.fields,
     'RiderPresence': Presence.fields,
     'DispatchOffer': Offer.fields,
+    'RiderOrder': RiderOrder.fields,
+    'Address': OrderAddress.fields,
+    'RiderRoute': RiderRoute.fields,
   };
   for (final MapEntry(key: schema, value: fields) in models.entries) {
     test('modèle $schema conforme au contrat', () {

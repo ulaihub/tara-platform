@@ -95,6 +95,21 @@ class RiderApi {
 
   Future<Json> order(String id) async => await _api.get('/rider/orders/$id') as Json;
 
+  /// Courses en cours, la plus récente d'abord.
+  Future<List<RiderOrder>> activeOrders() async => [
+    for (final json in await orders(scope: 'active')) RiderOrder.fromJson(json),
+  ];
+
+  Future<RiderOrder> riderOrder(String id) async => RiderOrder.fromJson(await order(id));
+
+  /// Itinéraire de la position du livreur à la prochaine étape de la course.
+  Future<RiderRoute> route(String orderId, GeoPoint from) async => RiderRoute.fromJson(
+    await _api.get(
+      '/rider/orders/$orderId/route',
+      query: {'latitude': '${from.latitude}', 'longitude': '${from.longitude}'},
+    ) as Json,
+  );
+
   Future<Earnings> earnings(String period) async =>
       Earnings.fromJson(await _api.get('/rider/earnings', query: {'period': period}) as Json);
 

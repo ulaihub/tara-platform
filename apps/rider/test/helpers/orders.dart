@@ -1,0 +1,72 @@
+import 'package:tara_rider/core/api/models.dart';
+
+/// Course telle que l'API la renvoie (GET /rider/orders/{id}), pour les tests et captures.
+Json orderJson({
+  String id = '00000000-0000-4000-8000-000000000002',
+  String status = 'ASSIGNED',
+  int collectAtPickup = 1500,
+  int collectAtDelivery = 12500,
+  bool pickupRestricted = false,
+  String? instructions = 'Colis au comptoir, demander Awa.',
+}) => {
+  'id': id,
+  'reference': 'TR-48213',
+  'status': status,
+  'packageSize': 'MEDIUM',
+  'isFragile': true,
+  'isExpress': false,
+  'instructions': instructions,
+  'pickup': {
+    'id': '00000000-0000-4000-8000-000000000010',
+    'label': 'Boutique',
+    'contactName': 'Awa',
+    'contactPhone': '+237690000101',
+    'city': 'Douala',
+    'neighborhood': {'id': '00000000-0000-4000-8000-000000000020', 'name': 'Akwa'},
+    'landmark': 'face à la pharmacie du Centre',
+    'latitude': 4.0511,
+    'longitude': 9.6942,
+    'photoKey': null,
+    'voiceNoteKey': null,
+    'source': 'SENDER',
+    'verifiedAt': null,
+    'motorbikeRestricted': pickupRestricted,
+    'createdAt': '2026-11-03T08:00:00.000Z',
+  },
+  'dropoff': {
+    'id': '00000000-0000-4000-8000-000000000011',
+    'label': null,
+    'contactName': null,
+    'contactPhone': null,
+    'city': 'Douala',
+    'neighborhood': {'id': '00000000-0000-4000-8000-000000000021', 'name': 'Bonapriso'},
+    'landmark': 'portail bleu après la boulangerie',
+    'latitude': 4.0283,
+    'longitude': 9.6957,
+    'photoKey': null,
+    'voiceNoteKey': null,
+    'source': 'SENDER',
+    'verifiedAt': null,
+    'motorbikeRestricted': false,
+    'createdAt': '2026-11-03T08:00:00.000Z',
+  },
+  'sender': {'name': 'Boutique Mama Ngo', 'phone': '+237690000101'},
+  'recipient': {'name': 'Paul Ekwalla', 'phone': '+237690000202'},
+  'riderEarning': 1500,
+  'collectAtPickup': collectAtPickup,
+  'collectAtDelivery': collectAtDelivery,
+  'navigation': {
+    'googleMaps': 'https://www.google.com/maps/dir/?api=1&destination=4.0511,9.6942&travelmode=driving',
+    'waze': 'https://waze.com/ul?ll=4.0511,9.6942&navigate=yes',
+  },
+  'failureDecision': null,
+  'awaitingSupportValidation': false,
+  'assignedAt': '2026-11-03T08:05:00.000Z',
+  'pickedUpAt': null,
+  'deliveredAt': null,
+};
+
+RiderOrder order({String status = 'ASSIGNED', int collectAtPickup = 1500, bool pickupRestricted = false}) =>
+    RiderOrder.fromJson(
+      orderJson(status: status, collectAtPickup: collectAtPickup, pickupRestricted: pickupRestricted),
+    );

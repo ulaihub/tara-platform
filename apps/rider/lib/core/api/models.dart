@@ -388,3 +388,213 @@ class Offer {
   /// Espèces que le livreur aura à encaisser (montant du colis et frais réglés en espèces).
   int get cashToCollect => codAmount + cashFee;
 }
+
+/// Adresse d'une course : point, quartier et repère écrit (B1).
+@immutable
+class OrderAddress {
+  const OrderAddress({
+    required this.city,
+    required this.landmark,
+    required this.latitude,
+    required this.longitude,
+    required this.motorbikeRestricted,
+    this.label,
+    this.contactName,
+    this.contactPhone,
+    this.neighborhood,
+  });
+
+  factory OrderAddress.fromJson(Json json) => OrderAddress(
+    label: json['label'] as String?,
+    contactName: json['contactName'] as String?,
+    contactPhone: json['contactPhone'] as String?,
+    city: _field(json, 'city'),
+    neighborhood: (json['neighborhood'] as Json?)?['name'] as String?,
+    landmark: _field(json, 'landmark'),
+    latitude: _field<num>(json, 'latitude').toDouble(),
+    longitude: _field<num>(json, 'longitude').toDouble(),
+    motorbikeRestricted: _field(json, 'motorbikeRestricted'),
+  );
+
+  static const fields = [
+    'label',
+    'contactName',
+    'contactPhone',
+    'city',
+    'neighborhood',
+    'landmark',
+    'latitude',
+    'longitude',
+    'motorbikeRestricted',
+  ];
+
+  final String? label;
+  final String? contactName;
+  final String? contactPhone;
+  final String city;
+  final String? neighborhood;
+  final String landmark;
+  final double latitude;
+  final double longitude;
+
+  /// Dans une zone interdite aux motos (B6) : finir à pied.
+  final bool motorbikeRestricted;
+
+  /// « Akwa · face à la pharmacie » : quartier puis repère.
+  String get line => [?neighborhood, landmark].join(' · ');
+}
+
+/// Expéditeur ou destinataire : contacts visibles seulement pendant la course.
+@immutable
+class OrderParty {
+  const OrderParty({this.name, this.phone});
+
+  factory OrderParty.fromJson(Json json) => OrderParty(name: json['name'] as String?, phone: json['phone'] as String?);
+
+  final String? name;
+  final String? phone;
+}
+
+/// Course attribuée au livreur (E2). Gardée telle quelle sur le téléphone pour l'usage
+/// hors connexion ([raw]).
+@immutable
+class RiderOrder {
+  const RiderOrder({
+    required this.raw,
+    required this.id,
+    required this.reference,
+    required this.status,
+    required this.packageSize,
+    required this.isFragile,
+    required this.isExpress,
+    required this.pickup,
+    required this.dropoff,
+    required this.sender,
+    required this.recipient,
+    required this.riderEarning,
+    required this.collectAtPickup,
+    required this.collectAtDelivery,
+    required this.awaitingSupportValidation,
+    this.instructions,
+    this.googleMapsUrl,
+    this.wazeUrl,
+    this.failureDecision,
+  });
+
+  factory RiderOrder.fromJson(Json json) {
+    final navigation = json['navigation'] as Json?;
+    return RiderOrder(
+      raw: json,
+      id: _field(json, 'id'),
+      reference: _field(json, 'reference'),
+      status: _field(json, 'status'),
+      packageSize: _field(json, 'packageSize'),
+      isFragile: _field(json, 'isFragile'),
+      isExpress: _field(json, 'isExpress'),
+      instructions: json['instructions'] as String?,
+      pickup: OrderAddress.fromJson(_field(json, 'pickup')),
+      dropoff: OrderAddress.fromJson(_field(json, 'dropoff')),
+      sender: OrderParty.fromJson(_field(json, 'sender')),
+      recipient: OrderParty.fromJson(_field(json, 'recipient')),
+      riderEarning: _field<num>(json, 'riderEarning').toInt(),
+      collectAtPickup: _field<num>(json, 'collectAtPickup').toInt(),
+      collectAtDelivery: _field<num>(json, 'collectAtDelivery').toInt(),
+      googleMapsUrl: navigation?['googleMaps'] as String?,
+      wazeUrl: navigation?['waze'] as String?,
+      failureDecision: json['failureDecision'] as String?,
+      awaitingSupportValidation: _field(json, 'awaitingSupportValidation'),
+    );
+  }
+
+  static const fields = [
+    'id',
+    'reference',
+    'status',
+    'packageSize',
+    'isFragile',
+    'isExpress',
+    'instructions',
+    'pickup',
+    'dropoff',
+    'sender',
+    'recipient',
+    'riderEarning',
+    'collectAtPickup',
+    'collectAtDelivery',
+    'navigation',
+    'failureDecision',
+    'awaitingSupportValidation',
+  ];
+
+  /// Réponse de l'API telle quelle (sauvegarde sur le téléphone).
+  final Json raw;
+  final String id;
+  final String reference;
+
+  /// ASSIGNED, PICKED_UP, IN_DELIVERY, DELIVERY_FAILED, DELIVERED, RETURNED, CANCELLED.
+  final String status;
+  final String packageSize;
+  final bool isFragile;
+  final bool isExpress;
+  final String? instructions;
+  final OrderAddress pickup;
+  final OrderAddress dropoff;
+  final OrderParty sender;
+  final OrderParty recipient;
+  final int riderEarning;
+
+  /// Espèces à encaisser auprès de l'expéditeur à l'enlèvement (frais payés en espèces).
+  final int collectAtPickup;
+
+  /// À encaisser auprès du destinataire (frais à sa charge et montant du colis).
+  final int collectAtDelivery;
+  final String? googleMapsUrl;
+  final String? wazeUrl;
+  final String? failureDecision;
+  final bool awaitingSupportValidation;
+
+  /// Toujours en cours pour le livreur (sinon : terminée, annulée ou réattribuée).
+  bool get inProgress => const {'ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED'}.contains(status);
+
+  /// Statut changé sur le téléphone, avant la confirmation du serveur (action en file).
+  RiderOrder withStatus(String status) => RiderOrder.fromJson({...raw, 'status': status});
+}
+
+/// Itinéraire vers la prochaine étape de la course, à dessiner sur la carte.
+@immutable
+class RiderRoute {
+  const RiderRoute({
+    required this.stop,
+    required this.meters,
+    required this.estimate,
+    required this.path,
+    this.seconds,
+  });
+
+  factory RiderRoute.fromJson(Json json) => RiderRoute(
+    stop: _field(json, 'stop'),
+    meters: _field<num>(json, 'meters').toInt(),
+    seconds: (json['seconds'] as num?)?.toInt(),
+    estimate: json['source'] == 'estimate',
+    path: [
+      for (final point in _field<List<Object?>>(json, 'path'))
+        [for (final value in point! as List<Object?>) (value! as num).toDouble()],
+    ],
+  );
+
+  static const fields = ['stop', 'meters', 'seconds', 'source', 'path'];
+
+  /// PICKUP (vendeur) ou DROPOFF (destinataire).
+  final String stop;
+  final int meters;
+  final int? seconds;
+
+  /// Ligne droite et distance estimées (calculateur d'itinéraires indisponible).
+  final bool estimate;
+
+  /// Paires [longitude, latitude].
+  final List<List<double>> path;
+
+  /// Minutes arrondies au supérieur, au moins 1.
+  int? get minutes => seconds == null ? null : (seconds! / 60).ceil().clamp(1, 600);
+}

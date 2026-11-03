@@ -10,6 +10,7 @@ import '../core/api/api_client.dart';
 import '../core/api/auth_api.dart';
 import '../core/api/models.dart';
 import '../core/api/rider_api.dart';
+import '../core/course/active_order.dart';
 import '../core/env.dart';
 import '../core/location/location_tracker.dart';
 import '../core/location/online_controller.dart';
@@ -69,6 +70,25 @@ final actionQueueProvider = Provider<ActionQueue>((ref) {
   return queue;
 });
 
+/// Course en cours : gardée sur le téléphone, mise à jour par l'API et le temps réel.
+final activeOrderProvider = Provider<ActiveOrderController>((ref) {
+  final rider = ref.watch(riderApiProvider);
+  final queue = ref.watch(actionQueueProvider);
+  final controller = ActiveOrderController(
+    store: ref.watch(keyValueStoreProvider),
+    fetchActive: rider.activeOrders,
+    fetchOrder: rider.riderOrder,
+    hasPendingActions: (orderId) => queue.forOrder(orderId).any((action) => !action.failed),
+    events: ref.watch(realtimeProvider).stream,
+  );
+  queue.addListener(controller.queueChanged);
+  ref.onDispose(() {
+    queue.removeListener(controller.queueChanged);
+    controller.dispose();
+  });
+  return controller;
+});
+
 enum AuthStatus { signedOut, signedIn }
 
 /// Session du livreur : connexion par code SMS, déconnexion, session refusée par le serveur.
@@ -97,6 +117,8 @@ class AuthController extends AsyncNotifier<AuthStatus> {
     try {
       await ref.read(authApiProvider).logout();
     } finally {
+      // Adresses et contacts de la course : rien ne reste sur le téléphone.
+      await ref.read(activeOrderProvider).clear();
       state = const AsyncData(AuthStatus.signedOut);
     }
   }
@@ -195,7 +217,9 @@ final riderRuntimeProvider = Provider<void>((ref) {
   final realtime = ref.watch(realtimeProvider)..connect();
   final queue = ref.watch(actionQueueProvider);
   final push = ref.watch(pushServiceProvider);
+  final activeOrder = ref.watch(activeOrderProvider);
   unawaited(push.start().catchError((Object _) {}));
+  unawaited(activeOrder.restore());
   final connectivity = Connectivity().onConnectivityChanged.listen((results) {
     if (!results.contains(ConnectivityResult.none)) unawaited(queue.flush());
   });
@@ -209,6 +233,7 @@ final riderRuntimeProvider = Provider<void>((ref) {
   final lifecycle = AppLifecycleListener(
     onResume: () {
       unawaited(queue.flush());
+      unawaited(activeOrder.refresh());
       unawaited(ref.read(riderConfigProvider.notifier).refresh());
     },
   );

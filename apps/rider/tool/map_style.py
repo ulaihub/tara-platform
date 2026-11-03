@@ -107,6 +107,22 @@ def style(name, t):
          "filter": ["==", ["get", "kind"], "NO_MOTORBIKE"],
          "paint": {"line-color": "#FF4D5A" if name == "dark" else "#C81E2C", "line-width": 2.5, "line-dasharray": [2, 1.5]}},
     ]
+    # Itinéraire de la course (source « tara-route ») : sous les noms de rues, au-dessus des
+    # routes. Tracé OSRM en trait plein ; ligne droite estimée (repli) en tirets.
+    route_case = t["halo"] if name == "dark" else "#FFFFFF"
+    layers += [
+        {"id": "tara-route-case", "type": "line", "source": "tara-route",
+         "layout": {"line-cap": "round", "line-join": "round"},
+         "paint": {"line-color": route_case, "line-width": interp((12, 6), (18, 13)), "line-opacity": 0.9}},
+        {"id": "tara-route-line", "type": "line", "source": "tara-route",
+         "filter": ["!=", ["get", "estimate"], True],
+         "layout": {"line-cap": "round", "line-join": "round"},
+         "paint": {"line-color": "#FF6A00", "line-width": interp((12, 3.5), (18, 8))}},
+        {"id": "tara-route-estimate", "type": "line", "source": "tara-route",
+         "filter": ["==", ["get", "estimate"], True],
+         "layout": {"line-join": "round"},
+         "paint": {"line-color": "#FF6A00", "line-width": interp((12, 3), (18, 6)), "line-dasharray": [1.5, 1.2]}},
+    ]
     # Textes : rues, numéros, lieux, quartiers.
     text = lambda size, color=t["text"], halo=1.6: {"text-color": color, "text-halo-color": t["halo"], "text-halo-width": halo}
     layers += [
@@ -155,6 +171,17 @@ def style(name, t):
          "layout": {"text-field": ["get", "name"], "text-font": FONT_BOLD, "text-size": interp((8, 13), (13, 20))},
          "paint": text(16, t["place"], 2)},
     ]
+    # Étape visée (source « tara-stop ») : vendeur = point orange cerclé de blanc avec halo ;
+    # destinataire = anneau orange épais au centre blanc.
+    layers += [
+        {"id": "tara-stop-halo", "type": "circle", "source": "tara-stop",
+         "paint": {"circle-color": "#FF6A00", "circle-opacity": 0.25, "circle-radius": 18}},
+        {"id": "tara-stop-dot", "type": "circle", "source": "tara-stop",
+         "paint": {"circle-radius": ["case", ["==", ["get", "kind"], "dropoff"], 7, 8],
+                   "circle-color": ["case", ["==", ["get", "kind"], "dropoff"], "#FFFFFF", "#FF6A00"],
+                   "circle-stroke-color": ["case", ["==", ["get", "kind"], "dropoff"], "#FF6A00", "#FFFFFF"],
+                   "circle-stroke-width": ["case", ["==", ["get", "kind"], "dropoff"], 5, 3]}},
+    ]
     # Position du livreur, au-dessus de tout : halo puis point (mise à jour par l'app).
     layers += [
         {"id": "tara-rider-halo", "type": "circle", "source": "tara-rider",
@@ -172,6 +199,8 @@ def style(name, t):
                              "attribution": "© OpenStreetMap contributors · OpenMapTiles"},
             "tara-zones": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
             "tara-rider": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
+            "tara-route": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
+            "tara-stop": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
         },
         "layers": layers,
     }
