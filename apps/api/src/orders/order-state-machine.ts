@@ -15,7 +15,8 @@ export const ORDER_TRANSITIONS: Record<OrderStatus, Partial<Record<OrderStatus, 
     CANCELLED: ['SENDER', 'DISPATCHER', 'SUPPORT', 'SYSTEM'],
   },
   SEARCHING_RIDER: {
-    ASSIGNED: ['SYSTEM', 'DISPATCHER'],
+    // RIDER : le livreur accepte une proposition (D2).
+    ASSIGNED: ['SYSTEM', 'DISPATCHER', 'RIDER'],
     CANCELLED: ['SENDER', 'DISPATCHER', 'SUPPORT', 'SYSTEM'],
   },
   ASSIGNED: {

@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthUser } from '../auth/auth.types.js';
 import { randomReadableId } from '../common/crypto.js';
 import { AppError } from '../common/errors/app-error.js';
+import { ENV } from '../config/config.module.js';
+import type { Env } from '../config/env.js';
+import { NotificationService } from '../notifications/notification.service.js';
 import type { MerchantProfile } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
@@ -35,6 +38,8 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationService,
+    @Inject(ENV) private readonly env: Env,
   ) {}
 
   async me(userId: string): Promise<z.output<typeof MeDto>> {
@@ -95,12 +100,14 @@ export class UsersService {
       niu: body.niu ?? null,
       ...(body.payoutSchedule ? { payoutSchedule: body.payoutSchedule } : {}),
     };
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const before = await tx.merchantProfile.findUnique({ where: { userId: actor.id } });
+      // Nouveau numéro de reversement : reversements gelés, ancien numéro prévenu (SIM swap).
+      const phoneChanged = before !== null && before.payoutPhone !== body.payoutPhone;
       const merchant = await tx.merchantProfile.upsert({
         where: { userId: actor.id },
         create: { userId: actor.id, ...data },
-        update: data,
+        update: { ...data, ...(phoneChanged ? { payoutPhoneChangedAt: new Date() } : {}) },
       });
       if (!actor.roles.includes('MERCHANT')) {
         await tx.user.update({
@@ -120,8 +127,25 @@ export class UsersService {
         },
         tx,
       );
-      return toMerchantDto(merchant);
+      return {
+        dto: toMerchantDto(merchant),
+        previousPhone: phoneChanged ? before.payoutPhone : null,
+      };
     });
+    if (result.previousPhone) {
+      const alerted = new Set([result.previousPhone, actor.phone]);
+      for (const phone of alerted) {
+        await this.notifications.toPhone({
+          phone,
+          template: 'PAYOUT_PHONE_CHANGED',
+          locale: actor.locale === 'EN' ? 'en' : 'fr',
+          params: { shop: body.shopName, hours: String(this.env.PAYOUT_HOLD_HOURS) },
+          userId: actor.id,
+          smsOnly: true,
+        });
+      }
+    }
+    return result.dto;
   }
 
   async recordConsent(

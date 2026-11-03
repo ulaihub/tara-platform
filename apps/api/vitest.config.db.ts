@@ -24,6 +24,9 @@ export default defineConfig({
       JOBS_ENABLED: 'false',
       PUBLIC_WEB_URL: 'https://tara.test',
       OSRM_URL: '',
+      // Base Redis réservée aux tests (vidée par les tests d'attribution).
+      REDIS_URL: process.env['TEST_REDIS_URL'] ?? 'redis://localhost:6379/1',
+      QUEUE_PREFIX: 'tara-test',
       // Plafonds anti-pompage relevés : les tests envoient beaucoup de codes depuis 127.0.0.1.
       OTP_MAX_PER_IP_PER_HOUR: '1000000',
       OTP_DAILY_GLOBAL_LIMIT: '1000000',

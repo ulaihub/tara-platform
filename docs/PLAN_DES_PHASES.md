@@ -8,6 +8,12 @@ avant le pilote.
 Chaque phase se termine par une démonstration et la validation du porteur de projet (« go »)
 avant de démarrer la suivante.
 
+**Avancement** : phases 0 à 3 livrées (back-end). Phase 3 : le simulateur financier traite 500
+commandes (espèces, Mobile Money, solde, contre-remboursement, annulations, retours, incidents
+Mobile Money) et le rapprochement sort à 0 FCFA d'écart, sans aucun reversement en double. Phase 2 : le simulateur attribue 100 % des
+60 courses de son scénario en moins de 2 minutes (médiane 16 s, 95e centile 73 s) ; il se relance
+avec `pnpm --filter @tara/api simulate`. Les maquettes des écrans sont attendues avant la phase 4.
+
 | Phase | Contenu                                                                                                                                                                                                                                     | Exigences                                         | Estimation (jours-dev) | Condition de sortie                                                                                |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------- |
 | 0     | Fondations : monorepo, infrastructure locale, intégration continue, schéma de données, protections en base                                                                                                                                  | Socle                                             | 3                      | Schéma validé par le porteur de projet                                                             |

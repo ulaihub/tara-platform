@@ -524,6 +524,14 @@ describe('Tarification et commandes (C1 à C7)', () => {
       const failed = await go('DELIVERY_FAILED', { failureReason: 'RECIPIENT_ABSENT' }).expect(200);
       expect(failed.body.attemptCount).toBe(1);
       await go('IN_DELIVERY').expect(200);
+      // Pas de livraison sans encaissement du contre-remboursement (E5), même forcée.
+      const unpaid = await go('DELIVERED').expect(409);
+      expect(unpaid.body.error.code).toBe('COLLECTION_REQUIRED');
+      await request(ctx.http)
+        .post(`/v1/rider/orders/${id}/collect`)
+        .set(riderUser.auth)
+        .send({ method: 'CASH' })
+        .expect(200);
       const delivered = await go('DELIVERED').expect(200);
       expect(delivered.body.timeline.map((e: { status: string }) => e.status)).toEqual([
         'CREATED',

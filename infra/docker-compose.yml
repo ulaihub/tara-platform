@@ -27,7 +27,8 @@ services:
 
   redis:
     image: redis:7-alpine
-    command: ['redis-server', '--appendonly', 'yes']
+    # Les files de tâches (BullMQ) exigent qu'aucune clé ne soit évincée.
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
     ports:
       - '6379:6379'
     volumes:

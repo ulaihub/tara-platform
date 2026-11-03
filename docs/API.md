@@ -10,19 +10,19 @@ npx @openapitools/openapi-generator-cli generate -i apps/api/openapi.json -g dar
 
 ## Conventions
 
-| Sujet       | Règle                                                                                                                                                                                                                |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Adresse     | Toutes les routes sont sous `/v1`, sauf `/health`.                                                                                                                                                                   |
-| Connexion   | `Authorization: Bearer <accessToken>` sur toutes les routes, sauf `auth/*`, `public/*` et `/health`.                                                                                                                 |
-| Langue      | `Accept-Language: fr` ou `en`. Pour un utilisateur connecté, la langue de son compte prime.                                                                                                                          |
-| Erreurs     | Toujours `{ "error": { "code", "message", "details?", "requestId?" } }`. L'app se fie à `code` (liste fermée dans le schéma `ErrorBody`) ; `message` est prêt à afficher ; `requestId` est à communiquer au support. |
-| Argent      | Montants en FCFA entiers, devise `XAF`. Jamais de décimales.                                                                                                                                                         |
-| Dates       | ISO 8601 en UTC (`2026-11-03T09:00:00.000Z`). L'app affiche l'heure du Cameroun (UTC+1).                                                                                                                             |
-| Téléphones  | Toutes les écritures courantes sont acceptées (`690 00 00 00`, `+237690000000`…) et renvoyées au format `+2376XXXXXXXX`.                                                                                             |
-| Pagination  | `?limit=20&cursor=<nextCursor>` ; la réponse contient `items` et `nextCursor` (`null` à la fin).                                                                                                                     |
-| Idempotence | En-tête `Idempotency-Key` (UUID) sur `POST /v1/orders` et `POST /v1/orders/batch` : en cas de coupure réseau, renvoyer la même requête avec la même clé renvoie la commande déjà créée (`replayed: true`).           |
-| Fichiers    | `multipart/form-data`, champ `file`. Photos et notes vocales : 1 Mo au plus (compresser côté app, viser moins de 150 Ko). Pièces KYC : 5 Mo, JPEG, PNG, WebP ou PDF ; le contenu réel est vérifié.                   |
-| Limitation  | 120 requêtes par minute et par compte connecté ; sur les routes publiques, par adresse IP avec des seuils larges (les opérateurs partagent une même IP entre abonnés). Au-delà : `429` avec le code `RATE_LIMITED`.  |
+| Sujet       | Règle                                                                                                                                                                                                                                                                            |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adresse     | Toutes les routes sont sous `/v1`, sauf `/health`.                                                                                                                                                                                                                               |
+| Connexion   | `Authorization: Bearer <accessToken>` sur toutes les routes, sauf `auth/*`, `public/*` et `/health`.                                                                                                                                                                             |
+| Langue      | `Accept-Language: fr` ou `en`. Pour un utilisateur connecté, la langue de son compte prime.                                                                                                                                                                                      |
+| Erreurs     | Toujours `{ "error": { "code", "message", "details?", "requestId?" } }`. L'app se fie à `code` (liste fermée dans le schéma `ErrorBody`) ; `message` est prêt à afficher ; `requestId` est à communiquer au support.                                                             |
+| Argent      | Montants en FCFA entiers, devise `XAF`. Jamais de décimales.                                                                                                                                                                                                                     |
+| Dates       | ISO 8601 en UTC (`2026-11-03T09:00:00.000Z`). L'app affiche l'heure du Cameroun (UTC+1).                                                                                                                                                                                         |
+| Téléphones  | Toutes les écritures courantes sont acceptées (`690 00 00 00`, `+237690000000`…) et renvoyées au format `+2376XXXXXXXX`.                                                                                                                                                         |
+| Pagination  | `?limit=20&cursor=<nextCursor>` ; la réponse contient `items` et `nextCursor` (`null` à la fin).                                                                                                                                                                                 |
+| Idempotence | En-tête `Idempotency-Key` (UUID) : facultatif sur `POST /v1/orders` et `POST /v1/orders/batch`, **obligatoire** sur toute opération qui déplace de l'argent (recharge, retrait, dépôt, reversement, avoir). Renvoyer la même requête avec la même clé ne refait pas l'opération. |
+| Fichiers    | `multipart/form-data`, champ `file`. Photos et notes vocales : 1 Mo au plus (compresser côté app, viser moins de 150 Ko). Pièces KYC : 5 Mo, JPEG, PNG, WebP ou PDF ; le contenu réel est vérifié.                                                                               |
+| Limitation  | 120 requêtes par minute et par compte connecté ; sur les routes publiques, par adresse IP avec des seuils larges (les opérateurs partagent une même IP entre abonnés). Au-delà : `429` avec le code `RATE_LIMITED`.                                                              |
 
 ## Connexion par code SMS (A1)
 
@@ -68,12 +68,140 @@ Après 5 codes faux, le second facteur est bloqué 15 minutes (`MFA_LOCKED`). T�
 | C6       | `promoCode` dans le devis et la commande, `referralCode` à l'inscription ; back-office : `/admin/promo-codes`                                                                                                              |
 | C7       | Back-office : `GET` et `POST /admin/pricing-grids`, `POST /admin/pricing-grids/{id}/activate`, `PATCH /admin/pricing-grids/{id}/surcharges/{code}`                                                                         |
 
-`POST /admin/orders/{id}/transition` permet aux opérations de faire avancer une commande à la main, en attendant l'attribution automatique (phase 2) et l'app livreur (phase 4).
+`POST /admin/orders/{id}/transition` permet aux opérations de forcer un statut en cas d'incident (tracé dans le journal d'audit).
 
 ## Cycle de vie d'une commande à sa création
 
 - Paiement en espèces ou par le destinataire, sans créneau : la commande passe aussitôt en `SEARCHING_RIDER`.
 - Prépaiement Mobile Money ou portefeuille : elle reste en `CREATED` jusqu'au paiement (phase 3).
-- Créneau programmé : elle reste en `CREATED` jusqu'à son lancement automatique (phase 2).
+- Créneau programmé : elle reste en `CREATED` et part en recherche de livreur 20 minutes avant le créneau.
 
-Le code d'enlèvement (4 chiffres) n'est renvoyé qu'une fois, à la création ; s'il est perdu, `POST /orders/{id}/pickup-code` en génère un nouveau. Le code de livraison est créé à l'enlèvement et envoyé par SMS au destinataire.
+Le code d'enlèvement (4 chiffres) n'est renvoyé qu'une fois, à la création ; s'il est perdu, `POST /orders/{id}/pickup-code` en génère un nouveau. Le code de livraison est créé à l'enlèvement et envoyé au destinataire (WhatsApp, ou SMS en repli). Après 5 codes faux saisis par le livreur, le code est bloqué : nouveau code d'enlèvement par l'expéditeur, validation de la livraison par le support.
+
+## Attribution des courses (D1 à D4)
+
+1. Dès qu'une commande passe en `SEARCHING_RIDER`, elle est proposée au livreur en ligne le mieux placé : distance d'approche, courses en cours, espèces détenues et note.
+2. Il a 30 secondes pour répondre. Refus ou silence : la course part au suivant. Après 3 tours sans preneur, elle est diffusée à 5 livreurs à la fois ; le premier qui accepte l'emporte.
+3. Le rayon de recherche s'élargit (3, 5, 8 puis 12 km). Sans livreur, nouvelle tentative toutes les 20 secondes ; après 5 minutes, le dispatch est alerté (temps réel et SMS d'astreinte), une seule fois.
+4. Sont exclus : pièces manquantes ou expirées, plafond d'espèces atteint (en comptant les espèces de la course), 2 courses déjà en cours, une autre proposition en attente. Un livreur qui a refusé ou rendu la course ne la revoit pas.
+
+Le dispatcheur voit les livreurs proches et la raison de chaque exclusion (`GET /admin/orders/{id}/candidates`), l'historique des propositions (`GET /admin/orders/{id}/dispatch`), et peut attribuer ou réattribuer à la main (`POST /admin/orders/{id}/assign`) ; le livreur retiré est prévenu.
+
+Tous les délais sont réglables par variables d'environnement (`DISPATCH_*`, voir `.env.example`).
+
+## Application livreur (E1 à E9)
+
+Toutes les routes sont sous `/v1/rider` et réservées au rôle `RIDER`.
+
+| Étape                 | Route                                                                  | Points d'attention                                                                                                                                              |
+| --------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| En ligne / hors ligne | `PUT /presence`, `GET /presence`                                       | Passage en ligne refusé (`RIDER_NOT_ELIGIBLE`) si une pièce manque ou a expiré ; `blockers` dit laquelle. Hors ligne : les propositions en cours sont refusées. |
+| Position              | `POST /location` ou événement `rider.location`                         | Toutes les 10 à 15 s. Sans position depuis 90 s, le livreur ne reçoit plus de propositions.                                                                     |
+| Propositions          | `GET /offers`, `POST /offers/{id}/accept`, `POST /offers/{id}/decline` | `OFFER_EXPIRED` ou `OFFER_NO_LONGER_AVAILABLE` si un autre a été plus rapide. La proposition ne contient aucune donnée du destinataire.                         |
+| Courses               | `GET /orders?scope=active\|history`, `GET /orders/{id}`                | Contacts et liens Google Maps / Waze visibles seulement pendant la course.                                                                                      |
+| Enlèvement (E3)       | `POST /orders/{id}/pickup`                                             | Code de l'expéditeur + `photoKey` (photo envoyée avant par `POST /media` avec `kind=PROOF_PHOTO`).                                                              |
+| Départ                | `POST /orders/{id}/depart`                                             |                                                                                                                                                                 |
+| Livraison (E4)        | `POST /orders/{id}/deliver`                                            | Code du destinataire + photo. Sans code : `awaitingSupportValidation: true`, le support appelle le destinataire puis valide.                                    |
+| Échec (E6)            | `POST /orders/{id}/fail`                                               | Motif, photo du lieu et journal d'appels (au moins un). L'expéditeur choisit ensuite : `POST /v1/orders/{id}/failure-decision` (`RETRY` ou `RETURN`).           |
+| Nouvelle tentative    | `POST /orders/{id}/retry`                                              |                                                                                                                                                                 |
+| Retour                | `POST /orders/{id}/return`                                             | Code de l'expéditeur (celui de l'enlèvement).                                                                                                                   |
+| Rendre une course     | `POST /orders/{id}/release`                                            | Avant l'enlèvement seulement ; motif obligatoire.                                                                                                               |
+| Gains (E9)            | `GET /earnings?period=day\|week\|month`                                | Périodes à l'heure du Cameroun, la semaine commence le lundi.                                                                                                   |
+| Alerte (E8)           | `POST /alerts`                                                         | Position envoyée au dispatch (temps réel) et par SMS aux numéros d'astreinte.                                                                                   |
+
+**Hors ligne (E7).** Chaque action accepte `latitude`, `longitude`, `occurredAt` (heure de l'action sur le téléphone, 72 h au plus) et `clientEventId` (identifiant unique généré par l'app). L'app met les actions en file sans réseau et les renvoie au retour du réseau : une action déjà reçue n'est pas refaite et la réponse donne l'état actuel de la course.
+
+Back-office : `POST /admin/orders/{id}/validate-delivery` (support ; au-delà de `SUPPORT_VALIDATION_LIMIT` FCFA à encaisser, administrateur), `GET /admin/safety-alerts`, `POST /admin/safety-alerts/{id}/acknowledge`, `POST /admin/safety-alerts/{id}/resolve`.
+
+## Temps réel (F1)
+
+Connexion Socket.IO sur l'espace `/realtime` (même hôte que l'API), avec le jeton d'accès :
+
+```js
+const socket = io('https://api.tara.cm/realtime', {
+  auth: { token: accessToken },
+  transports: ['websocket'],
+});
+```
+
+Jeton absent ou invalide : erreur de connexion `UNAUTHENTICATED`. À l'expiration du jeton, le serveur envoie `session.expired` puis coupe : se reconnecter avec un jeton renouvelé.
+
+| Sens          | Événement           | Contenu                                                                                     | Destinataires                               |
+| ------------- | ------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| app → serveur | `order.subscribe`   | `{ orderId }` ; accusé `{ ok, status, position }` (dernière position connue)                | Expéditeur, livreur de la course, équipe    |
+| app → serveur | `order.unsubscribe` | `{ orderId }`                                                                               |                                             |
+| app → serveur | `rider.location`    | Comme `POST /v1/rider/location` ; une toutes les 2 s au plus                                | Livreurs                                    |
+| serveur → app | `order.status`      | `{ orderId, reference, status, riderId, failureDecision, at }`                              | Abonnés de la commande, expéditeur, livreur |
+| serveur → app | `rider.position`    | `{ orderId, latitude, longitude, heading, speed, at }`                                      | Abonnés de la commande                      |
+| serveur → app | `offer.new`         | Schéma `DispatchOffer`                                                                      | Livreur sollicité                           |
+| serveur → app | `offer.closed`      | `{ offerId, orderId, outcome }`                                                             | Livreur sollicité                           |
+| serveur → app | `payment.status`    | `{ paymentId, purpose, status, amount, orderId }`                                           | Payeur connecté, abonnés de la commande     |
+| serveur → app | `payout.status`     | `{ payoutId, status, amount }`                                                              | Bénéficiaire                                |
+| serveur → app | `ops.*`             | `dispatch-alert`, `safety-alert`, `delivery-validation`, `rider-position` (toutes les 10 s) | Équipe (`ADMIN`, `DISPATCHER`, `SUPPORT`)   |
+
+Les événements servent à rafraîchir l'écran ; l'état qui fait foi reste celui de l'API REST (à relire après une reconnexion).
+
+## Notifications (F3)
+
+- **Push** (Firebase Cloud Messaging) : l'app envoie son jeton après la connexion et à chaque renouvellement, `PUT /v1/me/devices/{installationId}/push-token` (`null` pour arrêter). Les propositions de course sont en priorité haute sur le canal Android `offers` (son et réveil écran verrouillé) ; les autres sur le canal `orders`. `data.type` indique l'écran à ouvrir.
+- **Destinataire** (sans compte) : WhatsApp d'abord, avec des modèles approuvés par Meta nommés `tara_<modèle>` ; SMS si WhatsApp refuse le message ou signale plus tard un échec (webhook `POST /v1/webhooks/whatsapp`, signé).
+- Messages par statut : confirmation au destinataire à la création ; push à l'expéditeur à l'attribution, à l'enlèvement, au départ, à la livraison, à l'échec, au retour et à l'annulation ; code de livraison puis reçu au destinataire ; au livreur, annulation ou retrait de sa course.
+
+## Argent (G1 à G8, E5)
+
+Montants en FCFA entiers. Chaque mouvement est une écriture du grand livre ; les soldes affichés en sont tirés.
+
+**Paiement des frais d'une commande (G1).**
+
+| `feePaymentMethod` (payé par l'expéditeur) | Ce qui se passe                                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `CASH`                                     | Payé au livreur à l'enlèvement ; la commande part tout de suite.                                                    |
+| `WALLET`                                   | Débité du solde Tara à la création (`INSUFFICIENT_BALANCE` sinon) ; pour un marchand, de son portefeuille.          |
+| `MOMO_MTN`, `MOMO_ORANGE`                  | La commande reste `CREATED` ; `POST /orders/{id}/pay` envoie la demande au téléphone ; elle part à la confirmation. |
+
+Avec `feePayer: RECIPIENT`, le destinataire paie à la porte. Une commande annulée avant l'enlèvement rend ses frais au solde (avoir). Un retour que le destinataire devait payer est facturé à l'expéditeur. Un client dont le solde est négatif doit le régler avant de commander (`WALLET_IN_DEBT`).
+
+**Encaissement à la porte (E5).** `GET /rider/orders/{id}/collection` donne ce qui reste dû (frais du destinataire et contre-remboursement). `POST /rider/orders/{id}/collect` avec `{ "method": "CASH" }` l'enregistre tout de suite ; avec `{ "method": "MOBILE_MONEY", "phone", "operator" }`, une demande part au téléphone du destinataire et la confirmation arrive par l'événement `payment.status` (ou `GET /payments/{id}`). La livraison est refusée (`COLLECTION_REQUIRED`) tant que tout n'est pas encaissé. Frais d'encaissement : 2 %, minimum 250 FCFA, déduits du montant reversé au marchand.
+
+**Portefeuilles.**
+
+| Qui      | Routes                                                                                                                                                                              |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Client   | `GET /me/wallet`, `GET /me/wallet/transactions`, `POST /me/wallet/topup`, `POST /me/wallet/refund` (vers Mobile Money)                                                              |
+| Marchand | Idem avec `account=merchant` ; `POST /me/merchant/payouts` (à la demande, offres Pro et Business) ; `GET /me/payouts` ; `GET /me/merchant/statements/{AAAA-MM}` (PDF)               |
+| Livreur  | `GET /rider/wallet` (gains, espèces détenues, plafond, disponible), `GET /rider/wallet/transactions?account=earnings\|cash`, `POST /rider/withdrawals`, `POST /rider/cash-deposits` |
+
+Le livreur garde sa part sur les espèces qu'il encaisse : son disponible au retrait vaut ses gains moins les espèces qu'il détient. Au-delà de son plafond d'espèces, il ne reçoit plus de courses tant qu'il n'a pas déposé.
+
+**Reversements (G3).** Chaque jour à 18 h (heure du Cameroun), le portefeuille de chaque marchand en reversement quotidien part vers son numéro Mobile Money (500 FCFA minimum). Au-delà de 200 000 FCFA, un responsable financier valide d'abord. Un reversement échoué rend le montant au portefeuille.
+
+**Back-office finance** (`ADMIN`, `FINANCE`, double authentification) : `GET /admin/finance/overview`, `GET /admin/finance/payouts`, `POST /admin/finance/payouts/{id}/approve` et `/reject`, `POST /admin/finance/riders/{riderId}/cash-deposits` (dépôt au bureau), `POST /admin/finance/users/{userId}/credits` (avoir), `POST /admin/finance/treasury-transfers`, `GET /admin/finance/reconciliations`, `POST /admin/finance/reconciliations/{jour}/run`, `GET /admin/finance/journal.csv?from&to` (export comptable, séparateur point-virgule), `GET /admin/finance/merchants/{merchantId}/statements/{AAAA-MM}`.
+
+Notifications de l'agrégateur : `GET` ou `POST /v1/webhooks/payments/{prestataire}`, signées.
+
+## Couverture des exigences de la phase 3
+
+| Exigence | Réalisation                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| G1       | Espèces, Mobile Money (CamPay), solde Tara, destinataire payeur                                       |
+| G2       | Portefeuille marchand ligne par ligne                                                                 |
+| G3       | Reversement quotidien à 18 h, à la demande pour Pro et Business, validation au-delà d'un seuil        |
+| G4       | Portefeuille livreur : gains, espèces détenues, retrait                                               |
+| G5       | Plafond d'espèces appliqué à l'attribution, dépôt par Mobile Money ou au bureau                       |
+| G6       | Rapprochement chaque nuit à 1 h 30, relance manuelle, liste des écarts                                |
+| G7       | Relevé mensuel PDF                                                                                    |
+| G8       | Avoirs automatiques (annulation) ou accordés par la finance, remboursement du solde vers Mobile Money |
+| E5       | Encaissement espèces ou Mobile Money à la porte, livraison bloquée tant que ce n'est pas fait         |
+| H5       | Validation des reversements, rapprochement, export comptable CSV                                      |
+
+## Couverture des exigences de la phase 2
+
+| Exigence | Réalisation                                                                                                                               |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| D1       | Score du livreur (`rider-scoring.ts`), positions Redis GEO                                                                                |
+| D2       | Tours de proposition, diffusion, élargissement du rayon, alerte après 5 min (`dispatch.service.ts`) ; simulateur : 95 % en moins de 2 min |
+| D3       | `GET /admin/orders/{id}/candidates`, `GET /admin/orders/{id}/dispatch`, `POST /admin/orders/{id}/assign`                                  |
+| D4       | Pièces, plafond d'espèces, courses en cours, au passage en ligne et à chaque proposition                                                  |
+| E1 à E9  | Côté serveur : routes `/v1/rider/*` ci-dessus (l'app livreur arrive en phase 4)                                                           |
+| F1       | Socket.IO `/realtime` partagé entre instances par Redis                                                                                   |
+| F3       | Push, WhatsApp, SMS avec repli et nouvelles tentatives (file BullMQ)                                                                      |

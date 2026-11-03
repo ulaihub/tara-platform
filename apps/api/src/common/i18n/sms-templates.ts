@@ -29,6 +29,30 @@ const TEMPLATES = {
     fr: 'Tara : votre colis {reference} est en route. Code a donner au livreur : {code}. Suivi : {url}',
     en: 'Tara: your parcel {reference} is on its way. Code to give the rider: {code}. Tracking: {url}',
   },
+  RETURN_CODE: {
+    fr: 'Tara : la livraison {reference} a echoue. En cas de retour, donnez ce code au livreur seulement quand il vous rend le colis : {code}.',
+    en: 'Tara: delivery {reference} failed. If it is returned, give this code to the rider only when they hand the parcel back to you: {code}.',
+  },
+  DELIVERY_RECEIPT: {
+    fr: 'Tara : votre colis {reference} a ete livre. Merci de votre confiance !',
+    en: 'Tara: your parcel {reference} has been delivered. Thank you!',
+  },
+  ORDER_CANCELLED_RECIPIENT: {
+    fr: 'Tara : la livraison {reference} envoyee par {sender} a ete annulee.',
+    en: 'Tara: delivery {reference} sent by {sender} has been cancelled.',
+  },
+  OPS_DISPATCH_ALERT: {
+    fr: 'Tara OPS : la course {reference} attend un livreur depuis {minutes} min. A attribuer.',
+    en: 'Tara OPS: order {reference} has been waiting for a rider for {minutes} min. Please assign.',
+  },
+  OPS_SAFETY_ALERT: {
+    fr: 'Tara OPS ALERTE : le livreur {rider} ({phone}) a declenche une alerte. Position : {map}',
+    en: 'Tara OPS ALERT: rider {rider} ({phone}) triggered an alert. Location: {map}',
+  },
+  PAYOUT_PHONE_CHANGED: {
+    fr: 'Tara : le numero de reversement de {shop} vient d etre change. Reversements suspendus {hours} h. Si ce n est pas vous, contactez vite le support.',
+    en: 'Tara: the payout number of {shop} was just changed. Payouts paused for {hours} h. If this was not you, contact support right away.',
+  },
   KYC_DOCUMENT_EXPIRING: {
     fr: 'Tara : votre piece "{document}" expire le {date}. Envoyez la nouvelle dans l app pour continuer a recevoir des courses.',
     en: 'Tara: your document "{document}" expires on {date}. Upload the new one in the app to keep receiving jobs.',

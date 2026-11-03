@@ -3,6 +3,7 @@ import { InvalidEnvironmentError, parseEnv } from './env.js';
 describe('parseEnv', () => {
   const valid = {
     DATABASE_URL: 'postgresql://tara:tara@localhost:5432/tara',
+    REDIS_URL: 'redis://localhost:6379',
     JWT_SECRET: 'x'.repeat(32),
     CODE_HASH_SECRET: 'y'.repeat(32),
     STORAGE_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString('base64'),
@@ -34,6 +35,26 @@ describe('parseEnv', () => {
     );
   });
 
+  it('exige les identifiants du fournisseur SMS choisi et un secours distinct', () => {
+    expect(() => parseEnv({ ...valid, SMS_PROVIDER: 'orange' })).toThrow(
+      /ORANGE_SMS_CLIENT_ID[\s\S]*ORANGE_SMS_SENDER_PHONE/,
+    );
+    const orange = {
+      ...valid,
+      SMS_PROVIDER: 'orange',
+      ORANGE_SMS_CLIENT_ID: 'client-orange',
+      ORANGE_SMS_CLIENT_SECRET: 'secret-orange',
+      ORANGE_SMS_SENDER_PHONE: '+237690000000',
+    };
+    expect(parseEnv(orange).SMS_FALLBACK_PROVIDER).toBe('none');
+    expect(() => parseEnv({ ...orange, SMS_FALLBACK_PROVIDER: 'orange' })).toThrow(
+      /SMS_FALLBACK_PROVIDER/,
+    );
+    expect(() => parseEnv({ ...orange, SMS_FALLBACK_PROVIDER: 'twilio' })).toThrow(
+      /TWILIO_ACCOUNT_SID/,
+    );
+  });
+
   it('refuse un secret JWT trop court', () => {
     expect(() => parseEnv({ ...valid, JWT_SECRET: 'court' })).toThrow(/JWT_SECRET/);
   });
@@ -46,7 +67,7 @@ describe('parseEnv', () => {
 
   it('interdit le SMS factice et le stockage local en production', () => {
     expect(() => parseEnv({ ...valid, NODE_ENV: 'production' })).toThrow(
-      /SMS_PROVIDER[\s\S]*STORAGE_DRIVER/,
+      /SMS_PROVIDER[\s\S]*PUSH_PROVIDER[\s\S]*PAYMENT_PROVIDER[\s\S]*STORAGE_DRIVER/,
     );
   });
 });

@@ -16,4 +16,7 @@ paths = [
   '''apps/api/src/openapi/generate\.ts''',
   '''pnpm-lock\.yaml''',
   '''apps/api/openapi\.json''',
+  # Clé d'API Firebase de l'app livreur : identifiant public du projet, présent dans tout
+  # APK publié (documentation Firebase) ; sa protection passe par les restrictions de clé.
+  '''apps/rider/lib/firebase_options\.dart''',
 ]
