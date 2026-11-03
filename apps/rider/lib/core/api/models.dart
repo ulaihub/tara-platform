@@ -8,6 +8,10 @@ typedef Json = Map<String, Object?>;
 T _field<T>(Json json, String key) => json[key] as T;
 DateTime? _date(Object? value) => value == null ? null : DateTime.parse(value as String);
 
+/// Heure au format attendu par l'API : UTC, à la milliseconde (pas de microsecondes).
+String isoUtc(DateTime value) =>
+    DateTime.fromMillisecondsSinceEpoch(value.millisecondsSinceEpoch, isUtc: true).toIso8601String();
+
 @immutable
 class OtpChallenge {
   const OtpChallenge({required this.challengeId, required this.expiresAt, required this.resendAfterSeconds});
@@ -218,4 +222,85 @@ class SafetyAlert {
   final DateTime createdAt;
   final DateTime? cancelledAt;
   final DateTime? resolvedAt;
+}
+
+@immutable
+class KycDocument {
+  const KycDocument({required this.type, required this.status, required this.rejectionReason});
+  final String type;
+
+  /// PENDING, APPROVED, REJECTED ou EXPIRED.
+  final String status;
+  final String? rejectionReason;
+}
+
+/// Dossier du livreur : statut de validation, pièces envoyées et manquantes.
+@immutable
+class RiderProfile {
+  const RiderProfile({
+    required this.status,
+    required this.vehicleType,
+    required this.documents,
+    required this.missingDocuments,
+    required this.emergencyContactName,
+    required this.emergencyContactPhone,
+  });
+  factory RiderProfile.fromJson(Json json) {
+    final contact = json['emergencyContact'] as Json?;
+    return RiderProfile(
+      status: _field(json, 'status'),
+      vehicleType: _field(json, 'vehicleType'),
+      documents: [
+        for (final item in _field<List<Object?>>(json, 'documents'))
+          KycDocument(
+            type: _field(item! as Json, 'type'),
+            status: _field(item as Json, 'status'),
+            rejectionReason: _field(item, 'rejectionReason'),
+          ),
+      ],
+      missingDocuments: [for (final item in _field<List<Object?>>(json, 'missingDocuments')) item! as String],
+      emergencyContactName: contact?['name'] as String?,
+      emergencyContactPhone: contact?['phone'] as String?,
+    );
+  }
+  static const fields = ['status', 'vehicleType', 'documents', 'missingDocuments', 'emergencyContact'];
+
+  /// PENDING (en attente de validation), ACTIVE, SUSPENDED ou REJECTED.
+  final String status;
+  final String vehicleType;
+  final List<KycDocument> documents;
+  final List<String> missingDocuments;
+  final String? emergencyContactName;
+  final String? emergencyContactPhone;
+
+  bool get isActive => status == 'ACTIVE';
+}
+
+/// Position du téléphone, envoyée avec la présence, les positions et les actions.
+@immutable
+class GeoPoint {
+  const GeoPoint({
+    required this.latitude,
+    required this.longitude,
+    required this.recordedAt,
+    this.heading,
+    this.speed,
+    this.accuracy,
+  });
+
+  final double latitude;
+  final double longitude;
+  final DateTime recordedAt;
+  final double? heading;
+  final double? speed;
+  final double? accuracy;
+
+  Json toJson() => {
+    'latitude': latitude,
+    'longitude': longitude,
+    if (heading != null) 'heading': heading,
+    if (speed != null) 'speed': speed,
+    if (accuracy != null) 'accuracy': accuracy,
+    'recordedAt': isoUtc(recordedAt),
+  };
 }

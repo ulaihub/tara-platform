@@ -64,7 +64,9 @@ class ApiClient {
       if (error.status != 401 || session == null) rethrow;
       // Jeton refusé (révoqué, horloge du téléphone décalée) : un renouvellement, un essai.
       session = await _refresh(session);
-      return _request(method, path, body, query, session, headers);
+      // Un formulaire (photo) ne s'envoie qu'une fois : on en rejoue une copie.
+      final retryBody = body is FormData ? body.clone() : body;
+      return _request(method, path, retryBody, query, session, headers);
     }
   }
 
