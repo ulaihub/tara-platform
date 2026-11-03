@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Échec de livraison (clair)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F2EC}
+a{color:#C2410C}a:hover{color:#9A3412}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #C2410C;outline-offset:3px}
+@keyframes morph{0%,100%{border-radius:42% 58% 70% 30%/45% 45% 55% 55%}33%{border-radius:70% 30% 46% 54%/30% 29% 71% 70%}66%{border-radius:100% 60% 60% 100%/100% 100% 60% 60%}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-32px) scale(1.12)}}
+@keyframes sheen{0%{transform:translateX(-140%) skewX(-20deg)}55%,100%{transform:translateX(420%) skewX(-20deg)}}
+.blob{animation:morph 14s ease-in-out infinite,drift 20s ease-in-out infinite}
+.sheen{animation:sheen 3.6s ease-in-out infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F2EC; color: #16120E; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <div aria-hidden="true" class="blob" style="position: absolute; top: -140px; right: -150px; width: 360px; height: 360px; background: radial-gradient(circle at 40% 40%, #FF8A5C, #FF4D5A); filter: blur(60px); opacity: 0.4"></div>
+  <div aria-hidden="true" class="blob" style="position: absolute; bottom: -160px; left: -150px; width: 320px; height: 320px; background: radial-gradient(circle, #FFD27A, #FF8A00); filter: blur(70px); opacity: 0.38; animation-delay: -7s"></div>
+
+  <div style="position: relative; height: 100%; box-sizing: border-box; padding: 56px 20px 30px; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <a href="LivraisonClair.dc.html" aria-label="Retour" style="flex: none; width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.65); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 6px 16px rgba(140,70,10,0.08); color: #16120E; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+      </a>
+      <div>
+        <p style="margin: 0; font-size: 12px; color: rgba(22,18,14,0.66)">Course TR-48213 · Mariam Touré</p>
+        <h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Livraison impossible</h1>
+      </div>
+    </div>
+
+    <fieldset style="margin: 22px 0 0; padding: 0; border: 0">
+      <legend style="padding: 0; margin-bottom: 10px; font-size: 13px; font-weight: 700">Motif</legend>
+      <div role="radiogroup" aria-label="Motif de l'échec" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{reasons}}" as="r" hint-placeholder-count="6">
+          <button type="button" role="radio" aria-checked="{{r.checked}}" onClick="{{r.pick}}" style="{{r.style}}">{{r.label}}</button>
+        </sc-for>
+      </div>
+    </fieldset>
+
+    <section aria-label="Appels au destinataire" style="margin-top: 16px; padding: 16px; border-radius: 24px; background: rgba(255,255,255,0.62); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); box-shadow: inset 0 1px 0 #FFFFFF, 0 14px 30px rgba(140,70,10,0.08)">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <p style="margin: 0; font-size: 13px; font-weight: 700">Appels au destinataire</p>
+        <span style="font-size: 12px; font-weight: 600; color: rgba(22,18,14,0.66)">2 tentatives</span>
+      </div>
+      <ul style="list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+        <li style="display: flex; align-items: center; gap: 10px; font-size: 13px">
+          <span aria-hidden="true" style="width: 30px; height: 30px; border-radius: 10px; background: rgba(229,37,53,0.10); color: #C81E2C; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l5 5M21 3l-5 5M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg></span>
+          <span style="flex: 1">Sans réponse</span><span style="color: rgba(22,18,14,0.66); font-variant-numeric: tabular-nums">18:46 · 0:30</span>
+        </li>
+        <li style="display: flex; align-items: center; gap: 10px; font-size: 13px">
+          <span aria-hidden="true" style="width: 30px; height: 30px; border-radius: 10px; background: rgba(229,37,53,0.10); color: #C81E2C; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l5 5M21 3l-5 5M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg></span>
+          <span style="flex: 1">Sans réponse</span><span style="color: rgba(22,18,14,0.66); font-variant-numeric: tabular-nums">18:42 · 0:32</span>
+        </li>
+      </ul>
+      <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <a href="tel:+2250700000000" style="height: 46px; border-radius: 15px; background: rgba(16,160,110,0.12); border: 1px solid rgba(16,160,110,0.35); color: #0E7F57; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>Rappeler</a>
+        <a href="tel:+2250700000001" style="height: 46px; border-radius: 15px; background: #FFFFFF; border: 1px solid rgba(22,18,14,0.10); color: #16120E; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0116 0v2"></path><rect x="3" y="14" width="4" height="6" rx="1.5"></rect><rect x="17" y="14" width="4" height="6" rx="1.5"></rect></svg>Support Tara</a>
+      </div>
+    </section>
+
+    <button type="button" style="margin-top: 14px; display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 20px; border: 1.5px dashed #FF8A3D; background: rgba(255,138,0,0.06); color: #16120E; text-align: left; cursor: pointer">
+      <span aria-hidden="true" style="flex: none; width: 52px; height: 52px; border-radius: 15px; background: rgba(255,138,0,0.14); color: #C2410C; display: flex; align-items: center; justify-content: center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 15px; font-weight: 700">Photo du lieu <span style="font-size: 12px; font-weight: 700; color: #C2410C">· obligatoire</span></span>
+        <span style="font-size: 12px; color: rgba(22,18,14,0.62)">Porte, portail ou devanture visible</span>
+      </span>
+    </button>
+
+    <p style="margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: rgba(22,18,14,0.68)">Le vendeur est prévenu automatiquement. Vous serez ensuite guidé pour retourner le colis.</p>
+
+    <a href="RetourClair.dc.html" style="margin-top: auto; position: relative; overflow: hidden; height: 58px; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); color: #140800; text-decoration: none; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 14px 30px rgba(255,90,0,0.32), inset 0 1px 0 rgba(255,255,255,0.5)">
+      <span aria-hidden="true" class="sheen" style="position: absolute; top: 0; left: 0; width: 70px; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.6), rgba(255,255,255,0))"></span>
+      <span style="position: relative">Valider l'échec</span>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { reason: 'absent' };
+  }
+  renderVals() {
+    const base = 'height: 48px; padding: 0 12px; border-radius: 15px; font-size: 14px; text-align: left; cursor: pointer; ';
+    const on = base + 'font-weight: 700; border: 1.5px solid #FF8A3D; background: linear-gradient(160deg, rgba(255,176,0,0.26), rgba(255,106,0,0.16)); color: #16120E; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7)';
+    const off = base + 'font-weight: 600; border: 1px solid rgba(22,18,14,0.10); background: rgba(255,255,255,0.7); color: rgba(22,18,14,0.78)';
+    const list = [
+      { id: 'absent', label: 'Client absent' },
+      { id: 'injoignable', label: 'Injoignable' },
+      { id: 'adresse', label: 'Adresse introuvable' },
+      { id: 'refuse', label: 'Colis refusé' },
+      { id: 'paiement', label: 'Refus de payer' },
+      { id: 'autre', label: 'Autre motif' }
+    ];
+    return {
+      motion: this.props.motion === false ? 'off' : 'on',
+      reasons: list.map((r) => ({
+        ...r,
+        checked: this.state.reason === r.id ? 'true' : 'false',
+        style: this.state.reason === r.id ? on : off,
+        pick: () => this.setState({ reason: r.id })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

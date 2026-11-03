@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Accueil en ligne (clair)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F2EC}
+a{color:#C2410C}a:hover{color:#9A3412}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #C2410C;outline-offset:3px}
+@keyframes pulse{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.6);opacity:0}}
+@keyframes gooL{0%,100%{transform:translateX(-26px)}50%{transform:translateX(0)}}
+@keyframes gooR{0%,100%{transform:translateX(26px)}50%{transform:translateX(0)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes knob{0%,100%{border-radius:50%}50%{border-radius:46% 54% 50% 50%/54% 46% 54% 46%}}
+.pulse{animation:pulse 2.4s ease-out infinite}
+.gooL{animation:gooL 1.6s ease-in-out infinite}
+.gooR{animation:gooR 1.6s ease-in-out infinite}
+.breathe{animation:breathe 1.6s ease-in-out infinite}
+.knob{animation:knob 2.4s ease-in-out infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F2EC; color: #16120E; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <svg aria-hidden="true" width="0" height="0" style="position: absolute">
+    <defs>
+      <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"></feGaussianBlur><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10"></feColorMatrix></filter>
+    </defs>
+  </svg>
+  <svg aria-hidden="true" width="390" height="844" viewBox="0 0 390 844" style="position: absolute; inset: 0">
+    <rect width="390" height="844" fill="#ECE7E0"></rect>
+    <path d="M-20 700 C 60 640, 150 680, 220 640 S 340 610, 410 650 L410 860 L-20 860 Z" fill="#CFE2EA"></path>
+    <g fill="#E3DDD4">
+      <rect x="140" y="210" width="56" height="70" rx="8"></rect><rect x="226" y="220" width="70" height="90" rx="8"></rect><rect x="82" y="330" width="40" height="60" rx="8"></rect><rect x="226" y="350" width="110" height="34" rx="8"></rect><rect x="270" y="80" width="60" height="70" rx="8"></rect>
+    </g>
+    <g fill="none" stroke="#F8F6F2" stroke-width="7" stroke-linecap="round">
+      <path d="M-20 90 L410 60"></path><path d="M-20 300 L410 330"></path><path d="M-20 520 L410 490"></path>
+      <path d="M40 -20 L70 860"></path><path d="M210 -20 L190 860"></path><path d="M350 -20 L370 860"></path><path d="M-20 420 L180 400"></path>
+    </g>
+    <g fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round">
+      <path d="M-20 180 C 100 200, 240 150, 410 190"></path><path d="M120 -20 C 140 200, 100 420, 150 860"></path><path d="M410 380 C 300 400, 230 440, 150 600 S 60 700, -20 760"></path>
+    </g>
+    <g fill="#FF6A00" opacity="0.85">
+      <circle cx="250" cy="198" r="4"></circle><circle cx="84" cy="300" r="4"></circle><circle cx="300" cy="420" r="4"></circle><circle cx="176" cy="520" r="4"></circle>
+    </g>
+  </svg>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(246,242,236,0.8) 0%, rgba(246,242,236,0) 22%, rgba(246,242,236,0) 50%, rgba(246,242,236,0.92) 78%)"></div>
+
+  <div aria-hidden="true" style="position: absolute; left: 175px; top: 340px; width: 40px; height: 40px">
+    <span class="pulse" style="position: absolute; inset: 0; border-radius: 50%; background: rgba(255,106,0,0.4)"></span>
+    <span class="pulse" style="position: absolute; inset: 0; border-radius: 50%; background: rgba(255,106,0,0.4); animation-delay: -1.2s"></span>
+    <span style="position: absolute; left: -30px; top: -58px; width: 100px; height: 80px; background: radial-gradient(60% 100% at 50% 100%, rgba(255,106,0,0.4), rgba(255,106,0,0)); clip-path: polygon(50% 100%, 0 0, 100% 0)"></span>
+    <span style="position: absolute; inset: 8px; border-radius: 50%; background: linear-gradient(135deg, #FFB000, #FF3D00); border: 3px solid #FFFFFF; box-shadow: 0 6px 18px rgba(255,90,0,0.5)"></span>
+  </div>
+
+  <div style="position: absolute; top: 60px; left: 20px; right: 20px; display: flex; align-items: center; gap: 10px">
+    <a href="AccueilHorsLigneClair.dc.html" aria-label="Vous êtes en ligne. Passer hors ligne" style="flex: 1; height: 56px; box-sizing: border-box; padding: 0 8px 0 16px; border-radius: 22px; background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(26px) saturate(180%); -webkit-backdrop-filter: blur(26px) saturate(180%); box-shadow: 0 10px 24px rgba(140,70,10,0.12); color: #16120E; text-decoration: none; display: flex; align-items: center; gap: 10px">
+      <span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 50%; background: #10A06E; box-shadow: 0 0 0 4px rgba(16,160,110,0.18)"></span>
+      <span style="flex: 1; font-size: 15px; font-weight: 700">En ligne</span>
+      <span aria-hidden="true" style="position: relative; width: 64px; height: 38px; border-radius: 20px; background: linear-gradient(100deg, #FFB000, #FF6A00 60%, #FF3D00); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 16px rgba(255,90,0,0.35)">
+        <span class="knob" style="position: absolute; top: 4px; right: 4px; width: 30px; height: 30px; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.2)"></span>
+      </span>
+    </a>
+    <a href="GainsClair.dc.html" style="height: 56px; box-sizing: border-box; padding: 0 14px; border-radius: 22px; background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(26px) saturate(180%); -webkit-backdrop-filter: blur(26px) saturate(180%); box-shadow: 0 10px 24px rgba(140,70,10,0.12); color: #16120E; text-decoration: none; display: flex; flex-direction: column; justify-content: center">
+      <span style="font-size: 11px; color: rgba(22,18,14,0.66)">Aujourd'hui</span>
+      <span style="font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums">8 750 F</span>
+    </a>
+  </div>
+
+  <div style="position: absolute; right: 20px; top: 440px; display: flex; flex-direction: column; gap: 10px">
+    <a href="AlerteClair.dc.html" aria-label="Alerte de sécurité" style="width: 52px; height: 52px; border-radius: 18px; background: #E52535; border: 1px solid rgba(255,255,255,0.6); color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; box-shadow: 0 10px 24px rgba(229,37,53,0.35)">SOS</a>
+    <button type="button" aria-label="Recentrer la carte" style="width: 52px; height: 52px; border-radius: 18px; background: rgba(255,255,255,0.75); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 20px rgba(140,70,10,0.12); color: #16120E; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg>
+    </button>
+  </div>
+
+  <div style="position: absolute; left: 12px; right: 12px; bottom: 24px; display: flex; flex-direction: column; gap: 10px">
+    <a href="PropositionClair.dc.html" style="padding: 18px; border-radius: 28px; background: rgba(255,255,255,0.72); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); box-shadow: inset 0 1px 0 #FFFFFF, 0 20px 50px rgba(140,70,10,0.16); color: #16120E; text-decoration: none; display: flex; align-items: center; gap: 16px">
+      <span aria-hidden="true" style="position: relative; flex: none; width: 76px; height: 40px; filter: url(#goo)">
+        <span class="breathe" style="position: absolute; left: 26px; top: 8px; width: 24px; height: 24px; border-radius: 50%; background: #FF6A00"></span>
+        <span class="gooL" style="position: absolute; left: 30px; top: 12px; width: 16px; height: 16px; border-radius: 50%; background: #FFB000"></span>
+        <span class="gooR" style="position: absolute; left: 30px; top: 12px; width: 16px; height: 16px; border-radius: 50%; background: #FF3D00"></span>
+      </span>
+      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+        <span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700">Recherche de courses…</span>
+        <span style="font-size: 13px; line-height: 1.4; color: rgba(22,18,14,0.68)">Restez dans la zone, les propositions arrivent ici.</span>
+      </span>
+    </a>
+
+    <nav aria-label="Navigation principale" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px; border-radius: 26px; background: rgba(255,255,255,0.72); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); box-shadow: 0 16px 36px rgba(140,70,10,0.12)">
+      <a href="AccueilEnLigneClair.dc.html" aria-current="page" style="height: 52px; border-radius: 19px; background: rgba(255,106,0,0.14); color: #C2410C; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"></path></svg>Accueil</a>
+      <a href="GainsClair.dc.html" style="height: 52px; border-radius: 19px; color: rgba(22,18,14,0.68); text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Activité</a>
+      <a href="#profil" style="height: 52px; border-radius: 19px; color: rgba(22,18,14,0.68); text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20c1.4-3.2 4.2-5 7.5-5s6.1 1.8 7.5 5"></path></svg>Profil</a>
+    </nav>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { motion: this.props.motion === false ? 'off' : 'on' };
+  }
+}
+</script>
+</body>
+</html>
