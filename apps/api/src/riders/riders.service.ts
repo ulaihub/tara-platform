@@ -14,6 +14,7 @@ import {
   type AdminRiderDto,
   type AdminRiderListQuery,
   type ApplyRiderBody,
+  type EmergencyContactBody,
   type KycDocumentDto,
   REQUIRED_DOCUMENTS,
   type ReviewDocumentBody,
@@ -80,11 +81,54 @@ export class RidersService {
       cashLimit: rider.cashLimit,
       guarantorName: rider.guarantorName,
       guarantorPhone: rider.guarantorPhone,
+      emergencyContact:
+        rider.emergencyContactName && rider.emergencyContactPhone
+          ? { name: rider.emergencyContactName, phone: rider.emergencyContactPhone }
+          : null,
       approvedAt: rider.approvedAt?.toISOString() ?? null,
       suspendedReason: rider.suspendedReason,
       documents: [...latestByType(rider.documents).values()].map(toDocumentDto),
       missingDocuments: uncoveredDocuments(rider.documents, ['PENDING', 'APPROVED'], today),
     };
+  }
+
+  /** Le contact d'urgence doit pouvoir être joint à la place du livreur, pas le livreur. */
+  private checkEmergencyContact(actor: AuthUser, phone: string): void {
+    if (phone === actor.phone) throw AppError.unprocessable('EMERGENCY_CONTACT_IS_SELF');
+  }
+
+  /** Ajout, changement (contact donné) ou retrait (null) du contact d'urgence. */
+  async setEmergencyContact(
+    actor: AuthUser,
+    contact: z.output<typeof EmergencyContactBody> | null,
+    request: Request,
+  ): Promise<z.output<typeof RiderProfileDto>> {
+    if (contact) this.checkEmergencyContact(actor, contact.phone);
+    const before = await this.load({ userId: actor.id });
+    const rider = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.riderProfile.update({
+        where: { id: before.id },
+        data: {
+          emergencyContactName: contact?.name ?? null,
+          emergencyContactPhone: contact?.phone ?? null,
+        },
+        include: { documents: true },
+      });
+      await this.audit.record(
+        {
+          actor,
+          action: 'rider.emergency_contact_changed',
+          entityType: 'rider_profile',
+          entityId: before.id,
+          before: { emergencyContactName: before.emergencyContactName },
+          after: { emergencyContactName: updated.emergencyContactName },
+          request,
+        },
+        tx,
+      );
+      return updated;
+    });
+    return this.toProfileDto(rider);
   }
 
   private async load(where: { id: string } | { userId: string }): Promise<RiderWithDocuments> {
@@ -104,6 +148,7 @@ export class RidersService {
   ): Promise<z.output<typeof RiderProfileDto>> {
     const existing = await this.prisma.riderProfile.findUnique({ where: { userId: actor.id } });
     if (existing) throw AppError.conflict('RIDER_ALREADY_APPLIED');
+    if (body.emergencyContact) this.checkEmergencyContact(actor, body.emergencyContact.phone);
 
     const rider = await this.prisma.$transaction(async (tx) => {
       const created = await tx.riderProfile.create({
@@ -113,6 +158,8 @@ export class RidersService {
           plateNumber: body.plateNumber ?? null,
           guarantorName: body.guarantorName,
           guarantorPhone: body.guarantorPhone,
+          emergencyContactName: body.emergencyContact?.name ?? null,
+          emergencyContactPhone: body.emergencyContact?.phone ?? null,
         },
         include: { documents: true },
       });

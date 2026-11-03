@@ -1,3 +1,5 @@
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -29,11 +31,27 @@ android {
         versionName = flutter.versionName
     }
 
+    // Clé de signature de l'app (clé d'envoi Google Play), fournie par l'environnement :
+    // en CI par les secrets du dépôt, jamais versionnée. Sans elle, clé de débogage
+    // (APK de test seulement : les mises à jour entre deux machines sont refusées).
+    val keystoreBase64 = System.getenv("TARA_RIDER_KEYSTORE_BASE64")
+    signingConfigs {
+        if (!keystoreBase64.isNullOrBlank()) {
+            create("release") {
+                val file = layout.buildDirectory.file("signing/upload.jks").get().asFile
+                file.parentFile.mkdirs()
+                file.writeBytes(Base64.getDecoder().decode(keystoreBase64.trim()))
+                storeFile = file
+                storePassword = System.getenv("TARA_RIDER_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("TARA_RIDER_KEY_ALIAS")
+                keyPassword = System.getenv("TARA_RIDER_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 }

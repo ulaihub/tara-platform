@@ -49,6 +49,18 @@ const TEMPLATES = {
     fr: 'Tara OPS ALERTE : le livreur {rider} ({phone}) a declenche une alerte. Position : {map}',
     en: 'Tara OPS ALERT: rider {rider} ({phone}) triggered an alert. Location: {map}',
   },
+  OPS_SAFETY_ALERT_CANCELLED: {
+    fr: 'Tara OPS : le livreur {rider} ({phone}) a annule son alerte. Rappelez-le pour confirmer qu il va bien.',
+    en: 'Tara OPS: rider {rider} ({phone}) cancelled the alert. Call back to confirm they are safe.',
+  },
+  EMERGENCY_CONTACT_ALERT: {
+    fr: 'Tara : {rider} a declenche une alerte de securite pendant son travail. Position : {map}. Notre equipe le contacte.',
+    en: 'Tara: {rider} triggered a safety alert while working. Location: {map}. Our team is contacting them.',
+  },
+  EMERGENCY_CONTACT_ALERT_CANCELLED: {
+    fr: 'Tara : {rider} a annule son alerte de securite. Notre equipe verifie qu il va bien.',
+    en: 'Tara: {rider} cancelled their safety alert. Our team is checking that they are safe.',
+  },
   PAYOUT_PHONE_CHANGED: {
     fr: 'Tara : le numero de reversement de {shop} vient d etre change. Reversements suspendus {hours} h. Si ce n est pas vous, contactez vite le support.',
     en: 'Tara: the payout number of {shop} was just changed. Payouts paused for {hours} h. If this was not you, contact support right away.',

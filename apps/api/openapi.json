@@ -723,6 +723,26 @@
                     "example": "+237690000000",
                     "type": "string",
                     "maxLength": 32
+                  },
+                  "emergencyContact": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 80
+                      },
+                      "phone": {
+                        "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                        "example": "+237690000000",
+                        "type": "string",
+                        "maxLength": 32
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "phone"
+                    ]
                   }
                 },
                 "required": [
@@ -755,9 +775,115 @@
         ]
       }
     },
+    "/v1/riders/requirements": {
+      "get": {
+        "operationId": "Riders_requirements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentRequirement"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreurs"
+        ]
+      }
+    },
     "/v1/riders/me": {
       "get": {
         "operationId": "Riders_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderProfile"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreurs"
+        ]
+      }
+    },
+    "/v1/riders/me/emergency-contact": {
+      "put": {
+        "operationId": "Riders_setEmergencyContact",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "phone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  }
+                },
+                "required": [
+                  "name",
+                  "phone"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderProfile"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreurs"
+        ]
+      },
+      "delete": {
+        "operationId": "Riders_removeEmergencyContact",
         "parameters": [],
         "responses": {
           "200": {
@@ -3851,6 +3977,41 @@
         ]
       }
     },
+    "/v1/rider/alerts/{id}/cancel": {
+      "post": {
+        "operationId": "RiderApp_cancelAlert",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/orders/{id}/failure-decision": {
       "post": {
         "operationId": "SenderDecisions_failureDecision",
@@ -5875,25 +6036,298 @@
         "additionalProperties": false
       },
       "AdminRider": {
-        "$ref": "#/components/schemas/AdminRider"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RiderStatus"
+          },
+          "vehicleType": {
+            "$ref": "#/components/schemas/VehicleType"
+          },
+          "plateNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cashLimit": {
+            "type": "integer",
+            "description": "Plafond d’espèces détenues, en FCFA"
+          },
+          "guarantorName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "guarantorPhone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "emergencyContact": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "phone"
+            ],
+            "additionalProperties": false
+          },
+          "approvedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "suspendedReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KycDocument"
+            }
+          },
+          "missingDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KycDocumentType"
+            }
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "fullName": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "phone",
+              "fullName"
+            ],
+            "additionalProperties": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "documentHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KycDocument"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "vehicleType",
+          "plateNumber",
+          "cashLimit",
+          "guarantorName",
+          "guarantorPhone",
+          "emergencyContact",
+          "approvedAt",
+          "suspendedReason",
+          "documents",
+          "missingDocuments",
+          "user",
+          "createdAt",
+          "documentHistory"
+        ],
+        "additionalProperties": false
       },
       "AuthSession": {
-        "$ref": "#/components/schemas/AuthSession"
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Validité du jeton d’accès, en secondes"
+          },
+          "isNewUser": {
+            "type": "boolean"
+          },
+          "referralApplied": {
+            "type": "boolean"
+          },
+          "user": {
+            "$ref": "#/components/schemas/SessionUser"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "expiresIn",
+          "isNewUser",
+          "referralApplied",
+          "user"
+        ],
+        "additionalProperties": false
       },
       "Collection": {
-        "$ref": "#/components/schemas/Collection"
+        "type": "object",
+        "properties": {
+          "due": {
+            "type": "object",
+            "properties": {
+              "fee": {
+                "type": "integer"
+              },
+              "cod": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "fee",
+              "cod",
+              "total"
+            ],
+            "additionalProperties": false
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "payment": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "status": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "status",
+              "amount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "due",
+          "complete",
+          "payment"
+        ],
+        "additionalProperties": false
       },
       "Consent": {
-        "$ref": "#/components/schemas/Consent"
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "TERMS",
+              "PRIVACY",
+              "LOCATION",
+              "MARKETING"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "granted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "granted",
+          "createdAt"
+        ],
+        "additionalProperties": false
       },
       "CreatedBatch": {
-        "$ref": "#/components/schemas/CreatedBatch"
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pickupCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "replayed": {
+            "type": "boolean"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            }
+          }
+        },
+        "required": [
+          "batchId",
+          "pickupCode",
+          "replayed",
+          "orders"
+        ],
+        "additionalProperties": false
       },
       "CreatedOrder": {
-        "$ref": "#/components/schemas/CreatedOrder"
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "pickupCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "order",
+          "pickupCode",
+          "replayed"
+        ],
+        "additionalProperties": false
       },
       "DataExport": {
-        "$ref": "#/components/schemas/DataExport"
+        "type": "object",
+        "additionalProperties": {},
+        "description": "Toutes les données personnelles du compte (JSON)"
       },
       "DeviceInput": {
         "type": "object",
@@ -6126,10 +6560,263 @@
         "additionalProperties": false
       },
       "DispatchState": {
-        "$ref": "#/components/schemas/DispatchState"
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "searchingSince": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "alerted": {
+            "type": "boolean"
+          },
+          "offers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "riderId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "round": {
+                  "type": "integer"
+                },
+                "approachMeters": {
+                  "nullable": true,
+                  "type": "integer"
+                },
+                "offeredAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "respondedAt": {
+                  "nullable": true,
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "outcome": {
+                  "type": "string",
+                  "enum": [
+                    "PENDING",
+                    "ACCEPTED",
+                    "DECLINED",
+                    "EXPIRED",
+                    "WITHDRAWN"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "riderId",
+                "round",
+                "approachMeters",
+                "offeredAt",
+                "expiresAt",
+                "respondedAt",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "orderId",
+          "status",
+          "searchingSince",
+          "alerted",
+          "offers"
+        ],
+        "additionalProperties": false
+      },
+      "DocumentRequirement": {
+        "type": "object",
+        "properties": {
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/KycDocumentType"
+                },
+                "label": {
+                  "type": "object",
+                  "properties": {
+                    "fr": {
+                      "type": "string"
+                    },
+                    "en": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "fr",
+                    "en"
+                  ],
+                  "additionalProperties": false
+                },
+                "asksExpiry": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "label",
+                "asksExpiry"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "types"
+        ],
+        "additionalProperties": false
       },
       "ErrorBody": {
-        "$ref": "#/components/schemas/ErrorBody"
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_FAILED",
+                  "UNAUTHENTICATED",
+                  "FORBIDDEN",
+                  "NOT_FOUND",
+                  "RATE_LIMITED",
+                  "PAYLOAD_TOO_LARGE",
+                  "INTERNAL_ERROR",
+                  "IDEMPOTENCY_CONFLICT",
+                  "INVALID_PHONE",
+                  "OTP_REQUEST_TOO_SOON",
+                  "OTP_REQUEST_LIMIT",
+                  "OTP_INVALID",
+                  "OTP_EXPIRED",
+                  "OTP_TOO_MANY_ATTEMPTS",
+                  "OTP_LOCKED",
+                  "SMS_TEMPORARILY_UNAVAILABLE",
+                  "MFA_REQUIRED",
+                  "MFA_NOT_SET_UP",
+                  "MFA_ALREADY_ENABLED",
+                  "MFA_INVALID",
+                  "MFA_LOCKED",
+                  "ACCOUNT_HAS_ACTIVE_ORDERS",
+                  "ACCOUNT_DELETION_NOT_ALLOWED",
+                  "SMS_SEND_FAILED",
+                  "TERMS_REQUIRED",
+                  "ACCOUNT_SUSPENDED",
+                  "REFRESH_TOKEN_INVALID",
+                  "RIDER_ALREADY_APPLIED",
+                  "RIDER_NOT_FOUND",
+                  "RIDER_DOCUMENTS_INCOMPLETE",
+                  "RIDER_DECISION_INVALID",
+                  "KYC_DOCUMENT_NOT_FOUND",
+                  "KYC_DOCUMENT_ALREADY_REVIEWED",
+                  "MEDIA_TYPE_NOT_ALLOWED",
+                  "MEDIA_TOO_LARGE",
+                  "MEDIA_NOT_FOUND",
+                  "OUT_OF_SERVICE_AREA",
+                  "ZONE_GEOMETRY_INVALID",
+                  "ADDRESS_NOT_FOUND",
+                  "LOCATION_LINK_NOT_FOUND",
+                  "LOCATION_LINK_EXPIRED",
+                  "LOCATION_LINK_ALREADY_USED",
+                  "PRICING_UNAVAILABLE",
+                  "PRICING_GRID_NOT_FOUND",
+                  "PROMO_INVALID",
+                  "PROMO_EXPIRED",
+                  "PROMO_EXHAUSTED",
+                  "PROMO_NOT_ELIGIBLE",
+                  "PROMO_ALREADY_EXISTS",
+                  "ORDER_NOT_FOUND",
+                  "ORDER_TRANSITION_INVALID",
+                  "ORDER_CONFLICT",
+                  "ORDER_NOT_CANCELLABLE",
+                  "SAME_PICKUP_AND_DROPOFF",
+                  "SCHEDULE_INVALID",
+                  "MERCHANT_REQUIRED_FOR_COD",
+                  "COD_AMOUNT_TOO_HIGH",
+                  "PAYMENT_METHOD_NOT_ALLOWED",
+                  "PICKUP_ALREADY_DONE",
+                  "RECIPIENT_ALREADY_RESPONDED",
+                  "RIDER_NOT_ACTIVE",
+                  "RIDER_NOT_ELIGIBLE",
+                  "OFFER_NOT_FOUND",
+                  "OFFER_NO_LONGER_AVAILABLE",
+                  "OFFER_EXPIRED",
+                  "ORDER_ALREADY_ASSIGNED_TO_RIDER",
+                  "ACTION_TIME_INVALID",
+                  "PICKUP_CODE_INVALID",
+                  "PICKUP_CODE_LOCKED",
+                  "DELIVERY_CODE_INVALID",
+                  "DELIVERY_CODE_LOCKED",
+                  "NO_DELIVERY_VALIDATION_REQUEST",
+                  "DELIVERY_VALIDATION_ADMIN_REQUIRED",
+                  "FAILURE_DECISION_NOT_EXPECTED",
+                  "SAFETY_ALERT_NOT_FOUND",
+                  "SAFETY_ALERT_CLOSED",
+                  "EMERGENCY_CONTACT_IS_SELF",
+                  "PAYMENT_ALREADY_PENDING",
+                  "PAYMENT_NOT_FOUND",
+                  "PAYMENT_NOT_EXPECTED",
+                  "INSUFFICIENT_BALANCE",
+                  "WALLET_IN_DEBT",
+                  "COLLECTION_REQUIRED",
+                  "COLLECTION_NOT_EXPECTED",
+                  "ALREADY_COLLECTED",
+                  "PAYOUT_TOO_SMALL",
+                  "PAYOUT_IN_PROGRESS",
+                  "PAYOUT_NOT_ALLOWED",
+                  "PAYOUT_NOT_FOUND",
+                  "PAYOUT_NOT_AWAITING_APPROVAL",
+                  "DEPOSIT_TOO_LARGE",
+                  "PAYOUT_ON_HOLD",
+                  "PAYOUT_PHONE_NOT_ALLOWED",
+                  "SELF_APPROVAL_FORBIDDEN",
+                  "STATEMENT_PERIOD_INVALID"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "Message prêt à afficher, en français ou en anglais"
+              },
+              "details": {},
+              "requestId": {
+                "description": "À communiquer au support : retrouve la requête dans les journaux",
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false,
+        "description": "Format unique des erreurs de l’API"
       },
       "FailureReason": {
         "type": "string",
@@ -6138,6 +6825,7 @@
           "RECIPIENT_UNREACHABLE",
           "REFUSED",
           "ADDRESS_NOT_FOUND",
+          "PAYMENT_REFUSED",
           "OTHER"
         ]
       },
@@ -6149,10 +6837,100 @@
         ]
       },
       "FinanceOverview": {
-        "$ref": "#/components/schemas/FinanceOverview"
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "enum": [
+              "XAF"
+            ]
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "balance": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "code",
+                "name",
+                "balance"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "payoutsAwaitingApproval": {
+            "type": "integer"
+          },
+          "paymentsPending": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "currency",
+          "accounts",
+          "payoutsAwaitingApproval",
+          "paymentsPending"
+        ],
+        "additionalProperties": false
       },
       "KycDocument": {
-        "$ref": "#/components/schemas/KycDocument"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/KycDocumentType"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "expiresOn": {
+            "nullable": true,
+            "type": "string",
+            "format": "date"
+          },
+          "rejectionReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "status",
+          "expiresOn",
+          "rejectionReason",
+          "createdAt",
+          "reviewedAt"
+        ],
+        "additionalProperties": false
       },
       "KycDocumentType": {
         "type": "string",
@@ -6169,7 +6947,56 @@
         ]
       },
       "LocationLink": {
-        "$ref": "#/components/schemas/LocationLink"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Lien à partager au destinataire (WhatsApp, SMS)"
+          },
+          "recipientName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recipientPhone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LocationLinkStatus"
+          },
+          "address": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "recipientName",
+          "recipientPhone",
+          "expiresAt",
+          "status",
+          "address",
+          "createdAt"
+        ],
+        "additionalProperties": false
       },
       "LocationLinkStatus": {
         "type": "string",
@@ -6180,16 +7007,200 @@
         ]
       },
       "Me": {
-        "$ref": "#/components/schemas/Me"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "fullName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "FR",
+              "EN"
+            ]
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserRole"
+            }
+          },
+          "referralCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "merchant": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Merchant"
+              }
+            ]
+          },
+          "rider": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "ACTIVE",
+                  "SUSPENDED",
+                  "REJECTED"
+                ]
+              },
+              "vehicleType": {
+                "type": "string",
+                "enum": [
+                  "MOTORBIKE",
+                  "TRICYCLE",
+                  "CAR"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "status",
+              "vehicleType"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "phone",
+          "fullName",
+          "locale",
+          "roles",
+          "referralCode",
+          "createdAt",
+          "merchant",
+          "rider"
+        ],
+        "additionalProperties": false
       },
       "Media": {
-        "$ref": "#/components/schemas/Media"
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Clé à transmettre dans photoKey ou voiceNoteKey"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ADDRESS_PHOTO",
+              "VOICE_NOTE",
+              "KYC_DOCUMENT",
+              "PROOF_PHOTO"
+            ]
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "kind",
+          "mimeType",
+          "sizeBytes"
+        ],
+        "additionalProperties": false
       },
       "Merchant": {
-        "$ref": "#/components/schemas/Merchant"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "payoutPhone": {
+            "type": "string"
+          },
+          "payoutOperator": {
+            "$ref": "#/components/schemas/MobileMoneyOperator"
+          },
+          "payoutSchedule": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "ON_DEMAND"
+            ]
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PRO",
+              "BUSINESS"
+            ]
+          },
+          "rccm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "niu": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "shopName",
+          "category",
+          "payoutPhone",
+          "payoutOperator",
+          "payoutSchedule",
+          "plan",
+          "rccm",
+          "niu"
+        ],
+        "additionalProperties": false
       },
       "MfaSetup": {
-        "$ref": "#/components/schemas/MfaSetup"
+        "type": "object",
+        "properties": {
+          "secret": {
+            "type": "string",
+            "description": "À saisir dans l’application si le QR code ne peut pas être lu"
+          },
+          "otpauthUrl": {
+            "type": "string",
+            "description": "À afficher en QR code"
+          }
+        },
+        "required": [
+          "secret",
+          "otpauthUrl"
+        ],
+        "additionalProperties": false
       },
       "MobileMoneyOperator": {
         "type": "string",
@@ -6199,7 +7210,180 @@
         ]
       },
       "Order": {
-        "$ref": "#/components/schemas/Order"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "trackingUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "batchId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "isExpress": {
+            "type": "boolean"
+          },
+          "scheduledFor": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "packageSize": {
+            "$ref": "#/components/schemas/PackageSize"
+          },
+          "isFragile": {
+            "type": "boolean"
+          },
+          "declaredValue": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "instructions": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pickup": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "dropoff": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "recipient": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "confirmedAt": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time"
+              },
+              "available": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "note": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "phone",
+              "confirmedAt",
+              "available",
+              "note"
+            ],
+            "additionalProperties": false
+          },
+          "pricing": {
+            "type": "object",
+            "properties": {
+              "currency": {
+                "type": "string",
+                "enum": [
+                  "XAF"
+                ]
+              },
+              "distanceMeters": {
+                "type": "integer"
+              },
+              "basePrice": {
+                "type": "integer"
+              },
+              "surchargesTotal": {
+                "type": "integer"
+              },
+              "discountTotal": {
+                "type": "integer"
+              },
+              "totalPrice": {
+                "type": "integer"
+              },
+              "feePayer": {
+                "$ref": "#/components/schemas/FeePayer"
+              },
+              "feePaymentMethod": {
+                "$ref": "#/components/schemas/PaymentMethod"
+              },
+              "codAmount": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "currency",
+              "distanceMeters",
+              "basePrice",
+              "surchargesTotal",
+              "discountTotal",
+              "totalPrice",
+              "feePayer",
+              "feePaymentMethod",
+              "codAmount"
+            ],
+            "additionalProperties": false
+          },
+          "riderId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "attemptCount": {
+            "type": "integer"
+          },
+          "cancelReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderEvent"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "trackingUrl",
+          "batchId",
+          "isExpress",
+          "scheduledFor",
+          "packageSize",
+          "isFragile",
+          "declaredValue",
+          "instructions",
+          "pickup",
+          "dropoff",
+          "recipient",
+          "pricing",
+          "riderId",
+          "attemptCount",
+          "cancelReason",
+          "timeline",
+          "createdAt"
+        ],
+        "additionalProperties": false
       },
       "OrderEvent": {
         "type": "object",
@@ -6299,7 +7483,26 @@
         "additionalProperties": false
       },
       "OtpChallenge": {
-        "$ref": "#/components/schemas/OtpChallenge"
+        "type": "object",
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resendAfterSeconds": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "challengeId",
+          "expiresAt",
+          "resendAfterSeconds"
+        ],
+        "additionalProperties": false
       },
       "PackageSize": {
         "type": "string",
@@ -6312,7 +7515,64 @@
         "description": "S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg"
       },
       "Payment": {
-        "$ref": "#/components/schemas/Payment"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "DELIVERY_FEE",
+              "COD",
+              "RIDER_CASH_DEPOSIT",
+              "SUBSCRIPTION",
+              "WALLET_TOPUP"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SUCCEEDED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "orderId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "failureReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirmedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "purpose",
+          "status",
+          "amount",
+          "orderId",
+          "failureReason",
+          "createdAt",
+          "confirmedAt"
+        ],
+        "additionalProperties": false
       },
       "PaymentMethod": {
         "type": "string",
@@ -6324,10 +7584,78 @@
         ]
       },
       "Payout": {
-        "$ref": "#/components/schemas/Payout"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "beneficiary": {
+            "type": "string",
+            "enum": [
+              "MERCHANT",
+              "RIDER",
+              "CUSTOMER"
+            ]
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "fee": {
+            "type": "integer"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "AWAITING_APPROVAL",
+              "PROCESSING",
+              "SUCCEEDED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "failureReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "beneficiary",
+          "amount",
+          "fee",
+          "phone",
+          "status",
+          "failureReason",
+          "requestedAt",
+          "completedAt"
+        ],
+        "additionalProperties": false
       },
       "PickupCode": {
-        "$ref": "#/components/schemas/PickupCode"
+        "type": "object",
+        "properties": {
+          "pickupCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "pickupCode"
+        ],
+        "additionalProperties": false
       },
       "PointRef": {
         "anyOf": [
@@ -6365,10 +7693,164 @@
         ]
       },
       "PricingGrid": {
-        "$ref": "#/components/schemas/PricingGrid"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "vehicleType": {
+            "$ref": "#/components/schemas/VehicleType"
+          },
+          "riderShareBps": {
+            "type": "integer"
+          },
+          "perKmBeyondLastTier": {
+            "type": "integer"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validTo": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "tiers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "upToMeters": {
+                  "type": "integer"
+                },
+                "price": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "upToMeters",
+                "price"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "surcharges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "$ref": "#/components/schemas/SurchargeCode"
+                },
+                "amount": {
+                  "nullable": true,
+                  "type": "integer"
+                },
+                "percentBps": {
+                  "nullable": true,
+                  "type": "integer"
+                },
+                "active": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "code",
+                "amount",
+                "percentBps",
+                "active"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city",
+          "vehicleType",
+          "riderShareBps",
+          "perKmBeyondLastTier",
+          "active",
+          "validFrom",
+          "validTo",
+          "tiers",
+          "surcharges",
+          "createdAt"
+        ],
+        "additionalProperties": false
       },
       "PromoCode": {
-        "$ref": "#/components/schemas/PromoCode"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/PromoKind"
+          },
+          "value": {
+            "type": "integer"
+          },
+          "maxRedemptions": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "perUserLimit": {
+            "type": "integer"
+          },
+          "newCustomersOnly": {
+            "type": "boolean"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validTo": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "redemptions": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "kind",
+          "value",
+          "maxRedemptions",
+          "perUserLimit",
+          "newCustomersOnly",
+          "validFrom",
+          "validTo",
+          "active",
+          "redemptions"
+        ],
+        "additionalProperties": false
       },
       "PromoKind": {
         "type": "string",
@@ -6379,16 +7861,189 @@
         ]
       },
       "PublicLocationLink": {
-        "$ref": "#/components/schemas/PublicLocationLink"
+        "type": "object",
+        "properties": {
+          "senderName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recipientName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LocationLinkStatus"
+          }
+        },
+        "required": [
+          "senderName",
+          "recipientName",
+          "expiresAt",
+          "status"
+        ],
+        "additionalProperties": false
       },
       "PublicTracking": {
-        "$ref": "#/components/schemas/PublicTracking"
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "senderName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recipientName": {
+            "type": "string"
+          },
+          "dropoffLandmark": {
+            "type": "string"
+          },
+          "scheduledFor": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "recipientConfirmedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "recipientAvailable": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "canRespond": {
+            "type": "boolean"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/components/schemas/OrderStatus"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "status",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "reference",
+          "status",
+          "senderName",
+          "recipientName",
+          "dropoffLandmark",
+          "scheduledFor",
+          "recipientConfirmedAt",
+          "recipientAvailable",
+          "canRespond",
+          "timeline"
+        ],
+        "additionalProperties": false
       },
       "PushTokenBody": {
-        "$ref": "#/components/schemas/PushTokenBody"
+        "type": "object",
+        "properties": {
+          "pushToken": {
+            "nullable": true,
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "pushToken"
+        ]
       },
       "Quote": {
-        "$ref": "#/components/schemas/Quote"
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "XAF"
+            ]
+          },
+          "distanceMeters": {
+            "type": "integer"
+          },
+          "distanceSource": {
+            "type": "string",
+            "enum": [
+              "osrm",
+              "estimate"
+            ]
+          },
+          "estimatedMinutes": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "basePrice": {
+            "type": "integer"
+          },
+          "surcharges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "$ref": "#/components/schemas/SurchargeCode"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "code",
+                "amount"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "discountTotal": {
+            "type": "integer"
+          },
+          "totalPrice": {
+            "type": "integer"
+          },
+          "promoCode": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "currency",
+          "distanceMeters",
+          "distanceSource",
+          "estimatedMinutes",
+          "basePrice",
+          "surcharges",
+          "discountTotal",
+          "totalPrice",
+          "promoCode"
+        ],
+        "additionalProperties": false
       },
       "Recipient": {
         "type": "object",
@@ -6420,22 +8075,466 @@
         "additionalProperties": false
       },
       "Reconciliation": {
-        "$ref": "#/components/schemas/Reconciliation"
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "BALANCED",
+              "DISCREPANCIES"
+            ]
+          },
+          "totals": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "discrepancies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                },
+                "expected": {
+                  "type": "number"
+                },
+                "actual": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "type",
+                "reference",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "day",
+          "status",
+          "totals",
+          "discrepancies",
+          "updatedAt"
+        ],
+        "additionalProperties": false
       },
       "RiderConfig": {
-        "$ref": "#/components/schemas/RiderConfig"
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2
+              },
+              "dialCode": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "dialCode",
+              "currency"
+            ],
+            "additionalProperties": false
+          },
+          "safetyHotline": {
+            "type": "string"
+          },
+          "supportPhone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mobileMoneyOperators": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "offerTimeoutSeconds": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "country",
+          "safetyHotline",
+          "supportPhone",
+          "mobileMoneyOperators",
+          "offerTimeoutSeconds"
+        ],
+        "additionalProperties": false
       },
       "RiderEarnings": {
-        "$ref": "#/components/schemas/RiderEarnings"
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week",
+              "month"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "delivered": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "earnings": {
+            "type": "integer"
+          },
+          "cashCollected": {
+            "type": "integer"
+          },
+          "onlineSeconds": {
+            "type": "integer"
+          },
+          "bucket": {
+            "type": "string",
+            "enum": [
+              "two_hours",
+              "day",
+              "week"
+            ]
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "earnings": {
+                  "type": "integer"
+                },
+                "delivered": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "start",
+                "earnings",
+                "delivered"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "period",
+          "from",
+          "to",
+          "delivered",
+          "failed",
+          "returned",
+          "earnings",
+          "cashCollected",
+          "onlineSeconds",
+          "bucket",
+          "series"
+        ],
+        "additionalProperties": false
       },
       "RiderOrder": {
-        "$ref": "#/components/schemas/RiderOrder"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "packageSize": {
+            "$ref": "#/components/schemas/PackageSize"
+          },
+          "isFragile": {
+            "type": "boolean"
+          },
+          "isExpress": {
+            "type": "boolean"
+          },
+          "instructions": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pickup": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "dropoff": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "sender": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "phone": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "phone"
+            ],
+            "additionalProperties": false
+          },
+          "recipient": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "phone": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "phone"
+            ],
+            "additionalProperties": false
+          },
+          "riderEarning": {
+            "type": "integer"
+          },
+          "collectAtPickup": {
+            "type": "integer"
+          },
+          "collectAtDelivery": {
+            "type": "integer"
+          },
+          "navigation": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "googleMaps": {
+                "type": "string",
+                "format": "uri"
+              },
+              "waze": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": [
+              "googleMaps",
+              "waze"
+            ],
+            "additionalProperties": false
+          },
+          "failureDecision": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "RETRY",
+              "RETURN"
+            ]
+          },
+          "awaitingSupportValidation": {
+            "type": "boolean"
+          },
+          "assignedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickedUpAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveredAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "packageSize",
+          "isFragile",
+          "isExpress",
+          "instructions",
+          "pickup",
+          "dropoff",
+          "sender",
+          "recipient",
+          "riderEarning",
+          "collectAtPickup",
+          "collectAtDelivery",
+          "navigation",
+          "failureDecision",
+          "awaitingSupportValidation",
+          "assignedAt",
+          "pickedUpAt",
+          "deliveredAt"
+        ],
+        "additionalProperties": false
       },
       "RiderPresence": {
-        "$ref": "#/components/schemas/RiderPresence"
+        "type": "object",
+        "properties": {
+          "online": {
+            "type": "boolean"
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "online",
+          "blockers"
+        ],
+        "additionalProperties": false
       },
       "RiderProfile": {
-        "$ref": "#/components/schemas/RiderProfile"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RiderStatus"
+          },
+          "vehicleType": {
+            "$ref": "#/components/schemas/VehicleType"
+          },
+          "plateNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cashLimit": {
+            "type": "integer",
+            "description": "Plafond d’espèces détenues, en FCFA"
+          },
+          "guarantorName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "guarantorPhone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "emergencyContact": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "phone"
+            ],
+            "additionalProperties": false
+          },
+          "approvedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "suspendedReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KycDocument"
+            }
+          },
+          "missingDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KycDocumentType"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "vehicleType",
+          "plateNumber",
+          "cashLimit",
+          "guarantorName",
+          "guarantorPhone",
+          "emergencyContact",
+          "approvedAt",
+          "suspendedReason",
+          "documents",
+          "missingDocuments"
+        ],
+        "additionalProperties": false
       },
       "RiderStatus": {
         "type": "string",
@@ -6447,13 +8546,153 @@
         ]
       },
       "RiderWallet": {
-        "$ref": "#/components/schemas/RiderWallet"
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "enum": [
+              "XAF"
+            ]
+          },
+          "earnings": {
+            "type": "integer"
+          },
+          "cashHeld": {
+            "type": "integer"
+          },
+          "cashLimit": {
+            "type": "integer"
+          },
+          "available": {
+            "type": "integer"
+          },
+          "openPayout": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "amount": {
+                "type": "integer"
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "amount",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "currency",
+          "earnings",
+          "cashHeld",
+          "cashLimit",
+          "available",
+          "openPayout"
+        ],
+        "additionalProperties": false
       },
       "SafetyAlert": {
-        "$ref": "#/components/schemas/SafetyAlert"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "riderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "riderName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "riderPhone": {
+            "type": "string"
+          },
+          "orderId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolution": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "riderId",
+          "riderName",
+          "riderPhone",
+          "orderId",
+          "latitude",
+          "longitude",
+          "note",
+          "createdAt",
+          "acknowledgedAt",
+          "resolvedAt",
+          "cancelledAt",
+          "resolution"
+        ],
+        "additionalProperties": false
       },
       "SessionTokens": {
-        "$ref": "#/components/schemas/SessionTokens"
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Validité du jeton d’accès, en secondes"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "expiresIn"
+        ],
+        "additionalProperties": false
       },
       "SessionUser": {
         "type": "object",
@@ -6533,7 +8772,90 @@
         ]
       },
       "Wallet": {
-        "$ref": "#/components/schemas/Wallet"
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "enum": [
+              "XAF"
+            ]
+          },
+          "customer": {
+            "type": "object",
+            "properties": {
+              "balance": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "balance"
+            ],
+            "additionalProperties": false
+          },
+          "merchant": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "balance": {
+                "type": "integer"
+              },
+              "payoutSchedule": {
+                "type": "string",
+                "enum": [
+                  "DAILY",
+                  "ON_DEMAND"
+                ]
+              },
+              "plan": {
+                "type": "string",
+                "enum": [
+                  "FREE",
+                  "PRO",
+                  "BUSINESS"
+                ]
+              },
+              "payoutPhone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "balance",
+              "payoutSchedule",
+              "plan",
+              "payoutPhone"
+            ],
+            "additionalProperties": false
+          },
+          "openPayout": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "amount": {
+                "type": "integer"
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "amount",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "currency",
+          "customer",
+          "merchant",
+          "openPayout"
+        ],
+        "additionalProperties": false
       },
       "WalletLine": {
         "type": "object",
@@ -6572,7 +8894,33 @@
         "additionalProperties": false
       },
       "Zone": {
-        "$ref": "#/components/schemas/Zone"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ZoneKind"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city",
+          "kind",
+          "active"
+        ],
+        "additionalProperties": false
       },
       "ZoneKind": {
         "type": "string",

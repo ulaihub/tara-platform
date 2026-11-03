@@ -225,6 +225,8 @@ enum FailureReason {
   RECIPIENT_UNREACHABLE
   REFUSED
   ADDRESS_NOT_FOUND
+  /// Le destinataire refuse de payer le montant à encaisser.
+  PAYMENT_REFUSED
   OTHER
 
   @@map("failure_reason")
@@ -588,6 +590,9 @@ model RiderProfile {
   ratingCount     Int         @default(0) @map("rating_count")
   guarantorName   String?     @map("guarantor_name")
   guarantorPhone  String?     @map("guarantor_phone")
+  /// Proche prévenu par SMS si le livreur déclenche une alerte de sécurité (facultatif).
+  emergencyContactName  String? @map("emergency_contact_name")
+  emergencyContactPhone String? @map("emergency_contact_phone")
   approvedAt      DateTime?   @map("approved_at") @db.Timestamptz(3)
   approvedById    String?     @map("approved_by_id") @db.Uuid
   suspendedReason String?     @map("suspended_reason")
@@ -603,6 +608,7 @@ model RiderProfile {
   payments       Payment[]
   payouts        Payout[]
   safetyAlerts   SafetyAlert[]
+  onlineSessions RiderOnlineSession[]
 
   @@index([status])
   @@map("rider_profiles")
@@ -1033,6 +1039,8 @@ model SafetyAlert {
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   acknowledgedAt DateTime? @map("acknowledged_at") @db.Timestamptz(3)
   resolvedAt     DateTime? @map("resolved_at") @db.Timestamptz(3)
+  /// Annulée par le livreur : l'alerte reste visible du dispatch, qui rappelle le livreur.
+  cancelledAt    DateTime? @map("cancelled_at") @db.Timestamptz(3)
   handledById    String?   @map("handled_by_id") @db.Uuid
   resolution     String?
 
@@ -1043,6 +1051,22 @@ model SafetyAlert {
   @@index([resolvedAt, createdAt])
   @@index([riderId, createdAt])
   @@map("safety_alerts")
+}
+
+/// Période passée en ligne par un livreur (temps en ligne, E9). Ouverte au passage en
+/// ligne, prolongée par les positions (au plus une écriture par minute), fermée au passage
+/// hors ligne ; sans position depuis le délai de présence, elle s'arrête à la dernière vue.
+model RiderOnlineSession {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  riderId    String    @map("rider_id") @db.Uuid
+  startedAt  DateTime  @map("started_at") @db.Timestamptz(3)
+  lastSeenAt DateTime  @map("last_seen_at") @db.Timestamptz(3)
+  endedAt    DateTime? @map("ended_at") @db.Timestamptz(3)
+
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+
+  @@index([riderId, startedAt])
+  @@map("rider_online_sessions")
 }
 
 /// Notation réciproque expéditeur ↔ livreur (F4).

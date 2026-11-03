@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { uncoveredDocuments } from '../riders/riders.service.js';
 import { ACTIVE_RIDER_STATUSES, DispatchService } from './dispatch.service.js';
+import { OnlineTimeService } from './online-time.service.js';
 import { PresenceService, type RiderPosition } from './presence.service.js';
 
 /** Position transmise au back-office au plus une fois par livreur sur cet intervalle. */
@@ -26,6 +27,7 @@ export class RiderLocationService {
     private readonly presence: PresenceService,
     private readonly dispatch: DispatchService,
     private readonly realtime: RealtimeService,
+    private readonly onlineTime: OnlineTimeService,
   ) {}
 
   async riderOf(userId: string): Promise<RiderProfile & { documents: { id: string }[] }> {
@@ -59,6 +61,7 @@ export class RiderLocationService {
     const rider = await this.riderOf(userId);
     if (!online) {
       await this.presence.goOffline(rider.id);
+      await this.onlineTime.stop(rider.id, new Date());
       await this.dispatch.declineAllFor(rider.id);
       await this.update(userId, position);
       return { online: false, blockers: [] };
@@ -69,6 +72,7 @@ export class RiderLocationService {
     }
     checkClock(position.at);
     await this.presence.goOnline(rider.id, position);
+    await this.onlineTime.start(rider.id, new Date());
     return { online: true, blockers: [] };
   }
 
@@ -83,6 +87,7 @@ export class RiderLocationService {
     const id = riderId ?? (await this.riderOf(userId)).id;
     const accepted = await this.presence.update(id, position);
     if (!accepted) return;
+    if (await this.presence.isOnline(id)) await this.onlineTime.touch(id, new Date());
     const payload = {
       latitude: position.latitude,
       longitude: position.longitude,

@@ -27,6 +27,7 @@ function toDto(alert: AlertWithRider): z.output<typeof SafetyAlertDto> {
     createdAt: alert.createdAt.toISOString(),
     acknowledgedAt: alert.acknowledgedAt?.toISOString() ?? null,
     resolvedAt: alert.resolvedAt?.toISOString() ?? null,
+    cancelledAt: alert.cancelledAt?.toISOString() ?? null,
     resolution: alert.resolution,
   };
 }
@@ -65,11 +66,58 @@ export class SafetyAlertsService {
     });
     const dto = toDto(alert);
     this.realtime.toOps('ops.safety-alert', dto);
+    const map = `https://maps.google.com/?q=${body.latitude},${body.longitude}`;
+    const name = alert.rider.user.fullName ?? 'Livreur';
     await this.notifications.toOps('OPS_SAFETY_ALERT', {
-      rider: alert.rider.user.fullName ?? 'Livreur',
+      rider: name,
       phone: alert.rider.user.phone,
-      map: `https://maps.google.com/?q=${body.latitude},${body.longitude}`,
+      map,
     });
+    if (rider.emergencyContactPhone) {
+      await this.notifications.toPhone({
+        phone: rider.emergencyContactPhone,
+        template: 'EMERGENCY_CONTACT_ALERT',
+        locale: 'fr',
+        params: { rider: name, map },
+        smsOnly: true,
+      });
+    }
+    return dto;
+  }
+
+  /**
+   * Annulation par le livreur (fausse manœuvre, danger écarté). L'alerte n'est pas effacée :
+   * elle reste ouverte au dispatch, marquée annulée, et l'équipe rappelle le livreur, au cas
+   * où l'annulation lui aurait été imposée.
+   */
+  async cancel(user: AuthUser, id: string): Promise<z.output<typeof SafetyAlertDto>> {
+    const rider = await this.prisma.riderProfile.findUnique({ where: { userId: user.id } });
+    const alert = rider
+      ? await this.prisma.safetyAlert.findFirst({ where: { id, riderId: rider.id } })
+      : null;
+    if (!rider || !alert) throw AppError.notFound('SAFETY_ALERT_NOT_FOUND');
+    if (alert.cancelledAt || alert.resolvedAt) throw AppError.conflict('SAFETY_ALERT_CLOSED');
+    const updated = await this.prisma.safetyAlert.update({
+      where: { id },
+      data: { cancelledAt: new Date() },
+      include: INCLUDE,
+    });
+    const dto = toDto(updated);
+    this.realtime.toOps('ops.safety-alert', dto);
+    const name = updated.rider.user.fullName ?? 'Livreur';
+    await this.notifications.toOps('OPS_SAFETY_ALERT_CANCELLED', {
+      rider: name,
+      phone: updated.rider.user.phone,
+    });
+    if (rider.emergencyContactPhone) {
+      await this.notifications.toPhone({
+        phone: rider.emergencyContactPhone,
+        template: 'EMERGENCY_CONTACT_ALERT_CANCELLED',
+        locale: 'fr',
+        params: { rider: name },
+        smsOnly: true,
+      });
+    }
     return dto;
   }
 

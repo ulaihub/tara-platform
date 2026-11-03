@@ -5,8 +5,9 @@ import type { Env } from '../config/env.js';
 import { verifyCode } from '../common/crypto.js';
 import { AppError } from '../common/errors/app-error.js';
 import { pageOf } from '../common/pagination.js';
-import { CAMEROON_TIME_ZONE } from '../common/time.js';
+import { CAMEROON_TIME_ZONE, cameroonDate } from '../common/time.js';
 import { ACTIVE_RIDER_STATUSES } from '../dispatch/dispatch.service.js';
+import { OnlineTimeService } from '../dispatch/online-time.service.js';
 import { OrderFinanceService } from '../finance/order-finance.service.js';
 import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js';
 import type { Order, Prisma, RiderProfile } from '../generated/prisma/client.js';
@@ -63,6 +64,7 @@ export class RiderOrdersService {
     private readonly media: MediaService,
     private readonly realtime: RealtimeService,
     private readonly finance: OrderFinanceService,
+    private readonly onlineTime: OnlineTimeService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -354,11 +356,10 @@ export class RiderOrdersService {
   ): Promise<z.output<typeof EarningsDto>> {
     const rider = await this.riderOf(userId);
     const from = periodStart(period, now);
-    const [delivered, failed, returned, cash] = await Promise.all([
-      this.prisma.order.aggregate({
+    const [delivered, failed, returned, cash, onlineSeconds] = await Promise.all([
+      this.prisma.order.findMany({
         where: { riderId: rider.id, status: 'DELIVERED', deliveredAt: { gte: from, lte: now } },
-        _count: true,
-        _sum: { riderEarning: true },
+        select: { deliveredAt: true, riderEarning: true },
       }),
       this.prisma.orderEvent.count({
         where: {
@@ -374,16 +375,37 @@ export class RiderOrdersService {
         where: { riderId: rider.id, method: 'CASH', collectedAt: { gte: from, lte: now } },
         _sum: { collectedAmount: true },
       }),
+      this.onlineTime.seconds(rider.id, from, now, now),
     ]);
+    const starts = bucketStarts(period, from);
+    const series = starts.map((start) => ({
+      start: start.toISOString(),
+      earnings: 0,
+      delivered: 0,
+    }));
+    for (const order of delivered) {
+      if (!order.deliveredAt) continue;
+      // Dernière tranche commencée avant la livraison (les heures hors 6 h-22 h vont aux bords).
+      let index = 0;
+      while (index + 1 < starts.length && (starts[index + 1] as Date) <= order.deliveredAt) index++;
+      const bucket = series[index];
+      if (bucket) {
+        bucket.earnings += order.riderEarning;
+        bucket.delivered += 1;
+      }
+    }
     return {
       period,
       from: from.toISOString(),
       to: now.toISOString(),
-      delivered: delivered._count,
+      delivered: delivered.length,
       failed,
       returned,
-      earnings: delivered._sum.riderEarning ?? 0,
+      earnings: delivered.reduce((sum, order) => sum + order.riderEarning, 0),
       cashCollected: cash._sum.collectedAmount ?? 0,
+      onlineSeconds,
+      bucket: period === 'day' ? 'two_hours' : period === 'week' ? 'day' : 'week',
+      series,
     };
   }
 
@@ -516,6 +538,29 @@ function navigationTarget(order: RiderOrder): { latitude: number; longitude: num
 }
 
 /** Début du jour, de la semaine (lundi) ou du mois, à l'heure du Cameroun. */
+/** Débuts des tranches de l'histogramme des gains (voir RiderEarnings.series). */
+export function bucketStarts(period: 'day' | 'week' | 'month', from: Date): Date[] {
+  const hour = 3_600_000;
+  const day = 24 * hour;
+  switch (period) {
+    case 'day':
+      // 6 h, 8 h… 20 h : la première tranche reçoit aussi la nuit, la dernière le soir.
+      return [0, 1, 2, 3, 4, 5, 6, 7].map((i) => new Date(from.getTime() + (6 + 2 * i) * hour));
+    case 'week':
+      return [0, 1, 2, 3, 4, 5, 6].map((i) => new Date(from.getTime() + i * day));
+    case 'month': {
+      const starts: Date[] = [];
+      // Semaines du mois : 1er, 8, 15, 22, 29 (si ce jour existe dans le mois).
+      const monthOf = (date: Date): string => cameroonDate(date).slice(0, 7);
+      for (const offset of [0, 7, 14, 21, 28]) {
+        const start = new Date(from.getTime() + offset * day);
+        if (monthOf(start) === monthOf(from)) starts.push(start);
+      }
+      return starts;
+    }
+  }
+}
+
 export function periodStart(period: 'day' | 'week' | 'month', now: Date): Date {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: CAMEROON_TIME_ZONE,

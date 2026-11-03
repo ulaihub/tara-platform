@@ -301,6 +301,17 @@ export class RiderAppController {
   ): Out<typeof SafetyAlertDto> {
     return this.alerts.raise(user, body);
   }
+
+  /** Annulation de sa propre alerte : l'équipe est prévenue et rappelle le livreur (E8). */
+  @Post('alerts/:id/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodResponse(SafetyAlertDto)
+  cancelAlert(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Out<typeof SafetyAlertDto> {
+    return this.alerts.cancel(user, id);
+  }
 }
 
 /** Choix de l'expéditeur après un échec de livraison (E6). */

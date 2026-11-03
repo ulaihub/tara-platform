@@ -140,6 +140,15 @@ export const EarningsDto = z
     earnings: z.int(),
     /** Espèces encaissées sur la période (à déposer). */
     cashCollected: z.int(),
+    /** Temps passé en ligne sur la période, en secondes. */
+    onlineSeconds: z.int(),
+    /**
+     * Histogramme : tranches de 2 h de 6 h à 22 h (jour), jours du lundi au dimanche
+     * (semaine), semaines du mois à partir du 1er, 8, 15, 22 et 29 (mois). L'app
+     * affiche les libellés dans la langue du livreur.
+     */
+    bucket: z.enum(['two_hours', 'day', 'week']),
+    series: z.array(z.object({ start: z.iso.datetime(), earnings: z.int(), delivered: z.int() })),
   })
   .meta({ id: 'RiderEarnings' });
 
@@ -156,6 +165,8 @@ export const SafetyAlertDto = z
     createdAt: z.iso.datetime(),
     acknowledgedAt: z.iso.datetime().nullable(),
     resolvedAt: z.iso.datetime().nullable(),
+    /** Annulée par le livreur : l'équipe le rappelle avant de clore. */
+    cancelledAt: z.iso.datetime().nullable(),
     resolution: z.string().nullable(),
   })
   .meta({ id: 'SafetyAlert' });

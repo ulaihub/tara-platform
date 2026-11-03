@@ -47,8 +47,11 @@ export function toOpenApiSchema(schema: ZodType, io: 'input' | 'output' = 'outpu
   // Un schéma racine nommé devient lui-même une référence.
   const rootId = (z.globalRegistry.get(schema) as { id?: string } | undefined)?.id;
   if (rootId) {
-    openApiComponents.set(rootId, cleaned);
-    return { $ref: `#/components/schemas/${rootId}` };
+    const ref = `#/components/schemas/${rootId}`;
+    // Zod renvoie parfois la racine sous forme de référence vers sa propre définition, déjà
+    // enregistrée ci-dessus : ne pas l'écraser par une référence circulaire.
+    if (cleaned['$ref'] !== ref) openApiComponents.set(rootId, cleaned);
+    return { $ref: ref };
   }
   return cleaned;
 }

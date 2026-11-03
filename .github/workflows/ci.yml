@@ -150,8 +150,15 @@ jobs:
           path: apps/rider/test/**/failures/
           retention-days: 7
 
+      # Code Dart obscurci ; les symboles gardés à part servent à lire les plantages.
+      # Signature par la clé d'envoi si les secrets du dépôt existent, sinon clé de test.
       - name: APK par architecture
-        run: flutter build apk --release --split-per-abi
+        env:
+          TARA_RIDER_KEYSTORE_BASE64: ${{ secrets.TARA_RIDER_KEYSTORE_BASE64 }}
+          TARA_RIDER_KEYSTORE_PASSWORD: ${{ secrets.TARA_RIDER_KEYSTORE_PASSWORD }}
+          TARA_RIDER_KEY_ALIAS: ${{ secrets.TARA_RIDER_KEY_ALIAS }}
+          TARA_RIDER_KEY_PASSWORD: ${{ secrets.TARA_RIDER_KEY_PASSWORD }}
+        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
 
       # Cahier des charges : moins de 25 Mo à l'installation.
       - name: Poids des APK (25 Mo au plus)
@@ -172,6 +179,12 @@ jobs:
           name: tara-livreur-apk
           path: apps/rider/build/app/outputs/flutter-apk/app-*-release.apk
           retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tara-livreur-symboles
+          path: apps/rider/build/symbols/
+          retention-days: 90
 
   secrets:
     name: Secrets oubliés dans le code

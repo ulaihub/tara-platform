@@ -267,6 +267,14 @@ export const ERROR_MESSAGES = {
     en: 'No decision is expected for this order.',
   },
   SAFETY_ALERT_NOT_FOUND: { fr: 'Alerte introuvable.', en: 'Alert not found.' },
+  SAFETY_ALERT_CLOSED: {
+    fr: 'Cette alerte est déjà close ou annulée.',
+    en: 'This alert is already closed or cancelled.',
+  },
+  EMERGENCY_CONTACT_IS_SELF: {
+    fr: 'Le contact d’urgence doit être un proche, pas votre propre numéro.',
+    en: 'The emergency contact must be someone close to you, not your own number.',
+  },
 
   // Argent (G)
   PAYMENT_ALREADY_PENDING: {
