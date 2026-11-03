@@ -12,6 +12,7 @@ const GLYPHS = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
 const views = [
   { name: 'akwa-z16', center: [9.6996, 4.0496], zoom: 16 },
   { name: 'akwa-z17_5', center: [9.6985, 4.0478], zoom: 17.5 },
+  { name: 'zone-bord-z16_5', center: [9.6985, 4.0455], zoom: 16.5 },
   { name: 'bonapriso-z15', center: [9.6935, 4.0335], zoom: 15 },
   { name: 'douala-z12_5', center: [9.715, 4.05], zoom: 12.5 },
 ];

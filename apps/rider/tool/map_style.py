@@ -99,7 +99,10 @@ def style(name, t):
          "paint": {"line-color": "#FF8A3D", "line-width": 2, "line-opacity": 0.6, "line-dasharray": [4, 3]}},
         {"id": "tara-no-moto-fill", "type": "fill", "source": "tara-zones",
          "filter": ["==", ["get", "kind"], "NO_MOTORBIKE"],
-         "paint": {"fill-color": "#E52535", "fill-opacity": 0.22 if name == "dark" else 0.16}},
+         # Plus léger de près : la zone reste lisible, les rues dessous aussi.
+         "paint": {"fill-color": "#E52535",
+                   "fill-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.32 if name == "dark" else 0.24,
+                                    17, 0.12 if name == "dark" else 0.09]}},
         {"id": "tara-no-moto-line", "type": "line", "source": "tara-zones",
          "filter": ["==", ["get", "kind"], "NO_MOTORBIKE"],
          "paint": {"line-color": "#FF4D5A" if name == "dark" else "#C81E2C", "line-width": 2.5, "line-dasharray": [2, 1.5]}},
@@ -121,10 +124,12 @@ def style(name, t):
         {"id": "housenumber", "type": "symbol", "source": "openmaptiles", "source-layer": "housenumber",
          "minzoom": 17, "layout": {"text-field": ["get", "housenumber"], "text-font": FONT, "text-size": 10},
          "paint": text(10, t["house"], 1.2)},
+        # Libellé répété le long de la bordure : visible même quand on est à l'intérieur.
         {"id": "tara-no-moto-label", "type": "symbol", "source": "tara-zones", "minzoom": 13,
          "filter": ["==", ["get", "kind"], "NO_MOTORBIKE"],
-         "layout": {"text-field": ["get", "label"], "text-font": FONT_BOLD, "text-size": 12, "symbol-placement": "point"},
-         "paint": text(12, "#FF4D5A" if name == "dark" else "#B3121F")},
+         "layout": {"text-field": ["get", "label"], "text-font": FONT_BOLD, "text-size": 12,
+                    "symbol-placement": "line", "symbol-spacing": 220, "text-keep-upright": True},
+         "paint": text(12, "#FF4D5A" if name == "dark" else "#B3121F", 2)},
     ]
     # Commerces et lieux : point coloré par famille dès z15, nom dès z16.
     for group, classes in POI_GROUPS:
