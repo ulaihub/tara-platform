@@ -20,7 +20,16 @@ import 'home_summary.dart';
 /// 06 · Accueil — en ligne : carte plein écran, position suivie, gains du jour, SOS,
 /// recentrer, « Recherche de courses… ». Les propositions s'ouvrent par-dessus (07).
 class HomeOnlineScreen extends ConsumerStatefulWidget {
-  const HomeOnlineScreen({super.key, required this.onWentOffline, required this.onDetails, required this.onSos});
+  const HomeOnlineScreen({
+    super.key,
+    required this.onWentOffline,
+    required this.onDetails,
+    required this.onSos,
+    this.courseBanner,
+  });
+
+  /// Course en cours réduite : remplace « Recherche de courses… ».
+  final Widget? courseBanner;
 
   final VoidCallback onWentOffline;
   final VoidCallback onDetails;
@@ -137,26 +146,29 @@ class _HomeOnlineScreenState extends ConsumerState<HomeOnlineScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  GlassCard(
-                    radius: 24,
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 64, child: GooLoader(compact: true)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(l.searchingTitle, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
-                              const SizedBox(height: 2),
-                              Text(l.searchingJobsHint, style: TaraText.small.copyWith(color: c.textTertiary)),
-                            ],
+                  if (widget.courseBanner != null)
+                    widget.courseBanner!
+                  else
+                    GlassCard(
+                      radius: 24,
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 64, child: GooLoader(compact: true)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l.searchingTitle, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
+                                const SizedBox(height: 2),
+                                Text(l.searchingJobsHint, style: TaraText.small.copyWith(color: c.textTertiary)),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 12),
                   FloatingTabBar(
                     items: [

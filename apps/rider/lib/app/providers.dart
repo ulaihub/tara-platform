@@ -11,6 +11,7 @@ import '../core/api/auth_api.dart';
 import '../core/api/models.dart';
 import '../core/api/rider_api.dart';
 import '../core/course/active_order.dart';
+import '../core/course/course_actions.dart';
 import '../core/env.dart';
 import '../core/location/location_tracker.dart';
 import '../core/location/online_controller.dart';
@@ -80,6 +81,7 @@ final activeOrderProvider = Provider<ActiveOrderController>((ref) {
     fetchOrder: rider.riderOrder,
     hasPendingActions: (orderId) => queue.forOrder(orderId).any((action) => !action.failed),
     events: ref.watch(realtimeProvider).stream,
+    pushes: ref.watch(pushServiceProvider).messages,
   );
   queue.addListener(controller.queueChanged);
   ref.onDispose(() {
@@ -88,6 +90,11 @@ final activeOrderProvider = Provider<ActiveOrderController>((ref) {
   });
   return controller;
 });
+
+/// Actions de course (enlèvement, livraison…) passées par la file hors connexion.
+final courseActionsProvider = Provider<CourseActions>(
+  (ref) => CourseActions(queue: ref.watch(actionQueueProvider), activeOrder: ref.watch(activeOrderProvider)),
+);
 
 enum AuthStatus { signedOut, signedIn }
 

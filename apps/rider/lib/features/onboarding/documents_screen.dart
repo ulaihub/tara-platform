@@ -1,10 +1,9 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../design/components/buttons.dart';
+import '../../design/components/dashed.dart';
 import '../../design/components/glass.dart';
 import '../../design/components/inputs.dart';
 import '../../design/components/layout.dart';
@@ -226,7 +225,7 @@ class _DocumentRow extends StatelessWidget {
       container: true,
       child: switch (status) {
         DocumentStatus.toDo => CustomPaint(
-          painter: _DashedBorder(color: c.accentTintBorder, radius: 22),
+          painter: DashedBorderPainter(color: c.accentTintBorder, radius: 22),
           child: row,
         ),
         DocumentStatus.rejected || DocumentStatus.expired => DecoratedBox(
@@ -260,29 +259,4 @@ class _DocumentRow extends StatelessWidget {
       },
     );
   }
-}
-
-/// Bordure pointillée d'une pièce à envoyer.
-class _DashedBorder extends CustomPainter {
-  _DashedBorder({required this.color, required this.radius});
-
-  final Color color;
-  final double radius;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path()..addRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radius)));
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    for (final metric in path.computeMetrics()) {
-      for (var d = 0.0; d < metric.length; d += 10) {
-        canvas.drawPath(metric.extractPath(d, math.min(d + 5, metric.length)), paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedBorder old) => old.color != color || old.radius != radius;
 }

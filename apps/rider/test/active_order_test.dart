@@ -114,6 +114,24 @@ void main() {
     expect(active.order?.status, 'PICKED_UP');
   });
 
+  test('une notification d’annulation de la course la relit aussi', () async {
+    final pushes = StreamController<Json>.broadcast();
+    final active = ActiveOrderController(
+      store: store,
+      fetchActive: server.fetchActive,
+      fetchOrder: server.fetchOrder,
+      hasPendingActions: (_) => pending,
+      pushes: pushes.stream,
+    );
+    await active.start(order());
+    server.byId = order(status: 'CANCELLED');
+    pushes.add({'type': 'order.cancelled', 'orderId': '00000000-0000-4000-8000-000000000002'});
+    await pumpEventQueue();
+    expect(active.order, isNull);
+    expect(active.takeEnded(), OrderEnded.cancelled);
+    await pushes.close();
+  });
+
   test('quand la file de la course se vide, la course est relue', () async {
     final active = controller();
     await active.start(order());

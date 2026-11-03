@@ -21,8 +21,11 @@ class ActiveOrderController extends ChangeNotifier {
     required this.fetchOrder,
     required this.hasPendingActions,
     Stream<RealtimeEvent>? events,
+    Stream<Json>? pushes,
   }) {
-    _events = events?.listen(_onEvent);
+    _events = events?.listen((event) => _onEvent(event.name, event.payload));
+    // Annulation et réattribution arrivent par notification (`type`, `orderId`).
+    _pushes = pushes?.listen((data) => _onEvent('${data['type']}', data));
   }
 
   static const _key = 'tara.active-order';
@@ -38,6 +41,7 @@ class ActiveOrderController extends ChangeNotifier {
   final bool Function(String orderId) hasPendingActions;
 
   StreamSubscription<RealtimeEvent>? _events;
+  StreamSubscription<Json>? _pushes;
   RiderOrder? _order;
   OrderEnded? _ended;
   bool _loaded = false;
@@ -129,14 +133,15 @@ class ActiveOrderController extends ChangeNotifier {
     _hadPending = pending;
   }
 
-  void _onEvent(RealtimeEvent event) {
+  void _onEvent(String name, Json payload) {
     const watched = {'order.status', 'order.cancelled', 'order.reassigned'};
-    if (watched.contains(event.name) && event.payload['orderId'] == _order?.id) unawaited(refresh());
+    if (watched.contains(name) && payload['orderId'] == _order?.id) unawaited(refresh());
   }
 
   @override
   void dispose() {
     unawaited(_events?.cancel());
+    unawaited(_pushes?.cancel());
     super.dispose();
   }
 }

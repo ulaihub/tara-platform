@@ -472,10 +472,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vehicleShort => 'Motorbike';
 
   @override
-  String get jobAccepted => 'Job accepted';
+  String courseRef(String reference) {
+    return 'Job $reference';
+  }
 
   @override
-  String jobAcceptedBody(String reference) {
-    return 'Reference $reference. Head to the pickup point.';
+  String get toPickup => 'To pickup';
+
+  @override
+  String toPickupMinutes(int minutes) {
+    return 'To pickup · $minutes min';
+  }
+
+  @override
+  String get directions => 'Directions';
+
+  @override
+  String get openWith => 'Open directions with';
+
+  @override
+  String get collectAtPickupTitle => 'Collect at pickup';
+
+  @override
+  String get collectAtPickupBody => 'In cash, before taking the parcel.';
+
+  @override
+  String get noMotoAddress => 'Address in a no-motorbike zone: park outside and finish on foot.';
+
+  @override
+  String get pickupCodeLabel => 'Pickup code';
+
+  @override
+  String get pickupCodeHint => 'given by the sender';
+
+  @override
+  String get photoParcel => 'Photograph the parcel';
+
+  @override
+  String get photoParcelHint => 'Tara label visible';
+
+  @override
+  String photoParcelTaken(String time) {
+    return 'Parcel photo · taken at $time';
+  }
+
+  @override
+  String get retakePhoto => 'Retake';
+
+  @override
+  String get parcelCollected => 'Parcel collected';
+
+  @override
+  String get actionSavedOffline => 'Saved on the phone: sent automatically when the network is back.';
+
+  @override
+  String get noPositionYet => 'Looking for your position: wait a few seconds outdoors.';
+
+  @override
+  String get orderCancelledNotice => 'Job cancelled by the sender.';
+
+  @override
+  String get orderReassignedNotice => 'Job given to another rider.';
+
+  @override
+  String courseInProgress(String reference) {
+    return 'Job $reference in progress';
+  }
+
+  @override
+  String get courseResume => 'Resume';
+
+  @override
+  String get parcelOnBoard => 'Parcel on board';
+
+  @override
+  String parcelOnBoardBody(String reference) {
+    return 'Reference $reference. Heading to the recipient: the delivery screen comes in the next batch.';
   }
 }

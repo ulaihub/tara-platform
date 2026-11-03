@@ -5,19 +5,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
+import '../../core/course/active_order.dart';
+import '../../core/course/course_actions.dart';
 import '../../core/realtime/realtime_client.dart';
 import '../../design/components/glass.dart';
 import '../../design/tara_colors.dart';
 import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/status_screen.dart';
+import '../course/course_banner.dart';
+import '../course/pickup_screen.dart';
 import '../offer/offer_screen.dart';
 import 'home_offline_screen.dart';
 import 'home_online_screen.dart';
 import 'home_summary.dart';
 
 /// Accueil du livreur validé : hors ligne (05) ⇄ en ligne (06), propositions (07) reçues
-/// par le temps réel, les notifications ou au retour dans l'app.
+/// par le temps réel, les notifications ou au retour dans l'app, puis la course acceptée
+/// (08 enlèvement…). Le bouton retour d'une course la réduit à l'accueil.
 class HomeFlow extends ConsumerStatefulWidget {
   const HomeFlow({super.key});
 
@@ -27,8 +32,11 @@ class HomeFlow extends ConsumerStatefulWidget {
 
 class _HomeFlowState extends ConsumerState<HomeFlow> {
   Offer? _offer;
-  Json? _accepted;
   String? _notice;
+
+  /// Course réduite à l'accueil (bouton retour) : identifiant de la course réduite.
+  String? _minimized;
+  late final ActiveOrderController _activeOrder;
   Timer? _noticeTimer;
   StreamSubscription<RealtimeEvent>? _realtime;
   StreamSubscription<Json>? _push;
@@ -37,13 +45,23 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   void initState() {
     super.initState();
     _realtime = ref.read(realtimeProvider).stream.listen(_onEvent);
+    _activeOrder = ref.read(activeOrderProvider)..addListener(_onOrderChanged);
     _push = ref.read(pushServiceProvider).messages.listen((data) {
       if (data['type'] == 'offer.new') unawaited(_loadPendingOffers());
     });
   }
 
+  /// Course annulée ou réattribuée : le livreur en est averti.
+  void _onOrderChanged() {
+    final ended = _activeOrder.takeEnded();
+    if (ended == null || !mounted) return;
+    final l = AppLocalizations.of(context);
+    _showNotice(ended == OrderEnded.cancelled ? l.orderCancelledNotice : l.orderReassignedNotice);
+  }
+
   @override
   void dispose() {
+    _activeOrder.removeListener(_onOrderChanged);
     unawaited(_realtime?.cancel());
     unawaited(_push?.cancel());
     _noticeTimer?.cancel();
@@ -51,7 +69,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   }
 
   void _onEvent(RealtimeEvent event) {
-    if (!ref.read(onlineControllerProvider).online) return;
+    // Pas de nouvelle proposition pendant une course.
+    if (!ref.read(onlineControllerProvider).online || _activeOrder.order != null) return;
     switch (event.name) {
       case 'offer.new':
         if (_offer == null) setState(() => _offer = Offer.fromJson(event.payload));
@@ -65,7 +84,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Propositions en attente (notification touchée, retour en ligne, temps réel coupé).
   Future<void> _loadPendingOffers() async {
-    if (_offer != null) return;
+    if (_offer != null || _activeOrder.order != null) return;
     try {
       final offers = await ref.read(riderApiProvider).offers();
       if (mounted && offers.isNotEmpty && _offer == null) setState(() => _offer = Offer.fromJson(offers.first));
@@ -75,64 +94,103 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   }
 
   void _closeOffer(String? message) {
+    setState(() => _offer = null);
+    if (message != null) _showNotice(message);
+  }
+
+  void _showNotice(String message) {
+    setState(() => _notice = message);
+    _noticeTimer?.cancel();
+    _noticeTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted) setState(() => _notice = null);
+    });
+  }
+
+  Future<void> _accepted(Json order) async {
     setState(() {
       _offer = null;
-      _notice = message;
+      _minimized = null;
     });
-    _noticeTimer?.cancel();
-    if (message != null) {
-      _noticeTimer = Timer(const Duration(seconds: 4), () {
-        if (mounted) setState(() => _notice = null);
-      });
+    await _activeOrder.start(RiderOrder.fromJson(order));
+  }
+
+  /// Écran de la course selon son étape.
+  Widget _course(RiderOrder order) {
+    final l = AppLocalizations.of(context);
+    void minimize() => setState(() => _minimized = order.id);
+    final refused = ref.read(courseActionsProvider).refusedPickup(order.id);
+    if (order.status == 'ASSIGNED' || refused != null) {
+      return PickupScreen(
+        key: ValueKey('pickup-${order.id}'),
+        order: order,
+        onBack: minimize,
+        onSos: () {},
+        onPickedUp: (outcome) {
+          if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
+        },
+      );
     }
+    // Écran de livraison (09) au prochain lot.
+    return StatusScreen(
+      title: l.parcelOnBoard,
+      body: l.parcelOnBoardBody(order.reference),
+      actionLabel: l.continueLabel,
+      onAction: minimize,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final online = ref.watch(onlineControllerProvider);
-    final accepted = _accepted;
-    if (accepted != null) {
-      // Écran d'enlèvement (08) au prochain lot.
-      return StatusScreen(
-        title: l.jobAccepted,
-        body: l.jobAcceptedBody('${accepted['reference'] ?? ''}'),
-        actionLabel: l.continueLabel,
-        onAction: () => setState(() => _accepted = null),
-      );
-    }
+    final queue = ref.watch(actionQueueProvider);
     final offer = _offer;
     return ListenableBuilder(
-      listenable: online,
-      builder: (context, _) => Stack(
-        children: [
-          Positioned.fill(
-            child: online.online
-                ? HomeOnlineScreen(onWentOffline: () => setState(() {}), onDetails: () {}, onSos: () {})
-                : HomeOfflineScreen(
-                    onWentOnline: () {
-                      ref.invalidate(homeSummaryProvider);
-                      unawaited(_loadPendingOffers());
-                    },
-                    onDetails: () {},
-                  ),
-          ),
-          if (_notice != null)
-            Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top + 64, child: _Notice(_notice!)),
-          if (offer != null)
+      listenable: Listenable.merge([online, _activeOrder, queue]),
+      builder: (context, _) {
+        final order = _activeOrder.order;
+        // Hors ligne, une course en cours reste à l'écran : rien ne doit la faire oublier.
+        final showCourse = order != null && (_minimized != order.id || !online.online);
+        return Stack(
+          children: [
             Positioned.fill(
-              child: OfferScreen(
-                key: ValueKey(offer.id),
-                offer: offer,
-                onClosed: _closeOffer,
-                onAccepted: (order) => setState(() {
-                  _offer = null;
-                  _accepted = order;
-                }),
-              ),
+              child: showCourse
+                  ? _course(order)
+                  : online.online
+                  ? HomeOnlineScreen(
+                      onWentOffline: () => setState(() {}),
+                      onDetails: () {},
+                      onSos: () {},
+                      courseBanner: order == null
+                          ? null
+                          : CourseBanner(
+                              reference: order.reference,
+                              stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.parcelOnBoard,
+                              onResume: () => setState(() => _minimized = null),
+                            ),
+                    )
+                  : HomeOfflineScreen(
+                      onWentOnline: () {
+                        ref.invalidate(homeSummaryProvider);
+                        unawaited(_loadPendingOffers());
+                      },
+                      onDetails: () {},
+                    ),
             ),
-        ],
-      ),
+            if (_notice != null)
+              Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top + 64, child: _Notice(_notice!)),
+            if (offer != null)
+              Positioned.fill(
+                child: OfferScreen(
+                  key: ValueKey(offer.id),
+                  offer: offer,
+                  onClosed: _closeOffer,
+                  onAccepted: (order) => unawaited(_accepted(order)),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

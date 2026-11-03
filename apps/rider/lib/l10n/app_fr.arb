@@ -268,9 +268,58 @@
       }
     }
   },
-  "jobAccepted": "Course acceptée",
-  "jobAcceptedBody": "Référence {reference}. Rendez-vous au point d’enlèvement.",
-  "@jobAcceptedBody": {
+  "courseRef": "Course {reference}",
+  "toPickup": "Vers l’enlèvement",
+  "toPickupMinutes": "Vers l’enlèvement · {minutes} min",
+  "directions": "Itinéraire",
+  "openWith": "Ouvrir l’itinéraire avec",
+  "collectAtPickupTitle": "À encaisser à l’enlèvement",
+  "collectAtPickupBody": "En espèces, avant de prendre le colis.",
+  "noMotoAddress": "Adresse en zone interdite aux motos : garez-vous à l’extérieur et finissez à pied.",
+  "pickupCodeLabel": "Code d’enlèvement",
+  "pickupCodeHint": "donné par le vendeur",
+  "photoParcel": "Photographier le colis",
+  "photoParcelHint": "Étiquette Tara visible",
+  "photoParcelTaken": "Photo du colis · prise à {time}",
+  "retakePhoto": "Reprendre",
+  "parcelCollected": "Colis récupéré",
+  "actionSavedOffline": "Enregistré sur le téléphone : envoi automatique au retour du réseau.",
+  "noPositionYet": "Position en cours de recherche : patientez quelques secondes à l’extérieur.",
+  "orderCancelledNotice": "Course annulée par l’expéditeur.",
+  "orderReassignedNotice": "Course confiée à un autre livreur.",
+  "courseInProgress": "Course {reference} en cours",
+  "courseResume": "Reprendre",
+  "parcelOnBoard": "Colis à bord",
+  "parcelOnBoardBody": "Référence {reference}. Direction le destinataire : l’écran de livraison arrive au prochain lot.",
+  "@courseRef": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "@toPickupMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@photoParcelTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@courseInProgress": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "@parcelOnBoardBody": {
     "placeholders": {
       "reference": {
         "type": "String"

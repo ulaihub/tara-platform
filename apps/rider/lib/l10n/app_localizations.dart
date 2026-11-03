@@ -914,17 +914,143 @@ abstract class AppLocalizations {
   /// **'Moto'**
   String get vehicleShort;
 
-  /// No description provided for @jobAccepted.
+  /// No description provided for @courseRef.
   ///
   /// In fr, this message translates to:
-  /// **'Course acceptée'**
-  String get jobAccepted;
+  /// **'Course {reference}'**
+  String courseRef(String reference);
 
-  /// No description provided for @jobAcceptedBody.
+  /// No description provided for @toPickup.
   ///
   /// In fr, this message translates to:
-  /// **'Référence {reference}. Rendez-vous au point d’enlèvement.'**
-  String jobAcceptedBody(String reference);
+  /// **'Vers l’enlèvement'**
+  String get toPickup;
+
+  /// No description provided for @toPickupMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vers l’enlèvement · {minutes} min'**
+  String toPickupMinutes(int minutes);
+
+  /// No description provided for @directions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Itinéraire'**
+  String get directions;
+
+  /// No description provided for @openWith.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir l’itinéraire avec'**
+  String get openWith;
+
+  /// No description provided for @collectAtPickupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser à l’enlèvement'**
+  String get collectAtPickupTitle;
+
+  /// No description provided for @collectAtPickupBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'En espèces, avant de prendre le colis.'**
+  String get collectAtPickupBody;
+
+  /// No description provided for @noMotoAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse en zone interdite aux motos : garez-vous à l’extérieur et finissez à pied.'**
+  String get noMotoAddress;
+
+  /// No description provided for @pickupCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d’enlèvement'**
+  String get pickupCodeLabel;
+
+  /// No description provided for @pickupCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'donné par le vendeur'**
+  String get pickupCodeHint;
+
+  /// No description provided for @photoParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier le colis'**
+  String get photoParcel;
+
+  /// No description provided for @photoParcelHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étiquette Tara visible'**
+  String get photoParcelHint;
+
+  /// No description provided for @photoParcelTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo du colis · prise à {time}'**
+  String photoParcelTaken(String time);
+
+  /// No description provided for @retakePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre'**
+  String get retakePhoto;
+
+  /// No description provided for @parcelCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis récupéré'**
+  String get parcelCollected;
+
+  /// No description provided for @actionSavedOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistré sur le téléphone : envoi automatique au retour du réseau.'**
+  String get actionSavedOffline;
+
+  /// No description provided for @noPositionYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position en cours de recherche : patientez quelques secondes à l’extérieur.'**
+  String get noPositionYet;
+
+  /// No description provided for @orderCancelledNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course annulée par l’expéditeur.'**
+  String get orderCancelledNotice;
+
+  /// No description provided for @orderReassignedNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course confiée à un autre livreur.'**
+  String get orderReassignedNotice;
+
+  /// No description provided for @courseInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course {reference} en cours'**
+  String courseInProgress(String reference);
+
+  /// No description provided for @courseResume.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre'**
+  String get courseResume;
+
+  /// No description provided for @parcelOnBoard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis à bord'**
+  String get parcelOnBoard;
+
+  /// No description provided for @parcelOnBoardBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence {reference}. Direction le destinataire : l’écran de livraison arrive au prochain lot.'**
+  String parcelOnBoardBody(String reference);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

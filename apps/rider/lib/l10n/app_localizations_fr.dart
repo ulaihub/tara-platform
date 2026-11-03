@@ -474,10 +474,81 @@ class AppLocalizationsFr extends AppLocalizations {
   String get vehicleShort => 'Moto';
 
   @override
-  String get jobAccepted => 'Course acceptée';
+  String courseRef(String reference) {
+    return 'Course $reference';
+  }
 
   @override
-  String jobAcceptedBody(String reference) {
-    return 'Référence $reference. Rendez-vous au point d’enlèvement.';
+  String get toPickup => 'Vers l’enlèvement';
+
+  @override
+  String toPickupMinutes(int minutes) {
+    return 'Vers l’enlèvement · $minutes min';
+  }
+
+  @override
+  String get directions => 'Itinéraire';
+
+  @override
+  String get openWith => 'Ouvrir l’itinéraire avec';
+
+  @override
+  String get collectAtPickupTitle => 'À encaisser à l’enlèvement';
+
+  @override
+  String get collectAtPickupBody => 'En espèces, avant de prendre le colis.';
+
+  @override
+  String get noMotoAddress => 'Adresse en zone interdite aux motos : garez-vous à l’extérieur et finissez à pied.';
+
+  @override
+  String get pickupCodeLabel => 'Code d’enlèvement';
+
+  @override
+  String get pickupCodeHint => 'donné par le vendeur';
+
+  @override
+  String get photoParcel => 'Photographier le colis';
+
+  @override
+  String get photoParcelHint => 'Étiquette Tara visible';
+
+  @override
+  String photoParcelTaken(String time) {
+    return 'Photo du colis · prise à $time';
+  }
+
+  @override
+  String get retakePhoto => 'Reprendre';
+
+  @override
+  String get parcelCollected => 'Colis récupéré';
+
+  @override
+  String get actionSavedOffline => 'Enregistré sur le téléphone : envoi automatique au retour du réseau.';
+
+  @override
+  String get noPositionYet => 'Position en cours de recherche : patientez quelques secondes à l’extérieur.';
+
+  @override
+  String get orderCancelledNotice => 'Course annulée par l’expéditeur.';
+
+  @override
+  String get orderReassignedNotice => 'Course confiée à un autre livreur.';
+
+  @override
+  String courseInProgress(String reference) {
+    return 'Course $reference en cours';
+  }
+
+  @override
+  String get courseResume => 'Reprendre';
+
+  @override
+  String get parcelOnBoard => 'Colis à bord';
+
+  @override
+  String parcelOnBoardBody(String reference) {
+    return 'Référence $reference. Direction le destinataire : l’écran de livraison arrive au prochain lot.';
   }
 }
