@@ -195,6 +195,22 @@ enum PackageSize {
   @@map("package_size")
 }
 
+/// Nature du contenu d'un colis (C1) : tout type d'objet, précisé en clair à côté.
+enum PackageContents {
+  DOCUMENTS
+  CLOTHING
+  MEDICINE
+  LAUNDRY
+  HOUSEHOLD
+  ELECTRONICS
+  FOOD
+  BEAUTY
+  SECONDHAND
+  OTHER
+
+  @@map("package_contents")
+}
+
 enum OrderStatus {
   CREATED
   SEARCHING_RIDER
@@ -857,25 +873,28 @@ model OrderBatch {
 }
 
 model Order {
-  id               String      @id @default(uuid(7)) @db.Uuid
+  id                 String           @id @default(uuid(7)) @db.Uuid
   /// Référence lisible communiquée au client, ex. TR-7K3P9Q.
-  reference        String      @unique
+  reference          String           @unique
   /// Jeton du lien de suivi public (F2).
-  trackingToken    String      @unique @map("tracking_token")
-  senderId         String      @map("sender_id") @db.Uuid
-  merchantId       String?     @map("merchant_id") @db.Uuid
-  batchId          String?     @map("batch_id") @db.Uuid
-  pickupAddressId  String      @map("pickup_address_id") @db.Uuid
-  dropoffAddressId String      @map("dropoff_address_id") @db.Uuid
-  recipientName    String      @map("recipient_name")
-  recipientPhone   String      @map("recipient_phone")
-  packageSize      PackageSize @map("package_size")
-  isFragile        Boolean     @default(false) @map("is_fragile")
-  declaredValue    Int?        @map("declared_value")
-  instructions     String?
-  isExpress        Boolean     @default(false) @map("is_express")
-  scheduledFor     DateTime?   @map("scheduled_for") @db.Timestamptz(3)
-  status           OrderStatus @default(CREATED)
+  trackingToken      String           @unique @map("tracking_token")
+  senderId           String           @map("sender_id") @db.Uuid
+  merchantId         String?          @map("merchant_id") @db.Uuid
+  batchId            String?          @map("batch_id") @db.Uuid
+  pickupAddressId    String           @map("pickup_address_id") @db.Uuid
+  dropoffAddressId   String           @map("dropoff_address_id") @db.Uuid
+  recipientName      String           @map("recipient_name")
+  recipientPhone     String           @map("recipient_phone")
+  packageSize        PackageSize      @map("package_size")
+  /// Nature du contenu (null pour les commandes antérieures) et précision libre.
+  packageContents    PackageContents? @map("package_contents")
+  packageDescription String?          @map("package_description")
+  isFragile          Boolean          @default(false) @map("is_fragile")
+  declaredValue      Int?             @map("declared_value")
+  instructions       String?
+  isExpress          Boolean          @default(false) @map("is_express")
+  scheduledFor       DateTime?        @map("scheduled_for") @db.Timestamptz(3)
+  status             OrderStatus      @default(CREATED)
 
   // Prix figé à la création (C2) : total = base + suppléments − remises.
   pricingGridId    String        @map("pricing_grid_id") @db.Uuid

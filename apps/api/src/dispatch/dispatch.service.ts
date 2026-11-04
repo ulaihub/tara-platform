@@ -705,6 +705,7 @@ export function toOfferDto(
     codAmount: order.codAmount,
     cashFee: order.feePaymentMethod === 'CASH' ? order.totalPrice : 0,
     packageSize: order.packageSize,
+    packageContents: order.packageContents,
     isFragile: order.isFragile,
     isExpress: order.isExpress,
   };

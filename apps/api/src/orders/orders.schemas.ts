@@ -35,6 +35,22 @@ export const ActorRoleEnum = z
   .enum(['SENDER', 'RECIPIENT', 'RIDER', 'DISPATCHER', 'SUPPORT', 'SYSTEM'])
   .meta({ id: 'ActorRole' });
 
+/** Nature du contenu d'un colis (C1) : tout type d'objet, précisé en clair à côté. */
+export const PackageContentsEnum = z
+  .enum([
+    'DOCUMENTS',
+    'CLOTHING',
+    'MEDICINE',
+    'LAUNDRY',
+    'HOUSEHOLD',
+    'ELECTRONICS',
+    'FOOD',
+    'BEAUTY',
+    'SECONDHAND',
+    'OTHER',
+  ])
+  .meta({ id: 'PackageContents' });
+
 /** Plafond d'encaissement par commande, pour limiter le risque espèces (G5). */
 export const MAX_COD_AMOUNT = 500_000;
 
@@ -46,6 +62,10 @@ export const DeliveryItem = z.object({
   recipientName: z.string().trim().min(2).max(80),
   recipientPhone: CameroonMobile,
   packageSize: PackageSizeEnum,
+  /** Nature du contenu ; « Autre » si l'app ne la donne pas. */
+  packageContents: PackageContentsEnum.default('OTHER'),
+  /** Précision libre, ex. « 2 paires de chaussures ». */
+  packageDescription: z.string().trim().max(120).optional(),
   isFragile: z.boolean().default(false),
   declaredValue: Fcfa.optional(),
   /** Montant à encaisser auprès du destinataire, 0 si aucun (réservé aux marchands). */
@@ -92,6 +112,8 @@ export const OrderDto = z
     isExpress: z.boolean(),
     scheduledFor: z.iso.datetime().nullable(),
     packageSize: PackageSizeEnum,
+    packageContents: PackageContentsEnum.nullable(),
+    packageDescription: z.string().nullable(),
     isFragile: z.boolean(),
     declaredValue: z.int().nullable(),
     instructions: z.string().nullable(),

@@ -2397,6 +2397,18 @@
                   "packageSize": {
                     "$ref": "#/components/schemas/PackageSize"
                   },
+                  "packageContents": {
+                    "default": "OTHER",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PackageContents"
+                      }
+                    ]
+                  },
+                  "packageDescription": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
                   "isFragile": {
                     "default": false,
                     "type": "boolean"
@@ -2633,6 +2645,18 @@
                         },
                         "packageSize": {
                           "$ref": "#/components/schemas/PackageSize"
+                        },
+                        "packageContents": {
+                          "default": "OTHER",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/PackageContents"
+                            }
+                          ]
+                        },
+                        "packageDescription": {
+                          "type": "string",
+                          "maxLength": 120
                         },
                         "isFragile": {
                           "default": false,
@@ -7444,6 +7468,14 @@
           "packageSize": {
             "$ref": "#/components/schemas/PackageSize"
           },
+          "packageContents": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackageContents"
+              }
+            ]
+          },
           "isFragile": {
             "type": "boolean"
           },
@@ -7465,6 +7497,7 @@
           "codAmount",
           "cashFee",
           "packageSize",
+          "packageContents",
           "isFragile",
           "isExpress"
         ],
@@ -8244,6 +8277,18 @@
           "packageSize": {
             "$ref": "#/components/schemas/PackageSize"
           },
+          "packageContents": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackageContents"
+              }
+            ]
+          },
+          "packageDescription": {
+            "nullable": true,
+            "type": "string"
+          },
           "isFragile": {
             "type": "boolean"
           },
@@ -8372,6 +8417,8 @@
           "isExpress",
           "scheduledFor",
           "packageSize",
+          "packageContents",
+          "packageDescription",
           "isFragile",
           "declaredValue",
           "instructions",
@@ -8510,6 +8557,21 @@
           "resendAfterSeconds"
         ],
         "additionalProperties": false
+      },
+      "PackageContents": {
+        "type": "string",
+        "enum": [
+          "DOCUMENTS",
+          "CLOTHING",
+          "MEDICINE",
+          "LAUNDRY",
+          "HOUSEHOLD",
+          "ELECTRONICS",
+          "FOOD",
+          "BEAUTY",
+          "SECONDHAND",
+          "OTHER"
+        ]
       },
       "PackageSize": {
         "type": "string",
@@ -9352,6 +9414,18 @@
           "packageSize": {
             "$ref": "#/components/schemas/PackageSize"
           },
+          "packageContents": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackageContents"
+              }
+            ]
+          },
+          "packageDescription": {
+            "nullable": true,
+            "type": "string"
+          },
           "isFragile": {
             "type": "boolean"
           },
@@ -9508,6 +9582,8 @@
           "reference",
           "status",
           "packageSize",
+          "packageContents",
+          "packageDescription",
           "isFragile",
           "isExpress",
           "instructions",

@@ -243,12 +243,20 @@ describe('Tarification et commandes (C1 à C7)', () => {
         .post('/v1/orders')
         .set(m.auth)
         .set('Idempotency-Key', key)
-        .send(orderBody(m, { codAmount: 15_000 }))
+        .send(
+          orderBody(m, {
+            codAmount: 15_000,
+            packageContents: 'CLOTHING',
+            packageDescription: '2 paires de chaussures',
+          }),
+        )
         .expect(201);
       expect(res.body.pickupCode).toMatch(/^\d{4}$/);
       expect(res.body.order).toMatchObject({
         reference: expect.stringMatching(/^TR-[0-9A-Z]{6}$/),
         status: 'SEARCHING_RIDER',
+        packageContents: 'CLOTHING',
+        packageDescription: '2 paires de chaussures',
         recipient: { name: 'Client Bonamoussadi', phone: '+237655443322' },
         pricing: { codAmount: 15_000, feePaymentMethod: 'CASH', currency: 'XAF' },
       });

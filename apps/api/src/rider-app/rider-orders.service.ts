@@ -172,6 +172,8 @@ export class RiderOrdersService {
         reference: order.reference,
         status: order.status,
         packageSize: order.packageSize,
+        packageContents: order.packageContents,
+        packageDescription: order.packageDescription,
         isFragile: order.isFragile,
         isExpress: order.isExpress,
         instructions: order.instructions,

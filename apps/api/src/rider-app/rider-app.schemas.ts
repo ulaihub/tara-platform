@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import { PageQuery } from '../common/pagination.js';
 import { AddressDto, Latitude, Longitude } from '../geo/geo.schemas.js';
-import { FailureReasonEnum, OrderStatusEnum } from '../orders/orders.schemas.js';
+import {
+  FailureReasonEnum,
+  OrderStatusEnum,
+  PackageContentsEnum,
+} from '../orders/orders.schemas.js';
 import { PackageSizeEnum } from '../pricing/pricing.schemas.js';
 
 const Code4 = z.string().regex(/^\d{4}$/, 'quatre chiffres attendus');
@@ -136,6 +140,9 @@ export const RiderOrderDto = z
     reference: z.string(),
     status: OrderStatusEnum,
     packageSize: PackageSizeEnum,
+    /** Nature du contenu (C1) et précision de l'expéditeur. */
+    packageContents: PackageContentsEnum.nullable(),
+    packageDescription: z.string().nullable(),
     isFragile: z.boolean(),
     isExpress: z.boolean(),
     instructions: z.string().nullable(),

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Latitude, Longitude } from '../geo/geo.schemas.js';
+import { PackageContentsEnum } from '../orders/orders.schemas.js';
 import { PackageSizeEnum } from '../pricing/pricing.schemas.js';
 
 const Place = z.object({
@@ -40,6 +41,8 @@ export const OfferDto = z
     /** Frais de livraison réglés en espèces au livreur. */
     cashFee: z.int(),
     packageSize: PackageSizeEnum,
+    /** Nature du contenu (C1) : le livreur sait ce qu'il transporte avant d'accepter. */
+    packageContents: PackageContentsEnum.nullable(),
     isFragile: z.boolean(),
     isExpress: z.boolean(),
   })
