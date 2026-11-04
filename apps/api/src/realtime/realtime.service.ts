@@ -21,6 +21,7 @@ export type RealtimeEvent =
   | 'ops.course-alert'
   | 'payment.status'
   | 'payout.status'
+  | 'safety-alert.status'
   | 'session.expired';
 
 /**

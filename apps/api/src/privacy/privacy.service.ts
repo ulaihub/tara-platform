@@ -39,8 +39,12 @@ export class PrivacyService {
               select: {
                 latitude: true,
                 longitude: true,
+                accuracy: true,
+                neighborhood: true,
                 note: true,
                 createdAt: true,
+                policeCalledAt: true,
+                cancelledAt: true,
                 resolvedAt: true,
               },
             },

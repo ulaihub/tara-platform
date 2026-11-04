@@ -46,8 +46,8 @@ const TEMPLATES = {
     en: 'Tara OPS: order {reference} has been waiting for a rider for {minutes} min. Please assign.',
   },
   OPS_SAFETY_ALERT: {
-    fr: 'Tara OPS ALERTE : le livreur {rider} ({phone}) a declenche une alerte. Position : {map}',
-    en: 'Tara OPS ALERT: rider {rider} ({phone}) triggered an alert. Location: {map}',
+    fr: 'Tara OPS ALERTE : le livreur {rider} ({phone}), moto {plate}, a declenche une alerte. Quartier : {place}. Position : {map}',
+    en: 'Tara OPS ALERT: rider {rider} ({phone}), plate {plate}, triggered an alert. Area: {place}. Location: {map}',
   },
   OPS_SAFETY_ALERT_CANCELLED: {
     fr: 'Tara OPS : le livreur {rider} ({phone}) a annule son alerte. Rappelez-le pour confirmer qu il va bien.',

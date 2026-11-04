@@ -90,8 +90,12 @@ export const ReleaseBody = z.object({ reason: z.string().trim().min(3).max(300) 
 export const SafetyAlertBody = z.object({
   latitude: Latitude,
   longitude: Longitude,
+  /** Précision de la position, en mètres. */
+  accuracy: z.number().min(0).max(10_000).optional(),
   orderId: z.uuid().optional(),
   note: z.string().trim().max(300).optional(),
+  /** Identifiant généré par l'app : l'alerte renvoyée au retour du réseau n'est pas doublée. */
+  clientEventId: ActionContext.clientEventId,
 });
 
 /** Position actuelle du livreur, d'où part l'itinéraire. */
@@ -182,12 +186,20 @@ export const SafetyAlertDto = z
     riderId: z.uuid(),
     riderName: z.string().nullable(),
     riderPhone: z.string(),
+    /** Immatriculation de la moto, à donner à la police. */
+    riderPlate: z.string().nullable(),
     orderId: z.uuid().nullable(),
     latitude: z.number(),
     longitude: z.number(),
+    accuracy: z.number().nullable(),
+    /** Quartier où se trouve le livreur, s'il est connu. */
+    neighborhood: z.string().nullable(),
     note: z.string().nullable(),
     createdAt: z.iso.datetime(),
+    /** Prise en charge par un agent Tara. */
     acknowledgedAt: z.iso.datetime().nullable(),
+    /** Police appelée par l'agent Tara (livreur injoignable ou danger confirmé). */
+    policeCalledAt: z.iso.datetime().nullable(),
     resolvedAt: z.iso.datetime().nullable(),
     /** Annulée par le livreur : l'équipe le rappelle avant de clore. */
     cancelledAt: z.iso.datetime().nullable(),
@@ -197,6 +209,10 @@ export const SafetyAlertDto = z
 
 export const SafetyAlertListQuery = z.object({ status: z.enum(['open', 'all']).default('open') });
 export const ResolveAlertBody = z.object({ resolution: z.string().trim().min(3).max(500) });
+export const PoliceCalledBody = z.object({
+  /** Ce qui a été dit à la police, numéro d'intervention s'il est donné. */
+  note: z.string().trim().min(3).max(500),
+});
 export const ValidateDeliveryBody = z.object({ note: z.string().trim().min(3).max(300) });
 export const FailureDecisionBody = z.object({ decision: z.enum(['RETRY', 'RETURN']) });
 
@@ -210,6 +226,8 @@ export const RiderConfigDto = z
     }),
     safetyHotline: z.string(),
     supportPhone: z.string().nullable(),
+    /** Numéros d'urgence du pays, composés depuis l'écran d'alerte. */
+    emergencyNumbers: z.object({ police: z.string(), fire: z.string(), medical: z.string() }),
     mobileMoneyOperators: z.array(z.object({ code: z.string(), name: z.string() })),
     offerTimeoutSeconds: z.number(),
   })

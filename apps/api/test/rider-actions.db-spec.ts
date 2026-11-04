@@ -16,6 +16,7 @@ import {
   setupDouala,
   type TestMerchant,
 } from './helpers/orders.js';
+import { square } from './helpers/geo.js';
 import {
   activeRider,
   goOnline,
@@ -412,6 +413,7 @@ describe('Actions du livreur (E2 à E9)', () => {
       country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
       safetyHotline: '+237640114064',
       supportPhone: null,
+      emergencyNumbers: { police: '117', fire: '118', medical: '119' },
       mobileMoneyOperators: [
         { code: 'MTN', name: 'MTN MoMo' },
         { code: 'ORANGE', name: 'Orange Money' },
@@ -446,6 +448,82 @@ describe('Actions du livreur (E2 à E9)', () => {
       .set(support.auth)
       .expect(200);
     expect(after.body.map((alert: { id: string }) => alert.id)).not.toContain(res.body.id);
+  });
+
+  it('alerte : plaque et quartier pour l’équipe, renvoi sans doublon, police appelée par l’agent (E8)', async () => {
+    const rider = await activeRider(ctx);
+    await ctx.prisma.riderProfile.update({
+      where: { id: rider.riderId },
+      data: { plateNumber: 'LT 482 AB' },
+    });
+    const suffix = randomUUID().slice(0, 8);
+    await request(ctx.http)
+      .post('/v1/admin/zones')
+      .set(admin.auth)
+      .send({
+        name: `Akwa SOS ${suffix}`,
+        city: 'Douala',
+        kind: 'NEIGHBORHOOD',
+        geometry: square(HERE, 0.0002),
+      })
+      .expect(201);
+    const body = { ...HERE, accuracy: 8, clientEventId: `sos-${suffix}` };
+
+    const first = await request(ctx.http)
+      .post('/v1/rider/alerts')
+      .set(rider.auth)
+      .send(body)
+      .expect(201);
+    expect(first.body).toMatchObject({
+      riderPlate: 'LT 482 AB',
+      accuracy: 8,
+      policeCalledAt: null,
+    });
+    expect(first.body.neighborhood).toMatch(/^Akwa SOS /);
+    const sms = ctx.sms.lastTo(OPS_PHONE)?.text ?? '';
+    expect(sms).toContain('moto LT 482 AB');
+    expect(sms).toContain('Quartier : Akwa SOS');
+
+    // Renvoyée au retour du réseau : la même alerte, sans nouveau SMS à l'équipe.
+    const smsCount = ctx.sms.outbox.length;
+    const again = await request(ctx.http)
+      .post('/v1/rider/alerts')
+      .set(rider.auth)
+      .send(body)
+      .expect(201);
+    expect(again.body.id).toBe(first.body.id);
+    expect(ctx.sms.outbox.length).toBe(smsCount);
+
+    // Livreur injoignable : l'agent appelle la police ; heure, agent et note gardés, action tracée.
+    await request(ctx.http)
+      .post(`/v1/admin/safety-alerts/${first.body.id}/police-called`)
+      .set(rider.auth)
+      .send({ note: 'Appel au 117' })
+      .expect(403);
+    const called = await request(ctx.http)
+      .post(`/v1/admin/safety-alerts/${first.body.id}/police-called`)
+      .set(support.auth)
+      .send({ note: 'Livreur injoignable, 117 prévenu avec position et plaque' })
+      .expect(200);
+    expect(called.body.policeCalledAt).not.toBeNull();
+    expect(called.body.acknowledgedAt).not.toBeNull();
+    const stored = await ctx.prisma.safetyAlert.findUniqueOrThrow({ where: { id: first.body.id } });
+    expect(stored.policeCalledById).toBe(support.userId);
+    const audit = await ctx.prisma.auditLog.findFirst({
+      where: { entityId: first.body.id, action: 'safety-alert.police-called' },
+    });
+    expect(audit).not.toBeNull();
+
+    await request(ctx.http)
+      .post(`/v1/admin/safety-alerts/${first.body.id}/resolve`)
+      .set(support.auth)
+      .send({ resolution: 'Police sur place, livreur en sécurité' })
+      .expect(200);
+    await request(ctx.http)
+      .post(`/v1/admin/safety-alerts/${first.body.id}/police-called`)
+      .set(support.auth)
+      .send({ note: 'Encore' })
+      .expect(409);
   });
 
   it('prévient le contact d’urgence ; une alerte annulée reste ouverte au dispatch (E8)', async () => {

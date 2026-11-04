@@ -10,6 +10,9 @@ const base64Key32 = z.string().refine((value) => Buffer.from(value, 'base64').le
   message: 'doit être une clé de 32 octets encodée en base64 (openssl rand -base64 32)',
 });
 
+/** Numéro d'urgence court (police, pompiers, SAMU) : 2 à 4 chiffres. */
+const EmergencyNumber = z.string().regex(/^\d{2,4}$/, 'numéro d’urgence de 2 à 4 chiffres');
+
 const booleanFlag = z
   .enum(['true', 'false', '1', '0'])
   .transform((value) => value === 'true' || value === '1');
@@ -105,6 +108,10 @@ const envSchema = z
     OPS_ALERT_PHONES: z.string().default(''),
     /** Ligne de secours Tara (24 h/24), affichée sur l'écran d'alerte de l'app livreur. */
     SAFETY_HOTLINE_PHONE: CameroonMobile.default('+237640114064'),
+    /** Numéros d'urgence affichés sur l'écran d'alerte : police, pompiers, SAMU (Cameroun). */
+    EMERGENCY_POLICE_NUMBER: EmergencyNumber.default('117'),
+    EMERGENCY_FIRE_NUMBER: EmergencyNumber.default('118'),
+    EMERGENCY_MEDICAL_NUMBER: EmergencyNumber.default('119'),
     /** Ligne du support Tara, affichée dans l'app livreur ; sans valeur, le bouton est masqué. */
     SUPPORT_PHONE: CameroonMobile.optional(),
 

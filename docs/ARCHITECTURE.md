@@ -202,6 +202,19 @@ tara-platform/
     seulement (support, dispatch, administrateur), chaque consultation tracée. Alertes au
     support : action validée loin de l'adresse, long arrêt avec le colis, position simulée,
     trajet coupé.
+33. **Alerte SOS en deux volets.** Équipe Tara : maintien de 3 s (contre les appuis par
+    erreur), l'alerte part avec la position, sa précision et le quartier ; les agents
+    d'astreinte (SMS avec nom, plaque, quartier et lien carte) et le contact d'urgence sont
+    prévenus, un agent rappelle, le livreur suit la prise en charge en direct. Sans data,
+    l'alerte reste sur le téléphone et repart sans doublon au retour du réseau ; un SMS
+    pré-rempli vers la ligne Tara part en un geste (pas d'envoi automatique : la permission
+    d'envoyer des SMS est très encadrée par Google Play). Police : le livreur appelle le 117 depuis
+    l'écran (pompiers 118 et SAMU 119 en cas d'accident ; Android ouvre le téléphone avec le
+    numéro tapé, sans data ni crédit). S'il ne peut pas appeler (injoignable, danger
+    confirmé), l'agent appelle la police avec la position en direct et la plaque ; l'heure,
+    l'agent et ce qui a été dit restent avec l'alerte, action tracée. Rien n'est envoyé à la
+    police automatiquement : pas de canal officiel, et les fausses alertes nuiraient à la
+    crédibilité de Tara. Numéros d'urgence réglables côté serveur.
 
 ## Cycle de vie d'une commande
 

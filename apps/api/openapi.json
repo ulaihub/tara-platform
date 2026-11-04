@@ -4041,6 +4041,11 @@
                     "minimum": -180,
                     "maximum": 180
                   },
+                  "accuracy": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
                   "orderId": {
                     "type": "string",
                     "format": "uuid"
@@ -4048,6 +4053,10 @@
                   "note": {
                     "type": "string",
                     "maxLength": 300
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
                   }
                 },
                 "required": [
@@ -4450,6 +4459,61 @@
                 },
                 "required": [
                   "resolution"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/safety-alerts/{id}/police-called": {
+      "post": {
+        "operationId": "AdminSupport_policeCalled",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "note"
                 ]
               }
             }
@@ -8818,6 +8882,26 @@
             "nullable": true,
             "type": "string"
           },
+          "emergencyNumbers": {
+            "type": "object",
+            "properties": {
+              "police": {
+                "type": "string"
+              },
+              "fire": {
+                "type": "string"
+              },
+              "medical": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "police",
+              "fire",
+              "medical"
+            ],
+            "additionalProperties": false
+          },
           "mobileMoneyOperators": {
             "type": "array",
             "items": {
@@ -8845,6 +8929,7 @@
           "country",
           "safetyHotline",
           "supportPhone",
+          "emergencyNumbers",
           "mobileMoneyOperators",
           "offerTimeoutSeconds"
         ],
@@ -9319,6 +9404,10 @@
           "riderPhone": {
             "type": "string"
           },
+          "riderPlate": {
+            "nullable": true,
+            "type": "string"
+          },
           "orderId": {
             "nullable": true,
             "type": "string",
@@ -9330,6 +9419,14 @@
           "longitude": {
             "type": "number"
           },
+          "accuracy": {
+            "nullable": true,
+            "type": "number"
+          },
+          "neighborhood": {
+            "nullable": true,
+            "type": "string"
+          },
           "note": {
             "nullable": true,
             "type": "string"
@@ -9339,6 +9436,11 @@
             "format": "date-time"
           },
           "acknowledgedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "policeCalledAt": {
             "nullable": true,
             "type": "string",
             "format": "date-time"
@@ -9363,12 +9465,16 @@
           "riderId",
           "riderName",
           "riderPhone",
+          "riderPlate",
           "orderId",
           "latitude",
           "longitude",
+          "accuracy",
+          "neighborhood",
           "note",
           "createdAt",
           "acknowledgedAt",
+          "policeCalledAt",
           "resolvedAt",
           "cancelledAt",
           "resolution"

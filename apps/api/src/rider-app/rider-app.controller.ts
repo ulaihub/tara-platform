@@ -47,6 +47,7 @@ import {
   FailBody,
   FailureDecisionBody,
   PickupBody,
+  PoliceCalledBody,
   PositionActionBody,
   PositionBody,
   PresenceBody,
@@ -106,6 +107,11 @@ export class RiderAppController {
       country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
       safetyHotline: this.env.SAFETY_HOTLINE_PHONE,
       supportPhone: this.env.SUPPORT_PHONE ?? null,
+      emergencyNumbers: {
+        police: this.env.EMERGENCY_POLICE_NUMBER,
+        fire: this.env.EMERGENCY_FIRE_NUMBER,
+        medical: this.env.EMERGENCY_MEDICAL_NUMBER,
+      },
       mobileMoneyOperators: [
         { code: 'MTN', name: 'MTN MoMo' },
         { code: 'ORANGE', name: 'Orange Money' },
@@ -476,5 +482,22 @@ export class AdminSupportController {
     @ValidBody(ResolveAlertBody) body: z.output<typeof ResolveAlertBody>,
   ): Out<typeof SafetyAlertDto> {
     return this.alerts.resolve(id, user, body.resolution);
+  }
+
+  /**
+   * Police appelée par l'agent (livreur injoignable ou danger confirmé) : heure, agent et
+   * note gardés avec l'alerte, action tracée (E8).
+   */
+  @Post('safety-alerts/:id/police-called')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(PoliceCalledBody)
+  @ApiZodResponse(SafetyAlertDto)
+  policeCalled(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(PoliceCalledBody) body: z.output<typeof PoliceCalledBody>,
+    @Req() request: Request,
+  ): Out<typeof SafetyAlertDto> {
+    return this.alerts.policeCalled(id, user, body.note, request);
   }
 }

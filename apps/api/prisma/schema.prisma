@@ -466,7 +466,8 @@ model User {
   ticketsAssigned          Ticket[]               @relation("TicketAssignee")
   ticketMessages           TicketMessage[]
   mediaFiles               MediaFile[]
-  safetyAlertsHandled      SafetyAlert[]
+  safetyAlertsHandled      SafetyAlert[] @relation("SafetyAlertHandledBy")
+  safetyAlertsPoliceCalled SafetyAlert[] @relation("SafetyAlertPoliceCalledBy")
   payoutsReceived          Payout[]               @relation("PayoutUser")
   payoutsApproved          Payout[]               @relation("PayoutApprover")
   courseAlertsAcknowledged CourseAlert[]          @relation("CourseAlertAcknowledgedBy")
@@ -1044,7 +1045,13 @@ model SafetyAlert {
   orderId        String?   @map("order_id") @db.Uuid
   latitude       Float
   longitude      Float
+  /// Précision de la position, en mètres.
+  accuracy       Float?
+  /// Quartier où se trouvait le livreur au moment de l'alerte.
+  neighborhood   String?
   note           String?
+  /// Identifiant généré par l'app : une alerte renvoyée au retour du réseau n'est pas doublée.
+  clientEventId  String?   @map("client_event_id")
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   acknowledgedAt DateTime? @map("acknowledged_at") @db.Timestamptz(3)
   resolvedAt     DateTime? @map("resolved_at") @db.Timestamptz(3)
@@ -1052,11 +1059,17 @@ model SafetyAlert {
   cancelledAt    DateTime? @map("cancelled_at") @db.Timestamptz(3)
   handledById    String?   @map("handled_by_id") @db.Uuid
   resolution     String?
+  /// Police appelée par un agent Tara (livreur injoignable ou danger confirmé).
+  policeCalledAt   DateTime? @map("police_called_at") @db.Timestamptz(3)
+  policeCalledById String?   @map("police_called_by_id") @db.Uuid
+  policeNote       String?   @map("police_note")
 
-  rider     RiderProfile @relation(fields: [riderId], references: [id])
-  order     Order?       @relation(fields: [orderId], references: [id])
-  handledBy User?        @relation(fields: [handledById], references: [id])
+  rider          RiderProfile @relation(fields: [riderId], references: [id])
+  order          Order?       @relation(fields: [orderId], references: [id])
+  handledBy      User?        @relation("SafetyAlertHandledBy", fields: [handledById], references: [id])
+  policeCalledBy User?        @relation("SafetyAlertPoliceCalledBy", fields: [policeCalledById], references: [id])
 
+  @@unique([riderId, clientEventId])
   @@index([resolvedAt, createdAt])
   @@index([riderId, createdAt])
   @@map("safety_alerts")
