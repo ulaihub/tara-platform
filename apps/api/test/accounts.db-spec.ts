@@ -29,6 +29,18 @@ describe('Mon compte (A2, A4) et parrainage (C6)', () => {
     await ctx.app.close();
   });
 
+  it('donne les réglages de l’app expéditeur sans connexion', async () => {
+    const res = await request(ctx.http).get('/v1/public/config').expect(200);
+    expect(res.body).toMatchObject({
+      country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
+      mobileMoneyOperators: [
+        { code: 'MTN', name: 'MTN MoMo' },
+        { code: 'ORANGE', name: 'Orange Money' },
+      ],
+    });
+    expect(res.body).toHaveProperty('supportPhone');
+  });
+
   it('renvoie le profil avec un code de parrainage', async () => {
     const session = await signIn(ctx);
     const res = await request(ctx.http).get('/v1/me').set(session.auth).expect(200);

@@ -689,6 +689,27 @@
         ]
       }
     },
+    "/v1/public/config": {
+      "get": {
+        "operationId": "PublicConfig_config",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfig"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Réglages"
+        ]
+      }
+    },
     "/v1/riders/apply": {
       "post": {
         "operationId": "Riders_apply",
@@ -6771,6 +6792,62 @@
           "user",
           "createdAt",
           "documentHistory"
+        ],
+        "additionalProperties": false
+      },
+      "AppConfig": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2
+              },
+              "dialCode": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "dialCode",
+              "currency"
+            ],
+            "additionalProperties": false
+          },
+          "supportPhone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mobileMoneyOperators": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "country",
+          "supportPhone",
+          "mobileMoneyOperators"
         ],
         "additionalProperties": false
       },
