@@ -46,6 +46,7 @@ const ORDER_INCLUDE = {
   dropoffAddress: { include: { neighborhood: true } },
   sender: { select: { fullName: true, phone: true, merchant: { select: { shopName: true } } } },
   merchant: { select: { shopName: true } },
+  codCollection: { select: { collectedAmount: true, method: true } },
 } as const satisfies Prisma.OrderInclude;
 
 type RiderOrder = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
@@ -211,6 +212,14 @@ export class RiderOrdersService {
         assignedAt: order.assignedAt?.toISOString() ?? null,
         pickedUpAt: order.pickedUpAt?.toISOString() ?? null,
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
+        completedAt:
+          (order.deliveredAt ?? order.returnedAt ?? order.cancelledAt)?.toISOString() ?? null,
+        collected: order.codCollection
+          ? {
+              amount: order.codCollection.collectedAmount,
+              method: order.codCollection.method === 'CASH' ? 'CASH' : 'MOBILE_MONEY',
+            }
+          : null,
       };
     });
   }

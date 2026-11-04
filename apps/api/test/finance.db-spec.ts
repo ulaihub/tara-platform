@@ -129,6 +129,12 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(
       o.totalPrice + 10_000 - o.riderEarning,
     );
+    // Historique du livreur : montant encaissé et moyen.
+    const done = await request(ctx.http)
+      .get(`/v1/rider/orders/${placed.id}`)
+      .set(rider.auth)
+      .expect(200);
+    expect(done.body.collected).toEqual({ amount: 10_000, method: 'CASH' });
     const wallet = await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(200);
     expect(wallet.body).toMatchObject({
       earnings: 0,

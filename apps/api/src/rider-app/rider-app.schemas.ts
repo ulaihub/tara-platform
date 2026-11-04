@@ -161,6 +161,10 @@ export const RiderOrderDto = z
     assignedAt: z.iso.datetime().nullable(),
     pickedUpAt: z.iso.datetime().nullable(),
     deliveredAt: z.iso.datetime().nullable(),
+    /** Fin de la course : livrée, rendue à l'expéditeur ou annulée (historique, E9). */
+    completedAt: z.iso.datetime().nullable(),
+    /** Argent encaissé auprès du destinataire, et comment (historique, E9). */
+    collected: z.object({ amount: z.int(), method: z.enum(['CASH', 'MOBILE_MONEY']) }).nullable(),
   })
   .meta({ id: 'RiderOrder' });
 

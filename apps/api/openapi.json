@@ -9231,6 +9231,32 @@
             "nullable": true,
             "type": "string",
             "format": "date-time"
+          },
+          "completedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "collected": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "integer"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "CASH",
+                  "MOBILE_MONEY"
+                ]
+              }
+            },
+            "required": [
+              "amount",
+              "method"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -9256,7 +9282,9 @@
           "awaitingSupportValidation",
           "assignedAt",
           "pickedUpAt",
-          "deliveredAt"
+          "deliveredAt",
+          "completedAt",
+          "collected"
         ],
         "additionalProperties": false
       },

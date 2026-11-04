@@ -915,6 +915,8 @@ model Order {
   assignedAt           DateTime?        @map("assigned_at") @db.Timestamptz(3)
   pickedUpAt           DateTime?        @map("picked_up_at") @db.Timestamptz(3)
   deliveredAt          DateTime?        @map("delivered_at") @db.Timestamptz(3)
+  /// Colis rendu à l'expéditeur après un échec (E6).
+  returnedAt           DateTime?        @map("returned_at") @db.Timestamptz(3)
   cancelledAt          DateTime?        @map("cancelled_at") @db.Timestamptz(3)
 
   sender          User               @relation(fields: [senderId], references: [id])

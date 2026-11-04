@@ -160,6 +160,9 @@ export class OrderTransitionsService {
       case 'DELIVERED':
         data.deliveredAt = now;
         break;
+      case 'RETURNED':
+        data.returnedAt = now;
+        break;
       case 'CANCELLED':
         data.cancelledAt = now;
         data.cancelReason = options.note ?? null;

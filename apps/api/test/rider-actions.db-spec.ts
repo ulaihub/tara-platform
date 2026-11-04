@@ -196,6 +196,7 @@ describe('Actions du livreur (E2 à E9)', () => {
       .set(rider.auth)
       .expect(200);
     expect(history.body.items.map((item: { id: string }) => item.id)).toEqual([order.id]);
+    expect(history.body.items[0].completedAt).toBe(history.body.items[0].deliveredAt);
   });
 
   it('sans code, le support valide après appel ; au-delà du plafond, un administrateur (E4)', async () => {
@@ -356,6 +357,7 @@ describe('Actions du livreur (E2 à E9)', () => {
       .send({ senderCode: returnCode, ...HERE })
       .expect(200);
     expect(returned.body.status).toBe('RETURNED');
+    expect(returned.body.completedAt).not.toBeNull();
   });
 
   it('échec sans réponse de l’expéditeur : retour automatique ; le support peut choisir à sa place (E6)', async () => {
