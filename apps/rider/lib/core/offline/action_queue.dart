@@ -239,6 +239,9 @@ class ActionQueue extends ChangeNotifier {
   }
 }
 
+/// Identifiant unique d'un envoi (UUID v4) : un rejeu au retour du réseau n'est pas doublé.
+String newEventId() => _uuidV4();
+
 String _uuidV4() {
   final random = Random.secure();
   final bytes = List<int>.generate(16, (_) => random.nextInt(256));

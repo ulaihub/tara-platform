@@ -18,6 +18,7 @@ import '../course/course_banner.dart';
 import '../course/delivery_screen.dart';
 import '../course/pickup_screen.dart';
 import '../offer/offer_screen.dart';
+import '../safety/sos_screen.dart';
 import 'home_offline_screen.dart';
 import 'home_online_screen.dart';
 import 'home_summary.dart';
@@ -41,6 +42,9 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Encaissement ouvert (12), avec la livraison préparée à l'écran 09.
   ({String orderId, DeliveryDraft draft})? _collecting;
+
+  /// Écran d'alerte (14) ouvert par un bouton SOS, au-dessus de tout le reste.
+  bool _sos = false;
   late final ActiveOrderController _activeOrder;
   Timer? _noticeTimer;
   StreamSubscription<RealtimeEvent>? _realtime;
@@ -102,6 +106,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     }
   }
 
+  void _openSos() => setState(() => _sos = true);
+
   void _closeOffer(String? message) {
     setState(() => _offer = null);
     if (message != null) _showNotice(message);
@@ -128,7 +134,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     final l = AppLocalizations.of(context);
     final actions = ref.read(courseActionsProvider);
     void minimize() => setState(() => _minimized = order.id);
-    void sos() {}
+    void sos() => _openSos();
     // Une action refusée (code faux saisi hors réseau) ramène à son écran pour la corriger.
     if (order.status == 'ASSIGNED' || actions.refused(order.id, 'pickup') != null) {
       return PickupScreen(
@@ -221,7 +227,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                   ? HomeOnlineScreen(
                       onWentOffline: () => setState(() {}),
                       onDetails: () {},
-                      onSos: () {},
+                      onSos: _openSos,
                       courseBanner: order == null
                           ? null
                           : CourseBanner(
@@ -247,6 +253,14 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                   offer: offer,
                   onClosed: _closeOffer,
                   onAccepted: (order) => unawaited(_accepted(order)),
+                ),
+              ),
+            if (_sos)
+              Positioned.fill(
+                child: SosScreen(
+                  orderId: order?.id,
+                  orderReference: order?.reference,
+                  onClose: () => setState(() => _sos = false),
                 ),
               ),
           ],

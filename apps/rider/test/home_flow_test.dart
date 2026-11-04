@@ -19,12 +19,14 @@ import 'package:tara_rider/features/course/pickup_screen.dart';
 import 'package:tara_rider/features/home/home_flow.dart';
 import 'package:tara_rider/features/home/home_summary.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
+import 'package:tara_rider/features/safety/sos_screen.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/harness.dart';
 import 'helpers/orders.dart';
 import 'screens_auth_golden_test.dart' show settle;
 import 'screens_home_golden_test.dart' show summary;
+import 'screens_safety_golden_test.dart' show safetyAlert;
 
 class _Positions implements PositionSource {
   @override
@@ -74,6 +76,7 @@ Future<({ActiveOrderController active, ActionQueue queue})> pumpHome(
         onlineControllerProvider.overrideWithValue(online),
         takeProofPhotoProvider.overrideWithValue(() async => 'remise.jpg'),
         riderApiProvider.overrideWithValue(FakeRiderApi()),
+        safetyAlertProvider.overrideWithValue(safetyAlert()),
       ],
       child: const HomeFlow(),
     ),
@@ -95,6 +98,19 @@ void main() {
 
     await tester.tap(find.text('Reprendre'));
     await settle(tester);
+    expect(find.byType(PickupScreen), findsOneWidget);
+  });
+
+  testWidgets('SOS pendant la course : l’écran d’alerte s’ouvre par-dessus, fermer y revient', (tester) async {
+    await pumpHome(tester, order());
+    await tester.tap(find.bySemanticsLabel('Alerte de sécurité'));
+    await settle(tester);
+    expect(find.byType(SosScreen), findsOneWidget);
+    expect(find.text('Police · 117'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Fermer'));
+    await settle(tester);
+    expect(find.byType(SosScreen), findsNothing);
     expect(find.byType(PickupScreen), findsOneWidget);
   });
 

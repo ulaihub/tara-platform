@@ -1321,6 +1321,204 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Demande envoyée au client'**
   String get paymentRequestSent;
+
+  /// No description provided for @sosBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sécurité'**
+  String get sosBadge;
+
+  /// No description provided for @sosIdleTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Besoin d’aide ?'**
+  String get sosIdleTitle;
+
+  /// No description provided for @sosIdleBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maintenez le bouton 3 secondes. L’équipe Tara et votre contact d’urgence reçoivent votre position en direct.'**
+  String get sosIdleBody;
+
+  /// No description provided for @sosSentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerte envoyée'**
+  String get sosSentTitle;
+
+  /// No description provided for @sosSentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restez en lieu sûr si possible. Un agent Tara vous rappelle.'**
+  String get sosSentBody;
+
+  /// No description provided for @sosAcknowledgedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un agent Tara a pris en charge votre alerte et vous rappelle. Restez en lieu sûr si possible.'**
+  String get sosAcknowledgedBody;
+
+  /// No description provided for @sosPoliceCalledBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’équipe Tara a prévenu la police. Restez en lieu sûr si possible.'**
+  String get sosPoliceCalledBody;
+
+  /// No description provided for @sosPendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas d’internet'**
+  String get sosPendingTitle;
+
+  /// No description provided for @sosPendingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’alerte partira dès le retour du réseau. Envoyez-la aussi par SMS : il passe souvent sans internet.'**
+  String get sosPendingBody;
+
+  /// No description provided for @sosFailedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerte non envoyée'**
+  String get sosFailedTitle;
+
+  /// No description provided for @sosFailedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appelez Tara ou la police, ou envoyez l’alerte par SMS.'**
+  String get sosFailedBody;
+
+  /// No description provided for @sosClosedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’équipe Tara a clos votre alerte. Maintenez le bouton si vous avez encore besoin d’aide.'**
+  String get sosClosedBody;
+
+  /// No description provided for @sosPendingHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get sosPendingHint;
+
+  /// No description provided for @sosSendingHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi…'**
+  String get sosSendingHint;
+
+  /// No description provided for @sosYourPosition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre position'**
+  String get sosYourPosition;
+
+  /// No description provided for @sosPositionCurrent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position actuelle · précision {meters} m'**
+  String sosPositionCurrent(int meters);
+
+  /// No description provided for @sosPositionShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partagée en direct avec Tara · précision {meters} m'**
+  String sosPositionShared(int meters);
+
+  /// No description provided for @sosPositionSearching.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche de la position…'**
+  String get sosPositionSearching;
+
+  /// No description provided for @sosPositionUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position introuvable'**
+  String get sosPositionUnknown;
+
+  /// No description provided for @sosPlate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moto {plate}'**
+  String sosPlate(String plate);
+
+  /// No description provided for @sosCallTara.
+  ///
+  /// In fr, this message translates to:
+  /// **'Support Tara'**
+  String get sosCallTara;
+
+  /// No description provided for @sosCallPolice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Police · {number}'**
+  String sosCallPolice(String number);
+
+  /// No description provided for @sosAccident.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accident :'**
+  String get sosAccident;
+
+  /// No description provided for @sosFire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pompiers {number}'**
+  String sosFire(String number);
+
+  /// No description provided for @sosMedical.
+  ///
+  /// In fr, this message translates to:
+  /// **'SAMU {number}'**
+  String sosMedical(String number);
+
+  /// No description provided for @sosSendSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer l’alerte par SMS'**
+  String get sosSendSms;
+
+  /// No description provided for @sosCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler l’alerte'**
+  String get sosCancel;
+
+  /// No description provided for @sosCancelNeedsNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulation impossible sans réseau. Appelez Tara pour la confirmer.'**
+  String get sosCancelNeedsNetwork;
+
+  /// No description provided for @sosSmsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'SOS Tara : j\'ai besoin d\'aide. Position : {map}'**
+  String sosSmsBody(String map);
+
+  /// No description provided for @sosSmsNoPosition.
+  ///
+  /// In fr, this message translates to:
+  /// **'SOS Tara : j\'ai besoin d\'aide. Position inconnue.'**
+  String get sosSmsNoPosition;
+
+  /// No description provided for @sosSmsCourse.
+  ///
+  /// In fr, this message translates to:
+  /// **' Course {reference}.'**
+  String sosSmsCourse(String reference);
+
+  /// No description provided for @sosPositionCurrentPlain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position actuelle'**
+  String get sosPositionCurrentPlain;
+
+  /// No description provided for @sosPositionSharedPlain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partagée en direct avec Tara'**
+  String get sosPositionSharedPlain;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -409,5 +409,94 @@
         "type": "String"
       }
     }
-  }
+  },
+  "sosBadge": "Sécurité",
+  "sosIdleTitle": "Besoin d’aide ?",
+  "sosIdleBody": "Maintenez le bouton 3 secondes. L’équipe Tara et votre contact d’urgence reçoivent votre position en direct.",
+  "sosSentTitle": "Alerte envoyée",
+  "sosSentBody": "Restez en lieu sûr si possible. Un agent Tara vous rappelle.",
+  "sosAcknowledgedBody": "Un agent Tara a pris en charge votre alerte et vous rappelle. Restez en lieu sûr si possible.",
+  "sosPoliceCalledBody": "L’équipe Tara a prévenu la police. Restez en lieu sûr si possible.",
+  "sosPendingTitle": "Pas d’internet",
+  "sosPendingBody": "L’alerte partira dès le retour du réseau. Envoyez-la aussi par SMS : il passe souvent sans internet.",
+  "sosFailedTitle": "Alerte non envoyée",
+  "sosFailedBody": "Appelez Tara ou la police, ou envoyez l’alerte par SMS.",
+  "sosClosedBody": "L’équipe Tara a clos votre alerte. Maintenez le bouton si vous avez encore besoin d’aide.",
+  "sosPendingHint": "En attente",
+  "sosSendingHint": "Envoi…",
+  "sosYourPosition": "Votre position",
+  "sosPositionCurrent": "Position actuelle · précision {meters} m",
+  "@sosPositionCurrent": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "sosPositionShared": "Partagée en direct avec Tara · précision {meters} m",
+  "@sosPositionShared": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "sosPositionSearching": "Recherche de la position…",
+  "sosPositionUnknown": "Position introuvable",
+  "sosPlate": "Moto {plate}",
+  "@sosPlate": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "sosCallTara": "Support Tara",
+  "sosCallPolice": "Police · {number}",
+  "@sosCallPolice": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "sosAccident": "Accident :",
+  "sosFire": "Pompiers {number}",
+  "@sosFire": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "sosMedical": "SAMU {number}",
+  "@sosMedical": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "sosSendSms": "Envoyer l’alerte par SMS",
+  "sosCancel": "Annuler l’alerte",
+  "sosCancelNeedsNetwork": "Annulation impossible sans réseau. Appelez Tara pour la confirmer.",
+  "sosSmsBody": "SOS Tara : j'ai besoin d'aide. Position : {map}",
+  "@sosSmsBody": {
+    "placeholders": {
+      "map": {
+        "type": "String"
+      }
+    }
+  },
+  "sosSmsNoPosition": "SOS Tara : j'ai besoin d'aide. Position inconnue.",
+  "sosSmsCourse": " Course {reference}.",
+  "@sosSmsCourse": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "sosPositionCurrentPlain": "Position actuelle",
+  "sosPositionSharedPlain": "Partagée en direct avec Tara"
 }

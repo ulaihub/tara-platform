@@ -12,6 +12,7 @@ abstract final class TaraIcons {
   static const power = TaraIconData([_P('M12 3v8'), _P('M6.3 6.8a8 8 0 1011.4 0')]);
   static const shield = TaraIconData([_P('M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z')]);
   static const close = TaraIconData([_P('M6 6l12 12M18 6L6 18')]);
+  static const message = TaraIconData([_P('M4 5h16v11H9l-5 4z'), _P('M8 9.5h8M8 12.5h5')]);
   static const mapPin = TaraIconData([_P('M12 21s-7-6.2-7-12a7 7 0 0114 0c0 5.8-7 12-7 12z'), _C(12, 9, 2.5)]);
   static const headset = TaraIconData([_P('M4 14v-2a8 8 0 0116 0v2'), _R(3, 14, 4, 6, 1.5), _R(17, 14, 4, 6, 1.5)]);
   static const phone = TaraIconData([

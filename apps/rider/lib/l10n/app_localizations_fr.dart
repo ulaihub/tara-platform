@@ -699,4 +699,123 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paymentRequestSent => 'Demande envoyée au client';
+
+  @override
+  String get sosBadge => 'Sécurité';
+
+  @override
+  String get sosIdleTitle => 'Besoin d’aide ?';
+
+  @override
+  String get sosIdleBody =>
+      'Maintenez le bouton 3 secondes. L’équipe Tara et votre contact d’urgence reçoivent votre position en direct.';
+
+  @override
+  String get sosSentTitle => 'Alerte envoyée';
+
+  @override
+  String get sosSentBody => 'Restez en lieu sûr si possible. Un agent Tara vous rappelle.';
+
+  @override
+  String get sosAcknowledgedBody =>
+      'Un agent Tara a pris en charge votre alerte et vous rappelle. Restez en lieu sûr si possible.';
+
+  @override
+  String get sosPoliceCalledBody => 'L’équipe Tara a prévenu la police. Restez en lieu sûr si possible.';
+
+  @override
+  String get sosPendingTitle => 'Pas d’internet';
+
+  @override
+  String get sosPendingBody =>
+      'L’alerte partira dès le retour du réseau. Envoyez-la aussi par SMS : il passe souvent sans internet.';
+
+  @override
+  String get sosFailedTitle => 'Alerte non envoyée';
+
+  @override
+  String get sosFailedBody => 'Appelez Tara ou la police, ou envoyez l’alerte par SMS.';
+
+  @override
+  String get sosClosedBody =>
+      'L’équipe Tara a clos votre alerte. Maintenez le bouton si vous avez encore besoin d’aide.';
+
+  @override
+  String get sosPendingHint => 'En attente';
+
+  @override
+  String get sosSendingHint => 'Envoi…';
+
+  @override
+  String get sosYourPosition => 'Votre position';
+
+  @override
+  String sosPositionCurrent(int meters) {
+    return 'Position actuelle · précision $meters m';
+  }
+
+  @override
+  String sosPositionShared(int meters) {
+    return 'Partagée en direct avec Tara · précision $meters m';
+  }
+
+  @override
+  String get sosPositionSearching => 'Recherche de la position…';
+
+  @override
+  String get sosPositionUnknown => 'Position introuvable';
+
+  @override
+  String sosPlate(String plate) {
+    return 'Moto $plate';
+  }
+
+  @override
+  String get sosCallTara => 'Support Tara';
+
+  @override
+  String sosCallPolice(String number) {
+    return 'Police · $number';
+  }
+
+  @override
+  String get sosAccident => 'Accident :';
+
+  @override
+  String sosFire(String number) {
+    return 'Pompiers $number';
+  }
+
+  @override
+  String sosMedical(String number) {
+    return 'SAMU $number';
+  }
+
+  @override
+  String get sosSendSms => 'Envoyer l’alerte par SMS';
+
+  @override
+  String get sosCancel => 'Annuler l’alerte';
+
+  @override
+  String get sosCancelNeedsNetwork => 'Annulation impossible sans réseau. Appelez Tara pour la confirmer.';
+
+  @override
+  String sosSmsBody(String map) {
+    return 'SOS Tara : j\'ai besoin d\'aide. Position : $map';
+  }
+
+  @override
+  String get sosSmsNoPosition => 'SOS Tara : j\'ai besoin d\'aide. Position inconnue.';
+
+  @override
+  String sosSmsCourse(String reference) {
+    return ' Course $reference.';
+  }
+
+  @override
+  String get sosPositionCurrentPlain => 'Position actuelle';
+
+  @override
+  String get sosPositionSharedPlain => 'Partagée en direct avec Tara';
 }

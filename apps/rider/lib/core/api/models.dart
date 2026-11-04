@@ -72,6 +72,24 @@ class MobileMoneyOperator {
   final String name;
 }
 
+/// Numéros d'urgence du pays, composés depuis l'écran d'alerte (14).
+@immutable
+class EmergencyNumbers {
+  const EmergencyNumbers({required this.police, required this.fire, required this.medical});
+
+  factory EmergencyNumbers.fromJson(Json? json) => json == null
+      ? cameroon
+      : EmergencyNumbers(police: _field(json, 'police'), fire: _field(json, 'fire'), medical: _field(json, 'medical'));
+
+  /// Cameroun : police 117, pompiers 118, SAMU 119. Valeurs gardées si le serveur n'en
+  /// donne pas encore (réglages enregistrés par une version précédente de l'app).
+  static const cameroon = EmergencyNumbers(police: '117', fire: '118', medical: '119');
+
+  final String police;
+  final String fire;
+  final String medical;
+}
+
 /// Réglages de l'app venant du serveur, gardés sur le téléphone pour le hors connexion.
 @immutable
 class RiderConfig {
@@ -82,6 +100,7 @@ class RiderConfig {
     required this.supportPhone,
     required this.operators,
     required this.offerTimeoutSeconds,
+    this.emergencyNumbers = EmergencyNumbers.cameroon,
   });
   factory RiderConfig.fromJson(Json json) {
     final country = _field<Json>(json, 'country');
@@ -95,9 +114,17 @@ class RiderConfig {
           MobileMoneyOperator(_field((item! as Json), 'code'), _field(item as Json, 'name')),
       ],
       offerTimeoutSeconds: _field<num>(json, 'offerTimeoutSeconds').toInt(),
+      emergencyNumbers: EmergencyNumbers.fromJson(json['emergencyNumbers'] as Json?),
     );
   }
-  static const fields = ['country', 'safetyHotline', 'supportPhone', 'mobileMoneyOperators', 'offerTimeoutSeconds'];
+  static const fields = [
+    'country',
+    'safetyHotline',
+    'supportPhone',
+    'mobileMoneyOperators',
+    'offerTimeoutSeconds',
+    'emergencyNumbers',
+  ];
 
   final String dialCode;
   final String currency;
@@ -105,6 +132,7 @@ class RiderConfig {
   final String? supportPhone;
   final List<MobileMoneyOperator> operators;
   final int offerTimeoutSeconds;
+  final EmergencyNumbers emergencyNumbers;
 }
 
 @immutable
@@ -209,19 +237,53 @@ class DocumentRequirement {
 
 @immutable
 class SafetyAlert {
-  const SafetyAlert({required this.id, required this.createdAt, required this.cancelledAt, required this.resolvedAt});
+  const SafetyAlert({
+    required this.id,
+    required this.createdAt,
+    required this.cancelledAt,
+    required this.resolvedAt,
+    this.acknowledgedAt,
+    this.policeCalledAt,
+    this.neighborhood,
+    this.plate,
+  });
   factory SafetyAlert.fromJson(Json json) => SafetyAlert(
     id: _field(json, 'id'),
     createdAt: DateTime.parse(_field(json, 'createdAt')),
     cancelledAt: _date(json['cancelledAt']),
     resolvedAt: _date(json['resolvedAt']),
+    acknowledgedAt: _date(json['acknowledgedAt']),
+    policeCalledAt: _date(json['policeCalledAt']),
+    neighborhood: json['neighborhood'] as String?,
+    plate: json['riderPlate'] as String?,
   );
-  static const fields = ['id', 'createdAt', 'cancelledAt', 'resolvedAt'];
+  static const fields = [
+    'id',
+    'createdAt',
+    'cancelledAt',
+    'resolvedAt',
+    'acknowledgedAt',
+    'policeCalledAt',
+    'neighborhood',
+    'riderPlate',
+  ];
 
   final String id;
   final DateTime createdAt;
   final DateTime? cancelledAt;
   final DateTime? resolvedAt;
+
+  /// Prise en charge par un agent Tara.
+  final DateTime? acknowledgedAt;
+
+  /// Police appelée par l'agent Tara.
+  final DateTime? policeCalledAt;
+
+  /// Quartier où se trouve le livreur, s'il est connu.
+  final String? neighborhood;
+
+  /// Immatriculation de la moto, à donner à la police.
+  final String? plate;
 }
 
 @immutable

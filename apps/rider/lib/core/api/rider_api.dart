@@ -132,10 +132,23 @@ class RiderApi {
   Future<Earnings> earnings(String period) async =>
       Earnings.fromJson(await _api.get('/rider/earnings', query: {'period': period}) as Json);
 
-  Future<SafetyAlert> raiseAlert(GeoPoint position, {String? orderId, String? note}) async => SafetyAlert.fromJson(
+  /// Alerte SOS (E8). [clientEventId] : renvoyée au retour du réseau, elle n'est pas doublée.
+  Future<SafetyAlert> raiseAlert(
+    GeoPoint position, {
+    required String clientEventId,
+    String? orderId,
+    String? note,
+  }) async => SafetyAlert.fromJson(
     await _api.post(
       '/rider/alerts',
-      body: {'latitude': position.latitude, 'longitude': position.longitude, 'orderId': ?orderId, 'note': ?note},
+      body: {
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'accuracy': ?position.accuracy,
+        'orderId': ?orderId,
+        'note': ?note,
+        'clientEventId': clientEventId,
+      },
     ) as Json,
   );
 

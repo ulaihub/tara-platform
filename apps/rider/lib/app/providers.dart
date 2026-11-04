@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/api/api_client.dart';
 import '../core/api/auth_api.dart';
@@ -19,6 +20,7 @@ import '../core/location/online_controller.dart';
 import '../core/offline/action_queue.dart';
 import '../core/push/push_service.dart';
 import '../core/realtime/realtime_client.dart';
+import '../core/safety/safety_alert.dart';
 import '../core/session/session_store.dart';
 
 /// Stockage chiffré du téléphone (remplacé par un stockage en mémoire dans les tests).
@@ -165,6 +167,7 @@ class RiderConfigController extends AsyncNotifier<RiderConfig> {
       {'code': 'ORANGE', 'name': 'Orange Money'},
     ],
     'offerTimeoutSeconds': 30,
+    'emergencyNumbers': {'police': '117', 'fire': '118', 'medical': '119'},
   };
 
   @override
@@ -228,6 +231,32 @@ final onlineControllerProvider = Provider<OnlineController>((ref) {
 
 final positionSourceProvider = Provider<PositionSource>((ref) => DevicePositionSource());
 
+/// Ouverture d'un lien `tel:` ou `sms:` (application Téléphone ou Messages du téléphone).
+final launcherProvider = Provider<Future<bool> Function(Uri uri)>((ref) => launchUrl);
+
+/// Alerte SOS (14) : gardée sur le téléphone sans réseau, suivie en direct ensuite.
+final safetyAlertProvider = Provider<SafetyAlertController>((ref) {
+  final rider = ref.watch(riderApiProvider);
+  final controller = SafetyAlertController(
+    store: ref.watch(keyValueStoreProvider),
+    send: (alert) => rider.raiseAlert(alert.position, clientEventId: alert.clientEventId, orderId: alert.orderId),
+    cancel: rider.cancelAlert,
+    // Position récente (envoyée toutes les 10 s en ligne), sinon mesurée maintenant.
+    locate: () async {
+      final last = ref.read(onlineControllerProvider).lastPosition;
+      if (last != null && DateTime.now().difference(last.recordedAt) < const Duration(seconds: 30)) return last;
+      try {
+        return await ref.read(positionSourceProvider).current() ?? last;
+      } catch (_) {
+        return last;
+      }
+    },
+    events: ref.watch(realtimeProvider).stream,
+  );
+  ref.onDispose(controller.dispose);
+  return controller;
+});
+
 final pushServiceProvider = Provider<PushService>((ref) {
   final rider = ref.watch(riderApiProvider);
   final store = ref.watch(sessionStoreProvider);
@@ -249,14 +278,20 @@ final riderRuntimeProvider = Provider<void>((ref) {
   unawaited(activeOrder.restore());
   final track = ref.watch(trackBufferProvider);
   unawaited(track.flush());
+  // Alerte SOS restée sur le téléphone sans réseau : renvoyée aussitôt.
+  final safety = ref.watch(safetyAlertProvider);
+  unawaited(safety.restore());
   final connectivity = Connectivity().onConnectivityChanged.listen((results) {
     if (results.contains(ConnectivityResult.none)) return;
+    unawaited(safety.retry());
     unawaited(queue.flush());
     unawaited(track.flush());
   });
   // Reconnexion du temps réel : souvent le signe que le réseau est revenu.
   void onRealtime() {
-    if (realtime.connected.value) unawaited(queue.flush());
+    if (!realtime.connected.value) return;
+    unawaited(safety.retry());
+    unawaited(queue.flush());
   }
 
   realtime.connected.addListener(onRealtime);
