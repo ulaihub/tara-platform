@@ -16,7 +16,7 @@ const summary = HomeSummary(
   earnings: 8750,
   delivered: 6,
   onlineSeconds: 4 * 3600 + 35 * 60,
-  cashHeld: 23500,
+  available: 23500,
 );
 
 Widget home() => ProviderScope(

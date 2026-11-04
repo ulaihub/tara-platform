@@ -53,9 +53,18 @@ RiderOrder finished({
   });
 }
 
-FakeRiderApi activityApi() {
+/// [legacyCash] : espèces encaissées avant le solde prépayé, encore à reverser.
+FakeRiderApi activityApi({bool legacyCash = false}) {
   final api = FakeRiderApi()
-    ..wallet0 = RiderWallet(earnings: 9000, cashHeld: 37500, cashLimit: 50000, cashDueBy: DateTime(2026, 11, 5, 9, 40))
+    ..wallet0 = legacyCash
+        ? RiderWallet(
+            earnings: 9000,
+            available: 0,
+            cashHeld: 37500,
+            cashLimit: 50000,
+            cashDueBy: DateTime(2026, 11, 5, 9, 40),
+          )
+        : const RiderWallet(earnings: 42000, reserved: 12500, available: 29500, cashHeld: 0, cashLimit: 50000)
     ..earningsByPeriod['day'] = earningsOf('day', 'two_hours', [
       for (final (hour, value, count) in [
         (6, 0, 0),
@@ -149,8 +158,23 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/13_activite_semaine/${variant.name}.png'));
     });
 
-    goldenTest('13 reverser ${variant.name}', (tester) async {
+    goldenTest('13 recharger ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, activity(activityApi()));
+      await settle(tester);
+      await tester.ensureVisible(find.text('Recharger'));
+      await settle(tester);
+      await tester.tap(find.text('Recharger'));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(DepositScreen), findsOneWidget);
+      expect(find.text('Recharger mon solde'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/13_recharger/${variant.name}.png'));
+    });
+
+    goldenTest('13 reverser ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, activity(activityApi(legacyCash: true)));
+      await settle(tester);
+      await tester.ensureVisible(find.text('Reverser'));
       await settle(tester);
       await tester.tap(find.text('Reverser'));
       await settle(tester);

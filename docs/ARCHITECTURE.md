@@ -240,7 +240,8 @@ tara-platform/
     comptes verrouillés contre deux acceptations simultanées) ; à l'encaissement en espèces,
     il est pris sur le solde : le livreur garde les espèces, le marchand est crédité aussitôt.
     Le solde ne devient jamais négatif. Recharge par Mobile Money (frais payés par Tara) ou au
-    bureau ; les gains des courses déjà payées l'alimentent. Garant facultatif. Une course
+    bureau ; les gains des courses déjà payées l'alimentent. Garant facultatif, sa CNI n'est
+    plus exigée. Une course
     dont le destinataire paiera peut-être par Mobile Money est aussi couverte (on ne le sait
     qu'à la porte) : la réservation est libérée à la fin sans rien prendre.
 

@@ -80,7 +80,9 @@ void main() {
   testWidgets('espèces : monnaie à rendre, puis encaissement et livraison', (tester) async {
     await pumpCollection(tester);
     expect(find.text('12\u00A0500\u00A0F (exact)'), findsOneWidget);
-    expect(find.textContaining('50\u00A0000\u00A0F'), findsOneWidget);
+    // Solde prépayé : l'argent encaissé est pris sur le solde, déjà mis de côté.
+    expect(find.text('Pris sur votre solde (déjà mis de côté)'), findsOneWidget);
+    expect(find.text('−12\u00A0500\u00A0F'), findsOneWidget);
     await tapText(tester, '15\u00A0000\u00A0F');
     expect(find.text('2\u00A0500\u00A0F'), findsOneWidget);
     await tapText(tester, 'Confirmer l’encaissement');
@@ -92,7 +94,7 @@ void main() {
   testWidgets('Mobile Money : demande au numéro du client, confirmation, livraison', (tester) async {
     await pumpCollection(tester);
     await tapText(tester, 'Mobile Money');
-    expect(find.textContaining('Espèces en main après cette course'), findsOneWidget);
+    expect(find.text('Pris sur votre solde (déjà mis de côté)'), findsNothing);
     await tapText(tester, 'Envoyer la demande de paiement');
     // Numéro du destinataire repris ; Orange deviné d'après le 69…
     expect(api.requests.single, ('+237690000202', 'ORANGE'));

@@ -17,8 +17,9 @@ import 'onboarding_header.dart';
 
 enum _Vehicle { motorbike, car, tricycle }
 
-/// 03 · Inscription — profil. Pas de vélo au lancement ; garant obligatoire, contact
-/// d'urgence facultatif (prévenu par SMS en cas d'alerte).
+/// 03 · Inscription — profil. Pas de vélo au lancement ; garant facultatif (solde prépayé,
+/// décision 36) ; contact d'urgence facultatif (prévenu par SMS en cas d'alerte). Chacun se
+/// remplit en entier ou pas du tout.
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key, required this.onDone, this.onBack});
 
@@ -77,7 +78,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _phone(TextEditingController c) => isCameroonMobile(digitsOf(c.text));
   bool get _contactStarted => _contactName.text.trim().isNotEmpty || _contactPhone.text.trim().isNotEmpty;
   bool get _contactValid => !_contactStarted || (_name(_contactName) && _phone(_contactPhone));
-  bool get _valid => _name(_first) && _name(_last) && _name(_guarantorName) && _phone(_guarantorPhone) && _contactValid;
+  bool get _guarantorStarted => _guarantorName.text.trim().isNotEmpty || _guarantorPhone.text.trim().isNotEmpty;
+  bool get _guarantorValid => !_guarantorStarted || (_name(_guarantorName) && _phone(_guarantorPhone));
+  bool get _valid => _name(_first) && _name(_last) && _guarantorValid && _contactValid;
 
   Future<void> _submit() async {
     setState(() => _tried = true);
@@ -93,8 +96,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _Vehicle.tricycle => 'TRICYCLE',
         },
         plateNumber: _plate.text.trim().isEmpty ? null : _plate.text.trim(),
-        guarantorName: _guarantorName.text.trim(),
-        guarantorPhone: '+237${digitsOf(_guarantorPhone.text)}',
+        guarantor: _guarantorStarted
+            ? (name: _guarantorName.text.trim(), phone: '+237${digitsOf(_guarantorPhone.text)}')
+            : null,
         emergencyContact: _contactStarted
             ? (name: _contactName.text.trim(), phone: '+237${digitsOf(_contactPhone.text)}')
             : null,
@@ -130,9 +134,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     String? required(bool ok) => _tried && !ok ? l.requiredField : null;
-    String? phoneError(TextEditingController controller, {bool optional = false}) {
+
+    /// [started] : l'autre champ du même bloc facultatif est rempli.
+    String? phoneError(TextEditingController controller, {required bool started}) {
       if (!_tried) return null;
-      if (optional && controller.text.trim().isEmpty) return _contactStarted ? l.requiredField : null;
+      if (controller.text.trim().isEmpty) return started ? l.requiredField : null;
       return _phone(controller) ? null : l.phoneInvalid;
     }
 
@@ -190,7 +196,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Text(l.vehicle, style: TaraText.label.copyWith(color: c.textSecondary)),
                 const SizedBox(height: 8),
                 ChoiceChips<_Vehicle>(
-                  columns: 3,
+                  // Petit écran et grand texte : deux colonnes, sans couper « Voiture » en deux.
+                  columns: MediaQuery.sizeOf(context).width < 380 && MediaQuery.textScalerOf(context).scale(10) > 11
+                      ? 2
+                      : 3,
                   options: [
                     ChoiceOption(_Vehicle.motorbike, l.vehicleMotorbike),
                     ChoiceOption(_Vehicle.car, l.vehicleCar),
@@ -215,9 +224,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 4),
                 Text(l.guarantorHelp, style: TaraText.small.copyWith(color: c.textTertiary)),
                 const SizedBox(height: 14),
-                _Field(label: l.guarantorName, controller: _guarantorName, error: required(_name(_guarantorName))),
+                _Field(
+                  label: l.guarantorName,
+                  controller: _guarantorName,
+                  error: _tried && _guarantorStarted && !_name(_guarantorName) ? l.requiredField : null,
+                ),
                 const SizedBox(height: 14),
-                _phoneField(l.guarantorPhone, _guarantorPhone, error: phoneError(_guarantorPhone)),
+                _phoneField(
+                  l.guarantorPhone,
+                  _guarantorPhone,
+                  error: phoneError(_guarantorPhone, started: _guarantorStarted),
+                ),
               ],
             ),
           ),
@@ -238,7 +255,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   error: _tried && _contactStarted && !_name(_contactName) ? l.requiredField : null,
                 ),
                 const SizedBox(height: 14),
-                _phoneField(l.emergencyPhone, _contactPhone, error: phoneError(_contactPhone, optional: true)),
+                _phoneField(
+                  l.emergencyPhone,
+                  _contactPhone,
+                  error: phoneError(_contactPhone, started: _contactStarted),
+                ),
               ],
             ),
           ),

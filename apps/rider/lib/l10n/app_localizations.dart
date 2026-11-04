@@ -539,13 +539,13 @@ abstract class AppLocalizations {
   /// No description provided for @guarantor.
   ///
   /// In fr, this message translates to:
-  /// **'Garant'**
+  /// **'Garant (facultatif)'**
   String get guarantor;
 
   /// No description provided for @guarantorHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Une personne de confiance qui se porte garante de vous. Sa pièce d’identité sera demandée.'**
+  /// **'Une personne de confiance qui se porte garante de vous. Vous pouvez laisser ce bloc vide.'**
   String get guarantorHelp;
 
   /// No description provided for @guarantorName.
@@ -721,12 +721,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'En ligne'**
   String get onlineTime;
-
-  /// No description provided for @cashInHand.
-  ///
-  /// In fr, this message translates to:
-  /// **'Espèces en main'**
-  String get cashInHand;
 
   /// No description provided for @youAreOffline.
   ///
@@ -1273,18 +1267,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Mobile Money demande du réseau : encaissez en espèces ou réessayez.'**
   String get momoNeedsNetwork;
-
-  /// No description provided for @cashAfterCourse.
-  ///
-  /// In fr, this message translates to:
-  /// **'Espèces en main après cette course'**
-  String get cashAfterCourse;
-
-  /// No description provided for @cashLimitReached.
-  ///
-  /// In fr, this message translates to:
-  /// **'Au-delà de votre plafond ({limit}) : déposez des espèces au bureau Tara pour recevoir de nouvelles courses.'**
-  String cashLimitReached(String limit);
 
   /// No description provided for @confirmCollection.
   ///
@@ -2179,6 +2161,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vos actions sont gardées sur le téléphone'**
   String get offlineNoPending;
+
+  /// No description provided for @balanceAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde disponible'**
+  String get balanceAvailable;
+
+  /// No description provided for @balanceReserved.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} mis de côté pour vos courses en cours'**
+  String balanceReserved(String amount);
+
+  /// No description provided for @balanceExplain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couvre l’argent à encaisser sur vos courses'**
+  String get balanceExplain;
+
+  /// No description provided for @topUpAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharger'**
+  String get topUpAction;
+
+  /// No description provided for @topUpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharger mon solde'**
+  String get topUpTitle;
+
+  /// No description provided for @topUpAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get topUpAmount;
+
+  /// No description provided for @topUpOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre montant (F)'**
+  String get topUpOther;
+
+  /// No description provided for @topUpOtherHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. 15000'**
+  String get topUpOtherHint;
+
+  /// No description provided for @topUpBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une demande de paiement de {amount} part sur votre téléphone. Les frais Mobile Money sont pour Tara : votre solde reçoit {amount}.'**
+  String topUpBody(String amount);
+
+  /// No description provided for @topUpOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pouvez aussi recharger en espèces au bureau Tara.'**
+  String get topUpOffice;
+
+  /// No description provided for @topUpDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} ajoutés à votre solde.'**
+  String topUpDone(String amount);
+
+  /// No description provided for @topUpFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement non abouti. Réessayez ou rechargez au bureau Tara.'**
+  String get topUpFailed;
+
+  /// No description provided for @topUpRange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant entre {min} et {max}.'**
+  String topUpRange(String min, String max);
+
+  /// No description provided for @takenFromBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pris sur votre solde (déjà mis de côté)'**
+  String get takenFromBalance;
+
+  /// No description provided for @balanceShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde'**
+  String get balanceShort;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

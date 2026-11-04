@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_rider/core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/features/activity/deposit_screen.dart';
 
@@ -30,13 +31,80 @@ void main() {
     expect(find.text('S1'), findsOneWidget);
   });
 
-  testWidgets('espèces : heure limite de dépôt, puis retard', (tester) async {
+  testWidgets('solde prépayé : disponible et argent mis de côté, pas d’espèces à reverser', (tester) async {
     await pumpVariant(tester, Variant.matrix.first, activity(activityApi()));
+    await settle(tester);
+    expect(find.text('Solde disponible'), findsOneWidget);
+    expect(find.text('29\u00a0500\u00a0F'), findsOneWidget);
+    expect(find.text('12\u00a0500\u00a0F mis de côté pour vos courses en cours'), findsOneWidget);
+    expect(find.text('Espèces à reverser à Tara'), findsNothing);
+
+    final idle = activityApi()
+      ..wallet0 = const RiderWallet(earnings: 8000, available: 8000, cashHeld: 0, cashLimit: 50000);
+    await tester.pumpWidget(const SizedBox());
+    await pumpVariant(tester, Variant.matrix.first, activity(idle));
+    await settle(tester);
+    expect(find.text('Couvre l’argent à encaisser sur vos courses'), findsOneWidget);
+  });
+
+  testWidgets('recharger : montant au choix, demande Mobile Money, solde mis à jour', (tester) async {
+    final api = activityApi()..paymentStatuses = ['PENDING', 'SUCCEEDED'];
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    await tapText(tester, 'Recharger');
+    expect(find.text('Recharger mon solde'), findsOneWidget);
+
+    await tapText(tester, '25\u00a0000\u00a0F');
+    await tapText(tester, 'Envoyer la demande');
+    // Numéro du livreur repris, MTN deviné d'après le 677.
+    expect(api.topUps.single.$1, 25000);
+    expect(api.topUps.single.$2, '+237677123456');
+    expect(api.topUps.single.$3, 'MTN');
+    expect(find.text('Validez la demande sur votre téléphone…'), findsOneWidget);
+
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(seconds: 1));
+    }
+    expect(find.text('25\u00a0000\u00a0F ajoutés à votre solde.'), findsOneWidget);
+    // 29 500 disponibles + 25 000 rechargés.
+    expect(find.text('54\u00a0500 FCFA', findRichText: true), findsOneWidget);
+    await tapText(tester, 'Fermer');
+    expect(find.byType(DepositScreen), findsNothing);
+  });
+
+  testWidgets('recharger : autre montant, bornes, même demande renvoyée sans doublon', (tester) async {
+    const offline = ApiException(code: ApiException.network, message: '');
+    final api = activityApi()..topUpErrors.addAll([offline, offline]);
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    await tapText(tester, 'Recharger');
+
+    await tester.enterText(find.byType(EditableText).first, '300');
+    await settle(tester);
+    await tapText(tester, 'Envoyer la demande');
+    expect(find.text('Montant entre 500\u00a0F et 500\u00a0000\u00a0F.'), findsOneWidget);
+    expect(api.topUps, isEmpty);
+
+    // Réseau coupé : la même demande renvoyée garde sa clé ; un autre montant en prend une autre.
+    await tester.enterText(find.byType(EditableText).first, '15000');
+    await settle(tester);
+    await tapText(tester, 'Envoyer la demande');
+    await tapText(tester, 'Envoyer la demande');
+    await tester.enterText(find.byType(EditableText).first, '20000');
+    await settle(tester);
+    await tapText(tester, 'Envoyer la demande');
+    expect([for (final t in api.topUps) t.$1], [15000, 15000, 20000]);
+    expect(api.topUps[0].$4, api.topUps[1].$4);
+    expect(api.topUps[2].$4, isNot(api.topUps[1].$4));
+  });
+
+  testWidgets('anciennes espèces : heure limite de dépôt, puis retard', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, activity(activityApi(legacyCash: true)));
     await settle(tester);
     expect(find.text('À déposer avant demain 09:40'), findsOneWidget);
 
     final late = activityApi()
-      ..wallet0 = const RiderWallet(earnings: 0, cashHeld: 37500, cashLimit: 25000, cashOverdue: true);
+      ..wallet0 = const RiderWallet(earnings: 0, available: 0, cashHeld: 37500, cashLimit: 25000, cashOverdue: true);
     await tester.pumpWidget(const SizedBox());
     await pumpVariant(tester, Variant.matrix.first, activity(late));
     await settle(tester);
@@ -56,7 +124,7 @@ void main() {
   });
 
   testWidgets('reverser les espèces : demande Mobile Money, confirmation, retour à l’activité', (tester) async {
-    final api = activityApi()..paymentStatuses = ['PENDING', 'SUCCEEDED'];
+    final api = activityApi(legacyCash: true)..paymentStatuses = ['PENDING', 'SUCCEEDED'];
     await pumpVariant(tester, Variant.matrix.first, activity(api));
     await settle(tester);
     await tapText(tester, 'Reverser');

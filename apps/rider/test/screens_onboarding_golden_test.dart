@@ -69,7 +69,6 @@ final sampleDocuments = DocumentsState(
     requirement([('INSURANCE', 'Assurance', 'Insurance', true)]),
     requirement([('SELFIE', 'Photo du visage', 'Selfie', false)]),
     requirement([('CRIMINAL_RECORD', 'Casier judiciaire', 'Criminal record', false)]),
-    requirement([('GUARANTOR_ID', 'CNI du garant', 'Guarantor ID', false)]),
   ],
   profile: const RiderProfile(
     status: 'PENDING',

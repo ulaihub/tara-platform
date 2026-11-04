@@ -276,7 +276,7 @@ class _EarningsCard extends StatelessWidget {
               const SizedBox(width: 8),
               tile(formatOnline(s?.onlineSeconds ?? 0), l.onlineTime),
               const SizedBox(width: 8),
-              tile('${formatAmount(s?.cashHeld ?? 0)} F', l.cashInHand, accent: true),
+              tile('${formatAmount(s?.available ?? 0)} F', l.balanceShort, accent: true),
             ],
           ),
         ],

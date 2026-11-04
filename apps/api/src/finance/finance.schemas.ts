@@ -105,7 +105,7 @@ export const RiderWalletDto = z
     cashDueBy: z.iso.datetime().nullable(),
     /** Délai dépassé : plus de courses tant que les espèces ne sont pas déposées. */
     cashOverdue: z.boolean(),
-    /** Retirable maintenant : gains moins espèces détenues. */
+    /** Disponible : solde moins l'argent mis de côté et les anciennes espèces dues. */
     available: z.int(),
     openPayout: OpenPayout,
   })

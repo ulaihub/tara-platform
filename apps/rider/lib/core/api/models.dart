@@ -805,23 +805,35 @@ class RiderWallet {
     required this.earnings,
     required this.cashHeld,
     required this.cashLimit,
+    required this.available,
+    this.reserved = 0,
     this.cashDueBy,
     this.cashOverdue = false,
   });
 
   factory RiderWallet.fromJson(Json json) => RiderWallet(
     earnings: _field<num>(json, 'earnings').toInt(),
+    reserved: _field<num>(json, 'reserved').toInt(),
+    available: _field<num>(json, 'available').toInt(),
     cashHeld: _field<num>(json, 'cashHeld').toInt(),
     cashLimit: _field<num>(json, 'cashLimit').toInt(),
     cashDueBy: _date(json['cashDueBy']),
     cashOverdue: json['cashOverdue'] == true,
   );
 
-  static const fields = ['earnings', 'cashHeld', 'cashLimit', 'available', 'cashDueBy', 'cashOverdue'];
+  static const fields = ['earnings', 'reserved', 'cashHeld', 'cashLimit', 'available', 'cashDueBy', 'cashOverdue'];
 
+  /// Solde prépayé (G5) : gains et recharges, moins l'argent encaissé en espèces.
   final int earnings;
 
-  /// Espèces encaissées pas encore déposées (dues à Tara).
+  /// Mis de côté pour les courses avec encaissement en cours.
+  final int reserved;
+
+  /// Disponible : solde moins l'argent mis de côté et les anciennes espèces dues. Une
+  /// course avec encaissement n'est proposée que si ce montant la couvre.
+  final int available;
+
+  /// Espèces encaissées avant le solde prépayé et pas encore déposées (dues à Tara).
   final int cashHeld;
   final int cashLimit;
 
@@ -832,7 +844,7 @@ class RiderWallet {
   final bool cashOverdue;
 }
 
-/// Paiement Mobile Money demandé au téléphone du payeur (dépôt des espèces, G5).
+/// Paiement Mobile Money demandé au téléphone du payeur (recharge du solde, dépôt d'espèces, G5).
 @immutable
 class PaymentRequest {
   const PaymentRequest({required this.id, required this.status, required this.amount});

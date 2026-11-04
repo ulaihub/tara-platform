@@ -24,7 +24,8 @@ export const VehicleTypeEnum = z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']).meta({ i
 
 /**
  * Pièces exigées (A3). Chaque groupe doit être couvert par une pièce validée et non expirée ;
- * pour le véhicule, la carte grise OU le contrat de location suffit.
+ * pour le véhicule, la carte grise OU le contrat de location suffit. La CNI du garant reste
+ * acceptée (type GUARANTOR_ID) sans être exigée.
  */
 export const REQUIRED_DOCUMENTS: KycDocumentType[][] = [
   ['NATIONAL_ID_FRONT'],
@@ -34,7 +35,7 @@ export const REQUIRED_DOCUMENTS: KycDocumentType[][] = [
   ['INSURANCE'],
   ['SELFIE'],
   ['CRIMINAL_RECORD'],
-  ['GUARANTOR_ID'],
+  // Pas de CNI du garant : le garant est facultatif depuis le solde prépayé (décision 36).
 ];
 
 export const DOCUMENT_LABELS: Record<KycDocumentType, { fr: string; en: string }> = {

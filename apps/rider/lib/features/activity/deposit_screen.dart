@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
@@ -26,13 +27,33 @@ import '../course/course_scaffold.dart' show CourseFieldLabel;
 
 enum _DepositState { idle, sending, waiting, done, failed }
 
-/// Dépôt des espèces détenues (G5) par Mobile Money : une demande de paiement part sur le
-/// téléphone du livreur, confirmée en direct (sinon relue toutes les 5 s).
-class DepositScreen extends ConsumerStatefulWidget {
-  const DepositScreen({super.key, required this.amount, required this.onBack, required this.onDone});
+/// Montants de recharge proposés ; un autre montant peut être tapé.
+const topUpAmounts = [5000, 10000, 25000, 50000];
+const topUpMin = 500;
+const topUpMax = 500000;
 
-  /// Espèces détenues, déposées en une fois.
+/// Paiement Mobile Money à Tara depuis le téléphone du livreur (G5), confirmé en direct
+/// (sinon relu toutes les 5 s) : recharge du solde prépayé, ou dépôt des espèces encore
+/// dues (ancien fonctionnement).
+class DepositScreen extends ConsumerStatefulWidget {
+  /// Dépôt des espèces détenues, en une fois.
+  const DepositScreen({super.key, required this.amount, required this.onBack, required this.onDone})
+    : topUp = false,
+      available = 0;
+
+  /// Recharge du solde prépayé : montant au choix (frais de l'opérateur pour Tara).
+  const DepositScreen.topUp({super.key, required this.available, required this.onBack, required this.onDone})
+    : topUp = true,
+      amount = 0;
+
+  /// Espèces à déposer (dépôt).
   final int amount;
+
+  /// Recharge plutôt que dépôt.
+  final bool topUp;
+
+  /// Solde disponible avant la recharge.
+  final int available;
   final VoidCallback onBack;
   final VoidCallback onDone;
 
@@ -44,13 +65,22 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
   static const _blobs = [BlobSpec(alignment: Alignment(1.2, -1.05), size: 300, colors: BlobSpec.brand, blur: 70)];
 
   final _phone = TextEditingController();
+  final _other = TextEditingController();
   String? _operator;
+
+  /// Montant choisi parmi les puces (l'autre montant tapé l'emporte).
+  int _chip = topUpAmounts[1];
   _DepositState _state = _DepositState.idle;
   String? _error;
   String? _paymentId;
 
-  /// Même demande renvoyée (réponse perdue) : pas de second paiement.
+  /// Même demande renvoyée (réponse perdue) : pas de second paiement. Une demande changée
+  /// (montant, numéro, opérateur) en est une autre.
   String _key = newEventId();
+  String? _sentWith;
+
+  /// Montant de la dernière demande envoyée (affiché une fois payé).
+  int _sent = 0;
   StreamSubscription<RealtimeEvent>? _events;
   Timer? _poll;
 
@@ -64,8 +94,12 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
         if (guess != null && _state == _DepositState.idle) _operator = guess;
       });
     });
+    _other.addListener(() => setState(() => _error = null));
     unawaited(_prefillPhone());
   }
+
+  int get _amount => widget.topUp ? (int.tryParse(_other.text) ?? _chip) : widget.amount;
+  bool get _amountValid => widget.topUp ? _amount >= topUpMin && _amount <= topUpMax : _amount > 0;
 
   /// Numéro du livreur proposé par défaut (modifiable).
   Future<void> _prefillPhone() async {
@@ -84,6 +118,7 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
     unawaited(_events?.cancel());
     _poll?.cancel();
     _phone.dispose();
+    _other.dispose();
     super.dispose();
   }
 
@@ -95,6 +130,14 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
       setState(() => _error = l.phoneInvalid);
       return;
     }
+    if (!_amountValid) {
+      setState(() => _error = l.topUpRange('${formatAmount(topUpMin)} F', '${formatAmount(topUpMax)} F'));
+      return;
+    }
+    final request = '$_amount|$digits|$operator';
+    if (_sentWith != null && _sentWith != request) _key = newEventId();
+    _sentWith = request;
+    _sent = _amount;
     setState(() {
       _state = _DepositState.sending;
       _error = null;
@@ -102,9 +145,10 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
     unawaited(_events?.cancel());
     _events = ref.read(realtimeProvider).stream.listen(_onEvent);
     try {
-      final payment = await ref
-          .read(riderApiProvider)
-          .depositCash(amount: widget.amount, phone: '+237$digits', operator: operator, idempotencyKey: _key);
+      final api = ref.read(riderApiProvider);
+      final payment = widget.topUp
+          ? await api.topUp(amount: _amount, phone: '+237$digits', operator: operator, idempotencyKey: _key)
+          : await api.depositCash(amount: _amount, phone: '+237$digits', operator: operator, idempotencyKey: _key);
       if (!mounted) return;
       _paymentId = payment.id;
       _apply(payment.status);
@@ -156,9 +200,10 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final operators = ref.watch(riderConfigProvider).value?.operators ?? const <MobileMoneyOperator>[];
-    final amount = '${formatAmount(widget.amount)} F';
+    final topUp = widget.topUp;
     final busy = _state == _DepositState.sending || _state == _DepositState.waiting;
     final done = _state == _DepositState.done;
+    final amount = '${formatAmount(done ? _sent : _amount)} F';
 
     return TaraScreen(
       blobs: _blobs,
@@ -173,7 +218,10 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
               Expanded(
                 child: Semantics(
                   header: true,
-                  child: Text(l.depositTitle, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
+                  child: Text(
+                    topUp ? l.topUpTitle : l.depositTitle,
+                    style: TaraText.titleCourse.copyWith(color: c.textPrimary),
+                  ),
                 ),
               ),
             ],
@@ -185,9 +233,12 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l.cashToDeposit, style: TaraText.label.copyWith(color: c.textSecondary)),
+                Text(
+                  topUp ? l.balanceAvailable : l.cashToDeposit,
+                  style: TaraText.label.copyWith(color: c.textSecondary),
+                ),
                 const SizedBox(height: 4),
-                AmountText(widget.amount, style: TaraText.amountL),
+                AmountText(topUp ? widget.available + (done ? _sent : 0) : widget.amount, style: TaraText.amountL),
               ],
             ),
           ),
@@ -197,10 +248,39 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
               tone: TintTone.success,
               child: Semantics(
                 liveRegion: true,
-                child: Text(l.depositDone(amount), style: TaraText.text.copyWith(color: c.textPrimary)),
+                child: Text(
+                  topUp ? l.topUpDone(amount) : l.depositDone(amount),
+                  style: TaraText.text.copyWith(color: c.textPrimary),
+                ),
               ),
             )
           else ...[
+            if (topUp) ...[
+              CourseFieldLabel(l.topUpAmount),
+              const SizedBox(height: 8),
+              ChoiceChips<int>(
+                options: [for (final value in topUpAmounts) ChoiceOption(value, '${formatAmount(value)} F')],
+                selected: _other.text.isEmpty ? _chip : null,
+                onSelected: (value) {
+                  if (busy) return;
+                  _other.clear();
+                  setState(() => _chip = value);
+                },
+                height: 50,
+              ),
+              const SizedBox(height: 10),
+              IgnorePointer(
+                ignoring: busy,
+                child: TaraTextField(
+                  label: l.topUpOther,
+                  hint: l.topUpOtherHint,
+                  controller: _other,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             CourseFieldLabel(l.depositOperator),
             const SizedBox(height: 8),
             ChoiceChips<String>(
@@ -228,7 +308,11 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
                     child: Semantics(
                       liveRegion: true,
                       child: Text(
-                        busy ? l.depositWaiting : l.depositBody(amount),
+                        busy
+                            ? l.depositWaiting
+                            : topUp
+                            ? l.topUpBody(amount)
+                            : l.depositBody(amount),
                         style: TaraText.label.copyWith(color: c.textSecondary, height: 1.4),
                       ),
                     ),
@@ -237,8 +321,11 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            Text(l.depositOffice, style: TaraText.small.copyWith(color: c.textTertiary)),
-            if (_state == _DepositState.failed) ...[const SizedBox(height: 12), ErrorLine(l.depositFailed)],
+            Text(topUp ? l.topUpOffice : l.depositOffice, style: TaraText.small.copyWith(color: c.textTertiary)),
+            if (_state == _DepositState.failed) ...[
+              const SizedBox(height: 12),
+              ErrorLine(topUp ? l.topUpFailed : l.depositFailed),
+            ],
           ],
           if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
         ],
@@ -248,7 +335,7 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
                 label: l.depositSend,
                 icon: TaraIcons.arrowRight,
                 loading: busy,
-                onPressed: _operator == null || widget.amount <= 0 ? null : _send,
+                onPressed: _operator == null || _amount <= 0 ? null : _send,
               ),
       ),
     );

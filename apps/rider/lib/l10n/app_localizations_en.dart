@@ -257,10 +257,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plateHint => 'E.g. LT 123 AB';
 
   @override
-  String get guarantor => 'Guarantor';
+  String get guarantor => 'Guarantor (optional)';
 
   @override
-  String get guarantorHelp => 'A trusted person who vouches for you. Their ID will be requested.';
+  String get guarantorHelp => 'A trusted person who vouches for you. You can leave this section empty.';
 
   @override
   String get guarantorName => 'Guarantor’s name';
@@ -365,9 +365,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onlineTime => 'Online';
-
-  @override
-  String get cashInHand => 'Cash in hand';
 
   @override
   String get youAreOffline => 'You are offline';
@@ -670,14 +667,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get momoNeedsNetwork => 'Mobile Money needs a network: collect cash or try again.';
-
-  @override
-  String get cashAfterCourse => 'Cash on hand after this job';
-
-  @override
-  String cashLimitReached(String limit) {
-    return 'Above your limit ($limit): deposit cash at the Tara office to receive new jobs.';
-  }
 
   @override
   String get confirmCollection => 'Confirm collection';
@@ -1213,4 +1202,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineNoPending => 'Your actions are kept on the phone';
+
+  @override
+  String get balanceAvailable => 'Available balance';
+
+  @override
+  String balanceReserved(String amount) {
+    return '$amount set aside for your current jobs';
+  }
+
+  @override
+  String get balanceExplain => 'Covers the money you collect on your jobs';
+
+  @override
+  String get topUpAction => 'Top up';
+
+  @override
+  String get topUpTitle => 'Top up my balance';
+
+  @override
+  String get topUpAmount => 'Amount';
+
+  @override
+  String get topUpOther => 'Other amount (F)';
+
+  @override
+  String get topUpOtherHint => 'e.g. 15000';
+
+  @override
+  String topUpBody(String amount) {
+    return 'A payment request for $amount is sent to your phone. Tara pays the Mobile Money fees: your balance receives $amount.';
+  }
+
+  @override
+  String get topUpOffice => 'You can also top up with cash at the Tara office.';
+
+  @override
+  String topUpDone(String amount) {
+    return '$amount added to your balance.';
+  }
+
+  @override
+  String get topUpFailed => 'Payment did not go through. Try again or top up at the Tara office.';
+
+  @override
+  String topUpRange(String min, String max) {
+    return 'Amount between $min and $max.';
+  }
+
+  @override
+  String get takenFromBalance => 'Taken from your balance (already set aside)';
+
+  @override
+  String get balanceShort => 'Balance';
 }

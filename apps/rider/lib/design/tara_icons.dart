@@ -34,6 +34,9 @@ abstract final class TaraIcons {
   static const package = TaraIconData([_P('M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z'), _P('M3 7.5L12 12l9-4.5M12 12v9')]);
   static const clock = TaraIconData([_C(12, 12, 9), _P('M12 7v5l3 2')]);
   static const cash = TaraIconData([_R(2.5, 6, 19, 12, 2.5), _C(12, 12, 2.5), _P('M6 9.5v5M18 9.5v5')]);
+
+  /// Portefeuille (solde prépayé) : absent de la maquette, dessiné dans le même trait.
+  static const wallet = TaraIconData([_R(3, 7, 18, 13, 2.5), _P('M6 7l9.5-3.4a1.5 1.5 0 012 1.4V7'), _P('M16 13.5h2')]);
   static const refresh = TaraIconData([_P('M20 12a8 8 0 11-2.3-5.7M20 4v5h-5')]);
   static const arrowRight = TaraIconData([_P('M5 12h14M13 6l6 6-6 6')]);
   static const chevronDown = TaraIconData([_P('M6 9l6 6 6-6')]);

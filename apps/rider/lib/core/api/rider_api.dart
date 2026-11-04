@@ -30,9 +30,8 @@ class RiderApi {
 
   Future<RiderProfile> apply({
     required String vehicleType,
-    required String guarantorName,
-    required String guarantorPhone,
     String? plateNumber,
+    ({String name, String phone})? guarantor,
     ({String name, String phone})? emergencyContact,
   }) async => RiderProfile.fromJson(
     await _api.post(
@@ -40,8 +39,7 @@ class RiderApi {
       body: {
         'vehicleType': vehicleType,
         'plateNumber': ?plateNumber,
-        'guarantorName': guarantorName,
-        'guarantorPhone': guarantorPhone,
+        if (guarantor != null) ...{'guarantorName': guarantor.name, 'guarantorPhone': guarantor.phone},
         if (emergencyContact != null)
           'emergencyContact': {'name': emergencyContact.name, 'phone': emergencyContact.phone},
       },
@@ -106,6 +104,22 @@ class RiderApi {
   Future<List<RiderOrder>> history() async => [
     for (final json in await orders(scope: 'history')) RiderOrder.fromJson(json),
   ];
+
+  /// Recharge du solde prépayé par Mobile Money (G5) : demande au téléphone du livreur ;
+  /// les frais de l'opérateur sont pour Tara, le solde reçoit le montant entier.
+  /// [idempotencyKey] : la même demande renvoyée n'en crée pas une seconde.
+  Future<PaymentRequest> topUp({
+    required int amount,
+    required String phone,
+    required String operator,
+    required String idempotencyKey,
+  }) async => PaymentRequest.fromJson(
+    await _api.post(
+      '/rider/topups',
+      body: {'amount': amount, 'phone': phone, 'operator': operator},
+      headers: {'Idempotency-Key': idempotencyKey},
+    ) as Json,
+  );
 
   /// Dépôt des espèces détenues par Mobile Money (G5) : demande au téléphone du livreur.
   /// [idempotencyKey] : la même demande renvoyée n'en crée pas une seconde.

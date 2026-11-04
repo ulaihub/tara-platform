@@ -1,4 +1,5 @@
 import 'package:tara_rider/core/api/api_client.dart';
+import 'package:tara_rider/core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/api/rider_api.dart';
 import 'package:tara_rider/core/session/session_store.dart';
@@ -7,7 +8,13 @@ import 'package:tara_rider/core/session/session_store.dart';
 class FakeRiderApi extends RiderApi {
   FakeRiderApi() : super(ApiClient(baseUrl: 'http://test.invalid', store: SessionStore(MemoryKeyValueStore())));
 
-  RiderWallet wallet0 = const RiderWallet(earnings: 9000, cashHeld: 37500, cashLimit: 60000);
+  RiderWallet wallet0 = const RiderWallet(
+    earnings: 42000,
+    reserved: 12500,
+    available: 29500,
+    cashHeld: 0,
+    cashLimit: 50000,
+  );
 
   /// États successifs renvoyés par GET /collection (le dernier est répété).
   List<Collection> collections = [const Collection(total: 12500, complete: false, paymentId: 'p1')];
@@ -48,6 +55,22 @@ class FakeRiderApi extends RiderApi {
   }) async {
     deposits.add((amount, phone, operator, idempotencyKey));
     return PaymentRequest(id: 'dep1', status: 'PENDING', amount: amount);
+  }
+
+  /// Recharges demandées ; [topUpErrors] : erreurs renvoyées d'abord, une par demande.
+  final topUps = <(int amount, String phone, String operator, String key)>[];
+  final topUpErrors = <ApiException>[];
+
+  @override
+  Future<PaymentRequest> topUp({
+    required int amount,
+    required String phone,
+    required String operator,
+    required String idempotencyKey,
+  }) async {
+    topUps.add((amount, phone, operator, idempotencyKey));
+    if (topUpErrors.isNotEmpty) throw topUpErrors.removeAt(0);
+    return PaymentRequest(id: 'top1', status: 'PENDING', amount: amount);
   }
 
   @override

@@ -257,11 +257,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get plateHint => 'Ex. LT 123 AB';
 
   @override
-  String get guarantor => 'Garant';
+  String get guarantor => 'Garant (facultatif)';
 
   @override
   String get guarantorHelp =>
-      'Une personne de confiance qui se porte garante de vous. Sa pièce d’identité sera demandée.';
+      'Une personne de confiance qui se porte garante de vous. Vous pouvez laisser ce bloc vide.';
 
   @override
   String get guarantorName => 'Nom du garant';
@@ -366,9 +366,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onlineTime => 'En ligne';
-
-  @override
-  String get cashInHand => 'Espèces en main';
 
   @override
   String get youAreOffline => 'Vous êtes hors ligne';
@@ -673,14 +670,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get momoNeedsNetwork => 'Mobile Money demande du réseau : encaissez en espèces ou réessayez.';
-
-  @override
-  String get cashAfterCourse => 'Espèces en main après cette course';
-
-  @override
-  String cashLimitReached(String limit) {
-    return 'Au-delà de votre plafond ($limit) : déposez des espèces au bureau Tara pour recevoir de nouvelles courses.';
-  }
 
   @override
   String get confirmCollection => 'Confirmer l’encaissement';
@@ -1219,4 +1208,57 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get offlineNoPending => 'Vos actions sont gardées sur le téléphone';
+
+  @override
+  String get balanceAvailable => 'Solde disponible';
+
+  @override
+  String balanceReserved(String amount) {
+    return '$amount mis de côté pour vos courses en cours';
+  }
+
+  @override
+  String get balanceExplain => 'Couvre l’argent à encaisser sur vos courses';
+
+  @override
+  String get topUpAction => 'Recharger';
+
+  @override
+  String get topUpTitle => 'Recharger mon solde';
+
+  @override
+  String get topUpAmount => 'Montant';
+
+  @override
+  String get topUpOther => 'Autre montant (F)';
+
+  @override
+  String get topUpOtherHint => 'Ex. 15000';
+
+  @override
+  String topUpBody(String amount) {
+    return 'Une demande de paiement de $amount part sur votre téléphone. Les frais Mobile Money sont pour Tara : votre solde reçoit $amount.';
+  }
+
+  @override
+  String get topUpOffice => 'Vous pouvez aussi recharger en espèces au bureau Tara.';
+
+  @override
+  String topUpDone(String amount) {
+    return '$amount ajoutés à votre solde.';
+  }
+
+  @override
+  String get topUpFailed => 'Paiement non abouti. Réessayez ou rechargez au bureau Tara.';
+
+  @override
+  String topUpRange(String min, String max) {
+    return 'Montant entre $min et $max.';
+  }
+
+  @override
+  String get takenFromBalance => 'Pris sur votre solde (déjà mis de côté)';
+
+  @override
+  String get balanceShort => 'Solde';
 }

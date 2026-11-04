@@ -143,8 +143,8 @@
   "vehicleTricycle": "Tricycle",
   "plateNumber": "Immatriculation",
   "plateHint": "Ex. LT 123 AB",
-  "guarantor": "Garant",
-  "guarantorHelp": "Une personne de confiance qui se porte garante de vous. Sa pièce d’identité sera demandée.",
+  "guarantor": "Garant (facultatif)",
+  "guarantorHelp": "Une personne de confiance qui se porte garante de vous. Vous pouvez laisser ce bloc vide.",
   "guarantorName": "Nom du garant",
   "guarantorPhone": "Téléphone du garant",
   "emergencyContact": "Contact d’urgence (facultatif)",
@@ -205,7 +205,6 @@
     }
   },
   "onlineTime": "En ligne",
-  "cashInHand": "Espèces en main",
   "youAreOffline": "Vous êtes hors ligne",
   "offlineHint": "Passez en ligne pour recevoir les propositions de course autour de vous.",
   "locationNeeded": "Activez la localisation pour passer en ligne.",
@@ -378,8 +377,6 @@
   "momoFailed": "Paiement non abouti (refusé, annulé ou expiré). Renvoyez la demande ou encaissez en espèces.",
   "momoNoAnswer": "Toujours pas de réponse du client. Vous pouvez renvoyer la demande.",
   "momoNeedsNetwork": "Mobile Money demande du réseau : encaissez en espèces ou réessayez.",
-  "cashAfterCourse": "Espèces en main après cette course",
-  "cashLimitReached": "Au-delà de votre plafond ({limit}) : déposez des espèces au bureau Tara pour recevoir de nouvelles courses.",
   "confirmCollection": "Confirmer l’encaissement",
   "sendPaymentRequest": "Envoyer la demande de paiement",
   "resendPaymentRequest": "Renvoyer la demande",
@@ -397,13 +394,6 @@
   "@exactAmount": {
     "placeholders": {
       "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "@cashLimitReached": {
-    "placeholders": {
-      "limit": {
         "type": "String"
       }
     }
@@ -761,5 +751,51 @@
   "refusedHelp": "Refusée par le serveur. Corrigez-la depuis la course, ou appelez le support avant de la retirer.",
   "removeAction": "Retirer l’action",
   "confirmRemoveAction": "Confirmer le retrait",
-  "offlineNoPending": "Vos actions sont gardées sur le téléphone"
+  "offlineNoPending": "Vos actions sont gardées sur le téléphone",
+  "balanceAvailable": "Solde disponible",
+  "balanceReserved": "{amount} mis de côté pour vos courses en cours",
+  "@balanceReserved": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceExplain": "Couvre l’argent à encaisser sur vos courses",
+  "topUpAction": "Recharger",
+  "topUpTitle": "Recharger mon solde",
+  "topUpAmount": "Montant",
+  "topUpOther": "Autre montant (F)",
+  "topUpOtherHint": "Ex. 15000",
+  "topUpBody": "Une demande de paiement de {amount} part sur votre téléphone. Les frais Mobile Money sont pour Tara : votre solde reçoit {amount}.",
+  "@topUpBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpOffice": "Vous pouvez aussi recharger en espèces au bureau Tara.",
+  "topUpDone": "{amount} ajoutés à votre solde.",
+  "@topUpDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpFailed": "Paiement non abouti. Réessayez ou rechargez au bureau Tara.",
+  "topUpRange": "Montant entre {min} et {max}.",
+  "@topUpRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "takenFromBalance": "Pris sur votre solde (déjà mis de côté)",
+  "balanceShort": "Solde"
 }

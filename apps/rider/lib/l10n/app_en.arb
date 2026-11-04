@@ -74,8 +74,8 @@
   "vehicleTricycle": "Tricycle",
   "plateNumber": "Plate number",
   "plateHint": "E.g. LT 123 AB",
-  "guarantor": "Guarantor",
-  "guarantorHelp": "A trusted person who vouches for you. Their ID will be requested.",
+  "guarantor": "Guarantor (optional)",
+  "guarantorHelp": "A trusted person who vouches for you. You can leave this section empty.",
   "guarantorName": "Guarantor’s name",
   "guarantorPhone": "Guarantor’s phone",
   "emergencyContact": "Emergency contact (optional)",
@@ -105,7 +105,6 @@
   "details": "Details",
   "jobsCount": "{count, plural, =0{No jobs} =1{1 job} other{{count} jobs}}",
   "onlineTime": "Online",
-  "cashInHand": "Cash in hand",
   "youAreOffline": "You are offline",
   "offlineHint": "Go online to receive job offers around you.",
   "locationNeeded": "Turn on location to go online.",
@@ -197,8 +196,6 @@
   "momoFailed": "Payment not completed (refused, cancelled or expired). Resend the request or collect cash.",
   "momoNoAnswer": "Still no answer from the customer. You can resend the request.",
   "momoNeedsNetwork": "Mobile Money needs a network: collect cash or try again.",
-  "cashAfterCourse": "Cash on hand after this job",
-  "cashLimitReached": "Above your limit ({limit}): deposit cash at the Tara office to receive new jobs.",
   "confirmCollection": "Confirm collection",
   "sendPaymentRequest": "Send payment request",
   "resendPaymentRequest": "Resend request",
@@ -347,5 +344,51 @@
   "refusedHelp": "Refused by the server. Fix it from the job, or call support before removing it.",
   "removeAction": "Remove the action",
   "confirmRemoveAction": "Confirm removal",
-  "offlineNoPending": "Your actions are kept on the phone"
+  "offlineNoPending": "Your actions are kept on the phone",
+  "balanceAvailable": "Available balance",
+  "balanceReserved": "{amount} set aside for your current jobs",
+  "@balanceReserved": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceExplain": "Covers the money you collect on your jobs",
+  "topUpAction": "Top up",
+  "topUpTitle": "Top up my balance",
+  "topUpAmount": "Amount",
+  "topUpOther": "Other amount (F)",
+  "topUpOtherHint": "e.g. 15000",
+  "topUpBody": "A payment request for {amount} is sent to your phone. Tara pays the Mobile Money fees: your balance receives {amount}.",
+  "@topUpBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpOffice": "You can also top up with cash at the Tara office.",
+  "topUpDone": "{amount} added to your balance.",
+  "@topUpDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpFailed": "Payment did not go through. Try again or top up at the Tara office.",
+  "topUpRange": "Amount between {min} and {max}.",
+  "@topUpRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "takenFromBalance": "Taken from your balance (already set aside)",
+  "balanceShort": "Balance"
 }

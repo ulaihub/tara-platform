@@ -63,7 +63,7 @@ Le MVP compte 51 exigences, réparties en 8 modules ; la V2 en ajoute 9. Chaque 
 | --- | --- | --- |
 | A1 | Inscription et connexion par numéro de téléphone (+237) et code SMS à usage unique ; aucun e-mail obligatoire | MVP |
 | A2 | Profil expéditeur avec adresses favorites ; passage en mode marchand (nom de boutique, catégorie, numéro Mobile Money de reversement, RCCM et NIU facultatifs) | MVP |
-| A3 | Inscription livreur dans l'app : CNI recto-verso, permis A, carte grise, selfie, garant ; validation au back-office ; statuts en attente, actif, suspendu | MVP |
+| A3 | Inscription livreur dans l'app : CNI recto-verso, permis A, carte grise, selfie, garant facultatif ; validation au back-office ; statuts en attente, actif, suspendu | MVP |
 | A4 | Choix de la langue : français ou anglais | MVP |
 | A5 | Rappel automatique avant expiration d'un document du livreur | MVP |
 | A6 | Compte marchand multi-utilisateurs (gérant, employés) | V2 |

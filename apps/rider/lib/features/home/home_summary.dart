@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 
-/// Résumé de l'accueil : nom, gains et courses du jour, temps en ligne, espèces en main.
+/// Résumé de l'accueil : nom, gains et courses du jour, temps en ligne, solde disponible.
 @immutable
 class HomeSummary {
   const HomeSummary({
@@ -11,14 +11,16 @@ class HomeSummary {
     required this.earnings,
     required this.delivered,
     required this.onlineSeconds,
-    required this.cashHeld,
+    required this.available,
   });
 
   final String fullName;
   final int earnings;
   final int delivered;
   final int onlineSeconds;
-  final int cashHeld;
+
+  /// Solde prépayé disponible (G5) : couvre l'argent des courses avec encaissement.
+  final int available;
 }
 
 final homeSummaryProvider = FutureProvider<HomeSummary>((ref) async {
@@ -29,6 +31,6 @@ final homeSummaryProvider = FutureProvider<HomeSummary>((ref) async {
     earnings: earnings.earnings,
     delivered: earnings.delivered,
     onlineSeconds: earnings.onlineSeconds,
-    cashHeld: ((wallet['cashHeld'] as num?) ?? 0).toInt(),
+    available: ((wallet['available'] as num?) ?? 0).toInt(),
   );
 });

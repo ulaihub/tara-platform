@@ -20,7 +20,7 @@ import '../../l10n/app_localizations.dart';
 import 'deposit_screen.dart';
 
 /// 13 · Activité (E9) : gains du jour, de la semaine ou du mois avec leur histogramme,
-/// espèces à reverser à Tara, dernières courses terminées.
+/// solde prépayé et sa recharge (G5), anciennes espèces à reverser, dernières courses.
 class ActivityScreen extends ConsumerStatefulWidget {
   const ActivityScreen({super.key, required this.onTab, this.now});
 
@@ -45,7 +45,9 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
   late Future<List<RiderOrder>> _history;
   late Future<RiderWallet> _wallet;
   bool _all = false;
-  bool _depositing = false;
+
+  /// Écran de paiement à Tara ouvert : recharge du solde ou dépôt des espèces.
+  _Payment? _paying;
 
   @override
   void initState() {
@@ -143,17 +145,23 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                           future: _wallet,
                           builder: (context, snapshot) {
                             final wallet = snapshot.data;
-                            final cash = wallet?.cashHeld ?? 0;
-                            if (wallet == null || cash <= 0) return const SizedBox.shrink();
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: _CashBox(
-                                amount: cash,
-                                dueBy: wallet.cashDueBy,
-                                overdue: wallet.cashOverdue,
-                                now: now,
-                                onDeposit: () => setState(() => _depositing = true),
-                              ),
+                            if (wallet == null) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const SizedBox(height: 12),
+                                _BalanceBox(wallet: wallet, onTopUp: () => setState(() => _paying = _Payment.topUp)),
+                                if (wallet.cashHeld > 0) ...[
+                                  const SizedBox(height: 12),
+                                  _CashBox(
+                                    amount: wallet.cashHeld,
+                                    dueBy: wallet.cashDueBy,
+                                    overdue: wallet.cashOverdue,
+                                    now: now,
+                                    onDeposit: () => setState(() => _paying = _Payment.deposit),
+                                  ),
+                                ],
+                              ],
                             );
                           },
                         ),
@@ -225,18 +233,25 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             ),
           ),
         ),
-        if (_depositing)
+        if (_paying case final paying?)
           Positioned.fill(
             child: FutureBuilder<RiderWallet>(
               future: _wallet,
-              builder: (context, snapshot) => DepositScreen(
-                amount: snapshot.data?.cashHeld ?? 0,
-                onBack: () => setState(() => _depositing = false),
-                onDone: () => setState(() {
-                  _depositing = false;
+              builder: (context, snapshot) {
+                void back() => setState(() => _paying = null);
+                void done() => setState(() {
+                  _paying = null;
                   _load();
-                }),
-              ),
+                });
+                return switch (paying) {
+                  _Payment.topUp => DepositScreen.topUp(
+                    available: snapshot.data?.available ?? 0,
+                    onBack: back,
+                    onDone: done,
+                  ),
+                  _Payment.deposit => DepositScreen(amount: snapshot.data?.cashHeld ?? 0, onBack: back, onDone: done),
+                };
+              },
             ),
           ),
       ],
@@ -409,7 +424,96 @@ class _Histogram extends StatelessWidget {
   static bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
-/// « Espèces à reverser à Tara » et bouton « Reverser ».
+enum _Payment { topUp, deposit }
+
+/// Solde prépayé (G5) : disponible, montant mis de côté pour les courses en cours, bouton
+/// « Recharger ». Une course avec encaissement n'est proposée que si le disponible la couvre.
+class _BalanceBox extends StatelessWidget {
+  const _BalanceBox({required this.wallet, required this.onTopUp});
+  final RiderWallet wallet;
+  final VoidCallback onTopUp;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return _ActionBox(
+      tone: TintTone.accent,
+      icon: TaraIcons.wallet,
+      lines: [
+        Text(l.balanceAvailable, style: TaraText.label.copyWith(color: c.textSecondary)),
+        Text(
+          '${formatAmount(wallet.available)}\u00a0F',
+          style: TaraText.bodyStrong.copyWith(color: c.accentStrongText, fontFeatures: TaraText.tabular),
+        ),
+        Text(
+          wallet.reserved > 0 ? l.balanceReserved('${formatAmount(wallet.reserved)}\u00a0F') : l.balanceExplain,
+          style: TaraText.small.copyWith(color: c.textSecondary),
+        ),
+      ],
+      action: l.topUpAction,
+      onAction: onTopUp,
+    );
+  }
+}
+
+/// Encadré teinté : icône, lignes de texte lues ensemble, bouton à droite ; bouton dessous
+/// quand la place manque (petit écran, grand texte).
+class _ActionBox extends StatelessWidget {
+  const _ActionBox({
+    required this.tone,
+    required this.icon,
+    required this.lines,
+    required this.action,
+    required this.onAction,
+  });
+  final TintTone tone;
+  final TaraIconData icon;
+  final List<Widget> lines;
+  final String action;
+  final VoidCallback onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final text = Row(
+      children: [
+        TaraIcon(icon, size: 22, color: c.accentText),
+        const SizedBox(width: 12),
+        Expanded(
+          child: MergeSemantics(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: lines),
+          ),
+        ),
+      ],
+    );
+    final button = GlassButton(label: action, height: 44, radius: 14, onPressed: onAction);
+    return TintBox(
+      tone: tone,
+      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 300 && MediaQuery.textScalerOf(context).scale(10) <= 11;
+          if (wide) {
+            return Row(
+              children: [
+                Expanded(child: text),
+                const SizedBox(width: 8),
+                button,
+              ],
+            );
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [text, const SizedBox(height: 10), button],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Espèces encaissées avant le solde prépayé et pas encore reversées, bouton « Reverser ».
 class _CashBox extends StatelessWidget {
   const _CashBox({
     required this.amount,
@@ -436,39 +540,26 @@ class _CashBox extends StatelessWidget {
         : (due.year == now.year && due.month == now.month && due.day == now.day)
         ? l.cashDueAt(formatClock(due))
         : l.cashDueTomorrow(formatClock(due));
-    return TintBox(
+    return _ActionBox(
       tone: overdue ? TintTone.danger : TintTone.accent,
-      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
-      child: Row(
-        children: [
-          TaraIcon(TaraIcons.cash, size: 22, color: c.accentText),
-          const SizedBox(width: 12),
-          Expanded(
-            child: MergeSemantics(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l.cashToDeposit, style: TaraText.label.copyWith(color: c.textSecondary)),
-                  Text(
-                    '${formatAmount(amount)} F',
-                    style: TaraText.bodyStrong.copyWith(color: c.accentStrongText, fontFeatures: TaraText.tabular),
-                  ),
-                  if (deadline != null)
-                    Text(
-                      deadline,
-                      style: TaraText.small.copyWith(
-                        color: overdue ? c.dangerTextStrong : c.textSecondary,
-                        fontWeight: overdue ? FontWeight.w700 : FontWeight.w500,
-                      ),
-                    ),
-                ],
-              ),
+      icon: TaraIcons.cash,
+      lines: [
+        Text(l.cashToDeposit, style: TaraText.label.copyWith(color: c.textSecondary)),
+        Text(
+          '${formatAmount(amount)}\u00a0F',
+          style: TaraText.bodyStrong.copyWith(color: c.accentStrongText, fontFeatures: TaraText.tabular),
+        ),
+        if (deadline != null)
+          Text(
+            deadline,
+            style: TaraText.small.copyWith(
+              color: overdue ? c.dangerTextStrong : c.textSecondary,
+              fontWeight: overdue ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
-          const SizedBox(width: 8),
-          GlassButton(label: l.depositAction, height: 44, radius: 14, onPressed: onDeposit),
-        ],
-      ),
+      ],
+      action: l.depositAction,
+      onAction: onDeposit,
     );
   }
 }

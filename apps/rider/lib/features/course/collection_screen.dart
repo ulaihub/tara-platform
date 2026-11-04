@@ -92,7 +92,6 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   String? _paymentId;
   bool _busy = false;
   String? _error;
-  RiderWallet? _wallet;
   StreamSubscription<RealtimeEvent>? _events;
 
   /// Abonnement temps réel à la course (événements `payment.status`), retiré à la sortie.
@@ -118,16 +117,6 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
         if (guess != null && _momo == _MomoState.idle) _operator = guess;
       });
     });
-    unawaited(_loadWallet());
-  }
-
-  Future<void> _loadWallet() async {
-    try {
-      final wallet = await ref.read(riderApiProvider).riderWallet();
-      if (mounted) setState(() => _wallet = wallet);
-    } catch (_) {
-      // Sans réseau : la ligne « espèces en main » n'est pas affichée.
-    }
   }
 
   @override
@@ -289,8 +278,6 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
     final cash = _method == _Method.cash;
     final operators = ref.watch(riderConfigProvider).value?.operators ?? const <MobileMoneyOperator>[];
     final waiting = _momo == _MomoState.sending || _momo == _MomoState.waiting || _momo == _MomoState.noAnswer;
-    final wallet = _wallet;
-    final cashAfter = wallet == null ? null : wallet.cashHeld + (cash ? _due : 0);
     final change = _received - _due;
 
     return TaraScreen(
@@ -404,19 +391,20 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 16),
-            if (cashAfter != null) ...[
-              // Libellé à gauche, montant à droite (maquette) : une ligne de moins sur petit écran.
+            if (cash) ...[
+              // Solde prépayé (G5) : l'argent encaissé en espèces est pris sur le solde, où
+              // il est mis de côté depuis l'acceptation. Libellé à gauche, montant à droite.
               MergeSemantics(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Expanded(
-                      child: Text(l.cashAfterCourse, style: TaraText.label.copyWith(color: c.textSecondary)),
+                      child: Text(l.takenFromBalance, style: TaraText.label.copyWith(color: c.textSecondary)),
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '${formatAmount(cashAfter)} F',
+                      '${formatAmount(-_due)} F',
                       style: TaraText.label.copyWith(
                         color: c.accentStrongText,
                         fontWeight: FontWeight.w800,
@@ -426,10 +414,6 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   ],
                 ),
               ),
-              if (wallet != null && cashAfter > wallet.cashLimit) ...[
-                const SizedBox(height: 8),
-                CourseWarning(l.cashLimitReached('${formatAmount(wallet.cashLimit)} F')),
-              ],
               const SizedBox(height: 12),
             ],
             if (cash)
