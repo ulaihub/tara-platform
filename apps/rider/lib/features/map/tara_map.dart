@@ -3,16 +3,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:tara_map/map_style.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/map_backdrop.dart';
 import 'package:tara_ui/tara_colors.dart';
 
 import '../../core/api/models.dart';
-import '../../core/env.dart';
 import '../../l10n/app_localizations.dart';
 import 'map_zones.dart';
 
@@ -108,9 +107,9 @@ class _TaraMapState extends ConsumerState<TaraMap> {
   }
 
   Future<void> _loadStyle(Brightness brightness) async {
-    final raw = await rootBundle.loadString('assets/map/tara-${brightness == Brightness.dark ? 'dark' : 'light'}.json');
+    final style = await loadTaraMapStyle(brightness);
     if (!mounted) return;
-    setState(() => _style = raw.replaceAll('{{TILES_URL}}', Env.tilesUrl).replaceAll('{{GLYPHS_URL}}', Env.glyphsUrl));
+    setState(() => _style = style);
   }
 
   @override

@@ -51,7 +51,7 @@ const demoZone = {
 const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
 for (const theme of ['dark', 'light']) {
   const style = JSON.parse(
-    readFileSync(new URL(`../../assets/map/tara-${theme}.json`, import.meta.url), 'utf8')
+    readFileSync(new URL(`../../../../packages/tara_map/assets/tara-${theme}.json`, import.meta.url), 'utf8')
       .replaceAll('{{TILES_URL}}', TILES)
       .replaceAll('{{GLYPHS_URL}}', GLYPHS),
   );

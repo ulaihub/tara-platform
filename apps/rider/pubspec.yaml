@@ -29,6 +29,8 @@ dependencies:
   maplibre_gl: ^0.28.0
   tara_core:
     path: ../../packages/tara_core
+  tara_map:
+    path: ../../packages/tara_map
   tara_ui:
     path: ../../packages/tara_ui
 
@@ -43,6 +45,4 @@ flutter:
   uses-material-design: true
   generate: true
 
-  assets:
-    - assets/map/
 

@@ -865,6 +865,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  tara_map:
+    dependency: "direct main"
+    description:
+      path: "../../packages/tara_map"
+      relative: true
+    source: path
+    version: "0.1.0"
   tara_test:
     dependency: "direct dev"
     description:

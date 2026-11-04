@@ -1,11 +1,11 @@
-"""Génère les styles MapLibre de l'app livreur (assets/map/tara-{dark,light}.json).
+"""Génère les styles MapLibre des apps Tara (packages/tara_map/assets/tara-{dark,light}.json).
 
 Schéma de tuiles OpenMapTiles (tuiles Tara auto-hébergées, ou OpenFreeMap en développement).
 Priorité au terrain : noms de rues, quartiers, commerces et lieux utiles, numéros, et zones
 interdites aux motos bien visibles. `{{TILES_URL}}` et `{{GLYPHS_URL}}` sont remplacés par
 l'app au chargement.
 
-    python3 tool/map_style.py
+    python3 packages/tara_map/tool/map_style.py
 """
 import json
 import pathlib
@@ -211,7 +211,7 @@ def style(name, t):
         "layers": layers,
     }
 
-out = pathlib.Path(__file__).resolve().parent.parent / "assets" / "map"
+out = pathlib.Path(__file__).resolve().parent.parent / "assets"
 out.mkdir(parents=True, exist_ok=True)
 for name, theme in THEMES.items():
     (out / f"tara-{name}.json").write_text(json.dumps(style(name, theme), ensure_ascii=False, separators=(",", ":")) + "\n")

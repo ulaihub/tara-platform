@@ -12,4 +12,5 @@ apps/rider
 packages/tara_ui
 packages/tara_core
 packages/tara_test
+packages/tara_map
 apps/client
