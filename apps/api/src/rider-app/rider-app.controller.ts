@@ -107,7 +107,7 @@ export class RiderAppController {
       safetyHotline: this.env.SAFETY_HOTLINE_PHONE,
       supportPhone: this.env.SUPPORT_PHONE ?? null,
       mobileMoneyOperators: [
-        { code: 'MTN', name: 'MTN Mobile Money' },
+        { code: 'MTN', name: 'MTN MoMo' },
         { code: 'ORANGE', name: 'Orange Money' },
       ],
       offerTimeoutSeconds: this.env.DISPATCH_OFFER_TIMEOUT_SECONDS,

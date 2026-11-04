@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_rider/features/course/collection_screen.dart';
 
 void main() {
-  test('montants reçus proposés : l’exact, puis les coupures au-dessus', () {
-    expect(receivedAmounts(12500), [12500, 13000, 15000, 20000]);
-    expect(receivedAmounts(10000), [10000, 11000, 15000, 20000]);
-    expect(receivedAmounts(1500), [1500, 2000, 5000, 10000]);
+  test('montants reçus proposés : l’exact, puis les trois multiples de 5 000 au-dessus', () {
+    expect(receivedAmounts(12500), [12500, 15000, 20000, 25000]);
+    expect(receivedAmounts(10000), [10000, 15000, 20000, 25000]);
+    expect(receivedAmounts(1500), [1500, 5000, 10000, 15000]);
   });
 
   test('opérateur deviné d’après le numéro, sinon aucun', () {

@@ -25,16 +25,12 @@ import '../common/error_text.dart';
 import '../common/phone_format.dart';
 import 'course_scaffold.dart';
 
-/// Montants que le client tend le plus souvent : le montant exact, puis les coupures au-dessus
-/// (billets de 1 000, 5 000 et 10 000 FCFA). Trois propositions au plus après l'exact.
+/// Montants proposés (maquette 12) : le montant exact, puis les trois multiples de 5 000 FCFA
+/// au-dessus (12 500 → 15 000, 20 000, 25 000).
 List<int> receivedAmounts(int due) {
-  int above(int step) {
-    final up = (due / step).ceil() * step;
-    return up == due ? up + step : up;
-  }
-
-  final options = {above(1000), above(5000), above(10000), above(10000) + 10000}.where((v) => v > due).toList()..sort();
-  return [due, ...options.take(3)];
+  const step = 5000;
+  final first = (due ~/ step + 1) * step;
+  return [due, for (var i = 0; i < 3; i++) first + i * step];
 }
 
 /// Opérateur deviné d'après le numéro camerounais (le livreur peut le changer) : MTN pour

@@ -413,7 +413,7 @@ describe('Actions du livreur (E2 à E9)', () => {
       safetyHotline: '+237640114064',
       supportPhone: null,
       mobileMoneyOperators: [
-        { code: 'MTN', name: 'MTN Mobile Money' },
+        { code: 'MTN', name: 'MTN MoMo' },
         { code: 'ORANGE', name: 'Orange Money' },
       ],
       offerTimeoutSeconds: 30,

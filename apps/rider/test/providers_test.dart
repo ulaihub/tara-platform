@@ -125,7 +125,7 @@ void main() {
           'safetyHotline': '+237699999999',
           'supportPhone': '+237622222222',
           'mobileMoneyOperators': [
-            {'code': 'MTN', 'name': 'MTN Mobile Money'},
+            {'code': 'MTN', 'name': 'MTN MoMo'},
           ],
           'offerTimeoutSeconds': 25,
         },
