@@ -548,4 +548,142 @@ class AppLocalizationsFr extends AppLocalizations {
   String locationLinkMessage(String name, String sender, String url) {
     return 'Bonjour $name, $sender vous envoie un colis avec Tara. Indiquez où vous le livrer : $url';
   }
+
+  @override
+  String get packageTitle => 'Qu’y a-t-il dans le colis ?';
+
+  @override
+  String get packageBody => 'Le livreur sait ainsi comment le transporter.';
+
+  @override
+  String get contentsLabel => 'Nature du contenu';
+
+  @override
+  String get contentsDocuments => 'Documents';
+
+  @override
+  String get contentsClothing => 'Vêtements, chaussures';
+
+  @override
+  String get contentsMedicine => 'Médicaments';
+
+  @override
+  String get contentsLaundry => 'Linge';
+
+  @override
+  String get contentsHousehold => 'Cuisine, maison';
+
+  @override
+  String get contentsElectronics => 'Électronique';
+
+  @override
+  String get contentsFood => 'Alimentation';
+
+  @override
+  String get contentsBeauty => 'Beauté';
+
+  @override
+  String get contentsSecondhand => 'Brocante';
+
+  @override
+  String get contentsOther => 'Autre';
+
+  @override
+  String get contentsRequired => 'Choisissez la nature du contenu.';
+
+  @override
+  String get descriptionLabel => 'Précisez (facultatif)';
+
+  @override
+  String get descriptionLabelRequired => 'Précisez le contenu';
+
+  @override
+  String get descriptionRequired => 'Décrivez ce que contient le colis.';
+
+  @override
+  String get descriptionHintDocuments => 'Ex. Contrat signé, dossier';
+
+  @override
+  String get descriptionHintClothing => 'Ex. 2 paires de chaussures';
+
+  @override
+  String get descriptionHintMedicine => 'Ex. Ordonnance de la pharmacie';
+
+  @override
+  String get descriptionHintLaundry => 'Ex. 1 sac de linge repassé';
+
+  @override
+  String get descriptionHintHousehold => 'Ex. Marmite et 6 verres';
+
+  @override
+  String get descriptionHintElectronics => 'Ex. Téléphone et chargeur';
+
+  @override
+  String get descriptionHintFood => 'Ex. Gâteau d’anniversaire';
+
+  @override
+  String get descriptionHintBeauty => 'Ex. Perruque, crèmes';
+
+  @override
+  String get descriptionHintSecondhand => 'Ex. Lampe ancienne';
+
+  @override
+  String get descriptionHintOther => 'Ex. Pièce de moto';
+
+  @override
+  String get sizeLabel => 'Taille';
+
+  @override
+  String sizeMax(int kg) {
+    return '≤ $kg kg';
+  }
+
+  @override
+  String get sizeHelpS => 'Jusqu’à 2 kg · tient dans une main : enveloppe, téléphone, médicaments.';
+
+  @override
+  String get sizeHelpM => 'Jusqu’à 5 kg · boîte à chaussures, petit sac de vêtements.';
+
+  @override
+  String get sizeHelpL => 'Jusqu’à 10 kg · carton moyen, sac de linge.';
+
+  @override
+  String get sizeHelpXL => 'Jusqu’à 20 kg · gros carton, petit électroménager. Supplément colis XL.';
+
+  @override
+  String get fragileTitle => 'Fragile';
+
+  @override
+  String get fragileBody => 'Le livreur le transporte avec soin.';
+
+  @override
+  String get codLabel => 'À encaisser auprès du destinataire';
+
+  @override
+  String get codHint => '0 si rien à encaisser';
+
+  @override
+  String get codHelp =>
+      'Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, reversées sur votre Mobile Money.';
+
+  @override
+  String get codTooHigh => '500 000 F au plus par livraison.';
+
+  @override
+  String get valueLabel => 'Valeur du contenu (facultatif)';
+
+  @override
+  String get valueHint => 'Ex. 25 000';
+
+  @override
+  String get valueHelp => 'En FCFA. Indiquée au livreur, utile en cas de litige.';
+
+  @override
+  String get valueTooHigh => '10 000 000 F au plus.';
+
+  @override
+  String get instructionsLabel => 'Instructions pour le livreur (facultatif)';
+
+  @override
+  String get instructionsHint => 'Ex. Appeler en arrivant, sonner au portail vert';
 }

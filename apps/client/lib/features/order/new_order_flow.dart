@@ -17,6 +17,7 @@ import '../../l10n/app_localizations.dart';
 import '../common/scoped_page.dart';
 import 'address_editor.dart';
 import 'order_draft.dart';
+import 'package_step.dart';
 import 'pickup_step.dart';
 import 'recipient_step.dart';
 
@@ -36,8 +37,8 @@ class NewOrderFlow extends ConsumerStatefulWidget {
 class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
   static const _total = 5;
 
-  /// Étapes déjà construites ; les suivantes (colis, quand, récapitulatif) arrivent ensuite.
-  static const _built = 2;
+  /// Étapes déjà construites ; les suivantes (quand, récapitulatif) arrivent ensuite.
+  static const _built = 3;
 
   static const _blobs = [
     BlobSpec(alignment: Alignment(1.3, -1.1), size: 260, colors: BlobSpec.brand, blur: 70),
@@ -69,6 +70,7 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
   bool get _stepValid => switch (_step) {
     0 => _draft.pickup != null,
     1 => _draft.delivery.hasRecipient && _draft.delivery.hasAddress,
+    2 => _draft.delivery.hasPackage,
     _ => true,
   };
 
@@ -229,6 +231,7 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
                             showErrors: _tried,
                             onAddAddress: () => unawaited(_placeAddress(pickup: true)),
                           ),
+                          2 => PackageStep(draft: _draft, merchant: me.merchant != null, showErrors: _tried),
                           _ => RecipientStep(
                             draft: _draft,
                             senderName: me.merchant?.shopName ?? me.fullName ?? '',

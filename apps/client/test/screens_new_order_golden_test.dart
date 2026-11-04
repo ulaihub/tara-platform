@@ -10,10 +10,11 @@ import 'package:tara_client/features/order/address_editor.dart';
 import 'package:tara_client/features/order/new_order_flow.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_map/pin_picker_map.dart';
+import 'package:tara_ui/components/inputs.dart';
 
 import 'helpers/fake_client_api.dart';
 import 'helpers/harness.dart';
-import 'screens_home_golden_test.dart' show shopOwner;
+import 'screens_home_golden_test.dart' show person, shopOwner;
 
 /// Marchande avec sa boutique et sa maison enregistrées, et trois destinataires habituels.
 FakeClientApi orderApi() => FakeClientApi()
@@ -52,10 +53,23 @@ List<Override> overrides(FakeClientApi api, {Future<bool> Function(Uri uri)? lau
   launcherProvider.overrideWithValue(launcher ?? (_) async => true),
 ];
 
-Widget flow(FakeClientApi api, {VoidCallback? onClose, Future<bool> Function(Uri uri)? launcher}) => ProviderScope(
-  overrides: overrides(api, launcher: launcher),
-  child: NewOrderFlow(me: shopOwner, onClose: onClose ?? () {}),
-);
+Widget flow(FakeClientApi api, {Me me = shopOwner, VoidCallback? onClose, Future<bool> Function(Uri uri)? launcher}) =>
+    ProviderScope(
+      overrides: overrides(api, launcher: launcher),
+      child: NewOrderFlow(me: me, onClose: onClose ?? () {}),
+    );
+
+/// Étape 3 : enlèvement choisi d'office, destinataire pris dans les récents.
+Future<void> toPackage(WidgetTester tester) async {
+  await toRecipient(tester);
+  await tester.tap(find.text('Marie'));
+  await settle(tester);
+  await tester.tap(find.text('Continuer'));
+  await settle(tester);
+}
+
+/// Interrupteur « Fragile » de l'étape 3.
+bool fragileOn(WidgetTester tester) => tester.widget<GlassSwitch>(find.byType(GlassSwitch)).value;
 
 Future<void> toRecipient(WidgetTester tester) async {
   await settle(tester);
@@ -98,6 +112,14 @@ void main() {
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(AddressEditor), matchesGoldenFile('goldens/05_adresse_carte/${variant.name}.png'));
     });
+
+    goldenTest('05 colis ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, flow(orderApi()));
+      await toPackage(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Étape 3 sur 5 · Colis'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_colis/${variant.name}.png'));
+    });
   }
 
   for (final brightness in Brightness.values) {
@@ -129,6 +151,22 @@ void main() {
       await settle(tester);
       expect(find.text('Lien envoyé à Paul'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_destinataire/lien_${brightness.name}.png'));
+    });
+
+    goldenTest('05 colis rempli ${brightness.name}', (tester) async {
+      await pumpVariant(tester, variant, flow(orderApi()), surface: const Size(390, 1640));
+      await toPackage(tester);
+      await tester.tap(find.text('Électronique'));
+      await tester.enterText(find.byType(TextField).at(0), 'Téléphone et chargeur');
+      await tester.tap(find.text('M'));
+      await tester.enterText(find.byType(TextField).at(1), '125000');
+      await tester.enterText(find.byType(TextField).at(2), '125000');
+      await tester.enterText(find.byType(TextField).at(3), 'Appeler en arrivant');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      expect(find.text('125\u00a0000'), findsNWidgets(2));
+      expect(fragileOn(tester), isTrue);
+      await expectLater(capture, matchesGoldenFile('goldens/05_colis/rempli_${brightness.name}.png'));
     });
 
     goldenTest('05 destinataire incomplet ${brightness.name}', (tester) async {
@@ -300,5 +338,58 @@ void main() {
     await settle(tester);
     expect(find.byType(NewOrderFlow), findsNothing);
     expect(find.text('Nouvelle livraison'), findsOneWidget);
+  });
+
+  testWidgets('la nature du contenu suggère taille et fragilité, sans écraser un choix', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, flow(orderApi()), surface: const Size(390, 1400));
+    await toPackage(tester);
+    await tester.tap(find.text('L'));
+    await tester.tap(find.text('Cuisine, maison'));
+    await settle(tester);
+    expect(fragileOn(tester), isTrue);
+    expect(find.text('Jusqu’à 10 kg · carton moyen, sac de linge.'), findsOneWidget);
+
+    // Taille choisie : les documents ne la ramènent pas à S.
+    await tester.tap(find.text('Documents'));
+    await settle(tester);
+    expect(fragileOn(tester), isFalse);
+    expect(find.text('Jusqu’à 10 kg · carton moyen, sac de linge.'), findsOneWidget);
+
+    // Fragilité choisie : l'électronique ne la change plus.
+    await tester.tap(find.text('Fragile'));
+    await settle(tester);
+    expect(fragileOn(tester), isTrue);
+    await tester.tap(find.text('Médicaments'));
+    await settle(tester);
+    expect(fragileOn(tester), isTrue);
+  });
+
+  testWidgets('un colis « Autre » demande une précision ; les montants ont un plafond', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, flow(orderApi()), surface: const Size(390, 1400));
+    await toPackage(tester);
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    expect(find.text('Choisissez la nature du contenu.'), findsOneWidget);
+
+    await tester.tap(find.text('Autre'));
+    await settle(tester);
+    expect(find.text('Précisez le contenu'), findsOneWidget);
+    expect(find.text('Décrivez ce que contient le colis.'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).at(0), 'Pièce de moto');
+    await settle(tester);
+    expect(find.text('Décrivez ce que contient le colis.'), findsNothing);
+
+    await tester.enterText(find.byType(TextField).at(1), '600000');
+    await settle(tester);
+    expect(find.text('600\u00a0000'), findsOneWidget);
+    expect(find.text('500 000 F au plus par livraison.'), findsOneWidget);
+  });
+
+  testWidgets('un particulier n’a pas de montant à encaisser', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, flow(orderApi(), me: person), surface: const Size(390, 1400));
+    await toPackage(tester);
+    expect(find.text('Étape 3 sur 5 · Colis'), findsOneWidget);
+    expect(find.text('À encaisser auprès du destinataire'), findsNothing);
+    expect(find.text('Valeur du contenu (facultatif)'), findsOneWidget);
   });
 }

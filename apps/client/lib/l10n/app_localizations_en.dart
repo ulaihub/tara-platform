@@ -543,4 +543,142 @@ class AppLocalizationsEn extends AppLocalizations {
   String locationLinkMessage(String name, String sender, String url) {
     return 'Hello $name, $sender is sending you a parcel with Tara. Tell us where to deliver it: $url';
   }
+
+  @override
+  String get packageTitle => 'What’s in the parcel?';
+
+  @override
+  String get packageBody => 'So the rider knows how to carry it.';
+
+  @override
+  String get contentsLabel => 'Contents';
+
+  @override
+  String get contentsDocuments => 'Documents';
+
+  @override
+  String get contentsClothing => 'Clothes, shoes';
+
+  @override
+  String get contentsMedicine => 'Medicines';
+
+  @override
+  String get contentsLaundry => 'Laundry';
+
+  @override
+  String get contentsHousehold => 'Kitchen, home';
+
+  @override
+  String get contentsElectronics => 'Electronics';
+
+  @override
+  String get contentsFood => 'Food';
+
+  @override
+  String get contentsBeauty => 'Beauty';
+
+  @override
+  String get contentsSecondhand => 'Second-hand';
+
+  @override
+  String get contentsOther => 'Other';
+
+  @override
+  String get contentsRequired => 'Choose what the parcel contains.';
+
+  @override
+  String get descriptionLabel => 'Details (optional)';
+
+  @override
+  String get descriptionLabelRequired => 'Describe the contents';
+
+  @override
+  String get descriptionRequired => 'Say what the parcel contains.';
+
+  @override
+  String get descriptionHintDocuments => 'E.g. Signed contract, file';
+
+  @override
+  String get descriptionHintClothing => 'E.g. 2 pairs of shoes';
+
+  @override
+  String get descriptionHintMedicine => 'E.g. Pharmacy prescription';
+
+  @override
+  String get descriptionHintLaundry => 'E.g. 1 bag of ironed laundry';
+
+  @override
+  String get descriptionHintHousehold => 'E.g. Pot and 6 glasses';
+
+  @override
+  String get descriptionHintElectronics => 'E.g. Phone and charger';
+
+  @override
+  String get descriptionHintFood => 'E.g. Birthday cake';
+
+  @override
+  String get descriptionHintBeauty => 'E.g. Wig, creams';
+
+  @override
+  String get descriptionHintSecondhand => 'E.g. Vintage lamp';
+
+  @override
+  String get descriptionHintOther => 'E.g. Motorbike part';
+
+  @override
+  String get sizeLabel => 'Size';
+
+  @override
+  String sizeMax(int kg) {
+    return '≤ $kg kg';
+  }
+
+  @override
+  String get sizeHelpS => 'Up to 2 kg · fits in one hand: envelope, phone, medicines.';
+
+  @override
+  String get sizeHelpM => 'Up to 5 kg · shoe box, small bag of clothes.';
+
+  @override
+  String get sizeHelpL => 'Up to 10 kg · medium box, laundry bag.';
+
+  @override
+  String get sizeHelpXL => 'Up to 20 kg · large box, small appliance. XL parcel surcharge.';
+
+  @override
+  String get fragileTitle => 'Fragile';
+
+  @override
+  String get fragileBody => 'The rider carries it with care.';
+
+  @override
+  String get codLabel => 'To collect from the recipient';
+
+  @override
+  String get codHint => '0 if nothing to collect';
+
+  @override
+  String get codHelp =>
+      'The rider collects this amount on delivery; it joins your sales, paid out to your Mobile Money.';
+
+  @override
+  String get codTooHigh => '500,000 F at most per delivery.';
+
+  @override
+  String get valueLabel => 'Value of the contents (optional)';
+
+  @override
+  String get valueHint => 'E.g. 25,000';
+
+  @override
+  String get valueHelp => 'In FCFA. Shown to the rider, useful in case of dispute.';
+
+  @override
+  String get valueTooHigh => '10,000,000 F at most.';
+
+  @override
+  String get instructionsLabel => 'Instructions for the rider (optional)';
+
+  @override
+  String get instructionsHint => 'E.g. Call on arrival, ring at the green gate';
 }

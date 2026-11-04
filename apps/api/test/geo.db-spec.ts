@@ -173,6 +173,11 @@ describe('Adresses, zones et lien de localisation (B1 à B6)', () => {
       .set(merchant.auth)
       .send({ shopName: 'Mode Akwa', payoutPhone: '677000002', payoutOperator: 'MTN' })
       .expect(200);
+    await request(ctx.http)
+      .put(`/v1/me/devices/${merchant.installationId}/push-token`)
+      .set(merchant.auth)
+      .send({ pushToken: `push-${randomUUID()}-${randomUUID()}` })
+      .expect(204);
 
     const link = await request(ctx.http)
       .post('/v1/location-links')
@@ -217,6 +222,53 @@ describe('Adresses, zones et lien de localisation (B1 à B6)', () => {
     // L'adresse rejoint le carnet du marchand, prête pour une commande.
     const book = await request(ctx.http).get('/v1/addresses').set(merchant.auth).expect(200);
     expect(book.body.some((a: { id: string }) => a.id === submitted.body.address.id)).toBe(true);
+
+    // Le marchand est prévenu, une seule fois, même après la seconde tentative refusée.
+    const pushes = await ctx.prisma.notification.findMany({
+      where: {
+        userId: merchant.userId,
+        channel: 'PUSH',
+        template: { startsWith: 'LOCATION_LINK' },
+      },
+    });
+    expect(pushes).toHaveLength(1);
+    expect(pushes[0]).toMatchObject({
+      template: 'LOCATION_LINK_SUBMITTED',
+      payload: {
+        params: { name: 'Brenda', landmark: 'Maison rose derrière l’église' },
+        data: {
+          type: 'location_link.submitted',
+          linkId: link.body.id,
+          addressId: submitted.body.address.id,
+        },
+      },
+    });
+  });
+
+  it('prévient l’expéditeur même sans nom de destinataire (B3)', async () => {
+    const sender = await signIn(ctx);
+    await request(ctx.http)
+      .put(`/v1/me/devices/${sender.installationId}/push-token`)
+      .set(sender.auth)
+      .send({ pushToken: `push-${randomUUID()}-${randomUUID()}` })
+      .expect(204);
+    const link = await request(ctx.http)
+      .post('/v1/location-links')
+      .set(sender.auth)
+      .send({})
+      .expect(201);
+    const token = (link.body.url as string).split('/l/')[1];
+    await request(ctx.http)
+      .post(`/v1/public/location-links/${token}`)
+      .send({ ...PLACES.bonamoussadi, landmark: '  Portail noir après le carrefour ' })
+      .expect(200);
+    const push = await ctx.prisma.notification.findFirstOrThrow({
+      where: { userId: sender.userId, channel: 'PUSH' },
+    });
+    expect(push).toMatchObject({
+      template: 'LOCATION_LINK_SUBMITTED_ANONYMOUS',
+      payload: { params: { name: '', landmark: 'Portail noir après le carrefour' } },
+    });
   });
 
   it('refuse un lien expiré ou inconnu', async () => {

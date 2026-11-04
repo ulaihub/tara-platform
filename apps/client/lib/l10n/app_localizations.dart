@@ -1105,6 +1105,276 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Bonjour {name}, {sender} vous envoie un colis avec Tara. Indiquez où vous le livrer : {url}'**
   String locationLinkMessage(String name, String sender, String url);
+
+  /// No description provided for @packageTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qu’y a-t-il dans le colis ?'**
+  String get packageTitle;
+
+  /// No description provided for @packageBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur sait ainsi comment le transporter.'**
+  String get packageBody;
+
+  /// No description provided for @contentsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nature du contenu'**
+  String get contentsLabel;
+
+  /// No description provided for @contentsDocuments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Documents'**
+  String get contentsDocuments;
+
+  /// No description provided for @contentsClothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vêtements, chaussures'**
+  String get contentsClothing;
+
+  /// No description provided for @contentsMedicine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Médicaments'**
+  String get contentsMedicine;
+
+  /// No description provided for @contentsLaundry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Linge'**
+  String get contentsLaundry;
+
+  /// No description provided for @contentsHousehold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cuisine, maison'**
+  String get contentsHousehold;
+
+  /// No description provided for @contentsElectronics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Électronique'**
+  String get contentsElectronics;
+
+  /// No description provided for @contentsFood.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alimentation'**
+  String get contentsFood;
+
+  /// No description provided for @contentsBeauty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Beauté'**
+  String get contentsBeauty;
+
+  /// No description provided for @contentsSecondhand.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brocante'**
+  String get contentsSecondhand;
+
+  /// No description provided for @contentsOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get contentsOther;
+
+  /// No description provided for @contentsRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la nature du contenu.'**
+  String get contentsRequired;
+
+  /// No description provided for @descriptionLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisez (facultatif)'**
+  String get descriptionLabel;
+
+  /// No description provided for @descriptionLabelRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisez le contenu'**
+  String get descriptionLabelRequired;
+
+  /// No description provided for @descriptionRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez ce que contient le colis.'**
+  String get descriptionRequired;
+
+  /// No description provided for @descriptionHintDocuments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Contrat signé, dossier'**
+  String get descriptionHintDocuments;
+
+  /// No description provided for @descriptionHintClothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. 2 paires de chaussures'**
+  String get descriptionHintClothing;
+
+  /// No description provided for @descriptionHintMedicine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Ordonnance de la pharmacie'**
+  String get descriptionHintMedicine;
+
+  /// No description provided for @descriptionHintLaundry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. 1 sac de linge repassé'**
+  String get descriptionHintLaundry;
+
+  /// No description provided for @descriptionHintHousehold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Marmite et 6 verres'**
+  String get descriptionHintHousehold;
+
+  /// No description provided for @descriptionHintElectronics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Téléphone et chargeur'**
+  String get descriptionHintElectronics;
+
+  /// No description provided for @descriptionHintFood.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Gâteau d’anniversaire'**
+  String get descriptionHintFood;
+
+  /// No description provided for @descriptionHintBeauty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Perruque, crèmes'**
+  String get descriptionHintBeauty;
+
+  /// No description provided for @descriptionHintSecondhand.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Lampe ancienne'**
+  String get descriptionHintSecondhand;
+
+  /// No description provided for @descriptionHintOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Pièce de moto'**
+  String get descriptionHintOther;
+
+  /// No description provided for @sizeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille'**
+  String get sizeLabel;
+
+  /// No description provided for @sizeMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'≤ {kg} kg'**
+  String sizeMax(int kg);
+
+  /// No description provided for @sizeHelpS.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jusqu’à 2 kg · tient dans une main : enveloppe, téléphone, médicaments.'**
+  String get sizeHelpS;
+
+  /// No description provided for @sizeHelpM.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jusqu’à 5 kg · boîte à chaussures, petit sac de vêtements.'**
+  String get sizeHelpM;
+
+  /// No description provided for @sizeHelpL.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jusqu’à 10 kg · carton moyen, sac de linge.'**
+  String get sizeHelpL;
+
+  /// No description provided for @sizeHelpXL.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jusqu’à 20 kg · gros carton, petit électroménager. Supplément colis XL.'**
+  String get sizeHelpXL;
+
+  /// No description provided for @fragileTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fragile'**
+  String get fragileTitle;
+
+  /// No description provided for @fragileBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur le transporte avec soin.'**
+  String get fragileBody;
+
+  /// No description provided for @codLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser auprès du destinataire'**
+  String get codLabel;
+
+  /// No description provided for @codHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'0 si rien à encaisser'**
+  String get codHint;
+
+  /// No description provided for @codHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, reversées sur votre Mobile Money.'**
+  String get codHelp;
+
+  /// No description provided for @codTooHigh.
+  ///
+  /// In fr, this message translates to:
+  /// **'500 000 F au plus par livraison.'**
+  String get codTooHigh;
+
+  /// No description provided for @valueLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur du contenu (facultatif)'**
+  String get valueLabel;
+
+  /// No description provided for @valueHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. 25 000'**
+  String get valueHint;
+
+  /// No description provided for @valueHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'En FCFA. Indiquée au livreur, utile en cas de litige.'**
+  String get valueHelp;
+
+  /// No description provided for @valueTooHigh.
+  ///
+  /// In fr, this message translates to:
+  /// **'10 000 000 F au plus.'**
+  String get valueTooHigh;
+
+  /// No description provided for @instructionsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Instructions pour le livreur (facultatif)'**
+  String get instructionsLabel;
+
+  /// No description provided for @instructionsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Appeler en arrivant, sonner au portail vert'**
+  String get instructionsHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -471,3 +471,93 @@ class InfoNote extends StatelessWidget {
     );
   }
 }
+
+/// Interrupteur de la marque : rail en verre, pastille blanche qui glisse avec un léger
+/// rebond, dégradé orange une fois activé. Lu « activé / désactivé » par les lecteurs
+/// d'écran ; toute la ligne qui l'entoure peut le basculer.
+class GlassSwitch extends StatelessWidget {
+  const GlassSwitch({super.key, required this.value, required this.onChanged, this.semanticLabel});
+
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  final String? semanticLabel;
+
+  static const _width = 52.0;
+  static const _height = 32.0;
+  static const _knob = 26.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final enabled = onChanged != null;
+    return Semantics(
+      toggled: value,
+      enabled: enabled,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: enabled
+            ? () {
+                HapticFeedback.selectionClick();
+                onChanged!(!value);
+              }
+            : null,
+        child: Opacity(
+          opacity: enabled ? 1 : .45,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            width: _width,
+            height: _height,
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              gradient: value ? TaraBrand.gradient : null,
+              color: value ? null : c.track,
+              borderRadius: BorderRadius.circular(_height / 2),
+              border: Border.all(color: value ? const Color(0x00000000) : c.chipBorder),
+            ),
+            child: AnimatedAlign(
+              duration: const Duration(milliseconds: 260),
+              curve: const Cubic(0.5, -0.3, 0.3, 1.4),
+              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                width: _knob - 2,
+                height: _knob - 2,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFFFFF),
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Color.fromRGBO(0, 0, 0, .18), blurRadius: 6, offset: Offset(0, 2))],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Saisie d'un montant en FCFA : chiffres seulement, [maxDigits] au plus, milliers séparés
+/// par une espace insécable (« 12 500 »), curseur en fin de saisie.
+class AmountInputFormatter extends TextInputFormatter {
+  AmountInputFormatter({this.maxDigits = 7});
+
+  final int maxDigits;
+
+  /// Montant saisi, ou null si le champ est vide.
+  static int? valueOf(String text) {
+    final digits = text.replaceAll(RegExp(r'\D'), '');
+    return digits.isEmpty ? null : int.parse(digits);
+  }
+
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    var digits = newValue.text.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp('^0+(?=\\d)'), '');
+    if (digits.length > maxDigits) digits = digits.substring(0, maxDigits);
+    final out = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) out.write(' ');
+      out.write(digits[i]);
+    }
+    final text = out.toString();
+    return TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length));
+  }
+}

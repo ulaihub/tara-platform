@@ -31,6 +31,11 @@ class DeliveryDraft {
   String description = '';
   String size = 'S';
   bool fragile = false;
+
+  /// Taille et fragilité choisies par l'expéditeur : la nature du contenu ne les suggère
+  /// plus ensuite.
+  bool sizeChosen = false;
+  bool fragileChosen = false;
   int? declaredValue;
   int codAmount = 0;
   String instructions = '';
@@ -39,6 +44,17 @@ class DeliveryDraft {
 
   /// Adresse connue, ou demandée par lien (la commande attend alors qu'elle arrive).
   bool get hasAddress => dropoff != null || link != null;
+
+  /// Montant à encaisser au plus par livraison (G5) ; valeur déclarée au plus.
+  static const maxCod = 500000;
+  static const maxDeclaredValue = 10000000;
+
+  /// Nature choisie, précisée si « Autre », montants dans les plafonds.
+  bool get hasPackage =>
+      contents != null &&
+      (contents != 'OTHER' || description.trim().length >= 2) &&
+      codAmount <= maxCod &&
+      (declaredValue ?? 0) <= maxDeclaredValue;
 }
 
 /// Brouillon de la nouvelle livraison, rempli étape par étape (enlèvement, destinataire,

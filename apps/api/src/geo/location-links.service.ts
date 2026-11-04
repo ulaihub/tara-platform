@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
 import { ENV } from '../config/config.module.js';
@@ -6,7 +6,9 @@ import type { Env } from '../config/env.js';
 import { AppError } from '../common/errors/app-error.js';
 import { randomToken } from '../common/crypto.js';
 import type { LocationLink } from '../generated/prisma/client.js';
+import { NotificationService } from '../notifications/notification.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { RealtimeService } from '../realtime/realtime.service.js';
 import { AddressesService } from './addresses.service.js';
 import type {
   LocationLinkBody,
@@ -30,9 +32,13 @@ function statusOf(link: Pick<LocationLink, 'submittedAt' | 'expiresAt'>, now = n
  */
 @Injectable()
 export class LocationLinksService {
+  private readonly logger = new Logger(LocationLinksService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly addresses: AddressesService,
+    private readonly notifications: NotificationService,
+    private readonly realtime: RealtimeService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -132,7 +138,7 @@ export class LocationLinksService {
     if (status === 'SUBMITTED') throw AppError.conflict('LOCATION_LINK_ALREADY_USED');
     if (status === 'EXPIRED') throw new AppError('LOCATION_LINK_EXPIRED', 410);
 
-    await this.prisma.$transaction(async (tx) => {
+    const addressId = await this.prisma.$transaction(async (tx) => {
       const address = await this.addresses.createAddress(
         {
           ownerId: link.createdById,
@@ -150,7 +156,33 @@ export class LocationLinksService {
         data: { submittedAt: new Date(), addressId: address.id },
       });
       if (count !== 1) throw AppError.conflict('LOCATION_LINK_ALREADY_USED');
+      return address.id;
     });
+    await this.notifySubmitted(link, addressId, body.landmark, body.contactName);
     return this.publicView(token);
+  }
+
+  /**
+   * Prévient l'expéditeur que l'adresse est arrivée : push (app fermée) et événement temps
+   * réel (app ouverte sur la commande). Un échec d'envoi n'annule pas l'adresse.
+   */
+  private async notifySubmitted(
+    link: LocationLink,
+    addressId: string,
+    landmark: string,
+    contactName: string | undefined,
+  ): Promise<void> {
+    const data = { type: 'location_link.submitted', linkId: link.id, addressId };
+    this.realtime.toUser(link.createdById, 'location-link.submitted', data);
+    const name = (link.recipientName ?? contactName ?? '').trim();
+    try {
+      await this.notifications.toUser(link.createdById, {
+        template: name ? 'LOCATION_LINK_SUBMITTED' : 'LOCATION_LINK_SUBMITTED_ANONYMOUS',
+        params: { name, landmark: landmark.trim() },
+        data,
+      });
+    } catch (error) {
+      this.logger.warn(`Lien ${link.id} rempli, expéditeur non prévenu : ${String(error)}`);
+    }
   }
 }
