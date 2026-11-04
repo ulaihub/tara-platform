@@ -93,7 +93,7 @@ void main() {
     final refused = await actions.pickUp(order(), code: '0000', photoPath: 'colis.jpg', at: here);
     expect(refused.outcome, ActionOutcome.refused);
     expect(refused.message, 'Code de l’expéditeur incorrect. Essais restants : 4.');
-    expect(actions.refusedPickup(order().id)?.id, refused.actionId);
+    expect(actions.refused(order().id, 'pickup')?.id, refused.actionId);
     expect(active.order?.status, 'ASSIGNED');
 
     final fixed = await actions.pickUp(
@@ -107,7 +107,7 @@ void main() {
     expect(fixed.outcome, ActionOutcome.sent);
     expect(uploads, ['colis.jpg']);
     expect(sent.where((s) => s.$1.endsWith('/depart')), hasLength(1));
-    expect(actions.refusedPickup(order().id), isNull);
+    expect(actions.refused(order().id, 'pickup'), isNull);
   });
 
   test('photo reprise après un refus : l’ancienne action et sa photo sont abandonnées', () async {
@@ -138,5 +138,87 @@ void main() {
     await queue.flush();
     await queue.flush();
     expect(queue.items, isEmpty);
+  });
+
+  group('livraison', () {
+    setUp(() async => active.start(order(status: 'IN_DELIVERY')));
+
+    test('avec le code : reçue, la course est livrée et quitte le téléphone', () async {
+      final result = await actions.deliver(
+        order(status: 'IN_DELIVERY'),
+        code: '4821',
+        photoPath: 'remise.jpg',
+        at: here,
+      );
+      expect(result.outcome, ActionOutcome.sent);
+      expect(sent.single.$1, endsWith('/deliver'));
+      expect(sent.single.$2, containsPair('deliveryCode', '4821'));
+      expect(sent.single.$2.containsKey('receivedBy'), isFalse);
+      expect(active.order, isNull);
+    });
+
+    test('sans code : nom de la personne qui reçoit, attente de la validation du support', () async {
+      final result = await actions.deliver(
+        order(status: 'IN_DELIVERY'),
+        receivedBy: 'Sa sœur, Brigitte',
+        photoPath: 'remise.jpg',
+        at: here,
+      );
+      expect(result.outcome, ActionOutcome.sent);
+      expect(sent.single.$2, containsPair('receivedBy', 'Sa sœur, Brigitte'));
+      expect(sent.single.$2.containsKey('deliveryCode'), isFalse);
+      expect(active.order?.awaitingSupportValidation, isTrue);
+      expect(active.order?.status, 'IN_DELIVERY');
+    });
+
+    test('sans réseau : livraison gardée, la course l’indique en attendant l’envoi', () async {
+      server = (path, body) async => throw offline;
+      final result = await actions.deliver(
+        order(status: 'IN_DELIVERY'),
+        code: '4821',
+        photoPath: 'remise.jpg',
+        at: here,
+      );
+      expect(result.outcome, ActionOutcome.queued);
+      expect(active.order?.deliveryQueued, isTrue);
+      expect(queue.items.single.kind, 'deliver');
+    });
+
+    test('code faux puis passage sans code : l’action refusée est remplacée', () async {
+      var attempts = 0;
+      server = (path, body) async {
+        if (attempts++ == 0) {
+          throw const ApiException(
+            code: 'DELIVERY_CODE_INVALID',
+            message: 'Code du destinataire incorrect.',
+            status: 422,
+          );
+        }
+        return null;
+      };
+      final refused = await actions.deliver(
+        order(status: 'IN_DELIVERY'),
+        code: '0000',
+        photoPath: 'remise.jpg',
+        at: here,
+      );
+      expect(refused.outcome, ActionOutcome.refused);
+      expect(actions.refused(order().id, 'deliver')?.id, refused.actionId);
+
+      final fixed = await actions.deliver(
+        order(status: 'IN_DELIVERY'),
+        receivedBy: 'Le gardien',
+        photoPath: 'remise.jpg',
+        at: here,
+        retryActionId: refused.actionId,
+      );
+      expect(fixed.outcome, ActionOutcome.sent);
+      expect(sent.single.$2.containsKey('deliveryCode'), isFalse);
+      // La photo de remise, gardée, n'est pas renvoyée : elle était déjà sur le serveur.
+      expect(uploads, ['remise.jpg']);
+      expect(sent.single.$2, containsPair('photoKey', 'proofs/remise.jpg'));
+      expect(actions.refused(order().id, 'deliver'), isNull);
+      expect(queue.items, isEmpty);
+    });
   });
 }

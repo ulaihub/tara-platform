@@ -9,11 +9,13 @@ import '../../core/course/active_order.dart';
 import '../../core/course/course_actions.dart';
 import '../../core/realtime/realtime_client.dart';
 import '../../design/components/glass.dart';
+import '../../design/format.dart';
 import '../../design/tara_colors.dart';
 import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/status_screen.dart';
 import '../course/course_banner.dart';
+import '../course/delivery_screen.dart';
 import '../course/pickup_screen.dart';
 import '../offer/offer_screen.dart';
 import 'home_offline_screen.dart';
@@ -36,6 +38,9 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Course réduite à l'accueil (bouton retour) : identifiant de la course réduite.
   String? _minimized;
+
+  /// Encaissement ouvert pour cette course (avant l'envoi de la livraison).
+  String? _collecting;
   late final ActiveOrderController _activeOrder;
   Timer? _noticeTimer;
   StreamSubscription<RealtimeEvent>? _realtime;
@@ -56,7 +61,11 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     final ended = _activeOrder.takeEnded();
     if (ended == null || !mounted) return;
     final l = AppLocalizations.of(context);
-    _showNotice(ended == OrderEnded.cancelled ? l.orderCancelledNotice : l.orderReassignedNotice);
+    _showNotice(switch (ended) {
+      OrderEnded.delivered => l.orderDeliveredNotice,
+      OrderEnded.cancelled => l.orderCancelledNotice,
+      OrderEnded.reassigned => l.orderReassignedNotice,
+    });
   }
 
   @override
@@ -117,25 +126,65 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   /// Écran de la course selon son étape.
   Widget _course(RiderOrder order) {
     final l = AppLocalizations.of(context);
+    final actions = ref.read(courseActionsProvider);
     void minimize() => setState(() => _minimized = order.id);
-    final refused = ref.read(courseActionsProvider).refusedPickup(order.id);
-    if (order.status == 'ASSIGNED' || refused != null) {
+    void sos() {}
+    // Une action refusée (code faux saisi hors réseau) ramène à son écran pour la corriger.
+    if (order.status == 'ASSIGNED' || actions.refused(order.id, 'pickup') != null) {
       return PickupScreen(
         key: ValueKey('pickup-${order.id}'),
         order: order,
         onBack: minimize,
-        onSos: () {},
+        onSos: sos,
         onPickedUp: (outcome) {
           if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
         },
       );
     }
-    // Écran de livraison (09) au prochain lot.
-    return StatusScreen(
-      title: l.parcelOnBoard,
-      body: l.parcelOnBoardBody(order.reference),
-      actionLabel: l.continueLabel,
-      onAction: minimize,
+    final refusedDelivery = actions.refused(order.id, 'deliver') != null;
+    if (order.deliveryQueued && !refusedDelivery) {
+      return StatusScreen(
+        title: l.deliveryQueuedTitle,
+        body: l.deliveryQueuedBody,
+        actionLabel: l.backHome,
+        onAction: minimize,
+      );
+    }
+    if (order.awaitingSupportValidation && !refusedDelivery) {
+      return StatusScreen(
+        title: l.awaitingSupportTitle,
+        body: l.awaitingSupportBody,
+        actionLabel: l.backHome,
+        onAction: minimize,
+      );
+    }
+    if (order.status == 'DELIVERY_FAILED') {
+      // Écrans d'échec et de retour (10, 11) dans un prochain lot.
+      return StatusScreen(
+        title: l.deliveryFailedTitle,
+        body: l.deliveryFailedBody,
+        actionLabel: l.backHome,
+        onAction: minimize,
+      );
+    }
+    if (_collecting == order.id) {
+      // Écran d'encaissement (12) au prochain lot.
+      return StatusScreen(
+        title: l.collectionPendingTitle('${formatAmount(order.collectAtDelivery)}\u00A0F'),
+        body: l.collectionPendingBody,
+        actionLabel: l.back,
+        onAction: () => setState(() => _collecting = null),
+      );
+    }
+    return DeliveryScreen(
+      key: ValueKey('delivery-${order.id}'),
+      order: order,
+      onBack: minimize,
+      onSos: sos,
+      onCollect: () => setState(() => _collecting = order.id),
+      onDelivered: (outcome) {
+        if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
+      },
     );
   }
 
@@ -165,7 +214,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                           ? null
                           : CourseBanner(
                               reference: order.reference,
-                              stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.parcelOnBoard,
+                              stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.toDropoff,
                               onResume: () => setState(() => _minimized = null),
                             ),
                     )

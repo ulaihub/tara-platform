@@ -103,7 +103,12 @@ final trackBufferProvider = Provider<TrackBuffer>(
 
 /// Actions de course (enlèvement, livraison…) passées par la file hors connexion.
 final courseActionsProvider = Provider<CourseActions>(
-  (ref) => CourseActions(queue: ref.watch(actionQueueProvider), activeOrder: ref.watch(activeOrderProvider)),
+  (ref) => CourseActions(
+    queue: ref.watch(actionQueueProvider),
+    activeOrder: ref.watch(activeOrderProvider),
+    locate: () async =>
+        ref.read(onlineControllerProvider).lastPosition ?? await ref.read(positionSourceProvider).current(),
+  ),
 );
 
 enum AuthStatus { signedOut, signedIn }

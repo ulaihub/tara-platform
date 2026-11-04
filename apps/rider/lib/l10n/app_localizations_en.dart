@@ -538,15 +538,102 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courseResume => 'Resume';
 
   @override
-  String get parcelOnBoard => 'Parcel on board';
-
-  @override
-  String parcelOnBoardBody(String reference) {
-    return 'Reference $reference. Heading to the recipient: the delivery screen comes in the next batch.';
-  }
-
-  @override
   String courseRefRecorded(String reference) {
     return 'Job $reference · route recorded';
   }
+
+  @override
+  String get toDropoff => 'To the customer';
+
+  @override
+  String toDropoffMinutes(int minutes) {
+    return 'To the customer · $minutes min';
+  }
+
+  @override
+  String get arrivedAtDestination => 'Arrived at destination';
+
+  @override
+  String get collectAtDeliveryTitle => 'Collect on delivery';
+
+  @override
+  String get collectAtDeliveryBody => 'Cash or Mobile Money, before handover.';
+
+  @override
+  String farFromAddress(String distance) {
+    return 'You are $distance from the address: a delivery confirmed from here will be flagged to support.';
+  }
+
+  @override
+  String get deliveryCodeLabel => 'Recipient code';
+
+  @override
+  String get deliveryCodeHint => 'received by SMS';
+
+  @override
+  String get noCodeLink => 'The customer has no code';
+
+  @override
+  String get hasCodeLink => 'The customer has a code';
+
+  @override
+  String get noCodeTitle => 'Delivery without a code';
+
+  @override
+  String get noCodeBody =>
+      'The handover photo is required. Support calls the customer to confirm before closing the job.';
+
+  @override
+  String get receivedByLabel => 'Name of the person receiving';
+
+  @override
+  String get receivedByHint => 'E.g. their sister, the guard…';
+
+  @override
+  String get photoHandover => 'Photograph the handover';
+
+  @override
+  String get photoHandoverHint => 'Parcel and place visible';
+
+  @override
+  String photoHandoverTaken(String time) {
+    return 'Handover photo · taken at $time';
+  }
+
+  @override
+  String get confirmDelivery => 'Confirm delivery';
+
+  @override
+  String collectionPendingTitle(String amount) {
+    return 'Collection · $amount';
+  }
+
+  @override
+  String get collectionPendingBody =>
+      'The collection screen (12) comes in the next batch. The delivery is sent right after collection.';
+
+  @override
+  String get deliveryQueuedTitle => 'Delivery saved';
+
+  @override
+  String get deliveryQueuedBody => 'No network: the delivery is sent automatically as soon as it is back.';
+
+  @override
+  String get awaitingSupportTitle => 'Delivery declared';
+
+  @override
+  String get awaitingSupportBody =>
+      'Support calls the customer to confirm the handover. You will be notified once it is validated.';
+
+  @override
+  String get orderDeliveredNotice => 'Job delivered. Thank you!';
+
+  @override
+  String get backHome => 'Back to home';
+
+  @override
+  String get deliveryFailedTitle => 'Failed delivery';
+
+  @override
+  String get deliveryFailedBody => 'The failure and return screens (10 and 11) come in a later batch.';
 }

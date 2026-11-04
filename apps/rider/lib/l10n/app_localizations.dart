@@ -1034,23 +1034,179 @@ abstract class AppLocalizations {
   /// **'Reprendre'**
   String get courseResume;
 
-  /// No description provided for @parcelOnBoard.
-  ///
-  /// In fr, this message translates to:
-  /// **'Colis à bord'**
-  String get parcelOnBoard;
-
-  /// No description provided for @parcelOnBoardBody.
-  ///
-  /// In fr, this message translates to:
-  /// **'Référence {reference}. Direction le destinataire : l’écran de livraison arrive au prochain lot.'**
-  String parcelOnBoardBody(String reference);
-
   /// En-tête des écrans de course : le livreur sait que son trajet est enregistré pendant la course.
   ///
   /// In fr, this message translates to:
   /// **'Course {reference} · trajet enregistré'**
   String courseRefRecorded(String reference);
+
+  /// No description provided for @toDropoff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vers le client'**
+  String get toDropoff;
+
+  /// No description provided for @toDropoffMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vers le client · {minutes} min'**
+  String toDropoffMinutes(int minutes);
+
+  /// No description provided for @arrivedAtDestination.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrivé à destination'**
+  String get arrivedAtDestination;
+
+  /// No description provided for @collectAtDeliveryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser à la remise'**
+  String get collectAtDeliveryTitle;
+
+  /// No description provided for @collectAtDeliveryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces ou Mobile Money, avant la remise.'**
+  String get collectAtDeliveryBody;
+
+  /// No description provided for @farFromAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes à {distance} de l’adresse : une livraison confirmée d’ici sera signalée au support.'**
+  String farFromAddress(String distance);
+
+  /// No description provided for @deliveryCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code du destinataire'**
+  String get deliveryCodeLabel;
+
+  /// No description provided for @deliveryCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'reçu par SMS'**
+  String get deliveryCodeHint;
+
+  /// No description provided for @noCodeLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client n’a pas de code'**
+  String get noCodeLink;
+
+  /// No description provided for @hasCodeLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client a un code'**
+  String get hasCodeLink;
+
+  /// No description provided for @noCodeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison sans code'**
+  String get noCodeTitle;
+
+  /// No description provided for @noCodeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'La photo de remise est obligatoire. Le support appelle le client pour confirmer avant de clôturer la course.'**
+  String get noCodeBody;
+
+  /// No description provided for @receivedByLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de la personne qui reçoit'**
+  String get receivedByLabel;
+
+  /// No description provided for @receivedByHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. sa sœur, le gardien…'**
+  String get receivedByHint;
+
+  /// No description provided for @photoHandover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier la remise'**
+  String get photoHandover;
+
+  /// No description provided for @photoHandoverHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis et lieu de remise visibles'**
+  String get photoHandoverHint;
+
+  /// No description provided for @photoHandoverTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de remise · prise à {time}'**
+  String photoHandoverTaken(String time);
+
+  /// No description provided for @confirmDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la livraison'**
+  String get confirmDelivery;
+
+  /// No description provided for @collectionPendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissement · {amount}'**
+  String collectionPendingTitle(String amount);
+
+  /// No description provided for @collectionPendingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’écran d’encaissement (12) arrive au prochain lot. La livraison partira juste après l’encaissement.'**
+  String get collectionPendingBody;
+
+  /// No description provided for @deliveryQueuedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison enregistrée'**
+  String get deliveryQueuedTitle;
+
+  /// No description provided for @deliveryQueuedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de réseau : la livraison part automatiquement dès son retour.'**
+  String get deliveryQueuedBody;
+
+  /// No description provided for @awaitingSupportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison déclarée'**
+  String get awaitingSupportTitle;
+
+  /// No description provided for @awaitingSupportBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le support appelle le client pour confirmer la remise. Vous serez prévenu dès la validation.'**
+  String get awaitingSupportBody;
+
+  /// No description provided for @orderDeliveredNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course livrée. Merci !'**
+  String get orderDeliveredNotice;
+
+  /// No description provided for @backHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à l’accueil'**
+  String get backHome;
+
+  /// No description provided for @deliveryFailedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de livraison'**
+  String get deliveryFailedTitle;
+
+  /// No description provided for @deliveryFailedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’écran d’échec et de retour (10 et 11) arrive dans un prochain lot.'**
+  String get deliveryFailedBody;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

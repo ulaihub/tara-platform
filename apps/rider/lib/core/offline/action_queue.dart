@@ -192,11 +192,12 @@ class ActionQueue extends ChangeNotifier {
   }
 
   /// Le livreur abandonne une action refusée (après appel au support) : elle est retirée.
-  Future<void> discard(String id) async {
+  /// [keepPhoto] : la photo sert à l'action qui la remplace.
+  Future<void> discard(String id, {bool keepPhoto = false}) async {
     final action = _items.where((item) => item.id == id).firstOrNull;
     _items = _items.where((item) => item.id != id).toList();
     await _save();
-    if (action?.photoPath != null) await deletePhoto(action!.photoPath!);
+    if (!keepPhoto && action?.photoPath != null) await deletePhoto(action!.photoPath!);
   }
 
   /// Le livreur a corrigé l'action (code ressaisi) : elle repart.

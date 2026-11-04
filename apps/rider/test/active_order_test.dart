@@ -145,11 +145,11 @@ void main() {
     expect(active.order?.status, 'IN_DELIVERY');
   });
 
-  test('livrée : la course quitte le téléphone sans alerte', () async {
+  test('livrée : la course quitte le téléphone, le livreur en est informé', () async {
     final active = controller();
     await active.start(order());
     await active.update(order(status: 'DELIVERED'));
     expect(active.order, isNull);
-    expect(active.takeEnded(), isNull);
+    expect(active.takeEnded(), OrderEnded.delivered);
   });
 }

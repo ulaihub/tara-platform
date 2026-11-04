@@ -8,8 +8,8 @@ import '../api/models.dart';
 import '../realtime/realtime_client.dart';
 import '../session/session_store.dart';
 
-/// Pourquoi la course a quitté l'écran sans que le livreur la termine.
-enum OrderEnded { cancelled, reassigned }
+/// Pourquoi la course a quitté l'écran : livrée, ou retirée au livreur.
+enum OrderEnded { delivered, cancelled, reassigned }
 
 /// Course en cours du livreur. Gardée sur le téléphone (stockage chiffré) pour que la
 /// course, ses adresses et ses codes restent disponibles sans réseau ; tenue à jour par
@@ -49,7 +49,7 @@ class ActiveOrderController extends ChangeNotifier {
 
   RiderOrder? get order => _order;
 
-  /// Course annulée ou réattribuée pendant que le livreur l'avait : à lui signaler une fois.
+  /// Course livrée, annulée ou réattribuée : à signaler une fois au livreur.
   OrderEnded? takeEnded() {
     final ended = _ended;
     _ended = null;
@@ -92,6 +92,7 @@ class ActiveOrderController extends ChangeNotifier {
   Future<void> update(RiderOrder order) async {
     if (order.inProgress) return _set(order);
     if (order.status == 'CANCELLED') _ended = OrderEnded.cancelled;
+    if (order.status == 'DELIVERED') _ended = OrderEnded.delivered;
     await clear();
   }
 

@@ -288,8 +288,6 @@
   "orderReassignedNotice": "Course confiée à un autre livreur.",
   "courseInProgress": "Course {reference} en cours",
   "courseResume": "Reprendre",
-  "parcelOnBoard": "Colis à bord",
-  "parcelOnBoardBody": "Référence {reference}. Direction le destinataire : l’écran de livraison arrive au prochain lot.",
   "@toPickupMinutes": {
     "placeholders": {
       "minutes": {
@@ -311,18 +309,67 @@
       }
     }
   },
-  "@parcelOnBoardBody": {
+  "courseRefRecorded": "Course {reference} · trajet enregistré",
+  "@courseRefRecorded": {
+    "description": "En-tête des écrans de course : le livreur sait que son trajet est enregistré pendant la course.",
     "placeholders": {
       "reference": {
         "type": "String"
       }
     }
   },
-  "courseRefRecorded": "Course {reference} · trajet enregistré",
-  "@courseRefRecorded": {
-    "description": "En-tête des écrans de course : le livreur sait que son trajet est enregistré pendant la course.",
+  "toDropoff": "Vers le client",
+  "toDropoffMinutes": "Vers le client · {minutes} min",
+  "arrivedAtDestination": "Arrivé à destination",
+  "collectAtDeliveryTitle": "À encaisser à la remise",
+  "collectAtDeliveryBody": "Espèces ou Mobile Money, avant la remise.",
+  "farFromAddress": "Vous êtes à {distance} de l’adresse : une livraison confirmée d’ici sera signalée au support.",
+  "deliveryCodeLabel": "Code du destinataire",
+  "deliveryCodeHint": "reçu par SMS",
+  "noCodeLink": "Le client n’a pas de code",
+  "hasCodeLink": "Le client a un code",
+  "noCodeTitle": "Livraison sans code",
+  "noCodeBody": "La photo de remise est obligatoire. Le support appelle le client pour confirmer avant de clôturer la course.",
+  "receivedByLabel": "Nom de la personne qui reçoit",
+  "receivedByHint": "Ex. sa sœur, le gardien…",
+  "photoHandover": "Photographier la remise",
+  "photoHandoverHint": "Colis et lieu de remise visibles",
+  "photoHandoverTaken": "Photo de remise · prise à {time}",
+  "confirmDelivery": "Confirmer la livraison",
+  "collectionPendingTitle": "Encaissement · {amount}",
+  "collectionPendingBody": "L’écran d’encaissement (12) arrive au prochain lot. La livraison partira juste après l’encaissement.",
+  "deliveryQueuedTitle": "Livraison enregistrée",
+  "deliveryQueuedBody": "Pas de réseau : la livraison part automatiquement dès son retour.",
+  "awaitingSupportTitle": "Livraison déclarée",
+  "awaitingSupportBody": "Le support appelle le client pour confirmer la remise. Vous serez prévenu dès la validation.",
+  "orderDeliveredNotice": "Course livrée. Merci !",
+  "backHome": "Retour à l’accueil",
+  "deliveryFailedTitle": "Échec de livraison",
+  "deliveryFailedBody": "L’écran d’échec et de retour (10 et 11) arrive dans un prochain lot.",
+  "@toDropoffMinutes": {
     "placeholders": {
-      "reference": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@farFromAddress": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "@photoHandoverTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@collectionPendingTitle": {
+    "placeholders": {
+      "amount": {
         "type": "String"
       }
     }

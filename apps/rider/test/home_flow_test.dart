@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_rider/app/providers.dart';
@@ -7,10 +8,12 @@ import 'package:tara_rider/core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
 import 'package:tara_rider/core/course/course_actions.dart';
+import 'package:tara_rider/core/course/proof_photo.dart';
 import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/core/session/session_store.dart';
+import 'package:tara_rider/features/course/delivery_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
 import 'package:tara_rider/features/home/home_flow.dart';
 import 'package:tara_rider/features/home/home_summary.dart';
@@ -67,6 +70,7 @@ Future<({ActiveOrderController active, ActionQueue queue})> pumpHome(
         activeOrderProvider.overrideWithValue(active),
         courseActionsProvider.overrideWithValue(CourseActions(queue: queue, activeOrder: active)),
         onlineControllerProvider.overrideWithValue(online),
+        takeProofPhotoProvider.overrideWithValue(() async => 'remise.jpg'),
       ],
       child: const HomeFlow(),
     ),
@@ -91,9 +95,23 @@ void main() {
     expect(find.byType(PickupScreen), findsOneWidget);
   });
 
-  testWidgets('colis à bord : écran d’attente de la livraison', (tester) async {
+  testWidgets('colis à bord : écran de livraison ; livraison déclarée sans code : attente du support', (tester) async {
+    final (:active, queue: _) = await pumpHome(tester, order(status: 'IN_DELIVERY'));
+    expect(find.byType(DeliveryScreen), findsOneWidget);
+    await tester.runAsync(() => active.update(active.order!.withChanges({'awaitingSupportValidation': true})));
+    await settle(tester);
+    expect(find.text('Livraison déclarée'), findsOneWidget);
+  });
+
+  testWidgets('argent à encaisser : « Confirmer la livraison » ouvre d’abord l’encaissement', (tester) async {
     await pumpHome(tester, order(status: 'IN_DELIVERY'));
-    expect(find.text('Colis à bord'), findsOneWidget);
+    await tester.enterText(find.byType(EditableText).first, '4821');
+    await tester.ensureVisible(find.text('Photographier la remise'));
+    await tester.tap(find.text('Photographier la remise'));
+    await settle(tester);
+    await tester.tap(find.text('Confirmer la livraison'));
+    await settle(tester);
+    expect(find.text('Encaissement · 12\u00A0500\u00A0F'), findsOneWidget);
   });
 
   testWidgets('enlèvement refusé plus tard (code faux) : l’écran 08 revient avec le message', (tester) async {

@@ -31,10 +31,18 @@ class ActionResult {
 /// suite quand le réseau le permet, sinon gardées et rejouées sans doublon. L'état de la
 /// course sur le téléphone avance aussitôt ; le serveur le confirme ensuite.
 class CourseActions {
-  CourseActions({required this.queue, required this.activeOrder, this.settleTimeout = const Duration(seconds: 8)});
+  CourseActions({
+    required this.queue,
+    required this.activeOrder,
+    this.locate,
+    this.settleTimeout = const Duration(seconds: 8),
+  });
 
   final ActionQueue queue;
   final ActiveOrderController activeOrder;
+
+  /// Position du moment, jointe aux actions (dernière connue, sinon mesurée).
+  final Future<GeoPoint?> Function()? locate;
 
   /// Attente maximale de la réponse du serveur avant de continuer hors ligne.
   final Duration settleTimeout;
@@ -49,33 +57,99 @@ class CourseActions {
     String? retryActionId,
   }) async {
     final position = {'latitude': at.latitude, 'longitude': at.longitude};
-    final body = {'pickupCode': code, ...position};
-    final previous = queue.items.where((action) => action.id == retryActionId).firstOrNull;
-    String id;
-    if (previous != null && previous.photoPath == photoPath) {
-      // Même photo (déjà envoyée) : seul le code change.
-      await queue.retry(previous.id, body: body);
-      id = previous.id;
-    } else {
-      // Photo reprise : l'ancienne action est abandonnée, une nouvelle part.
-      if (previous != null) await queue.discard(previous.id);
-      id = (await queue.enqueue(orderId: order.id, kind: 'pickup', body: body, photoPath: photoPath)).id;
-    }
-    final action = await _settle(id);
-    if (action != null && action.failed) {
-      return ActionResult(
-        ActionOutcome.refused,
-        actionId: action.id,
-        code: action.failureCode,
-        message: action.failureMessage,
-      );
-    }
+    final action = await _send(
+      order,
+      kind: 'pickup',
+      body: {'pickupCode': code, ...position},
+      photoPath: photoPath,
+      retryActionId: retryActionId,
+    );
+    if (action != null && action.failed) return _refusal(action);
     // Un départ déjà en file (enlèvement corrigé après un refus) n'est pas doublé.
     final departQueued = queue.forOrder(order.id).any((item) => item.kind == 'depart' && !item.failed);
     if (!departQueued) await queue.enqueue(orderId: order.id, kind: 'depart', body: position);
     await activeOrder.update(order.withStatus('IN_DELIVERY'));
     return ActionResult(action == null ? ActionOutcome.sent : ActionOutcome.queued);
   }
+
+  /// Livraison (E4) : code du destinataire, ou sans code le nom de la personne qui reçoit
+  /// (le support appelle le client avant de valider) ; photo de remise dans les deux cas.
+  Future<ActionResult> deliver(
+    RiderOrder order, {
+    String? code,
+    String? receivedBy,
+    required String photoPath,
+    required GeoPoint at,
+    String? retryActionId,
+  }) async {
+    final action = await _send(
+      order,
+      kind: 'deliver',
+      body: {'deliveryCode': ?code, 'receivedBy': ?receivedBy, 'latitude': at.latitude, 'longitude': at.longitude},
+      photoPath: photoPath,
+      retryActionId: retryActionId,
+      // Passage avec ou sans code : la nouvelle action remplace l'ancienne.
+      sameMode: (previous) => previous.body.containsKey('deliveryCode') == (code != null),
+    );
+    if (action != null && action.failed) return _refusal(action);
+    if (action == null && code != null) {
+      // Reçue avec le code : la course est livrée et quitte le téléphone.
+      await activeOrder.update(order.withStatus('DELIVERED'));
+      return const ActionResult(ActionOutcome.sent);
+    }
+    await activeOrder.update(
+      order.withChanges({
+        if (code == null) 'awaitingSupportValidation': true,
+        if (action != null) RiderOrder.deliveryQueuedKey: true,
+      }),
+    );
+    return ActionResult(action == null ? ActionOutcome.sent : ActionOutcome.queued);
+  }
+
+  /// Action refusée de cette sorte encore dans la file (écran rouvert, app relancée).
+  QueuedAction? refused(String orderId, String kind) =>
+      queue.forOrder(orderId).where((action) => action.kind == kind && action.failed).lastOrNull;
+
+  /// Position jointe aux actions.
+  Future<GeoPoint?> position() async => locate?.call();
+
+  /// Envoie une action (ou la corrige après un refus) puis attend la réponse du serveur.
+  Future<QueuedAction?> _send(
+    RiderOrder order, {
+    required String kind,
+    required Json body,
+    required String photoPath,
+    String? retryActionId,
+    bool Function(QueuedAction previous)? sameMode,
+  }) async {
+    final previous = queue.items.where((action) => action.id == retryActionId).firstOrNull;
+    String id;
+    if (previous != null && previous.photoPath == photoPath && (sameMode?.call(previous) ?? true)) {
+      // Même photo (déjà envoyée) : seul le code change.
+      await queue.retry(previous.id, body: body);
+      id = previous.id;
+    } else {
+      // Photo reprise ou mode changé : l'ancienne action est abandonnée, une nouvelle part.
+      // Même photo : elle est gardée, et réutilisée telle quelle si elle a déjà été envoyée.
+      final samePhoto = previous?.photoPath == photoPath;
+      final uploaded = samePhoto ? previous?.body['photoKey'] : null;
+      if (previous != null) await queue.discard(previous.id, keepPhoto: samePhoto);
+      id = (await queue.enqueue(
+        orderId: order.id,
+        kind: kind,
+        body: {...body, 'photoKey': ?uploaded},
+        photoPath: photoPath,
+      )).id;
+    }
+    return _settle(id);
+  }
+
+  static ActionResult _refusal(QueuedAction action) => ActionResult(
+    ActionOutcome.refused,
+    actionId: action.id,
+    code: action.failureCode,
+    message: action.failureMessage,
+  );
 
   /// Attend l'envoi de l'action. Un envoi déjà en cours a pu partir sans elle : un second
   /// passage la prend. Renvoie l'action si elle est encore dans la file (sans réseau, ou
@@ -92,8 +166,4 @@ class CourseActions {
     // Réseau très lent : on n'attend pas plus de quelques secondes, l'envoi continue.
     return attempt().timeout(settleTimeout, onTimeout: find);
   }
-
-  /// Enlèvement refusé encore dans la file (écran rouvert, app relancée).
-  QueuedAction? refusedPickup(String orderId) =>
-      queue.forOrder(orderId).where((action) => action.kind == 'pickup' && action.failed).lastOrNull;
 }

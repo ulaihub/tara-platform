@@ -540,15 +540,102 @@ class AppLocalizationsFr extends AppLocalizations {
   String get courseResume => 'Reprendre';
 
   @override
-  String get parcelOnBoard => 'Colis à bord';
-
-  @override
-  String parcelOnBoardBody(String reference) {
-    return 'Référence $reference. Direction le destinataire : l’écran de livraison arrive au prochain lot.';
-  }
-
-  @override
   String courseRefRecorded(String reference) {
     return 'Course $reference · trajet enregistré';
   }
+
+  @override
+  String get toDropoff => 'Vers le client';
+
+  @override
+  String toDropoffMinutes(int minutes) {
+    return 'Vers le client · $minutes min';
+  }
+
+  @override
+  String get arrivedAtDestination => 'Arrivé à destination';
+
+  @override
+  String get collectAtDeliveryTitle => 'À encaisser à la remise';
+
+  @override
+  String get collectAtDeliveryBody => 'Espèces ou Mobile Money, avant la remise.';
+
+  @override
+  String farFromAddress(String distance) {
+    return 'Vous êtes à $distance de l’adresse : une livraison confirmée d’ici sera signalée au support.';
+  }
+
+  @override
+  String get deliveryCodeLabel => 'Code du destinataire';
+
+  @override
+  String get deliveryCodeHint => 'reçu par SMS';
+
+  @override
+  String get noCodeLink => 'Le client n’a pas de code';
+
+  @override
+  String get hasCodeLink => 'Le client a un code';
+
+  @override
+  String get noCodeTitle => 'Livraison sans code';
+
+  @override
+  String get noCodeBody =>
+      'La photo de remise est obligatoire. Le support appelle le client pour confirmer avant de clôturer la course.';
+
+  @override
+  String get receivedByLabel => 'Nom de la personne qui reçoit';
+
+  @override
+  String get receivedByHint => 'Ex. sa sœur, le gardien…';
+
+  @override
+  String get photoHandover => 'Photographier la remise';
+
+  @override
+  String get photoHandoverHint => 'Colis et lieu de remise visibles';
+
+  @override
+  String photoHandoverTaken(String time) {
+    return 'Photo de remise · prise à $time';
+  }
+
+  @override
+  String get confirmDelivery => 'Confirmer la livraison';
+
+  @override
+  String collectionPendingTitle(String amount) {
+    return 'Encaissement · $amount';
+  }
+
+  @override
+  String get collectionPendingBody =>
+      'L’écran d’encaissement (12) arrive au prochain lot. La livraison partira juste après l’encaissement.';
+
+  @override
+  String get deliveryQueuedTitle => 'Livraison enregistrée';
+
+  @override
+  String get deliveryQueuedBody => 'Pas de réseau : la livraison part automatiquement dès son retour.';
+
+  @override
+  String get awaitingSupportTitle => 'Livraison déclarée';
+
+  @override
+  String get awaitingSupportBody =>
+      'Le support appelle le client pour confirmer la remise. Vous serez prévenu dès la validation.';
+
+  @override
+  String get orderDeliveredNotice => 'Course livrée. Merci !';
+
+  @override
+  String get backHome => 'Retour à l’accueil';
+
+  @override
+  String get deliveryFailedTitle => 'Échec de livraison';
+
+  @override
+  String get deliveryFailedBody => 'L’écran d’échec et de retour (10 et 11) arrive dans un prochain lot.';
 }

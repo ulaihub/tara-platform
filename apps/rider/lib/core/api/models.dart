@@ -573,6 +573,14 @@ class RiderOrder {
 
   /// Statut changé sur le téléphone, avant la confirmation du serveur (action en file).
   RiderOrder withStatus(String status) => RiderOrder.fromJson({...raw, 'status': status});
+
+  /// Champs changés sur le téléphone (ex. livraison déclarée, en attente du support).
+  RiderOrder withChanges(Json changes) => RiderOrder.fromJson({...raw, ...changes});
+
+  /// Livraison enregistrée sur le téléphone, pas encore reçue par le serveur (sans réseau).
+  /// Champ propre à l'app : jamais renvoyé par l'API.
+  bool get deliveryQueued => raw[deliveryQueuedKey] == true;
+  static const deliveryQueuedKey = '_deliveryQueued';
 }
 
 /// Itinéraire vers la prochaine étape de la course, à dessiner sur la carte.

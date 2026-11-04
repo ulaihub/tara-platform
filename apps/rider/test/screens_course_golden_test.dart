@@ -8,8 +8,11 @@ import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
 import 'package:tara_rider/core/course/course_actions.dart';
 import 'package:tara_rider/core/course/proof_photo.dart';
+import 'package:tara_rider/core/location/location_tracker.dart';
+import 'package:tara_rider/core/location/online_controller.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/core/session/session_store.dart';
+import 'package:tara_rider/features/course/delivery_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 
@@ -35,14 +38,39 @@ CourseActions courseActions() {
   );
 }
 
-Widget scope(Widget child) => ProviderScope(
+/// Position du livreur pour les captures (Akwa : à 2,5 km du client de Bonapriso).
+class _Positions implements PositionSource {
+  @override
+  Future<LocationAccess> ensureAccess() async => LocationAccess.granted;
+  @override
+  Future<GeoPoint?> current() async =>
+      GeoPoint(latitude: 4.0511, longitude: 9.6942, recordedAt: DateTime.utc(2026, 11, 3));
+  @override
+  Stream<GeoPoint> watch({
+    required Duration interval,
+    required String notificationTitle,
+    required String notificationText,
+  }) => const Stream.empty();
+}
+
+Widget scope(Widget child, {OnlineController? online}) => ProviderScope(
   overrides: [
     keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
     realMapProvider.overrideWithValue(false),
     takeProofPhotoProvider.overrideWithValue(() async => photo),
     courseActionsProvider.overrideWithValue(courseActions()),
+    if (online != null) onlineControllerProvider.overrideWithValue(online),
   ],
   child: child,
+);
+
+DeliveryScreen delivery(RiderOrder order) => DeliveryScreen(
+  order: order,
+  onBack: () {},
+  onSos: () {},
+  onDelivered: (_) {},
+  onCollect: () {},
+  now: () => DateTime(2026, 11, 3, 15, 4),
 );
 
 PickupScreen pickup(RiderOrder order) => PickupScreen(
@@ -57,6 +85,43 @@ void main() {
   setUpAll(loadAppFonts);
 
   for (final variant in Variant.matrix) {
+    goldenTest('09 livraison ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scope(delivery(order(status: 'IN_DELIVERY'))));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('Code du destinataire'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/09_livraison/${variant.name}.png'));
+    });
+
+    goldenTest('09 livraison sans code ${variant.name}', (tester) async {
+      final online = OnlineController(
+        positions: _Positions(),
+        setPresence: ({required online, required position}) async => Presence(online: online, blockers: const []),
+        sendPosition: (_) async {},
+      );
+      await tester.runAsync(online.goOnline);
+      await pumpVariant(
+        tester,
+        variant,
+        scope(delivery(order(status: 'IN_DELIVERY', collectAtDelivery: 0)), online: online),
+      );
+      await settle(tester);
+      final context = tester.element(find.byType(DeliveryScreen));
+      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
+      await tester.ensureVisible(find.text('Le client n’a pas de code'));
+      await tester.tap(find.text('Le client n’a pas de code'));
+      await settle(tester);
+      await tester.enterText(find.byType(EditableText).first, 'Sa sœur, Brigitte');
+      await tester.ensureVisible(find.text('Photographier la remise'));
+      await tester.tap(find.text('Photographier la remise'));
+      await tester.pump();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('Vous êtes à 2,5'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/09_livraison_sans_code/${variant.name}.png'));
+    });
+
     goldenTest('08 enlèvement ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, scope(pickup(order())));
       await settle(tester);

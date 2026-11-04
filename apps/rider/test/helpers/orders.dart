@@ -66,7 +66,16 @@ Json orderJson({
   'deliveredAt': null,
 };
 
-RiderOrder order({String status = 'ASSIGNED', int collectAtPickup = 1500, bool pickupRestricted = false}) =>
-    RiderOrder.fromJson(
-      orderJson(status: status, collectAtPickup: collectAtPickup, pickupRestricted: pickupRestricted),
-    );
+RiderOrder order({
+  String status = 'ASSIGNED',
+  int collectAtPickup = 1500,
+  int collectAtDelivery = 12500,
+  bool pickupRestricted = false,
+}) => RiderOrder.fromJson(
+  orderJson(
+    status: status,
+    collectAtPickup: collectAtPickup,
+    collectAtDelivery: collectAtDelivery,
+    pickupRestricted: pickupRestricted,
+  ),
+);
