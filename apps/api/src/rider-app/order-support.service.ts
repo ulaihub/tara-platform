@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import type { Request } from 'express';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthUser } from '../auth/auth.types.js';
@@ -11,6 +12,18 @@ import { OrderTransitionsService } from '../orders/order-transitions.service.js'
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { RiderOrdersService } from './rider-orders.service.js';
+
+const DECISION_TEXT = {
+  SENDER: { RETRY: 'nouvelle tentative', RETURN: 'retour à l’expéditeur' },
+  SUPPORT: {
+    RETRY: 'nouvelle tentative, choisie par le support Tara',
+    RETURN: 'retour à l’expéditeur, choisi par le support Tara',
+  },
+  SYSTEM: {
+    RETRY: 'nouvelle tentative',
+    RETURN: 'retour à l’expéditeur, sans réponse dans le délai',
+  },
+} as const;
 
 /**
  * Décisions humaines sur une course en cours : validation d'une livraison sans code par le
@@ -86,21 +99,93 @@ export class OrderSupportService {
   }
 
   /** L'expéditeur choisit, après un échec : nouvelle tentative ou retour du colis. */
+  /** Choix de l'expéditeur après un échec : nouvelle tentative ou retour (E6). */
   async failureDecision(
     user: AuthUser,
     orderId: string,
     decision: 'RETRY' | 'RETURN',
   ): Promise<void> {
-    const order = await this.prisma.order.findUnique({
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (order?.senderId !== user.id) throw AppError.notFound('ORDER_NOT_FOUND');
+    await this.decide(orderId, decision, 'SENDER');
+  }
+
+  /**
+   * Le support choisit à la place de l'expéditeur (expéditeur joint par téléphone, ou
+   * injoignable alors que le livreur attend avec le colis). Action tracée.
+   */
+  async failureDecisionForSender(
+    user: AuthUser,
+    orderId: string,
+    decision: 'RETRY' | 'RETURN',
+    request: Request,
+  ): Promise<void> {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
+    await this.decide(orderId, decision, 'SUPPORT');
+    await this.audit.record({
+      actor: user,
+      action: 'order.failure-decision',
+      entityType: 'order',
+      entityId: orderId,
+      before: { failureDecision: order.failureDecision },
+      after: { failureDecision: decision },
+      request,
+    });
+  }
+
+  @Cron('*/30 * * * * *', { name: 'failure-decision-sweep' })
+  async scheduledSweep(): Promise<void> {
+    if (!this.env.JOBS_ENABLED) return;
+    await this.sweepFailures();
+  }
+
+  /**
+   * Retour automatique : sans décision de l'expéditeur dans le délai
+   * (FAILURE_DECISION_TIMEOUT_MINUTES), le colis repart chez lui ; le livreur n'attend pas.
+   */
+  async sweepFailures(now = new Date()): Promise<number> {
+    const due = await this.prisma.order.findMany({
+      where: {
+        status: 'DELIVERY_FAILED',
+        failureDecision: null,
+        failedAt: {
+          lte: new Date(now.getTime() - this.env.FAILURE_DECISION_TIMEOUT_MINUTES * 60_000),
+        },
+      },
+      select: { id: true },
+      take: 100,
+    });
+    let returned = 0;
+    for (const { id } of due) {
+      if (await this.decide(id, 'RETURN', 'SYSTEM')) returned++;
+    }
+    return returned;
+  }
+
+  /** Enregistre la décision, puis prévient le livreur (et l'expéditeur s'il n'a pas choisi). */
+  private async decide(
+    orderId: string,
+    decision: 'RETRY' | 'RETURN',
+    by: 'SENDER' | 'SUPPORT' | 'SYSTEM',
+  ): Promise<boolean> {
+    const { count } = await this.prisma.order.updateMany({
+      // Le retour automatique ne remplace jamais un choix déjà fait.
+      where: {
+        id: orderId,
+        status: 'DELIVERY_FAILED',
+        ...(by === 'SYSTEM' ? { failureDecision: null } : {}),
+      },
+      data: { failureDecision: decision },
+    });
+    if (count !== 1) {
+      if (by === 'SYSTEM') return false;
+      throw AppError.conflict('FAILURE_DECISION_NOT_EXPECTED');
+    }
+    const order = await this.prisma.order.findUniqueOrThrow({
       where: { id: orderId },
       include: { rider: { select: { userId: true } } },
     });
-    if (order?.senderId !== user.id) throw AppError.notFound('ORDER_NOT_FOUND');
-    const { count } = await this.prisma.order.updateMany({
-      where: { id: orderId, status: 'DELIVERY_FAILED' },
-      data: { failureDecision: decision },
-    });
-    if (count !== 1) throw AppError.conflict('FAILURE_DECISION_NOT_EXPECTED');
     const event = {
       orderId,
       reference: order.reference,
@@ -109,17 +194,24 @@ export class OrderSupportService {
       at: new Date().toISOString(),
     };
     this.realtime.toOrder(orderId, 'order.status', event);
+    const text = DECISION_TEXT[by][decision];
     if (order.rider) {
       this.realtime.toUser(order.rider.userId, 'order.status', event);
       await this.notifications.toUser(order.rider.userId, {
         template: 'RIDER_FAILURE_DECISION',
-        params: {
-          reference: order.reference,
-          decision: decision === 'RETRY' ? 'nouvelle tentative' : 'retour à l’expéditeur',
-        },
+        params: { reference: order.reference, decision: text },
         data: { type: 'order.failure-decision', orderId, decision },
         orderId,
       });
     }
+    if (by !== 'SENDER') {
+      await this.notifications.toUser(order.senderId, {
+        template: 'SENDER_FAILURE_DECISION',
+        params: { reference: order.reference, decision: text },
+        data: { type: 'order.status', orderId, status: 'DELIVERY_FAILED' },
+        orderId,
+      });
+    }
+    return true;
   }
 }

@@ -107,6 +107,11 @@ export class RiderAppController {
       country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
       safetyHotline: this.env.SAFETY_HOTLINE_PHONE,
       supportPhone: this.env.SUPPORT_PHONE ?? null,
+      failurePolicy: {
+        minCalls: this.env.FAILURE_MIN_CALLS,
+        callSpacingMinutes: this.env.FAILURE_CALL_SPACING_MINUTES,
+        decisionTimeoutMinutes: this.env.FAILURE_DECISION_TIMEOUT_MINUTES,
+      },
       emergencyNumbers: {
         police: this.env.EMERGENCY_POLICE_NUMBER,
         fire: this.env.EMERGENCY_FIRE_NUMBER,
@@ -451,6 +456,22 @@ export class AdminSupportController {
     @Req() request: Request,
   ): Promise<void> {
     await this.support.validateDelivery(user, id, body.note, request);
+  }
+
+  /**
+   * Après un échec, le support choisit à la place de l'expéditeur (joint par téléphone, ou
+   * injoignable alors que le livreur attend). Action tracée (E6).
+   */
+  @Post('orders/:id/failure-decision')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiZodBody(FailureDecisionBody)
+  async failureDecisionForSender(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(FailureDecisionBody) body: z.output<typeof FailureDecisionBody>,
+    @Req() request: Request,
+  ): Promise<void> {
+    await this.support.failureDecisionForSender(user, id, body.decision, request);
   }
 
   @Get('safety-alerts')

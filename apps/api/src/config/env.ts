@@ -112,6 +112,14 @@ const envSchema = z
     EMERGENCY_POLICE_NUMBER: EmergencyNumber.default('117'),
     EMERGENCY_FIRE_NUMBER: EmergencyNumber.default('118'),
     EMERGENCY_MEDICAL_NUMBER: EmergencyNumber.default('119'),
+    /**
+     * Échec de livraison (E6) : appels au destinataire exigés pour « absent », « injoignable »
+     * et « adresse introuvable », écart minimal entre le premier et le dernier, puis délai
+     * laissé à l'expéditeur pour choisir avant le retour automatique.
+     */
+    FAILURE_MIN_CALLS: z.coerce.number().int().min(1).max(5).default(2),
+    FAILURE_CALL_SPACING_MINUTES: z.coerce.number().min(0).max(60).default(5),
+    FAILURE_DECISION_TIMEOUT_MINUTES: z.coerce.number().min(0.05).max(240).default(15),
     /** Ligne du support Tara, affichée dans l'app livreur ; sans valeur, le bouton est masqué. */
     SUPPORT_PHONE: CameroonMobile.optional(),
 

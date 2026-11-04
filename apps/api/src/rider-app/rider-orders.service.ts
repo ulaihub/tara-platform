@@ -11,7 +11,7 @@ import { OnlineTimeService } from '../dispatch/online-time.service.js';
 import { OrderFinanceService } from '../finance/order-finance.service.js';
 import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js';
 import type { Order, Prisma, RiderProfile } from '../generated/prisma/client.js';
-import type { OrderStatus, ProofKind } from '../generated/prisma/enums.js';
+import type { FailureReason, OrderStatus, ProofKind } from '../generated/prisma/enums.js';
 import { AddressesService } from '../geo/addresses.service.js';
 import { checkTransition } from '../orders/order-state-machine.js';
 import {
@@ -57,6 +57,16 @@ type ActionContext = z.output<typeof PositionActionBody>;
  * sans effet de bord grâce à son identifiant (`clientEventId`) : l'app hors ligne peut
  * renvoyer sa file d'actions autant de fois que nécessaire.
  */
+/** Appels au destinataire exigés avant un échec, selon le motif (E6). */
+const CALLS_REQUIRED: Record<FailureReason, number | 'policy'> = {
+  RECIPIENT_ABSENT: 'policy',
+  RECIPIENT_UNREACHABLE: 'policy',
+  ADDRESS_NOT_FOUND: 'policy',
+  OTHER: 1,
+  REFUSED: 0,
+  PAYMENT_REFUSED: 0,
+};
+
 @Injectable()
 export class RiderOrdersService {
   constructor(
@@ -189,6 +199,14 @@ export class RiderOrdersService {
               }
             : null,
         failureDecision: order.failureDecision,
+        failureReason: order.failureReason,
+        failedAt: order.failedAt?.toISOString() ?? null,
+        failureDecisionDueAt:
+          order.status === 'DELIVERY_FAILED' && !order.failureDecision && order.failedAt
+            ? new Date(
+                order.failedAt.getTime() + this.env.FAILURE_DECISION_TIMEOUT_MINUTES * 60_000,
+              ).toISOString()
+            : null,
         awaitingSupportValidation: awaiting.has(order.id),
         assignedAt: order.assignedAt?.toISOString() ?? null,
         pickedUpAt: order.pickedUpAt?.toISOString() ?? null,
@@ -318,6 +336,7 @@ export class RiderOrdersService {
     if (await this.replayed(orderId, body.clientEventId)) return this.get(userId, orderId);
     const { order } = await this.load(userId, orderId);
     await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
+    this.checkFailure(body);
     await this.act(
       userId,
       order,
@@ -332,6 +351,32 @@ export class RiderOrdersService {
       { failureReason: body.reason, note: body.note },
     );
     return this.get(userId, orderId);
+  }
+
+  /**
+   * Preuve d'appel exigée selon le motif (E6) : un faux « client absent » coûte une course
+   * au client ; un refus sur place n'a pas besoin d'appel.
+   */
+  private checkFailure(body: z.output<typeof FailBody>): void {
+    if (body.reason === 'OTHER' && !body.note) {
+      throw AppError.badRequest('VALIDATION_FAILED', {}, [{ path: 'note', message: 'requis' }]);
+    }
+    const rule = CALLS_REQUIRED[body.reason];
+    const required = rule === 'policy' ? this.env.FAILURE_MIN_CALLS : rule;
+    if (required === 0) return;
+    const times = body.callLog
+      .filter((call) => call.to === 'RECIPIENT')
+      .map((call) => Date.parse(call.at))
+      .sort((a, b) => a - b);
+    const spacing = required > 1 ? this.env.FAILURE_CALL_SPACING_MINUTES * 60_000 : 0;
+    const spread = times.length > 0 ? (times.at(-1) ?? 0) - (times[0] ?? 0) : 0;
+    if (times.length < required || spread < spacing) {
+      if (required === 1) throw AppError.unprocessable('FAILURE_CALL_REQUIRED');
+      throw AppError.unprocessable('FAILURE_CALLS_REQUIRED', {
+        required,
+        spacingMinutes: this.env.FAILURE_CALL_SPACING_MINUTES,
+      });
+    }
   }
 
   /** Nouvelle tentative après un échec. */

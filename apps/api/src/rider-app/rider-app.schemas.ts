@@ -73,8 +73,13 @@ export const FailBody = z.object({
   reason: FailureReasonEnum,
   note: z.string().trim().max(300).optional(),
   photoKey: MediaKey,
-  /** Appels passés avant de déclarer l'échec (E6) : au moins un. */
-  callLog: z.array(CallLogEntry).min(1).max(20),
+  /**
+   * Appels passés depuis l'app avant de déclarer l'échec (E6). Exigés selon le motif :
+   * absent, injoignable, adresse introuvable : FAILURE_MIN_CALLS appels au destinataire
+   * étalés sur FAILURE_CALL_SPACING_MINUTES ; autre motif : un appel ; colis ou paiement
+   * refusé : aucun (le client est sur place).
+   */
+  callLog: z.array(CallLogEntry).max(20).default([]),
   ...ActionContext,
 });
 
@@ -146,6 +151,11 @@ export const RiderOrderDto = z
     /** Liens d'itinéraire vers la prochaine étape (E2). */
     navigation: z.object({ googleMaps: z.url(), waze: z.url() }).nullable(),
     failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
+    /** Dernier échec de livraison : motif et heure (E6). */
+    failureReason: FailureReasonEnum.nullable(),
+    failedAt: z.iso.datetime().nullable(),
+    /** Échec sans décision de l'expéditeur : heure du retour automatique. */
+    failureDecisionDueAt: z.iso.datetime().nullable(),
     /** Livraison sans code déclarée, en attente de la validation du support (E4). */
     awaitingSupportValidation: z.boolean(),
     assignedAt: z.iso.datetime().nullable(),
@@ -226,6 +236,12 @@ export const RiderConfigDto = z
     }),
     safetyHotline: z.string(),
     supportPhone: z.string().nullable(),
+    /** Échec de livraison (E6) : appels exigés et délai de décision de l'expéditeur. */
+    failurePolicy: z.object({
+      minCalls: z.int(),
+      callSpacingMinutes: z.number(),
+      decisionTimeoutMinutes: z.number(),
+    }),
     /** Numéros d'urgence du pays, composés depuis l'écran d'alerte. */
     emergencyNumbers: z.object({ police: z.string(), fire: z.string(), medical: z.string() }),
     mobileMoneyOperators: z.array(z.object({ code: z.string(), name: z.string() })),

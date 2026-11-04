@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { type FakePushProvider, PUSH_PROVIDER } from '../src/notifications/push.provider.js';
+import { OrderSupportService } from '../src/rider-app/order-support.service.js';
 import {
   createTestApp,
   type SignedIn,
@@ -252,22 +253,46 @@ describe('Actions du livreur (E2 à E9)', () => {
     const { rider, order } = await assigned();
     await pickUp(rider, order);
     const photoKey = await proofPhoto(ctx, rider);
-    await request(ctx.http)
+    // Client absent : deux appels au destinataire, à 5 min d'écart au moins.
+    const call = (minutesAgo: number) => ({
+      to: 'RECIPIENT',
+      at: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
+      durationSeconds: 30,
+    });
+    const none = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/fail`)
       .set(rider.auth)
       .send({ reason: 'RECIPIENT_ABSENT', photoKey, callLog: [], ...HERE })
+      .expect(422);
+    expect(none.body.error.code).toBe('FAILURE_CALLS_REQUIRED');
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'RECIPIENT_UNREACHABLE', photoKey, callLog: [call(3), call(0)], ...HERE })
+      .expect(422);
+    // Autre motif : un appel et une explication.
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'OTHER', photoKey, callLog: [call(0)], ...HERE })
       .expect(400);
+    // Refus sur place : pas d'appel exigé.
     const failed = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/fail`)
       .set(rider.auth)
       .send({
         reason: 'PAYMENT_REFUSED',
         photoKey,
-        callLog: [{ to: 'RECIPIENT', at: new Date().toISOString(), durationSeconds: 0 }],
         ...HERE,
       })
       .expect(200);
-    expect(failed.body.status).toBe('DELIVERY_FAILED');
+    expect(failed.body).toMatchObject({
+      status: 'DELIVERY_FAILED',
+      failureReason: 'PAYMENT_REFUSED',
+    });
+    expect(Date.parse(failed.body.failureDecisionDueAt) - Date.parse(failed.body.failedAt)).toBe(
+      15 * 60_000,
+    );
     const failure = await ctx.prisma.orderEvent.findFirstOrThrow({
       where: { orderId: order.id, toStatus: 'DELIVERY_FAILED' },
     });
@@ -310,6 +335,66 @@ describe('Actions du livreur (E2 à E9)', () => {
       .send({ senderCode: returnCode, ...HERE })
       .expect(200);
     expect(returned.body.status).toBe('RETURNED');
+  });
+
+  it('échec sans réponse de l’expéditeur : retour automatique ; le support peut choisir à sa place (E6)', async () => {
+    const call = (minutesAgo: number) => ({
+      to: 'RECIPIENT',
+      at: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
+      durationSeconds: 25,
+    });
+    const fail = async () => {
+      const { rider, order } = await assigned();
+      await pickUp(rider, order);
+      const photoKey = await proofPhoto(ctx, rider);
+      await request(ctx.http)
+        .post(`/v1/rider/orders/${order.id}/fail`)
+        .set(rider.auth)
+        .send({ reason: 'RECIPIENT_ABSENT', photoKey, callLog: [call(6), call(0)], ...HERE })
+        .expect(200);
+      return { rider, order };
+    };
+    const support$ = ctx.app.get(OrderSupportService);
+
+    const first = await fail();
+    // Avant le délai : rien ne change.
+    await support$.sweepFailures(new Date(Date.now() + 14 * 60_000));
+    const waiting = await ctx.prisma.order.findUniqueOrThrow({ where: { id: first.order.id } });
+    expect(waiting.failureDecision).toBeNull();
+    await support$.sweepFailures(new Date(Date.now() + 16 * 60_000));
+    const back = await request(ctx.http)
+      .get(`/v1/rider/orders/${first.order.id}`)
+      .set(first.rider.auth)
+      .expect(200);
+    expect(back.body).toMatchObject({ failureDecision: 'RETURN', failureDecisionDueAt: null });
+    expect(push.lastTo(first.rider.pushToken)).toMatchObject({
+      data: { type: 'order.failure-decision', decision: 'RETURN' },
+    });
+
+    // Le support choisit à la place de l'expéditeur ; le retour automatique ne le remplace pas.
+    const second = await fail();
+    await request(ctx.http)
+      .post(`/v1/admin/orders/${second.order.id}/failure-decision`)
+      .set(first.rider.auth)
+      .send({ decision: 'RETRY' })
+      .expect(403);
+    await request(ctx.http)
+      .post(`/v1/admin/orders/${second.order.id}/failure-decision`)
+      .set(support.auth)
+      .send({ decision: 'RETRY' })
+      .expect(204);
+    await support$.sweepFailures(new Date(Date.now() + 16 * 60_000));
+    const kept = await ctx.prisma.order.findUniqueOrThrow({ where: { id: second.order.id } });
+    expect(kept.failureDecision).toBe('RETRY');
+    const audit = await ctx.prisma.auditLog.findFirst({
+      where: { entityId: second.order.id, action: 'order.failure-decision' },
+    });
+    expect(audit).not.toBeNull();
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${second.order.id}/retry`)
+      .set(second.rider.auth)
+      .send(HERE)
+      .expect(200);
   });
 
   it('garde l’heure d’une action faite hors ligne et refuse une heure dans le futur (E7)', async () => {
@@ -413,6 +498,7 @@ describe('Actions du livreur (E2 à E9)', () => {
       country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
       safetyHotline: '+237640114064',
       supportPhone: null,
+      failurePolicy: { minCalls: 2, callSpacingMinutes: 5, decisionTimeoutMinutes: 15 },
       emergencyNumbers: { police: '117', fire: '118', medical: '119' },
       mobileMoneyOperators: [
         { code: 'MTN', name: 'MTN MoMo' },

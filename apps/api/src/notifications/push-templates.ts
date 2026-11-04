@@ -28,11 +28,11 @@ const TEMPLATES = {
   ORDER_DELIVERY_FAILED: {
     fr: {
       title: 'Livraison impossible',
-      body: '{reference} n’a pas pu être livré. Choisissez : nouvelle tentative ou retour.',
+      body: '{reference} n’a pas pu être livré. Choisissez vite : nouvelle tentative ou retour. Sans réponse, le colis vous est rapporté.',
     },
     en: {
       title: 'Delivery failed',
-      body: '{reference} could not be delivered. Choose: try again or return.',
+      body: '{reference} could not be delivered. Choose quickly: try again or return. Without an answer, the parcel is brought back to you.',
     },
   },
   ORDER_RETURNED: {
@@ -70,6 +70,10 @@ const TEMPLATES = {
       title: 'Payout failed',
       body: 'Sending {amount} XAF failed: the amount stays on your Tara balance.',
     },
+  },
+  SENDER_FAILURE_DECISION: {
+    fr: { title: 'Suite de votre livraison', body: '{reference} : {decision}.' },
+    en: { title: 'Your delivery', body: '{reference}: {decision}.' },
   },
   RIDER_FAILURE_DECISION: {
     fr: { title: 'Décision de l’expéditeur', body: '{reference} : {decision}.' },

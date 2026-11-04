@@ -466,8 +466,8 @@ model User {
   ticketsAssigned          Ticket[]               @relation("TicketAssignee")
   ticketMessages           TicketMessage[]
   mediaFiles               MediaFile[]
-  safetyAlertsHandled      SafetyAlert[] @relation("SafetyAlertHandledBy")
-  safetyAlertsPoliceCalled SafetyAlert[] @relation("SafetyAlertPoliceCalledBy")
+  safetyAlertsHandled      SafetyAlert[]          @relation("SafetyAlertHandledBy")
+  safetyAlertsPoliceCalled SafetyAlert[]          @relation("SafetyAlertPoliceCalledBy")
   payoutsReceived          Payout[]               @relation("PayoutUser")
   payoutsApproved          Payout[]               @relation("PayoutApprover")
   courseAlertsAcknowledged CourseAlert[]          @relation("CourseAlertAcknowledgedBy")
@@ -901,8 +901,12 @@ model Order {
   /// Début de la recherche de livreur en cours (D2) ; l'alerte part après 5 min.
   searchingSince       DateTime?        @map("searching_since") @db.Timestamptz(3)
   dispatchAlertedAt    DateTime?        @map("dispatch_alerted_at") @db.Timestamptz(3)
-  /// Choix de l'expéditeur après un échec : nouvelle tentative ou retour (E6).
+  /// Choix de l'expéditeur après un échec : nouvelle tentative ou retour (E6). Sans réponse
+  /// dans le délai (FAILURE_DECISION_TIMEOUT_MINUTES), retour automatique.
   failureDecision      FailureDecision? @map("failure_decision")
+  /// Dernier échec de livraison : heure et motif (E6).
+  failedAt             DateTime?        @map("failed_at") @db.Timestamptz(3)
+  failureReason        FailureReason?   @map("failure_reason")
   /// Frais de livraison réglés (prépaiement, espèces ou Mobile Money).
   feePaidAt            DateTime?        @map("fee_paid_at") @db.Timestamptz(3)
   cancelReason         String?          @map("cancel_reason")
@@ -1040,25 +1044,25 @@ model ReconciliationReport {
 
 /// Alerte de sécurité déclenchée par un livreur (E8) : sa position part au dispatch.
 model SafetyAlert {
-  id             String    @id @default(uuid(7)) @db.Uuid
-  riderId        String    @map("rider_id") @db.Uuid
-  orderId        String?   @map("order_id") @db.Uuid
-  latitude       Float
-  longitude      Float
+  id               String    @id @default(uuid(7)) @db.Uuid
+  riderId          String    @map("rider_id") @db.Uuid
+  orderId          String?   @map("order_id") @db.Uuid
+  latitude         Float
+  longitude        Float
   /// Précision de la position, en mètres.
-  accuracy       Float?
+  accuracy         Float?
   /// Quartier où se trouvait le livreur au moment de l'alerte.
-  neighborhood   String?
-  note           String?
+  neighborhood     String?
+  note             String?
   /// Identifiant généré par l'app : une alerte renvoyée au retour du réseau n'est pas doublée.
-  clientEventId  String?   @map("client_event_id")
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  acknowledgedAt DateTime? @map("acknowledged_at") @db.Timestamptz(3)
-  resolvedAt     DateTime? @map("resolved_at") @db.Timestamptz(3)
+  clientEventId    String?   @map("client_event_id")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  acknowledgedAt   DateTime? @map("acknowledged_at") @db.Timestamptz(3)
+  resolvedAt       DateTime? @map("resolved_at") @db.Timestamptz(3)
   /// Annulée par le livreur : l'alerte reste visible du dispatch, qui rappelle le livreur.
-  cancelledAt    DateTime? @map("cancelled_at") @db.Timestamptz(3)
-  handledById    String?   @map("handled_by_id") @db.Uuid
-  resolution     String?
+  cancelledAt      DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  handledById      String?   @map("handled_by_id") @db.Uuid
+  resolution       String?
   /// Police appelée par un agent Tara (livreur injoignable ou danger confirmé).
   policeCalledAt   DateTime? @map("police_called_at") @db.Timestamptz(3)
   policeCalledById String?   @map("police_called_by_id") @db.Uuid

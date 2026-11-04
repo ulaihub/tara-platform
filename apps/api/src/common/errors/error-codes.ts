@@ -267,6 +267,14 @@ export const ERROR_MESSAGES = {
     fr: 'Au-delà de {limit} FCFA à encaisser, la validation revient à un administrateur.',
     en: 'Above {limit} XAF to collect, validation requires an administrator.',
   },
+  FAILURE_CALL_REQUIRED: {
+    fr: 'Appelez le destinataire depuis l’app avant de déclarer l’échec.',
+    en: 'Call the recipient from the app before reporting the failure.',
+  },
+  FAILURE_CALLS_REQUIRED: {
+    fr: 'Appelez le destinataire au moins {required} fois depuis l’app, à {spacingMinutes} min d’écart, avant de déclarer l’échec.',
+    en: 'Call the recipient at least {required} times from the app, {spacingMinutes} min apart, before reporting the failure.',
+  },
   FAILURE_DECISION_NOT_EXPECTED: {
     fr: 'Aucune décision n’est attendue pour cette commande.',
     en: 'No decision is expected for this order.',

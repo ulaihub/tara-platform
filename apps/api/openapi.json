@@ -3701,7 +3701,7 @@
                     "maxLength": 200
                   },
                   "callLog": {
-                    "minItems": 1,
+                    "default": [],
                     "maxItems": 20,
                     "type": "array",
                     "items": {
@@ -3753,7 +3753,6 @@
                 "required": [
                   "reason",
                   "photoKey",
-                  "callLog",
                   "latitude",
                   "longitude"
                 ]
@@ -4333,6 +4332,56 @@
                 },
                 "required": [
                   "note"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/orders/{id}/failure-decision": {
+      "post": {
+        "operationId": "AdminSupport_failureDecisionForSender",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "RETRY",
+                      "RETURN"
+                    ]
+                  }
+                },
+                "required": [
+                  "decision"
                 ]
               }
             }
@@ -7398,6 +7447,8 @@
                   "DELIVERY_CODE_LOCKED",
                   "NO_DELIVERY_VALIDATION_REQUEST",
                   "DELIVERY_VALIDATION_ADMIN_REQUIRED",
+                  "FAILURE_CALL_REQUIRED",
+                  "FAILURE_CALLS_REQUIRED",
                   "FAILURE_DECISION_NOT_EXPECTED",
                   "SAFETY_ALERT_NOT_FOUND",
                   "SAFETY_ALERT_CLOSED",
@@ -8882,6 +8933,26 @@
             "nullable": true,
             "type": "string"
           },
+          "failurePolicy": {
+            "type": "object",
+            "properties": {
+              "minCalls": {
+                "type": "integer"
+              },
+              "callSpacingMinutes": {
+                "type": "number"
+              },
+              "decisionTimeoutMinutes": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "minCalls",
+              "callSpacingMinutes",
+              "decisionTimeoutMinutes"
+            ],
+            "additionalProperties": false
+          },
           "emergencyNumbers": {
             "type": "object",
             "properties": {
@@ -8929,6 +9000,7 @@
           "country",
           "safetyHotline",
           "supportPhone",
+          "failurePolicy",
           "emergencyNumbers",
           "mobileMoneyOperators",
           "offerTimeoutSeconds"
@@ -9124,6 +9196,24 @@
               "RETURN"
             ]
           },
+          "failureReason": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FailureReason"
+              }
+            ]
+          },
+          "failedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "failureDecisionDueAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
           "awaitingSupportValidation": {
             "type": "boolean"
           },
@@ -9160,6 +9250,9 @@
           "collectAtDelivery",
           "navigation",
           "failureDecision",
+          "failureReason",
+          "failedAt",
+          "failureDecisionDueAt",
           "awaitingSupportValidation",
           "assignedAt",
           "pickedUpAt",
