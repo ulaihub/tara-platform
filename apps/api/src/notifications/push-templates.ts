@@ -71,6 +71,36 @@ const TEMPLATES = {
       body: 'Sending {amount} XAF failed: the amount stays on your Tara balance.',
     },
   },
+  RIDER_CASH_REMINDER: {
+    fr: {
+      title: 'Espèces à déposer',
+      body: 'Déposez vos {amount} FCFA avant {time} (Mobile Money ou bureau Tara).',
+    },
+    en: {
+      title: 'Cash to pay back',
+      body: 'Pay back your {amount} XAF before {time} (Mobile Money or Tara office).',
+    },
+  },
+  RIDER_CASH_OVERDUE: {
+    fr: {
+      title: 'Dépôt en retard',
+      body: 'Plus de courses tant que vos {amount} FCFA ne sont pas déposés.',
+    },
+    en: {
+      title: 'Cash overdue',
+      body: 'No more jobs until your {amount} XAF are paid back.',
+    },
+  },
+  RIDER_CASH_SUSPENDED: {
+    fr: {
+      title: 'Compte suspendu',
+      body: 'Espèces non déposées : compte suspendu, {amount} FCFA restent dus. Contactez Tara.',
+    },
+    en: {
+      title: 'Account suspended',
+      body: 'Cash not paid back: account suspended, {amount} XAF still due. Contact Tara.',
+    },
+  },
   SENDER_FAILURE_DECISION: {
     fr: { title: 'Suite de votre livraison', body: '{reference} : {decision}.' },
     en: { title: 'Your delivery', body: '{reference}: {decision}.' },

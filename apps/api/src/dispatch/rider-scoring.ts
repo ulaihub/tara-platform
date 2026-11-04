@@ -26,17 +26,21 @@ export interface RiderSnapshot {
   documentsValid: boolean;
   cashHeld: number;
   cashLimit: number;
+  /** Espèces non déposées dans le délai (G5). */
+  cashOverdue: boolean;
   ratingSum: number;
   ratingCount: number;
 }
 
-export type Ineligibility = 'DOCUMENTS' | 'CASH_LIMIT' | 'TOO_MANY_ORDERS' | 'PENDING_OFFER';
+export type Ineligibility =
+  'DOCUMENTS' | 'CASH_LIMIT' | 'CASH_OVERDUE' | 'TOO_MANY_ORDERS' | 'PENDING_OFFER';
 
 /** Raisons pour lesquelles le livreur ne peut pas recevoir cette course (vide si éligible). */
 export function ineligibilities(rider: RiderSnapshot, orderCash: number): Ineligibility[] {
   const reasons: Ineligibility[] = [];
   if (!rider.documentsValid) reasons.push('DOCUMENTS');
   if (rider.cashHeld + orderCash > rider.cashLimit) reasons.push('CASH_LIMIT');
+  if (rider.cashOverdue) reasons.push('CASH_OVERDUE');
   if (rider.activeOrders >= MAX_ACTIVE_ORDERS) reasons.push('TOO_MANY_ORDERS');
   if (rider.hasPendingOffer) reasons.push('PENDING_OFFER');
   return reasons;

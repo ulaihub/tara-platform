@@ -585,7 +585,14 @@ model RiderProfile {
   vehicleType           VehicleType @default(MOTORBIKE) @map("vehicle_type")
   plateNumber           String?     @map("plate_number")
   /// Plafond d'espèces détenues, en FCFA (G5, D4).
-  cashLimit             Int         @default(50000) @map("cash_limit")
+  cashLimit             Int         @default(25000) @map("cash_limit")
+  /// Espèces gardées au-delà du délai de dépôt (24 h) depuis cette heure : plus de courses
+  /// tant qu'elles ne sont pas déposées (G5).
+  cashOverdueSince      DateTime?   @map("cash_overdue_since") @db.Timestamptz(3)
+  /// Dernier retard de dépôt : le plafond d'espèces redescend et remonte après 20 courses.
+  lastCashLateAt        DateTime?   @map("last_cash_late_at") @db.Timestamptz(3)
+  /// Suspendu faute de dépôt (au-delà de 72 h de retard) : réactivation par la finance.
+  cashSuspendedAt       DateTime?   @map("cash_suspended_at") @db.Timestamptz(3)
   /// Caution exigée pour le kit, en FCFA.
   depositRequired       Int         @default(15000) @map("deposit_required")
   ratingSum             Int         @default(0) @map("rating_sum")

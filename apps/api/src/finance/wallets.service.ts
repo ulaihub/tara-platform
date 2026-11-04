@@ -15,6 +15,7 @@ import {
   riderCashHeld,
   riderPayable,
 } from './ledger.accounts.js';
+import { CashDisciplineService } from './cash-discipline.service.js';
 import { LedgerService } from './ledger.service.js';
 import { PayoutsService } from './payouts.service.js';
 
@@ -40,6 +41,7 @@ export class WalletsService implements OnModuleInit {
     private readonly payments: PaymentsService,
     private readonly payouts: PayoutsService,
     private readonly audit: AuditService,
+    private readonly cash: CashDisciplineService,
   ) {}
 
   onModuleInit(): void {
@@ -91,6 +93,8 @@ export class WalletsService implements OnModuleInit {
       earnings: balances.get(riderPayable(rider.id).code) ?? 0,
       cashHeld: balances.get(riderCashHeld(rider.id).code) ?? 0,
       cashLimit: rider.cashLimit,
+      cashDueBy: (await this.cash.dueBy(rider.id)).dueBy?.toISOString() ?? null,
+      cashOverdue: rider.cashOverdueSince !== null,
       available: await this.payouts.available('RIDER', rider.id),
       openPayout: openPayout
         ? { id: openPayout.id, amount: openPayout.amount, status: openPayout.status }

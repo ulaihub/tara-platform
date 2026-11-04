@@ -12,6 +12,7 @@ const base: RiderSnapshot = {
   activeOrders: 0,
   hasPendingOffer: false,
   documentsValid: true,
+  cashOverdue: false,
   cashHeld: 0,
   cashLimit: 50_000,
   ratingSum: 0,
@@ -25,6 +26,8 @@ describe('choix du livreur (D1, D4)', () => {
     expect(ineligibilities({ ...base, cashHeld: 45_000 }, 6_000)).toEqual(['CASH_LIMIT']);
     expect(ineligibilities({ ...base, activeOrders: 2 }, 0)).toEqual(['TOO_MANY_ORDERS']);
     expect(ineligibilities({ ...base, hasPendingOffer: true }, 0)).toEqual(['PENDING_OFFER']);
+    // Espèces non déposées dans le délai (G5) : plus de courses jusqu'au dépôt.
+    expect(ineligibilities({ ...base, cashOverdue: true }, 0)).toEqual(['CASH_OVERDUE']);
   });
 
   it('préfère le plus proche, puis corrige par les courses en cours, les espèces et la note', () => {

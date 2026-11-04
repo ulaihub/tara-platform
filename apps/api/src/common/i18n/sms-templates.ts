@@ -49,6 +49,10 @@ const TEMPLATES = {
     fr: 'Tara OPS ALERTE : le livreur {rider} ({phone}), moto {plate}, a declenche une alerte. Quartier : {place}. Position : {map}',
     en: 'Tara OPS ALERT: rider {rider} ({phone}), plate {plate}, triggered an alert. Area: {place}. Location: {map}',
   },
+  OPS_CASH_OVERDUE: {
+    fr: 'Tara FINANCE : {rider} ({phone}) n a pas depose ses especes depuis {days} j. Compte suspendu, {offset} FCFA retenus sur ses gains, {amount} FCFA encore dus. Garant : {guarantor} ({guarantorPhone}).',
+    en: 'Tara FINANCE: {rider} ({phone}) has not paid back cash for {days} d. Account suspended, {offset} XAF taken from earnings, {amount} XAF still due. Guarantor: {guarantor} ({guarantorPhone}).',
+  },
   OPS_SAFETY_ALERT_CANCELLED: {
     fr: 'Tara OPS : le livreur {rider} ({phone}) a annule son alerte. Rappelez-le pour confirmer qu il va bien.',
     en: 'Tara OPS: rider {rider} ({phone}) cancelled the alert. Call back to confirm they are safe.',

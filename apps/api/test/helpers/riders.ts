@@ -28,7 +28,10 @@ export async function activeRider(
       userId: user.userId,
       status: 'ACTIVE',
       approvedAt: new Date(),
-      ...(options.cashLimit !== undefined ? { cashLimit: options.cashLimit } : {}),
+      // Livreur confirmé : plafond normal (un nouveau livreur commence à 25 000 FCFA).
+      cashLimit: options.cashLimit ?? 50_000,
+      guarantorName: 'Garant Test',
+      guarantorPhone: '+237699000111',
       documents: {
         create: REQUIRED_DOCUMENTS.map((group) => ({
           type: group[0] ?? 'SELFIE',

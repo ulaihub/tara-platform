@@ -286,6 +286,7 @@ export class DispatchService implements OnModuleInit {
         documentsValid: uncoveredDocuments(rider.documents, ['APPROVED'], today).length === 0,
         cashHeld: cash.get(rider.id) ?? 0,
         cashLimit: rider.cashLimit,
+        cashOverdue: rider.cashOverdueSince !== null,
         ratingSum: rider.ratingSum,
         ratingCount: rider.ratingCount,
       };

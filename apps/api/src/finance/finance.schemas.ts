@@ -90,6 +90,10 @@ export const RiderWalletDto = z
     /** Espèces encaissées et pas encore déposées (dues à Tara). */
     cashHeld: z.int(),
     cashLimit: z.int(),
+    /** Heure limite de dépôt des espèces détenues (24 h après l'encaissement le plus ancien). */
+    cashDueBy: z.iso.datetime().nullable(),
+    /** Délai dépassé : plus de courses tant que les espèces ne sont pas déposées. */
+    cashOverdue: z.boolean(),
     /** Retirable maintenant : gains moins espèces détenues. */
     available: z.int(),
     openPayout: OpenPayout,

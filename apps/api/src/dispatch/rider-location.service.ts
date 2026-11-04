@@ -50,6 +50,8 @@ export class RiderLocationService {
     if (!rider) return ['NOT_A_RIDER'];
     const reasons: string[] = [];
     if (rider.status !== 'ACTIVE') reasons.push(`STATUS_${rider.status}`);
+    // Espèces non déposées dans le délai (G5) : plus de courses jusqu'au dépôt.
+    if (rider.cashOverdueSince) reasons.push('CASH_OVERDUE');
     const missing = uncoveredDocuments(rider.documents, ['APPROVED'], cameroonDate(new Date()));
     reasons.push(...missing.map((type) => `DOCUMENT_${type}`));
     return reasons;

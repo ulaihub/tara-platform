@@ -225,6 +225,14 @@ tara-platform/
     support peut choisir à sa place (action tracée) ; sans décision après 15 min, retour
     automatique : le livreur n'attend jamais plus longtemps avec le colis. Règles et délai
     réglables côté serveur.
+35. **Espèces encaissées : dépôt sous 24 h.** Le livreur dépose ses espèces sous 24 h
+    (Mobile Money ou bureau) ; l'échéance se calcule sur le grand livre, les dépôts soldant
+    d'abord les espèces les plus anciennes. Rappel à 18 h. En retard : plus de courses ni de
+    passage en ligne jusqu'au dépôt, plafond ramené à 25 000 FCFA. Après 72 h de retard :
+    compte suspendu, gains dus retenus sur la dette (écriture `CASH_COMPENSATED`), équipe
+    prévenue par SMS avec les coordonnées du garant exigé à l'inscription ; la suspension
+    est levée par la finance, une plainte reste la décision tracée d'un administrateur.
+    Plafond de départ 25 000 FCFA, 50 000 FCFA après 20 courses livrées sans retard.
 
 ## Cycle de vie d'une commande
 

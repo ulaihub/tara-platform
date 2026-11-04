@@ -150,7 +150,8 @@ describe('Livreurs et pièces (A3, A5, H3)', () => {
     const res = await request(ctx.http).get('/v1/riders/me').set(rider.auth).expect(200);
     expect(res.body).toMatchObject({
       status: 'PENDING',
-      cashLimit: 50_000,
+      // Nouveau livreur : plafond de départ (50 000 FCFA après 20 courses sans retard).
+      cashLimit: 25_000,
       guarantorPhone: '+237699112233',
     });
     expect(res.body.missingDocuments).toHaveLength(REQUIRED_DOCUMENTS.length);
