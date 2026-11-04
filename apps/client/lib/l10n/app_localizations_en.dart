@@ -225,10 +225,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shopBalance => 'Shop sales';
 
   @override
-  String get shopBalanceDaily => 'Collected sales · paid out daily';
+  String get shopBalanceDaily => 'To receive · paid to your Mobile Money every night';
 
   @override
-  String get shopBalanceOnDemand => 'Collected sales · paid out on request';
+  String get shopBalanceOnDemand => 'To receive · paid out when you ask';
 
   @override
   String get inProgress => 'In progress';
@@ -265,4 +265,83 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersError => 'Could not load your deliveries.';
+
+  @override
+  String get finished => 'Finished';
+
+  @override
+  String get noOrdersFinished => 'No finished delivery yet.';
+
+  @override
+  String statusDelivered(String day) {
+    return 'Delivered · $day';
+  }
+
+  @override
+  String get statusReturned => 'Returned to sender';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get today => 'today';
+
+  @override
+  String get yesterday => 'yesterday';
+
+  @override
+  String get referralTitle => 'Referral';
+
+  @override
+  String get referralBody => 'Share your code: your friends enter it when signing up and get a discount.';
+
+  @override
+  String appVersion(String version) {
+    return 'Tara · version $version';
+  }
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get displaySection => 'Display';
+
+  @override
+  String get effectsAutoReduced => 'Reduced automatically on this phone.';
+
+  @override
+  String get effectsFull => 'Full';
+
+  @override
+  String get effectsHint => 'Reduced: fewer effects, smoother on a modest phone.';
+
+  @override
+  String get effectsLabel => 'Animations';
+
+  @override
+  String get effectsReduced => 'Reduced';
+
+  @override
+  String get helpSection => 'Help';
+
+  @override
+  String get languageLabel => 'Language';
+
+  @override
+  String get logoutConfirm => 'You will not receive jobs on this phone until you sign in again.';
+
+  @override
+  String get optionAuto => 'Auto';
+
+  @override
+  String get supportTara => 'Tara support';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeLabel => 'Theme';
+
+  @override
+  String get themeLight => 'Light';
 }

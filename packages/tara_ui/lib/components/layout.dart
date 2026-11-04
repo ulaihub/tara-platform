@@ -9,6 +9,8 @@ import '../tara_icons.dart';
 import '../tara_typography.dart';
 import 'glass.dart';
 
+export 'tab_shell.dart' show FloatingTabBar, TabItem;
+
 /// Gabarit commun d'un écran : fond du thème, formes liquides, horloge d'animation unique,
 /// zone sûre. Les marges hautes de la maquette incluent la barre d'état : ici `SafeArea`.
 class TaraScreen extends StatelessWidget {
@@ -263,77 +265,6 @@ class InfoPill extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Onglet de la barre flottante.
-@immutable
-class TabItem {
-  const TabItem(this.icon, this.label);
-  final TaraIconData icon;
-  final String label;
-}
-
-/// Barre d'onglets flottante (Accueil, Activité, Profil) en verre.
-class FloatingTabBar extends StatelessWidget {
-  const FloatingTabBar({super.key, required this.items, required this.current, required this.onSelected});
-
-  final List<TabItem> items;
-  final int current;
-  final ValueChanged<int> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = TaraColors.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-      child: GlassCard(
-        radius: 26,
-        fill: c.glassBar,
-        padding: const EdgeInsets.all(6),
-        child: Row(
-          children: [
-            for (var i = 0; i < items.length; i++)
-              Expanded(
-                child: Semantics(
-                  selected: i == current,
-                  button: true,
-                  label: items[i].label,
-                  excludeSemantics: true,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onSelected(i),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      constraints: const BoxConstraints(minHeight: 52),
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      decoration: BoxDecoration(
-                        color: i == current ? Color.fromRGBO(255, 106, 0, c.isDark ? .16 : .14) : null,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TaraIcon(items[i].icon, size: 22, color: i == current ? c.accentText : c.textTertiary),
-                          const SizedBox(height: 3),
-                          Text(
-                            items[i].label,
-                            style: TaraText.overline.copyWith(
-                              letterSpacing: 0,
-                              color: i == current ? c.accentText : c.textTertiary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }

@@ -49,6 +49,7 @@ class TaraColors extends ThemeExtension<TaraColors> {
     required this.glassHighlight,
     required this.glassStrong,
     required this.glassBar,
+    required this.tabBarGlass,
     required this.glassFallback,
     required this.chipBg,
     required this.chipBorder,
@@ -99,6 +100,10 @@ class TaraColors extends ThemeExtension<TaraColors> {
   final Color glassHighlight;
   final Color glassStrong;
   final Color glassBar;
+
+  /// Barre d'onglets : verre très clair, le contenu reste visible dessous (flou et couleurs
+  /// avivées).
+  final Color tabBarGlass;
 
   /// Surface opaque utilisée sans flou (mode effets réduits).
   final Color glassFallback;
@@ -155,6 +160,7 @@ class TaraColors extends ThemeExtension<TaraColors> {
     glassHighlight: Color.fromRGBO(255, 255, 255, 0.12),
     glassStrong: Color.fromRGBO(20, 20, 26, 0.84),
     glassBar: Color.fromRGBO(22, 22, 28, 0.60),
+    tabBarGlass: Color.fromRGBO(26, 26, 32, 0.32),
     glassFallback: Color.fromRGBO(26, 26, 33, 0.92),
     chipBg: Color.fromRGBO(255, 255, 255, 0.05),
     chipBorder: Color.fromRGBO(255, 255, 255, 0.14),
@@ -206,6 +212,7 @@ class TaraColors extends ThemeExtension<TaraColors> {
     glassHighlight: Color(0xFFFFFFFF),
     glassStrong: Color.fromRGBO(255, 255, 255, 0.88),
     glassBar: Color.fromRGBO(255, 255, 255, 0.72),
+    tabBarGlass: Color.fromRGBO(255, 255, 255, 0.40),
     glassFallback: Color.fromRGBO(255, 255, 255, 0.94),
     chipBg: Color.fromRGBO(255, 255, 255, 0.70),
     chipBorder: Color.fromRGBO(22, 18, 14, 0.10),

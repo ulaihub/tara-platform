@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -13,6 +14,7 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
+import '../orders/order_row.dart';
 
 /// Commandes en cours de l'expéditeur (accueil), relues à chaque retour sur l'accueil.
 final activeOrdersProvider = FutureProvider<List<OrderSummary>>(
@@ -33,7 +35,6 @@ class HomeScreen extends ConsumerWidget {
     required this.onLocationLink,
     required this.onOpenOrder,
     required this.onWallet,
-    required this.onTab,
     this.now,
   });
 
@@ -42,9 +43,6 @@ class HomeScreen extends ConsumerWidget {
   final VoidCallback onLocationLink;
   final ValueChanged<OrderSummary> onOpenOrder;
   final VoidCallback onWallet;
-
-  /// Barre d'onglets : 0 accueil, 1 commandes, 2 profil.
-  final ValueChanged<int> onTab;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -72,94 +70,74 @@ class HomeScreen extends ConsumerWidget {
     return TaraScreen(
       blobs: _blobs,
       safeBottom: false,
-      child: Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: refresh,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                children: [
-                  Row(
-                    children: [
-                      InitialsAvatar(name: me.fullName ?? ''),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: MergeSemantics(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                clock.hour < 18 ? l.goodMorning : l.goodEvening,
-                                style: TaraText.label.copyWith(color: c.textTertiary),
-                              ),
-                              Text(
-                                me.merchant?.shopName ?? me.fullName ?? '',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TaraText.cardTitle.copyWith(color: c.textPrimary),
-                              ),
-                            ],
-                          ),
+      // Le contenu défile jusqu'en bas de l'écran, sous la barre d'onglets en verre.
+      child: RefreshIndicator(
+        onRefresh: refresh,
+        child: ListView(
+          padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + TaraTabShell.bottomInset(context)),
+          children: [
+            Row(
+              children: [
+                InitialsAvatar(name: me.fullName ?? ''),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: MergeSemantics(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          clock.hour < 18 ? l.goodMorning : l.goodEvening,
+                          style: TaraText.label.copyWith(color: c.textTertiary),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  _SendCard(onNewOrder: onNewOrder, onLocationLink: onLocationLink),
-                  if (wallet != null) ...[
-                    const SizedBox(height: 12),
-                    _ShopBalance(wallet: wallet.value, onTap: onWallet),
-                  ],
-                  const SizedBox(height: 22),
-                  SectionHeader(
-                    title: l.inProgress,
-                    action: orders.value == null || orders.value!.isEmpty
-                        ? null
-                        : Text(
-                            '${orders.value!.length}',
-                            style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w800),
-                          ),
-                  ),
-                  const SizedBox(height: 8),
-                  switch (orders) {
-                    AsyncData(:final value) when value.isEmpty => _Empty(text: l.noOrdersInProgress),
-                    AsyncData(:final value) => GlassCard(
-                      radius: 22,
-                      shadow: false,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                      child: Column(
-                        children: [
-                          for (var i = 0; i < value.length; i++) ...[
-                            if (i > 0) Divider(height: 1, color: c.glassBorder),
-                            _OrderRow(order: value[i], now: clock, onTap: () => onOpenOrder(value[i])),
-                          ],
-                        ],
-                      ),
+                        Text(
+                          me.merchant?.shopName ?? me.fullName ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TaraText.cardTitle.copyWith(color: c.textPrimary),
+                        ),
+                      ],
                     ),
-                    AsyncError() => _Failed(onRetry: () => ref.invalidate(activeOrdersProvider)),
-                    _ => const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(child: GooLoader(compact: true)),
-                    ),
-                  },
-                ],
-              ),
-            ),
-          ),
-          SafeArea(
-            top: false,
-            child: FloatingTabBar(
-              items: [
-                TabItem(TaraIcons.home, l.tabHome),
-                TabItem(TaraIcons.package, l.tabOrders),
-                TabItem(TaraIcons.user, l.tabProfile),
+                  ),
+                ),
               ],
-              current: 0,
-              onSelected: onTab,
             ),
-          ),
-        ],
+            const SizedBox(height: 18),
+            _SendCard(onNewOrder: onNewOrder, onLocationLink: onLocationLink),
+            if (wallet != null) ...[const SizedBox(height: 12), _ShopBalance(wallet: wallet.value, onTap: onWallet)],
+            const SizedBox(height: 22),
+            SectionHeader(
+              title: l.inProgress,
+              action: orders.value == null || orders.value!.isEmpty
+                  ? null
+                  : Text(
+                      '${orders.value!.length}',
+                      style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w800),
+                    ),
+            ),
+            const SizedBox(height: 8),
+            switch (orders) {
+              AsyncData(:final value) when value.isEmpty => _Empty(text: l.noOrdersInProgress),
+              AsyncData(:final value) => GlassCard(
+                radius: 22,
+                shadow: false,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                child: Column(
+                  children: [
+                    for (var i = 0; i < value.length; i++) ...[
+                      if (i > 0) Divider(height: 1, color: c.glassBorder),
+                      OrderRow(order: value[i], now: clock, onTap: () => onOpenOrder(value[i])),
+                    ],
+                  ],
+                ),
+              ),
+              AsyncError() => _Failed(onRetry: () => ref.invalidate(activeOrdersProvider)),
+              _ => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(child: GooLoader(compact: true)),
+              ),
+            },
+          ],
+        ),
       ),
     );
   }
@@ -242,51 +220,6 @@ class _ShopBalance extends StatelessWidget {
         onTap: onTap,
       ),
     );
-  }
-}
-
-/// Livraison en cours : destinataire, quartier, étape.
-class _OrderRow extends StatelessWidget {
-  const _OrderRow({required this.order, required this.now, required this.onTap});
-  final OrderSummary order;
-  final DateTime now;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final c = TaraColors.of(context);
-    final scheduled = order.scheduledFor?.toLocal();
-    final (icon, tone, label) = switch (order.status) {
-      'CREATED' when scheduled != null && scheduled.isAfter(now) => (
-        TaraIcons.clock,
-        TintTone.accent,
-        l.statusScheduled(_when(l, scheduled, now)),
-      ),
-      'CREATED' || 'SEARCHING_RIDER' => (TaraIcons.timer, TintTone.accent, l.statusSearching),
-      'ASSIGNED' => (TaraIcons.navigation, TintTone.accent, l.statusRiderComing),
-      'PICKED_UP' || 'IN_DELIVERY' => (TaraIcons.package, TintTone.success, l.statusInDelivery),
-      'DELIVERY_FAILED' => (TaraIcons.alertCircle, TintTone.danger, l.statusFailed),
-      _ => (TaraIcons.package, TintTone.accent, order.status),
-    };
-    final place = order.dropoffNeighborhood ?? order.dropoffLandmark;
-    return ListRow(
-      leading: IconTile(icon: icon, size: 40, tone: tone),
-      title: '${order.recipientName} · $place',
-      subtitle: '$label · ${order.reference}',
-      trailing: TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
-      onTap: onTap,
-    );
-  }
-
-  static String _when(AppLocalizations l, DateTime at, DateTime now) {
-    final sameDay = at.year == now.year && at.month == now.month && at.day == now.day;
-    final tomorrow = now.add(const Duration(days: 1));
-    final nextDay = at.year == tomorrow.year && at.month == tomorrow.month && at.day == tomorrow.day;
-    final time = formatClock(at);
-    if (sameDay) return l.todayAt(time);
-    if (nextDay) return l.tomorrowAt(time);
-    return '${at.day.toString().padLeft(2, '0')}/${at.month.toString().padLeft(2, '0')} · $time';
   }
 }
 

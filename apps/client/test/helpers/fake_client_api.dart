@@ -11,11 +11,12 @@ class FakeClientApi extends ClientApi {
 
   /// Commandes en cours (accueil) et portefeuille renvoyés.
   List<OrderSummary> active = [];
+  List<OrderSummary> history = [];
   Wallet wallet0 = const Wallet(customerBalance: 0, merchantBalance: null, payoutSchedule: null);
 
   @override
   Future<List<OrderSummary>> orders({required String scope, int limit = 20}) async =>
-      scope == 'active' ? active : const [];
+      scope == 'active' ? active : history;
 
   @override
   Future<Wallet> wallet() async => wallet0;

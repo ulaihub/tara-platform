@@ -509,13 +509,13 @@ abstract class AppLocalizations {
   /// No description provided for @shopBalanceDaily.
   ///
   /// In fr, this message translates to:
-  /// **'Ventes encaissées · reversées chaque jour'**
+  /// **'À recevoir · versé chaque nuit sur votre Mobile Money'**
   String get shopBalanceDaily;
 
   /// No description provided for @shopBalanceOnDemand.
   ///
   /// In fr, this message translates to:
-  /// **'Ventes encaissées · reversées à la demande'**
+  /// **'À recevoir · versé quand vous le demandez'**
   String get shopBalanceOnDemand;
 
   /// No description provided for @inProgress.
@@ -577,6 +577,156 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de charger vos livraisons.'**
   String get ordersError;
+
+  /// No description provided for @finished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminées'**
+  String get finished;
+
+  /// No description provided for @noOrdersFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune livraison terminée pour l’instant.'**
+  String get noOrdersFinished;
+
+  /// No description provided for @statusDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée · {day}'**
+  String statusDelivered(String day);
+
+  /// No description provided for @statusReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retournée à l’expéditeur'**
+  String get statusReturned;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get statusCancelled;
+
+  /// No description provided for @today.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'hier'**
+  String get yesterday;
+
+  /// No description provided for @referralTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parrainage'**
+  String get referralTitle;
+
+  /// No description provided for @referralBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partagez votre code : vos amis l’entrent à leur inscription et profitent d’une réduction.'**
+  String get referralBody;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tara · version {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @cancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get cancel;
+
+  /// No description provided for @displaySection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affichage'**
+  String get displaySection;
+
+  /// No description provided for @effectsAutoReduced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduites automatiquement sur ce téléphone.'**
+  String get effectsAutoReduced;
+
+  /// No description provided for @effectsFull.
+  ///
+  /// In fr, this message translates to:
+  /// **'Complètes'**
+  String get effectsFull;
+
+  /// No description provided for @effectsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduites : moins d’effets, plus fluide sur un téléphone modeste.'**
+  String get effectsHint;
+
+  /// No description provided for @effectsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Animations'**
+  String get effectsLabel;
+
+  /// No description provided for @effectsReduced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduites'**
+  String get effectsReduced;
+
+  /// No description provided for @helpSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide'**
+  String get helpSection;
+
+  /// No description provided for @languageLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get languageLabel;
+
+  /// No description provided for @logoutConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.'**
+  String get logoutConfirm;
+
+  /// No description provided for @optionAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auto'**
+  String get optionAuto;
+
+  /// No description provided for @supportTara.
+  ///
+  /// In fr, this message translates to:
+  /// **'Support Tara'**
+  String get supportTara;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sombre'**
+  String get themeDark;
+
+  /// No description provided for @themeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Thème'**
+  String get themeLabel;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clair'**
+  String get themeLight;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

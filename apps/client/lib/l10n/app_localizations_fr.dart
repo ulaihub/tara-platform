@@ -226,10 +226,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shopBalance => 'Ventes de la boutique';
 
   @override
-  String get shopBalanceDaily => 'Ventes encaissées · reversées chaque jour';
+  String get shopBalanceDaily => 'À recevoir · versé chaque nuit sur votre Mobile Money';
 
   @override
-  String get shopBalanceOnDemand => 'Ventes encaissées · reversées à la demande';
+  String get shopBalanceOnDemand => 'À recevoir · versé quand vous le demandez';
 
   @override
   String get inProgress => 'En cours';
@@ -266,4 +266,84 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ordersError => 'Impossible de charger vos livraisons.';
+
+  @override
+  String get finished => 'Terminées';
+
+  @override
+  String get noOrdersFinished => 'Aucune livraison terminée pour l’instant.';
+
+  @override
+  String statusDelivered(String day) {
+    return 'Livrée · $day';
+  }
+
+  @override
+  String get statusReturned => 'Retournée à l’expéditeur';
+
+  @override
+  String get statusCancelled => 'Annulée';
+
+  @override
+  String get today => 'aujourd’hui';
+
+  @override
+  String get yesterday => 'hier';
+
+  @override
+  String get referralTitle => 'Parrainage';
+
+  @override
+  String get referralBody =>
+      'Partagez votre code : vos amis l’entrent à leur inscription et profitent d’une réduction.';
+
+  @override
+  String appVersion(String version) {
+    return 'Tara · version $version';
+  }
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get displaySection => 'Affichage';
+
+  @override
+  String get effectsAutoReduced => 'Réduites automatiquement sur ce téléphone.';
+
+  @override
+  String get effectsFull => 'Complètes';
+
+  @override
+  String get effectsHint => 'Réduites : moins d’effets, plus fluide sur un téléphone modeste.';
+
+  @override
+  String get effectsLabel => 'Animations';
+
+  @override
+  String get effectsReduced => 'Réduites';
+
+  @override
+  String get helpSection => 'Aide';
+
+  @override
+  String get languageLabel => 'Langue';
+
+  @override
+  String get logoutConfirm => 'Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.';
+
+  @override
+  String get optionAuto => 'Auto';
+
+  @override
+  String get supportTara => 'Support Tara';
+
+  @override
+  String get themeDark => 'Sombre';
+
+  @override
+  String get themeLabel => 'Thème';
+
+  @override
+  String get themeLight => 'Clair';
 }

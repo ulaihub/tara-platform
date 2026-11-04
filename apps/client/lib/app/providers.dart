@@ -8,6 +8,7 @@ import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/app_settings.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/api/client_api.dart';
 import '../core/api/client_models.dart';
@@ -31,6 +32,9 @@ final languageCodeProvider = Provider<String>((ref) {
   ref.onDispose(() => settings.removeListener(changed));
   return settings.languageCode(PlatformDispatcher.instance.locale);
 });
+
+/// Ouverture d'un lien ou d'un appel (remplacée dans les tests).
+final launcherProvider = Provider<Future<bool> Function(Uri uri)>((ref) => launchUrl);
 
 /// Version de l'app (remplacée dans les tests).
 final appVersionProvider = FutureProvider<String>((ref) async {

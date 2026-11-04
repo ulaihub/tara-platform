@@ -5,6 +5,8 @@ import 'package:tara_client/app/providers.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/features/home/home_screen.dart';
 import 'package:tara_core/session/session_store.dart';
+import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/tara_icons.dart';
 
 import 'helpers/fake_client_api.dart';
 import 'helpers/harness.dart';
@@ -55,14 +57,30 @@ FakeClientApi shopApi() => FakeClientApi()
 
 Widget home(Me me, FakeClientApi api) => ProviderScope(
   overrides: [keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()), clientApiProvider.overrideWithValue(api)],
-  child: HomeScreen(
-    me: me,
-    onNewOrder: () {},
-    onLocationLink: () {},
-    onOpenOrder: (_) {},
-    onWallet: () {},
-    onTab: (_) {},
-    now: () => homeNow,
+  child: tabs(
+    0,
+    HomeScreen(
+      me: me,
+      onNewOrder: () {},
+      onLocationLink: () {},
+      onOpenOrder: (_) {},
+      onWallet: () {},
+      now: () => homeNow,
+    ),
+  ),
+);
+
+/// Écran d'onglet dans son cadre : barre en verre au-dessus du contenu.
+Widget tabs(int current, Widget child) => Builder(
+  builder: (context) => TaraTabShell(
+    items: const [
+      TabItem(TaraIcons.home, 'Accueil'),
+      TabItem(TaraIcons.package, 'Commandes'),
+      TabItem(TaraIcons.user, 'Profil'),
+    ],
+    current: current,
+    onSelected: (_) {},
+    child: child,
   ),
 );
 
@@ -92,7 +110,7 @@ void main() {
         tester,
         Variant(brightness, ScreenSize.regular, 1),
         home(shopOwner, shopApi()),
-        surface: const Size(390, 1100),
+        surface: const Size(390, 1180),
       );
       await settle(tester);
       expect(find.text('Prévue demain à 09:30 · TR-48214'), findsOneWidget);

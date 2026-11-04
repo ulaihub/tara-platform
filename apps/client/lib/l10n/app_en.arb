@@ -69,8 +69,8 @@
   "newDelivery": "New delivery",
   "askAddress": "Ask the recipient for their address",
   "shopBalance": "Shop sales",
-  "shopBalanceDaily": "Collected sales · paid out daily",
-  "shopBalanceOnDemand": "Collected sales · paid out on request",
+  "shopBalanceDaily": "To receive · paid to your Mobile Money every night",
+  "shopBalanceOnDemand": "To receive · paid out when you ask",
   "inProgress": "In progress",
   "noOrdersInProgress": "No delivery in progress. Your parcels show up here as soon as they are sent.",
   "statusScheduled": "Scheduled {when}",
@@ -101,5 +101,44 @@
       }
     }
   },
-  "ordersError": "Could not load your deliveries."
+  "ordersError": "Could not load your deliveries.",
+  "finished": "Finished",
+  "noOrdersFinished": "No finished delivery yet.",
+  "statusDelivered": "Delivered · {day}",
+  "@statusDelivered": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "statusReturned": "Returned to sender",
+  "statusCancelled": "Cancelled",
+  "today": "today",
+  "yesterday": "yesterday",
+  "referralTitle": "Referral",
+  "referralBody": "Share your code: your friends enter it when signing up and get a discount.",
+  "appVersion": "Tara · version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "displaySection": "Display",
+  "effectsAutoReduced": "Reduced automatically on this phone.",
+  "effectsFull": "Full",
+  "effectsHint": "Reduced: fewer effects, smoother on a modest phone.",
+  "effectsLabel": "Animations",
+  "effectsReduced": "Reduced",
+  "helpSection": "Help",
+  "languageLabel": "Language",
+  "logoutConfirm": "You will not receive jobs on this phone until you sign in again.",
+  "optionAuto": "Auto",
+  "supportTara": "Tara support",
+  "themeDark": "Dark",
+  "themeLabel": "Theme",
+  "themeLight": "Light"
 }

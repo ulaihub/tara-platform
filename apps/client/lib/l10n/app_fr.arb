@@ -97,8 +97,8 @@
   "newDelivery": "Nouvelle livraison",
   "askAddress": "Demander l’adresse au destinataire",
   "shopBalance": "Ventes de la boutique",
-  "shopBalanceDaily": "Ventes encaissées · reversées chaque jour",
-  "shopBalanceOnDemand": "Ventes encaissées · reversées à la demande",
+  "shopBalanceDaily": "À recevoir · versé chaque nuit sur votre Mobile Money",
+  "shopBalanceOnDemand": "À recevoir · versé quand vous le demandez",
   "inProgress": "En cours",
   "noOrdersInProgress": "Aucune livraison en cours. Vos colis apparaissent ici dès leur envoi.",
   "statusScheduled": "Prévue {when}",
@@ -129,5 +129,44 @@
       }
     }
   },
-  "ordersError": "Impossible de charger vos livraisons."
+  "ordersError": "Impossible de charger vos livraisons.",
+  "finished": "Terminées",
+  "noOrdersFinished": "Aucune livraison terminée pour l’instant.",
+  "statusDelivered": "Livrée · {day}",
+  "@statusDelivered": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "statusReturned": "Retournée à l’expéditeur",
+  "statusCancelled": "Annulée",
+  "today": "aujourd’hui",
+  "yesterday": "hier",
+  "referralTitle": "Parrainage",
+  "referralBody": "Partagez votre code : vos amis l’entrent à leur inscription et profitent d’une réduction.",
+  "appVersion": "Tara · version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Annuler",
+  "displaySection": "Affichage",
+  "effectsAutoReduced": "Réduites automatiquement sur ce téléphone.",
+  "effectsFull": "Complètes",
+  "effectsHint": "Réduites : moins d’effets, plus fluide sur un téléphone modeste.",
+  "effectsLabel": "Animations",
+  "effectsReduced": "Réduites",
+  "helpSection": "Aide",
+  "languageLabel": "Langue",
+  "logoutConfirm": "Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.",
+  "optionAuto": "Auto",
+  "supportTara": "Support Tara",
+  "themeDark": "Sombre",
+  "themeLabel": "Thème",
+  "themeLight": "Clair"
 }
