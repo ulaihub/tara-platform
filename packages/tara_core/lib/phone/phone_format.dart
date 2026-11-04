@@ -39,3 +39,17 @@ class PhoneInputFormatter extends TextInputFormatter {
     );
   }
 }
+
+/// Opérateur deviné d'après le numéro camerounais (modifiable par l'utilisateur) : MTN pour
+/// 67, 650-654 et 680-684 ; Orange pour 69, 655-659 et 685-689.
+String? guessOperator(String nationalDigits) {
+  if (!isCameroonMobile(nationalDigits)) return null;
+  final second = nationalDigits[1];
+  final third = int.parse(nationalDigits[2]);
+  return switch (second) {
+    '7' => 'MTN',
+    '9' => 'ORANGE',
+    '5' || '8' => third <= 4 ? 'MTN' : 'ORANGE',
+    _ => null,
+  };
+}

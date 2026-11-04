@@ -24,6 +24,7 @@ class AuthApi {
     required String code,
     required String locale,
     String? termsVersion,
+    String? referralCode,
   }) async {
     String? appVersion;
     try {
@@ -39,6 +40,8 @@ class AuthApi {
         'code': code,
         'locale': locale,
         'termsVersion': ?termsVersion,
+        // Code de parrainage d'un ami (C6) : pris en compte à la création du compte seulement.
+        'referralCode': ?referralCode,
         'device': {'installationId': await _store.installationId(), 'platform': platform, 'appVersion': ?appVersion},
       },
     ) as Json;

@@ -22,7 +22,6 @@ import '../../core/api/models.dart';
 import '../../core/offline/action_queue.dart' show newEventId;
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../course/collection_screen.dart' show guessOperator;
 import '../course/course_scaffold.dart' show CourseFieldLabel;
 
 enum _DepositState { idle, sending, waiting, done, failed }
