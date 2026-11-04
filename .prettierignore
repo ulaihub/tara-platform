@@ -11,4 +11,5 @@ apps/rider
 # Paquets et apps Flutter : mis en forme par dart format.
 packages/tara_ui
 packages/tara_core
+packages/tara_test
 apps/client

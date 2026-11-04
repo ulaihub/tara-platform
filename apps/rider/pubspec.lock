@@ -865,6 +865,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  tara_test:
+    dependency: "direct dev"
+    description:
+      path: "../../packages/tara_test"
+      relative: true
+    source: path
+    version: "0.1.0"
   tara_ui:
     dependency: "direct main"
     description:

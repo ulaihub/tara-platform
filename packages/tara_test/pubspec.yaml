@@ -1,0 +1,18 @@
+name: tara_test
+description: "Outillage de test partagé des apps Tara : formats d'écran, thèmes, texte agrandi, captures de référence, polices."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  tara_ui:
+    path: ../tara_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
