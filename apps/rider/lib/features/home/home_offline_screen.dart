@@ -20,10 +20,19 @@ import 'home_summary.dart';
 /// 05 · Accueil — hors ligne : gains du jour, bouton « Passer en ligne ». Pas de cloche de
 /// notifications au lancement (les messages arrivent par notification du téléphone).
 class HomeOfflineScreen extends ConsumerStatefulWidget {
-  const HomeOfflineScreen({super.key, required this.onWentOnline, required this.onDetails, this.now});
+  const HomeOfflineScreen({
+    super.key,
+    required this.onWentOnline,
+    required this.onDetails,
+    required this.onTab,
+    this.now,
+  });
 
   final VoidCallback onWentOnline;
   final VoidCallback onDetails;
+
+  /// Barre d'onglets : 0 accueil, 1 activité, 2 profil.
+  final ValueChanged<int> onTab;
 
   /// Heure affichée (bonjour / bonsoir), fixée dans les tests.
   final DateTime? now;
@@ -184,7 +193,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                 TabItem(TaraIcons.user, l.tabProfile),
               ],
               current: 0,
-              onSelected: (_) {},
+              onSelected: widget.onTab,
             ),
           ],
         ),

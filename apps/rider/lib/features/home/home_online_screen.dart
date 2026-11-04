@@ -25,6 +25,7 @@ class HomeOnlineScreen extends ConsumerStatefulWidget {
     required this.onWentOffline,
     required this.onDetails,
     required this.onSos,
+    required this.onTab,
     this.courseBanner,
   });
 
@@ -34,6 +35,9 @@ class HomeOnlineScreen extends ConsumerStatefulWidget {
   final VoidCallback onWentOffline;
   final VoidCallback onDetails;
   final VoidCallback onSos;
+
+  /// Barre d'onglets : 0 accueil, 1 activité, 2 profil.
+  final ValueChanged<int> onTab;
 
   @override
   ConsumerState<HomeOnlineScreen> createState() => _HomeOnlineScreenState();
@@ -177,7 +181,7 @@ class _HomeOnlineScreenState extends ConsumerState<HomeOnlineScreen> {
                       TabItem(TaraIcons.user, l.tabProfile),
                     ],
                     current: 0,
-                    onSelected: (_) {},
+                    onSelected: widget.onTab,
                   ),
                 ],
               ),

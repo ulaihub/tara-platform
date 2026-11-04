@@ -1807,6 +1807,180 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Colis rendu au vendeur : course terminée.'**
   String get orderReturnedNotice;
+
+  /// No description provided for @earningsToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains d’aujourd’hui'**
+  String get earningsToday;
+
+  /// No description provided for @earningsWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains de la semaine'**
+  String get earningsWeek;
+
+  /// No description provided for @earningsMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains du mois'**
+  String get earningsMonth;
+
+  /// No description provided for @coursesCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune course} =1{1 course} other{{count} courses}}'**
+  String coursesCount(int count);
+
+  /// No description provided for @weekdaysShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lun,Mar,Mer,Jeu,Ven,Sam,Dim'**
+  String get weekdaysShort;
+
+  /// No description provided for @todayShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auj.'**
+  String get todayShort;
+
+  /// No description provided for @weekShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'S{number}'**
+  String weekShort(int number);
+
+  /// No description provided for @hourShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hour}h'**
+  String hourShort(int hour);
+
+  /// No description provided for @chartSemantics.
+  ///
+  /// In fr, this message translates to:
+  /// **'{caption} : {values}'**
+  String chartSemantics(String caption, String values);
+
+  /// No description provided for @cashToDeposit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces à reverser à Tara'**
+  String get cashToDeposit;
+
+  /// No description provided for @depositAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reverser'**
+  String get depositAction;
+
+  /// No description provided for @lastCourses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernières courses'**
+  String get lastCourses;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout voir'**
+  String get seeAll;
+
+  /// No description provided for @seeLess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir moins'**
+  String get seeLess;
+
+  /// No description provided for @statusDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrée'**
+  String get statusDelivered;
+
+  /// No description provided for @statusReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour au vendeur'**
+  String get statusReturned;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get statusCancelled;
+
+  /// No description provided for @cashCollectedAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} encaissés'**
+  String cashCollectedAmount(String amount);
+
+  /// No description provided for @noCoursesYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de course terminée.'**
+  String get noCoursesYet;
+
+  /// No description provided for @activityError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger l’activité.'**
+  String get activityError;
+
+  /// No description provided for @depositTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reverser les espèces'**
+  String get depositTitle;
+
+  /// No description provided for @depositBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une demande de paiement de {amount} part sur votre téléphone. Validez-la avec votre code Mobile Money.'**
+  String depositBody(String amount);
+
+  /// No description provided for @depositOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pouvez aussi déposer les espèces au bureau Tara.'**
+  String get depositOffice;
+
+  /// No description provided for @depositNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre numéro Mobile Money'**
+  String get depositNumber;
+
+  /// No description provided for @depositSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get depositSend;
+
+  /// No description provided for @depositWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validez la demande sur votre téléphone…'**
+  String get depositWaiting;
+
+  /// No description provided for @depositDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} reversés à Tara.'**
+  String depositDone(String amount);
+
+  /// No description provided for @depositFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement non abouti. Réessayez ou déposez au bureau Tara.'**
+  String get depositFailed;
+
+  /// No description provided for @depositOperator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opérateur'**
+  String get depositOperator;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

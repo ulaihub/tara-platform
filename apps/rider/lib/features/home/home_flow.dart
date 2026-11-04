@@ -13,6 +13,7 @@ import '../../design/format.dart';
 import '../../design/tara_colors.dart';
 import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
+import '../activity/activity_screen.dart';
 import '../common/status_screen.dart';
 import '../course/collection_screen.dart';
 import '../course/course_banner.dart';
@@ -51,6 +52,15 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Écran d'alerte (14) ouvert par un bouton SOS, au-dessus de tout le reste.
   bool _sos = false;
+
+  /// Onglet affiché quand aucune course n'est à l'écran : 0 accueil, 1 activité (13).
+  int _tab = 0;
+
+  /// Profil et réglages : écran pas encore dessiné, l'onglet ne change rien.
+  void _selectTab(int tab) {
+    if (tab != 2) setState(() => _tab = tab);
+  }
+
   late final ActiveOrderController _activeOrder;
   Timer? _noticeTimer;
   StreamSubscription<RealtimeEvent>? _realtime;
@@ -291,11 +301,14 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             Positioned.fill(
               child: showCourse
                   ? _course(order)
+                  : _tab == 1
+                  ? ActivityScreen(onTab: _selectTab)
                   : online.online
                   ? HomeOnlineScreen(
                       onWentOffline: () => setState(() {}),
-                      onDetails: () {},
+                      onDetails: () => _selectTab(1),
                       onSos: _openSos,
+                      onTab: _selectTab,
                       courseBanner: order == null
                           ? null
                           : CourseBanner(
@@ -309,7 +322,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                         ref.invalidate(homeSummaryProvider);
                         unawaited(_loadPendingOffers());
                       },
-                      onDetails: () {},
+                      onDetails: () => _selectTab(1),
+                      onTab: _selectTab,
                     ),
             ),
             if (_notice != null)

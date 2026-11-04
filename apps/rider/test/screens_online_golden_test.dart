@@ -49,7 +49,11 @@ void main() {
 
   for (final variant in Variant.matrix) {
     goldenTest('06 accueil en ligne ${variant.name}', (tester) async {
-      await pumpVariant(tester, variant, scope(HomeOnlineScreen(onWentOffline: () {}, onDetails: () {}, onSos: () {})));
+      await pumpVariant(
+        tester,
+        variant,
+        scope(HomeOnlineScreen(onWentOffline: () {}, onDetails: () {}, onSos: () {}, onTab: (_) {})),
+      );
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(capture, matchesGoldenFile('goldens/06_accueil_en_ligne/${variant.name}.png'));

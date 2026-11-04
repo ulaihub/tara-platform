@@ -102,6 +102,29 @@ class RiderApi {
 
   Future<RiderOrder> riderOrder(String id) async => RiderOrder.fromJson(await order(id));
 
+  /// Courses terminées (livrées, rendues, annulées), la plus récente d'abord (E9).
+  Future<List<RiderOrder>> history() async => [
+    for (final json in await orders(scope: 'history')) RiderOrder.fromJson(json),
+  ];
+
+  /// Dépôt des espèces détenues par Mobile Money (G5) : demande au téléphone du livreur.
+  /// [idempotencyKey] : la même demande renvoyée n'en crée pas une seconde.
+  Future<PaymentRequest> depositCash({
+    required int amount,
+    required String phone,
+    required String operator,
+    required String idempotencyKey,
+  }) async => PaymentRequest.fromJson(
+    await _api.post(
+      '/rider/cash-deposits',
+      body: {'amount': amount, 'phone': phone, 'operator': operator},
+      headers: {'Idempotency-Key': idempotencyKey},
+    ) as Json,
+  );
+
+  /// État d'un paiement (repli quand le temps réel est coupé).
+  Future<PaymentRequest> payment(String id) async => PaymentRequest.fromJson(await _api.get('/payments/$id') as Json);
+
   Future<RiderWallet> riderWallet() async => RiderWallet.fromJson(await wallet());
 
   /// Ce qui reste à encaisser auprès du destinataire.

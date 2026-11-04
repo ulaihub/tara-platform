@@ -992,4 +992,112 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderReturnedNotice => 'Parcel returned to the seller: job done.';
+
+  @override
+  String get earningsToday => 'Today\'s earnings';
+
+  @override
+  String get earningsWeek => 'This week\'s earnings';
+
+  @override
+  String get earningsMonth => 'This month\'s earnings';
+
+  @override
+  String coursesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jobs',
+      one: '1 job',
+      zero: 'No job',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weekdaysShort => 'Mon,Tue,Wed,Thu,Fri,Sat,Sun';
+
+  @override
+  String get todayShort => 'Today';
+
+  @override
+  String weekShort(int number) {
+    return 'W$number';
+  }
+
+  @override
+  String hourShort(int hour) {
+    return '${hour}h';
+  }
+
+  @override
+  String chartSemantics(String caption, String values) {
+    return '$caption: $values';
+  }
+
+  @override
+  String get cashToDeposit => 'Cash to pay back to Tara';
+
+  @override
+  String get depositAction => 'Pay back';
+
+  @override
+  String get lastCourses => 'Latest jobs';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get seeLess => 'See less';
+
+  @override
+  String get statusDelivered => 'Delivered';
+
+  @override
+  String get statusReturned => 'Returned to seller';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String cashCollectedAmount(String amount) {
+    return '$amount collected';
+  }
+
+  @override
+  String get noCoursesYet => 'No finished job yet.';
+
+  @override
+  String get activityError => 'Couldn\'t load your activity.';
+
+  @override
+  String get depositTitle => 'Pay back cash';
+
+  @override
+  String depositBody(String amount) {
+    return 'A payment request of $amount goes to your phone. Approve it with your Mobile Money PIN.';
+  }
+
+  @override
+  String get depositOffice => 'You can also bring the cash to the Tara office.';
+
+  @override
+  String get depositNumber => 'Your Mobile Money number';
+
+  @override
+  String get depositSend => 'Send the request';
+
+  @override
+  String get depositWaiting => 'Approve the request on your phone…';
+
+  @override
+  String depositDone(String amount) {
+    return '$amount paid back to Tara.';
+  }
+
+  @override
+  String get depositFailed => 'Payment not completed. Try again or pay at the Tara office.';
+
+  @override
+  String get depositOperator => 'Operator';
 }

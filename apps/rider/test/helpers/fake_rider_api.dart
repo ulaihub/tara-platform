@@ -16,6 +16,47 @@ class FakeRiderApi extends RiderApi {
   @override
   Future<RiderWallet> riderWallet() async => wallet0;
 
+  /// Gains par période (GET /rider/earnings) et périodes demandées.
+  final earningsByPeriod = <String, Earnings>{};
+  final periods = <String>[];
+
+  @override
+  Future<Earnings> earnings(String period) async {
+    periods.add(period);
+    return earningsByPeriod[period]!;
+  }
+
+  /// Courses terminées (GET /rider/orders?scope=history).
+  List<RiderOrder> finished = [];
+
+  @override
+  Future<List<RiderOrder>> history() async => finished;
+
+  @override
+  Future<Json> me() async => {'phone': '+237677123456'};
+
+  /// Dépôts demandés, et états successifs du paiement (le dernier est répété).
+  final deposits = <(int amount, String phone, String operator, String key)>[];
+  List<String> paymentStatuses = ['PENDING'];
+
+  @override
+  Future<PaymentRequest> depositCash({
+    required int amount,
+    required String phone,
+    required String operator,
+    required String idempotencyKey,
+  }) async {
+    deposits.add((amount, phone, operator, idempotencyKey));
+    return PaymentRequest(id: 'dep1', status: 'PENDING', amount: amount);
+  }
+
+  @override
+  Future<PaymentRequest> payment(String id) async => PaymentRequest(
+    id: id,
+    status: paymentStatuses.length > 1 ? paymentStatuses.removeAt(0) : paymentStatuses.single,
+    amount: 0,
+  );
+
   @override
   Future<Collection> collectMobileMoney(String orderId, {required String phone, required String operator}) async {
     requests.add((phone, operator));

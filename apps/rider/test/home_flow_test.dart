@@ -14,6 +14,7 @@ import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/core/session/session_store.dart';
+import 'package:tara_rider/features/activity/activity_screen.dart';
 import 'package:tara_rider/features/course/collection_screen.dart';
 import 'package:tara_rider/features/course/delivery_screen.dart';
 import 'package:tara_rider/features/course/failure_screen.dart';
@@ -214,5 +215,17 @@ void main() {
     await settle(tester);
     expect(sent.single, endsWith('/retry'));
     expect(find.byType(DeliveryScreen), findsOneWidget);
+  });
+  testWidgets('onglet Activité depuis l’accueil, puis retour à l’accueil', (tester) async {
+    await pumpHome(tester, order());
+    await tester.tap(find.bySemanticsLabel('Retour'));
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel('Activité'));
+    await settle(tester);
+    expect(find.byType(ActivityScreen), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Accueil'));
+    await settle(tester);
+    expect(find.byType(ActivityScreen), findsNothing);
+    expect(find.text('Course TR-48213 en cours'), findsOneWidget);
   });
 }

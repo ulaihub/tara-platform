@@ -619,5 +619,86 @@
   "parcelReturned": "Colis rendu",
   "returnQueuedTitle": "Retour enregistré",
   "returnQueuedBody": "Il sera envoyé dès le retour du réseau.",
-  "orderReturnedNotice": "Colis rendu au vendeur : course terminée."
+  "orderReturnedNotice": "Colis rendu au vendeur : course terminée.",
+  "earningsToday": "Gains d’aujourd’hui",
+  "earningsWeek": "Gains de la semaine",
+  "earningsMonth": "Gains du mois",
+  "coursesCount": "{count, plural, =0{Aucune course} =1{1 course} other{{count} courses}}",
+  "@coursesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weekdaysShort": "Lun,Mar,Mer,Jeu,Ven,Sam,Dim",
+  "todayShort": "Auj.",
+  "weekShort": "S{number}",
+  "@weekShort": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hourShort": "{hour}h",
+  "@hourShort": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "chartSemantics": "{caption} : {values}",
+  "@chartSemantics": {
+    "placeholders": {
+      "caption": {
+        "type": "String"
+      },
+      "values": {
+        "type": "String"
+      }
+    }
+  },
+  "cashToDeposit": "Espèces à reverser à Tara",
+  "depositAction": "Reverser",
+  "lastCourses": "Dernières courses",
+  "seeAll": "Tout voir",
+  "seeLess": "Voir moins",
+  "statusDelivered": "Livrée",
+  "statusReturned": "Retour au vendeur",
+  "statusCancelled": "Annulée",
+  "cashCollectedAmount": "{amount} encaissés",
+  "@cashCollectedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "noCoursesYet": "Pas encore de course terminée.",
+  "activityError": "Impossible de charger l’activité.",
+  "depositTitle": "Reverser les espèces",
+  "depositBody": "Une demande de paiement de {amount} part sur votre téléphone. Validez-la avec votre code Mobile Money.",
+  "@depositBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "depositOffice": "Vous pouvez aussi déposer les espèces au bureau Tara.",
+  "depositNumber": "Votre numéro Mobile Money",
+  "depositSend": "Envoyer la demande",
+  "depositWaiting": "Validez la demande sur votre téléphone…",
+  "depositDone": "{amount} reversés à Tara.",
+  "@depositDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "depositFailed": "Paiement non abouti. Réessayez ou déposez au bureau Tara.",
+  "depositOperator": "Opérateur"
 }

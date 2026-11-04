@@ -32,6 +32,7 @@ void main() {
     'RiderRoute': RiderRoute.fields,
     'Collection': Collection.fields,
     'RiderWallet': RiderWallet.fields,
+    'Payment': PaymentRequest.fields,
   };
   for (final MapEntry(key: schema, value: fields) in models.entries) {
     test('modèle $schema conforme au contrat', () {

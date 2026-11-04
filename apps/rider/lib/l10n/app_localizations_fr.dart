@@ -995,4 +995,112 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get orderReturnedNotice => 'Colis rendu au vendeur : course terminée.';
+
+  @override
+  String get earningsToday => 'Gains d’aujourd’hui';
+
+  @override
+  String get earningsWeek => 'Gains de la semaine';
+
+  @override
+  String get earningsMonth => 'Gains du mois';
+
+  @override
+  String coursesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses',
+      one: '1 course',
+      zero: 'Aucune course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weekdaysShort => 'Lun,Mar,Mer,Jeu,Ven,Sam,Dim';
+
+  @override
+  String get todayShort => 'Auj.';
+
+  @override
+  String weekShort(int number) {
+    return 'S$number';
+  }
+
+  @override
+  String hourShort(int hour) {
+    return '${hour}h';
+  }
+
+  @override
+  String chartSemantics(String caption, String values) {
+    return '$caption : $values';
+  }
+
+  @override
+  String get cashToDeposit => 'Espèces à reverser à Tara';
+
+  @override
+  String get depositAction => 'Reverser';
+
+  @override
+  String get lastCourses => 'Dernières courses';
+
+  @override
+  String get seeAll => 'Tout voir';
+
+  @override
+  String get seeLess => 'Voir moins';
+
+  @override
+  String get statusDelivered => 'Livrée';
+
+  @override
+  String get statusReturned => 'Retour au vendeur';
+
+  @override
+  String get statusCancelled => 'Annulée';
+
+  @override
+  String cashCollectedAmount(String amount) {
+    return '$amount encaissés';
+  }
+
+  @override
+  String get noCoursesYet => 'Pas encore de course terminée.';
+
+  @override
+  String get activityError => 'Impossible de charger l’activité.';
+
+  @override
+  String get depositTitle => 'Reverser les espèces';
+
+  @override
+  String depositBody(String amount) {
+    return 'Une demande de paiement de $amount part sur votre téléphone. Validez-la avec votre code Mobile Money.';
+  }
+
+  @override
+  String get depositOffice => 'Vous pouvez aussi déposer les espèces au bureau Tara.';
+
+  @override
+  String get depositNumber => 'Votre numéro Mobile Money';
+
+  @override
+  String get depositSend => 'Envoyer la demande';
+
+  @override
+  String get depositWaiting => 'Validez la demande sur votre téléphone…';
+
+  @override
+  String depositDone(String amount) {
+    return '$amount reversés à Tara.';
+  }
+
+  @override
+  String get depositFailed => 'Paiement non abouti. Réessayez ou déposez au bureau Tara.';
+
+  @override
+  String get depositOperator => 'Opérateur';
 }

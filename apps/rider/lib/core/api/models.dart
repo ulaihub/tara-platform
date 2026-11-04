@@ -610,6 +610,9 @@ class RiderOrder {
     this.failureReason,
     this.failedAt,
     this.failureDecisionDueAt,
+    this.completedAt,
+    this.collectedAmount,
+    this.collectedMethod,
   });
 
   factory RiderOrder.fromJson(Json json) {
@@ -636,6 +639,9 @@ class RiderOrder {
       failureReason: json['failureReason'] as String?,
       failedAt: _date(json['failedAt']),
       failureDecisionDueAt: _date(json['failureDecisionDueAt']),
+      completedAt: _date(json['completedAt']),
+      collectedAmount: ((json['collected'] as Json?)?['amount'] as num?)?.toInt(),
+      collectedMethod: (json['collected'] as Json?)?['method'] as String?,
       awaitingSupportValidation: _field(json, 'awaitingSupportValidation'),
     );
   }
@@ -661,6 +667,8 @@ class RiderOrder {
     'failedAt',
     'failureDecisionDueAt',
     'awaitingSupportValidation',
+    'completedAt',
+    'collected',
   ];
 
   /// Réponse de l'API telle quelle (sauvegarde sur le téléphone).
@@ -698,6 +706,13 @@ class RiderOrder {
 
   /// Échec sans décision : heure du retour automatique.
   final DateTime? failureDecisionDueAt;
+
+  /// Fin de la course (livrée, rendue ou annulée), pour l'historique.
+  final DateTime? completedAt;
+
+  /// Argent encaissé auprès du destinataire : montant et moyen (CASH ou MOBILE_MONEY).
+  final int? collectedAmount;
+  final String? collectedMethod;
   final bool awaitingSupportValidation;
 
   /// Toujours en cours pour le livreur (sinon : terminée, annulée ou réattribuée).
@@ -801,4 +816,22 @@ class RiderWallet {
   /// Espèces encaissées pas encore déposées (dues à Tara).
   final int cashHeld;
   final int cashLimit;
+}
+
+/// Paiement Mobile Money demandé au téléphone du payeur (dépôt des espèces, G5).
+@immutable
+class PaymentRequest {
+  const PaymentRequest({required this.id, required this.status, required this.amount});
+  factory PaymentRequest.fromJson(Json json) => PaymentRequest(
+    id: _field(json, 'id'),
+    status: _field(json, 'status'),
+    amount: _field<num>(json, 'amount').toInt(),
+  );
+  static const fields = ['id', 'status', 'amount'];
+
+  final String id;
+
+  /// PENDING, SUCCEEDED, FAILED ou CANCELLED.
+  final String status;
+  final int amount;
 }
