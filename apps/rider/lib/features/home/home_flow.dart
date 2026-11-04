@@ -14,6 +14,7 @@ import '../../design/format.dart';
 import '../../design/tara_colors.dart';
 import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
+import '../account/account_screen.dart';
 import '../activity/activity_screen.dart';
 import '../common/status_screen.dart';
 import '../course/collection_screen.dart';
@@ -24,6 +25,7 @@ import '../course/pickup_screen.dart';
 import '../course/return_screen.dart';
 import '../offer/offer_screen.dart';
 import '../offline/pending_actions_screen.dart';
+import '../onboarding/documents_controller.dart';
 import '../safety/sos_screen.dart';
 import 'home_offline_screen.dart';
 import 'home_online_screen.dart';
@@ -55,16 +57,14 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   /// Écran d'alerte (14) ouvert par un bouton SOS, au-dessus de tout le reste.
   bool _sos = false;
 
-  /// Onglet affiché quand aucune course n'est à l'écran : 0 accueil, 1 activité (13).
+  /// Onglet affiché quand aucune course n'est à l'écran : 0 accueil, 1 activité (13),
+  /// 2 profil et réglages.
   int _tab = 0;
 
   /// Écran des actions en attente (15), ouvert depuis le bandeau.
   bool _pending = false;
 
-  /// Profil et réglages : écran pas encore dessiné, l'onglet ne change rien.
-  void _selectTab(int tab) {
-    if (tab != 2) setState(() => _tab = tab);
-  }
+  void _selectTab(int tab) => setState(() => _tab = tab);
 
   late final ActiveOrderController _activeOrder;
   Timer? _noticeTimer;
@@ -78,6 +78,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     _activeOrder = ref.read(activeOrderProvider)..addListener(_onOrderChanged);
     _push = ref.read(pushServiceProvider).messages.listen((data) {
       if (data['type'] == 'offer.new') unawaited(_loadPendingOffers());
+      // Pièce refusée par l'équipe : le profil la montre à renvoyer.
+      if (data['type'] == 'kyc.document_rejected') ref.invalidate(documentsControllerProvider);
     });
   }
 
@@ -309,6 +311,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                   ? _course(order)
                   : _tab == 1
                   ? ActivityScreen(onTab: _selectTab)
+                  : _tab == 2
+                  ? AccountScreen(onTab: _selectTab)
                   : online.online
                   ? HomeOnlineScreen(
                       onWentOffline: () => setState(() {}),

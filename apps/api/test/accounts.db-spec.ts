@@ -11,6 +11,7 @@ import {
   type SignedIn,
   type TestContext,
 } from './helpers/app.js';
+import { activeRider } from './helpers/riders.js';
 
 /** Plus petit PNG valide (1 × 1 pixel). */
 const PNG = Buffer.from(
@@ -150,7 +151,7 @@ describe('Livreurs et pièces (A3, A5, H3)', () => {
     const res = await request(ctx.http).get('/v1/riders/me').set(rider.auth).expect(200);
     expect(res.body).toMatchObject({
       status: 'PENDING',
-      // Nouveau livreur : plafond de départ (50 000 FCFA après 20 courses sans retard).
+      // Plafond des espèces de l'ancien fonctionnement (avant le solde prépayé).
       cashLimit: 25_000,
       guarantorPhone: '+237699112233',
     });
@@ -202,6 +203,27 @@ describe('Livreurs et pièces (A3, A5, H3)', () => {
       })
       .expect(400);
     expect(res.body.error.code).toBe('MEDIA_TYPE_NOT_ALLOWED');
+  });
+
+  it('prévient le livreur d’une pièce refusée, avec le motif', async () => {
+    const rider = await activeRider(ctx);
+    const doc = await upload(rider, 'SELFIE').expect(201);
+    await request(ctx.http)
+      .post(`/v1/admin/kyc-documents/${doc.body.id}/review`)
+      .set(ops.auth)
+      .send({ decision: 'REJECTED', rejectionReason: 'Visage caché par le casque.' })
+      .expect(200);
+    const push = await ctx.prisma.notification.findFirstOrThrow({
+      where: { userId: rider.userId, channel: 'PUSH', template: 'RIDER_DOCUMENT_REJECTED' },
+    });
+    expect(push.payload).toMatchObject({
+      params: {
+        documentFr: 'Photo du visage',
+        documentEn: 'Selfie',
+        reason: 'Visage caché par le casque',
+      },
+      data: { type: 'kyc.document_rejected', documentType: 'SELFIE' },
+    });
   });
 
   it('ne valide le livreur qu’une fois toutes les pièces approuvées', async () => {

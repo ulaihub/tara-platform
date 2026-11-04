@@ -797,5 +797,61 @@
     }
   },
   "takenFromBalance": "Pris sur votre solde (déjà mis de côté)",
-  "balanceShort": "Solde"
+  "balanceShort": "Solde",
+  "myDocuments": "Mes pièces",
+  "myDocumentsBody": "Une pièce refusée ou expirée se renvoie ici ; l’équipe Tara la vérifie à nouveau.",
+  "docsToFix": "{count, plural, =1{1 pièce à renvoyer} other{{count} pièces à renvoyer}}",
+  "@docsToFix": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docsToFixHint": "Sans elle, vous ne pouvez plus recevoir de courses.",
+  "docsInReview": "{count, plural, =1{1 pièce en vérification} other{{count} pièces en vérification}}",
+  "@docsInReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docsAllApproved": "Toutes vos pièces sont validées",
+  "emergencyContactTitle": "Contact d’urgence",
+  "emergencyNone": "Aucun contact",
+  "add": "Ajouter",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "removeContact": "Retirer ce contact",
+  "displaySection": "Affichage",
+  "themeLabel": "Thème",
+  "optionAuto": "Auto",
+  "themeLight": "Clair",
+  "themeDark": "Sombre",
+  "languageLabel": "Langue",
+  "effectsLabel": "Animations",
+  "effectsFull": "Complètes",
+  "effectsReduced": "Réduites",
+  "effectsHint": "Réduites : moins d’effets, plus fluide sur un téléphone modeste.",
+  "effectsAutoReduced": "Réduites automatiquement sur ce téléphone.",
+  "helpSection": "Aide",
+  "supportTara": "Support Tara",
+  "logoutConfirm": "Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.",
+  "logoutBlockedCourse": "Terminez votre course avant de vous déconnecter.",
+  "logoutBlockedPending": "Des actions attendent le réseau : elles seraient perdues. Reconnectez-vous d’abord.",
+  "appVersion": "Tara Livreur · version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "accountActive": "Compte actif",
+  "accountPending": "Dossier en vérification",
+  "accountSuspended": "Compte suspendu",
+  "accountRejected": "Dossier refusé",
+  "profileError": "Impossible de charger votre profil."
 }

@@ -1261,4 +1261,128 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get balanceShort => 'Solde';
+
+  @override
+  String get myDocuments => 'Mes pièces';
+
+  @override
+  String get myDocumentsBody => 'Une pièce refusée ou expirée se renvoie ici ; l’équipe Tara la vérifie à nouveau.';
+
+  @override
+  String docsToFix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pièces à renvoyer',
+      one: '1 pièce à renvoyer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get docsToFixHint => 'Sans elle, vous ne pouvez plus recevoir de courses.';
+
+  @override
+  String docsInReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pièces en vérification',
+      one: '1 pièce en vérification',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get docsAllApproved => 'Toutes vos pièces sont validées';
+
+  @override
+  String get emergencyContactTitle => 'Contact d’urgence';
+
+  @override
+  String get emergencyNone => 'Aucun contact';
+
+  @override
+  String get add => 'Ajouter';
+
+  @override
+  String get edit => 'Modifier';
+
+  @override
+  String get save => 'Enregistrer';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get removeContact => 'Retirer ce contact';
+
+  @override
+  String get displaySection => 'Affichage';
+
+  @override
+  String get themeLabel => 'Thème';
+
+  @override
+  String get optionAuto => 'Auto';
+
+  @override
+  String get themeLight => 'Clair';
+
+  @override
+  String get themeDark => 'Sombre';
+
+  @override
+  String get languageLabel => 'Langue';
+
+  @override
+  String get effectsLabel => 'Animations';
+
+  @override
+  String get effectsFull => 'Complètes';
+
+  @override
+  String get effectsReduced => 'Réduites';
+
+  @override
+  String get effectsHint => 'Réduites : moins d’effets, plus fluide sur un téléphone modeste.';
+
+  @override
+  String get effectsAutoReduced => 'Réduites automatiquement sur ce téléphone.';
+
+  @override
+  String get helpSection => 'Aide';
+
+  @override
+  String get supportTara => 'Support Tara';
+
+  @override
+  String get logoutConfirm => 'Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.';
+
+  @override
+  String get logoutBlockedCourse => 'Terminez votre course avant de vous déconnecter.';
+
+  @override
+  String get logoutBlockedPending =>
+      'Des actions attendent le réseau : elles seraient perdues. Reconnectez-vous d’abord.';
+
+  @override
+  String appVersion(String version) {
+    return 'Tara Livreur · version $version';
+  }
+
+  @override
+  String get accountActive => 'Compte actif';
+
+  @override
+  String get accountPending => 'Dossier en vérification';
+
+  @override
+  String get accountSuspended => 'Compte suspendu';
+
+  @override
+  String get accountRejected => 'Dossier refusé';
+
+  @override
+  String get profileError => 'Impossible de charger votre profil.';
 }

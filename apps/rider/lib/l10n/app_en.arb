@@ -390,5 +390,61 @@
     }
   },
   "takenFromBalance": "Taken from your balance (already set aside)",
-  "balanceShort": "Balance"
+  "balanceShort": "Balance",
+  "myDocuments": "My documents",
+  "myDocumentsBody": "Send a rejected or expired document again here; the Tara team checks it again.",
+  "docsToFix": "{count, plural, =1{1 document to send again} other{{count} documents to send again}}",
+  "@docsToFix": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docsToFixHint": "Without it, you can no longer receive jobs.",
+  "docsInReview": "{count, plural, =1{1 document being checked} other{{count} documents being checked}}",
+  "@docsInReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docsAllApproved": "All your documents are approved",
+  "emergencyContactTitle": "Emergency contact",
+  "emergencyNone": "No contact",
+  "add": "Add",
+  "edit": "Edit",
+  "save": "Save",
+  "cancel": "Cancel",
+  "removeContact": "Remove this contact",
+  "displaySection": "Display",
+  "themeLabel": "Theme",
+  "optionAuto": "Auto",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "languageLabel": "Language",
+  "effectsLabel": "Animations",
+  "effectsFull": "Full",
+  "effectsReduced": "Reduced",
+  "effectsHint": "Reduced: fewer effects, smoother on a modest phone.",
+  "effectsAutoReduced": "Reduced automatically on this phone.",
+  "helpSection": "Help",
+  "supportTara": "Tara support",
+  "logoutConfirm": "You will not receive jobs on this phone until you sign in again.",
+  "logoutBlockedCourse": "Finish your job before signing out.",
+  "logoutBlockedPending": "Some actions are waiting for the network and would be lost. Reconnect first.",
+  "appVersion": "Tara Rider · version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "accountActive": "Account active",
+  "accountPending": "Application being checked",
+  "accountSuspended": "Account suspended",
+  "accountRejected": "Application rejected",
+  "profileError": "Could not load your profile."
 }

@@ -1255,4 +1255,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get balanceShort => 'Balance';
+
+  @override
+  String get myDocuments => 'My documents';
+
+  @override
+  String get myDocumentsBody => 'Send a rejected or expired document again here; the Tara team checks it again.';
+
+  @override
+  String docsToFix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents to send again',
+      one: '1 document to send again',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get docsToFixHint => 'Without it, you can no longer receive jobs.';
+
+  @override
+  String docsInReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents being checked',
+      one: '1 document being checked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get docsAllApproved => 'All your documents are approved';
+
+  @override
+  String get emergencyContactTitle => 'Emergency contact';
+
+  @override
+  String get emergencyNone => 'No contact';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get removeContact => 'Remove this contact';
+
+  @override
+  String get displaySection => 'Display';
+
+  @override
+  String get themeLabel => 'Theme';
+
+  @override
+  String get optionAuto => 'Auto';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get languageLabel => 'Language';
+
+  @override
+  String get effectsLabel => 'Animations';
+
+  @override
+  String get effectsFull => 'Full';
+
+  @override
+  String get effectsReduced => 'Reduced';
+
+  @override
+  String get effectsHint => 'Reduced: fewer effects, smoother on a modest phone.';
+
+  @override
+  String get effectsAutoReduced => 'Reduced automatically on this phone.';
+
+  @override
+  String get helpSection => 'Help';
+
+  @override
+  String get supportTara => 'Tara support';
+
+  @override
+  String get logoutConfirm => 'You will not receive jobs on this phone until you sign in again.';
+
+  @override
+  String get logoutBlockedCourse => 'Finish your job before signing out.';
+
+  @override
+  String get logoutBlockedPending => 'Some actions are waiting for the network and would be lost. Reconnect first.';
+
+  @override
+  String appVersion(String version) {
+    return 'Tara Rider · version $version';
+  }
+
+  @override
+  String get accountActive => 'Account active';
+
+  @override
+  String get accountPending => 'Application being checked';
+
+  @override
+  String get accountSuspended => 'Account suspended';
+
+  @override
+  String get accountRejected => 'Application rejected';
+
+  @override
+  String get profileError => 'Could not load your profile.';
 }

@@ -34,13 +34,21 @@ Future<String?> pickWithCamera({required bool selfie}) async {
 }
 
 /// 04 · Pièces justificatives : liste fournie par l'API, envoi avec progression, pièce
-/// refusée avec son motif et « Renvoyer ».
+/// refusée avec son motif et « Renvoyer ». Ouvert aussi depuis le profil ([fromProfile]) :
+/// mêmes pièces, sans les étapes de l'inscription.
 class DocumentsScreen extends ConsumerWidget {
-  const DocumentsScreen({super.key, required this.onDone, this.onBack, this.pickPhoto = pickWithCamera});
+  const DocumentsScreen({
+    super.key,
+    required this.onDone,
+    this.onBack,
+    this.pickPhoto = pickWithCamera,
+    this.fromProfile = false,
+  });
 
   final VoidCallback onDone;
   final VoidCallback? onBack;
   final PickPhoto pickPhoto;
+  final bool fromProfile;
 
   static const _blobs = [
     BlobSpec(alignment: Alignment(1.3, -1.05), size: 260, colors: BlobSpec.brand, blur: 70),
@@ -80,21 +88,43 @@ class DocumentsScreen extends ConsumerWidget {
         horizontal: 20,
         top: 8,
         content: [
-          OnboardingHeader(
-            step: 2,
-            total: 2,
-            name: l.stepDocuments,
-            progress: total == 0 ? 0 : done / total,
-            trailing: l.progressCount(done, total),
-            onBack: onBack,
-          ),
-          const SizedBox(height: 22),
-          Semantics(
-            header: true,
-            child: Text(l.documentsTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-          ),
+          if (fromProfile)
+            Row(
+              children: [
+                GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: onBack ?? onDone),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(l.myDocuments, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
+                  ),
+                ),
+                Text(
+                  l.progressCount(done, total),
+                  style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w700),
+                ),
+              ],
+            )
+          else ...[
+            OnboardingHeader(
+              step: 2,
+              total: 2,
+              name: l.stepDocuments,
+              progress: total == 0 ? 0 : done / total,
+              trailing: l.progressCount(done, total),
+              onBack: onBack,
+            ),
+            const SizedBox(height: 22),
+            Semantics(
+              header: true,
+              child: Text(l.documentsTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
+            ),
+          ],
           const SizedBox(height: 8),
-          Text(l.documentsBody, style: TaraText.body.copyWith(color: c.textSecondary)),
+          Text(
+            fromProfile ? l.myDocumentsBody : l.documentsBody,
+            style: TaraText.body.copyWith(color: c.textSecondary),
+          ),
           const SizedBox(height: 18),
           if (data == null && state.hasError) ...[
             ErrorLine(errorMessage(context, state.error!)),
@@ -106,21 +136,32 @@ class DocumentsScreen extends ConsumerWidget {
               child: Center(child: GooLoader()),
             )
           else
-            for (final item in data.items) ...[
+            for (final item in fromProfile ? _actionFirst(data.items) : data.items) ...[
               _DocumentRow(item: item, onTake: (type, asksExpiry) => _take(context, ref, type, asksExpiry)),
               const SizedBox(height: 10),
             ],
           const SizedBox(height: 8),
           InfoNote(text: l.documentsNote),
         ],
-        footer: PrimaryButton(
-          label: l.sendFile,
-          icon: TaraIcons.check,
-          onPressed: data != null && data.complete ? onDone : null,
-        ),
+        footer: fromProfile
+            ? PrimaryButton(label: l.close, icon: TaraIcons.check, onPressed: onDone)
+            : PrimaryButton(
+                label: l.sendFile,
+                icon: TaraIcons.check,
+                onPressed: data != null && data.complete ? onDone : null,
+              ),
       ),
     );
   }
+}
+
+/// Depuis le profil : les pièces à renvoyer (refusées, expirées, manquantes) d'abord.
+List<DocumentItem> _actionFirst(List<DocumentItem> items) {
+  bool needsAction(DocumentItem item) =>
+      item.status == DocumentStatus.rejected ||
+      item.status == DocumentStatus.expired ||
+      item.status == DocumentStatus.toDo;
+  return [...items.where(needsAction), ...items.where((item) => !needsAction(item))];
 }
 
 class _DocumentRow extends StatelessWidget {

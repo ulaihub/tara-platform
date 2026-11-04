@@ -2251,6 +2251,216 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Solde'**
   String get balanceShort;
+
+  /// No description provided for @myDocuments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes pièces'**
+  String get myDocuments;
+
+  /// No description provided for @myDocumentsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une pièce refusée ou expirée se renvoie ici ; l’équipe Tara la vérifie à nouveau.'**
+  String get myDocumentsBody;
+
+  /// No description provided for @docsToFix.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 pièce à renvoyer} other{{count} pièces à renvoyer}}'**
+  String docsToFix(int count);
+
+  /// No description provided for @docsToFixHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans elle, vous ne pouvez plus recevoir de courses.'**
+  String get docsToFixHint;
+
+  /// No description provided for @docsInReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 pièce en vérification} other{{count} pièces en vérification}}'**
+  String docsInReview(int count);
+
+  /// No description provided for @docsAllApproved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes vos pièces sont validées'**
+  String get docsAllApproved;
+
+  /// No description provided for @emergencyContactTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contact d’urgence'**
+  String get emergencyContactTitle;
+
+  /// No description provided for @emergencyNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contact'**
+  String get emergencyNone;
+
+  /// No description provided for @add.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get add;
+
+  /// No description provided for @edit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get edit;
+
+  /// No description provided for @save.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get save;
+
+  /// No description provided for @cancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get cancel;
+
+  /// No description provided for @removeContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer ce contact'**
+  String get removeContact;
+
+  /// No description provided for @displaySection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affichage'**
+  String get displaySection;
+
+  /// No description provided for @themeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Thème'**
+  String get themeLabel;
+
+  /// No description provided for @optionAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auto'**
+  String get optionAuto;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clair'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sombre'**
+  String get themeDark;
+
+  /// No description provided for @languageLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get languageLabel;
+
+  /// No description provided for @effectsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Animations'**
+  String get effectsLabel;
+
+  /// No description provided for @effectsFull.
+  ///
+  /// In fr, this message translates to:
+  /// **'Complètes'**
+  String get effectsFull;
+
+  /// No description provided for @effectsReduced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduites'**
+  String get effectsReduced;
+
+  /// No description provided for @effectsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduites : moins d’effets, plus fluide sur un téléphone modeste.'**
+  String get effectsHint;
+
+  /// No description provided for @effectsAutoReduced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduites automatiquement sur ce téléphone.'**
+  String get effectsAutoReduced;
+
+  /// No description provided for @helpSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide'**
+  String get helpSection;
+
+  /// No description provided for @supportTara.
+  ///
+  /// In fr, this message translates to:
+  /// **'Support Tara'**
+  String get supportTara;
+
+  /// No description provided for @logoutConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.'**
+  String get logoutConfirm;
+
+  /// No description provided for @logoutBlockedCourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminez votre course avant de vous déconnecter.'**
+  String get logoutBlockedCourse;
+
+  /// No description provided for @logoutBlockedPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Des actions attendent le réseau : elles seraient perdues. Reconnectez-vous d’abord.'**
+  String get logoutBlockedPending;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tara Livreur · version {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @accountActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte actif'**
+  String get accountActive;
+
+  /// No description provided for @accountPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier en vérification'**
+  String get accountPending;
+
+  /// No description provided for @accountSuspended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte suspendu'**
+  String get accountSuspended;
+
+  /// No description provided for @accountRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier refusé'**
+  String get accountRejected;
+
+  /// No description provided for @profileError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger votre profil.'**
+  String get profileError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

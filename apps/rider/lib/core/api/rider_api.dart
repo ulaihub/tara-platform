@@ -18,6 +18,10 @@ class RiderApi {
   /// Nom affiché du livreur (PATCH /me).
   Future<void> updateName(String fullName) => _api.send('PATCH', '/me', body: {'fullName': fullName});
 
+  /// Langue des SMS et notifications envoyés au livreur (choisie dans le profil).
+  Future<void> updateLocale(String languageCode) =>
+      _api.send('PATCH', '/me', body: {'locale': languageCode == 'en' ? 'EN' : 'FR'});
+
   /// Portefeuille : gains disponibles, espèces détenues et plafond.
   Future<Json> wallet() async => await _api.get('/rider/wallet') as Json;
 

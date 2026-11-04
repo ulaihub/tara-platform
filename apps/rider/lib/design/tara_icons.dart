@@ -19,6 +19,7 @@ abstract final class TaraIcons {
     _P('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2'),
   ]);
   static const chevronLeft = TaraIconData([_P('M15 6l-6 6 6 6')]);
+  static const chevronRight = TaraIconData([_P('M9 6l6 6-6 6')]);
   static const timer = TaraIconData([_C(12, 13, 8), _P('M12 9v4l2.5 2M9 2h6')]);
   static const phoneMissed = TaraIconData([
     _P('M16 3l5 5M21 3l-5 5M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2'),

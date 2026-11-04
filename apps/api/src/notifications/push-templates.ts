@@ -105,6 +105,17 @@ const TEMPLATES = {
     fr: { title: 'Suite de votre livraison', body: '{reference} : {decision}.' },
     en: { title: 'Your delivery', body: '{reference}: {decision}.' },
   },
+  // Le nom de la pièce est passé dans les deux langues ; le motif est celui de l'équipe.
+  RIDER_DOCUMENT_REJECTED: {
+    fr: {
+      title: 'Pièce refusée',
+      body: '{documentFr} — motif : {reason}. Renvoyez-la depuis votre profil.',
+    },
+    en: {
+      title: 'Document rejected',
+      body: '{documentEn} — reason: {reason}. Send it again from your profile.',
+    },
+  },
   RIDER_FAILURE_DECISION: {
     fr: { title: 'Décision de l’expéditeur', body: '{reference} : {decision}.' },
     en: { title: 'Sender decision', body: '{reference}: {decision}.' },

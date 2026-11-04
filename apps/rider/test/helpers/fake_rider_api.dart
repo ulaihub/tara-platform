@@ -40,7 +40,23 @@ class FakeRiderApi extends RiderApi {
   Future<List<RiderOrder>> history() async => finished;
 
   @override
-  Future<Json> me() async => {'phone': '+237677123456'};
+  Future<Json> me() async => {'fullName': 'Awa Ngono', 'phone': '+237677123456'};
+
+  /// Langues envoyées au serveur (PATCH /me).
+  final locales = <String>[];
+
+  @override
+  Future<void> updateLocale(String languageCode) async => locales.add(languageCode);
+
+  /// Contacts d'urgence enregistrés ; [profileAfter] : dossier renvoyé par le serveur.
+  final contacts = <(String name, String phone)>[];
+  RiderProfile Function(String name, String phone)? profileAfter;
+
+  @override
+  Future<RiderProfile> setEmergencyContact(String name, String phone) async {
+    contacts.add((name, phone));
+    return profileAfter!(name, phone);
+  }
 
   /// Dépôts demandés, et états successifs du paiement (le dernier est répété).
   final deposits = <(int amount, String phone, String operator, String key)>[];

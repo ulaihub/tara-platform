@@ -98,6 +98,12 @@ class DocumentsController extends AsyncNotifier<DocumentsState> {
     return DocumentsState(requirements: requirements, profile: profile);
   }
 
+  /// Dossier renvoyé par une autre action (contact d'urgence modifié dans le profil).
+  void replaceProfile(RiderProfile profile) {
+    final current = state.value;
+    if (current != null) state = AsyncData(current.copyWith(profile: profile));
+  }
+
   Future<void> upload(
     String type,
     String filePath, {

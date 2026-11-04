@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/api/api_client.dart';
@@ -24,6 +25,7 @@ import '../core/push/push_service.dart';
 import '../core/realtime/realtime_client.dart';
 import '../core/safety/safety_alert.dart';
 import '../core/session/session_store.dart';
+import 'app_settings.dart';
 
 /// Stockage chiffré du téléphone (remplacé par un stockage en mémoire dans les tests).
 final keyValueStoreProvider = Provider<KeyValueStore>((ref) => const SecureKeyValueStore());
@@ -31,10 +33,25 @@ final keyValueStoreProvider = Provider<KeyValueStore>((ref) => const SecureKeyVa
 /// Adresse de l'API (remplaçable dans les tests).
 final apiUrlProvider = Provider<String>((ref) => Env.apiUrl);
 
-/// Langue des messages du serveur : anglais si le téléphone est en anglais, sinon français.
-final languageCodeProvider = Provider<String>(
-  (ref) => PlatformDispatcher.instance.locale.languageCode == 'en' ? 'en' : 'fr',
-);
+/// Réglages d'affichage (thème, langue, effets), chargés au démarrage (main) et partagés
+/// avec l'app ; valeurs par défaut dans les tests.
+final appSettingsProvider = Provider<AppSettings>((ref) => AppSettings());
+
+/// Langue des messages du serveur : celle choisie dans le profil, sinon anglais si le
+/// téléphone est en anglais, sinon français. Recalculée quand le livreur la change.
+final languageCodeProvider = Provider<String>((ref) {
+  final settings = ref.watch(appSettingsProvider);
+  void changed() => ref.invalidateSelf();
+  settings.addListener(changed);
+  ref.onDispose(() => settings.removeListener(changed));
+  return settings.languageCode(PlatformDispatcher.instance.locale);
+});
+
+/// Version de l'app affichée dans le profil (remplacée dans les tests).
+final appVersionProvider = FutureProvider<String>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  return '${info.version} (${info.buildNumber})';
+});
 
 final sessionStoreProvider = Provider<SessionStore>((ref) => SessionStore(ref.watch(keyValueStoreProvider)));
 

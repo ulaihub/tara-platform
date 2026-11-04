@@ -357,6 +357,7 @@ class RiderProfile {
     required this.missingDocuments,
     required this.emergencyContactName,
     required this.emergencyContactPhone,
+    this.plateNumber,
   });
   factory RiderProfile.fromJson(Json json) {
     final contact = json['emergencyContact'] as Json?;
@@ -374,9 +375,10 @@ class RiderProfile {
       missingDocuments: [for (final item in _field<List<Object?>>(json, 'missingDocuments')) item! as String],
       emergencyContactName: contact?['name'] as String?,
       emergencyContactPhone: contact?['phone'] as String?,
+      plateNumber: json['plateNumber'] as String?,
     );
   }
-  static const fields = ['status', 'vehicleType', 'documents', 'missingDocuments', 'emergencyContact'];
+  static const fields = ['status', 'vehicleType', 'plateNumber', 'documents', 'missingDocuments', 'emergencyContact'];
 
   /// PENDING (en attente de validation), ACTIVE, SUSPENDED ou REJECTED.
   final String status;
@@ -385,6 +387,9 @@ class RiderProfile {
   final List<String> missingDocuments;
   final String? emergencyContactName;
   final String? emergencyContactPhone;
+
+  /// Immatriculation du véhicule (facultative à l'inscription).
+  final String? plateNumber;
 
   bool get isActive => status == 'ACTIVE';
 }
