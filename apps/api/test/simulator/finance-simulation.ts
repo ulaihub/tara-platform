@@ -312,10 +312,11 @@ export async function runFinanceSimulation(
       );
     }
 
-    // Reversements quotidiens des marchands : un envoi sur cinq perd sa réponse.
+    // Reversements quotidiens des marchands : le premier envoi, puis un sur cinq, perd sa
+    // réponse (au moins une coupure à chaque passage, quel que soit l'ordre des tirages).
     const original = provider.disburse.bind(provider);
     provider.disburse = (disbursement) => {
-      if (rng() < 0.2) {
+      if (stats.lostResponses === 0 || rng() < 0.2) {
         provider.loseResponseOnce.add(disbursement.reference);
         stats.lostResponses += 1;
       }
