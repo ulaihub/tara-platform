@@ -9,6 +9,7 @@ import '../../core/course/active_order.dart';
 import '../../core/course/course_actions.dart';
 import '../../core/realtime/realtime_client.dart';
 import '../../design/components/glass.dart';
+import '../../design/format.dart';
 import '../../design/tara_colors.dart';
 import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
@@ -16,7 +17,9 @@ import '../common/status_screen.dart';
 import '../course/collection_screen.dart';
 import '../course/course_banner.dart';
 import '../course/delivery_screen.dart';
+import '../course/failure_screen.dart';
 import '../course/pickup_screen.dart';
+import '../course/return_screen.dart';
 import '../offer/offer_screen.dart';
 import '../safety/sos_screen.dart';
 import 'home_offline_screen.dart';
@@ -43,6 +46,9 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   /// Encaissement ouvert (12), avec la livraison préparée à l'écran 09.
   ({String orderId, DeliveryDraft draft})? _collecting;
 
+  /// Écran d'échec (10) ouvert depuis la livraison : identifiant de la course.
+  String? _failing;
+
   /// Écran d'alerte (14) ouvert par un bouton SOS, au-dessus de tout le reste.
   bool _sos = false;
   late final ActiveOrderController _activeOrder;
@@ -67,6 +73,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     final l = AppLocalizations.of(context);
     _showNotice(switch (ended) {
       OrderEnded.delivered => l.orderDeliveredNotice,
+      OrderEnded.returned => l.orderReturnedNotice,
       OrderEnded.cancelled => l.orderCancelledNotice,
       OrderEnded.reassigned => l.orderReassignedNotice,
     });
@@ -107,6 +114,19 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   }
 
   void _openSos() => setState(() => _sos = true);
+
+  /// Nouvelle tentative demandée par l'expéditeur : retour vers le destinataire (09).
+  Future<void> _retry(RiderOrder order) async {
+    final l = AppLocalizations.of(context);
+    final actions = ref.read(courseActionsProvider);
+    final at = await actions.position();
+    if (!mounted) return;
+    if (at == null) return _showNotice(l.noPositionYet);
+    final result = await actions.retryDelivery(order, at: at);
+    if (!mounted) return;
+    if (result.outcome == ActionOutcome.refused) _showNotice(result.message ?? l.genericError);
+    if (result.outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
+  }
 
   void _closeOffer(String? message) {
     setState(() => _offer = null);
@@ -164,11 +184,49 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
         onAction: minimize,
       );
     }
+    void onFailed(ActionOutcome outcome) {
+      setState(() => _failing = null);
+      if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
+    }
+
+    // Échec refusé par le serveur (appels insuffisants, envoyé hors réseau) : à corriger.
+    if (actions.refused(order.id, 'fail') != null) {
+      return FailureScreen(key: ValueKey('failure-${order.id}'), order: order, onBack: minimize, onDone: onFailed);
+    }
     if (order.status == 'DELIVERY_FAILED') {
-      // Écrans d'échec et de retour (10, 11) dans un prochain lot.
+      if (order.returnQueued) {
+        return StatusScreen(
+          title: l.returnQueuedTitle,
+          body: l.returnQueuedBody,
+          actionLabel: l.backHome,
+          onAction: minimize,
+        );
+      }
+      if (order.failureDecision == 'RETURN' || actions.refused(order.id, 'return') != null) {
+        return ReturnScreen(
+          key: ValueKey('return-${order.id}'),
+          order: order,
+          onBack: minimize,
+          onSos: sos,
+          onReturned: (outcome) {
+            if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
+          },
+        );
+      }
+      if (order.failureDecision == 'RETRY') {
+        return StatusScreen(
+          title: l.retryTitle,
+          body: l.retryBody,
+          actionLabel: l.retryAction,
+          onAction: () => unawaited(_retry(order)),
+        );
+      }
+      // En attente de l'expéditeur (au plus le délai, puis retour automatique).
+      final queuedFailure = ref.read(actionQueueProvider).forOrder(order.id).any((a) => a.kind == 'fail');
+      final due = order.failureDecisionDueAt;
       return StatusScreen(
-        title: l.deliveryFailedTitle,
-        body: l.deliveryFailedBody,
+        title: l.failureWaitingTitle,
+        body: queuedFailure || due == null ? l.failureWaitingBodyQueued : l.failureWaitingBody(formatClock(due)),
         actionLabel: l.backHome,
         onAction: minimize,
       );
@@ -189,9 +247,19 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             onBack: minimize,
             onSos: sos,
             onCollect: (draft) => setState(() => _collecting = (orderId: order.id, draft: draft)),
+            onFailure: () => setState(() => _failing = order.id),
             onDelivered: onDone,
           ),
         ),
+        if (_failing == order.id)
+          Positioned.fill(
+            child: FailureScreen(
+              key: ValueKey('failure-${order.id}'),
+              order: order,
+              onBack: () => setState(() => _failing = null),
+              onDone: onFailed,
+            ),
+          ),
         if (collecting != null)
           Positioned.fill(
             child: CollectionScreen(

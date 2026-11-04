@@ -9,7 +9,7 @@ import '../realtime/realtime_client.dart';
 import '../session/session_store.dart';
 
 /// Pourquoi la course a quitté l'écran : livrée, ou retirée au livreur.
-enum OrderEnded { delivered, cancelled, reassigned }
+enum OrderEnded { delivered, returned, cancelled, reassigned }
 
 /// Course en cours du livreur. Gardée sur le téléphone (stockage chiffré) pour que la
 /// course, ses adresses et ses codes restent disponibles sans réseau ; tenue à jour par
@@ -93,6 +93,7 @@ class ActiveOrderController extends ChangeNotifier {
     if (order.inProgress) return _set(order);
     if (order.status == 'CANCELLED') _ended = OrderEnded.cancelled;
     if (order.status == 'DELIVERED') _ended = OrderEnded.delivered;
+    if (order.status == 'RETURNED') _ended = OrderEnded.returned;
     await clear();
   }
 
@@ -135,7 +136,8 @@ class ActiveOrderController extends ChangeNotifier {
   }
 
   void _onEvent(String name, Json payload) {
-    const watched = {'order.status', 'order.cancelled', 'order.reassigned'};
+    // Décision de l'expéditeur après un échec : `order.status` en direct, sinon notification.
+    const watched = {'order.status', 'order.cancelled', 'order.reassigned', 'order.failure-decision'};
     if (watched.contains(name) && payload['orderId'] == _order?.id) unawaited(refresh());
   }
 

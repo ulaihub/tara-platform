@@ -7,6 +7,7 @@ import 'package:tara_rider/app/providers.dart';
 import 'package:tara_rider/core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
+import 'package:tara_rider/core/course/call_journal.dart';
 import 'package:tara_rider/core/course/course_actions.dart';
 import 'package:tara_rider/core/course/proof_photo.dart';
 import 'package:tara_rider/core/location/location_tracker.dart';
@@ -15,7 +16,9 @@ import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/course/collection_screen.dart';
 import 'package:tara_rider/features/course/delivery_screen.dart';
+import 'package:tara_rider/features/course/failure_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
+import 'package:tara_rider/features/course/return_screen.dart';
 import 'package:tara_rider/features/home/home_flow.dart';
 import 'package:tara_rider/features/home/home_summary.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
@@ -72,11 +75,14 @@ Future<({ActiveOrderController active, ActionQueue queue})> pumpHome(
         homeSummaryProvider.overrideWith((ref) async => summary),
         actionQueueProvider.overrideWithValue(queue),
         activeOrderProvider.overrideWithValue(active),
-        courseActionsProvider.overrideWithValue(CourseActions(queue: queue, activeOrder: active)),
+        courseActionsProvider.overrideWithValue(
+          CourseActions(queue: queue, activeOrder: active, locate: () async => _Positions().current()),
+        ),
         onlineControllerProvider.overrideWithValue(online),
         takeProofPhotoProvider.overrideWithValue(() async => 'remise.jpg'),
         riderApiProvider.overrideWithValue(FakeRiderApi()),
         safetyAlertProvider.overrideWithValue(safetyAlert()),
+        callJournalProvider.overrideWithValue(CallJournal(store: store, dial: (_) async {})),
       ],
       child: const HomeFlow(),
     ),
@@ -161,5 +167,52 @@ void main() {
     await settle(tester);
     expect(find.byType(PickupScreen), findsOneWidget);
     expect(find.text('Code de l’expéditeur incorrect. Essais restants : 4.'), findsOneWidget);
+  });
+  testWidgets('« Livraison impossible ? » ouvre l’écran d’échec ; retour à la livraison', (tester) async {
+    await pumpHome(tester, order(status: 'IN_DELIVERY'));
+    await tester.ensureVisible(find.text('Livraison impossible\u00a0?'));
+    await tester.tap(find.text('Livraison impossible\u00a0?'));
+    await settle(tester);
+    expect(find.byType(FailureScreen), findsOneWidget);
+    expect(find.text('Encore 2 appels à passer.'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Retour').last);
+    await settle(tester);
+    expect(find.byType(FailureScreen), findsNothing);
+    expect(find.byType(DeliveryScreen), findsOneWidget);
+  });
+
+  testWidgets('échec sans décision : attente de l’expéditeur, heure du retour automatique', (tester) async {
+    await pumpHome(
+      tester,
+      order(
+        status: 'DELIVERY_FAILED',
+        failureReason: 'RECIPIENT_ABSENT',
+        failureDecisionDueAt: DateTime(2026, 11, 3, 15, 25).toUtc().toIso8601String(),
+      ),
+    );
+    expect(find.text('Échec enregistré'), findsOneWidget);
+    expect(find.textContaining('15:25'), findsOneWidget);
+  });
+
+  testWidgets('retour décidé : écran de retour vers le vendeur', (tester) async {
+    await pumpHome(tester, order(status: 'DELIVERY_FAILED', failureDecision: 'RETURN', failureReason: 'REFUSED'));
+    expect(find.byType(ReturnScreen), findsOneWidget);
+    expect(find.text('Échec · Colis refusé'), findsOneWidget);
+  });
+
+  testWidgets('nouvelle tentative : repartir vers le destinataire ramène à la livraison', (tester) async {
+    final sent = <String>[];
+    await pumpHome(
+      tester,
+      order(status: 'DELIVERY_FAILED', failureDecision: 'RETRY', failureReason: 'RECIPIENT_ABSENT'),
+      send: (path, body) async {
+        sent.add(path);
+        return null;
+      },
+    );
+    await tester.tap(find.text('Repartir vers le destinataire'));
+    await settle(tester);
+    expect(sent.single, endsWith('/retry'));
+    expect(find.byType(DeliveryScreen), findsOneWidget);
   });
 }

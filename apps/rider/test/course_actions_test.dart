@@ -259,4 +259,78 @@ void main() {
       expect(active.order, isNull);
     });
   });
+  group('échec, nouvelle tentative et retour', () {
+    final calls = [
+      {'to': 'RECIPIENT', 'at': '2026-11-03T15:00:00.000Z', 'durationSeconds': 30},
+      {'to': 'RECIPIENT', 'at': '2026-11-03T15:06:00.000Z', 'durationSeconds': 25},
+    ];
+    setUp(() async => active.start(order(status: 'IN_DELIVERY')));
+
+    test('échec reçu : motif, appels et photo du lieu ; la course attend l’expéditeur', () async {
+      final result = await actions.fail(
+        order(status: 'IN_DELIVERY'),
+        reason: 'RECIPIENT_ABSENT',
+        callLog: calls,
+        photoPath: 'lieu.jpg',
+        at: here,
+      );
+      expect(result.outcome, ActionOutcome.sent);
+      expect(sent.single.$1, endsWith('/fail'));
+      expect(sent.single.$2, containsPair('reason', 'RECIPIENT_ABSENT'));
+      expect(sent.single.$2['callLog'], calls);
+      expect(sent.single.$2, containsPair('photoKey', 'proofs/lieu.jpg'));
+      expect(active.order?.status, 'DELIVERY_FAILED');
+      expect(active.order?.failureReason, 'RECIPIENT_ABSENT');
+      expect(active.order?.failureDecisionDueAt?.difference(active.order!.failedAt!), const Duration(minutes: 15));
+    });
+
+    test('appels insuffisants selon le serveur : message, l’échec reste à corriger', () async {
+      server = (path, body) async => throw const ApiException(
+        code: 'FAILURE_CALLS_REQUIRED',
+        message: 'Appelez le destinataire au moins 2 fois.',
+        status: 422,
+      );
+      final result = await actions.fail(
+        order(status: 'IN_DELIVERY'),
+        reason: 'RECIPIENT_ABSENT',
+        callLog: const [],
+        photoPath: 'lieu.jpg',
+        at: here,
+      );
+      expect(result.outcome, ActionOutcome.refused);
+      expect(result.message, 'Appelez le destinataire au moins 2 fois.');
+      expect(actions.refused(order().id, 'fail')?.id, result.actionId);
+      expect(active.order?.status, 'IN_DELIVERY');
+    });
+
+    test('nouvelle tentative : la course repart vers le destinataire', () async {
+      await active.update(
+        order(status: 'DELIVERY_FAILED', failureDecision: 'RETRY', failureReason: 'RECIPIENT_ABSENT'),
+      );
+      final result = await actions.retryDelivery(active.order!, at: here);
+      expect(result.outcome, ActionOutcome.sent);
+      expect(sent.single.$1, endsWith('/retry'));
+      expect(active.order?.status, 'IN_DELIVERY');
+      expect(active.order?.failureDecision, isNull);
+    });
+
+    test('retour avec le code du vendeur : la course est terminée', () async {
+      await active.update(order(status: 'DELIVERY_FAILED', failureDecision: 'RETURN', failureReason: 'REFUSED'));
+      final result = await actions.returnToSender(active.order!, code: '5521', photoPath: 'rendu.jpg', at: here);
+      expect(result.outcome, ActionOutcome.sent);
+      expect(sent.single.$1, endsWith('/return'));
+      expect(sent.single.$2, containsPair('senderCode', '5521'));
+      expect(active.order, isNull);
+      expect(active.takeEnded(), OrderEnded.returned);
+    });
+
+    test('retour sans réseau : gardé sur le téléphone, la course l’indique', () async {
+      server = (path, body) async => throw offline;
+      await active.update(order(status: 'DELIVERY_FAILED', failureDecision: 'RETURN', failureReason: 'REFUSED'));
+      final result = await actions.returnToSender(active.order!, code: '5521', photoPath: 'rendu.jpg', at: here);
+      expect(result.outcome, ActionOutcome.queued);
+      expect(active.order?.returnQueued, isTrue);
+      expect(queue.items.single.kind, 'return');
+    });
+  });
 }

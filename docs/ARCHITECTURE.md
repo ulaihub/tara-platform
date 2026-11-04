@@ -215,6 +215,16 @@ tara-platform/
     l'agent et ce qui a été dit restent avec l'alerte, action tracée. Rien n'est envoyé à la
     police automatiquement : pas de canal officiel, et les fausses alertes nuiraient à la
     crédibilité de Tara. Numéros d'urgence réglables côté serveur.
+34. **Échec de livraison : preuve d'appel et décision bornée.** Client absent, injoignable
+    ou adresse introuvable : 2 appels au destinataire passés depuis l'app, à 5 min d'écart
+    au moins ; autre motif : 1 appel et une explication ; colis ou paiement refusé : aucun
+    (le client est sur place). L'app note l'heure de chaque appel et sa durée approchée
+    (temps passé hors de l'app ; le téléphone ne dit pas si l'appel a abouti, et lire le
+    journal d'appels demanderait une permission refusée par Google Play) ; le serveur
+    vérifie les règles. Après l'échec, l'expéditeur choisit nouvelle tentative ou retour ; le
+    support peut choisir à sa place (action tracée) ; sans décision après 15 min, retour
+    automatique : le livreur n'attend jamais plus longtemps avec le colis. Règles et délai
+    réglables côté serveur.
 
 ## Cycle de vie d'une commande
 

@@ -35,6 +35,7 @@ class DeliveryScreen extends ConsumerStatefulWidget {
     required this.onSos,
     required this.onDelivered,
     required this.onCollect,
+    required this.onFailure,
     this.now,
   });
 
@@ -47,6 +48,9 @@ class DeliveryScreen extends ConsumerStatefulWidget {
 
   /// Argent à encaisser d'abord : ouvre l'encaissement (12) avec la livraison préparée.
   final void Function(DeliveryDraft draft) onCollect;
+
+  /// « Livraison impossible ? » : écran d'échec (10).
+  final VoidCallback onFailure;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -179,11 +183,20 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       onBack: widget.onBack,
       onSos: widget.onSos,
       panelRatio: .70,
-      footer: PrimaryButton(
-        label: l.confirmDelivery,
-        icon: TaraIcons.check,
-        loading: _busy,
-        onPressed: _ready ? _submit : null,
+      footer: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PrimaryButton(
+            label: l.confirmDelivery,
+            icon: TaraIcons.check,
+            loading: _busy,
+            onPressed: _ready ? _submit : null,
+          ),
+          Center(
+            child: TaraLink(label: l.cantDeliver, onPressed: _busy ? null : widget.onFailure),
+          ),
+        ],
       ),
       children: [
         // Enlèvement fait ; étape en cours : l'encaissement s'il y en a, sinon la livraison.
@@ -193,7 +206,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
           name: name,
           line: order.dropoff.line,
           callLabel: l.callPerson(name),
-          onCall: phone == null ? null : () => callPhone(phone),
+          // Noté dans le journal d'appels : preuve d'appel en cas d'échec (10).
+          onCall: phone == null
+              ? null
+              : () => ref.read(callJournalProvider).call(order.id, to: 'RECIPIENT', phone: phone),
         ),
         if (due) ...[
           const SizedBox(height: 12),

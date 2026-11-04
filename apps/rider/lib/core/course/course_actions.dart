@@ -152,6 +152,77 @@ class CourseActions {
     retryActionId: draft.retryActionId,
   );
 
+  /// Échec de livraison (E6) : motif, photo du lieu et journal des appels. L'expéditeur
+  /// choisit ensuite nouvelle tentative ou retour ; sans réponse, retour automatique.
+  Future<ActionResult> fail(
+    RiderOrder order, {
+    required String reason,
+    String? note,
+    required List<Json> callLog,
+    required String photoPath,
+    required GeoPoint at,
+    Duration decisionTimeout = const Duration(minutes: 15),
+    String? retryActionId,
+  }) async {
+    final action = await _send(
+      order,
+      kind: 'fail',
+      body: {'reason': reason, 'note': ?note, 'callLog': callLog, 'latitude': at.latitude, 'longitude': at.longitude},
+      photoPath: photoPath,
+      retryActionId: retryActionId,
+    );
+    if (action != null && action.failed) return _refusal(action);
+    final now = DateTime.now();
+    await activeOrder.update(
+      order.withChanges({
+        'status': 'DELIVERY_FAILED',
+        'failureReason': reason,
+        'failureDecision': null,
+        'failedAt': isoUtc(now),
+        'failureDecisionDueAt': isoUtc(now.add(decisionTimeout)),
+      }),
+    );
+    return ActionResult(action == null ? ActionOutcome.sent : ActionOutcome.queued);
+  }
+
+  /// Nouvelle tentative demandée par l'expéditeur : retour vers le destinataire (écran 09).
+  Future<ActionResult> retryDelivery(RiderOrder order, {required GeoPoint at}) async {
+    final action = await queue.enqueue(
+      orderId: order.id,
+      kind: 'retry',
+      body: {'latitude': at.latitude, 'longitude': at.longitude},
+    );
+    final settled = await _settle(action.id);
+    if (settled != null && settled.failed) return _refusal(settled);
+    await activeOrder.update(order.withChanges({'status': 'IN_DELIVERY', 'failureDecision': null}));
+    return ActionResult(settled == null ? ActionOutcome.sent : ActionOutcome.queued);
+  }
+
+  /// Colis rendu à l'expéditeur (écran 11) : code de retour qu'il a reçu par SMS, photo.
+  Future<ActionResult> returnToSender(
+    RiderOrder order, {
+    required String code,
+    required String photoPath,
+    required GeoPoint at,
+    String? retryActionId,
+  }) async {
+    final action = await _send(
+      order,
+      kind: 'return',
+      body: {'senderCode': code, 'latitude': at.latitude, 'longitude': at.longitude},
+      photoPath: photoPath,
+      retryActionId: retryActionId,
+    );
+    if (action != null && action.failed) return _refusal(action);
+    if (action == null) {
+      // Reçu : la course est terminée et quitte le téléphone.
+      await activeOrder.update(order.withStatus('RETURNED'));
+      return const ActionResult(ActionOutcome.sent);
+    }
+    await activeOrder.update(order.withChanges({RiderOrder.returnQueuedKey: true}));
+    return const ActionResult(ActionOutcome.queued);
+  }
+
   /// Action refusée de cette sorte encore dans la file (écran rouvert, app relancée).
   QueuedAction? refused(String orderId, String kind) =>
       queue.forOrder(orderId).where((action) => action.kind == kind && action.failed).lastOrNull;

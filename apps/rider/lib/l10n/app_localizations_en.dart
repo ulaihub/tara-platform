@@ -623,12 +623,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backHome => 'Back to home';
 
   @override
-  String get deliveryFailedTitle => 'Failed delivery';
-
-  @override
-  String get deliveryFailedBody => 'The failure and return screens (10 and 11) come in a later batch.';
-
-  @override
   String get collectionTitle => 'Collection';
 
   @override
@@ -814,4 +808,188 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sosPositionSharedPlain => 'Shared live with Tara';
+
+  @override
+  String get failureTitle => 'Delivery impossible';
+
+  @override
+  String get failureReasonLabel => 'Reason';
+
+  @override
+  String get reasonRecipientAbsent => 'Customer absent';
+
+  @override
+  String get reasonRecipientUnreachable => 'Unreachable';
+
+  @override
+  String get reasonAddressNotFound => 'Address not found';
+
+  @override
+  String get reasonRefused => 'Parcel refused';
+
+  @override
+  String get reasonPaymentRefused => 'Refused to pay';
+
+  @override
+  String get reasonOther => 'Other reason';
+
+  @override
+  String get failureNoteLabel => 'Describe the reason';
+
+  @override
+  String get failureNoteHint => 'E.g. gate locked, dangerous dog';
+
+  @override
+  String get callsTitle => 'Calls to the recipient';
+
+  @override
+  String callsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attempts',
+      one: '1 attempt',
+      zero: 'No call',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callMade => 'Call made';
+
+  @override
+  String callMeta(String time, String duration) {
+    return '$time · $duration';
+  }
+
+  @override
+  String get callsNotRequired => 'No call required for this reason.';
+
+  @override
+  String get callsDone => 'Enough calls.';
+
+  @override
+  String callsMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more calls to make.',
+      one: '1 more call to make.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callsMissingAt(String time) {
+    return '1 more call, from $time.';
+  }
+
+  @override
+  String get callRecipient => 'Call';
+
+  @override
+  String get callAgain => 'Call again';
+
+  @override
+  String get photoPlace => 'Photo of the place · required';
+
+  @override
+  String get photoPlaceHint => 'Door, gate or shopfront visible';
+
+  @override
+  String photoPlaceTaken(String time) {
+    return 'Photo of the place · taken at $time';
+  }
+
+  @override
+  String failureNotice(int minutes) {
+    return 'The sender is told right away and chooses: try again or return. Without an answer within $minutes min, you bring the parcel back.';
+  }
+
+  @override
+  String get validateFailure => 'Confirm the failure';
+
+  @override
+  String get cantDeliver => 'Can\'t deliver?';
+
+  @override
+  String get failureWaitingTitle => 'Failure recorded';
+
+  @override
+  String failureWaitingBody(String time) {
+    return 'The sender chooses: try again or return. Without an answer, the return is decided at $time. Keep the parcel with you.';
+  }
+
+  @override
+  String get failureWaitingBodyQueued =>
+      'The failure will be sent as soon as the network is back. Keep the parcel with you.';
+
+  @override
+  String get retryTitle => 'New attempt';
+
+  @override
+  String get retryBody => 'The sender asks for a new attempt. Head back to the recipient.';
+
+  @override
+  String get retryAction => 'Head back to the recipient';
+
+  @override
+  String get returnTitle => 'Parcel return';
+
+  @override
+  String returnMinutes(int minutes) {
+    return 'Parcel return · $minutes min';
+  }
+
+  @override
+  String failureChip(String reason) {
+    return 'Failed · $reason';
+  }
+
+  @override
+  String get returnTo => 'Bring the parcel back to';
+
+  @override
+  String get returnStepJoin => 'Get to the seller';
+
+  @override
+  String get returnStepCode => 'Enter the seller\'s return code';
+
+  @override
+  String get returnStepPhoto => 'Photograph the returned parcel';
+
+  @override
+  String get stepInProgress => 'In progress';
+
+  @override
+  String get atSender => 'I\'m at the seller\'s';
+
+  @override
+  String get returnCodeLabel => 'Return code';
+
+  @override
+  String get returnCodeHint => 'received by the seller by SMS';
+
+  @override
+  String get photoReturned => 'Photograph the returned parcel';
+
+  @override
+  String get photoReturnedHint => 'Parcel in the seller\'s hands';
+
+  @override
+  String photoReturnedTaken(String time) {
+    return 'Return photo · taken at $time';
+  }
+
+  @override
+  String get parcelReturned => 'Parcel returned';
+
+  @override
+  String get returnQueuedTitle => 'Return recorded';
+
+  @override
+  String get returnQueuedBody => 'It will be sent as soon as the network is back.';
+
+  @override
+  String get orderReturnedNotice => 'Parcel returned to the seller: job done.';
 }

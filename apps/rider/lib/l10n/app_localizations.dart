@@ -1184,18 +1184,6 @@ abstract class AppLocalizations {
   /// **'Retour à l’accueil'**
   String get backHome;
 
-  /// No description provided for @deliveryFailedTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Échec de livraison'**
-  String get deliveryFailedTitle;
-
-  /// No description provided for @deliveryFailedBody.
-  ///
-  /// In fr, this message translates to:
-  /// **'L’écran d’échec et de retour (10 et 11) arrive dans un prochain lot.'**
-  String get deliveryFailedBody;
-
   /// No description provided for @collectionTitle.
   ///
   /// In fr, this message translates to:
@@ -1519,6 +1507,306 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Partagée en direct avec Tara'**
   String get sosPositionSharedPlain;
+
+  /// No description provided for @failureTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison impossible'**
+  String get failureTitle;
+
+  /// No description provided for @failureReasonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get failureReasonLabel;
+
+  /// No description provided for @reasonRecipientAbsent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client absent'**
+  String get reasonRecipientAbsent;
+
+  /// No description provided for @reasonRecipientUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Injoignable'**
+  String get reasonRecipientUnreachable;
+
+  /// No description provided for @reasonAddressNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse introuvable'**
+  String get reasonAddressNotFound;
+
+  /// No description provided for @reasonRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis refusé'**
+  String get reasonRefused;
+
+  /// No description provided for @reasonPaymentRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refus de payer'**
+  String get reasonPaymentRefused;
+
+  /// No description provided for @reasonOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre motif'**
+  String get reasonOther;
+
+  /// No description provided for @failureNoteLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisez le motif'**
+  String get failureNoteLabel;
+
+  /// No description provided for @failureNoteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. portail fermé, chien dangereux'**
+  String get failureNoteHint;
+
+  /// No description provided for @callsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appels au destinataire'**
+  String get callsTitle;
+
+  /// No description provided for @callsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun appel} =1{1 tentative} other{{count} tentatives}}'**
+  String callsCount(int count);
+
+  /// No description provided for @callMade.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appel passé'**
+  String get callMade;
+
+  /// No description provided for @callMeta.
+  ///
+  /// In fr, this message translates to:
+  /// **'{time} · {duration}'**
+  String callMeta(String time, String duration);
+
+  /// No description provided for @callsNotRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas d’appel exigé pour ce motif.'**
+  String get callsNotRequired;
+
+  /// No description provided for @callsDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appels suffisants.'**
+  String get callsDone;
+
+  /// No description provided for @callsMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Encore 1 appel à passer.} other{Encore {count} appels à passer.}}'**
+  String callsMissing(int count);
+
+  /// No description provided for @callsMissingAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encore 1 appel, à partir de {time}.'**
+  String callsMissingAt(String time);
+
+  /// No description provided for @callRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler'**
+  String get callRecipient;
+
+  /// No description provided for @callAgain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappeler'**
+  String get callAgain;
+
+  /// No description provided for @photoPlace.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo du lieu · obligatoire'**
+  String get photoPlace;
+
+  /// No description provided for @photoPlaceHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Porte, portail ou devanture visible'**
+  String get photoPlaceHint;
+
+  /// No description provided for @photoPlaceTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo du lieu · prise à {time}'**
+  String photoPlaceTaken(String time);
+
+  /// No description provided for @failureNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’expéditeur est prévenu tout de suite et choisit : nouvelle tentative ou retour. Sans réponse sous {minutes} min, vous lui rapportez le colis.'**
+  String failureNotice(int minutes);
+
+  /// No description provided for @validateFailure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider l’échec'**
+  String get validateFailure;
+
+  /// No description provided for @cantDeliver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison impossible ?'**
+  String get cantDeliver;
+
+  /// No description provided for @failureWaitingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec enregistré'**
+  String get failureWaitingTitle;
+
+  /// No description provided for @failureWaitingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’expéditeur choisit : nouvelle tentative ou retour. Sans réponse, le retour sera décidé à {time}. Gardez le colis avec vous.'**
+  String failureWaitingBody(String time);
+
+  /// No description provided for @failureWaitingBodyQueued.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’échec partira dès le retour du réseau. Gardez le colis avec vous.'**
+  String get failureWaitingBodyQueued;
+
+  /// No description provided for @retryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle tentative'**
+  String get retryTitle;
+
+  /// No description provided for @retryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’expéditeur demande une nouvelle tentative. Repartez vers le destinataire.'**
+  String get retryBody;
+
+  /// No description provided for @retryAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Repartir vers le destinataire'**
+  String get retryAction;
+
+  /// No description provided for @returnTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour du colis'**
+  String get returnTitle;
+
+  /// No description provided for @returnMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour du colis · {minutes} min'**
+  String returnMinutes(int minutes);
+
+  /// No description provided for @failureChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec · {reason}'**
+  String failureChip(String reason);
+
+  /// No description provided for @returnTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapporter le colis à'**
+  String get returnTo;
+
+  /// No description provided for @returnStepJoin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rejoindre le vendeur'**
+  String get returnStepJoin;
+
+  /// No description provided for @returnStepCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir le code de retour du vendeur'**
+  String get returnStepCode;
+
+  /// No description provided for @returnStepPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier le colis rendu'**
+  String get returnStepPhoto;
+
+  /// No description provided for @stepInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get stepInProgress;
+
+  /// No description provided for @atSender.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je suis chez le vendeur'**
+  String get atSender;
+
+  /// No description provided for @returnCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de retour'**
+  String get returnCodeLabel;
+
+  /// No description provided for @returnCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'reçu par SMS par le vendeur'**
+  String get returnCodeHint;
+
+  /// No description provided for @photoReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier le colis rendu'**
+  String get photoReturned;
+
+  /// No description provided for @photoReturnedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis entre les mains du vendeur'**
+  String get photoReturnedHint;
+
+  /// No description provided for @photoReturnedTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo du retour · prise à {time}'**
+  String photoReturnedTaken(String time);
+
+  /// No description provided for @parcelReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis rendu'**
+  String get parcelReturned;
+
+  /// No description provided for @returnQueuedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour enregistré'**
+  String get returnQueuedTitle;
+
+  /// No description provided for @returnQueuedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il sera envoyé dès le retour du réseau.'**
+  String get returnQueuedBody;
+
+  /// No description provided for @orderReturnedNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis rendu au vendeur : course terminée.'**
+  String get orderReturnedNotice;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

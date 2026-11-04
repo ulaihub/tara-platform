@@ -12,6 +12,7 @@ import '../core/api/auth_api.dart';
 import '../core/api/models.dart';
 import '../core/api/rider_api.dart';
 import '../core/course/active_order.dart';
+import '../core/course/call_journal.dart';
 import '../core/course/course_actions.dart';
 import '../core/course/track_buffer.dart';
 import '../core/env.dart';
@@ -168,6 +169,7 @@ class RiderConfigController extends AsyncNotifier<RiderConfig> {
     ],
     'offerTimeoutSeconds': 30,
     'emergencyNumbers': {'police': '117', 'fire': '118', 'medical': '119'},
+    'failurePolicy': {'minCalls': 2, 'callSpacingMinutes': 5, 'decisionTimeoutMinutes': 15},
   };
 
   @override
@@ -234,6 +236,19 @@ final positionSourceProvider = Provider<PositionSource>((ref) => DevicePositionS
 /// Ouverture d'un lien `tel:` ou `sms:` (application Téléphone ou Messages du téléphone).
 final launcherProvider = Provider<Future<bool> Function(Uri uri)>((ref) => launchUrl);
 
+/// Appels passés depuis l'app pendant la course : preuve d'appel en cas d'échec (E6).
+final callJournalProvider = Provider<CallJournal>((ref) {
+  final launch = ref.watch(launcherProvider);
+  final journal = CallJournal(
+    store: ref.watch(keyValueStoreProvider),
+    dial: (phone) async {
+      await launch(Uri(scheme: 'tel', path: phone));
+    },
+  );
+  ref.onDispose(journal.dispose);
+  return journal;
+});
+
 /// Alerte SOS (14) : gardée sur le téléphone sans réseau, suivie en direct ensuite.
 final safetyAlertProvider = Provider<SafetyAlertController>((ref) {
   final rider = ref.watch(riderApiProvider);
@@ -281,6 +296,10 @@ final riderRuntimeProvider = Provider<void>((ref) {
   // Alerte SOS restée sur le téléphone sans réseau : renvoyée aussitôt.
   final safety = ref.watch(safetyAlertProvider);
   unawaited(safety.restore());
+  // Appels de la course en cours seulement ; durée d'un appel notée au retour dans l'app.
+  final calls = ref.watch(callJournalProvider);
+  void keepCalls() => unawaited(calls.retainOnly(activeOrder.order?.id));
+  activeOrder.addListener(keepCalls);
   final connectivity = Connectivity().onConnectivityChanged.listen((results) {
     if (results.contains(ConnectivityResult.none)) return;
     unawaited(safety.retry());
@@ -298,6 +317,7 @@ final riderRuntimeProvider = Provider<void>((ref) {
   // Retour dans l'app : file relancée, réglages rafraîchis.
   final lifecycle = AppLifecycleListener(
     onResume: () {
+      unawaited(calls.resumed());
       unawaited(queue.flush());
       unawaited(track.flush());
       unawaited(activeOrder.refresh());
@@ -305,6 +325,7 @@ final riderRuntimeProvider = Provider<void>((ref) {
     },
   );
   ref.onDispose(() {
+    activeOrder.removeListener(keepCalls);
     lifecycle.dispose();
     unawaited(connectivity.cancel());
     realtime.connected.removeListener(onRealtime);

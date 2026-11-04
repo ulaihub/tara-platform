@@ -35,3 +35,9 @@ String formatOnline(int seconds) {
   if (minutes < 60) return '$minutes\u00A0min';
   return '${minutes ~/ 60}\u00A0h\u00A0${(minutes % 60).toString().padLeft(2, '0')}';
 }
+
+/// Heure locale du téléphone (18:42).
+String formatClock(DateTime time) {
+  final local = time.toLocal();
+  return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+}

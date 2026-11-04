@@ -342,8 +342,6 @@
   "awaitingSupportBody": "Le support appelle le client pour confirmer la remise. Vous serez prévenu dès la validation.",
   "orderDeliveredNotice": "Course livrée. Merci !",
   "backHome": "Retour à l’accueil",
-  "deliveryFailedTitle": "Échec de livraison",
-  "deliveryFailedBody": "L’écran d’échec et de retour (10 et 11) arrive dans un prochain lot.",
   "@toDropoffMinutes": {
     "placeholders": {
       "minutes": {
@@ -498,5 +496,128 @@
     }
   },
   "sosPositionCurrentPlain": "Position actuelle",
-  "sosPositionSharedPlain": "Partagée en direct avec Tara"
+  "sosPositionSharedPlain": "Partagée en direct avec Tara",
+  "failureTitle": "Livraison impossible",
+  "failureReasonLabel": "Motif",
+  "reasonRecipientAbsent": "Client absent",
+  "reasonRecipientUnreachable": "Injoignable",
+  "reasonAddressNotFound": "Adresse introuvable",
+  "reasonRefused": "Colis refusé",
+  "reasonPaymentRefused": "Refus de payer",
+  "reasonOther": "Autre motif",
+  "failureNoteLabel": "Précisez le motif",
+  "failureNoteHint": "Ex. portail fermé, chien dangereux",
+  "callsTitle": "Appels au destinataire",
+  "callsCount": "{count, plural, =0{Aucun appel} =1{1 tentative} other{{count} tentatives}}",
+  "@callsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callMade": "Appel passé",
+  "callMeta": "{time} · {duration}",
+  "@callMeta": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "callsNotRequired": "Pas d’appel exigé pour ce motif.",
+  "callsDone": "Appels suffisants.",
+  "callsMissing": "{count, plural, =1{Encore 1 appel à passer.} other{Encore {count} appels à passer.}}",
+  "@callsMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callsMissingAt": "Encore 1 appel, à partir de {time}.",
+  "@callsMissingAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "callRecipient": "Appeler",
+  "callAgain": "Rappeler",
+  "photoPlace": "Photo du lieu · obligatoire",
+  "photoPlaceHint": "Porte, portail ou devanture visible",
+  "photoPlaceTaken": "Photo du lieu · prise à {time}",
+  "@photoPlaceTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureNotice": "L’expéditeur est prévenu tout de suite et choisit : nouvelle tentative ou retour. Sans réponse sous {minutes} min, vous lui rapportez le colis.",
+  "@failureNotice": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "validateFailure": "Valider l’échec",
+  "cantDeliver": "Livraison impossible ?",
+  "failureWaitingTitle": "Échec enregistré",
+  "failureWaitingBody": "L’expéditeur choisit : nouvelle tentative ou retour. Sans réponse, le retour sera décidé à {time}. Gardez le colis avec vous.",
+  "@failureWaitingBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureWaitingBodyQueued": "L’échec partira dès le retour du réseau. Gardez le colis avec vous.",
+  "retryTitle": "Nouvelle tentative",
+  "retryBody": "L’expéditeur demande une nouvelle tentative. Repartez vers le destinataire.",
+  "retryAction": "Repartir vers le destinataire",
+  "returnTitle": "Retour du colis",
+  "returnMinutes": "Retour du colis · {minutes} min",
+  "@returnMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "failureChip": "Échec · {reason}",
+  "@failureChip": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "returnTo": "Rapporter le colis à",
+  "returnStepJoin": "Rejoindre le vendeur",
+  "returnStepCode": "Saisir le code de retour du vendeur",
+  "returnStepPhoto": "Photographier le colis rendu",
+  "stepInProgress": "En cours",
+  "atSender": "Je suis chez le vendeur",
+  "returnCodeLabel": "Code de retour",
+  "returnCodeHint": "reçu par SMS par le vendeur",
+  "photoReturned": "Photographier le colis rendu",
+  "photoReturnedHint": "Colis entre les mains du vendeur",
+  "photoReturnedTaken": "Photo du retour · prise à {time}",
+  "@photoReturnedTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parcelReturned": "Colis rendu",
+  "returnQueuedTitle": "Retour enregistré",
+  "returnQueuedBody": "Il sera envoyé dès le retour du réseau.",
+  "orderReturnedNotice": "Colis rendu au vendeur : course terminée."
 }

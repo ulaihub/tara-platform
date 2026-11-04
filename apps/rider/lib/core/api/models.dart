@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 
 /// Modèles des réponses de l'API utilisées par l'app livreur. Chaque champ lu ici existe
@@ -90,6 +92,51 @@ class EmergencyNumbers {
   final String medical;
 }
 
+/// Appels exigés avant un échec de livraison (réglages du serveur, E6).
+@immutable
+class FailurePolicy {
+  const FailurePolicy({
+    this.minCalls = 2,
+    this.callSpacing = const Duration(minutes: 5),
+    this.decisionTimeout = const Duration(minutes: 15),
+  });
+
+  factory FailurePolicy.fromJson(Json? json) => json == null
+      ? const FailurePolicy()
+      : FailurePolicy(
+          minCalls: _field<num>(json, 'minCalls').toInt(),
+          callSpacing: Duration(seconds: (_field<num>(json, 'callSpacingMinutes') * 60).round()),
+          decisionTimeout: Duration(seconds: (_field<num>(json, 'decisionTimeoutMinutes') * 60).round()),
+        );
+
+  final int minCalls;
+  final Duration callSpacing;
+
+  /// Délai laissé à l'expéditeur pour choisir avant le retour automatique.
+  final Duration decisionTimeout;
+
+  /// Appels au destinataire exigés pour ce motif : absent, injoignable, adresse
+  /// introuvable, [minCalls] ; autre motif, un ; colis ou paiement refusé, aucun.
+  int callsRequired(String reason) => switch (reason) {
+    'RECIPIENT_ABSENT' || 'RECIPIENT_UNREACHABLE' || 'ADDRESS_NOT_FOUND' => minCalls,
+    'OTHER' => 1,
+    _ => 0,
+  };
+
+  /// Heure à partir de laquelle les appels suffisent (null : déjà suffisants, ou il manque
+  /// des appels). [missing] : appels encore à passer.
+  ({int missing, DateTime? readyAt}) progress(String reason, List<DateTime> recipientCalls) {
+    final required = callsRequired(reason);
+    final times = [...recipientCalls]..sort();
+    final missing = math.max(0, required - times.length);
+    if (required < 2 || times.isEmpty) return (missing: missing, readyAt: null);
+    final readyAt = times.first.add(callSpacing);
+    // Le dernier appel doit venir au moins [callSpacing] après le premier.
+    if (missing == 0 && times.last.isBefore(readyAt)) return (missing: 1, readyAt: readyAt);
+    return (missing: missing, readyAt: missing > 0 ? readyAt : null);
+  }
+}
+
 /// Réglages de l'app venant du serveur, gardés sur le téléphone pour le hors connexion.
 @immutable
 class RiderConfig {
@@ -101,6 +148,7 @@ class RiderConfig {
     required this.operators,
     required this.offerTimeoutSeconds,
     this.emergencyNumbers = EmergencyNumbers.cameroon,
+    this.failurePolicy = const FailurePolicy(),
   });
   factory RiderConfig.fromJson(Json json) {
     final country = _field<Json>(json, 'country');
@@ -115,6 +163,7 @@ class RiderConfig {
       ],
       offerTimeoutSeconds: _field<num>(json, 'offerTimeoutSeconds').toInt(),
       emergencyNumbers: EmergencyNumbers.fromJson(json['emergencyNumbers'] as Json?),
+      failurePolicy: FailurePolicy.fromJson(json['failurePolicy'] as Json?),
     );
   }
   static const fields = [
@@ -124,6 +173,7 @@ class RiderConfig {
     'mobileMoneyOperators',
     'offerTimeoutSeconds',
     'emergencyNumbers',
+    'failurePolicy',
   ];
 
   final String dialCode;
@@ -133,6 +183,7 @@ class RiderConfig {
   final List<MobileMoneyOperator> operators;
   final int offerTimeoutSeconds;
   final EmergencyNumbers emergencyNumbers;
+  final FailurePolicy failurePolicy;
 }
 
 @immutable
@@ -556,6 +607,9 @@ class RiderOrder {
     this.googleMapsUrl,
     this.wazeUrl,
     this.failureDecision,
+    this.failureReason,
+    this.failedAt,
+    this.failureDecisionDueAt,
   });
 
   factory RiderOrder.fromJson(Json json) {
@@ -579,6 +633,9 @@ class RiderOrder {
       googleMapsUrl: navigation?['googleMaps'] as String?,
       wazeUrl: navigation?['waze'] as String?,
       failureDecision: json['failureDecision'] as String?,
+      failureReason: json['failureReason'] as String?,
+      failedAt: _date(json['failedAt']),
+      failureDecisionDueAt: _date(json['failureDecisionDueAt']),
       awaitingSupportValidation: _field(json, 'awaitingSupportValidation'),
     );
   }
@@ -600,6 +657,9 @@ class RiderOrder {
     'collectAtDelivery',
     'navigation',
     'failureDecision',
+    'failureReason',
+    'failedAt',
+    'failureDecisionDueAt',
     'awaitingSupportValidation',
   ];
 
@@ -627,7 +687,17 @@ class RiderOrder {
   final int collectAtDelivery;
   final String? googleMapsUrl;
   final String? wazeUrl;
+
+  /// Choix de l'expéditeur après un échec : RETRY (nouvelle tentative) ou RETURN (retour).
   final String? failureDecision;
+
+  /// Motif du dernier échec (RECIPIENT_ABSENT, RECIPIENT_UNREACHABLE, ADDRESS_NOT_FOUND,
+  /// REFUSED, PAYMENT_REFUSED, OTHER) et son heure.
+  final String? failureReason;
+  final DateTime? failedAt;
+
+  /// Échec sans décision : heure du retour automatique.
+  final DateTime? failureDecisionDueAt;
   final bool awaitingSupportValidation;
 
   /// Toujours en cours pour le livreur (sinon : terminée, annulée ou réattribuée).
@@ -643,6 +713,10 @@ class RiderOrder {
   /// Champ propre à l'app : jamais renvoyé par l'API.
   bool get deliveryQueued => raw[deliveryQueuedKey] == true;
   static const deliveryQueuedKey = '_deliveryQueued';
+
+  /// Retour enregistré sur le téléphone, pas encore reçu par le serveur (sans réseau).
+  bool get returnQueued => raw[returnQueuedKey] == true;
+  static const returnQueuedKey = '_returnQueued';
 }
 
 /// Itinéraire vers la prochaine étape de la course, à dessiner sur la carte.

@@ -625,12 +625,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get backHome => 'Retour à l’accueil';
 
   @override
-  String get deliveryFailedTitle => 'Échec de livraison';
-
-  @override
-  String get deliveryFailedBody => 'L’écran d’échec et de retour (10 et 11) arrive dans un prochain lot.';
-
-  @override
   String get collectionTitle => 'Encaissement';
 
   @override
@@ -818,4 +812,187 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sosPositionSharedPlain => 'Partagée en direct avec Tara';
+
+  @override
+  String get failureTitle => 'Livraison impossible';
+
+  @override
+  String get failureReasonLabel => 'Motif';
+
+  @override
+  String get reasonRecipientAbsent => 'Client absent';
+
+  @override
+  String get reasonRecipientUnreachable => 'Injoignable';
+
+  @override
+  String get reasonAddressNotFound => 'Adresse introuvable';
+
+  @override
+  String get reasonRefused => 'Colis refusé';
+
+  @override
+  String get reasonPaymentRefused => 'Refus de payer';
+
+  @override
+  String get reasonOther => 'Autre motif';
+
+  @override
+  String get failureNoteLabel => 'Précisez le motif';
+
+  @override
+  String get failureNoteHint => 'Ex. portail fermé, chien dangereux';
+
+  @override
+  String get callsTitle => 'Appels au destinataire';
+
+  @override
+  String callsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tentatives',
+      one: '1 tentative',
+      zero: 'Aucun appel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callMade => 'Appel passé';
+
+  @override
+  String callMeta(String time, String duration) {
+    return '$time · $duration';
+  }
+
+  @override
+  String get callsNotRequired => 'Pas d’appel exigé pour ce motif.';
+
+  @override
+  String get callsDone => 'Appels suffisants.';
+
+  @override
+  String callsMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Encore $count appels à passer.',
+      one: 'Encore 1 appel à passer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callsMissingAt(String time) {
+    return 'Encore 1 appel, à partir de $time.';
+  }
+
+  @override
+  String get callRecipient => 'Appeler';
+
+  @override
+  String get callAgain => 'Rappeler';
+
+  @override
+  String get photoPlace => 'Photo du lieu · obligatoire';
+
+  @override
+  String get photoPlaceHint => 'Porte, portail ou devanture visible';
+
+  @override
+  String photoPlaceTaken(String time) {
+    return 'Photo du lieu · prise à $time';
+  }
+
+  @override
+  String failureNotice(int minutes) {
+    return 'L’expéditeur est prévenu tout de suite et choisit : nouvelle tentative ou retour. Sans réponse sous $minutes min, vous lui rapportez le colis.';
+  }
+
+  @override
+  String get validateFailure => 'Valider l’échec';
+
+  @override
+  String get cantDeliver => 'Livraison impossible ?';
+
+  @override
+  String get failureWaitingTitle => 'Échec enregistré';
+
+  @override
+  String failureWaitingBody(String time) {
+    return 'L’expéditeur choisit : nouvelle tentative ou retour. Sans réponse, le retour sera décidé à $time. Gardez le colis avec vous.';
+  }
+
+  @override
+  String get failureWaitingBodyQueued => 'L’échec partira dès le retour du réseau. Gardez le colis avec vous.';
+
+  @override
+  String get retryTitle => 'Nouvelle tentative';
+
+  @override
+  String get retryBody => 'L’expéditeur demande une nouvelle tentative. Repartez vers le destinataire.';
+
+  @override
+  String get retryAction => 'Repartir vers le destinataire';
+
+  @override
+  String get returnTitle => 'Retour du colis';
+
+  @override
+  String returnMinutes(int minutes) {
+    return 'Retour du colis · $minutes min';
+  }
+
+  @override
+  String failureChip(String reason) {
+    return 'Échec · $reason';
+  }
+
+  @override
+  String get returnTo => 'Rapporter le colis à';
+
+  @override
+  String get returnStepJoin => 'Rejoindre le vendeur';
+
+  @override
+  String get returnStepCode => 'Saisir le code de retour du vendeur';
+
+  @override
+  String get returnStepPhoto => 'Photographier le colis rendu';
+
+  @override
+  String get stepInProgress => 'En cours';
+
+  @override
+  String get atSender => 'Je suis chez le vendeur';
+
+  @override
+  String get returnCodeLabel => 'Code de retour';
+
+  @override
+  String get returnCodeHint => 'reçu par SMS par le vendeur';
+
+  @override
+  String get photoReturned => 'Photographier le colis rendu';
+
+  @override
+  String get photoReturnedHint => 'Colis entre les mains du vendeur';
+
+  @override
+  String photoReturnedTaken(String time) {
+    return 'Photo du retour · prise à $time';
+  }
+
+  @override
+  String get parcelReturned => 'Colis rendu';
+
+  @override
+  String get returnQueuedTitle => 'Retour enregistré';
+
+  @override
+  String get returnQueuedBody => 'Il sera envoyé dès le retour du réseau.';
+
+  @override
+  String get orderReturnedNotice => 'Colis rendu au vendeur : course terminée.';
 }

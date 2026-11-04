@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_rider/app/providers.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
+import 'package:tara_rider/core/course/call_journal.dart';
 import 'package:tara_rider/core/course/course_actions.dart';
 import 'package:tara_rider/core/course/proof_photo.dart';
 import 'package:tara_rider/core/location/location_tracker.dart';
@@ -14,7 +15,9 @@ import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/course/collection_screen.dart';
 import 'package:tara_rider/features/course/delivery_screen.dart';
+import 'package:tara_rider/features/course/failure_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
+import 'package:tara_rider/features/course/return_screen.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 
 import 'helpers/fake_rider_api.dart';
@@ -55,15 +58,44 @@ class _Positions implements PositionSource {
   }) => const Stream.empty();
 }
 
-Widget scope(Widget child, {OnlineController? online}) => ProviderScope(
+Widget scope(Widget child, {OnlineController? online, CallJournal? calls}) => ProviderScope(
   overrides: [
     keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
     realMapProvider.overrideWithValue(false),
     takeProofPhotoProvider.overrideWithValue(() async => photo),
     courseActionsProvider.overrideWithValue(courseActions()),
+    callJournalProvider.overrideWithValue(calls ?? CallJournal(store: MemoryKeyValueStore(), dial: (_) async {})),
     if (online != null) onlineControllerProvider.overrideWithValue(online),
   ],
   child: child,
+);
+
+/// Appels passés au destinataire, aux heures données (journal sans téléphone).
+Future<CallJournal> callsAt(List<DateTime> times) async {
+  var clock = times.first;
+  final journal = CallJournal(store: MemoryKeyValueStore(), dial: (_) async {}, now: () => clock);
+  for (final time in times) {
+    clock = time;
+    await journal.call(order().id, to: 'RECIPIENT', phone: '+237690000202');
+    clock = time.add(const Duration(seconds: 31));
+    await journal.resumed();
+  }
+  return journal;
+}
+
+FailureScreen failure() => FailureScreen(
+  order: order(status: 'IN_DELIVERY'),
+  onBack: () {},
+  onDone: (_) {},
+  now: () => DateTime(2026, 11, 3, 15, 4),
+);
+
+ReturnScreen returning() => ReturnScreen(
+  order: order(status: 'DELIVERY_FAILED', failureDecision: 'RETURN', failureReason: 'RECIPIENT_ABSENT'),
+  onBack: () {},
+  onSos: () {},
+  onReturned: (_) {},
+  now: () => DateTime(2026, 11, 3, 15, 41),
 );
 
 Widget collection() => ProviderScope(
@@ -86,6 +118,7 @@ DeliveryScreen delivery(RiderOrder order) => DeliveryScreen(
   onSos: () {},
   onDelivered: (_) {},
   onCollect: (_) {},
+  onFailure: () {},
   now: () => DateTime(2026, 11, 3, 15, 4),
 );
 
@@ -192,6 +225,56 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Photo du colis · prise à 14:32'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/08_enlevement_pret/${variant.name}.png'));
+    });
+    goldenTest('10 échec ${variant.name}', (tester) async {
+      final calls = await tester.runAsync(() => callsAt([DateTime(2026, 11, 3, 15, 2)]));
+      await pumpVariant(tester, variant, scope(failure(), calls: calls));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Encore 1 appel, à partir de 15:07.'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/10_echec/${variant.name}.png'));
+    });
+
+    goldenTest('10 échec prêt ${variant.name}', (tester) async {
+      final calls = await tester.runAsync(() => callsAt([DateTime(2026, 11, 3, 14, 56), DateTime(2026, 11, 3, 15, 2)]));
+      await pumpVariant(tester, variant, scope(failure(), calls: calls));
+      await settle(tester);
+      final context = tester.element(find.byType(FailureScreen));
+      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
+      await tester.ensureVisible(find.text('Photo du lieu · obligatoire'));
+      await tester.tap(find.text('Photo du lieu · obligatoire'));
+      await settle(tester);
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Appels suffisants.'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/10_echec_pret/${variant.name}.png'));
+    });
+
+    goldenTest('11 retour ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scope(returning()));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Échec · Client absent'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/11_retour/${variant.name}.png'));
+    });
+
+    goldenTest('11 retour chez le vendeur ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scope(returning()));
+      await settle(tester);
+      final context = tester.element(find.byType(ReturnScreen));
+      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
+      await tester.tap(find.text('Je suis chez le vendeur'));
+      await settle(tester);
+      await tester.enterText(find.byType(EditableText).first, '5521');
+      await tester.ensureVisible(find.text('Photographier le colis rendu').last);
+      await tester.tap(find.text('Photographier le colis rendu').last);
+      await tester.pump();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Photo du retour · prise à 15:41'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/11_retour_vendeur/${variant.name}.png'));
     });
   }
 }
