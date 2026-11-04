@@ -32,9 +32,28 @@ export const PayoutBody = z.object({
   operator: Operator,
 });
 
+/**
+ * Champs de l'app hors connexion (facultatifs) : un encaissement en espèces fait sans réseau
+ * part avec l'heure et la position du moment ; renvoyé, il est sans effet.
+ */
+const OfflineContext = {
+  clientEventId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{8,100}$/)
+    .optional(),
+  occurredAt: z.iso.datetime().optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+};
+
 export const CollectBody = z.discriminatedUnion('method', [
-  z.object({ method: z.literal('CASH') }),
-  z.object({ method: z.literal('MOBILE_MONEY'), phone: CameroonMobile, operator: Operator }),
+  z.object({ method: z.literal('CASH'), ...OfflineContext }),
+  z.object({
+    method: z.literal('MOBILE_MONEY'),
+    phone: CameroonMobile,
+    operator: Operator,
+    ...OfflineContext,
+  }),
 ]);
 
 export const CollectionDto = z

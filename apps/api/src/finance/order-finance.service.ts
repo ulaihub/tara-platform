@@ -269,6 +269,15 @@ export class OrderFinanceService implements OnModuleInit {
     const rider = await this.prisma.riderProfile.findUnique({ where: { userId: riderUserId } });
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!rider || order?.riderId !== rider.id) throw AppError.notFound('ORDER_NOT_FOUND');
+    // Encaissement en espèces renvoyé par la file hors connexion (réponse perdue) : déjà
+    // enregistré, il est sans effet et ne bloque pas la livraison qui suit.
+    if (method.kind === 'CASH') {
+      const recorded = await this.prisma.journalEntry.findUnique({
+        where: { idempotencyKey: `order:${orderId}:collect-cash` },
+        select: { id: true },
+      });
+      if (recorded) return this.collectionState(order);
+    }
     if (order.status !== 'IN_DELIVERY') {
       throw AppError.conflict('ORDER_TRANSITION_INVALID', { from: order.status, to: 'DELIVERED' });
     }

@@ -5483,6 +5483,24 @@
                         "enum": [
                           "CASH"
                         ]
+                      },
+                      "clientEventId": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                      },
+                      "occurredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                      },
+                      "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
                       }
                     },
                     "required": [
@@ -5506,6 +5524,24 @@
                       },
                       "operator": {
                         "$ref": "#/components/schemas/MobileMoneyOperator"
+                      },
+                      "clientEventId": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                      },
+                      "occurredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                      },
+                      "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
                       }
                     },
                     "required": [

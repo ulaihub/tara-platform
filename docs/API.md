@@ -174,7 +174,7 @@ Montants en FCFA entiers. Chaque mouvement est une écriture du grand livre ; le
 
 Avec `feePayer: RECIPIENT`, le destinataire paie à la porte. Une commande annulée avant l'enlèvement rend ses frais au solde (avoir). Un retour que le destinataire devait payer est facturé à l'expéditeur. Un client dont le solde est négatif doit le régler avant de commander (`WALLET_IN_DEBT`).
 
-**Encaissement à la porte (E5).** `GET /rider/orders/{id}/collection` donne ce qui reste dû (frais du destinataire et contre-remboursement). `POST /rider/orders/{id}/collect` avec `{ "method": "CASH" }` l'enregistre tout de suite ; avec `{ "method": "MOBILE_MONEY", "phone", "operator" }`, une demande part au téléphone du destinataire et la confirmation arrive par l'événement `payment.status` (ou `GET /payments/{id}`). La livraison est refusée (`COLLECTION_REQUIRED`) tant que tout n'est pas encaissé. Frais d'encaissement : 2 %, minimum 250 FCFA, déduits du montant reversé au marchand.
+**Encaissement à la porte (E5).** `GET /rider/orders/{id}/collection` donne ce qui reste dû (frais du destinataire et contre-remboursement). `POST /rider/orders/{id}/collect` avec `{ "method": "CASH" }` l'enregistre tout de suite (faisable hors connexion : `clientEventId`, `occurredAt`, position ; renvoyé, il est sans effet) ; avec `{ "method": "MOBILE_MONEY", "phone", "operator" }`, une demande part au téléphone du destinataire et la confirmation arrive par l'événement `payment.status` (ou `GET /payments/{id}`). La livraison est refusée (`COLLECTION_REQUIRED`) tant que tout n'est pas encaissé. Frais d'encaissement : 2 %, minimum 250 FCFA, déduits du montant reversé au marchand.
 
 **Portefeuilles.**
 

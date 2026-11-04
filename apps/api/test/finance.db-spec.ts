@@ -99,13 +99,24 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     await request(ctx.http)
       .post(`/v1/rider/orders/${placed.id}/collect`)
       .set(rider.auth)
-      .send({ method: 'CASH' })
+      .send({
+        method: 'CASH',
+        clientEventId: 'encaissement-0001',
+        occurredAt: new Date().toISOString(),
+      })
       .expect(200);
-    await request(ctx.http)
+    // Renvoyé par la file hors connexion (réponse perdue) : sans effet, rien n'est compté deux fois.
+    const replay = await request(ctx.http)
       .post(`/v1/rider/orders/${placed.id}/collect`)
       .set(rider.auth)
-      .send({ method: 'CASH' })
-      .expect(409);
+      .send({ method: 'CASH', clientEventId: 'encaissement-0001' })
+      .expect(200);
+    expect(replay.body.complete).toBe(true);
+    expect(
+      await ctx.prisma.journalEntry.count({
+        where: { idempotencyKey: `order:${placed.id}:collect-cash` },
+      }),
+    ).toBe(1);
     await request(ctx.http)
       .post(`/v1/admin/orders/${placed.id}/transition`)
       .set(ops.auth)
