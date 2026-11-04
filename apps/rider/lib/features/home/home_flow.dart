@@ -9,6 +9,7 @@ import '../../core/course/active_order.dart';
 import '../../core/course/course_actions.dart';
 import '../../core/realtime/realtime_client.dart';
 import '../../design/components/glass.dart';
+import '../../design/components/layout.dart';
 import '../../design/format.dart';
 import '../../design/tara_colors.dart';
 import '../../design/tara_typography.dart';
@@ -22,6 +23,7 @@ import '../course/failure_screen.dart';
 import '../course/pickup_screen.dart';
 import '../course/return_screen.dart';
 import '../offer/offer_screen.dart';
+import '../offline/pending_actions_screen.dart';
 import '../safety/sos_screen.dart';
 import 'home_offline_screen.dart';
 import 'home_online_screen.dart';
@@ -55,6 +57,9 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Onglet affiché quand aucune course n'est à l'écran : 0 accueil, 1 activité (13).
   int _tab = 0;
+
+  /// Écran des actions en attente (15), ouvert depuis le bandeau.
+  bool _pending = false;
 
   /// Profil et réglages : écran pas encore dessiné, l'onglet ne change rien.
   void _selectTab(int tab) {
@@ -289,9 +294,10 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     final l = AppLocalizations.of(context);
     final online = ref.watch(onlineControllerProvider);
     final queue = ref.watch(actionQueueProvider);
+    final network = ref.watch(networkStatusProvider);
     final offer = _offer;
     return ListenableBuilder(
-      listenable: Listenable.merge([online, _activeOrder, queue]),
+      listenable: Listenable.merge([online, _activeOrder, queue, network]),
       builder: (context, _) {
         final order = _activeOrder.order;
         // Hors ligne, une course en cours reste à l'écran : rien ne doit la faire oublier.
@@ -326,8 +332,32 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                       onTab: _selectTab,
                     ),
             ),
+            // Bandeau sous les en-têtes (retour, SOS restent accessibles) : réseau coupé, ou
+            // action refusée par le serveur à vérifier.
+            if (!_pending && (network.offline || queue.failures.isNotEmpty))
+              Positioned(
+                left: 16,
+                right: 16,
+                top: MediaQuery.paddingOf(context).top + 70,
+                child: GestureDetector(
+                  onTap: () => setState(() => _pending = true),
+                  child: network.offline
+                      ? OfflineBanner(
+                          title: l.offlineBannerTitle,
+                          detail: queue.pendingCount > 0
+                              ? l.offlineBannerPending(queue.pendingCount)
+                              : l.offlineNoPending,
+                        )
+                      : OfflineBanner(
+                          title: l.refusedBannerTitle,
+                          detail: l.refusedBannerDetail(queue.failures.length),
+                        ),
+                ),
+              ),
             if (_notice != null)
               Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top + 64, child: _Notice(_notice!)),
+            if (_pending)
+              Positioned.fill(child: PendingActionsScreen(onContinue: () => setState(() => _pending = false))),
             if (offer != null)
               Positioned.fill(
                 child: OfferScreen(

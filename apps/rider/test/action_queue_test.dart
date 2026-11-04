@@ -129,4 +129,25 @@ void main() {
     expect(q.pendingCount, 1);
     expect(q.failures, isEmpty);
   });
+  test('encaissement fait hors réseau puis inutile (déjà payé) : retiré, la livraison part', () async {
+    final sent = <String>[];
+    final q = ActionQueue(
+      store: storage,
+      send: (path, body) async {
+        if (path.endsWith('/collect')) {
+          throw const ApiException(code: 'COLLECTION_NOT_EXPECTED', message: 'Rien à encaisser.', status: 409);
+        }
+        sent.add(path);
+        return null;
+      },
+      upload: (file) async => file,
+    );
+    await q.enqueue(orderId: 'o1', kind: 'collect', body: {'method': 'CASH'});
+    await q.enqueue(orderId: 'o1', kind: 'deliver', body: {'deliveryCode': '4821'});
+    await q.flush();
+    await q.flush();
+    expect(q.items, isEmpty);
+    expect(q.failures, isEmpty);
+    expect(sent, ['/rider/orders/o1/deliver']);
+  });
 }

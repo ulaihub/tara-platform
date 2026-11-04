@@ -1122,4 +1122,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get blockerPending => 'Account being validated.';
+
+  @override
+  String get pendingActionsTitle => 'Pending actions';
+
+  @override
+  String get autoSend => 'Sent automatically';
+
+  @override
+  String get queuedPickup => 'Pickup';
+
+  @override
+  String get queuedDepart => 'Leaving for the customer';
+
+  @override
+  String get queuedCollect => 'Cash collection';
+
+  @override
+  String get queuedDeliver => 'Delivery confirmed';
+
+  @override
+  String get queuedFail => 'Failed delivery';
+
+  @override
+  String get queuedRetry => 'New attempt';
+
+  @override
+  String get queuedReturn => 'Return to seller';
+
+  @override
+  String get detailCodePhoto => 'code + photo';
+
+  @override
+  String get detailNoCodePhoto => 'no code + photo';
+
+  @override
+  String detailPhotoSize(String size) {
+    return 'photo $size MB';
+  }
+
+  @override
+  String get statusWaiting => 'Waiting';
+
+  @override
+  String get statusSending => 'Sending…';
+
+  @override
+  String get statusRefused => 'Refused';
+
+  @override
+  String get offlineNote => 'You can keep going: the route and codes stay available offline.';
+
+  @override
+  String get retryNow => 'Try again now';
+
+  @override
+  String get retrying => 'Trying to send…';
+
+  @override
+  String get stillOffline => 'Still offline · Try again';
+
+  @override
+  String get continueCourse => 'Continue the job';
+
+  @override
+  String get allSent => 'Everything is sent.';
+
+  @override
+  String get refusedBannerTitle => 'Action refused';
+
+  @override
+  String refusedBannerDetail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count actions to check',
+      one: '1 action to check',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get refusedHelp => 'Refused by the server. Fix it from the job, or call support before removing it.';
+
+  @override
+  String get removeAction => 'Remove the action';
+
+  @override
+  String get confirmRemoveAction => 'Confirm removal';
+
+  @override
+  String get offlineNoPending => 'Your actions are kept on the phone';
 }

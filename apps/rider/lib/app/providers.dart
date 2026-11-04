@@ -18,6 +18,7 @@ import '../core/course/track_buffer.dart';
 import '../core/env.dart';
 import '../core/location/location_tracker.dart';
 import '../core/location/online_controller.dart';
+import '../core/network/network_status.dart';
 import '../core/offline/action_queue.dart';
 import '../core/push/push_service.dart';
 import '../core/realtime/realtime_client.dart';
@@ -232,6 +233,18 @@ final onlineControllerProvider = Provider<OnlineController>((ref) {
 });
 
 final positionSourceProvider = Provider<PositionSource>((ref) => DevicePositionSource());
+
+/// Réseau disponible ou non (bandeau « Hors connexion », écran 15).
+final networkStatusProvider = Provider<NetworkStatus>((ref) {
+  final status = NetworkStatus(
+    hasNetwork: Connectivity().onConnectivityChanged.map(
+      (results) => !results.every((result) => result == ConnectivityResult.none),
+    ),
+    realtimeConnected: ref.watch(realtimeProvider).connected,
+  );
+  ref.onDispose(status.dispose);
+  return status;
+});
 
 /// Ouverture d'un lien `tel:` ou `sms:` (application Téléphone ou Messages du téléphone).
 final launcherProvider = Provider<Future<bool> Function(Uri uri)>((ref) => launchUrl);

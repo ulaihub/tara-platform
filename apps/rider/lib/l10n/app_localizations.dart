@@ -2017,6 +2017,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Compte en cours de validation.'**
   String get blockerPending;
+
+  /// No description provided for @pendingActionsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions en attente'**
+  String get pendingActionsTitle;
+
+  /// No description provided for @autoSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi automatique'**
+  String get autoSend;
+
+  /// No description provided for @queuedPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enlèvement'**
+  String get queuedPickup;
+
+  /// No description provided for @queuedDepart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Départ vers le client'**
+  String get queuedDepart;
+
+  /// No description provided for @queuedCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissement espèces'**
+  String get queuedCollect;
+
+  /// No description provided for @queuedDeliver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison confirmée'**
+  String get queuedDeliver;
+
+  /// No description provided for @queuedFail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de livraison'**
+  String get queuedFail;
+
+  /// No description provided for @queuedRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle tentative'**
+  String get queuedRetry;
+
+  /// No description provided for @queuedReturn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour au vendeur'**
+  String get queuedReturn;
+
+  /// No description provided for @detailCodePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'code + photo'**
+  String get detailCodePhoto;
+
+  /// No description provided for @detailNoCodePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'sans code + photo'**
+  String get detailNoCodePhoto;
+
+  /// No description provided for @detailPhotoSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'photo {size} Mo'**
+  String detailPhotoSize(String size);
+
+  /// No description provided for @statusWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get statusWaiting;
+
+  /// No description provided for @statusSending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi…'**
+  String get statusSending;
+
+  /// No description provided for @statusRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée'**
+  String get statusRefused;
+
+  /// No description provided for @offlineNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pouvez continuer la course : l’itinéraire et les codes restent disponibles hors connexion.'**
+  String get offlineNote;
+
+  /// No description provided for @retryNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer maintenant'**
+  String get retryNow;
+
+  /// No description provided for @retrying.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tentative d’envoi…'**
+  String get retrying;
+
+  /// No description provided for @stillOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toujours hors connexion · Réessayer'**
+  String get stillOffline;
+
+  /// No description provided for @continueCourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer la course'**
+  String get continueCourse;
+
+  /// No description provided for @allSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout est envoyé.'**
+  String get allSent;
+
+  /// No description provided for @refusedBannerTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Action refusée'**
+  String get refusedBannerTitle;
+
+  /// No description provided for @refusedBannerDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 action à vérifier} other{{count} actions à vérifier}}'**
+  String refusedBannerDetail(int count);
+
+  /// No description provided for @refusedHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée par le serveur. Corrigez-la depuis la course, ou appelez le support avant de la retirer.'**
+  String get refusedHelp;
+
+  /// No description provided for @removeAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer l’action'**
+  String get removeAction;
+
+  /// No description provided for @confirmRemoveAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le retrait'**
+  String get confirmRemoveAction;
+
+  /// No description provided for @offlineNoPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos actions sont gardées sur le téléphone'**
+  String get offlineNoPending;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

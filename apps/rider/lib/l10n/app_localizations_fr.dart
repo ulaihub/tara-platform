@@ -1126,4 +1126,97 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get blockerPending => 'Compte en cours de validation.';
+
+  @override
+  String get pendingActionsTitle => 'Actions en attente';
+
+  @override
+  String get autoSend => 'Envoi automatique';
+
+  @override
+  String get queuedPickup => 'Enlèvement';
+
+  @override
+  String get queuedDepart => 'Départ vers le client';
+
+  @override
+  String get queuedCollect => 'Encaissement espèces';
+
+  @override
+  String get queuedDeliver => 'Livraison confirmée';
+
+  @override
+  String get queuedFail => 'Échec de livraison';
+
+  @override
+  String get queuedRetry => 'Nouvelle tentative';
+
+  @override
+  String get queuedReturn => 'Retour au vendeur';
+
+  @override
+  String get detailCodePhoto => 'code + photo';
+
+  @override
+  String get detailNoCodePhoto => 'sans code + photo';
+
+  @override
+  String detailPhotoSize(String size) {
+    return 'photo $size Mo';
+  }
+
+  @override
+  String get statusWaiting => 'En attente';
+
+  @override
+  String get statusSending => 'Envoi…';
+
+  @override
+  String get statusRefused => 'Refusée';
+
+  @override
+  String get offlineNote =>
+      'Vous pouvez continuer la course : l’itinéraire et les codes restent disponibles hors connexion.';
+
+  @override
+  String get retryNow => 'Réessayer maintenant';
+
+  @override
+  String get retrying => 'Tentative d’envoi…';
+
+  @override
+  String get stillOffline => 'Toujours hors connexion · Réessayer';
+
+  @override
+  String get continueCourse => 'Continuer la course';
+
+  @override
+  String get allSent => 'Tout est envoyé.';
+
+  @override
+  String get refusedBannerTitle => 'Action refusée';
+
+  @override
+  String refusedBannerDetail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count actions à vérifier',
+      one: '1 action à vérifier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get refusedHelp =>
+      'Refusée par le serveur. Corrigez-la depuis la course, ou appelez le support avant de la retirer.';
+
+  @override
+  String get removeAction => 'Retirer l’action';
+
+  @override
+  String get confirmRemoveAction => 'Confirmer le retrait';
+
+  @override
+  String get offlineNoPending => 'Vos actions sont gardées sur le téléphone';
 }

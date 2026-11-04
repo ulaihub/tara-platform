@@ -720,5 +720,46 @@
   "cashOverdueNotice": "En retard : plus de courses jusqu’au dépôt.",
   "blockerCashOverdue": "Espèces non déposées dans les 24 h : déposez-les (onglet Activité) pour recevoir des courses.",
   "blockerSuspended": "Compte suspendu : contactez Tara.",
-  "blockerPending": "Compte en cours de validation."
+  "blockerPending": "Compte en cours de validation.",
+  "pendingActionsTitle": "Actions en attente",
+  "autoSend": "Envoi automatique",
+  "queuedPickup": "Enlèvement",
+  "queuedDepart": "Départ vers le client",
+  "queuedCollect": "Encaissement espèces",
+  "queuedDeliver": "Livraison confirmée",
+  "queuedFail": "Échec de livraison",
+  "queuedRetry": "Nouvelle tentative",
+  "queuedReturn": "Retour au vendeur",
+  "detailCodePhoto": "code + photo",
+  "detailNoCodePhoto": "sans code + photo",
+  "detailPhotoSize": "photo {size} Mo",
+  "@detailPhotoSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "statusWaiting": "En attente",
+  "statusSending": "Envoi…",
+  "statusRefused": "Refusée",
+  "offlineNote": "Vous pouvez continuer la course : l’itinéraire et les codes restent disponibles hors connexion.",
+  "retryNow": "Réessayer maintenant",
+  "retrying": "Tentative d’envoi…",
+  "stillOffline": "Toujours hors connexion · Réessayer",
+  "continueCourse": "Continuer la course",
+  "allSent": "Tout est envoyé.",
+  "refusedBannerTitle": "Action refusée",
+  "refusedBannerDetail": "{count, plural, =1{1 action à vérifier} other{{count} actions à vérifier}}",
+  "@refusedBannerDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "refusedHelp": "Refusée par le serveur. Corrigez-la depuis la course, ou appelez le support avant de la retirer.",
+  "removeAction": "Retirer l’action",
+  "confirmRemoveAction": "Confirmer le retrait",
+  "offlineNoPending": "Vos actions sont gardées sur le téléphone"
 }

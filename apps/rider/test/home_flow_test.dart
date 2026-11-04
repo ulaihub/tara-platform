@@ -12,6 +12,7 @@ import 'package:tara_rider/core/course/course_actions.dart';
 import 'package:tara_rider/core/course/proof_photo.dart';
 import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';
+import 'package:tara_rider/core/network/network_status.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/activity/activity_screen.dart';
@@ -23,6 +24,7 @@ import 'package:tara_rider/features/course/return_screen.dart';
 import 'package:tara_rider/features/home/home_flow.dart';
 import 'package:tara_rider/features/home/home_summary.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
+import 'package:tara_rider/features/offline/pending_actions_screen.dart';
 import 'package:tara_rider/features/safety/sos_screen.dart';
 
 import 'helpers/fake_rider_api.dart';
@@ -50,6 +52,7 @@ Future<({ActiveOrderController active, ActionQueue queue})> pumpHome(
   WidgetTester tester,
   RiderOrder order, {
   Future<Object?> Function(String path, Json body)? send,
+  NetworkStatus? network,
 }) async {
   final store = MemoryKeyValueStore();
   final queue = ActionQueue(store: store, send: send ?? (_, _) async => null, upload: (path) async => path);
@@ -83,6 +86,7 @@ Future<({ActiveOrderController active, ActionQueue queue})> pumpHome(
         takeProofPhotoProvider.overrideWithValue(() async => 'remise.jpg'),
         riderApiProvider.overrideWithValue(FakeRiderApi()),
         safetyAlertProvider.overrideWithValue(safetyAlert()),
+        networkStatusProvider.overrideWithValue(network ?? NetworkStatus.fixed(offline: false)),
         callJournalProvider.overrideWithValue(CallJournal(store: store, dial: (_) async {})),
       ],
       child: const HomeFlow(),
@@ -227,5 +231,27 @@ void main() {
     await settle(tester);
     expect(find.byType(ActivityScreen), findsNothing);
     expect(find.text('Course TR-48213 en cours'), findsOneWidget);
+  });
+  testWidgets('hors connexion : bandeau sous l’en-tête, puis écran des actions en attente', (tester) async {
+    final (:active, :queue) = await pumpHome(
+      tester,
+      order(status: 'IN_DELIVERY'),
+      send: (path, body) async => throw const ApiException(code: ApiException.network, message: ''),
+      network: NetworkStatus.fixed(offline: true),
+    );
+    await tester.runAsync(() async {
+      await queue.enqueue(orderId: active.order!.id, kind: 'collect', body: {'method': 'CASH'});
+      await queue.flush();
+    });
+    await settle(tester);
+    expect(find.text('1 action en attente · enregistrées sur le téléphone'), findsOneWidget);
+    await tester.tap(find.text('Hors connexion'));
+    await settle(tester);
+    expect(find.byType(PendingActionsScreen), findsOneWidget);
+    expect(find.text('Encaissement espèces'), findsOneWidget);
+    await tester.tap(find.text('Continuer la course'));
+    await settle(tester);
+    expect(find.byType(PendingActionsScreen), findsNothing);
+    expect(find.byType(DeliveryScreen), findsOneWidget);
   });
 }

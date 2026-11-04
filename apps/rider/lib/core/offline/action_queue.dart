@@ -160,7 +160,20 @@ class ActionQueue extends ChangeNotifier {
 
   /// Envoie ce qui peut l'être. Un seul envoi à la fois ; sans réseau, on s'arrête et on
   /// réessaiera au prochain déclencheur (retour du réseau, minuterie, retour dans l'app).
-  Future<void> flush() => _flushing ??= _flush().whenComplete(() => _flushing = null);
+  Future<void> flush() {
+    final running = _flushing;
+    if (running != null) return running;
+    final started = _flush().whenComplete(() {
+      _flushing = null;
+      notifyListeners();
+    });
+    _flushing = started;
+    notifyListeners();
+    return started;
+  }
+
+  /// Envoi en cours (écran hors connexion : « Envoi… »).
+  bool get syncing => _flushing != null;
 
   Future<void> _flush() async {
     await load();
@@ -184,6 +197,13 @@ class ActionQueue extends ChangeNotifier {
         if (action.photoPath != null) await deletePhoto(action.photoPath!);
       } on ApiException catch (error) {
         if (_transient(error)) return;
+        if (_alreadySettled(action, error)) {
+          // Rien à refaire (déjà payé par Mobile Money entre-temps) : l'action est retirée
+          // et ne bloque pas la livraison qui la suit.
+          _items = _items.where((item) => item.id != action.id).toList();
+          await _save();
+          continue;
+        }
         _replace(action.copyWith(failureCode: error.code, failureMessage: error.message));
         blockedOrders.add(action.orderId);
         await _save();
@@ -218,6 +238,10 @@ class ActionQueue extends ChangeNotifier {
     await _save();
     await flush();
   }
+
+  /// Refus qui veut dire « déjà fait » : encaissement alors que tout est déjà payé.
+  static bool _alreadySettled(QueuedAction action, ApiException error) =>
+      action.kind == 'collect' && error.code == 'COLLECTION_NOT_EXPECTED';
 
   void _replace(QueuedAction action) => _items = [for (final item in _items) item.id == action.id ? action : item];
 
