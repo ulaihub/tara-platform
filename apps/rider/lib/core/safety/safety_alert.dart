@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_core/session/session_store.dart';
 
-import '../api/api_exception.dart';
 import '../api/models.dart';
 import '../offline/action_queue.dart';
-import '../realtime/realtime_client.dart';
-import '../session/session_store.dart';
 
 /// Étape de l'alerte SOS sur le téléphone.
 enum SafetyStatus {

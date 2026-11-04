@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/track_buffer.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 
 const offline = ApiException(code: ApiException.network, message: 'hors ligne');
 const notFound = ApiException(code: 'ORDER_NOT_FOUND', message: '', status: 404);

@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
-import 'package:tara_rider/core/realtime/realtime_client.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 
 import 'helpers/orders.dart';
 

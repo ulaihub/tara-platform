@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/app/providers.dart';
 import 'package:tara_rider/core/api/models.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/activity/activity_screen.dart';
 import 'package:tara_rider/features/activity/deposit_screen.dart';
 

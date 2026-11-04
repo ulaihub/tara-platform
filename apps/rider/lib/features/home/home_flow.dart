@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/format.dart';
@@ -12,7 +13,6 @@ import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../core/course/active_order.dart';
 import '../../core/course/course_actions.dart';
-import '../../core/realtime/realtime_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../account/account_screen.dart';
 import '../activity/activity_screen.dart';

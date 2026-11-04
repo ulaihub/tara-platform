@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/core/network/network_status.dart';
+import 'package:tara_core/network/network_status.dart';
 
 void main() {
   test('plus aucun réseau : hors connexion tout de suite ; retour du réseau : en ligne', () async {

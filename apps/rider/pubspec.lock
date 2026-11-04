@@ -858,6 +858,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  tara_core:
+    dependency: "direct main"
+    description:
+      path: "../../packages/tara_core"
+      relative: true
+    source: path
+    version: "0.1.0"
   tara_ui:
     dependency: "direct main"
     description:

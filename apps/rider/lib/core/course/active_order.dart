@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_core/session/session_store.dart';
 
-import '../api/api_exception.dart';
 import '../api/models.dart';
-import '../realtime/realtime_client.dart';
-import '../session/session_store.dart';
 
 /// Pourquoi la course a quitté l'écran : livrée, ou retirée au livreur.
 enum OrderEnded { delivered, returned, cancelled, reassigned }

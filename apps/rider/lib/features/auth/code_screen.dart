@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
@@ -18,7 +19,6 @@ import '../../core/api/models.dart';
 import '../../core/env.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/phone_format.dart';
 
 /// 02 · Code SMS : 6 chiffres, remplissage automatique proposé par le système, renvoi
 /// possible à la fin du minuteur fixé par le serveur.

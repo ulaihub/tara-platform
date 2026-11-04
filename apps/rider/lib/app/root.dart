@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/api_exception.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../core/api/api_exception.dart';
 import '../core/api/models.dart';
 import '../features/auth/code_screen.dart';
 import '../features/auth/sign_in_screen.dart';

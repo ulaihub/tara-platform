@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/brand.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
@@ -17,7 +18,6 @@ import '../../core/api/models.dart';
 import '../../core/env.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/phone_format.dart';
 
 /// 01 · Connexion par SMS.
 class SignInScreen extends ConsumerStatefulWidget {

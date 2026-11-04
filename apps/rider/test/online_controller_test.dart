@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
+import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';

@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import '../api/api_exception.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/session/session_store.dart';
+
 import '../api/models.dart';
-import '../session/session_store.dart';
 
 /// Envoi d'un lot de points de trajet (POST /rider/orders/{id}/track).
 typedef UploadTrack = Future<void> Function(String orderId, List<Json> points);

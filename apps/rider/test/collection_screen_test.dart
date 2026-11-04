@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/app/providers.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
 import 'package:tara_rider/core/course/course_actions.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/course/collection_screen.dart';
 
 import 'helpers/fake_rider_api.dart';

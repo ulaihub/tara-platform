@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
-import 'api_client.dart';
+import 'package:tara_core/api/api_client.dart';
+
 import 'models.dart';
 
 /// Routes de l'app livreur. Les actions d'une course (enlèvement, encaissement espèces,

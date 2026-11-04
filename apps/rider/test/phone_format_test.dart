@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/features/common/phone_format.dart';
+import 'package:tara_core/phone/phone_format.dart';
 
 void main() {
   test('numéro camerounais : 9 chiffres commençant par 6', () {

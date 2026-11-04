@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/core/api/models.dart';
-import 'package:tara_rider/core/realtime/realtime_client.dart';
 import 'package:tara_rider/core/safety/safety_alert.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 
 const offline = ApiException(code: ApiException.network, message: 'hors ligne');
 final here = GeoPoint(latitude: 4.0511, longitude: 9.6942, accuracy: 8, recordedAt: DateTime.utc(2026, 11, 4, 9));

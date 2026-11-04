@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/app/providers.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/common/status_screen.dart';
 import 'package:tara_rider/features/home/home_offline_screen.dart';
 import 'package:tara_rider/features/home/home_summary.dart';

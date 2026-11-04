@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
@@ -12,7 +13,6 @@ import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/phone_format.dart';
 
 /// Contact d'urgence (profil) : prévenu par SMS si le livreur déclenche une alerte SOS.
 /// Ajout, modification ou retrait ; le serveur renvoie le dossier à jour.

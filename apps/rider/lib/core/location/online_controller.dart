@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../api/api_exception.dart';
+import 'package:tara_core/api/api_exception.dart';
+
 import '../api/models.dart';
 import 'location_tracker.dart';
 

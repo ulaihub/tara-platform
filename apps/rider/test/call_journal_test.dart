@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/call_journal.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 
 void main() {
   const policy = FailurePolicy();

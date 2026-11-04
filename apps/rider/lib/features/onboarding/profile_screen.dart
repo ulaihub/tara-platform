@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
@@ -12,7 +13,6 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/phone_format.dart';
 import 'onboarding_header.dart';
 
 enum _Vehicle { motorbike, car, tricycle }

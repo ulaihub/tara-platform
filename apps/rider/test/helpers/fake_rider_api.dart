@@ -1,8 +1,8 @@
-import 'package:tara_rider/core/api/api_client.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
+import 'package:tara_core/api/api_client.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/api/rider_api.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 
 /// API livreur sans réseau pour les tests d'écrans : encaissement et portefeuille.
 class FakeRiderApi extends RiderApi {

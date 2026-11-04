@@ -2,9 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/tara_effects.dart';
-
-import '../core/session/session_store.dart';
 
 /// Réglages d'affichage choisis par le livreur (profil) : thème, langue, effets. Par
 /// défaut le thème et la langue suivent le téléphone. Gardés sur le téléphone ([store]).
