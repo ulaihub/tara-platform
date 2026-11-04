@@ -10,6 +10,16 @@ class ClientApi {
 
   Future<Me> me() async => Me.fromJson(await _api.get('/me') as Json);
 
+  /// Commandes de l'expéditeur, la plus récente d'abord : en cours (active) ou terminées
+  /// (history).
+  Future<List<OrderSummary>> orders({required String scope, int limit = 20}) async {
+    final page = await _api.get('/orders', query: {'scope': scope, 'limit': limit}) as Json;
+    return [for (final item in page['items']! as List<Object?>) OrderSummary.fromJson(item! as Json)];
+  }
+
+  /// Solde Tara de l'expéditeur et, pour un marchand, ventes encaissées à reverser.
+  Future<Wallet> wallet() async => Wallet.fromJson(await _api.get('/me/wallet') as Json);
+
   /// Nom affiché aux livreurs et dans les SMS des destinataires.
   Future<void> updateName(String fullName) => _api.send('PATCH', '/me', body: {'fullName': fullName});
 

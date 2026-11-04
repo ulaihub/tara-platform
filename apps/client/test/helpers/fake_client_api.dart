@@ -8,6 +8,17 @@ class FakeClientApi extends ClientApi {
   FakeClientApi() : super(ApiClient(baseUrl: 'http://test.invalid', store: SessionStore(MemoryKeyValueStore())));
 
   final names = <String>[];
+
+  /// Commandes en cours (accueil) et portefeuille renvoyés.
+  List<OrderSummary> active = [];
+  Wallet wallet0 = const Wallet(customerBalance: 0, merchantBalance: null, payoutSchedule: null);
+
+  @override
+  Future<List<OrderSummary>> orders({required String scope, int limit = 20}) async =>
+      scope == 'active' ? active : const [];
+
+  @override
+  Future<Wallet> wallet() async => wallet0;
   final merchants = <Map<String, String?>>[];
 
   @override

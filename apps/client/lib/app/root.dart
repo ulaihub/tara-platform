@@ -7,7 +7,7 @@ import '../features/auth/sign_in_screen.dart';
 import '../features/common/error_text.dart';
 import '../features/common/splash_screen.dart';
 import '../features/common/status_screen.dart';
-import '../features/home/home_screen.dart';
+import '../features/home/home_flow.dart';
 import '../features/onboarding/welcome_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'providers.dart';
@@ -97,6 +97,6 @@ class _AccountGate extends ConsumerWidget {
     if (account.needsProfile) {
       return WelcomeScreen(me: account, onDone: () => ref.invalidate(meProvider), onLogout: logout);
     }
-    return HomeScreen(me: account);
+    return HomeFlow(me: account);
   }
 }

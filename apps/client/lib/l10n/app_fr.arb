@@ -39,14 +39,6 @@
   "genericError": "Une erreur est survenue. Réessayez.",
   "getCode": "Recevoir le code",
   "haveReferral": "J’ai un code de parrainage",
-  "hello": "Bonjour {name}",
-  "@hello": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "kindPerson": "Pour moi",
   "kindPersonHelp": "Vous pourrez passer en mode boutique plus tard, depuis votre profil.",
   "kindQuestion": "Vous envoyez des colis…",
@@ -94,5 +86,48 @@
   "validate": "Valider",
   "welcomeBody": "Votre nom figure dans les messages envoyés à vos destinataires.",
   "welcomeTitle": "Bienvenue sur Tara",
-  "appTitle": "Tara"
+  "appTitle": "Tara",
+  "goodMorning": "Bonjour,",
+  "goodEvening": "Bonsoir,",
+  "tabHome": "Accueil",
+  "tabOrders": "Commandes",
+  "tabProfile": "Profil",
+  "sendTitle": "Envoyer un colis",
+  "sendBody": "Un livreur vient le chercher et le livre dans Douala, avec suivi en direct.",
+  "newDelivery": "Nouvelle livraison",
+  "askAddress": "Demander l’adresse au destinataire",
+  "shopBalance": "Ventes de la boutique",
+  "shopBalanceDaily": "Ventes encaissées · reversées chaque jour",
+  "shopBalanceOnDemand": "Ventes encaissées · reversées à la demande",
+  "inProgress": "En cours",
+  "noOrdersInProgress": "Aucune livraison en cours. Vos colis apparaissent ici dès leur envoi.",
+  "statusScheduled": "Prévue {when}",
+  "@statusScheduled": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "statusSearching": "Recherche d’un livreur",
+  "statusRiderComing": "Livreur en route vers l’enlèvement",
+  "statusInDelivery": "En livraison",
+  "statusFailed": "Livraison impossible · à décider",
+  "todayAt": "aujourd’hui à {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tomorrowAt": "demain à {time}",
+  "@tomorrowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersError": "Impossible de charger vos livraisons."
 }

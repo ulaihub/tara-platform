@@ -18,14 +18,6 @@
   "genericError": "Something went wrong. Please try again.",
   "getCode": "Get the code",
   "haveReferral": "I have a referral code",
-  "hello": "Hello {name}",
-  "@hello": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "kindPerson": "For myself",
   "kindPersonHelp": "You can switch to shop mode later, from your profile.",
   "kindQuestion": "You send parcels…",
@@ -66,5 +58,48 @@
   "validate": "Confirm",
   "welcomeBody": "Your name appears in the messages sent to your recipients.",
   "welcomeTitle": "Welcome to Tara",
-  "appTitle": "Tara"
+  "appTitle": "Tara",
+  "goodMorning": "Good morning,",
+  "goodEvening": "Good evening,",
+  "tabHome": "Home",
+  "tabOrders": "Orders",
+  "tabProfile": "Profile",
+  "sendTitle": "Send a parcel",
+  "sendBody": "A rider picks it up and delivers it in Douala, with live tracking.",
+  "newDelivery": "New delivery",
+  "askAddress": "Ask the recipient for their address",
+  "shopBalance": "Shop sales",
+  "shopBalanceDaily": "Collected sales · paid out daily",
+  "shopBalanceOnDemand": "Collected sales · paid out on request",
+  "inProgress": "In progress",
+  "noOrdersInProgress": "No delivery in progress. Your parcels show up here as soon as they are sent.",
+  "statusScheduled": "Scheduled {when}",
+  "@statusScheduled": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "statusSearching": "Looking for a rider",
+  "statusRiderComing": "Rider on the way to pickup",
+  "statusInDelivery": "Out for delivery",
+  "statusFailed": "Delivery failed · your decision needed",
+  "todayAt": "today at {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tomorrowAt": "tomorrow at {time}",
+  "@tomorrowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersError": "Could not load your deliveries."
 }

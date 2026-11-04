@@ -70,11 +70,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get haveReferral => 'I have a referral code';
 
   @override
-  String hello(String name) {
-    return 'Hello $name';
-  }
-
-  @override
   String get kindPerson => 'For myself';
 
   @override
@@ -198,4 +193,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appTitle => 'Tara';
+
+  @override
+  String get goodMorning => 'Good morning,';
+
+  @override
+  String get goodEvening => 'Good evening,';
+
+  @override
+  String get tabHome => 'Home';
+
+  @override
+  String get tabOrders => 'Orders';
+
+  @override
+  String get tabProfile => 'Profile';
+
+  @override
+  String get sendTitle => 'Send a parcel';
+
+  @override
+  String get sendBody => 'A rider picks it up and delivers it in Douala, with live tracking.';
+
+  @override
+  String get newDelivery => 'New delivery';
+
+  @override
+  String get askAddress => 'Ask the recipient for their address';
+
+  @override
+  String get shopBalance => 'Shop sales';
+
+  @override
+  String get shopBalanceDaily => 'Collected sales · paid out daily';
+
+  @override
+  String get shopBalanceOnDemand => 'Collected sales · paid out on request';
+
+  @override
+  String get inProgress => 'In progress';
+
+  @override
+  String get noOrdersInProgress => 'No delivery in progress. Your parcels show up here as soon as they are sent.';
+
+  @override
+  String statusScheduled(String when) {
+    return 'Scheduled $when';
+  }
+
+  @override
+  String get statusSearching => 'Looking for a rider';
+
+  @override
+  String get statusRiderComing => 'Rider on the way to pickup';
+
+  @override
+  String get statusInDelivery => 'Out for delivery';
+
+  @override
+  String get statusFailed => 'Delivery failed · your decision needed';
+
+  @override
+  String todayAt(String time) {
+    return 'today at $time';
+  }
+
+  @override
+  String tomorrowAt(String time) {
+    return 'tomorrow at $time';
+  }
+
+  @override
+  String get ordersError => 'Could not load your deliveries.';
 }

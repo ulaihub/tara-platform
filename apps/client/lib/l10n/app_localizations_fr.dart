@@ -70,11 +70,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get haveReferral => 'J’ai un code de parrainage';
 
   @override
-  String hello(String name) {
-    return 'Bonjour $name';
-  }
-
-  @override
   String get kindPerson => 'Pour moi';
 
   @override
@@ -199,4 +194,76 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appTitle => 'Tara';
+
+  @override
+  String get goodMorning => 'Bonjour,';
+
+  @override
+  String get goodEvening => 'Bonsoir,';
+
+  @override
+  String get tabHome => 'Accueil';
+
+  @override
+  String get tabOrders => 'Commandes';
+
+  @override
+  String get tabProfile => 'Profil';
+
+  @override
+  String get sendTitle => 'Envoyer un colis';
+
+  @override
+  String get sendBody => 'Un livreur vient le chercher et le livre dans Douala, avec suivi en direct.';
+
+  @override
+  String get newDelivery => 'Nouvelle livraison';
+
+  @override
+  String get askAddress => 'Demander l’adresse au destinataire';
+
+  @override
+  String get shopBalance => 'Ventes de la boutique';
+
+  @override
+  String get shopBalanceDaily => 'Ventes encaissées · reversées chaque jour';
+
+  @override
+  String get shopBalanceOnDemand => 'Ventes encaissées · reversées à la demande';
+
+  @override
+  String get inProgress => 'En cours';
+
+  @override
+  String get noOrdersInProgress => 'Aucune livraison en cours. Vos colis apparaissent ici dès leur envoi.';
+
+  @override
+  String statusScheduled(String when) {
+    return 'Prévue $when';
+  }
+
+  @override
+  String get statusSearching => 'Recherche d’un livreur';
+
+  @override
+  String get statusRiderComing => 'Livreur en route vers l’enlèvement';
+
+  @override
+  String get statusInDelivery => 'En livraison';
+
+  @override
+  String get statusFailed => 'Livraison impossible · à décider';
+
+  @override
+  String todayAt(String time) {
+    return 'aujourd’hui à $time';
+  }
+
+  @override
+  String tomorrowAt(String time) {
+    return 'demain à $time';
+  }
+
+  @override
+  String get ordersError => 'Impossible de charger vos livraisons.';
 }

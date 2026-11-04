@@ -7,6 +7,7 @@ export 'package:tara_core/api/models.dart';
 /// dans le contrat `apps/api/openapi.json` (vérifié par test/api_contract_test.dart).
 
 T _field<T>(Json json, String key) => json[key] as T;
+DateTime? _date(Object? value) => value == null ? null : DateTime.parse(value as String);
 
 @immutable
 class MobileMoneyOperator {
@@ -107,4 +108,88 @@ class Me {
   /// Profil à compléter à la première connexion : le nom figure dans les SMS envoyés aux
   /// destinataires (« Awa vous envoie un colis »).
   bool get needsProfile => (fullName ?? '').trim().length < 2;
+}
+
+/// Commande dans une liste (GET /orders) : accueil et historique.
+@immutable
+class OrderSummary {
+  const OrderSummary({
+    required this.id,
+    required this.reference,
+    required this.status,
+    required this.recipientName,
+    required this.dropoffLandmark,
+    required this.dropoffNeighborhood,
+    required this.totalPrice,
+    required this.codAmount,
+    required this.scheduledFor,
+    required this.createdAt,
+  });
+
+  factory OrderSummary.fromJson(Json json) => OrderSummary(
+    id: _field(json, 'id'),
+    reference: _field(json, 'reference'),
+    status: _field(json, 'status'),
+    recipientName: _field(json, 'recipientName'),
+    dropoffLandmark: _field(json, 'dropoffLandmark'),
+    dropoffNeighborhood: _field(json, 'dropoffNeighborhood'),
+    totalPrice: _field<num>(json, 'totalPrice').toInt(),
+    codAmount: _field<num>(json, 'codAmount').toInt(),
+    scheduledFor: _date(json['scheduledFor']),
+    createdAt: DateTime.parse(_field(json, 'createdAt')),
+  );
+
+  static const fields = [
+    'id',
+    'reference',
+    'status',
+    'recipientName',
+    'dropoffLandmark',
+    'dropoffNeighborhood',
+    'totalPrice',
+    'codAmount',
+    'scheduledFor',
+    'createdAt',
+  ];
+
+  final String id;
+  final String reference;
+
+  /// CREATED, SEARCHING_RIDER, ASSIGNED, PICKED_UP, IN_DELIVERY, DELIVERY_FAILED,
+  /// DELIVERED, RETURNED ou CANCELLED.
+  final String status;
+  final String recipientName;
+  final String dropoffLandmark;
+  final String? dropoffNeighborhood;
+  final int totalPrice;
+
+  /// Montant à encaisser auprès du destinataire (0 sans encaissement).
+  final int codAmount;
+  final DateTime? scheduledFor;
+  final DateTime createdAt;
+}
+
+/// Portefeuille (GET /me/wallet) : solde Tara de l'expéditeur, solde de la boutique.
+@immutable
+class Wallet {
+  const Wallet({required this.customerBalance, required this.merchantBalance, required this.payoutSchedule});
+
+  factory Wallet.fromJson(Json json) {
+    final merchant = json['merchant'] as Json?;
+    return Wallet(
+      customerBalance: _field<num>(_field<Json>(json, 'customer'), 'balance').toInt(),
+      merchantBalance: merchant == null ? null : _field<num>(merchant, 'balance').toInt(),
+      payoutSchedule: merchant == null ? null : _field<String>(merchant, 'payoutSchedule'),
+    );
+  }
+
+  static const fields = ['customer', 'merchant'];
+
+  final int customerBalance;
+
+  /// Ventes encaissées pas encore reversées (null sans boutique).
+  final int? merchantBalance;
+
+  /// DAILY (chaque jour) ou ON_DEMAND (à la demande).
+  final String? payoutSchedule;
 }

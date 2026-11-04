@@ -200,12 +200,6 @@ abstract class AppLocalizations {
   /// **'J’ai un code de parrainage'**
   String get haveReferral;
 
-  /// No description provided for @hello.
-  ///
-  /// In fr, this message translates to:
-  /// **'Bonjour {name}'**
-  String hello(String name);
-
   /// No description provided for @kindPerson.
   ///
   /// In fr, this message translates to:
@@ -451,6 +445,138 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Tara'**
   String get appTitle;
+
+  /// No description provided for @goodMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour,'**
+  String get goodMorning;
+
+  /// No description provided for @goodEvening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonsoir,'**
+  String get goodEvening;
+
+  /// No description provided for @tabHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil'**
+  String get tabHome;
+
+  /// No description provided for @tabOrders.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commandes'**
+  String get tabOrders;
+
+  /// No description provided for @tabProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get tabProfile;
+
+  /// No description provided for @sendTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer un colis'**
+  String get sendTitle;
+
+  /// No description provided for @sendBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un livreur vient le chercher et le livre dans Douala, avec suivi en direct.'**
+  String get sendBody;
+
+  /// No description provided for @newDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle livraison'**
+  String get newDelivery;
+
+  /// No description provided for @askAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander l’adresse au destinataire'**
+  String get askAddress;
+
+  /// No description provided for @shopBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes de la boutique'**
+  String get shopBalance;
+
+  /// No description provided for @shopBalanceDaily.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes encaissées · reversées chaque jour'**
+  String get shopBalanceDaily;
+
+  /// No description provided for @shopBalanceOnDemand.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes encaissées · reversées à la demande'**
+  String get shopBalanceOnDemand;
+
+  /// No description provided for @inProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get inProgress;
+
+  /// No description provided for @noOrdersInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune livraison en cours. Vos colis apparaissent ici dès leur envoi.'**
+  String get noOrdersInProgress;
+
+  /// No description provided for @statusScheduled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévue {when}'**
+  String statusScheduled(String when);
+
+  /// No description provided for @statusSearching.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche d’un livreur'**
+  String get statusSearching;
+
+  /// No description provided for @statusRiderComing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur en route vers l’enlèvement'**
+  String get statusRiderComing;
+
+  /// No description provided for @statusInDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'En livraison'**
+  String get statusInDelivery;
+
+  /// No description provided for @statusFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison impossible · à décider'**
+  String get statusFailed;
+
+  /// No description provided for @todayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui à {time}'**
+  String todayAt(String time);
+
+  /// No description provided for @tomorrowAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'demain à {time}'**
+  String tomorrowAt(String time);
+
+  /// No description provided for @ordersError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos livraisons.'**
+  String get ordersError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -23,6 +23,8 @@ void main() {
     'AppConfig': AppConfig.fields,
     'Me': Me.fields,
     'Merchant': Merchant.fields,
+    'OrderSummary': OrderSummary.fields,
+    'Wallet': Wallet.fields,
   };
   for (final MapEntry(key: schema, value: fields) in models.entries) {
     test('modèle $schema conforme au contrat', () {
