@@ -17,6 +17,9 @@ const INCLUDE = {
 
 type AlertWithRider = Prisma.SafetyAlertGetPayload<{ include: typeof INCLUDE }>;
 
+/** Une alerte ouverte depuis moins de 30 min n'est pas doublée par un nouvel appui. */
+const REOPEN_WINDOW_MS = 30 * 60_000;
+
 function toDto(alert: AlertWithRider): z.output<typeof SafetyAlertDto> {
   return {
     id: alert.id,
@@ -66,6 +69,23 @@ export class SafetyAlertsService {
     // Alerte renvoyée au retour du réseau : la même, sans nouveaux SMS.
     const replay = await this.findReplay(rider.id, body.clientEventId);
     if (replay) return toDto(replay);
+    // Alerte déjà ouverte (moins de 30 min) : l'équipe la revoit en direct, avec la nouvelle
+    // position, mais sans nouvelle salve de SMS (appuis répétés, coût des SMS).
+    const open = await this.prisma.safetyAlert.findFirst({
+      where: {
+        riderId: rider.id,
+        resolvedAt: null,
+        cancelledAt: null,
+        createdAt: { gte: new Date(Date.now() - REOPEN_WINDOW_MS) },
+      },
+      orderBy: { createdAt: 'desc' },
+      include: INCLUDE,
+    });
+    if (open) {
+      const dto = { ...toDto(open), latitude: body.latitude, longitude: body.longitude };
+      this.realtime.toOps('ops.safety-alert', dto);
+      return toDto(open);
+    }
     // Une course citée doit être la sienne ; sinon l'alerte part quand même, sans course.
     const order = body.orderId
       ? await this.prisma.order.findFirst({ where: { id: body.orderId, riderId: rider.id } })

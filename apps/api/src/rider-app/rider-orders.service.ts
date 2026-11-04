@@ -336,7 +336,7 @@ export class RiderOrdersService {
     if (await this.replayed(orderId, body.clientEventId)) return this.get(userId, orderId);
     const { order } = await this.load(userId, orderId);
     await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
-    this.checkFailure(body);
+    this.checkFailure(order, body);
     await this.act(
       userId,
       order,
@@ -350,6 +350,8 @@ export class RiderOrdersService {
       },
       { failureReason: body.reason, note: body.note },
     );
+    // Échec déclaré loin de l'adresse du destinataire : alerte au support (faux « absent »).
+    await this.tracks.checkAction(order, 'FAILURE', body, order.dropoffAddress);
     return this.get(userId, orderId);
   }
 
@@ -357,16 +359,21 @@ export class RiderOrdersService {
    * Preuve d'appel exigée selon le motif (E6) : un faux « client absent » coûte une course
    * au client ; un refus sur place n'a pas besoin d'appel.
    */
-  private checkFailure(body: z.output<typeof FailBody>): void {
+  private checkFailure(order: Order, body: z.output<typeof FailBody>): void {
     if (body.reason === 'OTHER' && !body.note) {
       throw AppError.badRequest('VALIDATION_FAILED', {}, [{ path: 'note', message: 'requis' }]);
     }
     const rule = CALLS_REQUIRED[body.reason];
     const required = rule === 'policy' ? this.env.FAILURE_MIN_CALLS : rule;
     if (required === 0) return;
+    // Le journal vient du téléphone : seuls comptent les appels de cette tentative (depuis
+    // l'enlèvement, ou depuis l'échec précédent) et pas dans le futur.
+    const from = (order.failedAt ?? order.pickedUpAt ?? order.assignedAt)?.getTime() ?? 0;
+    const until = Date.now() + 2 * 60_000;
     const times = body.callLog
       .filter((call) => call.to === 'RECIPIENT')
       .map((call) => Date.parse(call.at))
+      .filter((at) => at >= from && at <= until)
       .sort((a, b) => a - b);
     const spacing = required > 1 ? this.env.FAILURE_CALL_SPACING_MINUTES * 60_000 : 0;
     const spread = times.length > 0 ? (times.at(-1) ?? 0) - (times[0] ?? 0) : 0;

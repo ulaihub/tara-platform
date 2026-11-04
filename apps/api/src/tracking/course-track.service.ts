@@ -42,7 +42,7 @@ export interface TrackPointInput extends GeoPoint {
   mocked?: boolean | undefined;
 }
 
-type ActionKind = 'PICKUP' | 'DELIVERY' | 'RETURN';
+type ActionKind = 'PICKUP' | 'DELIVERY' | 'FAILURE' | 'RETURN';
 
 /**
  * Trajet des courses (sécurité, litiges, fraude) : chaque position reçue pendant une course

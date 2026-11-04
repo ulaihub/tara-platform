@@ -253,6 +253,11 @@ describe('Actions du livreur (E2 à E9)', () => {
     const { rider, order } = await assigned();
     await pickUp(rider, order);
     const photoKey = await proofPhoto(ctx, rider);
+    // Colis enlevé il y a 10 min : les appels comptent à partir de là.
+    await ctx.prisma.order.update({
+      where: { id: order.id },
+      data: { pickedUpAt: new Date(Date.now() - 10 * 60_000) },
+    });
     // Client absent : deux appels au destinataire, à 5 min d'écart au moins.
     const call = (minutesAgo: number) => ({
       to: 'RECIPIENT',
@@ -269,6 +274,17 @@ describe('Actions du livreur (E2 à E9)', () => {
       .post(`/v1/rider/orders/${order.id}/fail`)
       .set(rider.auth)
       .send({ reason: 'RECIPIENT_UNREACHABLE', photoKey, callLog: [call(3), call(0)], ...HERE })
+      .expect(422);
+    // Journal du téléphone : un appel d'avant l'enlèvement ou dans le futur ne compte pas.
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'RECIPIENT_ABSENT', photoKey, callLog: [call(30), call(0)], ...HERE })
+      .expect(422);
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'RECIPIENT_ABSENT', photoKey, callLog: [call(1), call(-10)], ...HERE })
       .expect(422);
     // Autre motif : un appel et une explication.
     await request(ctx.http)
@@ -297,6 +313,11 @@ describe('Actions du livreur (E2 à E9)', () => {
       where: { orderId: order.id, toStatus: 'DELIVERY_FAILED' },
     });
     expect(failure.failureReason).toBe('PAYMENT_REFUSED');
+    // Déclaré loin de l'adresse du destinataire : alerte au support.
+    const far = await ctx.prisma.courseAlert.findFirst({
+      where: { orderId: order.id, dedupeKey: 'ACTION_FAR:FAILURE' },
+    });
+    expect(far).not.toBeNull();
 
     await request(ctx.http)
       .post(`/v1/orders/${order.id}/failure-decision`)
@@ -346,6 +367,10 @@ describe('Actions du livreur (E2 à E9)', () => {
     const fail = async () => {
       const { rider, order } = await assigned();
       await pickUp(rider, order);
+      await ctx.prisma.order.update({
+        where: { id: order.id },
+        data: { pickedUpAt: new Date(Date.now() - 10 * 60_000) },
+      });
       const photoKey = await proofPhoto(ctx, rider);
       await request(ctx.http)
         .post(`/v1/rider/orders/${order.id}/fail`)
@@ -578,6 +603,14 @@ describe('Actions du livreur (E2 à E9)', () => {
       .send(body)
       .expect(201);
     expect(again.body.id).toBe(first.body.id);
+    expect(ctx.sms.outbox.length).toBe(smsCount);
+    // Nouvel appui pendant que l'alerte est ouverte : la même, sans nouvelle salve de SMS.
+    const pressed = await request(ctx.http)
+      .post('/v1/rider/alerts')
+      .set(rider.auth)
+      .send({ ...body, clientEventId: `sos-bis-${suffix}` })
+      .expect(201);
+    expect(pressed.body.id).toBe(first.body.id);
     expect(ctx.sms.outbox.length).toBe(smsCount);
 
     // Livreur injoignable : l'agent appelle la police ; heure, agent et note gardés, action tracée.
