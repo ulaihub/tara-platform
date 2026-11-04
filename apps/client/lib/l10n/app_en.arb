@@ -135,7 +135,7 @@
   "effectsReduced": "Reduced",
   "helpSection": "Help",
   "languageLabel": "Language",
-  "logoutConfirm": "You will not receive jobs on this phone until you sign in again.",
+  "logoutConfirm": "You will no longer receive notifications on this phone until you sign in again.",
   "optionAuto": "Auto",
   "supportTara": "Tara support",
   "themeDark": "Dark",
@@ -147,5 +147,101 @@
   "prohibitedDangerous": "Dangerous goods: gas, fuel, flammable, explosive or corrosive products",
   "prohibitedAnimals": "Live animals",
   "prohibitedCash": "Bundles of cash",
-  "prohibitedPledge": "By sending the parcel, you confirm it contains none of these."
+  "prohibitedPledge": "By sending the parcel, you confirm it contains none of these.",
+  "close": "Close",
+  "stepOf": "Step {current} of {total} · {title}",
+  "@stepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "stepPickup": "Pickup",
+  "stepRecipient": "Recipient",
+  "stepPackage": "Parcel",
+  "stepWhen": "When",
+  "stepSummary": "Summary",
+  "pickupTitle": "Where should we collect the parcel?",
+  "pickupBody": "The rider picks it up at this address.",
+  "noPickupYet": "No saved address yet. Place your shop or home on the map: it will be here next time.",
+  "addressesError": "Couldn’t load your addresses.",
+  "newAddress": "New address",
+  "pickupRequired": "Choose or add the pickup address.",
+  "pickupAddressTitle": "Pickup address",
+  "locationUnavailable": "Location not found: move the map to the right spot.",
+  "myPosition": "My location",
+  "pinHint": "Move the map to put the pin on the exact entrance.",
+  "neighborhoodLabel": "Neighbourhood",
+  "neighborhoodAuto": "Taken from the point on the map",
+  "neighborhoodSearch": "Search a neighbourhood",
+  "landmarkLabel": "Landmark",
+  "landmarkHint": "E.g. Blue gate after the crossroads pharmacy",
+  "landmarkRequired": "Describe a visible landmark (at least 3 characters).",
+  "addressLabel": "Label",
+  "labelShop": "Shop",
+  "labelHome": "Home",
+  "labelOffice": "Office",
+  "saveAddress": "Save address",
+  "recipientTitle": "Who receives the parcel?",
+  "recipientBody": "We send them delivery tracking by SMS.",
+  "recipientName": "Recipient’s name",
+  "recipientNameHint": "E.g. Marie Ngo",
+  "recipientPhone": "Their number",
+  "recipientNameRequired": "Enter the recipient’s name.",
+  "recentRecipients": "Recent",
+  "deliveriesCount": "{count, plural, =1{1 delivery} other{{count} deliveries}}",
+  "@deliveriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deliveryAddress": "Delivery address",
+  "placeOnMap": "Place on the map",
+  "placeOnMapBody": "You know where to deliver: place the pin yourself.",
+  "askRecipient": "Ask the recipient",
+  "askRecipientBody": "They get a link and place their own point on the map.",
+  "viaWhatsapp": "WhatsApp",
+  "viaSms": "SMS",
+  "recipientFirst": "First enter the recipient’s name and number.",
+  "linkSentTitle": "Link sent to {name}",
+  "@linkSentTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "linkWaiting": "Waiting for their point: the address shows here as soon as they place it. You can carry on meanwhile.",
+  "linkExpired": "The link expired without an answer.",
+  "resendLink": "Send the link again",
+  "placeMyself": "Place it myself",
+  "changeAddress": "Change address",
+  "addressVerified": "Address confirmed by a delivery",
+  "addressFromRecipient": "Placed by the recipient",
+  "addressRequired": "Say where to deliver the parcel.",
+  "whatsappUnavailable": "WhatsApp didn’t open. Try SMS.",
+  "smsUnavailable": "SMS didn’t open on this phone.",
+  "locationLinkMessage": "Hello {name}, {sender} is sending you a parcel with Tara. Tell us where to deliver it: {url}",
+  "@locationLinkMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "sender": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  }
 }

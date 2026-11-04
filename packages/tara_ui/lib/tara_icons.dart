@@ -54,6 +54,9 @@ abstract final class TaraIcons {
     _P('M9 12l2 2 4-4'),
   ]);
   static const alertCircle = TaraIconData([_C(12, 12, 9), _P('M12 8v5M12 16.5v.5')]);
+
+  /// Avion en papier (lien envoyé au destinataire) : absent de la maquette, même trait.
+  static const send = TaraIconData([_P('M21 3L3 10.5l7.5 3L14 21z'), _P('M10.5 13.5L21 3')]);
 }
 
 sealed class _Shape {

@@ -330,7 +330,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get languageLabel => 'Langue';
 
   @override
-  String get logoutConfirm => 'Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.';
+  String get logoutConfirm =>
+      'Vous ne recevrez plus de notifications sur ce téléphone jusqu’à votre prochaine connexion.';
 
   @override
   String get optionAuto => 'Auto';
@@ -368,4 +369,183 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get prohibitedPledge => 'En envoyant le colis, vous confirmez qu’il n’en contient aucun.';
+
+  @override
+  String get close => 'Fermer';
+
+  @override
+  String stepOf(int current, int total, String title) {
+    return 'Étape $current sur $total · $title';
+  }
+
+  @override
+  String get stepPickup => 'Enlèvement';
+
+  @override
+  String get stepRecipient => 'Destinataire';
+
+  @override
+  String get stepPackage => 'Colis';
+
+  @override
+  String get stepWhen => 'Quand';
+
+  @override
+  String get stepSummary => 'Récapitulatif';
+
+  @override
+  String get pickupTitle => 'Où récupérer le colis ?';
+
+  @override
+  String get pickupBody => 'Le livreur passe le prendre à cette adresse.';
+
+  @override
+  String get noPickupYet =>
+      'Aucune adresse enregistrée. Placez votre boutique ou votre domicile sur la carte : vous la retrouverez la prochaine fois.';
+
+  @override
+  String get addressesError => 'Impossible de charger vos adresses.';
+
+  @override
+  String get newAddress => 'Nouvelle adresse';
+
+  @override
+  String get pickupRequired => 'Choisissez ou ajoutez l’adresse d’enlèvement.';
+
+  @override
+  String get pickupAddressTitle => 'Adresse d’enlèvement';
+
+  @override
+  String get locationUnavailable => 'Position introuvable : déplacez la carte jusqu’au bon endroit.';
+
+  @override
+  String get myPosition => 'Ma position';
+
+  @override
+  String get pinHint => 'Déplacez la carte pour placer l’épingle sur l’entrée exacte.';
+
+  @override
+  String get neighborhoodLabel => 'Quartier';
+
+  @override
+  String get neighborhoodAuto => 'Déduit du point sur la carte';
+
+  @override
+  String get neighborhoodSearch => 'Rechercher un quartier';
+
+  @override
+  String get landmarkLabel => 'Repère';
+
+  @override
+  String get landmarkHint => 'Ex. Portail bleu après la pharmacie du carrefour';
+
+  @override
+  String get landmarkRequired => 'Décrivez un repère visible (3 caractères au moins).';
+
+  @override
+  String get addressLabel => 'Libellé';
+
+  @override
+  String get labelShop => 'Boutique';
+
+  @override
+  String get labelHome => 'Maison';
+
+  @override
+  String get labelOffice => 'Bureau';
+
+  @override
+  String get saveAddress => 'Enregistrer l’adresse';
+
+  @override
+  String get recipientTitle => 'Qui reçoit le colis ?';
+
+  @override
+  String get recipientBody => 'Nous lui envoyons le suivi de la livraison par SMS.';
+
+  @override
+  String get recipientName => 'Nom du destinataire';
+
+  @override
+  String get recipientNameHint => 'Ex. Marie Ngo';
+
+  @override
+  String get recipientPhone => 'Son numéro';
+
+  @override
+  String get recipientNameRequired => 'Saisissez le nom du destinataire.';
+
+  @override
+  String get recentRecipients => 'Récents';
+
+  @override
+  String deliveriesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count livraisons', one: '1 livraison');
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryAddress => 'Adresse de livraison';
+
+  @override
+  String get placeOnMap => 'Placer sur la carte';
+
+  @override
+  String get placeOnMapBody => 'Vous savez où livrer : placez l’épingle vous-même.';
+
+  @override
+  String get askRecipient => 'Demander au destinataire';
+
+  @override
+  String get askRecipientBody => 'Il reçoit un lien et place lui-même son point sur la carte.';
+
+  @override
+  String get viaWhatsapp => 'WhatsApp';
+
+  @override
+  String get viaSms => 'SMS';
+
+  @override
+  String get recipientFirst => 'Saisissez d’abord le nom et le numéro du destinataire.';
+
+  @override
+  String linkSentTitle(String name) {
+    return 'Lien envoyé à $name';
+  }
+
+  @override
+  String get linkWaiting =>
+      'En attente de son point : l’adresse s’affiche ici dès qu’il l’a placé. Vous pouvez continuer en attendant.';
+
+  @override
+  String get linkExpired => 'Le lien a expiré sans réponse.';
+
+  @override
+  String get resendLink => 'Renvoyer le lien';
+
+  @override
+  String get placeMyself => 'Placer moi-même';
+
+  @override
+  String get changeAddress => 'Changer d’adresse';
+
+  @override
+  String get addressVerified => 'Adresse confirmée par une livraison';
+
+  @override
+  String get addressFromRecipient => 'Placée par le destinataire';
+
+  @override
+  String get addressRequired => 'Indiquez où livrer le colis.';
+
+  @override
+  String get whatsappUnavailable => 'WhatsApp ne s’est pas ouvert. Essayez par SMS.';
+
+  @override
+  String get smsUnavailable => 'Les SMS ne se sont pas ouverts sur ce téléphone.';
+
+  @override
+  String locationLinkMessage(String name, String sender, String url) {
+    return 'Bonjour $name, $sender vous envoie un colis avec Tara. Indiquez où vous le livrer : $url';
+  }
 }

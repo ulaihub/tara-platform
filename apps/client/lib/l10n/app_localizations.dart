@@ -695,7 +695,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutConfirm.
   ///
   /// In fr, this message translates to:
-  /// **'Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.'**
+  /// **'Vous ne recevrez plus de notifications sur ce téléphone jusqu’à votre prochaine connexion.'**
   String get logoutConfirm;
 
   /// No description provided for @optionAuto.
@@ -769,6 +769,342 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'En envoyant le colis, vous confirmez qu’il n’en contient aucun.'**
   String get prohibitedPledge;
+
+  /// No description provided for @close.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get close;
+
+  /// No description provided for @stepOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étape {current} sur {total} · {title}'**
+  String stepOf(int current, int total, String title);
+
+  /// No description provided for @stepPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enlèvement'**
+  String get stepPickup;
+
+  /// No description provided for @stepRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Destinataire'**
+  String get stepRecipient;
+
+  /// No description provided for @stepPackage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis'**
+  String get stepPackage;
+
+  /// No description provided for @stepWhen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand'**
+  String get stepWhen;
+
+  /// No description provided for @stepSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récapitulatif'**
+  String get stepSummary;
+
+  /// No description provided for @pickupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où récupérer le colis ?'**
+  String get pickupTitle;
+
+  /// No description provided for @pickupBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur passe le prendre à cette adresse.'**
+  String get pickupBody;
+
+  /// No description provided for @noPickupYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune adresse enregistrée. Placez votre boutique ou votre domicile sur la carte : vous la retrouverez la prochaine fois.'**
+  String get noPickupYet;
+
+  /// No description provided for @addressesError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos adresses.'**
+  String get addressesError;
+
+  /// No description provided for @newAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle adresse'**
+  String get newAddress;
+
+  /// No description provided for @pickupRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez ou ajoutez l’adresse d’enlèvement.'**
+  String get pickupRequired;
+
+  /// No description provided for @pickupAddressTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse d’enlèvement'**
+  String get pickupAddressTitle;
+
+  /// No description provided for @locationUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position introuvable : déplacez la carte jusqu’au bon endroit.'**
+  String get locationUnavailable;
+
+  /// No description provided for @myPosition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ma position'**
+  String get myPosition;
+
+  /// No description provided for @pinHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déplacez la carte pour placer l’épingle sur l’entrée exacte.'**
+  String get pinHint;
+
+  /// No description provided for @neighborhoodLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quartier'**
+  String get neighborhoodLabel;
+
+  /// No description provided for @neighborhoodAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déduit du point sur la carte'**
+  String get neighborhoodAuto;
+
+  /// No description provided for @neighborhoodSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un quartier'**
+  String get neighborhoodSearch;
+
+  /// No description provided for @landmarkLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Repère'**
+  String get landmarkLabel;
+
+  /// No description provided for @landmarkHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Portail bleu après la pharmacie du carrefour'**
+  String get landmarkHint;
+
+  /// No description provided for @landmarkRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez un repère visible (3 caractères au moins).'**
+  String get landmarkRequired;
+
+  /// No description provided for @addressLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get addressLabel;
+
+  /// No description provided for @labelShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique'**
+  String get labelShop;
+
+  /// No description provided for @labelHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maison'**
+  String get labelHome;
+
+  /// No description provided for @labelOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bureau'**
+  String get labelOffice;
+
+  /// No description provided for @saveAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer l’adresse'**
+  String get saveAddress;
+
+  /// No description provided for @recipientTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui reçoit le colis ?'**
+  String get recipientTitle;
+
+  /// No description provided for @recipientBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous lui envoyons le suivi de la livraison par SMS.'**
+  String get recipientBody;
+
+  /// No description provided for @recipientName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du destinataire'**
+  String get recipientName;
+
+  /// No description provided for @recipientNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Marie Ngo'**
+  String get recipientNameHint;
+
+  /// No description provided for @recipientPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Son numéro'**
+  String get recipientPhone;
+
+  /// No description provided for @recipientNameRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez le nom du destinataire.'**
+  String get recipientNameRequired;
+
+  /// No description provided for @recentRecipients.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récents'**
+  String get recentRecipients;
+
+  /// No description provided for @deliveriesCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 livraison} other{{count} livraisons}}'**
+  String deliveriesCount(int count);
+
+  /// No description provided for @deliveryAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de livraison'**
+  String get deliveryAddress;
+
+  /// No description provided for @placeOnMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placer sur la carte'**
+  String get placeOnMap;
+
+  /// No description provided for @placeOnMapBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous savez où livrer : placez l’épingle vous-même.'**
+  String get placeOnMapBody;
+
+  /// No description provided for @askRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander au destinataire'**
+  String get askRecipient;
+
+  /// No description provided for @askRecipientBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il reçoit un lien et place lui-même son point sur la carte.'**
+  String get askRecipientBody;
+
+  /// No description provided for @viaWhatsapp.
+  ///
+  /// In fr, this message translates to:
+  /// **'WhatsApp'**
+  String get viaWhatsapp;
+
+  /// No description provided for @viaSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'SMS'**
+  String get viaSms;
+
+  /// No description provided for @recipientFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez d’abord le nom et le numéro du destinataire.'**
+  String get recipientFirst;
+
+  /// No description provided for @linkSentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien envoyé à {name}'**
+  String linkSentTitle(String name);
+
+  /// No description provided for @linkWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de son point : l’adresse s’affiche ici dès qu’il l’a placé. Vous pouvez continuer en attendant.'**
+  String get linkWaiting;
+
+  /// No description provided for @linkExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le lien a expiré sans réponse.'**
+  String get linkExpired;
+
+  /// No description provided for @resendLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le lien'**
+  String get resendLink;
+
+  /// No description provided for @placeMyself.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placer moi-même'**
+  String get placeMyself;
+
+  /// No description provided for @changeAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer d’adresse'**
+  String get changeAddress;
+
+  /// No description provided for @addressVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse confirmée par une livraison'**
+  String get addressVerified;
+
+  /// No description provided for @addressFromRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placée par le destinataire'**
+  String get addressFromRecipient;
+
+  /// No description provided for @addressRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez où livrer le colis.'**
+  String get addressRequired;
+
+  /// No description provided for @whatsappUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'WhatsApp ne s’est pas ouvert. Essayez par SMS.'**
+  String get whatsappUnavailable;
+
+  /// No description provided for @smsUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les SMS ne se sont pas ouverts sur ce téléphone.'**
+  String get smsUnavailable;
+
+  /// No description provided for @locationLinkMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {name}, {sender} vous envoie un colis avec Tara. Indiquez où vous le livrer : {url}'**
+  String locationLinkMessage(String name, String sender, String url);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

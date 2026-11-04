@@ -33,8 +33,12 @@ final languageCodeProvider = Provider<String>((ref) {
   return settings.languageCode(PlatformDispatcher.instance.locale);
 });
 
-/// Ouverture d'un lien ou d'un appel (remplacée dans les tests).
-final launcherProvider = Provider<Future<bool> Function(Uri uri)>((ref) => launchUrl);
+/// Ouverture d'un lien, d'un appel, de WhatsApp ou des SMS dans l'app du téléphone
+/// (remplacée dans les tests).
+final launcherProvider = Provider<Future<bool> Function(Uri uri)>(
+  (ref) =>
+      (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
+);
 
 /// Version de l'app (remplacée dans les tests).
 final appVersionProvider = FutureProvider<String>((ref) async {

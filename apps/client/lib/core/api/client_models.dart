@@ -193,3 +193,173 @@ class Wallet {
   /// DAILY (chaque jour) ou ON_DEMAND (à la demande).
   final String? payoutSchedule;
 }
+
+/// Quartier de Douala (liste des zones, B1).
+@immutable
+class Neighborhood {
+  const Neighborhood({required this.id, required this.name});
+  factory Neighborhood.fromJson(Json json) => Neighborhood(id: _field(json, 'id'), name: _field(json, 'name'));
+  static const fields = ['id', 'name'];
+
+  final String id;
+  final String name;
+}
+
+/// Adresse (B1) : point, quartier, repère écrit ; confirmée par une livraison (B4).
+@immutable
+class Address {
+  const Address({
+    required this.id,
+    required this.label,
+    required this.contactName,
+    required this.contactPhone,
+    required this.neighborhood,
+    required this.landmark,
+    required this.latitude,
+    required this.longitude,
+    required this.verified,
+    required this.motorbikeRestricted,
+  });
+
+  factory Address.fromJson(Json json) {
+    final neighborhood = json['neighborhood'] as Json?;
+    return Address(
+      id: _field(json, 'id'),
+      label: _field(json, 'label'),
+      contactName: _field(json, 'contactName'),
+      contactPhone: _field(json, 'contactPhone'),
+      neighborhood: neighborhood == null ? null : Neighborhood.fromJson(neighborhood),
+      landmark: _field(json, 'landmark'),
+      latitude: _field<num>(json, 'latitude').toDouble(),
+      longitude: _field<num>(json, 'longitude').toDouble(),
+      verified: json['verifiedAt'] != null,
+      motorbikeRestricted: json['motorbikeRestricted'] == true,
+    );
+  }
+
+  static const fields = [
+    'id',
+    'label',
+    'contactName',
+    'contactPhone',
+    'neighborhood',
+    'landmark',
+    'latitude',
+    'longitude',
+    'verifiedAt',
+    'motorbikeRestricted',
+  ];
+
+  final String id;
+  final String? label;
+  final String? contactName;
+  final String? contactPhone;
+  final Neighborhood? neighborhood;
+  final String landmark;
+  final double latitude;
+  final double longitude;
+
+  /// Point confirmé par une livraison réussie.
+  final bool verified;
+
+  /// Dans une zone interdite aux motos (B6).
+  final bool motorbikeRestricted;
+
+  /// « Bonapriso · Portail bleu après la pharmacie ».
+  String get summary => [?neighborhood?.name, landmark].join(' · ');
+}
+
+/// Destinataire fréquent du carnet (B5), avec sa dernière adresse.
+@immutable
+class Recipient {
+  const Recipient({required this.name, required this.phone, required this.ordersCount, required this.lastAddress});
+  factory Recipient.fromJson(Json json) => Recipient(
+    name: _field(json, 'name'),
+    phone: _field(json, 'phone'),
+    ordersCount: _field<num>(json, 'ordersCount').toInt(),
+    lastAddress: Address.fromJson(_field<Json>(json, 'lastAddress')),
+  );
+  static const fields = ['name', 'phone', 'ordersCount', 'lastAddress'];
+
+  final String name;
+  final String phone;
+  final int ordersCount;
+  final Address lastAddress;
+}
+
+/// Lien de localisation (B3) envoyé au destinataire pour qu'il place son point.
+@immutable
+class LocationLink {
+  const LocationLink({
+    required this.id,
+    required this.url,
+    required this.recipientName,
+    required this.status,
+    required this.expiresAt,
+    required this.address,
+  });
+  factory LocationLink.fromJson(Json json) {
+    final address = json['address'] as Json?;
+    return LocationLink(
+      id: _field(json, 'id'),
+      url: _field(json, 'url'),
+      recipientName: _field(json, 'recipientName'),
+      status: _field(json, 'status'),
+      expiresAt: DateTime.parse(_field(json, 'expiresAt')),
+      address: address == null ? null : Address.fromJson(address),
+    );
+  }
+  static const fields = ['id', 'url', 'recipientName', 'status', 'expiresAt', 'address'];
+
+  final String id;
+  final String url;
+  final String? recipientName;
+
+  /// PENDING, SUBMITTED ou EXPIRED.
+  final String status;
+  final DateTime expiresAt;
+  final Address? address;
+}
+
+/// Prix d'une livraison avant validation (C2).
+@immutable
+class Quote {
+  const Quote({
+    required this.distanceMeters,
+    required this.estimatedMinutes,
+    required this.basePrice,
+    required this.surcharges,
+    required this.discountTotal,
+    required this.totalPrice,
+    required this.promoCode,
+  });
+  factory Quote.fromJson(Json json) => Quote(
+    distanceMeters: _field<num>(json, 'distanceMeters').toInt(),
+    estimatedMinutes: (json['estimatedMinutes'] as num?)?.toInt(),
+    basePrice: _field<num>(json, 'basePrice').toInt(),
+    surcharges: [
+      for (final item in _field<List<Object?>>(json, 'surcharges'))
+        (code: _field<String>(item! as Json, 'code'), amount: _field<num>(item as Json, 'amount').toInt()),
+    ],
+    discountTotal: _field<num>(json, 'discountTotal').toInt(),
+    totalPrice: _field<num>(json, 'totalPrice').toInt(),
+    promoCode: _field(json, 'promoCode'),
+  );
+  static const fields = [
+    'distanceMeters',
+    'estimatedMinutes',
+    'basePrice',
+    'surcharges',
+    'discountTotal',
+    'totalPrice',
+    'promoCode',
+  ];
+
+  final int distanceMeters;
+  final int? estimatedMinutes;
+  final int basePrice;
+  final List<({String code, int amount})> surcharges;
+  final int discountTotal;
+  final int totalPrice;
+  final String? promoCode;
+}

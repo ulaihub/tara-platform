@@ -20,6 +20,57 @@ class ClientApi {
   /// Solde Tara de l'expéditeur et, pour un marchand, ventes encaissées à reverser.
   Future<Wallet> wallet() async => Wallet.fromJson(await _api.get('/me/wallet') as Json);
 
+  /// Adresses enregistrées de l'expéditeur (enlèvement), la plus récente d'abord.
+  Future<List<Address>> addresses() async => [
+    for (final item in await _api.get('/addresses') as List<Object?>) Address.fromJson(item! as Json),
+  ];
+
+  /// Nouvelle adresse (B1) : point, repère obligatoire, quartier (déduit du point sinon).
+  Future<Address> createAddress({
+    required double latitude,
+    required double longitude,
+    required String landmark,
+    String? neighborhoodId,
+    String? label,
+    String? contactName,
+    String? contactPhone,
+  }) async => Address.fromJson(
+    await _api.post(
+      '/addresses',
+      body: {
+        'latitude': latitude,
+        'longitude': longitude,
+        'landmark': landmark,
+        'neighborhoodId': ?neighborhoodId,
+        'label': ?label,
+        'contactName': ?contactName,
+        'contactPhone': ?contactPhone,
+      },
+    ) as Json,
+  );
+
+  /// Quartiers de Douala, pour le choix du quartier d'une adresse.
+  Future<List<Neighborhood>> neighborhoods() async => [
+    for (final item in await _api.get('/zones', query: {'kind': 'NEIGHBORHOOD', 'city': 'Douala'}) as List<Object?>)
+      Neighborhood.fromJson(item! as Json),
+  ];
+
+  /// Destinataires fréquents (B5), filtrés par nom ou numéro.
+  Future<List<Recipient>> recipients({String? query}) async => [
+    for (final item in await _api.get('/recipients', query: {'q': ?query}) as List<Object?>)
+      Recipient.fromJson(item! as Json),
+  ];
+
+  /// Lien de localisation (B3) : le destinataire place lui-même son point.
+  Future<LocationLink> createLocationLink({String? recipientName, String? recipientPhone}) async =>
+      LocationLink.fromJson(
+        await _api.post('/location-links', body: {'recipientName': ?recipientName, 'recipientPhone': ?recipientPhone})
+            as Json,
+      );
+
+  Future<LocationLink> locationLink(String id) async =>
+      LocationLink.fromJson(await _api.get('/location-links/$id') as Json);
+
   /// Nom affiché aux livreurs et dans les SMS des destinataires.
   Future<void> updateName(String fullName) => _api.send('PATCH', '/me', body: {'fullName': fullName});
 

@@ -12,10 +12,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^3.4.3
+  geolocator: ^14.0.1
   intl: ^0.20.3
   package_info_plus: ^10.2.2
   tara_core:
     path: ../../packages/tara_core
+  tara_map:
+    path: ../../packages/tara_map
   tara_ui:
     path: ../../packages/tara_ui
   url_launcher: ^6.3.3

@@ -328,7 +328,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageLabel => 'Language';
 
   @override
-  String get logoutConfirm => 'You will not receive jobs on this phone until you sign in again.';
+  String get logoutConfirm => 'You will no longer receive notifications on this phone until you sign in again.';
 
   @override
   String get optionAuto => 'Auto';
@@ -365,4 +365,182 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prohibitedPledge => 'By sending the parcel, you confirm it contains none of these.';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String stepOf(int current, int total, String title) {
+    return 'Step $current of $total · $title';
+  }
+
+  @override
+  String get stepPickup => 'Pickup';
+
+  @override
+  String get stepRecipient => 'Recipient';
+
+  @override
+  String get stepPackage => 'Parcel';
+
+  @override
+  String get stepWhen => 'When';
+
+  @override
+  String get stepSummary => 'Summary';
+
+  @override
+  String get pickupTitle => 'Where should we collect the parcel?';
+
+  @override
+  String get pickupBody => 'The rider picks it up at this address.';
+
+  @override
+  String get noPickupYet => 'No saved address yet. Place your shop or home on the map: it will be here next time.';
+
+  @override
+  String get addressesError => 'Couldn’t load your addresses.';
+
+  @override
+  String get newAddress => 'New address';
+
+  @override
+  String get pickupRequired => 'Choose or add the pickup address.';
+
+  @override
+  String get pickupAddressTitle => 'Pickup address';
+
+  @override
+  String get locationUnavailable => 'Location not found: move the map to the right spot.';
+
+  @override
+  String get myPosition => 'My location';
+
+  @override
+  String get pinHint => 'Move the map to put the pin on the exact entrance.';
+
+  @override
+  String get neighborhoodLabel => 'Neighbourhood';
+
+  @override
+  String get neighborhoodAuto => 'Taken from the point on the map';
+
+  @override
+  String get neighborhoodSearch => 'Search a neighbourhood';
+
+  @override
+  String get landmarkLabel => 'Landmark';
+
+  @override
+  String get landmarkHint => 'E.g. Blue gate after the crossroads pharmacy';
+
+  @override
+  String get landmarkRequired => 'Describe a visible landmark (at least 3 characters).';
+
+  @override
+  String get addressLabel => 'Label';
+
+  @override
+  String get labelShop => 'Shop';
+
+  @override
+  String get labelHome => 'Home';
+
+  @override
+  String get labelOffice => 'Office';
+
+  @override
+  String get saveAddress => 'Save address';
+
+  @override
+  String get recipientTitle => 'Who receives the parcel?';
+
+  @override
+  String get recipientBody => 'We send them delivery tracking by SMS.';
+
+  @override
+  String get recipientName => 'Recipient’s name';
+
+  @override
+  String get recipientNameHint => 'E.g. Marie Ngo';
+
+  @override
+  String get recipientPhone => 'Their number';
+
+  @override
+  String get recipientNameRequired => 'Enter the recipient’s name.';
+
+  @override
+  String get recentRecipients => 'Recent';
+
+  @override
+  String deliveriesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count deliveries', one: '1 delivery');
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryAddress => 'Delivery address';
+
+  @override
+  String get placeOnMap => 'Place on the map';
+
+  @override
+  String get placeOnMapBody => 'You know where to deliver: place the pin yourself.';
+
+  @override
+  String get askRecipient => 'Ask the recipient';
+
+  @override
+  String get askRecipientBody => 'They get a link and place their own point on the map.';
+
+  @override
+  String get viaWhatsapp => 'WhatsApp';
+
+  @override
+  String get viaSms => 'SMS';
+
+  @override
+  String get recipientFirst => 'First enter the recipient’s name and number.';
+
+  @override
+  String linkSentTitle(String name) {
+    return 'Link sent to $name';
+  }
+
+  @override
+  String get linkWaiting =>
+      'Waiting for their point: the address shows here as soon as they place it. You can carry on meanwhile.';
+
+  @override
+  String get linkExpired => 'The link expired without an answer.';
+
+  @override
+  String get resendLink => 'Send the link again';
+
+  @override
+  String get placeMyself => 'Place it myself';
+
+  @override
+  String get changeAddress => 'Change address';
+
+  @override
+  String get addressVerified => 'Address confirmed by a delivery';
+
+  @override
+  String get addressFromRecipient => 'Placed by the recipient';
+
+  @override
+  String get addressRequired => 'Say where to deliver the parcel.';
+
+  @override
+  String get whatsappUnavailable => 'WhatsApp didn’t open. Try SMS.';
+
+  @override
+  String get smsUnavailable => 'SMS didn’t open on this phone.';
+
+  @override
+  String locationLinkMessage(String name, String sender, String url) {
+    return 'Hello $name, $sender is sending you a parcel with Tara. Tell us where to deliver it: $url';
+  }
 }

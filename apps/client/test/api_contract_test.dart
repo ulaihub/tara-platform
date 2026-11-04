@@ -25,6 +25,11 @@ void main() {
     'Merchant': Merchant.fields,
     'OrderSummary': OrderSummary.fields,
     'Wallet': Wallet.fields,
+    'Zone': Neighborhood.fields,
+    'Address': Address.fields,
+    'Recipient': Recipient.fields,
+    'LocationLink': LocationLink.fields,
+    'Quote': Quote.fields,
   };
   for (final MapEntry(key: schema, value: fields) in models.entries) {
     test('modèle $schema conforme au contrat', () {

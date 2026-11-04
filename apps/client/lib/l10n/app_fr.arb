@@ -163,7 +163,7 @@
   "effectsReduced": "Réduites",
   "helpSection": "Aide",
   "languageLabel": "Langue",
-  "logoutConfirm": "Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.",
+  "logoutConfirm": "Vous ne recevrez plus de notifications sur ce téléphone jusqu’à votre prochaine connexion.",
   "optionAuto": "Auto",
   "supportTara": "Support Tara",
   "themeDark": "Sombre",
@@ -175,5 +175,101 @@
   "prohibitedDangerous": "Matières dangereuses : gaz, carburant, produits inflammables, explosifs ou corrosifs",
   "prohibitedAnimals": "Animaux vivants",
   "prohibitedCash": "Liasses d’argent liquide",
-  "prohibitedPledge": "En envoyant le colis, vous confirmez qu’il n’en contient aucun."
+  "prohibitedPledge": "En envoyant le colis, vous confirmez qu’il n’en contient aucun.",
+  "close": "Fermer",
+  "stepOf": "Étape {current} sur {total} · {title}",
+  "@stepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "stepPickup": "Enlèvement",
+  "stepRecipient": "Destinataire",
+  "stepPackage": "Colis",
+  "stepWhen": "Quand",
+  "stepSummary": "Récapitulatif",
+  "pickupTitle": "Où récupérer le colis ?",
+  "pickupBody": "Le livreur passe le prendre à cette adresse.",
+  "noPickupYet": "Aucune adresse enregistrée. Placez votre boutique ou votre domicile sur la carte : vous la retrouverez la prochaine fois.",
+  "addressesError": "Impossible de charger vos adresses.",
+  "newAddress": "Nouvelle adresse",
+  "pickupRequired": "Choisissez ou ajoutez l’adresse d’enlèvement.",
+  "pickupAddressTitle": "Adresse d’enlèvement",
+  "locationUnavailable": "Position introuvable : déplacez la carte jusqu’au bon endroit.",
+  "myPosition": "Ma position",
+  "pinHint": "Déplacez la carte pour placer l’épingle sur l’entrée exacte.",
+  "neighborhoodLabel": "Quartier",
+  "neighborhoodAuto": "Déduit du point sur la carte",
+  "neighborhoodSearch": "Rechercher un quartier",
+  "landmarkLabel": "Repère",
+  "landmarkHint": "Ex. Portail bleu après la pharmacie du carrefour",
+  "landmarkRequired": "Décrivez un repère visible (3 caractères au moins).",
+  "addressLabel": "Libellé",
+  "labelShop": "Boutique",
+  "labelHome": "Maison",
+  "labelOffice": "Bureau",
+  "saveAddress": "Enregistrer l’adresse",
+  "recipientTitle": "Qui reçoit le colis ?",
+  "recipientBody": "Nous lui envoyons le suivi de la livraison par SMS.",
+  "recipientName": "Nom du destinataire",
+  "recipientNameHint": "Ex. Marie Ngo",
+  "recipientPhone": "Son numéro",
+  "recipientNameRequired": "Saisissez le nom du destinataire.",
+  "recentRecipients": "Récents",
+  "deliveriesCount": "{count, plural, =1{1 livraison} other{{count} livraisons}}",
+  "@deliveriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deliveryAddress": "Adresse de livraison",
+  "placeOnMap": "Placer sur la carte",
+  "placeOnMapBody": "Vous savez où livrer : placez l’épingle vous-même.",
+  "askRecipient": "Demander au destinataire",
+  "askRecipientBody": "Il reçoit un lien et place lui-même son point sur la carte.",
+  "viaWhatsapp": "WhatsApp",
+  "viaSms": "SMS",
+  "recipientFirst": "Saisissez d’abord le nom et le numéro du destinataire.",
+  "linkSentTitle": "Lien envoyé à {name}",
+  "@linkSentTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "linkWaiting": "En attente de son point : l’adresse s’affiche ici dès qu’il l’a placé. Vous pouvez continuer en attendant.",
+  "linkExpired": "Le lien a expiré sans réponse.",
+  "resendLink": "Renvoyer le lien",
+  "placeMyself": "Placer moi-même",
+  "changeAddress": "Changer d’adresse",
+  "addressVerified": "Adresse confirmée par une livraison",
+  "addressFromRecipient": "Placée par le destinataire",
+  "addressRequired": "Indiquez où livrer le colis.",
+  "whatsappUnavailable": "WhatsApp ne s’est pas ouvert. Essayez par SMS.",
+  "smsUnavailable": "Les SMS ne se sont pas ouverts sur ce téléphone.",
+  "locationLinkMessage": "Bonjour {name}, {sender} vous envoie un colis avec Tara. Indiquez où vous le livrer : {url}",
+  "@locationLinkMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "sender": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  }
 }
