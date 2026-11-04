@@ -801,21 +801,35 @@ class Collection {
 /// Portefeuille du livreur : gains et espèces détenues (plafond D4).
 @immutable
 class RiderWallet {
-  const RiderWallet({required this.earnings, required this.cashHeld, required this.cashLimit});
+  const RiderWallet({
+    required this.earnings,
+    required this.cashHeld,
+    required this.cashLimit,
+    this.cashDueBy,
+    this.cashOverdue = false,
+  });
 
   factory RiderWallet.fromJson(Json json) => RiderWallet(
     earnings: _field<num>(json, 'earnings').toInt(),
     cashHeld: _field<num>(json, 'cashHeld').toInt(),
     cashLimit: _field<num>(json, 'cashLimit').toInt(),
+    cashDueBy: _date(json['cashDueBy']),
+    cashOverdue: json['cashOverdue'] == true,
   );
 
-  static const fields = ['earnings', 'cashHeld', 'cashLimit', 'available'];
+  static const fields = ['earnings', 'cashHeld', 'cashLimit', 'available', 'cashDueBy', 'cashOverdue'];
 
   final int earnings;
 
   /// Espèces encaissées pas encore déposées (dues à Tara).
   final int cashHeld;
   final int cashLimit;
+
+  /// Heure limite de dépôt (24 h après l'encaissement le plus ancien non déposé).
+  final DateTime? cashDueBy;
+
+  /// Délai dépassé : plus de courses jusqu'au dépôt.
+  final bool cashOverdue;
 }
 
 /// Paiement Mobile Money demandé au téléphone du payeur (dépôt des espèces, G5).

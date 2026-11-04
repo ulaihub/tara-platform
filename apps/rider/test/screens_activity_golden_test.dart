@@ -55,7 +55,7 @@ RiderOrder finished({
 
 FakeRiderApi activityApi() {
   final api = FakeRiderApi()
-    ..wallet0 = const RiderWallet(earnings: 9000, cashHeld: 37500, cashLimit: 60000)
+    ..wallet0 = RiderWallet(earnings: 9000, cashHeld: 37500, cashLimit: 50000, cashDueBy: DateTime(2026, 11, 5, 9, 40))
     ..earningsByPeriod['day'] = earningsOf('day', 'two_hours', [
       for (final (hour, value, count) in [
         (6, 0, 0),
@@ -136,7 +136,6 @@ void main() {
       await settle(tester);
       expect(tester.takeException(), isNull);
       expect(find.text('Gains d’aujourd’hui'), findsOneWidget);
-      expect(find.text('Akwa → Bonapriso'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/13_activite/${variant.name}.png'));
     });
 

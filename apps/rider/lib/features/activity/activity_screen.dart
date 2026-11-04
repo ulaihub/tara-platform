@@ -142,11 +142,18 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                         FutureBuilder<RiderWallet>(
                           future: _wallet,
                           builder: (context, snapshot) {
-                            final cash = snapshot.data?.cashHeld ?? 0;
-                            if (cash <= 0) return const SizedBox.shrink();
+                            final wallet = snapshot.data;
+                            final cash = wallet?.cashHeld ?? 0;
+                            if (wallet == null || cash <= 0) return const SizedBox.shrink();
                             return Padding(
                               padding: const EdgeInsets.only(top: 12),
-                              child: _CashBox(amount: cash, onDeposit: () => setState(() => _depositing = true)),
+                              child: _CashBox(
+                                amount: cash,
+                                dueBy: wallet.cashDueBy,
+                                overdue: wallet.cashOverdue,
+                                now: now,
+                                onDeposit: () => setState(() => _depositing = true),
+                              ),
                             );
                           },
                         ),
@@ -404,15 +411,33 @@ class _Histogram extends StatelessWidget {
 
 /// « Espèces à reverser à Tara » et bouton « Reverser ».
 class _CashBox extends StatelessWidget {
-  const _CashBox({required this.amount, required this.onDeposit});
+  const _CashBox({
+    required this.amount,
+    required this.dueBy,
+    required this.overdue,
+    required this.now,
+    required this.onDeposit,
+  });
   final int amount;
+  final DateTime? dueBy;
+  final bool overdue;
+  final DateTime now;
   final VoidCallback onDeposit;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
+    final due = dueBy?.toLocal();
+    final deadline = overdue
+        ? l.cashOverdueNotice
+        : due == null
+        ? null
+        : (due.year == now.year && due.month == now.month && due.day == now.day)
+        ? l.cashDueAt(formatClock(due))
+        : l.cashDueTomorrow(formatClock(due));
     return TintBox(
+      tone: overdue ? TintTone.danger : TintTone.accent,
       padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
       child: Row(
         children: [
@@ -428,6 +453,14 @@ class _CashBox extends StatelessWidget {
                     '${formatAmount(amount)} F',
                     style: TaraText.bodyStrong.copyWith(color: c.accentStrongText, fontFeatures: TaraText.tabular),
                   ),
+                  if (deadline != null)
+                    Text(
+                      deadline,
+                      style: TaraText.small.copyWith(
+                        color: overdue ? c.dangerTextStrong : c.textSecondary,
+                        fontWeight: overdue ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
                 ],
               ),
             ),

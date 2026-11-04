@@ -1103,4 +1103,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get depositOperator => 'Opérateur';
+
+  @override
+  String cashDueAt(String time) {
+    return 'À déposer avant $time';
+  }
+
+  @override
+  String cashDueTomorrow(String time) {
+    return 'À déposer avant demain $time';
+  }
+
+  @override
+  String get cashOverdueNotice => 'En retard : plus de courses jusqu’au dépôt.';
+
+  @override
+  String get blockerCashOverdue =>
+      'Espèces non déposées dans les 24 h : déposez-les (onglet Activité) pour recevoir des courses.';
+
+  @override
+  String get blockerSuspended => 'Compte suspendu : contactez Tara.';
+
+  @override
+  String get blockerPending => 'Compte en cours de validation.';
 }

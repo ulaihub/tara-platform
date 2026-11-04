@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/features/activity/deposit_screen.dart';
 
 import 'helpers/harness.dart';
@@ -26,6 +28,19 @@ void main() {
     expect(api.periods, ['day', 'week', 'month']);
     expect(find.text('Gains du mois'), findsOneWidget);
     expect(find.text('S1'), findsOneWidget);
+  });
+
+  testWidgets('espèces : heure limite de dépôt, puis retard', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, activity(activityApi()));
+    await settle(tester);
+    expect(find.text('À déposer avant demain 09:40'), findsOneWidget);
+
+    final late = activityApi()
+      ..wallet0 = const RiderWallet(earnings: 0, cashHeld: 37500, cashLimit: 25000, cashOverdue: true);
+    await tester.pumpWidget(const SizedBox());
+    await pumpVariant(tester, Variant.matrix.first, activity(late));
+    await settle(tester);
+    expect(find.text('En retard\u00a0: plus de courses jusqu’au dépôt.'), findsOneWidget);
   });
 
   testWidgets('dernières courses : trois, puis toutes ; statut, encaissement et gain', (tester) async {

@@ -1981,6 +1981,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Opérateur'**
   String get depositOperator;
+
+  /// No description provided for @cashDueAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'À déposer avant {time}'**
+  String cashDueAt(String time);
+
+  /// No description provided for @cashDueTomorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'À déposer avant demain {time}'**
+  String cashDueTomorrow(String time);
+
+  /// No description provided for @cashOverdueNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard : plus de courses jusqu’au dépôt.'**
+  String get cashOverdueNotice;
+
+  /// No description provided for @blockerCashOverdue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces non déposées dans les 24 h : déposez-les (onglet Activité) pour recevoir des courses.'**
+  String get blockerCashOverdue;
+
+  /// No description provided for @blockerSuspended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte suspendu : contactez Tara.'**
+  String get blockerSuspended;
+
+  /// No description provided for @blockerPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte en cours de validation.'**
+  String get blockerPending;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

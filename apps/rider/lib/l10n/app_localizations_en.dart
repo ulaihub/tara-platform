@@ -1100,4 +1100,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get depositOperator => 'Operator';
+
+  @override
+  String cashDueAt(String time) {
+    return 'Pay back before $time';
+  }
+
+  @override
+  String cashDueTomorrow(String time) {
+    return 'Pay back before tomorrow $time';
+  }
+
+  @override
+  String get cashOverdueNotice => 'Overdue: no more jobs until you pay back.';
+
+  @override
+  String get blockerCashOverdue => 'Cash not paid back within 24 h: pay it back (Activity tab) to receive jobs.';
+
+  @override
+  String get blockerSuspended => 'Account suspended: contact Tara.';
+
+  @override
+  String get blockerPending => 'Account being validated.';
 }

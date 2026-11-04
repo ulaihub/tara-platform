@@ -700,5 +700,25 @@
     }
   },
   "depositFailed": "Paiement non abouti. Réessayez ou déposez au bureau Tara.",
-  "depositOperator": "Opérateur"
+  "depositOperator": "Opérateur",
+  "cashDueAt": "À déposer avant {time}",
+  "@cashDueAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cashDueTomorrow": "À déposer avant demain {time}",
+  "@cashDueTomorrow": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cashOverdueNotice": "En retard : plus de courses jusqu’au dépôt.",
+  "blockerCashOverdue": "Espèces non déposées dans les 24 h : déposez-les (onglet Activité) pour recevoir des courses.",
+  "blockerSuspended": "Compte suspendu : contactez Tara.",
+  "blockerPending": "Compte en cours de validation."
 }

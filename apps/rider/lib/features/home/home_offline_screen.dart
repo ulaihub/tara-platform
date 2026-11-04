@@ -173,7 +173,12 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                               const SizedBox(height: 6),
                               for (final blocker in _blockers)
                                 Text(
-                                  '• ${requirements[blocker]?.call(language) ?? blocker}',
+                                  '• ${switch (blocker) {
+                                    'CASH_OVERDUE' => l.blockerCashOverdue,
+                                    'STATUS_SUSPENDED' => l.blockerSuspended,
+                                    'STATUS_PENDING' => l.blockerPending,
+                                    _ => requirements[blocker]?.call(language) ?? blocker,
+                                  }}',
                                   style: TaraText.label.copyWith(color: c.textSecondary),
                                 ),
                             ],

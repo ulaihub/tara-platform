@@ -314,5 +314,11 @@
   "depositWaiting": "Approve the request on your phone…",
   "depositDone": "{amount} paid back to Tara.",
   "depositFailed": "Payment not completed. Try again or pay at the Tara office.",
-  "depositOperator": "Operator"
+  "depositOperator": "Operator",
+  "cashDueAt": "Pay back before {time}",
+  "cashDueTomorrow": "Pay back before tomorrow {time}",
+  "cashOverdueNotice": "Overdue: no more jobs until you pay back.",
+  "blockerCashOverdue": "Cash not paid back within 24 h: pay it back (Activity tab) to receive jobs.",
+  "blockerSuspended": "Account suspended: contact Tara.",
+  "blockerPending": "Account being validated."
 }
