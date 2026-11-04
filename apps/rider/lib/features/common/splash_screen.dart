@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
-import '../../design/components/brand.dart';
-import '../../design/components/layout.dart';
-import '../../design/motion/effects.dart';
-import '../../design/motion/liquid_background.dart';
+import 'package:tara_ui/components/brand.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
 
 /// Démarrage (écran non dessiné, proposé) : logo et gouttes, le temps de relire la session
 /// et les réglages gardés sur le téléphone.

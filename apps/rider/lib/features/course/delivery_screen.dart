@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../core/course/course_actions.dart';
 import '../../core/course/proof_photo.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/inputs.dart';
-import '../../design/components/progress.dart';
-import '../../design/format.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/step_labels.dart';
 import '../map/tara_map.dart';
 import 'course_scaffold.dart';
 
@@ -200,7 +201,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       ),
       children: [
         // Enlèvement fait ; étape en cours : l'encaissement s'il y en a, sinon la livraison.
-        CourseStepper(labels: steps, activeIndex: 1),
+        CourseStepper(labels: steps, activeIndex: 1, stateLabels: stepStateLabels(l)),
         const SizedBox(height: 14),
         PartyRow(
           name: name,

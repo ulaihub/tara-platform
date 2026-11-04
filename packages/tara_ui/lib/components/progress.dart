@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../l10n/app_localizations.dart';
 import '../motion/effects.dart';
 import '../tara_colors.dart';
 import '../tara_icons.dart';
@@ -49,17 +48,26 @@ class LiquidProgressBar extends StatelessWidget {
 
 enum StepState { done, active, upcoming }
 
+/// États d'une étape lus par le lecteur d'écran, dans la langue de l'app.
+@immutable
+class StepStateLabels {
+  const StepStateLabels({required this.done, required this.active, required this.upcoming});
+  final String done;
+  final String active;
+  final String upcoming;
+}
+
 /// Étapes de la course : barre de 4 px et libellé ; faite, active ou à venir.
 class CourseStepper extends StatelessWidget {
-  const CourseStepper({super.key, required this.labels, required this.activeIndex});
+  const CourseStepper({super.key, required this.labels, required this.activeIndex, required this.stateLabels});
 
   final List<String> labels;
   final int activeIndex;
+  final StepStateLabels stateLabels;
 
   @override
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
-    final l = AppLocalizations.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -74,9 +82,9 @@ class CourseStepper extends StatelessWidget {
                 return Semantics(
                   label: labels[i],
                   value: switch (state) {
-                    StepState.done => l.stepDone,
-                    StepState.active => l.stepActive,
-                    StepState.upcoming => l.stepUpcoming,
+                    StepState.done => stateLabels.done,
+                    StepState.active => stateLabels.active,
+                    StepState.upcoming => stateLabels.upcoming,
                   },
                   excludeSemantics: true,
                   child: Column(

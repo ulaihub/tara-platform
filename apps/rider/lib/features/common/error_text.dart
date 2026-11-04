@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Message d'erreur lisible : celui du serveur (déjà dans la langue du livreur), ou un

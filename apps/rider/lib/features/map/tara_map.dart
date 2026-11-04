@@ -7,12 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/map_backdrop.dart';
+import 'package:tara_ui/tara_colors.dart';
 
 import '../../core/api/models.dart';
 import '../../core/env.dart';
-import '../../design/components/layout.dart';
-import '../../design/components/map_backdrop.dart';
-import '../../design/tara_colors.dart';
 import '../../l10n/app_localizations.dart';
 import 'map_zones.dart';
 

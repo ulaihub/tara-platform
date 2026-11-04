@@ -3,8 +3,9 @@ import 'package:flutter/widgets.dart';
 /// Typographie de la passation (§2.2) : Sora pour les titres et les chiffres, Plus Jakarta
 /// Sans pour le texte. Interlettrage CSS en em converti en pixels (em × taille).
 abstract final class TaraText {
-  static const sora = 'Sora';
-  static const jakarta = 'PlusJakartaSans';
+  /// Polices déclarées par ce paquet : Flutter les nomme « packages/tara_ui/… ».
+  static const sora = 'packages/tara_ui/Sora';
+  static const jakarta = 'packages/tara_ui/PlusJakartaSans';
 
   /// Chiffres de même largeur : montants, heures, compteurs ne « dansent » pas.
   static const tabular = [FontFeature.tabularFigures()];

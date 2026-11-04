@@ -1,10 +1,11 @@
 import 'package:flutter/widgets.dart';
 
-import '../../design/components/buttons.dart';
-import '../../design/components/progress.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
+
 import '../../l10n/app_localizations.dart';
 
 /// En-tête des étapes d'inscription : retour, « Étape 1 sur 2 · Profil », avancement.

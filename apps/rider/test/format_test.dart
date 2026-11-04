@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/design/format.dart';
+import 'package:tara_ui/format.dart';
 
 void main() {
   test('montants : milliers séparés par une espace insécable, signe moins typographique', () {

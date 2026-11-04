@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_rider/app/app_settings.dart';
-import 'package:tara_rider/design/tara_effects.dart';
-import 'package:tara_rider/design/tara_theme.dart';
 import 'package:tara_rider/l10n/app_localizations.dart';
+import 'package:tara_ui/tara_effects.dart';
+import 'package:tara_ui/tara_theme.dart';
 
 /// Format d'écran vérifié (consigne : 390×844 et Android compact 360×640).
 enum ScreenSize {

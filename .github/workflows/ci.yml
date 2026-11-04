@@ -136,6 +136,14 @@ jobs:
       - name: Dépendances
         run: flutter pub get --enforce-lockfile
 
+      # Design partagé avec l'app expéditeur : mis en forme et analysé comme l'app.
+      - name: Paquet partagé tara_ui
+        working-directory: packages/tara_ui
+        run: |
+          flutter pub get
+          dart format --output=none --set-exit-if-changed lib
+          flutter analyze
+
       - name: Traductions générées à jour
         run: |
           flutter gen-l10n

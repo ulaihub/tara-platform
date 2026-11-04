@@ -4,18 +4,18 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/dashed.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../core/location/online_controller.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/dashed.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../map/tara_map.dart';
 import 'course_header.dart';

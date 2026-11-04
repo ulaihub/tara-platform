@@ -2,17 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../core/course/active_order.dart';
 import '../../core/course/course_actions.dart';
 import '../../core/realtime/realtime_client.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/format.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../account/account_screen.dart';
 import '../activity/activity_screen.dart';
