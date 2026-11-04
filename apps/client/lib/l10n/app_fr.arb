@@ -1,0 +1,98 @@
+{
+  "@@locale": "fr",
+  "addLegalIds": "Ajouter RCCM et NIU (facultatif)",
+  "back": "Retour",
+  "categoryBeauty": "Beauté",
+  "categoryElectronics": "Électronique",
+  "categoryFashion": "Mode",
+  "categoryFood": "Alimentation",
+  "categoryHome": "Maison",
+  "categoryOther": "Autre",
+  "change": "Modifier",
+  "codeSentTo": "Envoyé par SMS au {phone}",
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "codeTitle": "Entrez le code reçu",
+  "continueLabel": "Continuer",
+  "countryCodeLabel": "Indicatif du pays {code}",
+  "@countryCodeLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "digitLabel": "Chiffre {index}",
+  "@digitLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "firstName": "Prénom",
+  "genericError": "Une erreur est survenue. Réessayez.",
+  "getCode": "Recevoir le code",
+  "haveReferral": "J’ai un code de parrainage",
+  "hello": "Bonjour {name}",
+  "@hello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "kindPerson": "Pour moi",
+  "kindPersonHelp": "Vous pourrez passer en mode boutique plus tard, depuis votre profil.",
+  "kindQuestion": "Vous envoyez des colis…",
+  "kindShop": "Pour ma boutique",
+  "kindShopHelp": "L’argent encaissé à la livraison vous est reversé par Mobile Money.",
+  "lastName": "Nom",
+  "legalAnd": " et la ",
+  "legalPrefix": "En continuant, vous acceptez les ",
+  "logout": "Se déconnecter",
+  "networkError": "Pas de connexion internet. Vérifiez le réseau et réessayez.",
+  "niu": "NIU",
+  "niuHint": "Ex. M012345678901A",
+  "noSms": "Pas reçu de SMS ? Contacter le support",
+  "payoutHelp": "Numéro Mobile Money qui reçoit vos ventes encaissées.",
+  "payoutNumber": "Numéro Mobile Money",
+  "payoutTitle": "Reversements",
+  "phoneHelp": "Un SMS gratuit vous est envoyé. Aucun e-mail n’est demandé.",
+  "phoneHint": "6XX XX XX XX",
+  "phoneInvalid": "Numéro de mobile camerounais à 9 chiffres, commençant par 6.",
+  "phoneLabel": "Numéro de téléphone",
+  "privacy": "politique de confidentialité",
+  "rccm": "RCCM",
+  "rccmHint": "Ex. RC/DLA/2024/B/1234",
+  "referralHint": "Ex. TARA-7KQ2PM",
+  "referralLabel": "Code de parrainage",
+  "requiredField": "Obligatoire",
+  "resend": "Renvoyer",
+  "resendIn": "Renvoyer le code dans {time}",
+  "@resendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resendNow": "Vous n’avez rien reçu ?",
+  "retry": "Réessayer",
+  "senderSpace": "Envoyez vos colis",
+  "shopCategory": "Catégorie (facultatif)",
+  "shopName": "Nom de la boutique",
+  "shopNameHint": "Ex. Awa Fashion",
+  "signInBody": "Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code par SMS.",
+  "signInTitle": "Vos colis livrés à Douala",
+  "terms": "conditions d’utilisation",
+  "validate": "Valider",
+  "welcomeBody": "Votre nom figure dans les messages envoyés à vos destinataires.",
+  "welcomeTitle": "Bienvenue sur Tara",
+  "appTitle": "Tara"
+}
