@@ -172,6 +172,7 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
         if (!didPop) _back();
       },
       child: TaraScreen(
+        safeBottom: false,
         blobs: _blobs,
         child: Column(
           children: [

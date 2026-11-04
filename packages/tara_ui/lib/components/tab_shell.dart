@@ -8,6 +8,7 @@ import '../tara_colors.dart';
 import '../tara_effects.dart';
 import '../tara_icons.dart';
 import '../tara_typography.dart';
+import 'glass.dart';
 
 /// Onglet de la barre flottante.
 @immutable
@@ -36,99 +37,46 @@ class FloatingTabBar extends StatelessWidget {
   static const _radius = 28.0;
   static const _elastic = Cubic(0.6, -0.35, 0.3, 1.45);
 
-  /// Avive les couleurs floutées derrière le verre (saturation × 1,6), comme un vrai verre.
-  static final _vibrancy = ColorFilter.matrix(_saturation(1.6));
-
-  static List<double> _saturation(double s) {
-    const r = 0.2126, g = 0.7152, b = 0.0722;
-    return [
-      r * (1 - s) + s, g * (1 - s), b * (1 - s), 0, 0, //
-      r * (1 - s), g * (1 - s) + s, b * (1 - s), 0, 0,
-      r * (1 - s), g * (1 - s), b * (1 - s) + s, 0, 0,
-      0, 0, 0, 1, 0,
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
-    final c = TaraColors.of(context);
     final effects = TaraEffects.of(context);
-    final shape = BorderRadius.circular(_radius);
-    final surface = DecoratedBox(
-      decoration: BoxDecoration(
-        color: effects.blur ? c.tabBarGlass : c.glassFallback,
-        borderRadius: shape,
-        border: Border.all(color: c.glassBorder.withValues(alpha: c.isDark ? .22 : .85)),
-        // Reflet du verre : plus clair en haut, transparent en bas.
-        gradient: effects.blur
-            ? LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  c.glassHighlight.withValues(alpha: c.isDark ? .10 : .45),
-                  c.glassHighlight.withValues(alpha: 0),
-                ],
-              )
-            : null,
-      ),
-      child: SizedBox(
-        height: barHeight,
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth / items.length;
-              return Stack(
-                children: [
-                  AnimatedPositioned(
-                    duration: effects.decorativeMotion ? const Duration(milliseconds: 520) : Duration.zero,
-                    curve: _elastic,
-                    left: width * current,
-                    top: 0,
-                    bottom: 0,
-                    width: width,
-                    child: const _Lens(),
-                  ),
-                  Row(
-                    children: [
-                      for (var i = 0; i < items.length; i++)
-                        Expanded(
-                          child: _TabButton(item: items[i], selected: i == current, onTap: () => onSelected(i)),
-                        ),
-                    ],
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
     // Posée au-dessus des écrans : sans ce Material transparent, ses textes n'auraient pas
     // de style de base (soulignés en jaune par Flutter).
     return Material(
       type: MaterialType.transparency,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, bottomMargin),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: shape,
-            boxShadow: [
-              BoxShadow(
-                color: Color.fromRGBO(0, 0, 0, c.isDark ? .35 : .10),
-                blurRadius: 30,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: shape,
-            child: effects.blur
-                ? BackdropFilter(
-                    filter: ImageFilter.compose(outer: _vibrancy, inner: ImageFilter.blur(sigmaX: 18, sigmaY: 18)),
-                    child: surface,
-                  )
-                : surface,
+        child: GlassDock(
+          radius: _radius,
+          padding: const EdgeInsets.all(6),
+          child: SizedBox(
+            height: barHeight - 12,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth / items.length;
+                return Stack(
+                  children: [
+                    AnimatedPositioned(
+                      duration: effects.decorativeMotion ? const Duration(milliseconds: 520) : Duration.zero,
+                      curve: _elastic,
+                      left: width * current,
+                      top: 0,
+                      bottom: 0,
+                      width: width,
+                      child: const _Lens(),
+                    ),
+                    Row(
+                      children: [
+                        for (var i = 0; i < items.length; i++)
+                          Expanded(
+                            child: _TabButton(item: items[i], selected: i == current, onTap: () => onSelected(i)),
+                          ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

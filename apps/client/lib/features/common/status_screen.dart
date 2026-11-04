@@ -37,6 +37,7 @@ class StatusScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         content: [

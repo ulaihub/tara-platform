@@ -267,6 +267,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
     final change = _received - _due;
 
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

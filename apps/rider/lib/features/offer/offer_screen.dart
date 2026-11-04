@@ -130,6 +130,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     final earningLabel = Text(l.yourEarning, style: TaraText.label.copyWith(color: c.textSecondary));
     final earning = AmountText(offer.riderEarning, style: TaraText.amountXL.copyWith(fontSize: 40));
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

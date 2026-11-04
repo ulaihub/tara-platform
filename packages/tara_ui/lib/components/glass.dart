@@ -146,3 +146,76 @@ class TintBox extends StatelessWidget {
     );
   }
 }
+
+/// Socle flottant en verre clair (barre d'onglets, bouton du bas) : le contenu qui passe
+/// dessous est flouté et ses couleurs avivées (saturation × 1,6), reflet en haut, bord
+/// clair. L'enfant est posé hors du découpage pour garder son ombre (bouton orange).
+/// Effets réduits : surface opaque sans flou.
+class GlassDock extends StatelessWidget {
+  const GlassDock({super.key, required this.child, this.radius = 28, this.padding = EdgeInsets.zero});
+
+  final Widget child;
+  final double radius;
+  final EdgeInsets padding;
+
+  static final _vibrancy = ColorFilter.matrix(_saturation(1.6));
+
+  static List<double> _saturation(double s) {
+    const r = 0.2126, g = 0.7152, b = 0.0722;
+    return [
+      r * (1 - s) + s, g * (1 - s), b * (1 - s), 0, 0, //
+      r * (1 - s), g * (1 - s) + s, b * (1 - s), 0, 0,
+      r * (1 - s), g * (1 - s), b * (1 - s) + s, 0, 0,
+      0, 0, 0, 1, 0,
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final effects = TaraEffects.of(context);
+    final shape = BorderRadius.circular(radius);
+    final surface = DecoratedBox(
+      decoration: BoxDecoration(
+        color: effects.blur ? c.tabBarGlass : c.glassFallback,
+        borderRadius: shape,
+        border: Border.all(color: c.glassBorder.withValues(alpha: c.isDark ? .22 : .85)),
+        // Reflet du verre : plus clair en haut, transparent en bas.
+        gradient: effects.blur
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  c.glassHighlight.withValues(alpha: c.isDark ? .10 : .45),
+                  c.glassHighlight.withValues(alpha: 0),
+                ],
+              )
+            : null,
+      ),
+    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: shape,
+        boxShadow: [
+          BoxShadow(color: Color.fromRGBO(0, 0, 0, c.isDark ? .35 : .10), blurRadius: 30, offset: const Offset(0, 12)),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: shape,
+              child: effects.blur
+                  ? BackdropFilter(
+                      filter: ImageFilter.compose(outer: _vibrancy, inner: ImageFilter.blur(sigmaX: 18, sigmaY: 18)),
+                      child: surface,
+                    )
+                  : surface,
+            ),
+          ),
+          Padding(padding: padding, child: child),
+        ],
+      ),
+    );
+  }
+}

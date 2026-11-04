@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../format.dart';
 import '../motion/effects.dart';
@@ -467,9 +468,13 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-/// Formulaire : contenu qui défile, actions fixées en bas de l'écran et au-dessus du
-/// clavier. Le bouton principal reste visible même sur un petit écran avec texte agrandi.
-class ScrollWithFooter extends StatelessWidget {
+/// Formulaire : contenu qui défile jusqu'en bas de l'écran, sous les actions posées dans un
+/// socle en verre flottant (comme la barre d'onglets), au-dessus du clavier. L'écran ne
+/// réserve pas la zone système du bas (`TaraScreen(safeBottom: false)`) : le socle s'en
+/// écarte lui-même et le contenu y défile. Le bouton
+/// principal reste visible même sur un petit écran avec texte agrandi ; le contenu garde
+/// assez de marge pour finir au-dessus du socle.
+class ScrollWithFooter extends StatefulWidget {
   const ScrollWithFooter({super.key, required this.content, required this.footer, this.horizontal = 24, this.top = 16});
 
   /// Contenu qui défile, de haut en bas.
@@ -478,24 +483,89 @@ class ScrollWithFooter extends StatelessWidget {
   final double horizontal;
   final double top;
 
+  /// Marge du socle sous lui et autour du bouton.
+  static const dockMargin = 12.0;
+  static const dockPadding = 6.0;
+
+  @override
+  State<ScrollWithFooter> createState() => _ScrollWithFooterState();
+}
+
+class _ScrollWithFooterState extends State<ScrollWithFooter> {
+  /// Hauteur du socle, relue après sa mise en page (estimée pour la première image).
+  double _footerHeight = 58 + 2 * ScrollWithFooter.dockPadding + ScrollWithFooter.dockMargin;
+
   @override
   Widget build(BuildContext context) {
+    final h = widget.horizontal;
+    const pad = ScrollWithFooter.dockPadding;
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Column(
+      child: Stack(
         children: [
-          Expanded(
+          Positioned.fill(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(horizontal, top, horizontal, 16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: content),
+              padding: EdgeInsets.fromLTRB(h, widget.top, h, _footerHeight + 16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: widget.content),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16),
-            child: SizedBox(width: double.infinity, child: footer),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _SizeReporter(
+              onHeight: (height) {
+                if ((height - _footerHeight).abs() > .5) setState(() => _footerHeight = height);
+              },
+              child: Padding(
+                // Sous le socle : la zone système du bas (le contenu y passe aussi).
+                padding: EdgeInsets.fromLTRB(
+                  h - pad,
+                  0,
+                  h - pad,
+                  ScrollWithFooter.dockMargin + MediaQuery.paddingOf(context).bottom,
+                ),
+                child: GlassDock(
+                  radius: 20 + pad,
+                  padding: const EdgeInsets.all(pad),
+                  child: SizedBox(width: double.infinity, child: widget.footer),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
+  }
+}
+
+/// Donne la hauteur de son enfant après chaque mise en page où elle change.
+class _SizeReporter extends SingleChildRenderObjectWidget {
+  const _SizeReporter({required this.onHeight, required super.child});
+
+  final ValueChanged<double> onHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSizeReporter(onHeight);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSizeReporter renderObject) => renderObject.onHeight = onHeight;
+}
+
+class _RenderSizeReporter extends RenderProxyBox {
+  _RenderSizeReporter(this.onHeight);
+
+  ValueChanged<double> onHeight;
+  double? _reported;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final height = size.height;
+    if (height == _reported) return;
+    _reported = height;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (attached) onHeight(height);
+    });
   }
 }

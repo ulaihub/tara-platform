@@ -89,6 +89,7 @@ class _EmergencyContactScreenState extends ConsumerState<EmergencyContactScreen>
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

@@ -143,6 +143,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
 
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

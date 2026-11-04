@@ -121,6 +121,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final shop = _kind == _Kind.shop;
 
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

@@ -91,6 +91,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final config = ref.watch(riderConfigProvider).value;
     final dialCode = config?.dialCode ?? '+237';
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 24,

@@ -185,6 +185,7 @@ class _FailureScreenState extends ConsumerState<FailureScreen> {
         final ready = _photoPath != null && progress.missing == 0 && noteOk;
 
         return TaraScreen(
+          safeBottom: false,
           blobs: _blobs,
           child: ScrollWithFooter(
             horizontal: 20,

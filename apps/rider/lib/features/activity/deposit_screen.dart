@@ -205,6 +205,7 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
     final amount = '${formatAmount(done ? _sent : _amount)} F';
 
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

@@ -198,69 +198,61 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
             bottom: 0,
             height: panelHeight,
             child: SheetPanel(
-              child: SafeArea(
-                top: false,
-                child: ScrollWithFooter(
-                  horizontal: 20,
-                  top: 4,
-                  content: [
-                    Text(l.pinHint, style: TaraText.small.copyWith(color: c.textTertiary)),
-                    const SizedBox(height: 14),
-                    Text(l.neighborhoodLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: _chooseNeighborhood,
-                      child: Container(
-                        constraints: const BoxConstraints(minHeight: 52),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: c.inputBg,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: c.chipBorder),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _neighborhood?.name ?? l.neighborhoodAuto,
-                                style: TaraText.body.copyWith(
-                                  color: _neighborhood == null ? c.placeholder : c.textPrimary,
-                                ),
+              child: ScrollWithFooter(
+                horizontal: 20,
+                top: 4,
+                content: [
+                  Text(l.pinHint, style: TaraText.small.copyWith(color: c.textTertiary)),
+                  const SizedBox(height: 14),
+                  Text(l.neighborhoodLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: _chooseNeighborhood,
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 52),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: c.inputBg,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: c.chipBorder),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _neighborhood?.name ?? l.neighborhoodAuto,
+                              style: TaraText.body.copyWith(
+                                color: _neighborhood == null ? c.placeholder : c.textPrimary,
                               ),
                             ),
-                            TaraIcon(TaraIcons.chevronDown, size: 20, color: c.textTertiary),
-                          ],
-                        ),
+                          ),
+                          TaraIcon(TaraIcons.chevronDown, size: 20, color: c.textTertiary),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    TaraTextField(
-                      label: l.landmarkLabel,
-                      hint: l.landmarkHint,
-                      controller: _landmark,
-                      textCapitalization: TextCapitalization.sentences,
-                    ),
-                    if (_tried && !_valid) ...[const SizedBox(height: 6), ErrorLine(l.landmarkRequired)],
-                    if (widget.forPickup) ...[
-                      const SizedBox(height: 14),
-                      Text(l.addressLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
-                      const SizedBox(height: 8),
-                      ChoiceChips<String>(
-                        columns: 3,
-                        options: [for (final code in pickupLabels) ChoiceOption(code, labelText(l, code))],
-                        selected: _label,
-                        onSelected: (value) => setState(() => _label = value),
-                      ),
-                    ],
-                    if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
-                  ],
-                  footer: PrimaryButton(
-                    label: l.saveAddress,
-                    icon: TaraIcons.check,
-                    loading: _saving,
-                    onPressed: _save,
                   ),
-                ),
+                  const SizedBox(height: 14),
+                  TaraTextField(
+                    label: l.landmarkLabel,
+                    hint: l.landmarkHint,
+                    controller: _landmark,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  if (_tried && !_valid) ...[const SizedBox(height: 6), ErrorLine(l.landmarkRequired)],
+                  if (widget.forPickup) ...[
+                    const SizedBox(height: 14),
+                    Text(l.addressLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
+                    const SizedBox(height: 8),
+                    ChoiceChips<String>(
+                      columns: 3,
+                      options: [for (final code in pickupLabels) ChoiceOption(code, labelText(l, code))],
+                      selected: _label,
+                      onSelected: (value) => setState(() => _label = value),
+                    ),
+                  ],
+                  if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
+                ],
+                footer: PrimaryButton(label: l.saveAddress, icon: TaraIcons.check, loading: _saving, onPressed: _save),
               ),
             ),
           ),

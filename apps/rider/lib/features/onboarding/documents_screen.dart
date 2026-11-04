@@ -84,6 +84,7 @@ class DocumentsScreen extends ConsumerWidget {
     final total = data?.requirements.length ?? 0;
     final done = data?.doneCount ?? 0;
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

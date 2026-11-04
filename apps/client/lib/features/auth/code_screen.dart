@@ -127,6 +127,7 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     final support = ref.watch(appConfigProvider).value?.supportPhone;
     final waiting = _remaining > Duration.zero;
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,
