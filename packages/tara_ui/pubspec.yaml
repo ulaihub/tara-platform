@@ -10,6 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   device_info_plus: ^13.3.0
+  # Réglages d'affichage gardés dans le stockage du téléphone (AppSettings).
+  tara_core:
+    path: ../tara_core
   path_parsing: ^1.1.0
 
 dev_dependencies:

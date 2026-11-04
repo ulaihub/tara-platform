@@ -12,6 +12,7 @@ import 'package:tara_core/network/network_status.dart';
 import 'package:tara_core/push/push_service.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_core/session/session_store.dart';
+import 'package:tara_ui/app_settings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/api/models.dart';
@@ -25,7 +26,6 @@ import '../core/location/location_tracker.dart';
 import '../core/location/online_controller.dart';
 import '../core/offline/action_queue.dart';
 import '../core/safety/safety_alert.dart';
-import 'app_settings.dart';
 
 /// Stockage chiffré du téléphone (remplacé par un stockage en mémoire dans les tests).
 final keyValueStoreProvider = Provider<KeyValueStore>((ref) => const SecureKeyValueStore());

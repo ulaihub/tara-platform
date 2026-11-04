@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/app/app_settings.dart';
 import 'package:tara_rider/l10n/app_localizations.dart';
+import 'package:tara_ui/app_settings.dart';
 import 'package:tara_ui/tara_effects.dart';
 import 'package:tara_ui/tara_theme.dart';
 

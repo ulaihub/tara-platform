@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tara_ui/app_settings.dart';
 import 'package:tara_ui/components/brand.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
@@ -15,7 +16,6 @@ import 'package:tara_ui/tara_effects.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
-import '../../app/app_settings.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/step_labels.dart';
 
