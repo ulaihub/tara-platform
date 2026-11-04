@@ -2511,6 +2511,18 @@
                 }
               ]
             }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "history"
+              ]
+            }
           }
         ],
         "responses": {
@@ -8443,6 +8455,10 @@
           "dropoffLandmark": {
             "type": "string"
           },
+          "dropoffNeighborhood": {
+            "nullable": true,
+            "type": "string"
+          },
           "totalPrice": {
             "type": "integer"
           },
@@ -8465,6 +8481,7 @@
           "status",
           "recipientName",
           "dropoffLandmark",
+          "dropoffNeighborhood",
           "totalPrice",
           "codAmount",
           "scheduledFor",

@@ -464,6 +464,20 @@ describe('Tarification et commandes (C1 à C7)', () => {
         id: order.body.order.id,
         dropoffLandmark: expect.any(String),
       });
+      // Quartier déduit du point, null hors des quartiers connus.
+      expect(list.body.items[0]).toHaveProperty('dropoffNeighborhood');
+      // Accueil de l'expéditeur : commandes en cours d'un côté, terminées de l'autre.
+      const active = await request(ctx.http).get('/v1/orders?scope=active').set(m.auth).expect(200);
+      expect(active.body.items.map((item: { id: string }) => item.id)).toContain(
+        order.body.order.id,
+      );
+      const history = await request(ctx.http)
+        .get('/v1/orders?scope=history')
+        .set(m.auth)
+        .expect(200);
+      expect(history.body.items.map((item: { id: string }) => item.id)).not.toContain(
+        order.body.order.id,
+      );
     });
 
     it('n’accepte qu’une annulation parmi deux simultanées', async () => {

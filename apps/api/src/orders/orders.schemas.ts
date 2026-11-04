@@ -149,6 +149,8 @@ export const OrderSummaryDto = z
     status: OrderStatusEnum,
     recipientName: z.string(),
     dropoffLandmark: z.string(),
+    /** Quartier de livraison (null hors des quartiers connus). */
+    dropoffNeighborhood: z.string().nullable(),
     totalPrice: z.int(),
     codAmount: z.int(),
     scheduledFor: z.iso.datetime().nullable(),
@@ -156,7 +158,21 @@ export const OrderSummaryDto = z
   })
   .meta({ id: 'OrderSummary' });
 
-export const OrderListQuery = PageQuery.extend({ status: OrderStatusEnum.optional() });
+/** Statuts d'une commande en cours (suivie sur l'accueil) ; les autres sont terminées. */
+export const ACTIVE_ORDER_STATUSES = [
+  'CREATED',
+  'SEARCHING_RIDER',
+  'ASSIGNED',
+  'PICKED_UP',
+  'IN_DELIVERY',
+  'DELIVERY_FAILED',
+] as const;
+
+export const OrderListQuery = PageQuery.extend({
+  status: OrderStatusEnum.optional(),
+  /** active : commandes en cours ; history : livrées, retournées ou annulées. */
+  scope: z.enum(['active', 'history']).optional(),
+});
 
 export const CancelOrderBody = z.object({ reason: z.string().trim().min(3).max(300) });
 

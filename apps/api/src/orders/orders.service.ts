@@ -27,6 +27,7 @@ import {
   type DeliveryItem,
   MAX_COD_AMOUNT,
   type OrderDto,
+  ACTIVE_ORDER_STATUSES,
   type OrderListQuery,
   type OrderSummaryDto,
   type PublicTrackingDto,
@@ -195,11 +196,15 @@ export class OrdersService {
       where: {
         senderId: user.id,
         ...(query.status ? { status: query.status } : {}),
+        ...(query.scope === 'active' ? { status: { in: [...ACTIVE_ORDER_STATUSES] } } : {}),
+        ...(query.scope === 'history' ? { status: { notIn: [...ACTIVE_ORDER_STATUSES] } } : {}),
         ...(query.cursor ? { id: { lt: query.cursor } } : {}),
       },
       orderBy: { id: 'desc' },
       take: query.limit + 1,
-      include: { dropoffAddress: { select: { landmark: true } } },
+      include: {
+        dropoffAddress: { select: { landmark: true, neighborhood: { select: { name: true } } } },
+      },
     });
     const page = pageOf(rows, query.limit);
     return {
@@ -209,6 +214,7 @@ export class OrdersService {
         status: order.status,
         recipientName: order.recipientName,
         dropoffLandmark: order.dropoffAddress.landmark,
+        dropoffNeighborhood: order.dropoffAddress.neighborhood?.name ?? null,
         totalPrice: order.totalPrice,
         codAmount: order.codAmount,
         scheduledFor: order.scheduledFor?.toISOString() ?? null,
