@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_rider/l10n/app_localizations.dart';
 import 'package:tara_test/harness.dart' as shared;
+import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/tara_icons.dart';
 
 export 'package:tara_test/harness.dart' show ScreenSize, Variant, capture, goldenTest;
 
@@ -20,4 +22,16 @@ Future<void> pumpVariant(
   locale: locale,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
+);
+
+/// Écran d'onglet dans son cadre : contenu sous la barre d'onglets en verre.
+Widget tabs(int current, Widget child) => TaraTabShell(
+  items: const [
+    TabItem(TaraIcons.home, 'Accueil'),
+    TabItem(TaraIcons.activity, 'Activité'),
+    TabItem(TaraIcons.user, 'Profil'),
+  ],
+  current: current,
+  onSelected: (_) {},
+  child: child,
 );

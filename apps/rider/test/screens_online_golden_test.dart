@@ -52,7 +52,7 @@ void main() {
       await pumpVariant(
         tester,
         variant,
-        scope(HomeOnlineScreen(onWentOffline: () {}, onDetails: () {}, onSos: () {}, onTab: (_) {})),
+        scope(tabs(0, HomeOnlineScreen(onWentOffline: () {}, onDetails: () {}, onSos: () {}))),
       );
       await settle(tester);
       expect(tester.takeException(), isNull);

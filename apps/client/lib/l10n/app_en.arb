@@ -140,5 +140,12 @@
   "supportTara": "Tara support",
   "themeDark": "Dark",
   "themeLabel": "Theme",
-  "themeLight": "Light"
+  "themeLight": "Light",
+  "prohibitedTitle": "Prohibited items",
+  "prohibitedWeapons": "Weapons, including knives, and ammunition",
+  "prohibitedIllegal": "Illegal goods: drugs, counterfeits",
+  "prohibitedDangerous": "Dangerous goods: gas, fuel, flammable, explosive or corrosive products",
+  "prohibitedAnimals": "Live animals",
+  "prohibitedCash": "Bundles of cash",
+  "prohibitedPledge": "By sending the parcel, you confirm it contains none of these."
 }

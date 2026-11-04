@@ -25,7 +25,7 @@ Widget home() => ProviderScope(
     homeSummaryProvider.overrideWith((ref) async => summary),
     documentLabelsProvider.overrideWith((ref) async => {}),
   ],
-  child: HomeOfflineScreen(onWentOnline: () {}, onDetails: () {}, onTab: (_) {}, now: DateTime(2026, 11, 3, 19)),
+  child: tabs(0, HomeOfflineScreen(onWentOnline: () {}, onDetails: () {}, now: DateTime(2026, 11, 3, 19))),
 );
 
 void main() {

@@ -344,4 +344,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeLight => 'Light';
+
+  @override
+  String get prohibitedTitle => 'Prohibited items';
+
+  @override
+  String get prohibitedWeapons => 'Weapons, including knives, and ammunition';
+
+  @override
+  String get prohibitedIllegal => 'Illegal goods: drugs, counterfeits';
+
+  @override
+  String get prohibitedDangerous => 'Dangerous goods: gas, fuel, flammable, explosive or corrosive products';
+
+  @override
+  String get prohibitedAnimals => 'Live animals';
+
+  @override
+  String get prohibitedCash => 'Bundles of cash';
+
+  @override
+  String get prohibitedPledge => 'By sending the parcel, you confirm it contains none of these.';
 }

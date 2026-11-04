@@ -8,6 +8,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -28,10 +29,7 @@ enum _Sub { documents, contact }
 /// identité et véhicule, pièces et leur état (une pièce refusée ou expirée se renvoie
 /// d'ici), contact d'urgence, affichage (thème, langue, effets), support, déconnexion.
 class AccountScreen extends ConsumerStatefulWidget {
-  const AccountScreen({super.key, required this.onTab, this.pickPhoto = pickWithCamera});
-
-  /// Barre d'onglets : 0 accueil, 1 activité, 2 profil.
-  final ValueChanged<int> onTab;
+  const AccountScreen({super.key, this.pickPhoto = pickWithCamera});
 
   /// Photo d'une pièce à renvoyer (remplacée dans les tests).
   final PickPhoto pickPhoto;
@@ -98,130 +96,117 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           child: TaraScreen(
             blobs: _blobs,
             safeBottom: false,
-            child: Column(
-              children: [
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async => _reload(),
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                      children: [
-                        Semantics(
-                          header: true,
-                          child: Text(l.tabProfile, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-                        ),
-                        const SizedBox(height: 16),
-                        FutureBuilder<Json>(
-                          future: _me,
-                          builder: (context, snapshot) => _IdentityCard(
-                            name: snapshot.data?['fullName'] as String?,
-                            phone: snapshot.data?['phone'] as String?,
-                            profile: profile,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        SectionHeader(
-                          title: l.myDocuments,
-                          action: documents.value == null
-                              ? null
-                              : TaraLink(label: l.seeAll, onPressed: () => setState(() => _sub = _Sub.documents)),
-                        ),
-                        const SizedBox(height: 8),
-                        if (documents.value case final data?)
-                          _DocumentsSummary(state: data, onOpen: () => setState(() => _sub = _Sub.documents))
-                        else if (documents.hasError)
-                          _Failed(onRetry: _reload)
-                        else
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(child: GooLoader(compact: true)),
-                          ),
-                        const SizedBox(height: 20),
-                        SectionHeader(title: l.emergencyContactTitle),
-                        const SizedBox(height: 8),
-                        _ContactCard(
-                          profile: profile,
-                          onEdit: profile == null ? null : () => setState(() => _sub = _Sub.contact),
-                        ),
-                        const SizedBox(height: 20),
-                        SectionHeader(title: l.displaySection),
-                        const SizedBox(height: 8),
-                        _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
-                        if (config?.supportPhone case final support?) ...[
-                          const SizedBox(height: 20),
-                          SectionHeader(title: l.helpSection),
-                          const SizedBox(height: 8),
-                          GlassCard(
-                            radius: 22,
-                            shadow: false,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                            child: ListRow(
-                              leading: const IconTile(icon: TaraIcons.headset),
-                              title: l.supportTara,
-                              subtitle: displayPhone(support),
-                              trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
-                              onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 24),
-                        ListenableBuilder(
-                          listenable: Listenable.merge([activeOrder, queue]),
-                          builder: (context, _) => _LogoutBlock(
-                            blocked: activeOrder.order != null
-                                ? l.logoutBlockedCourse
-                                : queue.pendingCount > 0
-                                ? l.logoutBlockedPending
-                                : null,
-                            confirming: _confirmLogout,
-                            busy: _loggingOut,
-                            onLogout: _logout,
-                            onCancel: () => setState(() => _confirmLogout = false),
-                          ),
-                        ),
-                        if (version != null) ...[
-                          const SizedBox(height: 18),
-                          Center(
-                            child: Text(l.appVersion(version), style: TaraText.small.copyWith(color: c.textTertiary)),
-                          ),
-                        ],
-                      ],
+            // Le contenu défile jusqu'en bas de l'écran, sous la barre d'onglets en verre.
+            child: RefreshIndicator(
+              onRefresh: () async => _reload(),
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + TaraTabShell.bottomInset(context)),
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(l.tabProfile, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
+                  ),
+                  const SizedBox(height: 16),
+                  FutureBuilder<Json>(
+                    future: _me,
+                    builder: (context, snapshot) => _IdentityCard(
+                      name: snapshot.data?['fullName'] as String?,
+                      phone: snapshot.data?['phone'] as String?,
+                      profile: profile,
                     ),
                   ),
-                ),
-                SafeArea(
-                  top: false,
-                  child: FloatingTabBar(
-                    items: [
-                      TabItem(TaraIcons.home, l.tabHome),
-                      TabItem(TaraIcons.activity, l.tabActivity),
-                      TabItem(TaraIcons.user, l.tabProfile),
-                    ],
-                    current: 2,
-                    onSelected: widget.onTab,
+                  const SizedBox(height: 20),
+                  SectionHeader(
+                    title: l.myDocuments,
+                    action: documents.value == null
+                        ? null
+                        : TaraLink(label: l.seeAll, onPressed: () => setState(() => _sub = _Sub.documents)),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  if (documents.value case final data?)
+                    _DocumentsSummary(state: data, onOpen: () => setState(() => _sub = _Sub.documents))
+                  else if (documents.hasError)
+                    _Failed(onRetry: _reload)
+                  else
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: GooLoader(compact: true)),
+                    ),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.emergencyContactTitle),
+                  const SizedBox(height: 8),
+                  _ContactCard(
+                    profile: profile,
+                    onEdit: profile == null ? null : () => setState(() => _sub = _Sub.contact),
+                  ),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.displaySection),
+                  const SizedBox(height: 8),
+                  _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
+                  if (config?.supportPhone case final support?) ...[
+                    const SizedBox(height: 20),
+                    SectionHeader(title: l.helpSection),
+                    const SizedBox(height: 8),
+                    GlassCard(
+                      radius: 22,
+                      shadow: false,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                      child: ListRow(
+                        leading: const IconTile(icon: TaraIcons.headset),
+                        title: l.supportTara,
+                        subtitle: displayPhone(support),
+                        trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
+                        onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  ListenableBuilder(
+                    listenable: Listenable.merge([activeOrder, queue]),
+                    builder: (context, _) => _LogoutBlock(
+                      blocked: activeOrder.order != null
+                          ? l.logoutBlockedCourse
+                          : queue.pendingCount > 0
+                          ? l.logoutBlockedPending
+                          : null,
+                      confirming: _confirmLogout,
+                      busy: _loggingOut,
+                      onLogout: _logout,
+                      onCancel: () => setState(() => _confirmLogout = false),
+                    ),
+                  ),
+                  if (version != null) ...[
+                    const SizedBox(height: 18),
+                    Center(
+                      child: Text(l.appVersion(version), style: TaraText.small.copyWith(color: c.textTertiary)),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
         if (_sub == _Sub.documents)
           Positioned.fill(
-            child: DocumentsScreen(
-              fromProfile: true,
-              pickPhoto: widget.pickPhoto,
-              onDone: () => setState(() => _sub = null),
+            child: HideTabBar(
+              child: DocumentsScreen(
+                fromProfile: true,
+                pickPhoto: widget.pickPhoto,
+                onDone: () => setState(() => _sub = null),
+              ),
             ),
           ),
         if (_sub == _Sub.contact && profile != null)
           Positioned.fill(
-            child: EmergencyContactScreen(
-              profile: profile,
-              onBack: () => setState(() => _sub = null),
-              onSaved: (updated) {
-                ref.read(documentsControllerProvider.notifier).replaceProfile(updated);
-                setState(() => _sub = null);
-              },
+            child: HideTabBar(
+              child: EmergencyContactScreen(
+                profile: profile,
+                onBack: () => setState(() => _sub = null),
+                onSaved: (updated) {
+                  ref.read(documentsControllerProvider.notifier).replaceProfile(updated);
+                  setState(() => _sub = null);
+                },
+              ),
             ),
           ),
       ],

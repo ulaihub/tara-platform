@@ -168,5 +168,12 @@
   "supportTara": "Support Tara",
   "themeDark": "Sombre",
   "themeLabel": "Thème",
-  "themeLight": "Clair"
+  "themeLight": "Clair",
+  "prohibitedTitle": "Objets interdits",
+  "prohibitedWeapons": "Armes, y compris armes blanches, et munitions",
+  "prohibitedIllegal": "Produits illicites : drogues, contrefaçons",
+  "prohibitedDangerous": "Matières dangereuses : gaz, carburant, produits inflammables, explosifs ou corrosifs",
+  "prohibitedAnimals": "Animaux vivants",
+  "prohibitedCash": "Liasses d’argent liquide",
+  "prohibitedPledge": "En envoyant le colis, vous confirmez qu’il n’en contient aucun."
 }

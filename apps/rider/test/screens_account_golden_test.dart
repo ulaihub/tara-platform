@@ -94,9 +94,9 @@ class AccountHarness {
     activeOrderProvider.overrideWithValue(active),
   ];
 
-  Widget screen({List<Override> extra = const [], ValueChanged<int>? onTab}) => ProviderScope(
+  Widget screen({List<Override> extra = const []}) => ProviderScope(
     overrides: [...overrides, ...extra],
-    child: AccountScreen(onTab: onTab ?? (_) {}, pickPhoto: ({required selfie}) async => null),
+    child: tabs(2, AccountScreen(pickPhoto: ({required selfie}) async => null)),
   );
 }
 

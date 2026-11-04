@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
@@ -309,31 +311,38 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             Positioned.fill(
               child: showCourse
                   ? _course(order)
-                  : _tab == 1
-                  ? ActivityScreen(onTab: _selectTab)
-                  : _tab == 2
-                  ? AccountScreen(onTab: _selectTab)
-                  : online.online
-                  ? HomeOnlineScreen(
-                      onWentOffline: () => setState(() {}),
-                      onDetails: () => _selectTab(1),
-                      onSos: _openSos,
-                      onTab: _selectTab,
-                      courseBanner: order == null
-                          ? null
-                          : CourseBanner(
-                              reference: order.reference,
-                              stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.toDropoff,
-                              onResume: () => setState(() => _minimized = null),
-                            ),
-                    )
-                  : HomeOfflineScreen(
-                      onWentOnline: () {
-                        ref.invalidate(homeSummaryProvider);
-                        unawaited(_loadPendingOffers());
+                  // Onglets : contenu sous la barre en verre, transition vitrée entre onglets.
+                  : TaraTabShell(
+                      items: [
+                        TabItem(TaraIcons.home, l.tabHome),
+                        TabItem(TaraIcons.activity, l.tabActivity),
+                        TabItem(TaraIcons.user, l.tabProfile),
+                      ],
+                      current: _tab,
+                      onSelected: _selectTab,
+                      child: switch (_tab) {
+                        1 => const ActivityScreen(),
+                        2 => const AccountScreen(),
+                        _ when online.online => HomeOnlineScreen(
+                          onWentOffline: () => setState(() {}),
+                          onDetails: () => _selectTab(1),
+                          onSos: _openSos,
+                          courseBanner: order == null
+                              ? null
+                              : CourseBanner(
+                                  reference: order.reference,
+                                  stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.toDropoff,
+                                  onResume: () => setState(() => _minimized = null),
+                                ),
+                        ),
+                        _ => HomeOfflineScreen(
+                          onWentOnline: () {
+                            ref.invalidate(homeSummaryProvider);
+                            unawaited(_loadPendingOffers());
+                          },
+                          onDetails: () => _selectTab(1),
+                        ),
                       },
-                      onDetails: () => _selectTab(1),
-                      onTab: _selectTab,
                     ),
             ),
             // Bandeau sous les en-têtes (retour, SOS restent accessibles) : réseau coupé, ou

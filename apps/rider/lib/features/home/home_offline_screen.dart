@@ -5,10 +5,10 @@ import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/map_backdrop.dart';
 import 'package:tara_ui/components/status.dart';
+import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
-import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
@@ -20,19 +20,10 @@ import 'home_summary.dart';
 /// 05 · Accueil — hors ligne : gains du jour, bouton « Passer en ligne ». Pas de cloche de
 /// notifications au lancement (les messages arrivent par notification du téléphone).
 class HomeOfflineScreen extends ConsumerStatefulWidget {
-  const HomeOfflineScreen({
-    super.key,
-    required this.onWentOnline,
-    required this.onDetails,
-    required this.onTab,
-    this.now,
-  });
+  const HomeOfflineScreen({super.key, required this.onWentOnline, required this.onDetails, this.now});
 
   final VoidCallback onWentOnline;
   final VoidCallback onDetails;
-
-  /// Barre d'onglets : 0 accueil, 1 activité, 2 profil.
-  final ValueChanged<int> onTab;
 
   /// Heure affichée (bonjour / bonsoir), fixée dans les tests.
   final DateTime? now;
@@ -81,8 +72,11 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
     final hour = (widget.now ?? DateTime.now()).hour;
     final language = Localizations.localeOf(context).languageCode;
     final requirements = ref.watch(documentLabelsProvider).value ?? const {};
+    // Place de la barre d'onglets en verre : le contenu défile dessous.
+    final inset = TaraTabShell.bottomInset(context);
     return TaraScreen(
       blobs: _blobs,
+      safeBottom: false,
       background: Positioned.fill(
         child: Stack(
           fit: StackFit.expand,
@@ -97,7 +91,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -136,7 +130,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                         label: l.goOnline,
                         semanticLabel: l.goOnlineLabel,
                         // 210 px, réduit jusqu'à 140 sur petit écran ou avec le texte agrandi.
-                        size: (constraints.maxHeight - 150).clamp(140, 210).toDouble(),
+                        size: (constraints.maxHeight - inset - 150).clamp(140, 210).toDouble(),
                         onPressed: _switching ? null : _goOnline,
                       ),
                       const SizedBox(height: 22),
@@ -185,20 +179,11 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16 + inset),
                     ],
                   ),
                 ),
               ),
-            ),
-            FloatingTabBar(
-              items: [
-                TabItem(TaraIcons.home, l.tabHome),
-                TabItem(TaraIcons.activity, l.tabActivity),
-                TabItem(TaraIcons.user, l.tabProfile),
-              ],
-              current: 0,
-              onSelected: widget.onTab,
             ),
           ],
         ),

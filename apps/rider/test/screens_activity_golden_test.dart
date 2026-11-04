@@ -131,9 +131,9 @@ FakeRiderApi activityApi({bool legacyCash = false}) {
   return api;
 }
 
-Widget activity(FakeRiderApi api, {ValueChanged<int>? onTab}) => ProviderScope(
+Widget activity(FakeRiderApi api) => ProviderScope(
   overrides: [keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()), riderApiProvider.overrideWithValue(api)],
-  child: ActivityScreen(onTab: onTab ?? (_) {}, now: () => activityNow),
+  child: tabs(1, ActivityScreen(now: () => activityNow)),
 );
 
 void main() {

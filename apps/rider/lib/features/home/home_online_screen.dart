@@ -6,6 +6,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/status.dart';
+import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -25,7 +26,6 @@ class HomeOnlineScreen extends ConsumerStatefulWidget {
     required this.onWentOffline,
     required this.onDetails,
     required this.onSos,
-    required this.onTab,
     this.courseBanner,
   });
 
@@ -35,9 +35,6 @@ class HomeOnlineScreen extends ConsumerStatefulWidget {
   final VoidCallback onWentOffline;
   final VoidCallback onDetails;
   final VoidCallback onSos;
-
-  /// Barre d'onglets : 0 accueil, 1 activité, 2 profil.
-  final ValueChanged<int> onTab;
 
   @override
   ConsumerState<HomeOnlineScreen> createState() => _HomeOnlineScreenState();
@@ -112,9 +109,18 @@ class _HomeOnlineScreenState extends ConsumerState<HomeOnlineScreen> {
               ),
             ),
           ),
+          // En bas : place de la barre d'onglets en verre, qui flotte sur la carte.
           SafeArea(
+            bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                8,
+                16,
+                TaraTabShell.bottomInset(context) > 0
+                    ? TaraTabShell.bottomInset(context) + 4
+                    : 12 + MediaQuery.paddingOf(context).bottom,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -173,16 +179,6 @@ class _HomeOnlineScreenState extends ConsumerState<HomeOnlineScreen> {
                         ],
                       ),
                     ),
-                  const SizedBox(height: 12),
-                  FloatingTabBar(
-                    items: [
-                      TabItem(TaraIcons.home, l.tabHome),
-                      TabItem(TaraIcons.activity, l.tabActivity),
-                      TabItem(TaraIcons.user, l.tabProfile),
-                    ],
-                    current: 0,
-                    onSelected: widget.onTab,
-                  ),
                 ],
               ),
             ),

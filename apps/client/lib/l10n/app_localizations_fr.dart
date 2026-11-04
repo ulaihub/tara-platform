@@ -346,4 +346,26 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get themeLight => 'Clair';
+
+  @override
+  String get prohibitedTitle => 'Objets interdits';
+
+  @override
+  String get prohibitedWeapons => 'Armes, y compris armes blanches, et munitions';
+
+  @override
+  String get prohibitedIllegal => 'Produits illicites : drogues, contrefaçons';
+
+  @override
+  String get prohibitedDangerous =>
+      'Matières dangereuses : gaz, carburant, produits inflammables, explosifs ou corrosifs';
+
+  @override
+  String get prohibitedAnimals => 'Animaux vivants';
+
+  @override
+  String get prohibitedCash => 'Liasses d’argent liquide';
+
+  @override
+  String get prohibitedPledge => 'En envoyant le colis, vous confirmez qu’il n’en contient aucun.';
 }

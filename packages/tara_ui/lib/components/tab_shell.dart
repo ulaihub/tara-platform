@@ -208,8 +208,10 @@ class _TabButton extends StatelessWidget {
 
 /// Écrans à onglets : le contenu occupe tout l'écran et défile sous la barre en verre ;
 /// le changement d'onglet passe par une transition vitrée ([GlassTabSwitcher]). Les listes
-/// réservent [bottomInset] en bas pour que leur dernier élément dépasse la barre.
-class TaraTabShell extends StatelessWidget {
+/// réservent [bottomInset] en bas pour que leur dernier élément dépasse la barre. Un
+/// sous-écran plein écran ouvert dans un onglet (recharge, pièces…) masque la barre en
+/// s'enveloppant de [HideTabBar].
+class TaraTabShell extends StatefulWidget {
   const TaraTabShell({
     super.key,
     required this.items,
@@ -235,26 +237,55 @@ class TaraTabShell extends StatelessWidget {
       context.dependOnInheritedWidgetOfExactType<_TabInset>()?.inset ?? 0;
 
   @override
+  State<TaraTabShell> createState() => _TaraTabShellState();
+}
+
+class _TaraTabShellState extends State<TaraTabShell> {
+  /// Sous-écrans ouverts qui masquent la barre.
+  final _hiders = <Object>{};
+
+  void _setHidden(Object owner, {required bool hidden}) {
+    if (!mounted) return;
+    setState(() => hidden ? _hiders.add(owner) : _hiders.remove(owner));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final inset = showBar ? FloatingTabBar.height + MediaQuery.paddingOf(context).bottom : 0.0;
+    final effects = TaraEffects.of(context);
+    final inset = widget.showBar ? FloatingTabBar.height + MediaQuery.paddingOf(context).bottom : 0.0;
+    final visible = widget.showBar && _hiders.isEmpty;
+    final duration = effects.decorativeMotion ? const Duration(milliseconds: 260) : Duration.zero;
     return Stack(
       children: [
         Positioned.fill(
           child: _TabInset(
             inset: inset,
+            shell: this,
             child: GlassTabSwitcher(
-              child: KeyedSubtree(key: ValueKey(current), child: child),
+              child: KeyedSubtree(key: ValueKey(widget.current), child: widget.child),
             ),
           ),
         ),
-        if (showBar)
+        if (widget.showBar)
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: FloatingTabBar(items: items, current: current, onSelected: onSelected),
+            child: IgnorePointer(
+              ignoring: !visible,
+              child: AnimatedSlide(
+                offset: visible ? Offset.zero : const Offset(0, 1.2),
+                duration: duration,
+                curve: Curves.easeOutCubic,
+                child: AnimatedOpacity(
+                  opacity: visible ? 1 : 0,
+                  duration: duration,
+                  child: SafeArea(
+                    top: false,
+                    child: FloatingTabBar(items: widget.items, current: widget.current, onSelected: widget.onSelected),
+                  ),
+                ),
+              ),
             ),
           ),
       ],
@@ -263,11 +294,48 @@ class TaraTabShell extends StatelessWidget {
 }
 
 class _TabInset extends InheritedWidget {
-  const _TabInset({required this.inset, required super.child});
+  const _TabInset({required this.inset, required this.shell, required super.child});
   final double inset;
+  final _TaraTabShellState shell;
 
   @override
   bool updateShouldNotify(_TabInset oldWidget) => oldWidget.inset != inset;
+}
+
+/// Sous-écran plein écran ouvert dans un onglet : tant qu'il est affiché, la barre
+/// d'onglets se retire (glisse vers le bas).
+class HideTabBar extends StatefulWidget {
+  const HideTabBar({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<HideTabBar> createState() => _HideTabBarState();
+}
+
+class _HideTabBarState extends State<HideTabBar> {
+  _TaraTabShellState? _shell;
+
+  @override
+  void initState() {
+    super.initState();
+    // Après la construction : la barre ne peut pas changer pendant que l'arbre se bâtit.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _shell = context.getInheritedWidgetOfExactType<_TabInset>()?.shell;
+      _shell?._setHidden(this, hidden: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    final shell = _shell;
+    if (shell != null) WidgetsBinding.instance.addPostFrameCallback((_) => shell._setHidden(this, hidden: false));
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Transition vitrée entre deux onglets : l'écran qui part se floute et s'efface, celui

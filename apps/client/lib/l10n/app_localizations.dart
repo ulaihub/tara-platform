@@ -727,6 +727,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Clair'**
   String get themeLight;
+
+  /// No description provided for @prohibitedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objets interdits'**
+  String get prohibitedTitle;
+
+  /// No description provided for @prohibitedWeapons.
+  ///
+  /// In fr, this message translates to:
+  /// **'Armes, y compris armes blanches, et munitions'**
+  String get prohibitedWeapons;
+
+  /// No description provided for @prohibitedIllegal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Produits illicites : drogues, contrefaçons'**
+  String get prohibitedIllegal;
+
+  /// No description provided for @prohibitedDangerous.
+  ///
+  /// In fr, this message translates to:
+  /// **'Matières dangereuses : gaz, carburant, produits inflammables, explosifs ou corrosifs'**
+  String get prohibitedDangerous;
+
+  /// No description provided for @prohibitedAnimals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Animaux vivants'**
+  String get prohibitedAnimals;
+
+  /// No description provided for @prohibitedCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liasses d’argent liquide'**
+  String get prohibitedCash;
+
+  /// No description provided for @prohibitedPledge.
+  ///
+  /// In fr, this message translates to:
+  /// **'En envoyant le colis, vous confirmez qu’il n’en contient aucun.'**
+  String get prohibitedPledge;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

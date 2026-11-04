@@ -84,7 +84,7 @@ Le MVP compte 51 exigences, réparties en 8 modules ; la V2 en ajoute 9. Chaque 
 
 | ID | Exigence | Lot |
 | --- | --- | --- |
-| C1 | Saisie : enlèvement, livraison, nom et téléphone du destinataire, taille (S, M, L, XL), fragile, valeur déclarée, montant à encaisser, instructions | MVP |
+| C1 | Saisie : enlèvement, livraison, nom et téléphone du destinataire, nature du contenu (tout type d'objet : documents, vêtements et chaussures, médicaments, linge, cuisine et maison, électronique, alimentation, beauté, brocante, autre, avec précision libre), taille (S, M, L, XL), fragile, valeur déclarée, montant à encaisser, instructions ; rappel des objets interdits : armes et munitions, produits illicites, matières dangereuses, animaux vivants, liasses d'argent liquide | MVP |
 | C2 | Prix calculé avant validation (distance routière, suppléments) et affiché TTC | MVP |
 | C3 | Livraison immédiate ou programmée sur un créneau, jusqu'à J+7 | MVP |
 | C4 | Jusqu'à 10 livraisons depuis un même point d'enlèvement en une seule saisie | MVP |
