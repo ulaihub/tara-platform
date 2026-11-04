@@ -9,11 +9,11 @@ import '../../core/course/active_order.dart';
 import '../../core/course/course_actions.dart';
 import '../../core/realtime/realtime_client.dart';
 import '../../design/components/glass.dart';
-import '../../design/format.dart';
 import '../../design/tara_colors.dart';
 import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/status_screen.dart';
+import '../course/collection_screen.dart';
 import '../course/course_banner.dart';
 import '../course/delivery_screen.dart';
 import '../course/pickup_screen.dart';
@@ -39,8 +39,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   /// Course réduite à l'accueil (bouton retour) : identifiant de la course réduite.
   String? _minimized;
 
-  /// Encaissement ouvert pour cette course (avant l'envoi de la livraison).
-  String? _collecting;
+  /// Encaissement ouvert (12), avec la livraison préparée à l'écran 09.
+  ({String orderId, DeliveryDraft draft})? _collecting;
   late final ActiveOrderController _activeOrder;
   Timer? _noticeTimer;
   StreamSubscription<RealtimeEvent>? _realtime;
@@ -167,24 +167,36 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
         onAction: minimize,
       );
     }
-    if (_collecting == order.id) {
-      // Écran d'encaissement (12) au prochain lot.
-      return StatusScreen(
-        title: l.collectionPendingTitle('${formatAmount(order.collectAtDelivery)}\u00A0F'),
-        body: l.collectionPendingBody,
-        actionLabel: l.back,
-        onAction: () => setState(() => _collecting = null),
-      );
+    final collecting = _collecting?.orderId == order.id ? _collecting : null;
+    void onDone(ActionOutcome outcome) {
+      setState(() => _collecting = null);
+      if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
     }
-    return DeliveryScreen(
-      key: ValueKey('delivery-${order.id}'),
-      order: order,
-      onBack: minimize,
-      onSos: sos,
-      onCollect: () => setState(() => _collecting = order.id),
-      onDelivered: (outcome) {
-        if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
-      },
+
+    // L'encaissement (12) se pose sur la livraison (09), qui garde code et photo au retour.
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DeliveryScreen(
+            key: ValueKey('delivery-${order.id}'),
+            order: order,
+            onBack: minimize,
+            onSos: sos,
+            onCollect: (draft) => setState(() => _collecting = (orderId: order.id, draft: draft)),
+            onDelivered: onDone,
+          ),
+        ),
+        if (collecting != null)
+          Positioned.fill(
+            child: CollectionScreen(
+              key: ValueKey('collection-${order.id}'),
+              order: order,
+              draft: collecting.draft,
+              onBack: () => setState(() => _collecting = null),
+              onDone: onDone,
+            ),
+          ),
+      ],
     );
   }
 

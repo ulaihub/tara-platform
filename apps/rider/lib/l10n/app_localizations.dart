@@ -1148,18 +1148,6 @@ abstract class AppLocalizations {
   /// **'Confirmer la livraison'**
   String get confirmDelivery;
 
-  /// No description provided for @collectionPendingTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Encaissement · {amount}'**
-  String collectionPendingTitle(String amount);
-
-  /// No description provided for @collectionPendingBody.
-  ///
-  /// In fr, this message translates to:
-  /// **'L’écran d’encaissement (12) arrive au prochain lot. La livraison partira juste après l’encaissement.'**
-  String get collectionPendingBody;
-
   /// No description provided for @deliveryQueuedTitle.
   ///
   /// In fr, this message translates to:
@@ -1207,6 +1195,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'L’écran d’échec et de retour (10 et 11) arrive dans un prochain lot.'**
   String get deliveryFailedBody;
+
+  /// No description provided for @collectionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissement'**
+  String get collectionTitle;
+
+  /// No description provided for @collectionSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course {reference} · {name}'**
+  String collectionSubtitle(String reference, String name);
+
+  /// No description provided for @toCollectFromCustomer.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser auprès du client'**
+  String get toCollectFromCustomer;
+
+  /// No description provided for @methodCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get methodCash;
+
+  /// No description provided for @methodMomo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money'**
+  String get methodMomo;
+
+  /// No description provided for @amountReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant reçu'**
+  String get amountReceived;
+
+  /// No description provided for @exactAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} (exact)'**
+  String exactAmount(String amount);
+
+  /// No description provided for @changeToGive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Monnaie à rendre'**
+  String get changeToGive;
+
+  /// No description provided for @customerOperator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opérateur du client'**
+  String get customerOperator;
+
+  /// No description provided for @customerMomoNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro Mobile Money du client'**
+  String get customerMomoNumber;
+
+  /// No description provided for @momoHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client valide le paiement sur son téléphone, puis la course se clôture.'**
+  String get momoHint;
+
+  /// No description provided for @momoWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de la validation du client…'**
+  String get momoWaiting;
+
+  /// No description provided for @momoFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement non abouti (refusé, annulé ou expiré). Renvoyez la demande ou encaissez en espèces.'**
+  String get momoFailed;
+
+  /// No description provided for @momoNoAnswer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toujours pas de réponse du client. Vous pouvez renvoyer la demande.'**
+  String get momoNoAnswer;
+
+  /// No description provided for @momoNeedsNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money demande du réseau : encaissez en espèces ou réessayez.'**
+  String get momoNeedsNetwork;
+
+  /// No description provided for @cashAfterCourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces en main après cette course'**
+  String get cashAfterCourse;
+
+  /// No description provided for @cashLimitReached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au-delà de votre plafond ({limit}) : déposez des espèces au bureau Tara pour recevoir de nouvelles courses.'**
+  String cashLimitReached(String limit);
+
+  /// No description provided for @confirmCollection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer l’encaissement'**
+  String get confirmCollection;
+
+  /// No description provided for @sendPaymentRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande de paiement'**
+  String get sendPaymentRequest;
+
+  /// No description provided for @resendPaymentRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer la demande'**
+  String get resendPaymentRequest;
+
+  /// No description provided for @paymentRequestSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée au client'**
+  String get paymentRequestSent;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

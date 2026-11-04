@@ -604,15 +604,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDelivery => 'Confirm delivery';
 
   @override
-  String collectionPendingTitle(String amount) {
-    return 'Collection · $amount';
-  }
-
-  @override
-  String get collectionPendingBody =>
-      'The collection screen (12) comes in the next batch. The delivery is sent right after collection.';
-
-  @override
   String get deliveryQueuedTitle => 'Delivery saved';
 
   @override
@@ -636,4 +627,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deliveryFailedBody => 'The failure and return screens (10 and 11) come in a later batch.';
+
+  @override
+  String get collectionTitle => 'Collection';
+
+  @override
+  String collectionSubtitle(String reference, String name) {
+    return 'Job $reference · $name';
+  }
+
+  @override
+  String get toCollectFromCustomer => 'To collect from the customer';
+
+  @override
+  String get methodCash => 'Cash';
+
+  @override
+  String get methodMomo => 'Mobile Money';
+
+  @override
+  String get amountReceived => 'Amount received';
+
+  @override
+  String exactAmount(String amount) {
+    return '$amount (exact)';
+  }
+
+  @override
+  String get changeToGive => 'Change to give';
+
+  @override
+  String get customerOperator => 'Customer’s operator';
+
+  @override
+  String get customerMomoNumber => 'Customer’s Mobile Money number';
+
+  @override
+  String get momoHint => 'The customer approves the payment on their phone, then the job closes.';
+
+  @override
+  String get momoWaiting => 'Waiting for the customer to approve…';
+
+  @override
+  String get momoFailed => 'Payment not completed (refused, cancelled or expired). Resend the request or collect cash.';
+
+  @override
+  String get momoNoAnswer => 'Still no answer from the customer. You can resend the request.';
+
+  @override
+  String get momoNeedsNetwork => 'Mobile Money needs a network: collect cash or try again.';
+
+  @override
+  String get cashAfterCourse => 'Cash on hand after this job';
+
+  @override
+  String cashLimitReached(String limit) {
+    return 'Above your limit ($limit): deposit cash at the Tara office to receive new jobs.';
+  }
+
+  @override
+  String get confirmCollection => 'Confirm collection';
+
+  @override
+  String get sendPaymentRequest => 'Send payment request';
+
+  @override
+  String get resendPaymentRequest => 'Resend request';
+
+  @override
+  String get paymentRequestSent => 'Request sent to the customer';
 }

@@ -606,15 +606,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get confirmDelivery => 'Confirmer la livraison';
 
   @override
-  String collectionPendingTitle(String amount) {
-    return 'Encaissement · $amount';
-  }
-
-  @override
-  String get collectionPendingBody =>
-      'L’écran d’encaissement (12) arrive au prochain lot. La livraison partira juste après l’encaissement.';
-
-  @override
   String get deliveryQueuedTitle => 'Livraison enregistrée';
 
   @override
@@ -638,4 +629,74 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deliveryFailedBody => 'L’écran d’échec et de retour (10 et 11) arrive dans un prochain lot.';
+
+  @override
+  String get collectionTitle => 'Encaissement';
+
+  @override
+  String collectionSubtitle(String reference, String name) {
+    return 'Course $reference · $name';
+  }
+
+  @override
+  String get toCollectFromCustomer => 'À encaisser auprès du client';
+
+  @override
+  String get methodCash => 'Espèces';
+
+  @override
+  String get methodMomo => 'Mobile Money';
+
+  @override
+  String get amountReceived => 'Montant reçu';
+
+  @override
+  String exactAmount(String amount) {
+    return '$amount (exact)';
+  }
+
+  @override
+  String get changeToGive => 'Monnaie à rendre';
+
+  @override
+  String get customerOperator => 'Opérateur du client';
+
+  @override
+  String get customerMomoNumber => 'Numéro Mobile Money du client';
+
+  @override
+  String get momoHint => 'Le client valide le paiement sur son téléphone, puis la course se clôture.';
+
+  @override
+  String get momoWaiting => 'En attente de la validation du client…';
+
+  @override
+  String get momoFailed =>
+      'Paiement non abouti (refusé, annulé ou expiré). Renvoyez la demande ou encaissez en espèces.';
+
+  @override
+  String get momoNoAnswer => 'Toujours pas de réponse du client. Vous pouvez renvoyer la demande.';
+
+  @override
+  String get momoNeedsNetwork => 'Mobile Money demande du réseau : encaissez en espèces ou réessayez.';
+
+  @override
+  String get cashAfterCourse => 'Espèces en main après cette course';
+
+  @override
+  String cashLimitReached(String limit) {
+    return 'Au-delà de votre plafond ($limit) : déposez des espèces au bureau Tara pour recevoir de nouvelles courses.';
+  }
+
+  @override
+  String get confirmCollection => 'Confirmer l’encaissement';
+
+  @override
+  String get sendPaymentRequest => 'Envoyer la demande de paiement';
+
+  @override
+  String get resendPaymentRequest => 'Renvoyer la demande';
+
+  @override
+  String get paymentRequestSent => 'Demande envoyée au client';
 }

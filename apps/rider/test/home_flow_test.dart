@@ -13,12 +13,14 @@ import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/core/session/session_store.dart';
+import 'package:tara_rider/features/course/collection_screen.dart';
 import 'package:tara_rider/features/course/delivery_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
 import 'package:tara_rider/features/home/home_flow.dart';
 import 'package:tara_rider/features/home/home_summary.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 
+import 'helpers/fake_rider_api.dart';
 import 'helpers/harness.dart';
 import 'helpers/orders.dart';
 import 'screens_auth_golden_test.dart' show settle;
@@ -71,6 +73,7 @@ Future<({ActiveOrderController active, ActionQueue queue})> pumpHome(
         courseActionsProvider.overrideWithValue(CourseActions(queue: queue, activeOrder: active)),
         onlineControllerProvider.overrideWithValue(online),
         takeProofPhotoProvider.overrideWithValue(() async => 'remise.jpg'),
+        riderApiProvider.overrideWithValue(FakeRiderApi()),
       ],
       child: const HomeFlow(),
     ),
@@ -111,7 +114,13 @@ void main() {
     await settle(tester);
     await tester.tap(find.text('Confirmer la livraison'));
     await settle(tester);
-    expect(find.text('Encaissement · 12\u00A0500\u00A0F'), findsOneWidget);
+    expect(find.byType(CollectionScreen), findsOneWidget);
+    expect(find.text('À encaisser auprès du client'), findsOneWidget);
+    // Retour : la livraison préparée (code, photo) est toujours là.
+    await tester.tap(find.bySemanticsLabel('Retour').last);
+    await settle(tester);
+    expect(find.byType(CollectionScreen), findsNothing);
+    expect(find.textContaining('Photo de remise'), findsOneWidget);
   });
 
   testWidgets('enlèvement refusé plus tard (code faux) : l’écran 08 revient avec le message', (tester) async {

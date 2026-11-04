@@ -12,10 +12,12 @@ import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/core/session/session_store.dart';
+import 'package:tara_rider/features/course/collection_screen.dart';
 import 'package:tara_rider/features/course/delivery_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 
+import 'helpers/fake_rider_api.dart';
 import 'helpers/fonts.dart';
 import 'helpers/harness.dart';
 import 'helpers/orders.dart';
@@ -64,12 +66,26 @@ Widget scope(Widget child, {OnlineController? online}) => ProviderScope(
   child: child,
 );
 
+Widget collection() => ProviderScope(
+  overrides: [
+    keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
+    riderApiProvider.overrideWithValue(FakeRiderApi()),
+    courseActionsProvider.overrideWithValue(courseActions()),
+  ],
+  child: CollectionScreen(
+    order: order(status: 'IN_DELIVERY'),
+    draft: DeliveryDraft(photoPath: photo, code: '4821'),
+    onBack: () {},
+    onDone: (_) {},
+  ),
+);
+
 DeliveryScreen delivery(RiderOrder order) => DeliveryScreen(
   order: order,
   onBack: () {},
   onSos: () {},
   onDelivered: (_) {},
-  onCollect: () {},
+  onCollect: (_) {},
   now: () => DateTime(2026, 11, 3, 15, 4),
 );
 
@@ -85,6 +101,36 @@ void main() {
   setUpAll(loadAppFonts);
 
   for (final variant in Variant.matrix) {
+    goldenTest('12 encaissement espèces ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, collection());
+      await settle(tester);
+      await tester.ensureVisible(find.text('15\u00A0000\u00A0F'));
+      await tester.tap(find.text('15\u00A0000\u00A0F'));
+      await settle(tester);
+      // Bas du contenu : sur petit écran, la monnaie à rendre reste visible au-dessus du bouton.
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('2\u00A0500\u00A0F').hitTestable(), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/12_encaissement_especes/${variant.name}.png'));
+    });
+
+    goldenTest('12 encaissement mobile money ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, collection());
+      await settle(tester);
+      await tester.tap(find.text('Mobile Money'));
+      await settle(tester);
+      await tester.ensureVisible(find.text('Envoyer la demande de paiement'));
+      await tester.tap(find.text('Envoyer la demande de paiement'));
+      await settle(tester);
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('En attente de la validation du client…').hitTestable(), findsOneWidget);
+      expect(find.text('Demande envoyée au client'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/12_encaissement_mobile_money/${variant.name}.png'));
+    });
+
     goldenTest('09 livraison ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, scope(delivery(order(status: 'IN_DELIVERY'))));
       await settle(tester);

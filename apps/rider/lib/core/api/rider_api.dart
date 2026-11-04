@@ -102,6 +102,21 @@ class RiderApi {
 
   Future<RiderOrder> riderOrder(String id) async => RiderOrder.fromJson(await order(id));
 
+  Future<RiderWallet> riderWallet() async => RiderWallet.fromJson(await wallet());
+
+  /// Ce qui reste à encaisser auprès du destinataire.
+  Future<Collection> collection(String orderId) async =>
+      Collection.fromJson(await _api.get('/rider/orders/$orderId/collection') as Json);
+
+  /// Demande de paiement Mobile Money envoyée au téléphone du destinataire.
+  Future<Collection> collectMobileMoney(String orderId, {required String phone, required String operator}) async =>
+      Collection.fromJson(
+        await _api.post(
+          '/rider/orders/$orderId/collect',
+          body: {'method': 'MOBILE_MONEY', 'phone': phone, 'operator': operator},
+        ) as Json,
+      );
+
   /// Positions de la course prises sans réseau, envoyées en lot.
   Future<void> uploadTrack(String orderId, List<Json> points) =>
       _api.post('/rider/orders/$orderId/track', body: {'points': points});

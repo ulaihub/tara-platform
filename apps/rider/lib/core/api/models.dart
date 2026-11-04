@@ -621,3 +621,48 @@ class RiderRoute {
   /// Minutes arrondies au supérieur, au moins 1.
   int? get minutes => seconds == null ? null : (seconds! / 60).ceil().clamp(1, 600);
 }
+
+/// Ce qui reste à encaisser auprès du destinataire (E5).
+@immutable
+class Collection {
+  const Collection({required this.total, required this.complete, this.paymentId, this.paymentStatus});
+
+  factory Collection.fromJson(Json json) {
+    final payment = json['payment'] as Json?;
+    return Collection(
+      total: _field<num>(_field<Json>(json, 'due'), 'total').toInt(),
+      complete: _field(json, 'complete'),
+      paymentId: payment?['id'] as String?,
+      paymentStatus: payment?['status'] as String?,
+    );
+  }
+
+  static const fields = ['due', 'complete', 'payment'];
+
+  final int total;
+  final bool complete;
+
+  /// Demande Mobile Money en attente de la validation du client.
+  final String? paymentId;
+  final String? paymentStatus;
+}
+
+/// Portefeuille du livreur : gains et espèces détenues (plafond D4).
+@immutable
+class RiderWallet {
+  const RiderWallet({required this.earnings, required this.cashHeld, required this.cashLimit});
+
+  factory RiderWallet.fromJson(Json json) => RiderWallet(
+    earnings: _field<num>(json, 'earnings').toInt(),
+    cashHeld: _field<num>(json, 'cashHeld').toInt(),
+    cashLimit: _field<num>(json, 'cashLimit').toInt(),
+  );
+
+  static const fields = ['earnings', 'cashHeld', 'cashLimit', 'available'];
+
+  final int earnings;
+
+  /// Espèces encaissées pas encore déposées (dues à Tara).
+  final int cashHeld;
+  final int cashLimit;
+}

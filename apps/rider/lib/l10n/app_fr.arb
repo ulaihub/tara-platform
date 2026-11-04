@@ -336,8 +336,6 @@
   "photoHandoverHint": "Colis et lieu de remise visibles",
   "photoHandoverTaken": "Photo de remise · prise à {time}",
   "confirmDelivery": "Confirmer la livraison",
-  "collectionPendingTitle": "Encaissement · {amount}",
-  "collectionPendingBody": "L’écran d’encaissement (12) arrive au prochain lot. La livraison partira juste après l’encaissement.",
   "deliveryQueuedTitle": "Livraison enregistrée",
   "deliveryQueuedBody": "Pas de réseau : la livraison part automatiquement dès son retour.",
   "awaitingSupportTitle": "Livraison déclarée",
@@ -367,9 +365,47 @@
       }
     }
   },
-  "@collectionPendingTitle": {
+  "collectionTitle": "Encaissement",
+  "collectionSubtitle": "Course {reference} · {name}",
+  "toCollectFromCustomer": "À encaisser auprès du client",
+  "methodCash": "Espèces",
+  "methodMomo": "Mobile Money",
+  "amountReceived": "Montant reçu",
+  "exactAmount": "{amount} (exact)",
+  "changeToGive": "Monnaie à rendre",
+  "customerOperator": "Opérateur du client",
+  "customerMomoNumber": "Numéro Mobile Money du client",
+  "momoHint": "Le client valide le paiement sur son téléphone, puis la course se clôture.",
+  "momoWaiting": "En attente de la validation du client…",
+  "momoFailed": "Paiement non abouti (refusé, annulé ou expiré). Renvoyez la demande ou encaissez en espèces.",
+  "momoNoAnswer": "Toujours pas de réponse du client. Vous pouvez renvoyer la demande.",
+  "momoNeedsNetwork": "Mobile Money demande du réseau : encaissez en espèces ou réessayez.",
+  "cashAfterCourse": "Espèces en main après cette course",
+  "cashLimitReached": "Au-delà de votre plafond ({limit}) : déposez des espèces au bureau Tara pour recevoir de nouvelles courses.",
+  "confirmCollection": "Confirmer l’encaissement",
+  "sendPaymentRequest": "Envoyer la demande de paiement",
+  "resendPaymentRequest": "Renvoyer la demande",
+  "paymentRequestSent": "Demande envoyée au client",
+  "@collectionSubtitle": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@exactAmount": {
     "placeholders": {
       "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cashLimitReached": {
+    "placeholders": {
+      "limit": {
         "type": "String"
       }
     }

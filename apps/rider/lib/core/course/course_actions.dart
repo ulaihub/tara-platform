@@ -1,8 +1,23 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../api/models.dart';
 import '../offline/action_queue.dart';
 import 'active_order.dart';
+
+/// Livraison préparée à l'écran 09, envoyée juste après l'encaissement (12).
+@immutable
+class DeliveryDraft {
+  const DeliveryDraft({required this.photoPath, this.code, this.receivedBy, this.retryActionId});
+
+  final String photoPath;
+  final String? code;
+  final String? receivedBy;
+
+  /// Livraison refusée à corriger (code faux).
+  final String? retryActionId;
+}
 
 /// Issue d'une action de course.
 enum ActionOutcome {
@@ -105,6 +120,37 @@ class CourseActions {
     );
     return ActionResult(action == null ? ActionOutcome.sent : ActionOutcome.queued);
   }
+
+  /// Encaissement en espèces puis livraison, dans cet ordre : le serveur refuse une livraison
+  /// tant que tout n'est pas encaissé. Sans réseau, les deux partent ensemble au retour du
+  /// réseau, l'encaissement d'abord.
+  Future<ActionResult> collectCashAndDeliver(RiderOrder order, DeliveryDraft draft, {required GeoPoint at}) async {
+    final pending = queue.forOrder(order.id).where((action) => action.kind == 'collect' && !action.failed).firstOrNull;
+    final id =
+        pending?.id ??
+        (await queue.enqueue(
+          orderId: order.id,
+          kind: 'collect',
+          body: {'method': 'CASH', 'latitude': at.latitude, 'longitude': at.longitude},
+        )).id;
+    final collect = await _settle(id);
+    if (collect != null && collect.failed) {
+      // Déjà payé (Mobile Money confirmé entre-temps) : rien à encaisser, on livre.
+      if (collect.failureCode != 'COLLECTION_NOT_EXPECTED') return _refusal(collect);
+      await queue.discard(collect.id);
+    }
+    return deliverDraft(order, draft, at: at);
+  }
+
+  /// Livraison préparée (après un encaissement Mobile Money confirmé, ou sans argent dû).
+  Future<ActionResult> deliverDraft(RiderOrder order, DeliveryDraft draft, {required GeoPoint at}) => deliver(
+    order,
+    code: draft.code,
+    receivedBy: draft.receivedBy,
+    photoPath: draft.photoPath,
+    at: at,
+    retryActionId: draft.retryActionId,
+  );
 
   /// Action refusée de cette sorte encore dans la file (écran rouvert, app relancée).
   QueuedAction? refused(String orderId, String kind) =>

@@ -45,8 +45,8 @@ class DeliveryScreen extends ConsumerStatefulWidget {
   /// Livraison envoyée (sent) ou gardée sur le téléphone (queued).
   final void Function(ActionOutcome outcome) onDelivered;
 
-  /// Argent à encaisser d'abord : ouvre l'encaissement (12).
-  final VoidCallback onCollect;
+  /// Argent à encaisser d'abord : ouvre l'encaissement (12) avec la livraison préparée.
+  final void Function(DeliveryDraft draft) onCollect;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -107,7 +107,14 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     if (photo == null || !_ready) return;
     // Argent à encaisser : l'encaissement d'abord, la livraison partira ensuite.
     if (widget.order.collectAtDelivery > 0) {
-      widget.onCollect();
+      widget.onCollect(
+        DeliveryDraft(
+          photoPath: photo,
+          code: _withCode ? _code.text : null,
+          receivedBy: _withCode ? null : _receivedBy.text.trim(),
+          retryActionId: _refusedActionId,
+        ),
+      );
       return;
     }
     setState(() {

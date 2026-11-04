@@ -30,6 +30,8 @@ void main() {
     'RiderOrder': RiderOrder.fields,
     'Address': OrderAddress.fields,
     'RiderRoute': RiderRoute.fields,
+    'Collection': Collection.fields,
+    'RiderWallet': RiderWallet.fields,
   };
   for (final MapEntry(key: schema, value: fields) in models.entries) {
     test('modèle $schema conforme au contrat', () {

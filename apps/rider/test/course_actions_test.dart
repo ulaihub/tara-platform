@@ -221,4 +221,42 @@ void main() {
       expect(queue.items, isEmpty);
     });
   });
+
+  group('encaissement puis livraison', () {
+    const draft = DeliveryDraft(photoPath: 'remise.jpg', code: '4821');
+    setUp(() async => active.start(order(status: 'IN_DELIVERY')));
+
+    test('espèces : encaissement d’abord, puis la livraison, la course est livrée', () async {
+      final result = await actions.collectCashAndDeliver(order(status: 'IN_DELIVERY'), draft, at: here);
+      expect(result.outcome, ActionOutcome.sent);
+      expect(sent.map((s) => s.$1.split('/').last), ['collect', 'deliver']);
+      expect(sent.first.$2, containsPair('method', 'CASH'));
+      expect(sent.first.$2['clientEventId'], isA<String>());
+      expect(active.order, isNull);
+    });
+
+    test('sans réseau : les deux gardés dans l’ordre, livraison en attente d’envoi', () async {
+      server = (path, body) async => throw offline;
+      final result = await actions.collectCashAndDeliver(order(status: 'IN_DELIVERY'), draft, at: here);
+      expect(result.outcome, ActionOutcome.queued);
+      expect(queue.items.map((a) => a.kind), ['collect', 'deliver']);
+      expect(active.order?.deliveryQueued, isTrue);
+      // Réessai : l'encaissement déjà en file n'est pas doublé.
+      await actions.collectCashAndDeliver(order(status: 'IN_DELIVERY'), draft, at: here);
+      expect(queue.items.where((a) => a.kind == 'collect'), hasLength(1));
+    });
+
+    test('déjà payé (Mobile Money confirmé entre-temps) : on livre sans encaisser', () async {
+      server = (path, body) async {
+        if (path.endsWith('/collect')) {
+          throw const ApiException(code: 'COLLECTION_NOT_EXPECTED', message: 'Rien à encaisser.', status: 409);
+        }
+        return null;
+      };
+      final result = await actions.collectCashAndDeliver(order(status: 'IN_DELIVERY'), draft, at: here);
+      expect(result.outcome, ActionOutcome.sent);
+      expect(queue.items, isEmpty);
+      expect(active.order, isNull);
+    });
+  });
 }
