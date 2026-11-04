@@ -79,8 +79,9 @@ export const EmergencyContactBody = z.object({
 export const ApplyRiderBody = z.object({
   vehicleType: VehicleTypeEnum.default('MOTORBIKE'),
   plateNumber: z.string().trim().min(3).max(20).optional(),
-  guarantorName: z.string().trim().min(2).max(80),
-  guarantorPhone: CameroonMobile,
+  /** Garant facultatif : le solde prépayé (décision 36) couvre l'argent encaissé. */
+  guarantorName: z.string().trim().min(2).max(80).optional(),
+  guarantorPhone: CameroonMobile.optional(),
   emergencyContact: EmergencyContactBody.optional(),
 });
 

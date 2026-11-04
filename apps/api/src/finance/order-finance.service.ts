@@ -228,8 +228,9 @@ export class OrderFinanceService implements OnModuleInit {
       description: `Frais de livraison ${order.reference} payés en espèces à l'enlèvement`,
       idempotencyKey: `order:${order.id}:fee-cash`,
       orderId: order.id,
+      // Solde prépayé : le livreur garde les espèces, le montant est pris sur son solde.
       postings: [
-        { account: riderCashHeld(order.riderId), amount: order.totalPrice },
+        { account: riderPayable(order.riderId), amount: order.totalPrice },
         { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.totalPrice },
       ],
     });
@@ -309,7 +310,9 @@ export class OrderFinanceService implements OnModuleInit {
       const fresh = await tx.order.findUniqueOrThrow({ where: { id: orderId } });
       const due = (await this.collectionState(fresh, tx)).due;
       if (due.total === 0) throw AppError.conflict('ALREADY_COLLECTED');
-      await this.postCollection(tx, fresh, due, riderCashHeld(rider.id), {
+      // Solde prépayé : le livreur garde les espèces, le montant est pris sur son solde
+      // (mis de côté à l'acceptation) et le marchand est crédité aussitôt.
+      await this.postCollection(tx, fresh, due, riderPayable(rider.id), {
         idempotencyKey: `order:${orderId}:collect-cash`,
         paymentId: null,
         method: 'CASH',

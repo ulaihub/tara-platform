@@ -8,6 +8,8 @@ import {
   type TestContext,
 } from './helpers/app.js';
 import { createAddress, ensureDoualaServiceArea, PLACES } from './helpers/geo.js';
+import { PLATFORM_ACCOUNTS, riderPayable } from '../src/finance/ledger.accounts.js';
+import { LedgerService } from '../src/finance/ledger.service.js';
 
 /** Grille du business plan (C2). */
 const DOUALA_GRID = {
@@ -506,6 +508,19 @@ describe('Tarification et commandes (C1 à C7)', () => {
         where: { id: riderUser.userId },
         data: { roles: ['CUSTOMER', 'RIDER'] },
       });
+      // Solde prépayé qui couvre l'argent à encaisser (G5, décision 36).
+      const ledger = ctx.app.get(LedgerService);
+      await ctx.prisma.$transaction((tx) =>
+        ledger.post(tx, {
+          kind: 'PAYMENT_RECEIVED',
+          description: 'Recharge de départ (test)',
+          idempotencyKey: `test-start-balance:${rider.id}`,
+          postings: [
+            { account: PLATFORM_ACCOUNTS.officeCash, amount: 50_000 },
+            { account: riderPayable(rider.id), amount: -50_000 },
+          ],
+        }),
+      );
 
       const go = (to: string, extra: Record<string, unknown> = {}) =>
         request(ctx.http)

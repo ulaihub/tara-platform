@@ -13,7 +13,14 @@ export const MobileMoneyPayer = z.object({
 export const PaymentDto = z
   .object({
     id: z.uuid(),
-    purpose: z.enum(['DELIVERY_FEE', 'COD', 'RIDER_CASH_DEPOSIT', 'SUBSCRIPTION', 'WALLET_TOPUP']),
+    purpose: z.enum([
+      'DELIVERY_FEE',
+      'COD',
+      'RIDER_CASH_DEPOSIT',
+      'SUBSCRIPTION',
+      'WALLET_TOPUP',
+      'RIDER_TOPUP',
+    ]),
     status: z.enum(['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED']),
     amount: z.int(),
     orderId: z.uuid().nullable(),
@@ -25,6 +32,8 @@ export const PaymentDto = z
 
 export const TopUpBody = MobileMoneyPayer.extend({ amount: Fcfa });
 export const DepositBody = MobileMoneyPayer.extend({ amount: Fcfa });
+/** Recharge du solde prépayé du livreur : 500 FCFA au moins (frais payés par Tara). */
+export const RiderTopUpBody = MobileMoneyPayer.extend({ amount: Fcfa.min(500).max(500_000) });
 export const PayoutBody = z.object({
   /** Par défaut, tout le disponible. */
   amount: Fcfa.optional(),
@@ -85,8 +94,10 @@ export const WalletDto = z
 export const RiderWalletDto = z
   .object({
     currency: z.literal('XAF'),
-    /** Gains dus au livreur. */
+    /** Solde prépayé du livreur : ses gains et ses recharges, moins l'argent encaissé. */
     earnings: z.int(),
+    /** Mis de côté pour ses courses avec encaissement en cours. */
+    reserved: z.int(),
     /** Espèces encaissées et pas encore déposées (dues à Tara). */
     cashHeld: z.int(),
     cashLimit: z.int(),

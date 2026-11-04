@@ -225,7 +225,7 @@ tara-platform/
     support peut choisir à sa place (action tracée) ; sans décision après 15 min, retour
     automatique : le livreur n'attend jamais plus longtemps avec le colis. Règles et délai
     réglables côté serveur.
-35. **Espèces encaissées : dépôt sous 24 h.** Le livreur dépose ses espèces sous 24 h
+35. **Espèces encaissées : dépôt sous 24 h (remplacé par la décision 36, gardé pour les espèces encore dues).** Le livreur dépose ses espèces sous 24 h
     (Mobile Money ou bureau) ; l'échéance se calcule sur le grand livre, les dépôts soldant
     d'abord les espèces les plus anciennes. Rappel à 18 h. En retard : plus de courses ni de
     passage en ligne jusqu'au dépôt, plafond ramené à 25 000 FCFA. Après 72 h de retard :
@@ -233,6 +233,16 @@ tara-platform/
     prévenue par SMS avec les coordonnées du garant exigé à l'inscription ; la suspension
     est levée par la finance, une plainte reste la décision tracée d'un administrateur.
     Plafond de départ 25 000 FCFA, 50 000 FCFA après 20 courses livrées sans retard.
+36. **Solde prépayé du livreur (comme les chauffeurs Yango).** Pour qu'un livreur ne puisse
+    jamais garder l'argent d'un marchand, sans garant ni recouvrement : son solde (gains et
+    recharges) couvre l'argent qu'il encaisse. À l'acceptation d'une course avec
+    encaissement, le montant est mis de côté sur son solde (refusée s'il ne le couvre pas,
+    comptes verrouillés contre deux acceptations simultanées) ; à l'encaissement en espèces,
+    il est pris sur le solde : le livreur garde les espèces, le marchand est crédité aussitôt.
+    Le solde ne devient jamais négatif. Recharge par Mobile Money (frais payés par Tara) ou au
+    bureau ; les gains des courses déjà payées l'alimentent. Garant facultatif. Une course
+    dont le destinataire paiera peut-être par Mobile Money est aussi couverte (on ne le sait
+    qu'à la porte) : la réservation est libérée à la fin sans rien prendre.
 
 ## Cycle de vie d'une commande
 

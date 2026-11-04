@@ -91,7 +91,10 @@ export class PayoutsService implements OnModuleInit {
     }
   }
 
-  /** Disponible au reversement ; pour un livreur, ses gains moins les espèces qu'il détient. */
+  /**
+   * Disponible au reversement ; pour un livreur, son solde moins l'argent mis de côté pour
+   * ses courses avec encaissement et les espèces encore dues (ancien fonctionnement).
+   */
   async available(
     beneficiary: PayoutBeneficiary,
     ownerId: string,
@@ -100,7 +103,11 @@ export class PayoutsService implements OnModuleInit {
     const balance = await this.ledger.balance(this.account(beneficiary, ownerId), db);
     if (beneficiary !== 'RIDER') return Math.max(0, balance);
     const cash = await this.ledger.balance(riderCashHeld(ownerId), db);
-    return Math.max(0, balance - Math.max(0, cash));
+    const holds = await db.riderBalanceHold.aggregate({
+      where: { riderId: ownerId, releasedAt: null },
+      _sum: { amount: true },
+    });
+    return Math.max(0, balance - Math.max(0, cash) - (holds._sum.amount ?? 0));
   }
 
   // --- Demande ------------------------------------------------------------------------------

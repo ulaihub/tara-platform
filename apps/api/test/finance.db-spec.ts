@@ -8,6 +8,7 @@ import {
   riderPayable,
 } from '../src/finance/ledger.accounts.js';
 import { LedgerService } from '../src/finance/ledger.service.js';
+import { cashCarried } from '../src/dispatch/rider-scoring.js';
 import { PaymentsService } from '../src/payments/payments.service.js';
 import { PayoutsService } from '../src/finance/payouts.service.js';
 import { type FakePaymentProvider, PAYMENT_PROVIDER } from '../src/payments/payment.provider.js';
@@ -20,7 +21,7 @@ import {
 } from './helpers/app.js';
 import { createAddress, PLACES } from './helpers/geo.js';
 import { merchant, type PlacedOrder, placeOrder, setupDouala } from './helpers/orders.js';
-import { activeRider, type TestRider } from './helpers/riders.js';
+import { activeRider, RIDER_START_BALANCE, type TestRider } from './helpers/riders.js';
 
 describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à G8)', () => {
   let ctx: TestContext;
@@ -79,14 +80,21 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     return payment.providerReference ?? '';
   }
 
-  it('espèces : frais à l’enlèvement, contre-remboursement à la porte, part du livreur gardée', async () => {
+  it('espèces : frais à l’enlèvement et contre-remboursement pris sur le solde prépayé', async () => {
     const shop = await merchant(ctx);
     const rider = await activeRider(ctx);
     const placed = await placeOrder(ctx, shop, { codAmount: 10_000 });
     await toTheDoor(placed, rider);
     const o = await order(placed.id);
     expect(o.feePaidAt).not.toBeNull();
-    expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(o.totalPrice);
+    // Le livreur garde les espèces des frais : le montant est pris sur son solde, et l'argent
+    // de la course reste mis de côté jusqu'à la fin.
+    expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(0);
+    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(
+      RIDER_START_BALANCE - o.totalPrice,
+    );
+    const during = await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(200);
+    expect(during.body.reserved).toBe(10_000 + o.totalPrice);
 
     const due = await request(ctx.http)
       .get(`/v1/rider/orders/${placed.id}/collection`)
@@ -123,12 +131,12 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       .send({ to: 'DELIVERED' })
       .expect(200);
 
-    // Marchand : 10 000 − 2 % (minimum 250) ; livreur : sa part prise sur les espèces.
+    // Marchand payé tout de suite : 10 000 − 2 % (minimum 250). Livreur : espèces en main,
+    // montant pris sur son solde, gain crédité ; rien ne reste dû, rien n'est mis de côté.
+    const expected = RIDER_START_BALANCE - o.totalPrice - 10_000 + o.riderEarning;
     expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(9_750);
-    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(0);
-    expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(
-      o.totalPrice + 10_000 - o.riderEarning,
-    );
+    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(expected);
+    expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(0);
     // Historique du livreur : montant encaissé et moyen.
     const done = await request(ctx.http)
       .get(`/v1/rider/orders/${placed.id}`)
@@ -137,9 +145,10 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     expect(done.body.collected).toEqual({ amount: 10_000, method: 'CASH' });
     const wallet = await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(200);
     expect(wallet.body).toMatchObject({
-      earnings: 0,
-      cashHeld: o.totalPrice + 10_000 - o.riderEarning,
-      available: 0,
+      earnings: expected,
+      reserved: 0,
+      cashHeld: 0,
+      available: expected,
     });
 
     const lines = await request(ctx.http)
@@ -276,8 +285,10 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       .set(ops.auth)
       .send({ to: 'DELIVERED' })
       .expect(200);
-    // Rien en espèces : le livreur a tout son gain à retirer.
-    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(o.riderEarning);
+    // Rien en espèces : solde intact plus le gain ; l'argent mis de côté est libéré.
+    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(
+      RIDER_START_BALANCE + o.riderEarning,
+    );
     expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(20_000 - 400);
   });
 
@@ -296,7 +307,9 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     await go('RETURNED');
     const o = await order(placed.id);
     expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(-o.totalPrice);
-    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(o.riderEarning);
+    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(
+      RIDER_START_BALANCE + o.riderEarning,
+    );
   });
 
   it('reversement : réponse perdue puis rattrapée sans double envoi, notification répétée sans effet (G3)', async () => {
@@ -414,11 +427,46 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     ).toBe(1);
   });
 
-  it('livreur : dépôt d’espèces, plafond, retrait du disponible seulement (G4, G5)', async () => {
+  it('livreur : solde prépayé rechargé sans frais, réservé à l’acceptation, retrait du disponible (G4, G5)', async () => {
     const shop = await merchant(ctx);
-    const rider = await activeRider(ctx);
+    const rider = await activeRider(ctx, { balance: 0 });
     const placed = await placeOrder(ctx, shop, { codAmount: 15_000 });
+    const o = await order(placed.id);
+    const carried = cashCarried(o);
+
+    // Solde vide : pas de course avec encaissement.
+    const refused = await request(ctx.http)
+      .post(`/v1/admin/orders/${placed.id}/transition`)
+      .set(ops.auth)
+      .send({ to: 'ASSIGNED', riderId: rider.riderId })
+      .expect(422);
+    expect(refused.body.error.code).toBe('RIDER_BALANCE_TOO_LOW');
+
+    // Recharge Mobile Money : crédité du montant entier, Tara paie les frais.
+    const fees = await ledger.balance(PLATFORM_ACCOUNTS.providerFees);
+    const topUp = await request(ctx.http)
+      .post('/v1/rider/topups')
+      .set(rider.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: 30_000, phone: rider.phone, operator: 'MTN' })
+      .expect(201);
+    expect(topUp.body).toMatchObject({ purpose: 'RIDER_TOPUP', status: 'PENDING' });
+    await settle(await pendingReference(topUp.body.id), 'SUCCEEDED');
+    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(30_000);
+    expect(await ledger.balance(PLATFORM_ACCOUNTS.providerFees)).toBeGreaterThanOrEqual(fees);
+
+    // Course acceptée : l'argent à encaisser est mis de côté ; seul le reste se retire.
     await toTheDoor(placed, rider);
+    const wallet = await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(200);
+    expect(wallet.body.reserved).toBe(carried);
+    const tooMuch = await request(ctx.http)
+      .post('/v1/rider/withdrawals')
+      .set(rider.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: wallet.body.available + 1, phone: rider.phone, operator: 'MTN' })
+      .expect(422);
+    expect(tooMuch.body.error.code).toBe('INSUFFICIENT_BALANCE');
+
     await request(ctx.http)
       .post(`/v1/rider/orders/${placed.id}/collect`)
       .set(rider.auth)
@@ -429,14 +477,48 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       .set(ops.auth)
       .send({ to: 'DELIVERED' })
       .expect(200);
-    const cash = await ledger.balance(riderCashHeld(rider.riderId));
-    expect(cash).toBeGreaterThan(15_000);
+    // Espèces en main ; solde = recharge − argent encaissé + gain ; rien ne reste dû.
+    const after = 30_000 - carried + o.riderEarning;
+    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(after);
+    expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(0);
+    const done = await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(200);
+    expect(done.body).toMatchObject({ earnings: after, reserved: 0, available: after });
 
+    // Recharge au bureau, rejouée : comptée une fois, tracée.
+    const officeKey = key();
+    for (let i = 0; i < 2; i += 1) {
+      await request(ctx.http)
+        .post(`/v1/admin/finance/riders/${rider.riderId}/topups`)
+        .set(finance.auth)
+        .set('Idempotency-Key', officeKey)
+        .send({ amount: 5_000, note: 'Remis au bureau d’Akwa' })
+        .expect(201);
+    }
+    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(after + 5_000);
+    const audit = await ctx.prisma.auditLog.findFirst({
+      where: { entityId: rider.riderId, action: 'rider.balance_topped_up' },
+    });
+    expect(audit).not.toBeNull();
+  });
+
+  it('espèces d’avant le solde prépayé : dépôt Mobile Money ou au bureau, jamais plus que le dû', async () => {
+    const rider = await activeRider(ctx, { balance: 0 });
+    await ctx.prisma.$transaction((tx) =>
+      ledger.post(tx, {
+        kind: 'COD_COLLECTED',
+        description: 'Espèces encaissées avant le solde prépayé (test)',
+        idempotencyKey: `test-legacy-cash:${rider.riderId}`,
+        postings: [
+          { account: riderCashHeld(rider.riderId), amount: 12_000 },
+          { account: PLATFORM_ACCOUNTS.codFees, amount: -12_000 },
+        ],
+      }),
+    );
     const tooMuch = await request(ctx.http)
       .post('/v1/rider/cash-deposits')
       .set(rider.auth)
       .set('Idempotency-Key', key())
-      .send({ amount: cash + 1, phone: rider.phone, operator: 'MTN' })
+      .send({ amount: 12_001, phone: rider.phone, operator: 'MTN' })
       .expect(422);
     expect(tooMuch.body.error.code).toBe('DEPOSIT_TOO_LARGE');
     const deposit = await request(ctx.http)
@@ -444,30 +526,14 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       .set(rider.auth)
       .set('Idempotency-Key', key())
       .send({ amount: 10_000, phone: rider.phone, operator: 'MTN' });
-    expect(deposit.body).toMatchObject({ status: 'PENDING' });
     await settle(await pendingReference(deposit.body.id), 'SUCCEEDED');
-    const officeKey = key();
-    for (let i = 0; i < 2; i += 1) {
-      await request(ctx.http)
-        .post(`/v1/admin/finance/riders/${rider.riderId}/cash-deposits`)
-        .set(finance.auth)
-        .set('Idempotency-Key', officeKey)
-        .send({ amount: cash - 10_000, note: 'Remis au bureau d’Akwa' })
-        .expect(201);
-    }
-    expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(0);
-    expect(await ledger.balance(PLATFORM_ACCOUNTS.officeCash)).toBeGreaterThanOrEqual(
-      cash - 10_000,
-    );
-
-    // Rien à retirer : sa part a déjà été gardée sur les espèces.
-    const empty = await request(ctx.http)
-      .post('/v1/rider/withdrawals')
-      .set(rider.auth)
+    await request(ctx.http)
+      .post(`/v1/admin/finance/riders/${rider.riderId}/cash-deposits`)
+      .set(finance.auth)
       .set('Idempotency-Key', key())
-      .send({ phone: rider.phone, operator: 'MTN' })
-      .expect(422);
-    expect(empty.body.error.code).toBe('PAYOUT_TOO_SMALL');
+      .send({ amount: 2_000, note: 'Remis au bureau' })
+      .expect(201);
+    expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(0);
   });
 
   it('solde client : recharge, prépaiement refusé si dette, remboursement vers Mobile Money (G1, G8)', async () => {

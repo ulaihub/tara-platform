@@ -32,7 +32,7 @@ Concevoir, développer et mettre en production une plateforme de livraison urbai
 | Expéditeur particulier | App Tara | Commande, paie, suit, note le livreur |
 | Marchand ou entreprise | App Tara en mode marchand (portail web en V2) | Crée des commandes une à une ou en masse, suit ses encaissements, reçoit ses reversements et factures |
 | Destinataire | Page de suivi web, SMS, WhatsApp | Suit le colis, donne le code de livraison, paie en espèces ou Mobile Money |
-| Livreur | App Tara Livreur | Accepte, enlève, livre, encaisse, dépose les espèces, retire ses gains |
+| Livreur | App Tara Livreur | Accepte, enlève, livre, encaisse, recharge son solde prépayé, retire ses gains |
 | Dispatcheur | Back-office | Surveille la flotte en direct, réattribue, gère les incidents |
 | Agent de support | Back-office | Traite les réclamations et les litiges |
 | Responsable financier | Back-office | Rapproche les encaissements, valide les reversements, exporte la comptabilité |
@@ -98,10 +98,10 @@ Le MVP compte 51 exigences, réparties en 8 modules ; la V2 en ajoute 9. Chaque 
 
 | ID | Exigence | Lot |
 | --- | --- | --- |
-| D1 | Proposition automatique au livreur disponible le mieux placé (distance d'approche, note, courses en cours, espèces détenues) | MVP |
+| D1 | Proposition automatique au livreur disponible le mieux placé (distance d'approche, note, courses en cours) ; une course avec encaissement seulement à un livreur dont le solde prépayé la couvre | MVP |
 | D2 | 30 s pour accepter, puis proposition au suivant ; diffusion à plusieurs livreurs après 3 refus ; alerte au dispatch après 5 min sans livreur | MVP |
 | D3 | Attribution et réattribution manuelles par le dispatcheur | MVP |
-| D4 | Livreur exclu des propositions si plafond d'espèces atteint ou document expiré | MVP |
+| D4 | Livreur exclu des propositions si document expiré ; exclu des courses avec encaissement si son solde prépayé disponible ne couvre pas le montant | MVP |
 | D5 | Regroupement automatique de colis dans une même tournée | V2 |
 
 ### E. Exécution de la livraison (app livreur)
@@ -135,8 +135,8 @@ Le MVP compte 51 exigences, réparties en 8 modules ; la V2 en ajoute 9. Chaque 
 | G1 | Paiement de la livraison par MTN MoMo, Orange Money, solde Tara ou espèces ; option « le destinataire paie la livraison » | MVP |
 | G2 | Portefeuille marchand : encaissements, frais déduits, solde, historique ligne par ligne | MVP |
 | G3 | Reversement automatique quotidien à heure fixe (par défaut 18 h) vers le Mobile Money du marchand ; reversement à la demande pour les Pro | MVP |
-| G4 | Portefeuille livreur : gains, commissions dues sur courses payées en espèces, espèces détenues, retrait vers Mobile Money | MVP |
-| G5 | Plafond d'espèces par livreur ; dépôt par Mobile Money ou au bureau ; blocage des nouvelles courses au-delà | MVP |
+| G4 | Portefeuille livreur : solde prépayé (gains et recharges, moins l'argent encaissé en espèces), montant mis de côté pour les courses en cours, retrait du disponible vers Mobile Money | MVP |
+| G5 | Solde prépayé du livreur (décision 36) : recharge par Mobile Money (frais payés par Tara) ou au bureau ; l'argent à encaisser est mis de côté sur le solde à l'acceptation, puis pris sur le solde à l'encaissement (le livreur garde les espèces, le marchand est crédité aussitôt) ; le solde ne peut pas devenir négatif : aucune dette, aucun garant | MVP |
 | G6 | Rapprochement automatique quotidien : encaissements déclarés, dépôts et reversements, avec liste des écarts | MVP |
 | G7 | Relevé mensuel PDF par marchand | MVP |
 | G8 | Remboursements et avoirs | MVP |

@@ -12,27 +12,11 @@ import { LedgerService } from './ledger.service.js';
 const HOUR_MS = 3_600_000;
 
 /**
- * Plafond d'espèces après une course : le plafond de départ passe au plafond normal après
- * assez de courses sans retard de dépôt ; un plafond fixé à la main par la finance (ni l'un
- * ni l'autre) n'est jamais changé.
- */
-export function nextCashLimit(input: {
-  limit: number;
-  deliveredSinceLate: number;
-  start: number;
-  full: number;
-  courses: number;
-}): number {
-  if (input.limit === input.start && input.deliveredSinceLate >= input.courses) return input.full;
-  return input.limit;
-}
-
-/**
- * Espèces encaissées par les livreurs (G5, décisions 35) : à déposer sous 24 h (Mobile Money
- * ou bureau). Rappel à 18 h ; en retard, plus de courses tant qu'elles ne sont pas déposées
- * et plafond ramené à celui de départ ; 72 h de retard : compte suspendu, gains retenus sur
- * la dette, équipe prévenue avec le garant. Les dépôts soldent d'abord les espèces les plus
- * anciennes.
+ * Espèces encore dues par un livreur (ancien fonctionnement, avant le solde prépayé de la
+ * décision 36 : les nouvelles courses n'en créent plus). À déposer sous 24 h (Mobile Money
+ * ou bureau) ; rappel à 18 h ; en retard, plus de courses tant qu'elles ne sont pas
+ * déposées ; 72 h de retard : compte suspendu, gains retenus sur la dette, équipe prévenue.
+ * Les dépôts soldent d'abord les espèces les plus anciennes.
  */
 @Injectable()
 export class CashDisciplineService {
@@ -126,10 +110,7 @@ export class CashDisciplineService {
     return sent;
   }
 
-  /**
-   * Passage régulier : retards, suspensions, dépôts faits (blocage levé) et plafonds qui
-   * remontent après assez de courses sans retard.
-   */
+  /** Passage régulier : retards, suspensions, dépôts faits (blocage levé). */
   async sweep(
     now = new Date(),
     only?: string[],
@@ -143,7 +124,7 @@ export class CashDisciplineService {
       if (!dueBy || dueBy > now) continue;
       const rider = await this.prisma.riderProfile.findUniqueOrThrow({ where: { id: riderId } });
       if (!rider.cashOverdueSince) {
-        await this.markOverdue(rider.id, rider.userId, rider.cashLimit, dueBy, cashHeld, now);
+        await this.markOverdue(rider.id, rider.userId, dueBy, cashHeld, now);
         overdue++;
       }
       const lateSince = rider.cashOverdueSince ?? dueBy;
@@ -173,25 +154,19 @@ export class CashDisciplineService {
       await this.prisma.riderProfile.update({ where: { id }, data: { cashOverdueSince: null } });
       cleared++;
     }
-    await this.promote(only);
     return { overdue, suspended, cleared };
   }
 
   private async markOverdue(
     riderId: string,
     userId: string,
-    limit: number,
     dueBy: Date,
     cashHeld: number,
     now: Date,
   ): Promise<void> {
     await this.prisma.riderProfile.update({
       where: { id: riderId },
-      data: {
-        cashOverdueSince: dueBy,
-        lastCashLateAt: now,
-        cashLimit: Math.min(limit, this.env.CASH_LIMIT_START),
-      },
+      data: { cashOverdueSince: dueBy, lastCashLateAt: now },
     });
     await this.notifications.toUser(userId, {
       template: 'RIDER_CASH_OVERDUE',
@@ -264,42 +239,6 @@ export class CashDisciplineService {
       after: { status: 'SUSPENDED', offset: offset.amount, remaining: offset.remaining },
     });
     this.logger.warn(`Livreur ${riderId} suspendu : ${offset.remaining} FCFA non déposés`);
-  }
-
-  /** Plafond de départ → plafond normal après assez de courses livrées sans retard. */
-  private async promote(only?: string[]): Promise<void> {
-    const candidates = await this.prisma.riderProfile.findMany({
-      where: {
-        cashLimit: this.env.CASH_LIMIT_START,
-        status: 'ACTIVE',
-        cashOverdueSince: null,
-        ...(only ? { id: { in: only } } : {}),
-      },
-      select: { id: true, cashLimit: true, lastCashLateAt: true },
-      take: 500,
-    });
-    for (const rider of candidates) {
-      const delivered = await this.prisma.order.count({
-        where: {
-          riderId: rider.id,
-          status: 'DELIVERED',
-          ...(rider.lastCashLateAt ? { deliveredAt: { gt: rider.lastCashLateAt } } : {}),
-        },
-      });
-      const limit = nextCashLimit({
-        limit: rider.cashLimit,
-        deliveredSinceLate: delivered,
-        start: this.env.CASH_LIMIT_START,
-        full: this.env.CASH_LIMIT_FULL,
-        courses: this.env.CASH_LIMIT_PROMOTION_COURSES,
-      });
-      if (limit !== rider.cashLimit) {
-        await this.prisma.riderProfile.update({
-          where: { id: rider.id },
-          data: { cashLimit: limit },
-        });
-      }
-    }
   }
 }
 

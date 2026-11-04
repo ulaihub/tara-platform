@@ -744,11 +744,7 @@
                       "phone"
                     ]
                   }
-                },
-                "required": [
-                  "guarantorName",
-                  "guarantorPhone"
-                ]
+                }
               }
             }
           }
@@ -5467,6 +5463,73 @@
         ]
       }
     },
+    "/v1/rider/topups": {
+      "post": {
+        "operationId": "RiderFinance_topUp",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Identifiant unique de l’opération (UUID). Renvoyer la même requête après une coupure réseau ne refait pas l’opération.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "operator": {
+                    "$ref": "#/components/schemas/MobileMoneyOperator"
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "minimum": 500,
+                    "maximum": 500000
+                  }
+                },
+                "required": [
+                  "phone",
+                  "operator",
+                  "amount"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/rider/cash-deposits": {
       "post": {
         "operationId": "RiderFinance_deposit",
@@ -6023,6 +6086,90 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Payout"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · finance"
+        ]
+      }
+    },
+    "/v1/admin/finance/riders/{riderId}/topups": {
+      "post": {
+        "operationId": "AdminFinance_topUpAtOffice",
+        "parameters": [
+          {
+            "name": "riderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Identifiant unique de l’opération (UUID). Renvoyer la même requête après une coupure réseau ne refait pas l’opération.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5000000
+                  },
+                  "note": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "amount",
+                  "note"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entryId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "balance": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "entryId",
+                    "balance"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -7065,7 +7212,7 @@
               "type": "string",
               "enum": [
                 "DOCUMENTS",
-                "CASH_LIMIT",
+                "BALANCE_TOO_LOW",
                 "CASH_OVERDUE",
                 "TOO_MANY_ORDERS",
                 "PENDING_OFFER"
@@ -7448,6 +7595,7 @@
                   "DELIVERY_CODE_LOCKED",
                   "NO_DELIVERY_VALIDATION_REQUEST",
                   "DELIVERY_VALIDATION_ADMIN_REQUIRED",
+                  "RIDER_BALANCE_TOO_LOW",
                   "FAILURE_CALL_REQUIRED",
                   "FAILURE_CALLS_REQUIRED",
                   "FAILURE_DECISION_NOT_EXPECTED",
@@ -8293,7 +8441,8 @@
               "COD",
               "RIDER_CASH_DEPOSIT",
               "SUBSCRIPTION",
-              "WALLET_TOPUP"
+              "WALLET_TOPUP",
+              "RIDER_TOPUP"
             ]
           },
           "status": {
@@ -9466,6 +9615,9 @@
           "earnings": {
             "type": "integer"
           },
+          "reserved": {
+            "type": "integer"
+          },
           "cashHeld": {
             "type": "integer"
           },
@@ -9509,6 +9661,7 @@
         "required": [
           "currency",
           "earnings",
+          "reserved",
           "cashHeld",
           "cashLimit",
           "cashDueBy",

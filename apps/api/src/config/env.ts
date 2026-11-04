@@ -121,15 +121,11 @@ const envSchema = z
     FAILURE_CALL_SPACING_MINUTES: z.coerce.number().min(0).max(60).default(5),
     FAILURE_DECISION_TIMEOUT_MINUTES: z.coerce.number().min(0.05).max(240).default(15),
     /**
-     * Espèces encaissées (G5) : délai de dépôt, retard au-delà duquel le compte est suspendu
-     * (gains retenus, garant appelé), plafond de départ, plafond normal et courses sans
-     * retard pour y passer.
+     * Espèces encore dues d'avant le solde prépayé (G5) : délai de dépôt, puis retard au-delà
+     * duquel le compte est suspendu (gains retenus).
      */
     CASH_DEPOSIT_DEADLINE_HOURS: z.coerce.number().min(1).max(240).default(24),
     CASH_OVERDUE_SUSPEND_HOURS: z.coerce.number().min(1).max(720).default(72),
-    CASH_LIMIT_START: z.coerce.number().int().min(0).default(25_000),
-    CASH_LIMIT_FULL: z.coerce.number().int().min(0).default(50_000),
-    CASH_LIMIT_PROMOTION_COURSES: z.coerce.number().int().min(1).default(20),
     /** Ligne du support Tara, affichée dans l'app livreur ; sans valeur, le bouton est masqué. */
     SUPPORT_PHONE: CameroonMobile.optional(),
 

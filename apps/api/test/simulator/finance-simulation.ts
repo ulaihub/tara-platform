@@ -98,7 +98,9 @@ export async function runFinanceSimulation(
       shops.push(shop);
     }
     const riders: TestRider[] = [];
-    for (let i = 0; i < options.riders; i += 1) riders.push(await activeRider(ctx));
+    // Solde prépayé confortable : chaque livreur peut porter deux courses avec encaissement.
+    for (let i = 0; i < options.riders; i += 1)
+      riders.push(await activeRider(ctx, { balance: 1_000_000 }));
     log(`${shops.length} marchands, ${riders.length} livreurs ; ${options.orders} commandes`);
 
     /** Notification du prestataire : parfois perdue (rattrapée par l'interrogation), parfois répétée. */

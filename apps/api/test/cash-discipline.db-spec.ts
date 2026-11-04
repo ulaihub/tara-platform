@@ -10,7 +10,7 @@ import { activeRider, type TestRider } from './helpers/riders.js';
 const OPS_PHONE = '+237690000003';
 const HOUR = 3_600_000;
 
-describe('Espèces encaissées : dépôt sous 24 h (G5)', () => {
+describe('Espèces d’avant le solde prépayé : dépôt sous 24 h (G5)', () => {
   let ctx: TestContext;
   let finance: SignedIn;
   let cash: CashDisciplineService;
@@ -67,7 +67,7 @@ describe('Espèces encaissées : dépôt sous 24 h (G5)', () => {
       .send({ online: true, ...nearAkwa(0) });
 
   it('échéance à 24 h, rappel, retard qui bloque, suspension avec gains retenus et garant', async () => {
-    const rider = await activeRider(ctx);
+    const rider = await activeRider(ctx, { balance: 0 });
     const start = Date.now();
     await collect(rider, 10_000, 'a');
     await earn(rider, 3_000);
@@ -88,11 +88,10 @@ describe('Espèces encaissées : dépôt sous 24 h (G5)', () => {
         .cashOverdueSince,
     ).toBeNull();
 
-    // Échéance dépassée : plus de courses, plafond ramené à 25 000 FCFA.
+    // Échéance dépassée : plus de courses jusqu'au dépôt.
     await cash.sweep(new Date(start + 25 * HOUR), [rider.riderId]);
     const late = await ctx.prisma.riderProfile.findUniqueOrThrow({ where: { id: rider.riderId } });
     expect(late.cashOverdueSince).not.toBeNull();
-    expect(late.cashLimit).toBe(25_000);
     expect(push.lastTo(rider.pushToken)).toMatchObject({ data: { type: 'cash.overdue' } });
     const blocked = await goOnline(rider).expect(422);
     expect(blocked.body.error.code).toBe('RIDER_NOT_ELIGIBLE');
@@ -139,7 +138,7 @@ describe('Espèces encaissées : dépôt sous 24 h (G5)', () => {
   });
 
   it('dépôt dans les temps : aucun retard', async () => {
-    const rider = await activeRider(ctx);
+    const rider = await activeRider(ctx, { balance: 0 });
     const start = Date.now();
     await collect(rider, 5_000, 'b');
     await deposit(rider, 5_000, 'dep-temps-0001');
@@ -148,6 +147,5 @@ describe('Espèces encaissées : dépôt sous 24 h (G5)', () => {
       where: { id: rider.riderId },
     });
     expect(profile.cashOverdueSince).toBeNull();
-    expect(profile.cashLimit).toBe(50_000);
   });
 });

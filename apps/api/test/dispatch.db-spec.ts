@@ -170,16 +170,16 @@ describe('Attribution des courses (D1 à D4)', () => {
     expect(res.body.error.code).toBe('OFFER_NO_LONGER_AVAILABLE');
   });
 
-  it('écarte les pièces expirées et le plafond d’espèces, et l’explique au dispatch (D4)', async () => {
+  it('écarte les pièces expirées et le solde prépayé insuffisant, et l’explique au dispatch (D4, G5)', async () => {
     const expired = await onlineRider(0.001);
-    const broke = await onlineRider(0.002, { cashLimit: 3_000 });
+    const broke = await onlineRider(0.002, { balance: 3_000 });
     const ok = await onlineRider(0.01);
     // Pièce expirée depuis le passage en ligne.
     await ctx.prisma.kycDocument.updateMany({
       where: { riderId: expired.riderId, type: 'DRIVING_LICENSE' },
       data: { expiresOn: new Date(Date.now() - 2 * 86_400_000) },
     });
-    // 5 000 FCFA à encaisser + frais en espèces : au-delà du plafond de 3 000 FCFA.
+    // 5 000 FCFA à encaisser + frais en espèces : au-delà de son solde de 3 000 FCFA.
     const order = await placeOrder(ctx, shop, { codAmount: 5_000 });
 
     const offers = await pendingOffers(order.id);
@@ -196,7 +196,7 @@ describe('Attribution des courses (D1 à D4)', () => {
       ]),
     );
     expect(byId.get(expired.riderId)?.ineligibleBecause).toEqual(['DOCUMENTS']);
-    expect(byId.get(broke.riderId)?.ineligibleBecause).toEqual(['CASH_LIMIT']);
+    expect(byId.get(broke.riderId)?.ineligibleBecause).toEqual(['BALANCE_TOO_LOW']);
     expect(byId.get(ok.riderId)?.ineligibleBecause).toEqual(['PENDING_OFFER']);
   });
 

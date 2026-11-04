@@ -267,6 +267,10 @@ export const ERROR_MESSAGES = {
     fr: 'Au-delà de {limit} FCFA à encaisser, la validation revient à un administrateur.',
     en: 'Above {limit} XAF to collect, validation requires an administrator.',
   },
+  RIDER_BALANCE_TOO_LOW: {
+    fr: 'Solde Tara insuffisant pour cette course : {required} FCFA à encaisser, {available} FCFA disponibles. Rechargez votre solde.',
+    en: 'Not enough Tara balance for this job: {required} XAF to collect, {available} XAF available. Top up your balance.',
+  },
   FAILURE_CALL_REQUIRED: {
     fr: 'Appelez le destinataire depuis l’app avant de déclarer l’échec.',
     en: 'Call the recipient from the app before reporting the failure.',

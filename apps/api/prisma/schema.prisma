@@ -281,6 +281,8 @@ enum PaymentPurpose {
   RIDER_CASH_DEPOSIT
   SUBSCRIPTION
   WALLET_TOPUP
+  /// Recharge du solde prépayé du livreur (frais Mobile Money payés par Tara).
+  RIDER_TOPUP
 
   @@map("payment_purpose")
 }
@@ -617,6 +619,7 @@ model RiderProfile {
   payments       Payment[]
   payouts        Payout[]
   safetyAlerts   SafetyAlert[]
+  balanceHolds   RiderBalanceHold[]
   onlineSessions RiderOnlineSession[]
   trackPoints    CourseTrackPoint[]
   courseTracks   CourseTrack[]
@@ -944,6 +947,7 @@ model Order {
   notifications   Notification[]
   tickets         Ticket[]
   safetyAlerts    SafetyAlert[]
+  balanceHolds    RiderBalanceHold[]
   trackPoints     CourseTrackPoint[]
   tracks          CourseTrack[]
   courseAlerts    CourseAlert[]
@@ -1049,6 +1053,24 @@ model ReconciliationReport {
   ranBy User? @relation(fields: [ranById], references: [id])
 
   @@map("reconciliation_reports")
+}
+
+/// Montant mis de côté sur le solde prépayé du livreur pour une course avec encaissement :
+/// pris à l'acceptation, libéré quand la course se termine ou lui est retirée (G5).
+model RiderBalanceHold {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  riderId    String    @map("rider_id") @db.Uuid
+  orderId    String    @map("order_id") @db.Uuid
+  amount     Int
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  releasedAt DateTime? @map("released_at") @db.Timestamptz(3)
+
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+  order Order        @relation(fields: [orderId], references: [id])
+
+  @@index([riderId, releasedAt])
+  @@index([orderId])
+  @@map("rider_balance_holds")
 }
 
 /// Alerte de sécurité déclenchée par un livreur (E8) : sa position part au dispatch.
