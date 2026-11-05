@@ -134,6 +134,7 @@ export function toPaymentDto(payment: Payment): z.output<typeof PaymentDto> {
     status: payment.status,
     amount: payment.amount,
     orderId: payment.orderId,
+    batchId: payment.batchId,
     failureReason: payment.failureReason,
     createdAt: payment.createdAt.toISOString(),
     confirmedAt: payment.confirmedAt?.toISOString() ?? null,
@@ -300,6 +301,20 @@ export class WalletController {
     @ValidBody(MobileMoneyPayer) body: z.output<typeof MobileMoneyPayer>,
   ): Out<typeof PaymentDto> {
     return toPaymentDto(await this.finance.pay(user.id, id, body.phone));
+  }
+
+  /** Paiement d'avance d'un lot de livraisons en une seule fois (C4, G1). */
+  @Post('orders/batches/:id/pay')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @ApiTags('Commandes')
+  @ApiZodBody(MobileMoneyPayer)
+  @ApiZodResponse(PaymentDto, HttpStatus.CREATED)
+  async payBatch(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(MobileMoneyPayer) body: z.output<typeof MobileMoneyPayer>,
+  ): Out<typeof PaymentDto> {
+    return toPaymentDto(await this.finance.payBatch(user.id, id, body.phone));
   }
 
   /** Statut d'un paiement (à interroger si la connexion temps réel est coupée). */

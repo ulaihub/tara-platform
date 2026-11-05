@@ -189,17 +189,29 @@ class OrderPlaced extends StatelessWidget {
                 liveRegion: true,
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: 56,
-                      child: Center(
-                        child: scheduled != null
-                            ? TaraIcon(TaraIcons.clock, size: 26, color: c.accentText)
-                            : riderFound
-                            ? TaraIcon(TaraIcons.check, size: 26, color: c.success)
-                            : const GooLoader(compact: true),
-                      ),
+                    // Pastille de 44 px : animation de recherche, coche verte ou horloge,
+                    // toujours alignée sur le texte.
+                    SizedBox.square(
+                      dimension: 44,
+                      child: scheduled == null && !riderFound
+                          ? const Center(child: GooLoader(compact: true))
+                          : DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: riderFound ? c.successTintBg : c.chipBorder.withValues(alpha: .25),
+                                border: Border.all(color: riderFound ? c.successTintBorder : c.chipBorder),
+                              ),
+                              child: Center(
+                                child: TaraIcon(
+                                  riderFound ? TaraIcons.check : TaraIcons.clock,
+                                  size: 22,
+                                  strokeWidth: 2.4,
+                                  color: riderFound ? c.success : c.accentText,
+                                ),
+                              ),
+                            ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         scheduled != null

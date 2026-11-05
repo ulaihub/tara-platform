@@ -144,8 +144,43 @@ export class OrderFinanceService implements OnModuleInit {
     });
   }
 
+  /**
+   * Un seul paiement Mobile Money pour tout un lot (C4) : la somme des frais des commandes
+   * du lot encore à payer (les annulées n'en font plus partie).
+   */
+  async payBatch(userId: string, batchId: string, phone: string): Promise<Payment> {
+    const batch = await this.prisma.orderBatch.findUnique({
+      where: { id: batchId },
+      include: { orders: true },
+    });
+    if (batch?.senderId !== userId) throw AppError.notFound('ORDER_NOT_FOUND');
+    const payable = batch.orders.filter(
+      (order) =>
+        order.status === 'CREATED' &&
+        !order.feePaidAt &&
+        order.feePayer === 'SENDER' &&
+        order.feePaymentMethod.startsWith('MOMO_'),
+    );
+    if (payable.length === 0) throw AppError.conflict('PAYMENT_NOT_EXPECTED');
+    const attempts = await this.prisma.payment.count({
+      where: { batchId, purpose: 'DELIVERY_FEE' },
+    });
+    const method = payable[0]?.feePaymentMethod === 'MOMO_ORANGE' ? 'MOMO_ORANGE' : 'MOMO_MTN';
+    return this.payments.request({
+      purpose: 'DELIVERY_FEE',
+      amount: payable.reduce((sum, order) => sum + order.totalPrice, 0),
+      phone,
+      method,
+      payerId: userId,
+      batchId,
+      idempotencyKey: `batch:${batchId}:prepay:${attempts + 1}`,
+      description: `Tara ${payable.length} livraisons`,
+    });
+  }
+
   /** Frais payés par Mobile Money : d'avance par l'expéditeur, ou à la porte par le destinataire. */
   private async onFeePaid(tx: Prisma.TransactionClient, payment: Payment): Promise<OrderChange[]> {
+    if (payment.batchId) return this.onBatchPaid(tx, payment, payment.batchId);
     const order = payment.orderId
       ? await tx.order.findUnique({ where: { id: payment.orderId } })
       : null;
@@ -178,6 +213,68 @@ export class OrderFinanceService implements OnModuleInit {
       role: 'SYSTEM',
     });
     return [change];
+  }
+
+  /**
+   * Lot payé : les frais de chaque commande encore à payer sont réglés et elles partent en
+   * recherche de livreur. Ce qui reste (commande annulée entre-temps) revient au solde de
+   * l'expéditeur, comme tout paiement sans emploi.
+   */
+  private async onBatchPaid(
+    tx: Prisma.TransactionClient,
+    payment: Payment,
+    batchId: string,
+  ): Promise<OrderChange[]> {
+    const orders = await tx.order.findMany({
+      where: { batchId, feePaidAt: null, status: 'CREATED', feePayer: 'SENDER' },
+      orderBy: { createdAt: 'asc' },
+    });
+    const due = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    if (orders.length === 0 || due > payment.amount) {
+      const first = await tx.order.findFirst({ where: { batchId } });
+      await this.unallocated(tx, payment, first);
+      return [];
+    }
+    const changes: OrderChange[] = [];
+    for (const order of orders) {
+      await this.ledger.post(tx, {
+        kind: 'PAYMENT_RECEIVED',
+        description: `Frais de livraison ${order.reference} payés par Mobile Money (lot)`,
+        idempotencyKey: `payment:${payment.id}:${order.id}`,
+        orderId: order.id,
+        paymentId: payment.id,
+        postings: [
+          { account: PLATFORM_ACCOUNTS.mobileMoney, amount: order.totalPrice },
+          { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.totalPrice },
+        ],
+      });
+      const paid = await tx.order.update({
+        where: { id: order.id },
+        data: { feePaidAt: new Date() },
+      });
+      if (paid.scheduledFor) continue;
+      const { change } = await this.transitions.applyIn(tx, paid, 'SEARCHING_RIDER', {
+        id: null,
+        role: 'SYSTEM',
+      });
+      changes.push(change);
+    }
+    const rest = payment.amount - due;
+    const first = orders[0];
+    if (rest > 0 && first) {
+      await this.ledger.post(tx, {
+        kind: 'PAYMENT_RECEIVED',
+        description: `Paiement ${payment.id} : reste du lot crédité au solde`,
+        idempotencyKey: `payment:${payment.id}:rest`,
+        orderId: null,
+        paymentId: payment.id,
+        postings: [
+          { account: PLATFORM_ACCOUNTS.mobileMoney, amount: rest },
+          { account: senderAccount(first), amount: -rest },
+        ],
+      });
+    }
+    return changes;
   }
 
   /**

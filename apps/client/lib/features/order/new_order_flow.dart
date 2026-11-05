@@ -242,19 +242,19 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
   }
 
   Future<void> _requestPayment() async {
-    final order = _placed!.orders.first;
+    final placed = _placed!;
+    final api = ref.read(clientApiProvider);
+    final phone = '+237${_draft.payerPhone}';
+    final operator = _draft.paymentMethod == 'MOMO_ORANGE' ? 'ORANGE' : 'MTN';
     setState(() {
       _paying = true;
       _payError = null;
     });
     try {
-      final payment = await ref
-          .read(clientApiProvider)
-          .payOrder(
-            order.id,
-            phone: '+237${_draft.payerPhone}',
-            operator: _draft.paymentMethod == 'MOMO_ORANGE' ? 'ORANGE' : 'MTN',
-          );
+      // Un lot se paie en une seule fois : une seule demande sur le téléphone.
+      final payment = placed.batchId != null && placed.orders.length > 1
+          ? await api.payBatch(placed.batchId!, phone: phone, operator: operator)
+          : await api.payOrder(placed.orders.first.id, phone: phone, operator: operator);
       if (!mounted) return;
       setState(() => _payment = payment);
       _paymentPoll?.cancel();
@@ -284,10 +284,12 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
 
   Future<void> _cancelUnpaid() async {
     final l = AppLocalizations.of(context);
-    final order = _placed!.orders.first;
+    final orders = _placed!.orders;
     setState(() => _paying = true);
     try {
-      await ref.read(clientApiProvider).cancelOrder(order.id, l.cancelReasonUnpaid);
+      for (final order in orders) {
+        await ref.read(clientApiProvider).cancelOrder(order.id, l.cancelReasonUnpaid);
+      }
       ref.invalidate(activeOrdersProvider);
       widget.onClose();
     } catch (error) {

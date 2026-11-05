@@ -5315,6 +5315,67 @@
         ]
       }
     },
+    "/v1/orders/batches/{id}/pay": {
+      "post": {
+        "operationId": "Wallet_payBatch",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "operator": {
+                    "$ref": "#/components/schemas/MobileMoneyOperator"
+                  }
+                },
+                "required": [
+                  "phone",
+                  "operator"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Portefeuille",
+          "Commandes"
+        ]
+      }
+    },
     "/v1/payments/{id}": {
       "get": {
         "operationId": "Wallet_payment",
@@ -8618,6 +8679,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "batchId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
           "failureReason": {
             "nullable": true,
             "type": "string"
@@ -8638,6 +8704,7 @@
           "status",
           "amount",
           "orderId",
+          "batchId",
           "failureReason",
           "createdAt",
           "confirmedAt"

@@ -123,6 +123,11 @@ class ClientApi {
   Future<Payment> payOrder(String orderId, {required String phone, required String operator}) async =>
       Payment.fromJson(await _api.post('/orders/$orderId/pay', body: {'phone': phone, 'operator': operator}) as Json);
 
+  /// Un seul paiement Mobile Money pour toutes les livraisons d'un lot (C4).
+  Future<Payment> payBatch(String batchId, {required String phone, required String operator}) async => Payment.fromJson(
+    await _api.post('/orders/batches/$batchId/pay', body: {'phone': phone, 'operator': operator}) as Json,
+  );
+
   Future<Payment> payment(String id) async => Payment.fromJson(await _api.get('/payments/$id') as Json);
 
   Future<void> cancelOrder(String orderId, String reason) =>

@@ -80,18 +80,9 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
         ..payerPhone = digits
         ..touch();
     });
-    // Mobile Money et codes promo : une seule livraison à la fois.
-    if (_batch) {
-      draft.promoCode = null;
-      if (draft.paymentMethod?.startsWith('MOMO_') ?? false) draft.paymentMethod = null;
-    }
-    draft.paymentMethod ??= _batch
-        ? 'CASH'
-        : switch (guessOperator(draft.payerPhone)) {
-            'ORANGE' => 'MOMO_ORANGE',
-            'MTN' => 'MOMO_MTN',
-            _ => 'CASH',
-          };
+    // Codes promo : une seule livraison à la fois.
+    if (_batch) draft.promoCode = null;
+    draft.paymentMethod ??= _momoGuess;
     // Après la première image : le calcul des prix rafraîchit le parcours.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_quoteAll());
@@ -103,6 +94,29 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
     _promo.dispose();
     _phone.dispose();
     super.dispose();
+  }
+
+  /// Le moyen choisi par l'expéditeur n'est plus remplacé par la suggestion.
+  bool _methodChosen = false;
+
+  String get _momoGuess => switch (guessOperator(_draft.payerPhone)) {
+    'ORANGE' => 'MOMO_ORANGE',
+    'MTN' => 'MOMO_MTN',
+    _ => 'CASH',
+  };
+
+  /// Suggestion : une boutique dont les ventes couvrent la course paie avec elles (rien
+  /// à valider sur le téléphone, rien à sortir) ; sinon Mobile Money de son opérateur.
+  void _suggestMethod() {
+    if (_methodChosen) return;
+    final balance = ref.read(walletProvider).value?.merchantBalance;
+    final total = _draft.total;
+    final enough = widget.me.merchant != null && balance != null && _draft.allQuoted && total > 0 && balance >= total;
+    final pick = enough ? 'WALLET' : _momoGuess;
+    if (_draft.paymentMethod == pick) return;
+    _draft
+      ..paymentMethod = pick
+      ..touch();
   }
 
   Future<Quote> _quote(DeliveryDraft delivery, {String? promoCode}) => ref
@@ -134,6 +148,7 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
       if (!mounted) return;
       _draft.touch();
     }
+    _suggestMethod();
   }
 
   Future<void> _applyPromo() async {
@@ -173,6 +188,7 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
 
   void _setMethod(String method) {
     HapticFeedback.selectionClick();
+    _methodChosen = true;
     _draft
       ..paymentMethod = method
       ..touch();
@@ -187,6 +203,8 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
     final pickup = draft.pickup!;
     final shop = widget.me.merchant != null;
     final wallet = ref.watch(walletProvider).value;
+    // Ventes connues après le prix : la suggestion peut changer.
+    ref.listen(walletProvider, (_, _) => _suggestMethod());
     final balance = shop ? wallet?.merchantBalance : wallet?.customerBalance;
     final total = draft.total;
     final pending = draft.deliveries.where((d) => d.dropoff == null).toList();
@@ -297,8 +315,8 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
           const SizedBox(height: 12),
           label(l.paymentLabel),
           for (final (method, icon, title, body) in [
-            ('MOMO_MTN', TaraIcons.phone, l.payMtn, _batch ? l.momoBatchOff : l.payMomoBody),
-            ('MOMO_ORANGE', TaraIcons.phone, l.payOrange, _batch ? l.momoBatchOff : l.payMomoBody),
+            ('MOMO_MTN', TaraIcons.phone, l.payMtn, l.payMomoBody),
+            ('MOMO_ORANGE', TaraIcons.phone, l.payOrange, l.payMomoBody),
             (
               'WALLET',
               TaraIcons.wallet,
@@ -307,23 +325,22 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
                   ? ''
                   : total > 0 && balance < total
                   ? l.walletTooLow('${formatAmount(balance)} F')
+                  : shop && total > 0
+                  ? l.payWalletShopBody('${formatAmount(balance - total)} F')
                   : l.payWalletBody('${formatAmount(balance)} F'),
             ),
             ('CASH', TaraIcons.cash, l.payCash, l.payCashBody),
           ]) ...[
-            Opacity(
-              opacity: _batch && method.startsWith('MOMO_') ? .45 : 1,
-              child: AddressChoice(
-                icon: icon,
-                title: title,
-                subtitle: body,
-                selected: draft.paymentMethod == method,
-                onTap: _batch && method.startsWith('MOMO_') ? () {} : () => _setMethod(method),
-              ),
+            AddressChoice(
+              icon: icon,
+              title: title,
+              subtitle: body,
+              selected: draft.paymentMethod == method,
+              onTap: () => _setMethod(method),
             ),
             const SizedBox(height: 8),
           ],
-          if (draft.momo && !_batch) ...[
+          if (draft.momo) ...[
             const SizedBox(height: 6),
             TaraTextField(
               label: l.payerPhoneLabel,

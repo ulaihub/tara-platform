@@ -24,6 +24,8 @@ export const PaymentDto = z
     status: z.enum(['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED']),
     amount: z.int(),
     orderId: z.uuid().nullable(),
+    /** Lot de livraisons payé en une fois (C4). */
+    batchId: z.uuid().nullable(),
     failureReason: z.string().nullable(),
     createdAt: z.iso.datetime(),
     confirmedAt: z.iso.datetime().nullable(),

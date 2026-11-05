@@ -460,7 +460,6 @@
   },
   "payCash": "Espèces à l’enlèvement",
   "payCashBody": "Vous payez le livreur quand il récupère le colis.",
-  "momoBatchOff": "Mobile Money : une livraison à la fois pour l’instant.",
   "payerPhoneLabel": "Numéro qui paie",
   "orderFor": "Commander · {amount}",
   "@orderFor": {
@@ -510,5 +509,13 @@
       }
     }
   },
-  "backHome": "Retour à l’accueil"
+  "backHome": "Retour à l’accueil",
+  "payWalletShopBody": "Pris sur vos ventes : il vous restera {amount} à recevoir.",
+  "@payWalletShopBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

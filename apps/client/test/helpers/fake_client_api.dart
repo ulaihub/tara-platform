@@ -180,6 +180,19 @@ class FakeClientApi extends ClientApi {
     );
   }
 
+  final batchPaid = <({String batchId, String phone, String operator})>[];
+
+  @override
+  Future<Payment> payBatch(String batchId, {required String phone, required String operator}) async {
+    batchPaid.add((batchId: batchId, phone: phone, operator: operator));
+    return const Payment(
+      id: '00000000-0000-4000-8000-000000000701',
+      status: 'PENDING',
+      amount: 2900,
+      failureReason: null,
+    );
+  }
+
   @override
   Future<Payment> payment(String id) async {
     final status = paymentStatuses.length > 1 ? paymentStatuses.removeAt(0) : paymentStatuses.first;

@@ -345,7 +345,6 @@
   "walletTooLow": "Available: {amount}, not enough for this order.",
   "payCash": "Cash at pickup",
   "payCashBody": "You pay the rider when they collect the parcel.",
-  "momoBatchOff": "Mobile Money: one delivery at a time for now.",
   "payerPhoneLabel": "Paying number",
   "orderFor": "Order · {amount}",
   "orderSlide": "Slide to order",
@@ -364,5 +363,6 @@
   "searchingRider": "Looking for a rider…",
   "riderFound": "Rider found! They’re coming for the parcel.",
   "scheduledPickup": "The rider will come {when}.",
-  "backHome": "Back to home"
+  "backHome": "Back to home",
+  "payWalletShopBody": "Taken from your sales: {amount} left to receive."
 }

@@ -234,6 +234,87 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     expect(broke.body.error.code).toBe('INSUFFICIENT_BALANCE');
   });
 
+  it('lot payé par Mobile Money en une fois : chaque commande réglée, le reste au solde', async () => {
+    const shop = await merchant(ctx);
+    const item = (n: number) => ({
+      dropoffAddressId: shop.dropoffId,
+      recipientName: `Client ${n}`,
+      recipientPhone: `+2376770000${n}${n}`,
+      packageSize: 'M',
+    });
+    const created = await request(ctx.http)
+      .post('/v1/orders/batch')
+      .set(shop.auth)
+      .send({
+        pickupAddressId: shop.pickupId,
+        feePaymentMethod: 'MOMO_MTN',
+        items: [1, 2, 3].map(item),
+      })
+      .expect(201);
+    const batchId = created.body.batchId as string;
+    const [a, b, c] = created.body.orders as {
+      id: string;
+      status: string;
+      pricing: { totalPrice: number };
+    }[];
+    expect([a, b, c].map((o) => o?.status)).toEqual(['CREATED', 'CREATED', 'CREATED']);
+    // Annulée avant la demande : elle n'en fait plus partie.
+    await request(ctx.http)
+      .post(`/v1/orders/${c?.id}/cancel`)
+      .set(shop.auth)
+      .send({ reason: 'Client absent' })
+      .expect(200);
+
+    const pay = await request(ctx.http)
+      .post(`/v1/orders/batches/${batchId}/pay`)
+      .set(shop.auth)
+      .send({ phone: shop.phone, operator: 'MTN' })
+      .expect(201);
+    expect(pay.body).toMatchObject({
+      status: 'PENDING',
+      batchId,
+      orderId: null,
+      amount: (a?.pricing.totalPrice ?? 0) + (b?.pricing.totalPrice ?? 0),
+    });
+    // Pas deux invites en même temps sur le téléphone.
+    const twice = await request(ctx.http)
+      .post(`/v1/orders/batches/${batchId}/pay`)
+      .set(shop.auth)
+      .send({ phone: shop.phone, operator: 'MTN' })
+      .expect(409);
+    expect(twice.body.error.code).toBe('PAYMENT_ALREADY_PENDING');
+    // Lot d'un autre : introuvable.
+    const stranger = await merchant(ctx);
+    await request(ctx.http)
+      .post(`/v1/orders/batches/${batchId}/pay`)
+      .set(stranger.auth)
+      .send({ phone: stranger.phone, operator: 'MTN' })
+      .expect(404);
+
+    // Annulée pendant que le client valide : son montant revient à son solde.
+    await request(ctx.http)
+      .post(`/v1/orders/${b?.id}/cancel`)
+      .set(shop.auth)
+      .send({ reason: 'Client absent' })
+      .expect(200);
+    const reference = await pendingReference(pay.body.id);
+    await settle(reference, 'SUCCEEDED');
+
+    const paidA = await order(a?.id ?? '');
+    expect(paidA).toMatchObject({ status: 'SEARCHING_RIDER', feePaidAt: expect.any(Date) });
+    expect((await order(b?.id ?? '')).status).toBe('CANCELLED');
+    expect(await ledger.balance(merchantPayable(paidA.merchantId ?? ''))).toBe(
+      b?.pricing.totalPrice,
+    );
+    expect(await ctx.prisma.journalEntry.count({ where: { paymentId: pay.body.id } })).toBe(2);
+    // Plus rien à payer dans ce lot.
+    await request(ctx.http)
+      .post(`/v1/orders/batches/${batchId}/pay`)
+      .set(shop.auth)
+      .send({ phone: shop.phone, operator: 'MTN' })
+      .expect(409);
+  });
+
   it('refuse un paiement d’un autre montant que celui demandé', async () => {
     const shop = await merchant(ctx);
     const placed = await placeOrder(ctx, shop, { feePaymentMethod: 'MOMO_ORANGE' });

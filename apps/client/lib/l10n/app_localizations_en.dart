@@ -880,9 +880,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payCashBody => 'You pay the rider when they collect the parcel.';
 
   @override
-  String get momoBatchOff => 'Mobile Money: one delivery at a time for now.';
-
-  @override
   String get payerPhoneLabel => 'Paying number';
 
   @override
@@ -947,4 +944,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backHome => 'Back to home';
+
+  @override
+  String payWalletShopBody(String amount) {
+    return 'Taken from your sales: $amount left to receive.';
+  }
 }

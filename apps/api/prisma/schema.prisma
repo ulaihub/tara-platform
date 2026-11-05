@@ -865,9 +865,10 @@ model OrderBatch {
   idempotencyKey  String?  @unique @map("idempotency_key")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  sender        User    @relation(fields: [senderId], references: [id])
-  pickupAddress Address @relation(fields: [pickupAddressId], references: [id])
+  sender        User      @relation(fields: [senderId], references: [id])
+  pickupAddress Address   @relation(fields: [pickupAddressId], references: [id])
   orders        Order[]
+  payments      Payment[]
 
   @@map("order_batches")
 }
@@ -1262,6 +1263,8 @@ model Payment {
   payerPhone        String?        @map("payer_phone")
   payerId           String?        @map("payer_id") @db.Uuid
   orderId           String?        @map("order_id") @db.Uuid
+  /// Lot de livraisons payé en une fois (C4) : réparti ensuite sur chaque commande.
+  batchId           String?        @map("batch_id") @db.Uuid
   riderId           String?        @map("rider_id") @db.Uuid
   /// Code du prestataire : "fake", "aggregator", "mtn_momo", "orange_money", "cash".
   provider          String
@@ -1279,12 +1282,14 @@ model Payment {
 
   payer          User?          @relation(fields: [payerId], references: [id])
   order          Order?         @relation(fields: [orderId], references: [id])
+  batch          OrderBatch?    @relation(fields: [batchId], references: [id])
   rider          RiderProfile?  @relation(fields: [riderId], references: [id])
   codCollection  CodCollection?
   journalEntries JournalEntry[]
 
   @@unique([provider, providerReference])
   @@index([status, createdAt])
+  @@index([batchId])
   @@map("payments")
 }
 

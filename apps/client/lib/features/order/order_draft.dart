@@ -108,11 +108,11 @@ class OrderDraft extends ChangeNotifier {
   bool get allQuoted => deliveries.every((d) => d.dropoff != null && d.quote != null);
   int get total => deliveries.fold(0, (sum, d) => sum + (d.quote?.totalPrice ?? 0));
 
-  /// Moyen de paiement choisi et utilisable (Mobile Money : numéro valide, une livraison).
+  /// Moyen de paiement choisi et utilisable (Mobile Money : numéro valide).
   bool get hasPayment =>
       !senderPays ||
       switch (paymentMethod) {
-        'MOMO_MTN' || 'MOMO_ORANGE' => deliveries.length == 1 && RegExp(r'^6\d{8}$').hasMatch(payerPhone),
+        'MOMO_MTN' || 'MOMO_ORANGE' => RegExp(r'^6\d{8}$').hasMatch(payerPhone),
         'WALLET' || 'CASH' => true,
         _ => false,
       };

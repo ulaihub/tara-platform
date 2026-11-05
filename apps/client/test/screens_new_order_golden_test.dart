@@ -252,6 +252,7 @@ void main() {
       final realtime = FakeRealtime();
       await pumpVariant(tester, variant, flow(api, realtime: realtime));
       await toSummary(tester);
+      await tapVisible(tester, 'MTN Mobile Money');
       await slideToOrder(tester);
       expect(find.text('Validez le paiement sur votre téléphone'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_paiement/${brightness.name}.png'));
@@ -540,8 +541,14 @@ void main() {
       final api = orderApi();
       final realtime = FakeRealtime();
       var closed = 0;
-      await pumpVariant(tester, Variant.matrix.first, flow(api, realtime: realtime, onClose: () => closed++));
+      await pumpVariant(
+        tester,
+        Variant.matrix.first,
+        flow(api, realtime: realtime, onClose: () => closed++),
+        surface: const Size(390, 1500),
+      );
       await toSummary(tester);
+      await tapVisible(tester, 'MTN Mobile Money');
       expect(api.quotes.single, {
         'dropoff': '00000000-0000-4000-8000-000000000204',
         'size': 'S',
@@ -597,8 +604,14 @@ void main() {
     testWidgets('paiement refusé : nouvelle demande, ou annulation de la commande', (tester) async {
       final api = orderApi()..paymentStatuses = ['FAILED'];
       var closed = 0;
-      await pumpVariant(tester, Variant.matrix.first, flow(api, onClose: () => closed++));
+      await pumpVariant(
+        tester,
+        Variant.matrix.first,
+        flow(api, onClose: () => closed++),
+        surface: const Size(390, 1500),
+      );
       await toSummary(tester);
+      await tapVisible(tester, 'MTN Mobile Money');
       await slideToOrder(tester);
       await tester.pump(const Duration(seconds: 4));
       await settle(tester);
@@ -660,7 +673,7 @@ void main() {
       expect(api.created.single.body['promoCode'], 'BIENVENUE');
     });
 
-    testWidgets('plusieurs livraisons : un lot, un seul code, Mobile Money remplacé', (tester) async {
+    testWidgets('plusieurs livraisons : un lot, un seul code, un seul paiement Mobile Money', (tester) async {
       final api = orderApi();
       await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1700));
       await toSummary(tester);
@@ -678,20 +691,52 @@ void main() {
       expect(find.text('Étape 5 sur 5 · Récapitulatif'), findsOneWidget);
       expect(find.text('LIVRAISON 2'), findsOneWidget);
       expect(find.text('Total · 2 livraisons'), findsOneWidget);
-      expect(find.text('Commander · 2\u00a0900\u00a0F'), findsOneWidget);
-      expect(find.text('Mobile Money : une livraison à la fois pour l’instant.'), findsNWidgets(2));
+      expect(find.text('Commander · 2 900 F'), findsOneWidget);
       expect(find.text('Code promo'), findsNothing);
 
+      await tapVisible(tester, 'MTN Mobile Money');
       await slideToOrder(tester);
       final batch = api.created.single;
       expect(batch.batch, isTrue);
-      expect(batch.body['feePaymentMethod'], 'CASH');
+      expect(batch.body['feePaymentMethod'], 'MOMO_MTN');
       expect(
         [for (final item in batch.body['items']! as List) (item as Map)['recipientName']],
         ['Marie Ngo', 'Jean Mbarga'],
       );
+      // Une seule demande de paiement pour tout le lot.
+      expect(api.paid, isEmpty);
+      expect(api.batchPaid.single, (
+        batchId: '00000000-0000-4000-8000-000000000600',
+        phone: '+237677123456',
+        operator: 'MTN',
+      ));
+      expect(find.textContaining('2 900 F'), findsOneWidget);
+
+      api.paymentStatuses = ['SUCCEEDED'];
+      await tester.pump(const Duration(seconds: 4));
+      await settle(tester);
       expect(find.text('2 livraisons · TR-48301 → TR-48302'), findsOneWidget);
       expect(find.text('7 3 0 2'), findsOneWidget);
+    });
+
+    testWidgets('boutique : ses ventes couvrent la course, elles sont proposées d’office', (tester) async {
+      final api = orderApi();
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toSummary(tester);
+      expect(find.text('Pris sur vos ventes : il vous restera 127 300 F à recevoir.'), findsOneWidget);
+      await slideToOrder(tester);
+      expect(api.created.single.body['feePaymentMethod'], 'WALLET');
+      expect(api.paid, isEmpty);
+      expect(find.text('Commande envoyée !'), findsOneWidget);
+    });
+
+    testWidgets('boutique : ventes insuffisantes, Mobile Money de son opérateur proposé', (tester) async {
+      final api = orderApi()..wallet0 = const Wallet(customerBalance: 0, merchantBalance: 500, payoutSchedule: 'DAILY');
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toSummary(tester);
+      expect(find.text('Disponible : 500 F, pas assez pour cette commande.'), findsOneWidget);
+      await slideToOrder(tester);
+      expect(api.created.single.body['feePaymentMethod'], 'MOMO_MTN');
     });
 
     testWidgets('ajout abandonné : retour au récapitulatif, sans livraison vide', (tester) async {

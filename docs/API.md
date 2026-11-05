@@ -167,11 +167,11 @@ Montants en FCFA entiers. Chaque mouvement est une écriture du grand livre ; le
 
 **Paiement des frais d'une commande (G1).**
 
-| `feePaymentMethod` (payé par l'expéditeur) | Ce qui se passe                                                                                                     |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `CASH`                                     | Payé au livreur à l'enlèvement ; la commande part tout de suite.                                                    |
-| `WALLET`                                   | Débité du solde Tara à la création (`INSUFFICIENT_BALANCE` sinon) ; pour un marchand, de son portefeuille.          |
-| `MOMO_MTN`, `MOMO_ORANGE`                  | La commande reste `CREATED` ; `POST /orders/{id}/pay` envoie la demande au téléphone ; elle part à la confirmation. |
+| `feePaymentMethod` (payé par l'expéditeur) | Ce qui se passe                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CASH`                                     | Payé au livreur à l'enlèvement ; la commande part tout de suite.                                                                                                                                                                                                                                             |
+| `WALLET`                                   | Débité du solde Tara à la création (`INSUFFICIENT_BALANCE` sinon) ; pour un marchand, de son portefeuille.                                                                                                                                                                                                   |
+| `MOMO_MTN`, `MOMO_ORANGE`                  | La commande reste `CREATED` ; `POST /orders/{id}/pay` envoie la demande au téléphone ; elle part à la confirmation. Lot (C4) : `POST /orders/batches/{id}/pay`, une seule demande pour toutes les commandes encore à payer, réparties à la confirmation (une commande annulée entre-temps revient au solde). |
 
 Avec `feePayer: RECIPIENT`, le destinataire paie à la porte. Une commande annulée avant l'enlèvement rend ses frais au solde (avoir). Un retour que le destinataire devait payer est facturé à l'expéditeur. Un client dont le solde est négatif doit le régler avant de commander (`WALLET_IN_DEBT`).
 

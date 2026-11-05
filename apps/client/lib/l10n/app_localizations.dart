@@ -1712,12 +1712,6 @@ abstract class AppLocalizations {
   /// **'Vous payez le livreur quand il récupère le colis.'**
   String get payCashBody;
 
-  /// No description provided for @momoBatchOff.
-  ///
-  /// In fr, this message translates to:
-  /// **'Mobile Money : une livraison à la fois pour l’instant.'**
-  String get momoBatchOff;
-
   /// No description provided for @payerPhoneLabel.
   ///
   /// In fr, this message translates to:
@@ -1831,6 +1825,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Retour à l’accueil'**
   String get backHome;
+
+  /// No description provided for @payWalletShopBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pris sur vos ventes : il vous restera {amount} à recevoir.'**
+  String payWalletShopBody(String amount);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
