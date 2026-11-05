@@ -1831,6 +1831,228 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pris sur vos ventes : il vous restera {amount} à recevoir.'**
   String payWalletShopBody(String amount);
+
+  /// No description provided for @trackAwaitingPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente du paiement'**
+  String get trackAwaitingPayment;
+
+  /// No description provided for @trackAwaitingPaymentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validez le paiement Mobile Money pour lancer la recherche d’un livreur.'**
+  String get trackAwaitingPaymentBody;
+
+  /// No description provided for @trackScheduled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison programmée'**
+  String get trackScheduled;
+
+  /// No description provided for @trackSearching.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche d’un livreur…'**
+  String get trackSearching;
+
+  /// No description provided for @trackSearchingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les livreurs proches de l’enlèvement reçoivent la course.'**
+  String get trackSearchingBody;
+
+  /// No description provided for @trackAssigned.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rider} vient chercher le colis'**
+  String trackAssigned(String rider);
+
+  /// No description provided for @trackAssignedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez-lui le code d’enlèvement à son arrivée.'**
+  String get trackAssignedBody;
+
+  /// No description provided for @trackOnTheWay.
+  ///
+  /// In fr, this message translates to:
+  /// **'En route vers {recipient}'**
+  String trackOnTheWay(String recipient);
+
+  /// No description provided for @trackOnTheWayBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis récupéré à {time}.'**
+  String trackOnTheWayBody(String time);
+
+  /// No description provided for @trackFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison impossible'**
+  String get trackFailed;
+
+  /// No description provided for @trackFailedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur n’a pas pu livrer. Choisissez la suite : nouvelle tentative ou retour.'**
+  String get trackFailedBody;
+
+  /// No description provided for @trackDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis livré !'**
+  String get trackDelivered;
+
+  /// No description provided for @trackDeliveredBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis à {recipient} à {time}.'**
+  String trackDeliveredBody(String recipient, String time);
+
+  /// No description provided for @trackReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis retourné'**
+  String get trackReturned;
+
+  /// No description provided for @trackCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison annulée'**
+  String get trackCancelled;
+
+  /// No description provided for @trackEta.
+  ///
+  /// In fr, this message translates to:
+  /// **'Environ {minutes} min'**
+  String trackEta(int minutes);
+
+  /// No description provided for @stepOrdered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande'**
+  String get stepOrdered;
+
+  /// No description provided for @stepRiderFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur'**
+  String get stepRiderFound;
+
+  /// No description provided for @stepPickedUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récupéré'**
+  String get stepPickedUp;
+
+  /// No description provided for @stepDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livré'**
+  String get stepDelivered;
+
+  /// No description provided for @vehicleMotorbike.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moto'**
+  String get vehicleMotorbike;
+
+  /// No description provided for @vehicleTricycle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tricycle'**
+  String get vehicleTricycle;
+
+  /// No description provided for @vehicleCar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voiture'**
+  String get vehicleCar;
+
+  /// No description provided for @callRider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler {name}'**
+  String callRider(String name);
+
+  /// No description provided for @forRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour {name}'**
+  String forRecipient(String name);
+
+  /// No description provided for @newPickupCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau code d’enlèvement'**
+  String get newPickupCode;
+
+  /// No description provided for @pickupCodeShown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d’enlèvement : {code}'**
+  String pickupCodeShown(String code);
+
+  /// No description provided for @cancelDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la livraison'**
+  String get cancelDelivery;
+
+  /// No description provided for @cancelConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Touchez encore pour confirmer l’annulation.'**
+  String get cancelConfirm;
+
+  /// No description provided for @cancelReasonSender.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée par l’expéditeur'**
+  String get cancelReasonSender;
+
+  /// No description provided for @deliveredBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livré par {rider}'**
+  String deliveredBy(String rider);
+
+  /// No description provided for @deliveredIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'en {minutes} min'**
+  String deliveredIn(int minutes);
+
+  /// No description provided for @collectedAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} encaissés'**
+  String collectedAmount(String amount);
+
+  /// No description provided for @shareRecap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager'**
+  String get shareRecap;
+
+  /// No description provided for @recapShareText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis livré par Tara · {reference} · {recipient} · {time}'**
+  String recapShareText(String reference, String recipient, String time);
+
+  /// No description provided for @trackOrderError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger le suivi.'**
+  String get trackOrderError;
+
+  /// No description provided for @trackDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre la livraison'**
+  String get trackDelivery;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -130,6 +130,13 @@ class ClientApi {
 
   Future<Payment> payment(String id) async => Payment.fromJson(await _api.get('/payments/$id') as Json);
 
+  /// Commande suivie (F1) : trajet, livreur, étapes.
+  Future<TrackedOrder> order(String id) async => TrackedOrder.fromJson(await _api.get('/orders/$id') as Json);
+
+  /// Nouveau code d'enlèvement si l'expéditeur a perdu le précédent.
+  Future<String> newPickupCode(String orderId) async =>
+      (await _api.post('/orders/$orderId/pickup-code') as Json)['pickupCode']! as String;
+
   Future<void> cancelOrder(String orderId, String reason) =>
       _api.post('/orders/$orderId/cancel', body: {'reason': reason});
 

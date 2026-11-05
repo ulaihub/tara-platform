@@ -28,6 +28,7 @@ class RealtimeClient {
     'payment.status',
     'payout.status',
     'location-link.submitted',
+    'rider.position',
   ];
 
   final String baseUrl;
@@ -84,7 +85,23 @@ class RealtimeClient {
     return true;
   }
 
-  void subscribeOrder(String orderId) => _socket?.emit('order.subscribe', {'orderId': orderId});
+  /// Suit une commande (statut, position du livreur). [onAck] reçoit la réponse du
+  /// serveur : statut et dernière position connue, pour ne pas attendre le prochain envoi.
+  void subscribeOrder(String orderId, {void Function(Json ack)? onAck}) {
+    final socket = _socket;
+    if (socket == null) return;
+    if (onAck == null) {
+      socket.emit('order.subscribe', {'orderId': orderId});
+      return;
+    }
+    socket.emitWithAck(
+      'order.subscribe',
+      {'orderId': orderId},
+      ack: (Object? data) {
+        if (data is Map) onAck(Map<String, Object?>.from(data));
+      },
+    );
+  }
 
   void unsubscribeOrder(String orderId) => _socket?.emit('order.unsubscribe', {'orderId': orderId});
 

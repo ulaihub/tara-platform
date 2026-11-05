@@ -517,5 +517,135 @@
         "type": "String"
       }
     }
-  }
+  },
+  "trackAwaitingPayment": "En attente du paiement",
+  "trackAwaitingPaymentBody": "Validez le paiement Mobile Money pour lancer la recherche d’un livreur.",
+  "trackScheduled": "Livraison programmée",
+  "trackSearching": "Recherche d’un livreur…",
+  "trackSearchingBody": "Les livreurs proches de l’enlèvement reçoivent la course.",
+  "trackAssigned": "{rider} vient chercher le colis",
+  "@trackAssigned": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      }
+    }
+  },
+  "trackAssignedBody": "Donnez-lui le code d’enlèvement à son arrivée.",
+  "trackOnTheWay": "En route vers {recipient}",
+  "@trackOnTheWay": {
+    "placeholders": {
+      "recipient": {
+        "type": "String"
+      }
+    }
+  },
+  "trackOnTheWayBody": "Colis récupéré à {time}.",
+  "@trackOnTheWayBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "trackFailed": "Livraison impossible",
+  "trackFailedBody": "Le livreur n’a pas pu livrer. Choisissez la suite : nouvelle tentative ou retour.",
+  "trackDelivered": "Colis livré !",
+  "trackDeliveredBody": "Remis à {recipient} à {time}.",
+  "@trackDeliveredBody": {
+    "placeholders": {
+      "recipient": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "trackReturned": "Colis retourné",
+  "trackCancelled": "Livraison annulée",
+  "trackEta": "Environ {minutes} min",
+  "@trackEta": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "stepOrdered": "Commande",
+  "stepRiderFound": "Livreur",
+  "stepPickedUp": "Récupéré",
+  "stepDelivered": "Livré",
+  "vehicleMotorbike": "Moto",
+  "vehicleTricycle": "Tricycle",
+  "vehicleCar": "Voiture",
+  "callRider": "Appeler {name}",
+  "@callRider": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "forRecipient": "Pour {name}",
+  "@forRecipient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "newPickupCode": "Nouveau code d’enlèvement",
+  "pickupCodeShown": "Code d’enlèvement : {code}",
+  "@pickupCodeShown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelDelivery": "Annuler la livraison",
+  "cancelConfirm": "Touchez encore pour confirmer l’annulation.",
+  "cancelReasonSender": "Annulée par l’expéditeur",
+  "deliveredBy": "Livré par {rider}",
+  "@deliveredBy": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveredIn": "en {minutes} min",
+  "@deliveredIn": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "collectedAmount": "{amount} encaissés",
+  "@collectedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "shareRecap": "Partager",
+  "recapShareText": "Colis livré par Tara · {reference} · {recipient} · {time}",
+  "@recapShareText": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "trackOrderError": "Impossible de charger le suivi.",
+  "trackDelivery": "Suivre la livraison"
 }

@@ -55,6 +55,15 @@ abstract final class TaraIcons {
   ]);
   static const alertCircle = TaraIconData([_C(12, 12, 9), _P('M12 8v5M12 16.5v.5')]);
 
+  /// Moto du livreur sur la carte de suivi : absente de la maquette, même trait.
+  static const moto = TaraIconData([
+    _C(5.5, 16.5, 3),
+    _C(18.5, 16.5, 3),
+    _P('M8.5 16.5h5l3.5-7'),
+    _P('M17 9.5l-1.6-4H18'),
+    _P('M3.5 11.5h6.5l1.5 2.5'),
+  ]);
+
   /// Avion en papier (lien envoyé au destinataire) : absent de la maquette, même trait.
   static const send = TaraIconData([_P('M21 3L3 10.5l7.5 3L14 21z'), _P('M10.5 13.5L21 3')]);
 }

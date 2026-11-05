@@ -954,4 +954,139 @@ class AppLocalizationsFr extends AppLocalizations {
   String payWalletShopBody(String amount) {
     return 'Pris sur vos ventes : il vous restera $amount à recevoir.';
   }
+
+  @override
+  String get trackAwaitingPayment => 'En attente du paiement';
+
+  @override
+  String get trackAwaitingPaymentBody => 'Validez le paiement Mobile Money pour lancer la recherche d’un livreur.';
+
+  @override
+  String get trackScheduled => 'Livraison programmée';
+
+  @override
+  String get trackSearching => 'Recherche d’un livreur…';
+
+  @override
+  String get trackSearchingBody => 'Les livreurs proches de l’enlèvement reçoivent la course.';
+
+  @override
+  String trackAssigned(String rider) {
+    return '$rider vient chercher le colis';
+  }
+
+  @override
+  String get trackAssignedBody => 'Donnez-lui le code d’enlèvement à son arrivée.';
+
+  @override
+  String trackOnTheWay(String recipient) {
+    return 'En route vers $recipient';
+  }
+
+  @override
+  String trackOnTheWayBody(String time) {
+    return 'Colis récupéré à $time.';
+  }
+
+  @override
+  String get trackFailed => 'Livraison impossible';
+
+  @override
+  String get trackFailedBody => 'Le livreur n’a pas pu livrer. Choisissez la suite : nouvelle tentative ou retour.';
+
+  @override
+  String get trackDelivered => 'Colis livré !';
+
+  @override
+  String trackDeliveredBody(String recipient, String time) {
+    return 'Remis à $recipient à $time.';
+  }
+
+  @override
+  String get trackReturned => 'Colis retourné';
+
+  @override
+  String get trackCancelled => 'Livraison annulée';
+
+  @override
+  String trackEta(int minutes) {
+    return 'Environ $minutes min';
+  }
+
+  @override
+  String get stepOrdered => 'Commande';
+
+  @override
+  String get stepRiderFound => 'Livreur';
+
+  @override
+  String get stepPickedUp => 'Récupéré';
+
+  @override
+  String get stepDelivered => 'Livré';
+
+  @override
+  String get vehicleMotorbike => 'Moto';
+
+  @override
+  String get vehicleTricycle => 'Tricycle';
+
+  @override
+  String get vehicleCar => 'Voiture';
+
+  @override
+  String callRider(String name) {
+    return 'Appeler $name';
+  }
+
+  @override
+  String forRecipient(String name) {
+    return 'Pour $name';
+  }
+
+  @override
+  String get newPickupCode => 'Nouveau code d’enlèvement';
+
+  @override
+  String pickupCodeShown(String code) {
+    return 'Code d’enlèvement : $code';
+  }
+
+  @override
+  String get cancelDelivery => 'Annuler la livraison';
+
+  @override
+  String get cancelConfirm => 'Touchez encore pour confirmer l’annulation.';
+
+  @override
+  String get cancelReasonSender => 'Annulée par l’expéditeur';
+
+  @override
+  String deliveredBy(String rider) {
+    return 'Livré par $rider';
+  }
+
+  @override
+  String deliveredIn(int minutes) {
+    return 'en $minutes min';
+  }
+
+  @override
+  String collectedAmount(String amount) {
+    return '$amount encaissés';
+  }
+
+  @override
+  String get shareRecap => 'Partager';
+
+  @override
+  String recapShareText(String reference, String recipient, String time) {
+    return 'Colis livré par Tara · $reference · $recipient · $time';
+  }
+
+  @override
+  String get trackOrderError => 'Impossible de charger le suivi.';
+
+  @override
+  String get trackDelivery => 'Suivre la livraison';
 }

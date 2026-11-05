@@ -144,6 +144,17 @@ describe('Actions du livreur (E2 à E9)', () => {
 
   it('livre avec le code du destinataire et une photo, puis compte les gains (E4, E9)', async () => {
     const { rider, order } = await assigned();
+    // Suivi de l'expéditeur (F1) : prénom et initiale du livreur, son numéro pendant la course.
+    const riderUser = await ctx.prisma.user.findUniqueOrThrow({ where: { id: rider.userId } });
+    const tracked = await request(ctx.http)
+      .get(`/v1/orders/${order.id}`)
+      .set(shop.auth)
+      .expect(200);
+    expect(tracked.body.rider).toMatchObject({
+      name: expect.stringMatching(/^\S+( \p{Lu}\.)?$/u),
+      phone: riderUser.phone,
+      vehicleType: 'MOTORBIKE',
+    });
     await pickUp(rider, order);
     const code = deliveryCodeFor(order);
     const photoKey = await proofPhoto(ctx, rider);
@@ -166,6 +177,9 @@ describe('Actions du livreur (E2 à E9)', () => {
       navigation: null,
     });
     expect(ctx.sms.lastTo(order.recipientPhone)?.text).toContain('a ete livre');
+    // Livrée : l'expéditeur garde le nom pour le récapitulatif, plus le numéro.
+    const done = await request(ctx.http).get(`/v1/orders/${order.id}`).set(shop.auth).expect(200);
+    expect(done.body.rider).toMatchObject({ phone: null });
 
     const earnings = await request(ctx.http)
       .get('/v1/rider/earnings?period=day')

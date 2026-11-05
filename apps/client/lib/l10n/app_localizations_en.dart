@@ -949,4 +949,139 @@ class AppLocalizationsEn extends AppLocalizations {
   String payWalletShopBody(String amount) {
     return 'Taken from your sales: $amount left to receive.';
   }
+
+  @override
+  String get trackAwaitingPayment => 'Waiting for payment';
+
+  @override
+  String get trackAwaitingPaymentBody => 'Confirm the Mobile Money payment to start looking for a rider.';
+
+  @override
+  String get trackScheduled => 'Scheduled delivery';
+
+  @override
+  String get trackSearching => 'Looking for a rider…';
+
+  @override
+  String get trackSearchingBody => 'Riders near the pickup are receiving the job.';
+
+  @override
+  String trackAssigned(String rider) {
+    return '$rider is coming for the parcel';
+  }
+
+  @override
+  String get trackAssignedBody => 'Give them the pickup code when they arrive.';
+
+  @override
+  String trackOnTheWay(String recipient) {
+    return 'On the way to $recipient';
+  }
+
+  @override
+  String trackOnTheWayBody(String time) {
+    return 'Parcel collected at $time.';
+  }
+
+  @override
+  String get trackFailed => 'Delivery failed';
+
+  @override
+  String get trackFailedBody => 'The rider couldn’t deliver. Choose what’s next: try again or return.';
+
+  @override
+  String get trackDelivered => 'Parcel delivered!';
+
+  @override
+  String trackDeliveredBody(String recipient, String time) {
+    return 'Handed to $recipient at $time.';
+  }
+
+  @override
+  String get trackReturned => 'Parcel returned';
+
+  @override
+  String get trackCancelled => 'Delivery cancelled';
+
+  @override
+  String trackEta(int minutes) {
+    return 'About $minutes min';
+  }
+
+  @override
+  String get stepOrdered => 'Order';
+
+  @override
+  String get stepRiderFound => 'Rider';
+
+  @override
+  String get stepPickedUp => 'Collected';
+
+  @override
+  String get stepDelivered => 'Delivered';
+
+  @override
+  String get vehicleMotorbike => 'Motorbike';
+
+  @override
+  String get vehicleTricycle => 'Tricycle';
+
+  @override
+  String get vehicleCar => 'Car';
+
+  @override
+  String callRider(String name) {
+    return 'Call $name';
+  }
+
+  @override
+  String forRecipient(String name) {
+    return 'For $name';
+  }
+
+  @override
+  String get newPickupCode => 'New pickup code';
+
+  @override
+  String pickupCodeShown(String code) {
+    return 'Pickup code: $code';
+  }
+
+  @override
+  String get cancelDelivery => 'Cancel the delivery';
+
+  @override
+  String get cancelConfirm => 'Tap again to confirm the cancellation.';
+
+  @override
+  String get cancelReasonSender => 'Cancelled by the sender';
+
+  @override
+  String deliveredBy(String rider) {
+    return 'Delivered by $rider';
+  }
+
+  @override
+  String deliveredIn(int minutes) {
+    return 'in $minutes min';
+  }
+
+  @override
+  String collectedAmount(String amount) {
+    return '$amount collected';
+  }
+
+  @override
+  String get shareRecap => 'Share';
+
+  @override
+  String recapShareText(String reference, String recipient, String time) {
+    return 'Parcel delivered by Tara · $reference · $recipient · $time';
+  }
+
+  @override
+  String get trackOrderError => 'Couldn’t load the tracking.';
+
+  @override
+  String get trackDelivery => 'Track the delivery';
 }

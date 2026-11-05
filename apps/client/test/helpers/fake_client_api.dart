@@ -202,6 +202,15 @@ class FakeClientApi extends ClientApi {
   @override
   Future<void> cancelOrder(String orderId, String reason) async => cancelled.add(orderId);
 
+  /// Commandes suivies, par identifiant (modifiées par les tests au fil des étapes).
+  final tracked = <String, TrackedOrder>{};
+
+  @override
+  Future<TrackedOrder> order(String id) async => tracked[id]!;
+
+  @override
+  Future<String> newPickupCode(String orderId) async => '5190';
+
   @override
   Future<Merchant> becomeMerchant({
     required String shopName,
@@ -224,21 +233,28 @@ class FakeClientApi extends ClientApi {
 }
 
 /// Adresse de test : point dans Douala, quartier et repère.
-Address fakeAddress(String id, String landmark, {String? label, String? neighborhood, bool verified = false}) =>
-    Address(
-      id: '00000000-0000-4000-8000-0000000002${id.padLeft(2, '0')}',
-      label: label,
-      contactName: null,
-      contactPhone: null,
-      neighborhood: neighborhood == null
-          ? null
-          : Neighborhood(id: '00000000-0000-4000-8000-000000000199', name: neighborhood),
-      landmark: landmark,
-      latitude: 4.05,
-      longitude: 9.70,
-      verified: verified,
-      motorbikeRestricted: false,
-    );
+Address fakeAddress(
+  String id,
+  String landmark, {
+  String? label,
+  String? neighborhood,
+  bool verified = false,
+  double latitude = 4.05,
+  double longitude = 9.70,
+}) => Address(
+  id: '00000000-0000-4000-8000-0000000002${id.padLeft(2, '0')}',
+  label: label,
+  contactName: null,
+  contactPhone: null,
+  neighborhood: neighborhood == null
+      ? null
+      : Neighborhood(id: '00000000-0000-4000-8000-000000000199', name: neighborhood),
+  landmark: landmark,
+  latitude: latitude,
+  longitude: longitude,
+  verified: verified,
+  motorbikeRestricted: false,
+);
 
 /// Lien de localisation envoyé, en attente du destinataire (ou rempli si [address]).
 LocationLink pendingLink(String? name, {Address? address}) => LocationLink(

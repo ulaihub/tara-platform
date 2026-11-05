@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
@@ -39,6 +40,19 @@ final languageCodeProvider = Provider<String>((ref) {
 final launcherProvider = Provider<Future<bool> Function(Uri uri)>(
   (ref) =>
       (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
+);
+
+/// Partage d'un texte et d'une image (récapitulatif de livraison) par la feuille de partage
+/// du téléphone : WhatsApp, SMS… (remplacé dans les tests).
+final shareProvider = Provider<Future<void> Function(String text, Uint8List? png)>(
+  (ref) => (text, png) async {
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        files: png == null ? null : [XFile.fromData(png, name: 'tara-livraison.png', mimeType: 'image/png')],
+      ),
+    );
+  },
 );
 
 /// Version de l'app (remplacée dans les tests).

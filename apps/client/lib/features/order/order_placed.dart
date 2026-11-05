@@ -91,8 +91,12 @@ class OrderPlaced extends StatelessWidget {
     required this.recipients,
     required this.riderFound,
     required this.onDone,
+    this.onTrack,
     this.scheduled,
   });
+
+  /// Suivi de la livraison (une seule commande).
+  final VoidCallback? onTrack;
 
   final Placement placement;
 
@@ -227,7 +231,18 @@ class OrderPlaced extends StatelessWidget {
               ),
             ),
           ],
-          footer: PrimaryButton(label: l.backHome, icon: TaraIcons.home, onPressed: onDone),
+          footer: onTrack == null
+              ? PrimaryButton(label: l.backHome, icon: TaraIcons.home, onPressed: onDone)
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    PrimaryButton(label: l.trackDelivery, icon: TaraIcons.navigation, onPressed: onTrack),
+                    Center(
+                      child: TaraLink(label: l.backHome, onPressed: onDone),
+                    ),
+                  ],
+                ),
         ),
         const Positioned.fill(child: Confetti()),
       ],

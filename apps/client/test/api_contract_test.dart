@@ -35,6 +35,11 @@ void main() {
     'CreatedBatch': Placement.batchFields,
     'Payment': Payment.fields,
   };
+  test('commande suivie et livreur conformes au contrat', () {
+    expect(propertiesOf('Order'), containsAll(TrackedOrder.fields));
+    expect(jsonEncode(schemas['Order']), allOf(contains('"vehicleType"'), contains('"plateNumber"')));
+  });
+
   test('portefeuille : ventes du jour de la boutique', () {
     final wallet = jsonEncode(schemas['Wallet']);
     expect(wallet, allOf(contains('"todaySales"'), contains('"todayDeliveries"')));

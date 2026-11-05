@@ -37,10 +37,13 @@ import 'when_step.dart';
 /// précédente ; à la première, il ferme le parcours. La commande part d'un geste
 /// (glisser), puis : paiement Mobile Money s'il le faut, et « Commande envoyée ».
 class NewOrderFlow extends ConsumerStatefulWidget {
-  const NewOrderFlow({super.key, required this.me, required this.onClose, this.now});
+  const NewOrderFlow({super.key, required this.me, required this.onClose, this.onTrack, this.now});
 
   final Me me;
   final VoidCallback onClose;
+
+  /// « Suivre la livraison » après la commande (une seule livraison).
+  final ValueChanged<String>? onTrack;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -398,6 +401,12 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
           ? null
           : scheduleText(l, Localizations.localeOf(context).toLanguageTag(), scheduled, now),
       onDone: _finish,
+      onTrack: placed.orders.length == 1 && widget.onTrack != null
+          ? () {
+              ref.invalidate(activeOrdersProvider);
+              widget.onTrack!(placed.orders.first.id);
+            }
+          : null,
     );
   }
 

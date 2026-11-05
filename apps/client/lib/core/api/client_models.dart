@@ -440,3 +440,132 @@ class Payment {
   final int amount;
   final String? failureReason;
 }
+
+/// Livreur d'une course, vu par l'expéditeur (F1) : numéro seulement pendant la course.
+@immutable
+class OrderRider {
+  const OrderRider({required this.name, required this.phone, required this.vehicleType, required this.plateNumber});
+  factory OrderRider.fromJson(Json json) => OrderRider(
+    name: _field(json, 'name'),
+    phone: _field(json, 'phone'),
+    vehicleType: _field(json, 'vehicleType'),
+    plateNumber: _field(json, 'plateNumber'),
+  );
+  static const fields = ['name', 'phone', 'vehicleType', 'plateNumber'];
+
+  final String name;
+  final String? phone;
+
+  /// MOTORBIKE, TRICYCLE ou CAR.
+  final String vehicleType;
+  final String? plateNumber;
+}
+
+/// Commande suivie par l'expéditeur (F1) : trajet, destinataire, livreur, étapes.
+@immutable
+class TrackedOrder {
+  const TrackedOrder({
+    required this.id,
+    required this.reference,
+    required this.status,
+    required this.trackingUrl,
+    required this.scheduledFor,
+    required this.pickup,
+    required this.dropoff,
+    required this.recipientName,
+    required this.recipientPhone,
+    required this.contents,
+    required this.size,
+    required this.totalPrice,
+    required this.codAmount,
+    required this.rider,
+    required this.timeline,
+    required this.createdAt,
+  });
+
+  factory TrackedOrder.fromJson(Json json) {
+    final recipient = _field<Json>(json, 'recipient');
+    final pricing = _field<Json>(json, 'pricing');
+    final rider = json['rider'] as Json?;
+    final scheduled = json['scheduledFor'] as String?;
+    return TrackedOrder(
+      id: _field(json, 'id'),
+      reference: _field(json, 'reference'),
+      status: _field(json, 'status'),
+      trackingUrl: _field(json, 'trackingUrl'),
+      scheduledFor: scheduled == null ? null : DateTime.parse(scheduled),
+      pickup: Address.fromJson(_field<Json>(json, 'pickup')),
+      dropoff: Address.fromJson(_field<Json>(json, 'dropoff')),
+      recipientName: _field(recipient, 'name'),
+      recipientPhone: _field(recipient, 'phone'),
+      contents: json['packageContents'] as String?,
+      size: _field(json, 'packageSize'),
+      totalPrice: _field<num>(pricing, 'totalPrice').toInt(),
+      codAmount: _field<num>(pricing, 'codAmount').toInt(),
+      rider: rider == null ? null : OrderRider.fromJson(rider),
+      timeline: [
+        for (final item in _field<List<Object?>>(json, 'timeline'))
+          (status: _field<String>(item! as Json, 'status'), at: DateTime.parse(_field(item as Json, 'at'))),
+      ],
+      createdAt: DateTime.parse(_field(json, 'createdAt')),
+    );
+  }
+
+  static const fields = [
+    'id',
+    'reference',
+    'status',
+    'trackingUrl',
+    'scheduledFor',
+    'pickup',
+    'dropoff',
+    'recipient',
+    'packageContents',
+    'packageSize',
+    'pricing',
+    'rider',
+    'timeline',
+    'createdAt',
+  ];
+
+  final String id;
+  final String reference;
+  final String status;
+
+  /// Page de suivi publique (partagée au destinataire).
+  final String trackingUrl;
+  final DateTime? scheduledFor;
+  final Address pickup;
+  final Address dropoff;
+  final String recipientName;
+  final String recipientPhone;
+  final String? contents;
+  final String size;
+  final int totalPrice;
+  final int codAmount;
+  final OrderRider? rider;
+  final List<({String status, DateTime at})> timeline;
+  final DateTime createdAt;
+
+  /// Heure du premier passage à [status] (null s'il n'a pas eu lieu).
+  DateTime? reachedAt(String status) => timeline.where((step) => step.status == status).firstOrNull?.at;
+
+  TrackedOrder withStatus(String next) => TrackedOrder(
+    id: id,
+    reference: reference,
+    status: next,
+    trackingUrl: trackingUrl,
+    scheduledFor: scheduledFor,
+    pickup: pickup,
+    dropoff: dropoff,
+    recipientName: recipientName,
+    recipientPhone: recipientPhone,
+    contents: contents,
+    size: size,
+    totalPrice: totalPrice,
+    codAmount: codAmount,
+    rider: rider,
+    timeline: timeline,
+    createdAt: createdAt,
+  );
+}

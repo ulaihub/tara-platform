@@ -138,6 +138,18 @@ export const OrderDto = z
       codAmount: z.int(),
     }),
     riderId: z.uuid().nullable(),
+    /**
+     * Livreur de la course, pour l'expéditeur (F1) : prénom et initiale, véhicule, plaque ;
+     * numéro seulement pendant la course (pour l'appeler).
+     */
+    rider: z
+      .object({
+        name: z.string(),
+        phone: z.string().nullable(),
+        vehicleType: z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']),
+        plateNumber: z.string().nullable(),
+      })
+      .nullable(),
     attemptCount: z.int(),
     cancelReason: z.string().nullable(),
     timeline: z.array(OrderEventDto),

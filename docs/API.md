@@ -214,12 +214,12 @@ Notifications de l'agrégateur : `GET` ou `POST /v1/webhooks/payments/{prestatai
 
 ## Couverture des exigences de la phase 2
 
-| Exigence | Réalisation                                                                                                                               |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| D1       | Score du livreur (`rider-scoring.ts`), positions Redis GEO                                                                                |
-| D2       | Tours de proposition, diffusion, élargissement du rayon, alerte après 5 min (`dispatch.service.ts`) ; simulateur : 95 % en moins de 2 min |
-| D3       | `GET /admin/orders/{id}/candidates`, `GET /admin/orders/{id}/dispatch`, `POST /admin/orders/{id}/assign`                                  |
-| D4       | Pièces, plafond d'espèces, courses en cours, au passage en ligne et à chaque proposition                                                  |
-| E1 à E9  | Côté serveur : routes `/v1/rider/*` ci-dessus (l'app livreur arrive en phase 4)                                                           |
-| F1       | Socket.IO `/realtime` partagé entre instances par Redis                                                                                   |
-| F3       | Push, WhatsApp, SMS avec repli et nouvelles tentatives (file BullMQ) ; canaux Android au son de la marque : `offers`, `orders`, `money`   |
+| Exigence | Réalisation                                                                                                                                                                                                                                                                       |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1       | Score du livreur (`rider-scoring.ts`), positions Redis GEO                                                                                                                                                                                                                        |
+| D2       | Tours de proposition, diffusion, élargissement du rayon, alerte après 5 min (`dispatch.service.ts`) ; simulateur : 95 % en moins de 2 min                                                                                                                                         |
+| D3       | `GET /admin/orders/{id}/candidates`, `GET /admin/orders/{id}/dispatch`, `POST /admin/orders/{id}/assign`                                                                                                                                                                          |
+| D4       | Pièces, plafond d'espèces, courses en cours, au passage en ligne et à chaque proposition                                                                                                                                                                                          |
+| E1 à E9  | Côté serveur : routes `/v1/rider/*` ci-dessus (l'app livreur arrive en phase 4)                                                                                                                                                                                                   |
+| F1       | Socket.IO `/realtime` partagé entre instances par Redis ; suivi de l'expéditeur : `order.subscribe` (dernière position dans la réponse), `rider.position`, `order.status` ; `GET /orders/{id}` donne le livreur (prénom et initiale, véhicule, plaque ; numéro pendant la course) |
+| F3       | Push, WhatsApp, SMS avec repli et nouvelles tentatives (file BullMQ) ; canaux Android au son de la marque : `offers`, `orders`, `money`                                                                                                                                           |

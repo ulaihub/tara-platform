@@ -18,6 +18,7 @@ import '../common/scoped_page.dart';
 import '../order/new_order_flow.dart';
 import '../orders/orders_screen.dart';
 import '../profile/profile_screen.dart';
+import '../tracking/tracking_screen.dart';
 import 'home_screen.dart';
 
 /// Onglets de l'expéditeur (Accueil, Commandes, Profil) : le contenu défile sous la barre en
@@ -79,12 +80,29 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     }
   }
 
-  /// Nouvelle livraison en plein écran, au-dessus des onglets.
+  /// Nouvelle livraison en plein écran, au-dessus des onglets ; « Suivre la livraison »
+  /// remplace le parcours par le suivi.
   void _newOrder() => unawaited(
     Navigator.of(context).push(
-      scopedPage<void>(context, (context) => NewOrderFlow(me: widget.me, onClose: () => Navigator.of(context).pop())),
+      scopedPage<void>(
+        context,
+        (flowContext) => NewOrderFlow(
+          me: widget.me,
+          onClose: () => Navigator.of(flowContext).pop(),
+          onTrack: (orderId) => unawaited(
+            Navigator.of(flowContext).pushReplacement(scopedPage<void>(flowContext, (c) => _tracking(c, orderId))),
+          ),
+        ),
+      ),
     ),
   );
+
+  /// Suivi d'une commande (F1), en plein écran.
+  void _openOrder(String orderId) =>
+      unawaited(Navigator.of(context).push(scopedPage<void>(context, (c) => _tracking(c, orderId))));
+
+  Widget _tracking(BuildContext context, String orderId) =>
+      TrackingScreen(orderId: orderId, now: widget.now, onBack: () => Navigator.of(context).pop());
 
   @override
   Widget build(BuildContext context) {
@@ -102,13 +120,13 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             current: _tab,
             onSelected: (tab) => setState(() => _tab = tab),
             child: switch (_tab) {
-              1 => OrdersScreen(onOpenOrder: (_) {}, now: widget.now),
+              1 => OrdersScreen(onOpenOrder: (order) => _openOrder(order.id), now: widget.now),
               2 => ProfileScreen(me: widget.me),
               _ => HomeScreen(
                 me: widget.me,
                 onNewOrder: _newOrder,
                 onLocationLink: () {},
-                onOpenOrder: (_) {},
+                onOpenOrder: (order) => _openOrder(order.id),
                 onWallet: () {},
                 now: widget.now,
               ),

@@ -8451,6 +8451,38 @@
             "type": "string",
             "format": "uuid"
           },
+          "rider": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "phone": {
+                "nullable": true,
+                "type": "string"
+              },
+              "vehicleType": {
+                "type": "string",
+                "enum": [
+                  "MOTORBIKE",
+                  "TRICYCLE",
+                  "CAR"
+                ]
+              },
+              "plateNumber": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "phone",
+              "vehicleType",
+              "plateNumber"
+            ],
+            "additionalProperties": false
+          },
           "attemptCount": {
             "type": "integer"
           },
@@ -8488,6 +8520,7 @@
           "recipient",
           "pricing",
           "riderId",
+          "rider",
           "attemptCount",
           "cancelReason",
           "timeline",

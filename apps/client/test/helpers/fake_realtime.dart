@@ -17,4 +17,17 @@ class FakeRealtime extends RealtimeClient {
   void connect() {}
 
   void emit(String name, Json payload) => _events.add(RealtimeEvent(name, payload));
+
+  /// Commandes suivies, et réponse du serveur à l'abonnement (dernière position connue).
+  final subscribed = <String>[];
+  Json ack = const {'ok': true};
+
+  @override
+  void subscribeOrder(String orderId, {void Function(Json ack)? onAck}) {
+    subscribed.add(orderId);
+    onAck?.call(ack);
+  }
+
+  @override
+  void unsubscribeOrder(String orderId) => subscribed.remove(orderId);
 }

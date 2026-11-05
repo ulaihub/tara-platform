@@ -43,7 +43,28 @@ const ORDER_INCLUDE = {
   pickupAddress: ADDRESS_INCLUDE,
   dropoffAddress: ADDRESS_INCLUDE,
   events: { orderBy: { recordedAt: 'asc' } },
+  rider: {
+    select: {
+      vehicleType: true,
+      plateNumber: true,
+      user: { select: { fullName: true, phone: true } },
+    },
+  },
 } as const satisfies Prisma.OrderInclude;
+
+/** Statuts où l'expéditeur peut joindre le livreur. */
+const RIDER_REACHABLE: readonly string[] = [
+  'ASSIGNED',
+  'PICKED_UP',
+  'IN_DELIVERY',
+  'DELIVERY_FAILED',
+];
+
+/** « Jean Mbarga » → « Jean M. » : assez pour reconnaître le livreur à la porte. */
+function shortName(fullName: string | null): string {
+  const [first = '', last] = (fullName ?? '').trim().split(/\s+/);
+  return last ? `${first} ${last[0]?.toUpperCase()}.` : first || 'Livreur';
+}
 
 type OrderFull = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
 
@@ -147,6 +168,14 @@ export class OrdersService {
         codAmount: order.codAmount,
       },
       riderId: order.riderId,
+      rider: order.rider
+        ? {
+            name: shortName(order.rider.user.fullName),
+            phone: RIDER_REACHABLE.includes(order.status) ? order.rider.user.phone : null,
+            vehicleType: order.rider.vehicleType,
+            plateNumber: order.rider.plateNumber,
+          }
+        : null,
       attemptCount: order.attemptCount,
       cancelReason: order.cancelReason,
       timeline: order.events.map((event: OrderEvent) => ({
