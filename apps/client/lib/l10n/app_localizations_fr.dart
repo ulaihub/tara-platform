@@ -1526,4 +1526,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String walletBalanceTile(String amount) {
     return 'Solde Tara : $amount';
   }
+
+  @override
+  String get askTitle => 'Demander l’adresse';
+
+  @override
+  String get askIntro =>
+      'Envoyez un lien à votre client : il place lui-même son point et écrit un repère. Vous êtes prévenu dès que c’est fait, et la livraison se crée avec son adresse.';
+
+  @override
+  String get askSendWhatsapp => 'Envoyer par WhatsApp';
+
+  @override
+  String get askSendSms => 'Par SMS';
+
+  @override
+  String askSent(String name) {
+    return 'Lien envoyé à $name. Vous serez prévenu dès qu’il aura placé son point.';
+  }
+
+  @override
+  String get askRequested => 'Adresses demandées';
+
+  @override
+  String get askNone => 'Aucune adresse demandée pour l’instant.';
+
+  @override
+  String askPending(String date) {
+    return 'En attente · lien valable jusqu’au $date';
+  }
+
+  @override
+  String askReceived(String landmark) {
+    return 'Point reçu · $landmark';
+  }
+
+  @override
+  String get askExpired => 'Expiré sans réponse';
+
+  @override
+  String get askCreateOrder => 'Créer la livraison';
+
+  @override
+  String get askResend => 'Renvoyer';
+
+  @override
+  String askArrived(String name) {
+    return '$name a placé son point : vous pouvez créer la livraison.';
+  }
 }

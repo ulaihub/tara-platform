@@ -2767,6 +2767,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Solde Tara : {amount}'**
   String walletBalanceTile(String amount);
+
+  /// No description provided for @askTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander l’adresse'**
+  String get askTitle;
+
+  /// No description provided for @askIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyez un lien à votre client : il place lui-même son point et écrit un repère. Vous êtes prévenu dès que c’est fait, et la livraison se crée avec son adresse.'**
+  String get askIntro;
+
+  /// No description provided for @askSendWhatsapp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer par WhatsApp'**
+  String get askSendWhatsapp;
+
+  /// No description provided for @askSendSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par SMS'**
+  String get askSendSms;
+
+  /// No description provided for @askSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien envoyé à {name}. Vous serez prévenu dès qu’il aura placé son point.'**
+  String askSent(String name);
+
+  /// No description provided for @askRequested.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresses demandées'**
+  String get askRequested;
+
+  /// No description provided for @askNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune adresse demandée pour l’instant.'**
+  String get askNone;
+
+  /// No description provided for @askPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente · lien valable jusqu’au {date}'**
+  String askPending(String date);
+
+  /// No description provided for @askReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Point reçu · {landmark}'**
+  String askReceived(String landmark);
+
+  /// No description provided for @askExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expiré sans réponse'**
+  String get askExpired;
+
+  /// No description provided for @askCreateOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer la livraison'**
+  String get askCreateOrder;
+
+  /// No description provided for @askResend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer'**
+  String get askResend;
+
+  /// No description provided for @askArrived.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a placé son point : vous pouvez créer la livraison.'**
+  String askArrived(String name);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

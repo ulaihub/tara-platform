@@ -1034,5 +1034,46 @@
         "type": "String"
       }
     }
+  },
+  "askTitle": "Demander l’adresse",
+  "askIntro": "Envoyez un lien à votre client : il place lui-même son point et écrit un repère. Vous êtes prévenu dès que c’est fait, et la livraison se crée avec son adresse.",
+  "askSendWhatsapp": "Envoyer par WhatsApp",
+  "askSendSms": "Par SMS",
+  "askSent": "Lien envoyé à {name}. Vous serez prévenu dès qu’il aura placé son point.",
+  "@askSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "askRequested": "Adresses demandées",
+  "askNone": "Aucune adresse demandée pour l’instant.",
+  "askPending": "En attente · lien valable jusqu’au {date}",
+  "@askPending": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "askReceived": "Point reçu · {landmark}",
+  "@askReceived": {
+    "placeholders": {
+      "landmark": {
+        "type": "String"
+      }
+    }
+  },
+  "askExpired": "Expiré sans réponse",
+  "askCreateOrder": "Créer la livraison",
+  "askResend": "Renvoyer",
+  "askArrived": "{name} a placé son point : vous pouvez créer la livraison.",
+  "@askArrived": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

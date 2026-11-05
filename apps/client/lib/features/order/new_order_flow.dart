@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -37,7 +38,7 @@ import 'when_step.dart';
 /// précédente ; à la première, il ferme le parcours. La commande part d'un geste
 /// (glisser), puis : paiement Mobile Money s'il le faut, et « Commande envoyée ».
 class NewOrderFlow extends ConsumerStatefulWidget {
-  const NewOrderFlow({super.key, required this.me, required this.onClose, this.onTrack, this.now});
+  const NewOrderFlow({super.key, required this.me, required this.onClose, this.onTrack, this.now, this.fromLink});
 
   final Me me;
   final VoidCallback onClose;
@@ -47,6 +48,9 @@ class NewOrderFlow extends ConsumerStatefulWidget {
 
   /// Horloge (tests).
   final DateTime Function()? now;
+
+  /// Adresse reçue par lien de localisation (B3) : destinataire et adresse déjà remplis.
+  final LocationLink? fromLink;
 
   @override
   ConsumerState<NewOrderFlow> createState() => _NewOrderFlowState();
@@ -90,6 +94,15 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
   @override
   void initState() {
     super.initState();
+    if (widget.fromLink case final link?) {
+      // Point placé par le destinataire : son nom, son numéro et son adresse sont repris.
+      final phone = digitsOf(link.recipientPhone ?? '').replaceFirst(RegExp('^237'), '');
+      _draft.deliveries.first
+        ..recipientName = link.recipientName ?? ''
+        ..recipientPhone = phone
+        ..dropoff = link.address
+        ..link = link;
+    }
     _draft.addListener(_watchLinks);
     // Le serveur annonce l'adresse placée par le destinataire : relue aussitôt.
     _events = ref.read(realtimeProvider).stream.listen(_onEvent);

@@ -520,5 +520,18 @@
   "statementsBody": "Each month’s PDF statement: sales, fees, payouts, balances.",
   "statementCurrent": "{month} (in progress)",
   "statementShare": "Tara statement for {month}",
-  "walletBalanceTile": "Tara balance: {amount}"
+  "walletBalanceTile": "Tara balance: {amount}",
+  "askTitle": "Ask for the address",
+  "askIntro": "Send your customer a link: they place their own point and write a landmark. You are told as soon as it is done, and the delivery is created with their address.",
+  "askSendWhatsapp": "Send by WhatsApp",
+  "askSendSms": "By SMS",
+  "askSent": "Link sent to {name}. You will be told as soon as they place their point.",
+  "askRequested": "Requested addresses",
+  "askNone": "No address requested yet.",
+  "askPending": "Waiting · link valid until {date}",
+  "askReceived": "Point received · {landmark}",
+  "askExpired": "Expired without reply",
+  "askCreateOrder": "Create the delivery",
+  "askResend": "Send again",
+  "askArrived": "{name} placed their point: you can create the delivery."
 }

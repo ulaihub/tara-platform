@@ -421,6 +421,7 @@ class LocationLink {
     required this.status,
     required this.expiresAt,
     required this.address,
+    this.recipientPhone,
   });
   factory LocationLink.fromJson(Json json) {
     final address = json['address'] as Json?;
@@ -428,16 +429,20 @@ class LocationLink {
       id: _field(json, 'id'),
       url: _field(json, 'url'),
       recipientName: _field(json, 'recipientName'),
+      recipientPhone: json['recipientPhone'] as String?,
       status: _field(json, 'status'),
       expiresAt: DateTime.parse(_field(json, 'expiresAt')),
       address: address == null ? null : Address.fromJson(address),
     );
   }
-  static const fields = ['id', 'url', 'recipientName', 'status', 'expiresAt', 'address'];
+  static const fields = ['id', 'url', 'recipientName', 'recipientPhone', 'status', 'expiresAt', 'address'];
 
   final String id;
   final String url;
   final String? recipientName;
+
+  /// Numéro du destinataire au format +237…
+  final String? recipientPhone;
 
   /// PENDING, SUBMITTED ou EXPIRED.
   final String status;

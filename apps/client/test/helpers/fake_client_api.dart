@@ -92,6 +92,12 @@ class FakeClientApi extends ClientApi {
   @override
   Future<LocationLink> locationLink(String id) async => linkAfter ?? pendingLink(null);
 
+  /// Adresses demandées depuis l'accueil.
+  List<LocationLink> links = [];
+
+  @override
+  Future<List<LocationLink>> locationLinks() async => links;
+
   // --- Prix, commande, paiement ------------------------------------------------------
 
   final quotes = <Map<String, Object?>>[];
@@ -360,11 +366,12 @@ Address fakeAddress(
 );
 
 /// Lien de localisation envoyé, en attente du destinataire (ou rempli si [address]).
-LocationLink pendingLink(String? name, {Address? address}) => LocationLink(
+LocationLink pendingLink(String? name, {Address? address, String? phone, String status = 'PENDING'}) => LocationLink(
   id: '00000000-0000-4000-8000-000000000301',
   url: 'https://tara.cm/l/Q7mK2pXa9RtL4vNe',
   recipientName: name,
-  status: address == null ? 'PENDING' : 'SUBMITTED',
+  recipientPhone: phone,
+  status: address == null ? status : 'SUBMITTED',
   expiresAt: DateTime.utc(2026, 11, 7, 10),
   address: address,
 );

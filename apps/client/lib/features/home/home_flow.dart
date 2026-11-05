@@ -22,6 +22,7 @@ import '../orders/orders_screen.dart';
 import '../profile/profile_screen.dart';
 import '../tracking/tracking_screen.dart';
 import '../wallet/wallet_screen.dart';
+import 'ask_address_screen.dart';
 import 'home_screen.dart';
 
 /// Onglets de l'expéditeur (Accueil, Commandes, Profil) : le contenu défile sous la barre en
@@ -116,7 +117,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   /// Nouvelle livraison en plein écran, au-dessus des onglets ; « Suivre la livraison »
   /// remplace le parcours par le suivi. Nouvelle version des conditions pas encore signée :
   /// elle est présentée d'abord, la livraison s'ouvre une fois signée.
-  void _newOrder() {
+  void _newOrder({LocationLink? fromLink}) {
     final terms = ref.read(termsStatusProvider).value;
     if (terms != null && !terms.upToDate) {
       unawaited(
@@ -128,7 +129,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
               onLater: () => Navigator.of(route).pop(),
               onSigned: () {
                 Navigator.of(route).pop();
-                _openNewOrder();
+                _openNewOrder(fromLink: fromLink);
               },
             ),
           ),
@@ -136,19 +137,38 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
       );
       return;
     }
-    _openNewOrder();
+    _openNewOrder(fromLink: fromLink);
   }
 
-  void _openNewOrder() => unawaited(
+  void _openNewOrder({LocationLink? fromLink}) => unawaited(
     Navigator.of(context).push(
       scopedPage<void>(
         context,
         (flowContext) => NewOrderFlow(
           me: widget.me,
+          fromLink: fromLink,
           onClose: () => Navigator.of(flowContext).pop(),
           onTrack: (orderId) => unawaited(
             Navigator.of(flowContext).pushReplacement(scopedPage<void>(flowContext, (c) => _tracking(c, orderId))),
           ),
+        ),
+      ),
+    ),
+  );
+
+  /// « Demander l'adresse » (B3) : lien envoyé au destinataire, puis livraison créée avec
+  /// son point, l'écran du lien remplacé par la nouvelle livraison.
+  void _askAddress() => unawaited(
+    Navigator.of(context).push(
+      scopedPage<void>(
+        context,
+        (route) => AskAddressScreen(
+          me: widget.me,
+          onBack: () => Navigator.of(route).pop(),
+          onCreateOrder: (link) {
+            Navigator.of(route).pop();
+            _newOrder(fromLink: link);
+          },
         ),
       ),
     ),
@@ -193,7 +213,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
               _ => HomeScreen(
                 me: widget.me,
                 onNewOrder: _newOrder,
-                onLocationLink: () {},
+                onLocationLink: _askAddress,
                 onOpenOrder: (order) => _openOrder(order.id),
                 onWallet: _openWallet,
                 now: widget.now,

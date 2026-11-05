@@ -1521,4 +1521,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String walletBalanceTile(String amount) {
     return 'Tara balance: $amount';
   }
+
+  @override
+  String get askTitle => 'Ask for the address';
+
+  @override
+  String get askIntro =>
+      'Send your customer a link: they place their own point and write a landmark. You are told as soon as it is done, and the delivery is created with their address.';
+
+  @override
+  String get askSendWhatsapp => 'Send by WhatsApp';
+
+  @override
+  String get askSendSms => 'By SMS';
+
+  @override
+  String askSent(String name) {
+    return 'Link sent to $name. You will be told as soon as they place their point.';
+  }
+
+  @override
+  String get askRequested => 'Requested addresses';
+
+  @override
+  String get askNone => 'No address requested yet.';
+
+  @override
+  String askPending(String date) {
+    return 'Waiting · link valid until $date';
+  }
+
+  @override
+  String askReceived(String landmark) {
+    return 'Point received · $landmark';
+  }
+
+  @override
+  String get askExpired => 'Expired without reply';
+
+  @override
+  String get askCreateOrder => 'Create the delivery';
+
+  @override
+  String get askResend => 'Send again';
+
+  @override
+  String askArrived(String name) {
+    return '$name placed their point: you can create the delivery.';
+  }
 }

@@ -70,6 +70,11 @@ class ClientApi {
             as Json,
       );
 
+  /// Adresses demandées par lien (B3), les plus récentes d'abord.
+  Future<List<LocationLink>> locationLinks() async => [
+    for (final item in (await _api.get('/location-links') as List).cast<Json>()) LocationLink.fromJson(item),
+  ];
+
   Future<LocationLink> locationLink(String id) async =>
       LocationLink.fromJson(await _api.get('/location-links/$id') as Json);
 
