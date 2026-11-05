@@ -325,5 +325,36 @@
   "instructionsLabel": "Instructions pour le livreur (facultatif)",
   "instructionsHint": "Ex. Appeler en arrivant, sonner au portail vert",
   "soundsLabel": "Sons",
-  "soundsHint": "Commande envoyée, adresse reçue, colis livré… Le mode silencieux du téléphone est respecté."
+  "soundsHint": "Commande envoyée, adresse reçue, colis livré… Le mode silencieux du téléphone est respecté.",
+  "whenTitle": "Quand le livreur doit-il passer ?",
+  "whenBody": "Il récupère le colis, puis le livre aussitôt.",
+  "whenNow": "Maintenant",
+  "whenNowBody": "Un livreur part dès que possible.",
+  "whenLater": "Programmer",
+  "whenLaterBody": "Un jour et une heure, jusqu’à 7 jours à l’avance.",
+  "dayLabel": "Jour",
+  "timeLabel": "Heure de passage",
+  "dayToday": "Aujourd’hui",
+  "dayTomorrow": "Demain",
+  "dateAt": "{date} à {time}",
+  "@dateAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduledSummary": "Enlèvement prévu {when}.",
+  "@scheduledSummary": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "nightSurcharge": "Entre 20 h et 6 h, un supplément de nuit s’applique.",
+  "slotRequired": "Choisissez une heure de passage."
 }

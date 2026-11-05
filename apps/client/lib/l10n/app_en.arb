@@ -290,5 +290,19 @@
   "instructionsLabel": "Instructions for the rider (optional)",
   "instructionsHint": "E.g. Call on arrival, ring at the green gate",
   "soundsLabel": "Sounds",
-  "soundsHint": "Order sent, address received, parcel delivered… Your phone’s silent mode is respected."
+  "soundsHint": "Order sent, address received, parcel delivered… Your phone’s silent mode is respected.",
+  "whenTitle": "When should the rider come?",
+  "whenBody": "They collect the parcel, then deliver it right away.",
+  "whenNow": "Now",
+  "whenNowBody": "A rider sets off as soon as possible.",
+  "whenLater": "Schedule",
+  "whenLaterBody": "A day and time, up to 7 days ahead.",
+  "dayLabel": "Day",
+  "timeLabel": "Pickup time",
+  "dayToday": "Today",
+  "dayTomorrow": "Tomorrow",
+  "dateAt": "{date} at {time}",
+  "scheduledSummary": "Pickup planned {when}.",
+  "nightSurcharge": "Between 8 pm and 6 am, a night surcharge applies.",
+  "slotRequired": "Choose a pickup time."
 }

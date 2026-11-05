@@ -687,4 +687,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get soundsHint => 'Order sent, address received, parcel delivered… Your phone’s silent mode is respected.';
+
+  @override
+  String get whenTitle => 'When should the rider come?';
+
+  @override
+  String get whenBody => 'They collect the parcel, then deliver it right away.';
+
+  @override
+  String get whenNow => 'Now';
+
+  @override
+  String get whenNowBody => 'A rider sets off as soon as possible.';
+
+  @override
+  String get whenLater => 'Schedule';
+
+  @override
+  String get whenLaterBody => 'A day and time, up to 7 days ahead.';
+
+  @override
+  String get dayLabel => 'Day';
+
+  @override
+  String get timeLabel => 'Pickup time';
+
+  @override
+  String get dayToday => 'Today';
+
+  @override
+  String get dayTomorrow => 'Tomorrow';
+
+  @override
+  String dateAt(String date, String time) {
+    return '$date at $time';
+  }
+
+  @override
+  String scheduledSummary(String when) {
+    return 'Pickup planned $when.';
+  }
+
+  @override
+  String get nightSurcharge => 'Between 8 pm and 6 am, a night surcharge applies.';
+
+  @override
+  String get slotRequired => 'Choose a pickup time.';
 }

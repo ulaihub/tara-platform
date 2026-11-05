@@ -64,8 +64,12 @@ class OrderDraft extends ChangeNotifier {
   final deliveries = <DeliveryDraft>[DeliveryDraft()];
   int _current = 0;
 
-  /// null : tout de suite ; sinon créneau programmé (C3).
+  /// Livraison programmée (C3) plutôt que tout de suite ; [scheduledFor] est alors l'heure
+  /// de passage choisie (null tant qu'elle ne l'est pas).
+  bool later = false;
   DateTime? scheduledFor;
+
+  bool get hasWhen => !later || scheduledFor != null;
 
   Address? get pickup => _pickup;
   set pickup(Address? value) {

@@ -8,6 +8,7 @@ import 'package:tara_client/core/location.dart';
 import 'package:tara_client/features/home/home_flow.dart';
 import 'package:tara_client/features/order/address_editor.dart';
 import 'package:tara_client/features/order/new_order_flow.dart';
+import 'package:tara_client/features/order/when_step.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/inputs.dart';
@@ -15,7 +16,7 @@ import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_client_api.dart';
 import 'helpers/harness.dart';
-import 'screens_home_golden_test.dart' show person, shopOwner;
+import 'screens_home_golden_test.dart' show homeNow, person, shopOwner;
 
 /// Marchande avec sa boutique et sa maison enregistrées, et trois destinataires habituels.
 FakeClientApi orderApi() => FakeClientApi()
@@ -57,7 +58,7 @@ List<Override> overrides(FakeClientApi api, {Future<bool> Function(Uri uri)? lau
 Widget flow(FakeClientApi api, {Me me = shopOwner, VoidCallback? onClose, Future<bool> Function(Uri uri)? launcher}) =>
     ProviderScope(
       overrides: overrides(api, launcher: launcher),
-      child: NewOrderFlow(me: me, onClose: onClose ?? () {}),
+      child: NewOrderFlow(me: me, onClose: onClose ?? () {}, now: () => homeNow),
     );
 
 /// Étape 3 : enlèvement choisi d'office, destinataire pris dans les récents.
@@ -65,6 +66,14 @@ Future<void> toPackage(WidgetTester tester) async {
   await toRecipient(tester);
   await tester.tap(find.text('Marie'));
   await settle(tester);
+  await tester.tap(find.text('Continuer'));
+  await settle(tester);
+}
+
+/// Étape 4 : colis « Documents ».
+Future<void> toWhen(WidgetTester tester) async {
+  await toPackage(tester);
+  await tester.tap(find.text('Documents'));
   await tester.tap(find.text('Continuer'));
   await settle(tester);
 }
@@ -112,6 +121,14 @@ void main() {
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(AddressEditor), matchesGoldenFile('goldens/05_adresse_carte/${variant.name}.png'));
+    });
+
+    goldenTest('05 quand ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, flow(orderApi()));
+      await toWhen(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Étape 4 sur 5 · Quand'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_quand/${variant.name}.png'));
     });
 
     goldenTest('05 colis ${variant.name}', (tester) async {
@@ -168,6 +185,22 @@ void main() {
       expect(find.text('125\u00a0000'), findsNWidgets(2));
       expect(fragileOn(tester), isTrue);
       await expectLater(capture, matchesGoldenFile('goldens/05_colis/rempli_${brightness.name}.png'));
+    });
+
+    goldenTest('05 quand programmé ${brightness.name}', (tester) async {
+      await pumpVariant(tester, variant, flow(orderApi()), surface: const Size(390, 1340));
+      await toWhen(tester);
+      await tester.tap(find.text('Programmer'));
+      await settle(tester);
+      await tester.tap(find.text('Demain'));
+      await settle(tester);
+      await tester.tap(find.text('20:00'));
+      await settle(tester);
+      expect(
+        find.text('Enlèvement prévu demain à 20:00.\nEntre 20 h et 6 h, un supplément de nuit s’applique.'),
+        findsOneWidget,
+      );
+      await expectLater(capture, matchesGoldenFile('goldens/05_quand/programme_${brightness.name}.png'));
     });
 
     goldenTest('05 destinataire incomplet ${brightness.name}', (tester) async {
@@ -393,5 +426,50 @@ void main() {
     expect(find.text('Étape 3 sur 5 · Colis'), findsOneWidget);
     expect(find.text('À encaisser auprès du destinataire'), findsNothing);
     expect(find.text('Valeur du contenu (facultatif)'), findsOneWidget);
+  });
+
+  group('créneaux (C3)', () {
+    test('30 min d’avance au moins, 7 jours au plus, de 6 h à 21 h 30', () {
+      final now = DateTime(2026, 11, 4, 10, 20);
+      final days = scheduleDays(now);
+      expect(days, hasLength(8));
+      expect(scheduleSlots(days.first, now).first, DateTime(2026, 11, 4, 11));
+      expect(scheduleSlots(days[1], now), hasLength(32));
+      expect(scheduleSlots(days.last, now).last, DateTime(2026, 11, 11, 10));
+      expect(isNightSlot(DateTime(2026, 11, 5, 20)), isTrue);
+      expect(isNightSlot(DateTime(2026, 11, 5, 19, 30)), isFalse);
+    });
+
+    test('le soir, plus de créneau aujourd’hui : on commence demain', () {
+      final now = DateTime(2026, 11, 4, 21, 10);
+      expect(scheduleDays(now).first, DateTime(2026, 11, 5));
+    });
+  });
+
+  testWidgets('programmer demande une heure ; changer de jour la retire', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, flow(orderApi()), surface: const Size(390, 1200));
+    await toWhen(tester);
+    expect(find.text('Jour'), findsNothing);
+    await tester.tap(find.text('Programmer'));
+    await settle(tester);
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Choisissez une heure de passage.'));
+    expect(find.text('Choisissez une heure de passage.'), findsOneWidget);
+
+    await tester.tap(find.text('11:00'));
+    await settle(tester);
+    expect(find.text('Choisissez une heure de passage.'), findsNothing);
+    expect(find.text('Enlèvement prévu aujourd’hui à 11:00.'), findsOneWidget);
+
+    await tester.tap(find.text('Demain'));
+    await settle(tester);
+    expect(find.textContaining('Enlèvement prévu'), findsNothing);
+    expect(find.text('06:00'), findsOneWidget);
+
+    // Revenir à « Maintenant » : plus rien à choisir.
+    await tester.tap(find.text('Maintenant'));
+    await settle(tester);
+    expect(find.text('Jour'), findsNothing);
   });
 }

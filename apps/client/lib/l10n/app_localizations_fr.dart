@@ -693,4 +693,50 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get soundsHint =>
       'Commande envoyée, adresse reçue, colis livré… Le mode silencieux du téléphone est respecté.';
+
+  @override
+  String get whenTitle => 'Quand le livreur doit-il passer ?';
+
+  @override
+  String get whenBody => 'Il récupère le colis, puis le livre aussitôt.';
+
+  @override
+  String get whenNow => 'Maintenant';
+
+  @override
+  String get whenNowBody => 'Un livreur part dès que possible.';
+
+  @override
+  String get whenLater => 'Programmer';
+
+  @override
+  String get whenLaterBody => 'Un jour et une heure, jusqu’à 7 jours à l’avance.';
+
+  @override
+  String get dayLabel => 'Jour';
+
+  @override
+  String get timeLabel => 'Heure de passage';
+
+  @override
+  String get dayToday => 'Aujourd’hui';
+
+  @override
+  String get dayTomorrow => 'Demain';
+
+  @override
+  String dateAt(String date, String time) {
+    return '$date à $time';
+  }
+
+  @override
+  String scheduledSummary(String when) {
+    return 'Enlèvement prévu $when.';
+  }
+
+  @override
+  String get nightSurcharge => 'Entre 20 h et 6 h, un supplément de nuit s’applique.';
+
+  @override
+  String get slotRequired => 'Choisissez une heure de passage.';
 }

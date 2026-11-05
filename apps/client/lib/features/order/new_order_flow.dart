@@ -21,15 +21,19 @@ import 'order_draft.dart';
 import 'package_step.dart';
 import 'pickup_step.dart';
 import 'recipient_step.dart';
+import 'when_step.dart';
 
 /// Nouvelle livraison (C1–C4), en cinq étapes : enlèvement, destinataire, colis, quand,
 /// récapitulatif. « Retour » (ou le geste retour du téléphone) revient à l'étape
 /// précédente ; à la première, il ferme le parcours.
 class NewOrderFlow extends ConsumerStatefulWidget {
-  const NewOrderFlow({super.key, required this.me, required this.onClose});
+  const NewOrderFlow({super.key, required this.me, required this.onClose, this.now});
 
   final Me me;
   final VoidCallback onClose;
+
+  /// Horloge (tests).
+  final DateTime Function()? now;
 
   @override
   ConsumerState<NewOrderFlow> createState() => _NewOrderFlowState();
@@ -38,8 +42,8 @@ class NewOrderFlow extends ConsumerStatefulWidget {
 class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
   static const _total = 5;
 
-  /// Étapes déjà construites ; les suivantes (quand, récapitulatif) arrivent ensuite.
-  static const _built = 3;
+  /// Étapes déjà construites ; le récapitulatif arrive ensuite.
+  static const _built = 4;
 
   static const _blobs = [
     BlobSpec(alignment: Alignment(1.3, -1.1), size: 260, colors: BlobSpec.brand, blur: 70),
@@ -72,6 +76,7 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
     0 => _draft.pickup != null,
     1 => _draft.delivery.hasRecipient && _draft.delivery.hasAddress,
     2 => _draft.delivery.hasPackage,
+    3 => _draft.hasWhen,
     _ => true,
   };
 
@@ -234,6 +239,7 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
                             onAddAddress: () => unawaited(_placeAddress(pickup: true)),
                           ),
                           2 => PackageStep(draft: _draft, merchant: me.merchant != null, showErrors: _tried),
+                          3 => WhenStep(draft: _draft, showErrors: _tried, now: widget.now ?? DateTime.now),
                           _ => RecipientStep(
                             draft: _draft,
                             senderName: me.merchant?.shopName ?? me.fullName ?? '',

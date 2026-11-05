@@ -1387,6 +1387,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Commande envoyée, adresse reçue, colis livré… Le mode silencieux du téléphone est respecté.'**
   String get soundsHint;
+
+  /// No description provided for @whenTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand le livreur doit-il passer ?'**
+  String get whenTitle;
+
+  /// No description provided for @whenBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il récupère le colis, puis le livre aussitôt.'**
+  String get whenBody;
+
+  /// No description provided for @whenNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maintenant'**
+  String get whenNow;
+
+  /// No description provided for @whenNowBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un livreur part dès que possible.'**
+  String get whenNowBody;
+
+  /// No description provided for @whenLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Programmer'**
+  String get whenLater;
+
+  /// No description provided for @whenLaterBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un jour et une heure, jusqu’à 7 jours à l’avance.'**
+  String get whenLaterBody;
+
+  /// No description provided for @dayLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour'**
+  String get dayLabel;
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Heure de passage'**
+  String get timeLabel;
+
+  /// No description provided for @dayToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd’hui'**
+  String get dayToday;
+
+  /// No description provided for @dayTomorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demain'**
+  String get dayTomorrow;
+
+  /// No description provided for @dateAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} à {time}'**
+  String dateAt(String date, String time);
+
+  /// No description provided for @scheduledSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enlèvement prévu {when}.'**
+  String scheduledSummary(String when);
+
+  /// No description provided for @nightSurcharge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entre 20 h et 6 h, un supplément de nuit s’applique.'**
+  String get nightSurcharge;
+
+  /// No description provided for @slotRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez une heure de passage.'**
+  String get slotRequired;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
