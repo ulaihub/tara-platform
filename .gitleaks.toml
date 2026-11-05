@@ -12,6 +12,8 @@ paths = [
   '''apps/api/\.env\.example''',
   '''apps/api/vitest\.config\.db\.ts''',
   '''apps/api/test/''',
+  # Données factices des tests de la page de suivi (jeton de lien inventé).
+  '''apps/tracking/test/fixtures\.ts''',
   '''apps/api/src/.*\.spec\.ts''',
   '''apps/api/src/openapi/generate\.ts''',
   '''pnpm-lock\.yaml''',
