@@ -18,6 +18,7 @@ import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../common/step_labels.dart';
 import '../map/tara_map.dart';
+import 'address_help.dart';
 import 'course_scaffold.dart';
 
 /// Au-delà, le livreur est prévenu que sa livraison sera signalée au support.
@@ -217,6 +218,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
               ? null
               : () => ref.read(callJournalProvider).call(order.id, to: 'RECIPIENT', phone: phone),
         ),
+        AddressHelp(orderId: order.id, stop: 'dropoff', address: order.dropoff, name: name),
         if (due) ...[
           const SizedBox(height: 12),
           CollectBox(amount: order.collectAtDelivery, title: l.collectAtDeliveryTitle, body: l.collectAtDeliveryBody),

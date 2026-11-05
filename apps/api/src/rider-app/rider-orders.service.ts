@@ -131,6 +131,26 @@ export class RiderOrdersService {
     return { items: await this.toDtos(page.items), nextCursor: page.nextCursor };
   }
 
+  /**
+   * Photo de façade ou note vocale d'une adresse de la course (B2) : pour son livreur, tant
+   * que la course est en cours. Ensuite, comme pour un autre livreur, introuvable.
+   */
+  async addressMedia(
+    userId: string,
+    orderId: string,
+    stop: 'pickup' | 'dropoff',
+    kind: 'photo' | 'voice',
+  ): Promise<{ buffer: Buffer; mimeType: string }> {
+    const { order } = await this.load(userId, orderId);
+    if (!(ACTIVE_RIDER_STATUSES as readonly OrderStatus[]).includes(order.status)) {
+      throw AppError.notFound('MEDIA_NOT_FOUND');
+    }
+    const address = stop === 'pickup' ? order.pickupAddress : order.dropoffAddress;
+    const key = kind === 'photo' ? address.photoKey : address.voiceNoteKey;
+    if (!key) throw AppError.notFound('MEDIA_NOT_FOUND');
+    return this.media.read(key);
+  }
+
   async get(userId: string, orderId: string): Promise<z.output<typeof RiderOrderDto>> {
     const { order } = await this.load(userId, orderId);
     const [dto] = await this.toDtos([order]);

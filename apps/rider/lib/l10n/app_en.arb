@@ -488,5 +488,10 @@
   "termsPrivacyTitle": "Privacy policy",
   "termsToSign": "New version to read and sign",
   "blockerTerms": "Our terms have changed: read and sign them to receive deliveries.",
-  "readAndSign": "Read and sign"
+  "readAndSign": "Read and sign",
+  "addressPhoto": "See the entrance",
+  "addressVoice": "Play the note",
+  "addressVoiceStop": "Stop the note",
+  "addressMediaFailed": "File unavailable right now: try again.",
+  "addressPhotoTitle": "Entrance · {name}"
 }

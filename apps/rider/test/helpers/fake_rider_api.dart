@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
@@ -15,6 +18,17 @@ class FakeRiderApi extends RiderApi {
     cashHeld: 0,
     cashLimit: 50000,
   );
+
+  /// Photos et notes d'adresse téléchargées : (course, étape, photo|voice).
+  final mediaFetched = <(String, String, String)>[];
+
+  @override
+  Future<Uint8List> addressMedia(String orderId, String stop, String kind) async {
+    mediaFetched.add((orderId, stop, kind));
+    return base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+    );
+  }
 
   /// Notes données aux expéditeurs : (course, étoiles).
   final ratings = <(String, int)>[];

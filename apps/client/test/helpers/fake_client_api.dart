@@ -65,8 +65,12 @@ class FakeClientApi extends ClientApi {
     String? label,
     String? contactName,
     String? contactPhone,
+    String? photoKey,
+    String? voiceNoteKey,
   }) async {
     createdAddresses.add({
+      'photoKey': ?photoKey,
+      'voiceNoteKey': ?voiceNoteKey,
       'latitude': latitude,
       'longitude': longitude,
       'landmark': landmark,
@@ -91,6 +95,15 @@ class FakeClientApi extends ClientApi {
 
   @override
   Future<LocationLink> locationLink(String id) async => linkAfter ?? pendingLink(null);
+
+  /// Fichiers envoyés : (chemin, ADDRESS_PHOTO ou VOICE_NOTE).
+  final uploads = <(String, String)>[];
+
+  @override
+  Future<String> uploadMedia(String filePath, String kind, {String? mimeType}) async {
+    uploads.add((filePath, kind));
+    return 'address/${kind.toLowerCase()}-${uploads.length}';
+  }
 
   /// Adresses retirées du carnet.
   final deletedAddresses = <String>[];

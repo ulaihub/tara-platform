@@ -33,6 +33,7 @@ dependencies:
     path: ../../packages/tara_map
   tara_ui:
     path: ../../packages/tara_ui
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:

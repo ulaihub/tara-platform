@@ -1600,4 +1600,56 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get removeYes => 'Oui, retirer';
+
+  @override
+  String get mediaSection => 'Pour aider le livreur (facultatif)';
+
+  @override
+  String get facadePhoto => 'Photo de la façade';
+
+  @override
+  String get facadePhotoHint => 'Le livreur reconnaît l’entrée au premier coup d’œil.';
+
+  @override
+  String get takePhoto => 'Prendre la photo';
+
+  @override
+  String get retake => 'Reprendre';
+
+  @override
+  String get removeMedia => 'Retirer';
+
+  @override
+  String get voiceNote => 'Note vocale';
+
+  @override
+  String get voiceNoteHint => '30 secondes pour expliquer le chemin, dans la langue de votre choix.';
+
+  @override
+  String get recordNote => 'Enregistrer';
+
+  @override
+  String recordingNote(String elapsed) {
+    return 'Enregistrement… $elapsed / 0:30';
+  }
+
+  @override
+  String get stopRecording => 'Arrêter';
+
+  @override
+  String listenNote(String length) {
+    return 'Écouter ($length)';
+  }
+
+  @override
+  String get stopListening => 'Arrêter l’écoute';
+
+  @override
+  String get redoNote => 'Refaire';
+
+  @override
+  String get micDenied => 'Micro refusé : autorisez-le pour Tara dans les réglages du téléphone.';
+
+  @override
+  String get facadePhotoLabel => 'Photo de la façade prise';
 }

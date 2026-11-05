@@ -48,6 +48,12 @@ abstract final class TaraIcons {
   ]);
   static const license = TaraIconData([_R(3, 5, 18, 14, 3), _P('M7 10h6M7 14h10')]);
   static const upload = TaraIconData([_P('M12 16V4M7 9l5-5 5 5M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2')]);
+  static const mic = TaraIconData([
+    _P('M12 3a3 3 0 00-3 3v6a3 3 0 006 0V6a3 3 0 00-3-3z'),
+    _P('M5 11a7 7 0 0014 0M12 18v3M9 21h6'),
+  ]);
+  static const play = TaraIconData([_P('M8 5v14l11-7z')]);
+  static const stop = TaraIconData([_P('M7 7h10v10H7z')]);
   static const download = TaraIconData([_P('M12 4v12M7 11l5 5 5-5M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2')]);
   static const selfie = TaraIconData([_C(12, 9, 4), _P('M4.5 20c1.4-3.2 4.2-5 7.5-5s6.1 1.8 7.5 5')]);
   static const shieldCheck = TaraIconData([

@@ -9,10 +9,12 @@ import {
   Post,
   Put,
   Req,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
 import { ENV } from '../config/config.module.js';
@@ -209,6 +211,32 @@ export class RiderAppController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Out<typeof RiderOrderDto> {
     return this.orders.get(user.id, id);
+  }
+
+  /**
+   * Photo de façade (`photo`) ou note vocale (`voice`) de l'adresse d'enlèvement ou de
+   * livraison (B2), pendant la course. Fichier brut, gardé une heure par l'app.
+   */
+  @Get('orders/:id/address-media/:stop/:kind')
+  @ApiProduces('image/jpeg', 'image/png', 'image/webp', 'audio/mp4', 'audio/aac', 'audio/mpeg')
+  @ApiOkResponse({
+    description: 'Photo ou note vocale',
+    schema: { type: 'string', format: 'binary' },
+  })
+  async addressMedia(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('stop') stop: string,
+    @Param('kind') kind: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    if ((stop !== 'pickup' && stop !== 'dropoff') || (kind !== 'photo' && kind !== 'voice')) {
+      throw AppError.notFound('MEDIA_NOT_FOUND');
+    }
+    const media = await this.orders.addressMedia(user.id, id, stop, kind);
+    response.setHeader('Content-Type', media.mimeType);
+    response.setHeader('Cache-Control', 'private, max-age=3600');
+    return new StreamableFile(media.buffer);
   }
 
   /**

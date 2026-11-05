@@ -2713,6 +2713,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Lire et signer'**
   String get readAndSign;
+
+  /// No description provided for @addressPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la façade'**
+  String get addressPhoto;
+
+  /// No description provided for @addressVoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écouter la note'**
+  String get addressVoice;
+
+  /// No description provided for @addressVoiceStop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêter la note'**
+  String get addressVoiceStop;
+
+  /// No description provided for @addressMediaFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier indisponible pour le moment : réessayez.'**
+  String get addressMediaFailed;
+
+  /// No description provided for @addressPhotoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Façade · {name}'**
+  String addressPhotoTitle(String name);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

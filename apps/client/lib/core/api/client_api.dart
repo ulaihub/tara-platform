@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart' show DioMediaType, FormData, MultipartFile;
 import 'package:tara_core/api/api_client.dart';
 
 import 'client_models.dart';
@@ -36,6 +37,8 @@ class ClientApi {
     String? label,
     String? contactName,
     String? contactPhone,
+    String? photoKey,
+    String? voiceNoteKey,
   }) async => Address.fromJson(
     await _api.post(
       '/addresses',
@@ -47,14 +50,27 @@ class ClientApi {
         'label': ?label,
         'contactName': ?contactName,
         'contactPhone': ?contactPhone,
+        'photoKey': ?photoKey,
+        'voiceNoteKey': ?voiceNoteKey,
       },
     ) as Json,
   );
 
-  /// Quartiers de Douala, pour le choix du quartier d'une adresse.
   /// Retire une adresse du carnet ; elle reste attachée aux livraisons passées.
   Future<void> deleteAddress(String id) => _api.delete('/addresses/$id');
 
+  /// Photo de façade (`ADDRESS_PHOTO`) ou note vocale (`VOICE_NOTE`) d'une adresse (B2) :
+  /// renvoie la clé à joindre à l'adresse.
+  Future<String> uploadMedia(String filePath, String kind, {String? mimeType}) async {
+    final file = await MultipartFile.fromFile(
+      filePath,
+      contentType: mimeType == null ? null : DioMediaType.parse(mimeType),
+    );
+    final media = await _api.post('/media', body: FormData.fromMap({'kind': kind, 'file': file})) as Json;
+    return media['key']! as String;
+  }
+
+  /// Quartiers de Douala, pour le choix du quartier d'une adresse.
   Future<List<Neighborhood>> neighborhoods() async => [
     for (final item in await _api.get('/zones', query: {'kind': 'NEIGHBORHOOD', 'city': 'Douala'}) as List<Object?>)
       Neighborhood.fromJson(item! as Json),

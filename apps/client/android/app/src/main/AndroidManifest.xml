@@ -4,6 +4,8 @@
          arrière-plan, pas de service au premier plan. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- Note vocale facultative d'une adresse (30 s au plus, B2), enregistrée à la demande. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <!-- Notifications du suivi des commandes (Android 13 et plus). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 

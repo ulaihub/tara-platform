@@ -19,6 +19,7 @@ import '../../core/course/proof_photo.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../map/tara_map.dart';
+import 'address_help.dart';
 import 'course_scaffold.dart';
 import 'failure_screen.dart' show failureReasonLabel;
 
@@ -285,6 +286,7 @@ class _ReturnScreenState extends ConsumerState<ReturnScreen> {
           callLabel: l.callPerson(senderName),
           onCall: phone == null ? null : () => callPhone(phone),
         ),
+        AddressHelp(orderId: order.id, stop: 'pickup', address: order.pickup, name: senderName),
         const SizedBox(height: 14),
         _ReturnSteps(
           labels: [l.returnStepJoin, l.returnStepCode, l.returnStepPhoto],

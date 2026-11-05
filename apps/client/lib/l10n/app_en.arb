@@ -540,5 +540,21 @@
   "newAddressTitle": "New address",
   "removeAddress": "Remove {label}",
   "removeAddressConfirm": "Remove “{label}” from your addresses? Past deliveries are not affected.",
-  "removeYes": "Yes, remove"
+  "removeYes": "Yes, remove",
+  "mediaSection": "To help the rider (optional)",
+  "facadePhoto": "Photo of the entrance",
+  "facadePhotoHint": "The rider recognises the entrance at a glance.",
+  "takePhoto": "Take the photo",
+  "retake": "Retake",
+  "removeMedia": "Remove",
+  "voiceNote": "Voice note",
+  "voiceNoteHint": "30 seconds to explain the way, in the language of your choice.",
+  "recordNote": "Record",
+  "recordingNote": "Recording… {elapsed} / 0:30",
+  "stopRecording": "Stop",
+  "listenNote": "Listen ({length})",
+  "stopListening": "Stop listening",
+  "redoNote": "Redo",
+  "micDenied": "Microphone refused: allow it for Tara in the phone settings.",
+  "facadePhotoLabel": "Photo of the entrance taken"
 }

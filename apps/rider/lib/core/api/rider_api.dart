@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 
 import 'package:tara_core/api/api_client.dart';
@@ -213,6 +215,11 @@ class RiderApi {
     ) as Json;
     return media['key']! as String;
   }
+
+  /// Photo de façade (`photo`) ou note vocale (`voice`) de l'adresse d'enlèvement
+  /// (`pickup`) ou de livraison (`dropoff`), pendant la course (B2).
+  Future<Uint8List> addressMedia(String orderId, String stop, String kind) =>
+      _api.getBytes('/rider/orders/$orderId/address-media/$stop/$kind');
 
   /// Jeton de notification de cet appareil (null pour ne plus rien recevoir).
   Future<void> registerPushToken(String installationId, String? token) =>

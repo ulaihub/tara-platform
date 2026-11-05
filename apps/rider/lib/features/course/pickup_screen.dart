@@ -14,6 +14,7 @@ import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../common/step_labels.dart';
 import '../map/tara_map.dart';
+import 'address_help.dart';
 import 'course_scaffold.dart';
 
 /// 08 · Enlèvement : itinéraire jusqu'au vendeur, montant à encaisser sur place, code de
@@ -149,6 +150,7 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           callLabel: l.callPerson(senderName),
           onCall: phone == null ? null : () => callPhone(phone),
         ),
+        AddressHelp(orderId: order.id, stop: 'pickup', address: order.pickup, name: senderName),
         if (order.collectAtPickup > 0) ...[
           const SizedBox(height: 12),
           CollectBox(amount: order.collectAtPickup, title: l.collectAtPickupTitle, body: l.collectAtPickupBody),

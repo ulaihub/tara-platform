@@ -16,6 +16,7 @@ import '../../core/api/client_models.dart';
 import '../../core/location.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import 'address_media_section.dart';
 
 /// Libellés proposés pour une adresse d'enlèvement.
 const pickupLabels = ['SHOP', 'HOME', 'OFFICE'];
@@ -57,6 +58,7 @@ class AddressEditor extends ConsumerStatefulWidget {
 class _AddressEditorState extends ConsumerState<AddressEditor> {
   final _map = PinPickerHandle();
   final _landmark = TextEditingController();
+  final _media = AddressMedia();
   late MapPoint _point = widget.initial ?? MapPoint.douala;
   Neighborhood? _neighborhood;
   String? _label;
@@ -76,6 +78,7 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
   @override
   void dispose() {
     _landmark.dispose();
+    _media.dispose();
     super.dispose();
   }
 
@@ -100,6 +103,12 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
     final l = AppLocalizations.of(context);
     setState(() => _saving = true);
     try {
+      // Photo et note vocale d'abord : l'adresse les référence (B2).
+      final api = ref.read(clientApiProvider);
+      final photo = _media.photo;
+      final voice = _media.voice;
+      final photoKey = photo == null ? null : await api.uploadMedia(photo, 'ADDRESS_PHOTO', mimeType: 'image/jpeg');
+      final voiceNoteKey = voice == null ? null : await api.uploadMedia(voice, 'VOICE_NOTE', mimeType: 'audio/mp4');
       final address = await ref
           .read(clientApiProvider)
           .createAddress(
@@ -110,6 +119,8 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
             label: _label == null ? null : labelText(l, _label!),
             contactName: widget.contactName,
             contactPhone: widget.contactPhone,
+            photoKey: photoKey,
+            voiceNoteKey: voiceNoteKey,
           );
       if (mounted) widget.onSaved(address);
     } catch (error) {
@@ -250,6 +261,8 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
                       onSelected: (value) => setState(() => _label = value),
                     ),
                   ],
+                  const SizedBox(height: 16),
+                  AddressMediaSection(media: _media),
                   if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
                 ],
                 footer: PrimaryButton(label: l.saveAddress, icon: TaraIcons.check, loading: _saving, onPressed: _save),

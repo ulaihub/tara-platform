@@ -143,6 +143,47 @@ describe('Actions du livreur (E2 à E9)', () => {
     ).toBe(1);
   });
 
+  it('photo de façade et note vocale de l’adresse : pour le livreur de la course, pendant la course (B2)', async () => {
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+      'base64',
+    );
+    const voice = Buffer.from('fausse note vocale AAC');
+    const upload = async (kind: string, file: Buffer, filename: string, contentType: string) =>
+      (
+        await request(ctx.http)
+          .post('/v1/media')
+          .set(shop.auth)
+          .field('kind', kind)
+          .attach('file', file, { filename, contentType })
+          .expect(201)
+      ).body.key as string;
+    const photoKey = await upload('ADDRESS_PHOTO', png, 'facade.png', 'image/png');
+    const voiceNoteKey = await upload('VOICE_NOTE', voice, 'note.m4a', 'audio/mp4');
+    const dropoff = await request(ctx.http)
+      .post('/v1/addresses')
+      .set(shop.auth)
+      .send({ ...nearAkwa(0.004), landmark: 'Portail bleu', photoKey, voiceNoteKey })
+      .expect(201);
+
+    const { rider, order } = await assigned({ dropoffAddressId: dropoff.body.id });
+    const base = `/v1/rider/orders/${order.id}/address-media`;
+    const photo = await request(ctx.http)
+      .get(`${base}/dropoff/photo`)
+      .set(rider.auth)
+      .buffer(true)
+      .expect(200);
+    expect(photo.headers['content-type']).toBe('image/png');
+    expect(Buffer.compare(photo.body as Buffer, png)).toBe(0);
+    const note = await request(ctx.http).get(`${base}/dropoff/voice`).set(rider.auth).expect(200);
+    expect(note.headers['content-type']).toBe('audio/mp4');
+    // Rien à l'enlèvement, mauvais type, autre livreur : introuvable.
+    await request(ctx.http).get(`${base}/pickup/photo`).set(rider.auth).expect(404);
+    await request(ctx.http).get(`${base}/dropoff/video`).set(rider.auth).expect(404);
+    const other = await activeRider(ctx);
+    await request(ctx.http).get(`${base}/dropoff/photo`).set(other.auth).expect(404);
+  });
+
   it('livre avec le code du destinataire et une photo, puis compte les gains (E4, E9)', async () => {
     const { rider, order } = await assigned();
     // Suivi de l'expéditeur (F1) : prénom et initiale du livreur, son numéro pendant la course.

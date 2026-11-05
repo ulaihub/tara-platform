@@ -964,5 +964,17 @@
   "termsPrivacyTitle": "Politique de confidentialité",
   "termsToSign": "Nouvelle version à lire et signer",
   "blockerTerms": "Nos conditions ont changé : lisez-les et signez-les pour recevoir des courses.",
-  "readAndSign": "Lire et signer"
+  "readAndSign": "Lire et signer",
+  "addressPhoto": "Voir la façade",
+  "addressVoice": "Écouter la note",
+  "addressVoiceStop": "Arrêter la note",
+  "addressMediaFailed": "Fichier indisponible pour le moment : réessayez.",
+  "addressPhotoTitle": "Façade · {name}",
+  "@addressPhotoTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

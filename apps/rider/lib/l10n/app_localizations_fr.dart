@@ -1533,4 +1533,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get readAndSign => 'Lire et signer';
+
+  @override
+  String get addressPhoto => 'Voir la façade';
+
+  @override
+  String get addressVoice => 'Écouter la note';
+
+  @override
+  String get addressVoiceStop => 'Arrêter la note';
+
+  @override
+  String get addressMediaFailed => 'Fichier indisponible pour le moment : réessayez.';
+
+  @override
+  String addressPhotoTitle(String name) {
+    return 'Façade · $name';
+  }
 }

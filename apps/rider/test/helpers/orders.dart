@@ -12,6 +12,7 @@ Json orderJson({
   String? failureReason,
   String? failedAt,
   String? failureDecisionDueAt,
+  bool dropoffMedia = false,
 }) => {
   'id': id,
   'reference': 'TR-48213',
@@ -47,8 +48,8 @@ Json orderJson({
     'landmark': 'portail bleu après la boulangerie',
     'latitude': 4.0283,
     'longitude': 9.6957,
-    'photoKey': null,
-    'voiceNoteKey': null,
+    'photoKey': dropoffMedia ? 'address/facade.jpg' : null,
+    'voiceNoteKey': dropoffMedia ? 'address/note.m4a' : null,
     'source': 'SENDER',
     'verifiedAt': null,
     'motorbikeRestricted': false,
@@ -81,8 +82,10 @@ RiderOrder order({
   String? failureDecision,
   String? failureReason,
   String? failureDecisionDueAt,
+  bool dropoffMedia = false,
 }) => RiderOrder.fromJson(
   orderJson(
+    dropoffMedia: dropoffMedia,
     status: status,
     collectAtPickup: collectAtPickup,
     collectAtDelivery: collectAtDelivery,

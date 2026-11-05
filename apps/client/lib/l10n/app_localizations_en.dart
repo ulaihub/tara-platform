@@ -1594,4 +1594,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeYes => 'Yes, remove';
+
+  @override
+  String get mediaSection => 'To help the rider (optional)';
+
+  @override
+  String get facadePhoto => 'Photo of the entrance';
+
+  @override
+  String get facadePhotoHint => 'The rider recognises the entrance at a glance.';
+
+  @override
+  String get takePhoto => 'Take the photo';
+
+  @override
+  String get retake => 'Retake';
+
+  @override
+  String get removeMedia => 'Remove';
+
+  @override
+  String get voiceNote => 'Voice note';
+
+  @override
+  String get voiceNoteHint => '30 seconds to explain the way, in the language of your choice.';
+
+  @override
+  String get recordNote => 'Record';
+
+  @override
+  String recordingNote(String elapsed) {
+    return 'Recording… $elapsed / 0:30';
+  }
+
+  @override
+  String get stopRecording => 'Stop';
+
+  @override
+  String listenNote(String length) {
+    return 'Listen ($length)';
+  }
+
+  @override
+  String get stopListening => 'Stop listening';
+
+  @override
+  String get redoNote => 'Redo';
+
+  @override
+  String get micDenied => 'Microphone refused: allow it for Tara in the phone settings.';
+
+  @override
+  String get facadePhotoLabel => 'Photo of the entrance taken';
 }

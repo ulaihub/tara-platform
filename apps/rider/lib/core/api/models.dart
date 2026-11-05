@@ -435,6 +435,8 @@ class OrderAddress {
     this.contactName,
     this.contactPhone,
     this.neighborhood,
+    this.hasPhoto = false,
+    this.hasVoiceNote = false,
   });
 
   factory OrderAddress.fromJson(Json json) => OrderAddress(
@@ -447,9 +449,13 @@ class OrderAddress {
     latitude: _field<num>(json, 'latitude').toDouble(),
     longitude: _field<num>(json, 'longitude').toDouble(),
     motorbikeRestricted: _field(json, 'motorbikeRestricted'),
+    hasPhoto: json['photoKey'] != null,
+    hasVoiceNote: json['voiceNoteKey'] != null,
   );
 
   static const fields = [
+    'photoKey',
+    'voiceNoteKey',
     'label',
     'contactName',
     'contactPhone',
@@ -472,6 +478,10 @@ class OrderAddress {
 
   /// Dans une zone interdite aux motos (B6) : finir à pied.
   final bool motorbikeRestricted;
+
+  /// Photo de la façade et note vocale laissées par l'expéditeur (B2).
+  final bool hasPhoto;
+  final bool hasVoiceNote;
 
   /// « Akwa · face à la pharmacie » : quartier puis repère.
   String get line => [?neighborhood, landmark].join(' · ');

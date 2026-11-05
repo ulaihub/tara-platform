@@ -2887,6 +2887,102 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Oui, retirer'**
   String get removeYes;
+
+  /// No description provided for @mediaSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour aider le livreur (facultatif)'**
+  String get mediaSection;
+
+  /// No description provided for @facadePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de la façade'**
+  String get facadePhoto;
+
+  /// No description provided for @facadePhotoHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur reconnaît l’entrée au premier coup d’œil.'**
+  String get facadePhotoHint;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre la photo'**
+  String get takePhoto;
+
+  /// No description provided for @retake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre'**
+  String get retake;
+
+  /// No description provided for @removeMedia.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get removeMedia;
+
+  /// No description provided for @voiceNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note vocale'**
+  String get voiceNote;
+
+  /// No description provided for @voiceNoteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'30 secondes pour expliquer le chemin, dans la langue de votre choix.'**
+  String get voiceNoteHint;
+
+  /// No description provided for @recordNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get recordNote;
+
+  /// No description provided for @recordingNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement… {elapsed} / 0:30'**
+  String recordingNote(String elapsed);
+
+  /// No description provided for @stopRecording.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêter'**
+  String get stopRecording;
+
+  /// No description provided for @listenNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écouter ({length})'**
+  String listenNote(String length);
+
+  /// No description provided for @stopListening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêter l’écoute'**
+  String get stopListening;
+
+  /// No description provided for @redoNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refaire'**
+  String get redoNote;
+
+  /// No description provided for @micDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Micro refusé : autorisez-le pour Tara dans les réglages du téléphone.'**
+  String get micDenied;
+
+  /// No description provided for @facadePhotoLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de la façade prise'**
+  String get facadePhotoLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

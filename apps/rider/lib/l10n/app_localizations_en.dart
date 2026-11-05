@@ -1525,4 +1525,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readAndSign => 'Read and sign';
+
+  @override
+  String get addressPhoto => 'See the entrance';
+
+  @override
+  String get addressVoice => 'Play the note';
+
+  @override
+  String get addressVoiceStop => 'Stop the note';
+
+  @override
+  String get addressMediaFailed => 'File unavailable right now: try again.';
+
+  @override
+  String addressPhotoTitle(String name) {
+    return 'Entrance · $name';
+  }
 }

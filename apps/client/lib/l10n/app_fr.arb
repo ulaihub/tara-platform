@@ -1096,5 +1096,35 @@
       }
     }
   },
-  "removeYes": "Oui, retirer"
+  "removeYes": "Oui, retirer",
+  "mediaSection": "Pour aider le livreur (facultatif)",
+  "facadePhoto": "Photo de la façade",
+  "facadePhotoHint": "Le livreur reconnaît l’entrée au premier coup d’œil.",
+  "takePhoto": "Prendre la photo",
+  "retake": "Reprendre",
+  "removeMedia": "Retirer",
+  "voiceNote": "Note vocale",
+  "voiceNoteHint": "30 secondes pour expliquer le chemin, dans la langue de votre choix.",
+  "recordNote": "Enregistrer",
+  "recordingNote": "Enregistrement… {elapsed} / 0:30",
+  "@recordingNote": {
+    "placeholders": {
+      "elapsed": {
+        "type": "String"
+      }
+    }
+  },
+  "stopRecording": "Arrêter",
+  "listenNote": "Écouter ({length})",
+  "@listenNote": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      }
+    }
+  },
+  "stopListening": "Arrêter l’écoute",
+  "redoNote": "Refaire",
+  "micDenied": "Micro refusé : autorisez-le pour Tara dans les réglages du téléphone.",
+  "facadePhotoLabel": "Photo de la façade prise"
 }
