@@ -304,6 +304,45 @@ describe('Actions du livreur (E2 à E9)', () => {
       .expect(422);
   });
 
+  it('page de suivi du destinataire : livreur à appeler, heure estimée, somme à payer (F2)', async () => {
+    const { rider, order } = await assigned({ codAmount: 12_500, feePayer: 'RECIPIENT' });
+    const placed = await request(ctx.http).get(`/v1/orders/${order.id}`).set(shop.auth).expect(200);
+    const token = (placed.body.trackingUrl as string).split('/t/')[1];
+    const total = placed.body.pricing.totalPrice as number;
+
+    // Livreur trouvé, colis pas encore pris : son nom, pas encore son numéro.
+    const before = await request(ctx.http).get(`/v1/public/tracking/${token}`).expect(200);
+    expect(before.body).toMatchObject({
+      status: 'ASSIGNED',
+      rider: { name: expect.any(String), vehicleType: 'MOTORBIKE', phone: null },
+      eta: null,
+      due: { fee: total, cod: 12_500, total: total + 12_500 },
+      paymentPending: null,
+    });
+
+    // Colis à bord : numéro du livreur et heure estimée d'après sa dernière position.
+    await pickUp(rider, order);
+    const riderUser = await ctx.prisma.user.findUniqueOrThrow({ where: { id: rider.userId } });
+    const coming = await request(ctx.http).get(`/v1/public/tracking/${token}`).expect(200);
+    expect(coming.body).toMatchObject({
+      status: 'IN_DELIVERY',
+      rider: { phone: riderUser.phone },
+      eta: { minutes: expect.any(Number), distanceMeters: expect.any(Number) },
+    });
+    expect(coming.body.eta.minutes).toBeGreaterThanOrEqual(1);
+    expect(coming.body.eta.progress).toBeGreaterThanOrEqual(0);
+    expect(coming.body.eta.progress).toBeLessThanOrEqual(1);
+
+    // Le livreur envoie la demande Mobile Money : la page invite à la valider.
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/collect`)
+      .set(rider.auth)
+      .send({ method: 'MOBILE_MONEY', phone: '677001122', operator: 'MTN' })
+      .expect(200);
+    const asked = await request(ctx.http).get(`/v1/public/tracking/${token}`).expect(200);
+    expect(asked.body.paymentPending).toEqual({ amount: total + 12_500 });
+  });
+
   it('sans code, le support valide après appel ; au-delà du plafond, un administrateur (E4)', async () => {
     const { rider, order } = await assigned({ codAmount: 5_000 });
     await pickUp(rider, order);

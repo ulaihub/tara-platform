@@ -10,12 +10,10 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
-import { CurrentUser, Public, Roles } from '../auth/decorators.js';
-import { AppError } from '../common/errors/app-error.js';
+import { CurrentUser, Roles } from '../auth/decorators.js';
 import { idempotencyKey } from '../common/idempotency.js';
 import { pageSchema } from '../common/pagination.js';
 import {
@@ -36,12 +34,10 @@ import {
   OrderListQuery,
   OrderSummaryDto,
   PickupCodeDto,
-  PublicTrackingDto,
   RateBody,
   RatingDto,
   RecipientDto,
   RecipientQuery,
-  RecipientResponseBody,
 } from './orders.schemas.js';
 import { OrdersService } from './orders.service.js';
 import { RatingsService } from './ratings.service.js';
@@ -159,37 +155,6 @@ export class RecipientsController {
     @ValidQuery(RecipientQuery) query: z.output<typeof RecipientQuery>,
   ): Promise<z.output<typeof RecipientDto>[]> {
     return this.orders.recipients(user, query.q);
-  }
-}
-
-const TrackingToken = z.string().regex(/^[A-Za-z0-9_-]{16,64}$/);
-
-/** Page de suivi ouverte par le destinataire depuis le SMS, sans compte. */
-@ApiTags('Public')
-@Public()
-@Throttle({ default: { limit: 120, ttl: 60_000 } })
-@Controller('public/tracking')
-export class PublicTrackingController {
-  constructor(private readonly orders: OrdersService) {}
-
-  @Get(':token')
-  @ApiZodResponse(PublicTrackingDto)
-  view(@Param('token') token: string): Promise<z.output<typeof PublicTrackingDto>> {
-    if (!TrackingToken.safeParse(token).success) throw AppError.notFound('ORDER_NOT_FOUND');
-    return this.orders.publicTracking(token);
-  }
-
-  /** Le destinataire confirme son adresse et sa disponibilité (C5). */
-  @Post(':token/response')
-  @HttpCode(HttpStatus.OK)
-  @ApiZodBody(RecipientResponseBody)
-  @ApiZodResponse(PublicTrackingDto)
-  respond(
-    @Param('token') token: string,
-    @ValidBody(RecipientResponseBody) body: z.output<typeof RecipientResponseBody>,
-  ): Promise<z.output<typeof PublicTrackingDto>> {
-    if (!TrackingToken.safeParse(token).success) throw AppError.notFound('ORDER_NOT_FOUND');
-    return this.orders.recipientResponse(token, body);
   }
 }
 

@@ -31,7 +31,6 @@ import {
   ACTIVE_ORDER_STATUSES,
   type OrderListQuery,
   type OrderSummaryDto,
-  type PublicTrackingDto,
   type RecipientDto,
   type RecipientResponseBody,
 } from './orders.schemas.js';
@@ -63,7 +62,7 @@ const RIDER_REACHABLE: readonly string[] = [
 ];
 
 /** « Jean Mbarga » → « Jean M. » : assez pour reconnaître le livreur à la porte. */
-function shortName(fullName: string | null): string {
+export function shortName(fullName: string | null): string {
   const [first = '', last] = (fullName ?? '').trim().split(/\s+/);
   return last ? `${first} ${last[0]?.toUpperCase()}.` : first || 'Livreur';
 }
@@ -681,45 +680,13 @@ export class OrdersService {
 
   // --- Page de suivi publique (C5, F2) -----------------------------------------------------
 
-  private async byTrackingToken(token: string) {
-    const order = await this.prisma.order.findUnique({
-      where: { trackingToken: token },
-      include: {
-        dropoffAddress: { select: { landmark: true } },
-        merchant: { select: { shopName: true } },
-        sender: { select: { fullName: true } },
-        events: { orderBy: { recordedAt: 'asc' } },
-      },
-    });
-    if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
-    return order;
-  }
-
-  async publicTracking(token: string): Promise<z.output<typeof PublicTrackingDto>> {
-    const order = await this.byTrackingToken(token);
-    return {
-      reference: order.reference,
-      status: order.status,
-      senderName: order.merchant?.shopName ?? order.sender.fullName ?? null,
-      recipientName: order.recipientName,
-      dropoffLandmark: order.dropoffAddress.landmark,
-      scheduledFor: order.scheduledFor?.toISOString() ?? null,
-      recipientConfirmedAt: order.recipientConfirmedAt?.toISOString() ?? null,
-      recipientAvailable: order.recipientAvailable,
-      canRespond: BEFORE_PICKUP.includes(order.status) && !order.recipientConfirmedAt,
-      timeline: order.events.map((event) => ({
-        status: event.toStatus,
-        at: event.occurredAt.toISOString(),
-      })),
-    };
-  }
-
   /** Réponse du destinataire au message de confirmation (C5). */
   async recipientResponse(
     token: string,
     body: z.output<typeof RecipientResponseBody>,
-  ): Promise<z.output<typeof PublicTrackingDto>> {
-    const order = await this.byTrackingToken(token);
+  ): Promise<void> {
+    const order = await this.prisma.order.findUnique({ where: { trackingToken: token } });
+    if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
     const { count } = await this.prisma.order.updateMany({
       where: { id: order.id, recipientConfirmedAt: null, status: { in: BEFORE_PICKUP } },
       data: {
@@ -733,6 +700,5 @@ export class OrdersService {
         order.recipientConfirmedAt ? 'RECIPIENT_ALREADY_RESPONDED' : 'PICKUP_ALREADY_DONE',
       );
     }
-    return this.publicTracking(token);
   }
 }

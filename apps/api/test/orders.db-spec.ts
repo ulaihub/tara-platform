@@ -430,7 +430,13 @@ describe('Tarification et commandes (C1 à C7)', () => {
         .expect(201);
       const token = (order.body.order.trackingUrl as string).split('/t/')[1];
       const view = await request(ctx.http).get(`/v1/public/tracking/${token}`).expect(200);
-      expect(view.body).toMatchObject({ canRespond: true, recipientName: 'Client Bonamoussadi' });
+      expect(view.body).toMatchObject({
+        canRespond: true,
+        recipientName: 'Client Bonamoussadi',
+        rider: null,
+        eta: null,
+        failureDecision: null,
+      });
       expect(JSON.stringify(view.body)).not.toContain('+237');
 
       const answer = await request(ctx.http)

@@ -43,7 +43,7 @@ tara-platform/
 │   │   └── test/            tests d'intégration contre PostgreSQL (*.db-spec.ts)
 │   ├── rider/               app livreur Flutter — phase 4
 │   ├── client/              app expéditeur Flutter — phase 5
-│   ├── tracking/            page de suivi web — phase 5
+│   ├── tracking/            page de suivi web (Hono, rendue côté serveur) — phase 5
 │   └── backoffice/          back-office Next.js — phase 6
 ├── packages/                code partagé (client d'API généré, à partir de la phase 1)
 ├── infra/
@@ -68,6 +68,7 @@ tara-platform/
 | OSRM                 | 6.0.0                | Image `ghcr.io/project-osrm/osrm-backend`                                                                               |
 | Flutter / Dart       | 3.47 / 3.13          | App livreur `apps/rider` ; version épinglée en CI (les captures de référence en dépendent)                              |
 | MapLibre             | Native (via Flutter) | Rendu des tuiles vectorielles, styles Tara sombre et clair, régions hors connexion                                      |
+| Hono                 | 4.13                 | Page de suivi `apps/tracking` : rendue côté serveur, quasi sans JavaScript, moins de 200 Ko                             |
 
 ## Décisions de conception
 

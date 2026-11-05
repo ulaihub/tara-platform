@@ -5,7 +5,6 @@ import { OrderTransitionsService } from './order-transitions.service.js';
 import {
   AdminOrdersController,
   OrdersController,
-  PublicTrackingController,
   RecipientsController,
 } from './orders.controller.js';
 import { OrdersService } from './orders.service.js';
@@ -13,12 +12,7 @@ import { RatingsService } from './ratings.service.js';
 
 @Module({
   imports: [GeoModule, PricingModule],
-  controllers: [
-    OrdersController,
-    RecipientsController,
-    PublicTrackingController,
-    AdminOrdersController,
-  ],
+  controllers: [OrdersController, RecipientsController, AdminOrdersController],
   providers: [OrdersService, OrderTransitionsService, RatingsService],
   exports: [OrdersService, OrderTransitionsService, RatingsService],
 })

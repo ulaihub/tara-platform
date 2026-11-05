@@ -262,6 +262,7 @@ export const RecipientDto = z
 
 export const RecipientQuery = z.object({ q: z.string().trim().min(1).max(40).optional() });
 
+/** Page de suivi du destinataire (F2), sans compte : rien de plus que ce qu'il lui faut. */
 export const PublicTrackingDto = z
   .object({
     reference: z.string(),
@@ -269,12 +270,42 @@ export const PublicTrackingDto = z
     senderName: z.string().nullable(),
     recipientName: z.string(),
     dropoffLandmark: z.string(),
+    dropoffNeighborhood: z.string().nullable(),
     scheduledFor: z.iso.datetime().nullable(),
     recipientConfirmedAt: z.iso.datetime().nullable(),
     recipientAvailable: z.boolean().nullable(),
     /** Le destinataire peut encore confirmer sa disponibilité (avant l'enlèvement). */
     canRespond: z.boolean(),
     timeline: z.array(z.object({ status: OrderStatusEnum, at: z.iso.datetime() })),
+    /**
+     * Livreur : prénom et initiale, véhicule, plaque ; son numéro seulement quand il vient
+     * vers le destinataire (colis à bord, ou échec en attente).
+     */
+    rider: z
+      .object({
+        name: z.string(),
+        vehicleType: z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']),
+        plateNumber: z.string().nullable(),
+        phone: z.string().nullable(),
+      })
+      .nullable(),
+    /**
+     * Arrivée estimée (prudente) quand le livreur roule vers le destinataire, d'après sa
+     * dernière position (de moins de 5 min). `progress` : part du trajet faite, de 0 à 1.
+     */
+    eta: z
+      .object({
+        minutes: z.int(),
+        distanceMeters: z.int(),
+        progress: z.number().min(0).max(1),
+      })
+      .nullable(),
+    /** À payer à la porte : frais de livraison (si le destinataire les paie) et colis. */
+    due: z.object({ fee: z.int(), cod: z.int(), total: z.int() }),
+    /** Demande Mobile Money envoyée par le livreur, à valider sur le téléphone. */
+    paymentPending: z.object({ amount: z.int() }).nullable(),
+    /** Après un échec : nouvelle tentative ou retour à l'expéditeur, si c'est décidé. */
+    failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
   })
   .meta({ id: 'PublicTracking' });
 

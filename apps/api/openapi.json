@@ -2942,6 +2942,74 @@
         ]
       }
     },
+    "/v1/admin/orders/{id}/transition": {
+      "post": {
+        "operationId": "AdminOrders_transition",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "to": {
+                    "$ref": "#/components/schemas/OrderStatus"
+                  },
+                  "riderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "failureReason": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FailureReason"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "to"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · commandes"
+        ]
+      }
+    },
     "/v1/public/tracking/{token}": {
       "get": {
         "operationId": "PublicTracking_view",
@@ -3021,1743 +3089,6 @@
         },
         "tags": [
           "Public"
-        ]
-      }
-    },
-    "/v1/admin/orders/{id}/transition": {
-      "post": {
-        "operationId": "AdminOrders_transition",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "to": {
-                    "$ref": "#/components/schemas/OrderStatus"
-                  },
-                  "riderId": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "failureReason": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/FailureReason"
-                      }
-                    ]
-                  },
-                  "note": {
-                    "type": "string",
-                    "maxLength": 300
-                  }
-                },
-                "required": [
-                  "to"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Order"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · commandes"
-        ]
-      }
-    },
-    "/v1/rider/config": {
-      "get": {
-        "operationId": "RiderApp_config",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderConfig"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/presence": {
-      "put": {
-        "operationId": "RiderApp_presence",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "heading": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 360
-                  },
-                  "speed": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100
-                  },
-                  "accuracy": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 10000
-                  },
-                  "recordedAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "mocked": {
-                    "type": "boolean"
-                  },
-                  "online": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "latitude",
-                  "longitude",
-                  "online"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderPresence"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      },
-      "get": {
-        "operationId": "RiderApp_presenceState",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderPresence"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/location": {
-      "post": {
-        "operationId": "RiderApp_locate",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "heading": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 360
-                  },
-                  "speed": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100
-                  },
-                  "accuracy": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 10000
-                  },
-                  "recordedAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "mocked": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "latitude",
-                  "longitude"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/offers": {
-      "get": {
-        "operationId": "RiderApp_offers",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DispatchOffer"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/offers/{id}/accept": {
-      "post": {
-        "operationId": "RiderApp_accept",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderOrder"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/offers/{id}/decline": {
-      "post": {
-        "operationId": "RiderApp_decline",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders": {
-      "get": {
-        "operationId": "RiderApp_list",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 20,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100
-            }
-          },
-          {
-            "name": "cursor",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "scope",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "active",
-              "type": "string",
-              "enum": [
-                "active",
-                "history"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/RiderOrder"
-                      }
-                    },
-                    "nextCursor": {
-                      "nullable": true,
-                      "type": "string",
-                      "format": "uuid"
-                    }
-                  },
-                  "required": [
-                    "items",
-                    "nextCursor"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}": {
-      "get": {
-        "operationId": "RiderApp_get",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderOrder"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/route": {
-      "get": {
-        "operationId": "RiderApp_route",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "latitude",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number",
-              "minimum": -90,
-              "maximum": 90
-            }
-          },
-          {
-            "name": "longitude",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number",
-              "minimum": -180,
-              "maximum": 180
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderRoute"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/pickup": {
-      "post": {
-        "operationId": "RiderApp_pickup",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "pickupCode": {
-                    "type": "string",
-                    "pattern": "^\\d{4}$"
-                  },
-                  "photoKey": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
-                  },
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "occurredAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "clientEventId": {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
-                  }
-                },
-                "required": [
-                  "pickupCode",
-                  "photoKey",
-                  "latitude",
-                  "longitude"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderOrder"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/depart": {
-      "post": {
-        "operationId": "RiderApp_depart",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "occurredAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "clientEventId": {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
-                  }
-                },
-                "required": [
-                  "latitude",
-                  "longitude"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderOrder"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/deliver": {
-      "post": {
-        "operationId": "RiderApp_deliver",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "deliveryCode": {
-                    "type": "string",
-                    "pattern": "^\\d{4}$"
-                  },
-                  "receivedBy": {
-                    "type": "string",
-                    "minLength": 2,
-                    "maxLength": 80
-                  },
-                  "photoKey": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
-                  },
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "occurredAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "clientEventId": {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
-                  }
-                },
-                "required": [
-                  "photoKey",
-                  "latitude",
-                  "longitude"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderOrder"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/fail": {
-      "post": {
-        "operationId": "RiderApp_fail",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "reason": {
-                    "$ref": "#/components/schemas/FailureReason"
-                  },
-                  "note": {
-                    "type": "string",
-                    "maxLength": 300
-                  },
-                  "photoKey": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
-                  },
-                  "callLog": {
-                    "default": [],
-                    "maxItems": 20,
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "to": {
-                          "type": "string",
-                          "enum": [
-                            "RECIPIENT",
-                            "SENDER"
-                          ]
-                        },
-                        "at": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "durationSeconds": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 3600
-                        }
-                      },
-                      "required": [
-                        "to",
-                        "at",
-                        "durationSeconds"
-                      ]
-                    }
-                  },
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "occurredAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "clientEventId": {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
-                  }
-                },
-                "required": [
-                  "reason",
-                  "photoKey",
-                  "latitude",
-                  "longitude"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderOrder"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/rating": {
-      "post": {
-        "operationId": "RiderApp_rateSender",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "score": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 5
-                  },
-                  "comment": {
-                    "type": "string",
-                    "maxLength": 300
-                  }
-                },
-                "required": [
-                  "score"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Rating"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/retry": {
-      "post": {
-        "operationId": "RiderApp_retry",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "occurredAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "clientEventId": {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
-                  }
-                },
-                "required": [
-                  "latitude",
-                  "longitude"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderOrder"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/return": {
-      "post": {
-        "operationId": "RiderApp_returnToSender",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "senderCode": {
-                    "type": "string",
-                    "pattern": "^\\d{4}$"
-                  },
-                  "photoKey": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
-                  },
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "occurredAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "clientEventId": {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
-                  }
-                },
-                "required": [
-                  "senderCode",
-                  "latitude",
-                  "longitude"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderOrder"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/orders/{id}/release": {
-      "post": {
-        "operationId": "RiderApp_release",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "reason": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 300
-                  }
-                },
-                "required": [
-                  "reason"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/earnings": {
-      "get": {
-        "operationId": "RiderApp_earnings",
-        "parameters": [
-          {
-            "name": "period",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "day",
-              "type": "string",
-              "enum": [
-                "day",
-                "week",
-                "month"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RiderEarnings"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/alerts": {
-      "post": {
-        "operationId": "RiderApp_alert",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "latitude": {
-                    "type": "number",
-                    "minimum": -90,
-                    "maximum": 90
-                  },
-                  "longitude": {
-                    "type": "number",
-                    "minimum": -180,
-                    "maximum": 180
-                  },
-                  "accuracy": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 10000
-                  },
-                  "orderId": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "note": {
-                    "type": "string",
-                    "maxLength": 300
-                  },
-                  "clientEventId": {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
-                  }
-                },
-                "required": [
-                  "latitude",
-                  "longitude"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafetyAlert"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/rider/alerts/{id}/cancel": {
-      "post": {
-        "operationId": "RiderApp_cancelAlert",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafetyAlert"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Livreur"
-        ]
-      }
-    },
-    "/v1/orders/{id}/failure-decision": {
-      "post": {
-        "operationId": "SenderDecisions_failureDecision",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "decision": {
-                    "type": "string",
-                    "enum": [
-                      "RETRY",
-                      "RETURN"
-                    ]
-                  }
-                },
-                "required": [
-                  "decision"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Commandes"
-        ]
-      }
-    },
-    "/v1/admin/orders/{id}/dispatch": {
-      "get": {
-        "operationId": "AdminDispatch_state",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DispatchState"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · attribution"
-        ]
-      }
-    },
-    "/v1/admin/orders/{id}/candidates": {
-      "get": {
-        "operationId": "AdminDispatch_candidates",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DispatchCandidate"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · attribution"
-        ]
-      }
-    },
-    "/v1/admin/orders/{id}/assign": {
-      "post": {
-        "operationId": "AdminDispatch_assign",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "riderId": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "note": {
-                    "type": "string",
-                    "maxLength": 300
-                  }
-                },
-                "required": [
-                  "riderId"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Order"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · attribution"
-        ]
-      }
-    },
-    "/v1/admin/orders/{id}/validate-delivery": {
-      "post": {
-        "operationId": "AdminSupport_validateDelivery",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "note": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 300
-                  }
-                },
-                "required": [
-                  "note"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · support"
-        ]
-      }
-    },
-    "/v1/admin/orders/{id}/failure-decision": {
-      "post": {
-        "operationId": "AdminSupport_failureDecisionForSender",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "decision": {
-                    "type": "string",
-                    "enum": [
-                      "RETRY",
-                      "RETURN"
-                    ]
-                  }
-                },
-                "required": [
-                  "decision"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · support"
-        ]
-      }
-    },
-    "/v1/admin/safety-alerts": {
-      "get": {
-        "operationId": "AdminSupport_listAlerts",
-        "parameters": [
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "open",
-              "type": "string",
-              "enum": [
-                "open",
-                "all"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SafetyAlert"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · support"
-        ]
-      }
-    },
-    "/v1/admin/safety-alerts/{id}/acknowledge": {
-      "post": {
-        "operationId": "AdminSupport_acknowledge",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafetyAlert"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · support"
-        ]
-      }
-    },
-    "/v1/admin/safety-alerts/{id}/resolve": {
-      "post": {
-        "operationId": "AdminSupport_resolve",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "resolution": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 500
-                  }
-                },
-                "required": [
-                  "resolution"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafetyAlert"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · support"
-        ]
-      }
-    },
-    "/v1/admin/safety-alerts/{id}/police-called": {
-      "post": {
-        "operationId": "AdminSupport_policeCalled",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "note": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 500
-                  }
-                },
-                "required": [
-                  "note"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafetyAlert"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · support"
         ]
       }
     },
@@ -6666,6 +4997,1675 @@
         ],
         "tags": [
           "Back-office · finance"
+        ]
+      }
+    },
+    "/v1/rider/config": {
+      "get": {
+        "operationId": "RiderApp_config",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderConfig"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/presence": {
+      "put": {
+        "operationId": "RiderApp_presence",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "heading": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "accuracy": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "recordedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "mocked": {
+                    "type": "boolean"
+                  },
+                  "online": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude",
+                  "online"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderPresence"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      },
+      "get": {
+        "operationId": "RiderApp_presenceState",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderPresence"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/location": {
+      "post": {
+        "operationId": "RiderApp_locate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "heading": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "accuracy": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "recordedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "mocked": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/offers": {
+      "get": {
+        "operationId": "RiderApp_offers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DispatchOffer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/offers/{id}/accept": {
+      "post": {
+        "operationId": "RiderApp_accept",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/offers/{id}/decline": {
+      "post": {
+        "operationId": "RiderApp_decline",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders": {
+      "get": {
+        "operationId": "RiderApp_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "active",
+              "type": "string",
+              "enum": [
+                "active",
+                "history"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RiderOrder"
+                      }
+                    },
+                    "nextCursor": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "nextCursor"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}": {
+      "get": {
+        "operationId": "RiderApp_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/route": {
+      "get": {
+        "operationId": "RiderApp_route",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "latitude",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "longitude",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderRoute"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/pickup": {
+      "post": {
+        "operationId": "RiderApp_pickup",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pickupCode": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "photoKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "pickupCode",
+                  "photoKey",
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/depart": {
+      "post": {
+        "operationId": "RiderApp_depart",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/deliver": {
+      "post": {
+        "operationId": "RiderApp_deliver",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deliveryCode": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "receivedBy": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "photoKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "photoKey",
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/fail": {
+      "post": {
+        "operationId": "RiderApp_fail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "$ref": "#/components/schemas/FailureReason"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "photoKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "callLog": {
+                    "default": [],
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "to": {
+                          "type": "string",
+                          "enum": [
+                            "RECIPIENT",
+                            "SENDER"
+                          ]
+                        },
+                        "at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "durationSeconds": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 3600
+                        }
+                      },
+                      "required": [
+                        "to",
+                        "at",
+                        "durationSeconds"
+                      ]
+                    }
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "reason",
+                  "photoKey",
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/rating": {
+      "post": {
+        "operationId": "RiderApp_rateSender",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "score": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "comment": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "score"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rating"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/retry": {
+      "post": {
+        "operationId": "RiderApp_retry",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/return": {
+      "post": {
+        "operationId": "RiderApp_returnToSender",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "senderCode": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "photoKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "senderCode",
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/release": {
+      "post": {
+        "operationId": "RiderApp_release",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/earnings": {
+      "get": {
+        "operationId": "RiderApp_earnings",
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "day",
+              "type": "string",
+              "enum": [
+                "day",
+                "week",
+                "month"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderEarnings"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/alerts": {
+      "post": {
+        "operationId": "RiderApp_alert",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "accuracy": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "orderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/alerts/{id}/cancel": {
+      "post": {
+        "operationId": "RiderApp_cancelAlert",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/orders/{id}/failure-decision": {
+      "post": {
+        "operationId": "SenderDecisions_failureDecision",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "RETRY",
+                      "RETURN"
+                    ]
+                  }
+                },
+                "required": [
+                  "decision"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/admin/orders/{id}/dispatch": {
+      "get": {
+        "operationId": "AdminDispatch_state",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchState"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · attribution"
+        ]
+      }
+    },
+    "/v1/admin/orders/{id}/candidates": {
+      "get": {
+        "operationId": "AdminDispatch_candidates",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DispatchCandidate"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · attribution"
+        ]
+      }
+    },
+    "/v1/admin/orders/{id}/assign": {
+      "post": {
+        "operationId": "AdminDispatch_assign",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "riderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "riderId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · attribution"
+        ]
+      }
+    },
+    "/v1/admin/orders/{id}/validate-delivery": {
+      "post": {
+        "operationId": "AdminSupport_validateDelivery",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "note"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/orders/{id}/failure-decision": {
+      "post": {
+        "operationId": "AdminSupport_failureDecisionForSender",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "RETRY",
+                      "RETURN"
+                    ]
+                  }
+                },
+                "required": [
+                  "decision"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/safety-alerts": {
+      "get": {
+        "operationId": "AdminSupport_listAlerts",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "open",
+              "type": "string",
+              "enum": [
+                "open",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SafetyAlert"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/safety-alerts/{id}/acknowledge": {
+      "post": {
+        "operationId": "AdminSupport_acknowledge",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/safety-alerts/{id}/resolve": {
+      "post": {
+        "operationId": "AdminSupport_resolve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resolution": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "resolution"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
+        ]
+      }
+    },
+    "/v1/admin/safety-alerts/{id}/police-called": {
+      "post": {
+        "operationId": "AdminSupport_policeCalled",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "note"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · support"
         ]
       }
     },
@@ -9258,6 +9258,10 @@
           "dropoffLandmark": {
             "type": "string"
           },
+          "dropoffNeighborhood": {
+            "nullable": true,
+            "type": "string"
+          },
           "scheduledFor": {
             "nullable": true,
             "type": "string",
@@ -9294,6 +9298,102 @@
               ],
               "additionalProperties": false
             }
+          },
+          "rider": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "vehicleType": {
+                "type": "string",
+                "enum": [
+                  "MOTORBIKE",
+                  "TRICYCLE",
+                  "CAR"
+                ]
+              },
+              "plateNumber": {
+                "nullable": true,
+                "type": "string"
+              },
+              "phone": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "vehicleType",
+              "plateNumber",
+              "phone"
+            ],
+            "additionalProperties": false
+          },
+          "eta": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "minutes": {
+                "type": "integer"
+              },
+              "distanceMeters": {
+                "type": "integer"
+              },
+              "progress": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "minutes",
+              "distanceMeters",
+              "progress"
+            ],
+            "additionalProperties": false
+          },
+          "due": {
+            "type": "object",
+            "properties": {
+              "fee": {
+                "type": "integer"
+              },
+              "cod": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "fee",
+              "cod",
+              "total"
+            ],
+            "additionalProperties": false
+          },
+          "paymentPending": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "amount"
+            ],
+            "additionalProperties": false
+          },
+          "failureDecision": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "RETRY",
+              "RETURN"
+            ]
           }
         },
         "required": [
@@ -9302,11 +9402,17 @@
           "senderName",
           "recipientName",
           "dropoffLandmark",
+          "dropoffNeighborhood",
           "scheduledFor",
           "recipientConfirmedAt",
           "recipientAvailable",
           "canRespond",
-          "timeline"
+          "timeline",
+          "rider",
+          "eta",
+          "due",
+          "paymentPending",
+          "failureDecision"
         ],
         "additionalProperties": false
       },
