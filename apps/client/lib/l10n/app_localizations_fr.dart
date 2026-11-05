@@ -91,7 +91,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get legalAnd => ' et la ';
 
   @override
-  String get legalPrefix => 'En continuant, vous acceptez les ';
+  String get legalPrefix => 'Nouveau compte : vous lirez et accepterez les ';
 
   @override
   String get logout => 'Se déconnecter';
@@ -1296,4 +1296,77 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get topUpCancel => 'Choisir le retour à la place';
+
+  @override
+  String get termsTitle => 'Conditions d’utilisation';
+
+  @override
+  String get termsUpdateTitle => 'Nos conditions ont changé';
+
+  @override
+  String get termsSignupIntro =>
+      'Avant de créer votre compte, lisez les conditions et la politique de confidentialité jusqu’en bas. Elles expliquent les prix, les frais quand une livraison échoue et ce que nous faisons de vos données.';
+
+  @override
+  String get termsUpdateIntro =>
+      'Lisez la nouvelle version jusqu’en bas, puis signez-la avec le code reçu par SMS. Sans signature, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.';
+
+  @override
+  String get termsLater => 'Plus tard';
+
+  @override
+  String get termsEnd => 'Vous êtes arrivé au bout des textes.';
+
+  @override
+  String get termsScrollFirst => 'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.';
+
+  @override
+  String get termsCheckPrefix => 'J’ai lu et j’accepte les ';
+
+  @override
+  String termsCheckTerms(String version) {
+    return 'conditions d’utilisation (version $version)';
+  }
+
+  @override
+  String get termsCheckAnd => ' et la ';
+
+  @override
+  String get termsCheckPrivacy => 'politique de confidentialité';
+
+  @override
+  String get termsCreateAccount => 'Accepter et créer mon compte';
+
+  @override
+  String get termsGetCode => 'Recevoir le code pour signer';
+
+  @override
+  String termsCodeSent(String phone) {
+    return 'Code envoyé au $phone. Il vaut signature de votre acceptation.';
+  }
+
+  @override
+  String get termsSign => 'Signer';
+
+  @override
+  String termsAcceptedOn(String version, String date) {
+    return 'Version $version acceptée le $date';
+  }
+
+  @override
+  String termsVersionLine(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get termsSection => 'Conditions et confidentialité';
+
+  @override
+  String get termsToSign => 'Nouvelle version à lire et signer';
+
+  @override
+  String get termsSigned => 'Conditions signées. Merci !';
+
+  @override
+  String get termsPrivacyTitle => 'Politique de confidentialité';
 }

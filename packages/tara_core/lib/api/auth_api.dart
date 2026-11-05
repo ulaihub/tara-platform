@@ -18,12 +18,14 @@ class AuthApi {
     await _api.post('/auth/otp', body: {'phone': phone, 'locale': locale}, auth: false) as Json,
   );
 
-  /// Vérifie le code ; la session est enregistrée dans le stockage chiffré.
+  /// Vérifie le code ; la session est enregistrée dans le stockage chiffré. Nouveau compte :
+  /// `TERMS_REQUIRED`, puis le même code avec [terms] (versions lues et acceptées), que le
+  /// code signe.
   Future<AuthSession> verifyOtp({
     required String challengeId,
     required String code,
     required String locale,
-    String? termsVersion,
+    Map<String, String>? terms,
     String? referralCode,
   }) async {
     String? appVersion;
@@ -39,7 +41,7 @@ class AuthApi {
         'challengeId': challengeId,
         'code': code,
         'locale': locale,
-        'termsVersion': ?termsVersion,
+        'terms': ?terms,
         // Code de parrainage d'un ami (C6) : pris en compte à la création du compte seulement.
         'referralCode': ?referralCode,
         'device': {'installationId': await _store.installationId(), 'platform': platform, 'appVersion': ?appVersion},

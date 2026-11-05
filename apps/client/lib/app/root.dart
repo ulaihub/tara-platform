@@ -8,6 +8,7 @@ import '../features/common/error_text.dart';
 import '../features/common/splash_screen.dart';
 import '../features/common/status_screen.dart';
 import '../features/home/home_flow.dart';
+import '../features/legal/terms_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'providers.dart';
@@ -29,30 +30,53 @@ class RootGate extends ConsumerWidget {
   }
 }
 
-class _AuthFlow extends StatefulWidget {
+class _AuthFlow extends ConsumerStatefulWidget {
   const _AuthFlow();
 
   @override
-  State<_AuthFlow> createState() => _AuthFlowState();
+  ConsumerState<_AuthFlow> createState() => _AuthFlowState();
 }
 
-class _AuthFlowState extends State<_AuthFlow> {
+class _AuthFlowState extends ConsumerState<_AuthFlow> {
   OtpChallenge? _challenge;
   String? _phone;
   String? _referral;
 
+  /// Code juste d'un nouveau compte : il signera les conditions une fois acceptées.
+  String? _signupCode;
+
   @override
   Widget build(BuildContext context) {
     final challenge = _challenge;
+    final signupCode = _signupCode;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
-      child: challenge == null
+      child: challenge != null && signupCode != null
+          ? PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, _) => setState(() => _signupCode = null),
+              child: TermsScreen.signup(
+                key: const ValueKey('terms'),
+                onBack: () => setState(() => _signupCode = null),
+                // Le code de connexion signe : la session s'ouvre et RootGate passe au compte.
+                onAccept: (versions) => ref
+                    .read(authControllerProvider.notifier)
+                    .verifyCode(
+                      challengeId: challenge.challengeId,
+                      code: signupCode,
+                      terms: versions,
+                      referralCode: _referral,
+                    ),
+              ),
+            )
+          : challenge == null
           ? SignInScreen(
               key: const ValueKey('sign-in'),
               initialPhone: _phone,
               initialReferral: _referral,
               onCodeSent: (challenge, phone, referral) => setState(() {
                 _challenge = challenge;
+                _signupCode = null;
                 _phone = phone;
                 _referral = referral;
               }),
@@ -68,17 +92,29 @@ class _AuthFlowState extends State<_AuthFlow> {
                 onBack: () => setState(() => _challenge = null),
                 // La session change d'état : RootGate passe au compte.
                 onSignedIn: (_) {},
+                onTermsRequired: (challenge, code) => setState(() {
+                  _challenge = challenge;
+                  _signupCode = code;
+                }),
               ),
             ),
     );
   }
 }
 
-class _AccountGate extends ConsumerWidget {
+class _AccountGate extends ConsumerStatefulWidget {
   const _AccountGate();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AccountGate> createState() => _AccountGateState();
+}
+
+class _AccountGateState extends ConsumerState<_AccountGate> {
+  /// « Plus tard » : la nouvelle version sera redemandée avant la prochaine commande.
+  bool _termsPostponed = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final me = ref.watch(meProvider);
     void logout() => ref.read(authControllerProvider.notifier).logout();
@@ -96,6 +132,15 @@ class _AccountGate extends ConsumerWidget {
     final account = me.value!;
     if (account.needsProfile) {
       return WelcomeScreen(me: account, onDone: () => ref.invalidate(meProvider), onLogout: logout);
+    }
+    // Nouvelle version des conditions : présentée à l'ouverture (sans réseau, plus tard).
+    final terms = ref.watch(termsStatusProvider).value;
+    if (terms != null && !terms.upToDate && !_termsPostponed) {
+      return TermsScreen.update(
+        phone: account.phone,
+        onLater: () => setState(() => _termsPostponed = true),
+        onSigned: () {},
+      );
     }
     return HomeFlow(me: account);
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/legal_api.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/app_settings.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -21,6 +22,8 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
+import '../common/scoped_page.dart';
+import '../legal/terms_screen.dart';
 
 /// Onglet Profil de l'expéditeur (non dessiné : style Tara) : identité et boutique, code de
 /// parrainage à partager (C6), affichage (thème, langue, animations), support, déconnexion.
@@ -127,6 +130,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SectionHeader(title: l.displaySection),
           const SizedBox(height: 8),
           _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
+          const SizedBox(height: 20),
+          SectionHeader(title: l.termsSection),
+          const SizedBox(height: 8),
+          _TermsCard(phone: me.phone),
           if (support != null) ...[
             const SizedBox(height: 20),
             SectionHeader(title: l.helpSection),
@@ -319,4 +326,52 @@ class _LogoutBlock extends StatelessWidget {
 void _toggleSounds(BuildContext context, AppSettings settings) {
   settings.sounds = !settings.sounds;
   if (settings.sounds) TaraFeedback.play(context, TaraSound.received);
+}
+
+/// Conditions et confidentialité : version acceptée et date (copie consultable), nouvelle
+/// version à signer.
+class _TermsCard extends ConsumerWidget {
+  const _TermsCard({required this.phone});
+
+  final String phone;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final status = ref.watch(termsStatusProvider).value;
+    void open(Widget Function(BuildContext context) builder) =>
+        unawaited(Navigator.of(context).push(scopedPage<void>(context, builder)));
+    Widget row(String document, String title) {
+      final accepted = status?.accepted.where((item) => item.document == document).firstOrNull;
+      return ListRow(
+        leading: const IconTile(icon: TaraIcons.shieldCheck),
+        title: title,
+        subtitle: accepted == null
+            ? null
+            : l.termsAcceptedOn(accepted.version, formatDay(context, accepted.acceptedAt)),
+        trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+        onTap: () => open((_) => LegalDocumentScreen(document: document, acceptedAt: accepted?.acceptedAt)),
+      );
+    }
+
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      child: Column(
+        children: [
+          if (status != null && !status.upToDate)
+            ListRow(
+              leading: const IconTile(icon: TaraIcons.alertCircle),
+              title: l.termsToSign,
+              trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.accentText),
+              onTap: () => open((route) => TermsScreen.update(phone: phone, onSigned: () => Navigator.of(route).pop())),
+            ),
+          row('expediteurs', l.termsTitle),
+          row(LegalApi.privacyDocument, l.termsPrivacyTitle),
+        ],
+      ),
+    );
+  }
 }

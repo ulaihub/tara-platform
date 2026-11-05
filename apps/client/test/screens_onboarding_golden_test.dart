@@ -5,17 +5,21 @@ import 'package:tara_client/app/providers.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/features/auth/code_screen.dart';
 import 'package:tara_client/features/auth/sign_in_screen.dart';
+import 'package:tara_client/features/legal/terms_screen.dart';
 import 'package:tara_client/features/onboarding/welcome_screen.dart';
 import 'package:tara_core/session/session_store.dart';
+import 'package:tara_ui/components/check_row.dart';
 
 import 'helpers/fake_client_api.dart';
+import 'helpers/fake_legal_api.dart';
 import 'helpers/harness.dart';
 
 /// Écrans sans réseau : stockage en mémoire, API factice.
-Widget scoped(Widget child, {FakeClientApi? api}) => ProviderScope(
+Widget scoped(Widget child, {FakeClientApi? api, FakeLegalApi? legal}) => ProviderScope(
   overrides: [
     keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
     clientApiProvider.overrideWithValue(api ?? FakeClientApi()),
+    legalApiProvider.overrideWithValue(legal ?? FakeLegalApi()),
   ],
   child: child,
 );
@@ -55,12 +59,53 @@ void main() {
       await pumpVariant(
         tester,
         variant,
-        scoped(CodeScreen(phone: '+237690123456', challenge: challenge, onBack: () {}, onSignedIn: (_) {})),
+        scoped(
+          CodeScreen(
+            phone: '+237690123456',
+            challenge: challenge,
+            onBack: () {},
+            onSignedIn: (_) {},
+            onTermsRequired: (_, _) {},
+          ),
+        ),
       );
       await tester.enterText(find.byType(EditableText).first, '4821');
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(capture, matchesGoldenFile('goldens/02_code/${variant.name}.png'));
+    });
+
+    goldenTest('02 conditions inscription ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scoped(TermsScreen.signup(onAccept: (_) async {}, onBack: () {})));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      await expectLater(capture, matchesGoldenFile('goldens/02_conditions/${variant.name}.png'));
+    });
+
+    goldenTest('02 conditions lues et cochées ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scoped(TermsScreen.signup(onAccept: (_) async {}, onBack: () {})));
+      await settle(tester);
+      await readToEnd(tester);
+      await tester.tap(find.byType(TaraCheckRow));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      await expectLater(capture, matchesGoldenFile('goldens/02_conditions_cochees/${variant.name}.png'));
+    });
+
+    goldenTest('02 nouvelle version à signer ${variant.name}', (tester) async {
+      await pumpVariant(
+        tester,
+        variant,
+        scoped(TermsScreen.update(phone: '+237677123456', onLater: () {}, onSigned: () {})),
+      );
+      await settle(tester);
+      await readToEnd(tester);
+      await tester.tap(find.byType(TaraCheckRow));
+      await settle(tester);
+      await tester.tap(find.text('Recevoir le code pour signer'));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      await expectLater(capture, matchesGoldenFile('goldens/02_conditions_signature/${variant.name}.png'));
     });
 
     goldenTest('03 bienvenue ${variant.name}', (tester) async {
@@ -104,4 +149,10 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/03_bienvenue_boutique/complet_${brightness.name}.png'));
     });
   }
+}
+
+/// Fait défiler les textes jusqu'en bas : la case à cocher devient active.
+Future<void> readToEnd(WidgetTester tester) async {
+  await tester.drag(find.byType(Scrollable).first, const Offset(0, -4000));
+  await settle(tester);
 }

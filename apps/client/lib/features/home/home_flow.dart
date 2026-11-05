@@ -16,6 +16,7 @@ import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/scoped_page.dart';
+import '../legal/terms_screen.dart';
 import '../order/new_order_flow.dart';
 import '../orders/orders_screen.dart';
 import '../profile/profile_screen.dart';
@@ -112,8 +113,32 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   }
 
   /// Nouvelle livraison en plein écran, au-dessus des onglets ; « Suivre la livraison »
-  /// remplace le parcours par le suivi.
-  void _newOrder() => unawaited(
+  /// remplace le parcours par le suivi. Nouvelle version des conditions pas encore signée :
+  /// elle est présentée d'abord, la livraison s'ouvre une fois signée.
+  void _newOrder() {
+    final terms = ref.read(termsStatusProvider).value;
+    if (terms != null && !terms.upToDate) {
+      unawaited(
+        Navigator.of(context).push(
+          scopedPage<void>(
+            context,
+            (route) => TermsScreen.update(
+              phone: widget.me.phone,
+              onLater: () => Navigator.of(route).pop(),
+              onSigned: () {
+                Navigator.of(route).pop();
+                _openNewOrder();
+              },
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+    _openNewOrder();
+  }
+
+  void _openNewOrder() => unawaited(
     Navigator.of(context).push(
       scopedPage<void>(
         context,

@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
+import 'package:tara_core/api/legal_api.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/app_settings.dart';
@@ -82,6 +83,20 @@ final authApiProvider = Provider<AuthApi>(
 
 final clientApiProvider = Provider<ClientApi>((ref) => ClientApi(ref.watch(apiClientProvider)));
 
+final legalApiProvider = Provider<LegalApi>(
+  (ref) => LegalApi(ref.watch(apiClientProvider), ref.watch(sessionStoreProvider), app: 'client'),
+);
+
+/// Textes à lire avant d'accepter : conditions des expéditeurs, puis confidentialité.
+final termsDocumentsProvider = FutureProvider<List<LegalDocument>>((ref) => ref.read(legalApiProvider).appDocuments());
+
+/// Conditions à signer (nouvelle version) et versions acceptées ; relu après chaque signature
+/// et à chaque changement de session.
+final termsStatusProvider = FutureProvider<TermsStatus>((ref) {
+  ref.watch(authControllerProvider.select((auth) => auth.value));
+  return ref.read(legalApiProvider).status();
+});
+
 /// Temps réel (Socket.IO) : statut des commandes, reversements, adresse placée par un
 /// destinataire. Accélère l'app ; l'API REST reste la référence.
 final realtimeProvider = Provider<RealtimeClient>((ref) {
@@ -115,7 +130,7 @@ class AuthController extends AsyncNotifier<AuthStatus> {
   Future<AuthSession> verifyCode({
     required String challengeId,
     required String code,
-    String? termsVersion,
+    Map<String, String>? terms,
     String? referralCode,
   }) async {
     final session = await ref
@@ -124,7 +139,7 @@ class AuthController extends AsyncNotifier<AuthStatus> {
           challengeId: challengeId,
           code: code,
           locale: ref.read(languageCodeProvider),
-          termsVersion: termsVersion,
+          terms: terms,
           referralCode: referralCode,
         );
     state = const AsyncData(AuthStatus.signedIn);
@@ -180,4 +195,8 @@ class AppConfigController extends AsyncNotifier<AppConfig> {
 final appConfigProvider = AsyncNotifierProvider<AppConfigController, AppConfig>(AppConfigController.new);
 
 /// Compte connecté (nom, boutique) ; relu après chaque modification du profil.
-final meProvider = FutureProvider<Me>((ref) => ref.read(clientApiProvider).me());
+final meProvider = FutureProvider<Me>((ref) {
+  // Autre compte après une déconnexion : relu, jamais celui de la session précédente.
+  ref.watch(authControllerProvider.select((auth) => auth.value));
+  return ref.read(clientApiProvider).me();
+});

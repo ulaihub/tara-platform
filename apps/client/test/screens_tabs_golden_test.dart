@@ -12,6 +12,7 @@ import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_client_api.dart';
+import 'helpers/fake_legal_api.dart';
 import 'helpers/fake_realtime.dart';
 import 'helpers/harness.dart';
 import 'screens_home_golden_test.dart' show homeNow, shopApi, shopOwner, summary, tabs;
@@ -24,6 +25,7 @@ Widget scoped(Widget child, FakeClientApi api, {FakeRealtime? realtime}) => Prov
     appVersionProvider.overrideWith((ref) async => '0.1.0 (1)'),
     realtimeProvider.overrideWithValue(realtime ?? FakeRealtime()),
     realMapProvider.overrideWithValue(false),
+    legalApiProvider.overrideWithValue(FakeLegalApi()),
   ],
   child: child,
 );
