@@ -1423,4 +1423,38 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count étoiles', one: '1 étoile');
     return '$_temp0';
   }
+
+  @override
+  String get returnFeesTitle => 'Frais de retour à encaisser';
+
+  @override
+  String returnFeesBody(String name, String amount) {
+    return '$name règle $amount avant de récupérer son colis : c’est ce que son solde Tara ne couvre pas.';
+  }
+
+  @override
+  String returnFeesCash(String amount) {
+    return 'Espèces reçues · $amount';
+  }
+
+  @override
+  String get returnFeesCashNote => 'Vous gardez les espèces : le montant est pris sur votre solde.';
+
+  @override
+  String get returnFeesMomo => 'Demander par Mobile Money';
+
+  @override
+  String get returnFeesSend => 'Envoyer la demande';
+
+  @override
+  String get returnFeesWaiting => 'Demande envoyée : l’expéditeur valide sur son téléphone.';
+
+  @override
+  String get returnFeesPaid => 'Frais de retour réglés : vous pouvez rendre le colis.';
+
+  @override
+  String get returnFeesChecking => 'Vérification des frais de retour…';
+
+  @override
+  String get returnFeesOffline => 'Connexion nécessaire pour vérifier les frais de retour.';
 }

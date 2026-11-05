@@ -2521,6 +2521,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{1 étoile} other{{count} étoiles}}'**
   String starsLabel(int count);
+
+  /// No description provided for @returnFeesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de retour à encaisser'**
+  String get returnFeesTitle;
+
+  /// No description provided for @returnFeesBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} règle {amount} avant de récupérer son colis : c’est ce que son solde Tara ne couvre pas.'**
+  String returnFeesBody(String name, String amount);
+
+  /// No description provided for @returnFeesCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces reçues · {amount}'**
+  String returnFeesCash(String amount);
+
+  /// No description provided for @returnFeesCashNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous gardez les espèces : le montant est pris sur votre solde.'**
+  String get returnFeesCashNote;
+
+  /// No description provided for @returnFeesMomo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander par Mobile Money'**
+  String get returnFeesMomo;
+
+  /// No description provided for @returnFeesSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get returnFeesSend;
+
+  /// No description provided for @returnFeesWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée : l’expéditeur valide sur son téléphone.'**
+  String get returnFeesWaiting;
+
+  /// No description provided for @returnFeesPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de retour réglés : vous pouvez rendre le colis.'**
+  String get returnFeesPaid;
+
+  /// No description provided for @returnFeesChecking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification des frais de retour…'**
+  String get returnFeesChecking;
+
+  /// No description provided for @returnFeesOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion nécessaire pour vérifier les frais de retour.'**
+  String get returnFeesOffline;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

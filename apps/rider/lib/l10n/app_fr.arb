@@ -884,5 +884,32 @@
         "type": "int"
       }
     }
-  }
+  },
+  "returnFeesTitle": "Frais de retour à encaisser",
+  "returnFeesBody": "{name} règle {amount} avant de récupérer son colis : c’est ce que son solde Tara ne couvre pas.",
+  "@returnFeesBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "returnFeesCash": "Espèces reçues · {amount}",
+  "@returnFeesCash": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "returnFeesCashNote": "Vous gardez les espèces : le montant est pris sur votre solde.",
+  "returnFeesMomo": "Demander par Mobile Money",
+  "returnFeesSend": "Envoyer la demande",
+  "returnFeesWaiting": "Demande envoyée : l’expéditeur valide sur son téléphone.",
+  "returnFeesPaid": "Frais de retour réglés : vous pouvez rendre le colis.",
+  "returnFeesChecking": "Vérification des frais de retour…",
+  "returnFeesOffline": "Connexion nécessaire pour vérifier les frais de retour."
 }

@@ -456,5 +456,15 @@
   "rateSenderBody": "Sender of your last delivery",
   "rateSenderThanks": "Thanks! Your rating helps Tara pick its customers well.",
   "senderFallback": "the sender",
-  "starsLabel": "{count, plural, =1{1 star} other{{count} stars}}"
+  "starsLabel": "{count, plural, =1{1 star} other{{count} stars}}",
+  "returnFeesTitle": "Return fees to collect",
+  "returnFeesBody": "{name} pays {amount} before getting the parcel back: what their Tara balance doesn’t cover.",
+  "returnFeesCash": "Cash received · {amount}",
+  "returnFeesCashNote": "You keep the cash: the amount is taken from your balance.",
+  "returnFeesMomo": "Ask by Mobile Money",
+  "returnFeesSend": "Send the request",
+  "returnFeesWaiting": "Request sent: the sender approves it on their phone.",
+  "returnFeesPaid": "Return fees paid: you can hand the parcel back.",
+  "returnFeesChecking": "Checking return fees…",
+  "returnFeesOffline": "A connection is needed to check the return fees."
 }

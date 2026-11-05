@@ -150,6 +150,10 @@ class RiderApi {
   Future<Collection> collection(String orderId) async =>
       Collection.fromJson(await _api.get('/rider/orders/$orderId/collection') as Json);
 
+  /// Espèces reçues (frais de retour) : enregistrées tout de suite, prises sur le solde.
+  Future<Collection> collectCash(String orderId) async =>
+      Collection.fromJson(await _api.post('/rider/orders/$orderId/collect', body: {'method': 'CASH'}) as Json);
+
   /// Demande de paiement Mobile Money envoyée au téléphone du destinataire.
   Future<Collection> collectMobileMoney(String orderId, {required String phone, required String operator}) async =>
       Collection.fromJson(

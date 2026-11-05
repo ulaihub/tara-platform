@@ -19,6 +19,8 @@ import 'package:tara_rider/features/course/failure_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
 import 'package:tara_rider/features/course/return_screen.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/fonts.dart';
@@ -58,9 +60,13 @@ class _Positions implements PositionSource {
   }) => const Stream.empty();
 }
 
-Widget scope(Widget child, {OnlineController? online, CallJournal? calls}) => ProviderScope(
+/// Retour sans frais à encaisser : le solde de l'expéditeur les couvre.
+FakeRiderApi noReturnFees() => FakeRiderApi()..collections = [const Collection(total: 0, complete: true)];
+
+Widget scope(Widget child, {OnlineController? online, CallJournal? calls, FakeRiderApi? api}) => ProviderScope(
   overrides: [
     keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
+    riderApiProvider.overrideWithValue(api ?? noReturnFees()),
     realMapProvider.overrideWithValue(false),
     takeProofPhotoProvider.overrideWithValue(() async => photo),
     courseActionsProvider.overrideWithValue(courseActions()),
@@ -276,5 +282,37 @@ void main() {
       expect(find.text('Photo du retour · prise à 15:41'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/11_retour_vendeur/${variant.name}.png'));
     });
+
+    goldenTest('11 retour frais à encaisser ${variant.name}', (tester) async {
+      final api = FakeRiderApi()..collections = [const Collection(total: 750, complete: false)];
+      await pumpVariant(tester, variant, scope(returning(), api: api));
+      await settle(tester);
+      await tester.tap(find.text('Je suis chez le vendeur'));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Frais de retour à encaisser'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/11_retour_frais/${variant.name}.png'));
+    });
   }
+
+  testWidgets('retour : pas de paiement, pas de colis ; espèces reçues, puis le colis peut être rendu', (tester) async {
+    final api = FakeRiderApi()..collections = [const Collection(total: 750, complete: false)];
+    await pumpVariant(tester, Variant.matrix.first, scope(returning(), api: api), surface: const Size(390, 1400));
+    await settle(tester);
+    await tester.tap(find.text('Je suis chez le vendeur'));
+    await settle(tester);
+    await tester.enterText(find.byType(EditableText).first, '5521');
+    await tester.tap(find.text('Photographier le colis rendu').last);
+    await settle(tester);
+    // Code et photo prêts, mais frais non réglés : le bouton reste inactif.
+    final returned = find.widgetWithText(PrimaryButton, 'Colis rendu');
+    expect(tester.widget<PrimaryButton>(returned).onPressed, isNull);
+
+    await tester.tap(find.text('Espèces reçues · 750 F'));
+    await settle(tester);
+    expect(api.cashCollected, ['00000000-0000-4000-8000-000000000002']);
+    expect(find.text('Frais de retour réglés : vous pouvez rendre le colis.'), findsOneWidget);
+    expect(tester.widget<PrimaryButton>(returned).onPressed, isNotNull);
+    expect(sounds.played, contains(TaraSound.cash));
+  });
 }

@@ -123,6 +123,15 @@ class FakeRiderApi extends RiderApi {
     return const Collection(total: 12500, complete: false, paymentId: 'p1', paymentStatus: 'PENDING');
   }
 
+  /// Espèces enregistrées (frais de retour).
+  final cashCollected = <String>[];
+
+  @override
+  Future<Collection> collectCash(String orderId) async {
+    cashCollected.add(orderId);
+    return const Collection(total: 0, complete: true);
+  }
+
   @override
   Future<Collection> collection(String orderId) async =>
       collections.length > 1 ? collections.removeAt(0) : collections.single;

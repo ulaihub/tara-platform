@@ -1415,4 +1415,38 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count stars', one: '1 star');
     return '$_temp0';
   }
+
+  @override
+  String get returnFeesTitle => 'Return fees to collect';
+
+  @override
+  String returnFeesBody(String name, String amount) {
+    return '$name pays $amount before getting the parcel back: what their Tara balance doesn’t cover.';
+  }
+
+  @override
+  String returnFeesCash(String amount) {
+    return 'Cash received · $amount';
+  }
+
+  @override
+  String get returnFeesCashNote => 'You keep the cash: the amount is taken from your balance.';
+
+  @override
+  String get returnFeesMomo => 'Ask by Mobile Money';
+
+  @override
+  String get returnFeesSend => 'Send the request';
+
+  @override
+  String get returnFeesWaiting => 'Request sent: the sender approves it on their phone.';
+
+  @override
+  String get returnFeesPaid => 'Return fees paid: you can hand the parcel back.';
+
+  @override
+  String get returnFeesChecking => 'Checking return fees…';
+
+  @override
+  String get returnFeesOffline => 'A connection is needed to check the return fees.';
 }
