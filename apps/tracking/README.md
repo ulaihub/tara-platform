@@ -18,6 +18,22 @@ payer à la porte et demande Mobile Money en cours, confirmation de disponibilit
   l'adresse), pas de cache, pas d'indexation. Seuls les jetons au bon format vont jusqu'à
   l'API.
 
+## Lien de localisation (B3)
+
+`/l/{jeton}` : l'expéditeur envoie ce lien au destinataire, qui place lui-même son point de
+livraison, sans compte.
+
+1. **Sa position** : bouton « Utiliser ma position » (GPS du téléphone, précision affichée ;
+   au-delà de 100 m, la page conseille de la reprendre). Seule page autorisée à lire la
+   position (`Permissions-Policy: geolocation=(self)`), seulement après le toucher.
+2. **Son repère** écrit, obligatoire (3 à 300 caractères).
+3. **Facultatif** : son nom (prérempli) et un autre numéro, vérifié (mobile camerounais).
+
+Envoi par formulaire classique ; l'API refuse un point hors de la zone desservie, un lien
+déjà utilisé (`409`) ou expiré (`410`). Après l'envoi : remerciement, et l'expéditeur est
+prévenu dans son app. Sans JavaScript, la page explique qu'il faut l'activer : la position
+ne peut pas être lue autrement.
+
 ## Lancer
 
 ```sh

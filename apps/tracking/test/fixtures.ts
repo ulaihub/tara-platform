@@ -1,4 +1,12 @@
-import type { OrderStatus, PublicTracking, RespondResult, TrackingApi } from '../src/api.js';
+import type {
+  LocationSubmit,
+  OrderStatus,
+  PublicLocationLink,
+  PublicTracking,
+  RespondResult,
+  SubmitResult,
+  TrackingApi,
+} from '../src/api.js';
 
 export const TOKEN = 'k3Jx9Qm2Lp7Vw4Rz8Ty1';
 
@@ -61,10 +69,24 @@ export function tracking(status: OrderStatus, patch: Partial<PublicTracking> = {
   };
 }
 
+/** Lien de localisation d'Awa Fashion pour Marie, valable jusqu'au 6 novembre 18:00 (Douala). */
+export function locationLink(patch: Partial<PublicLocationLink> = {}): PublicLocationLink {
+  return {
+    senderName: 'Awa Fashion',
+    recipientName: 'Marie Ngo',
+    expiresAt: '2026-11-06T17:00:00.000Z',
+    status: 'PENDING',
+    ...patch,
+  };
+}
+
 /** API sans réseau : renvoie [data], garde les réponses du destinataire. */
 export class FakeApi implements TrackingApi {
   constructor(public data: PublicTracking | null = tracking('IN_DELIVERY')) {}
   down = false;
+  link: PublicLocationLink | null = locationLink();
+  submitResult: SubmitResult = 'ok';
+  submissions: { token: string; body: LocationSubmit; ip?: string }[] = [];
   respondResult: RespondResult = 'ok';
   responses: { token: string; body: { available: boolean; note?: string }; ip?: string }[] = [];
   views: { token: string; ip?: string }[] = [];
@@ -83,5 +105,18 @@ export class FakeApi implements TrackingApi {
     if (this.down) throw new (await import('../src/api.js')).ApiUnavailableError('panne');
     this.responses.push({ token, body, ...(ip ? { ip } : {}) });
     return this.respondResult;
+  }
+
+  async locationLink(token: string, ip?: string): Promise<PublicLocationLink | null> {
+    this.views.push({ token, ...(ip ? { ip } : {}) });
+    if (this.down) throw new (await import('../src/api.js')).ApiUnavailableError('panne');
+    return this.link;
+  }
+
+  async submitLocation(token: string, body: LocationSubmit, ip?: string): Promise<SubmitResult> {
+    if (this.down) throw new (await import('../src/api.js')).ApiUnavailableError('panne');
+    this.submissions.push({ token, body, ...(ip ? { ip } : {}) });
+    if (this.submitResult === 'ok' && this.link) this.link = { ...this.link, status: 'SUBMITTED' };
+    return this.submitResult;
   }
 }

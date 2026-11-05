@@ -54,3 +54,13 @@ export function initials(name: string): string {
     .slice(0, 2)
     .toUpperCase();
 }
+
+/** « 6 novembre à 18:00 » (heure de Douala), « 6 November at 18:00 » en anglais. */
+export function formatDayTime(iso: string, locale: 'fr' | 'en'): string {
+  const day = new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+    timeZone: TIME_ZONE,
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date(iso));
+  return `${day} ${locale === 'fr' ? 'à' : 'at'} ${formatClock(iso)}`;
+}

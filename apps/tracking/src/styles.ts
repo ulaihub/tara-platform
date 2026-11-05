@@ -53,6 +53,17 @@ form{margin:0}
 textarea{display:block;width:100%;min-height:64px;margin:12px 0;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;resize:vertical}
 .choices{display:grid;gap:8px}
 h2{font-weight:800;font-size:17px;margin:0}
+.num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent-bg);color:var(--accent);font-weight:800;font-size:14px}
+.step{margin:8px 0 12px}
+.field{display:block;font-size:13px;font-weight:800;color:var(--muted);margin-top:12px}
+.field+textarea{margin-top:6px}
+input[type=text],input[type=tel]{display:block;width:100%;min-height:48px;margin:6px 0 0;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit}
+.status{margin:10px 0 0;font-size:14px;color:var(--muted)}.status:empty{display:none}
+.status.ok{color:var(--ok);font-weight:800}.status.warn{color:var(--accent);font-weight:800}.status.err{color:var(--danger);font-weight:800}
+.note.error{background:var(--danger-bg);border-color:transparent;color:var(--danger);font-weight:800}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.center{text-align:center}
+[hidden]{display:none!important}
 footer{margin-top:22px;text-align:center;color:var(--faint);font-size:12px}
 footer p{margin:4px 0}footer a{color:inherit}
 :focus-visible{outline:3px solid #FF8A3D;outline-offset:2px}

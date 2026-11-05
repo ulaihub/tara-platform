@@ -7,10 +7,12 @@ export const Message: FC<{
   title: string;
   body: string;
   action?: { href: string; label: string };
-}> = ({ icon, title, body, action }) => (
+  /** Pastille verte : action réussie (point envoyé). */
+  tone?: 'ok' | 'muted';
+}> = ({ icon, title, body, action, tone = 'muted' }) => (
   <section class="card">
     <div class="hero">
-      <span class="badge muted">
+      <span class={`badge ${tone}`}>
         <Icon name={icon} size={24} />
       </span>
       <div class="grow">

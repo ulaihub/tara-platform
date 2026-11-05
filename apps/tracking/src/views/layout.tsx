@@ -12,8 +12,12 @@ export const Layout: FC<{
   fingerprint?: string;
   langHref: string;
   refreshHref?: string;
+  /** Titre de l'onglet (par défaut : suivi du colis). */
+  title?: string;
+  /** Script propre à la page (lien de localisation). */
+  script?: string;
   children: Child;
-}> = ({ t, nonce, reference, fingerprint, langHref, refreshHref, children }) => (
+}> = ({ t, nonce, reference, fingerprint, langHref, refreshHref, title, script, children }) => (
   <>
     {raw('<!doctype html>')}
     <html lang={t.lang}>
@@ -23,7 +27,7 @@ export const Layout: FC<{
         <meta name="robots" content="noindex" />
         <meta name="theme-color" content="#F6F2EC" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0A0A0F" media="(prefers-color-scheme: dark)" />
-        <title>{reference ? `${t.title} · ${reference}` : t.title}</title>
+        <title>{title ?? (reference ? `${t.title} · ${reference}` : t.title)}</title>
         <link rel="icon" href="/static/marque-clair.svg" type="image/svg+xml" />
         <style nonce={nonce} dangerouslySetInnerHTML={{ __html: CSS }} />
       </head>
@@ -54,6 +58,7 @@ export const Layout: FC<{
         {fingerprint ? (
           <script nonce={nonce} dangerouslySetInnerHTML={{ __html: LIVE_SCRIPT }} />
         ) : null}
+        {script ? <script nonce={nonce} dangerouslySetInnerHTML={{ __html: script }} /> : null}
       </body>
     </html>
   </>

@@ -3,12 +3,14 @@ import { Hono, type Context } from 'hono';
 import { NONCE, secureHeaders } from 'hono/secure-headers';
 import {
   ApiUnavailableError,
+  type PublicLocationLink,
   type PublicTracking,
   TOKEN_PATTERN,
   type TrackingApi,
 } from './api.js';
 import { type Locale, pickLocale, strings } from './i18n.js';
 import { renderPage } from './render.js';
+import { EMPTY_PLACE, type PlaceValues } from './views/place.js';
 
 export interface AppOptions {
   api: TrackingApi;
@@ -37,6 +39,16 @@ const ASSETS: Record<string, string> = {
 };
 
 const FINAL = new Set(['DELIVERED', 'RETURNED', 'CANCELLED']);
+
+/**
+ * Mobile camerounais saisi librement (« 6 77 12 34 56 », « +237677123456 ») au format de
+ * l'API ; '' si rien n'est saisi, null s'il n'est pas valable.
+ */
+export function cameroonMobile(input: string): string | null {
+  if (input.trim() === '') return '';
+  const digits = input.replace(/\D/g, '').replace(/^(00)?237(?=\d{9}$)/, '');
+  return /^6\d{8}$/.test(digits) ? `+237${digits}` : null;
+}
 
 /** Empreinte de ce qui change à l'écran : la page se recharge quand elle bouge. */
 export function fingerprint(data: PublicTracking): string {
@@ -68,6 +80,15 @@ export function createApp(options: AppOptions): Hono {
   );
 
   const app = new Hono();
+  /**
+   * Lien de localisation (B3) : seule page qui lit la position du téléphone. Posé avant les
+   * en-têtes de sécurité pour passer après eux sur la réponse.
+   */
+  app.use('/l/*', async (c, next) => {
+    await next();
+    c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
+  });
+
   app.use(
     secureHeaders({
       contentSecurityPolicy: {
@@ -188,6 +209,157 @@ export function createApp(options: AppOptions): Hono {
       throw error;
     }
   });
+
+  app.get('/l/:token', async (c) => {
+    const token = c.req.param('token');
+    if (!TOKEN_PATTERN.test(token)) return notFound(c);
+    let link: PublicLocationLink | null;
+    try {
+      link = await api.locationLink(token, clientIp(c));
+    } catch (error) {
+      if (error instanceof ApiUnavailableError) return unavailable(c);
+      throw error;
+    }
+    if (!link) return notFound(c);
+    return place(c, token, link, EMPTY_PLACE, null, c.req.query('r') === 'ok');
+  });
+
+  /** Point envoyé par le destinataire : vérifié ici, puis transmis à l'API. */
+  app.post('/l/:token', async (c) => {
+    const token = c.req.param('token');
+    if (!TOKEN_PATTERN.test(token)) return notFound(c);
+    const t = strings(locale(c)).place;
+    const form = await c.req.parseBody();
+    const field = (name: string, max: number) => {
+      const value = form[name];
+      return typeof value === 'string' ? value.trim().slice(0, max) : '';
+    };
+    const values: PlaceValues = {
+      latitude: field('latitude', 20),
+      longitude: field('longitude', 20),
+      accuracy: field('accuracy', 8).replace(/\D/g, ''),
+      landmark: field('landmark', 300),
+      name: field('name', 80),
+      phone: field('phone', 20),
+    };
+    const latitude = Number(values.latitude);
+    const longitude = Number(values.longitude);
+    const located =
+      values.latitude !== '' &&
+      values.longitude !== '' &&
+      Number.isFinite(latitude) &&
+      Number.isFinite(longitude) &&
+      Math.abs(latitude) <= 90 &&
+      Math.abs(longitude) <= 180;
+    const phone = cameroonMobile(values.phone);
+    const error = !located
+      ? t.errorPosition
+      : values.landmark.length < 3
+        ? t.errorLandmark
+        : values.phone !== '' && phone === null
+          ? t.errorPhone
+          : null;
+    const kept = located ? values : { ...values, latitude: '', longitude: '', accuracy: '' };
+
+    try {
+      if (error) return await placeAgain(c, token, kept, error);
+      const result = await api.submitLocation(
+        token,
+        {
+          latitude,
+          longitude,
+          landmark: values.landmark,
+          ...(values.name ? { contactName: values.name } : {}),
+          ...(phone ? { contactPhone: phone } : {}),
+        },
+        clientIp(c),
+      );
+      const back = `/l/${token}${langQuery(c)}`;
+      switch (result) {
+        case 'ok':
+          return c.redirect(`${back}${back.includes('?') ? '&' : '?'}r=ok`, 303);
+        case 'already':
+        case 'expired':
+          return c.redirect(back, 303);
+        case 'not-found':
+          return notFound(c);
+        case 'out-of-area':
+          return await placeAgain(c, token, values, t.errorArea);
+        case 'invalid':
+          return await placeAgain(c, token, values, t.errorInvalid);
+      }
+    } catch (error) {
+      if (error instanceof ApiUnavailableError) return unavailable(c);
+      throw error;
+    }
+  });
+
+  /** Formulaire rendu de nouveau, avec la saisie et l'erreur. */
+  async function placeAgain(c: Context, token: string, values: PlaceValues, error: string) {
+    const link = await api.locationLink(token, clientIp(c));
+    if (!link) return notFound(c);
+    return place(c, token, link, values, error, false, 422);
+  }
+
+  /** Selon l'état du lien : formulaire, point déjà envoyé (merci) ou lien expiré. */
+  function place(
+    c: Context,
+    token: string,
+    link: PublicLocationLink,
+    values: PlaceValues,
+    error: string | null,
+    sent: boolean,
+    status: 200 | 422 = 200,
+  ) {
+    const t = strings(locale(c));
+    if (link.status === 'SUBMITTED') {
+      return c.html(
+        renderPage.message(
+          c,
+          t,
+          nonce(c),
+          sent
+            ? {
+                icon: 'check',
+                tone: 'ok',
+                title: t.place.sentTitle,
+                body: t.place.sentBody(link.senderName),
+              }
+            : { icon: 'pin', title: t.place.usedTitle, body: t.place.usedBody(link.senderName) },
+          t.place.title,
+        ),
+      );
+    }
+    if (link.status === 'EXPIRED') {
+      return c.html(
+        renderPage.message(
+          c,
+          t,
+          nonce(c),
+          {
+            icon: 'clock',
+            title: t.place.expiredTitle,
+            body: t.place.expiredBody(link.senderName),
+          },
+          t.place.title,
+        ),
+        410,
+      );
+    }
+    return c.html(
+      renderPage.place(c, {
+        link,
+        t,
+        locale: locale(c),
+        nonce: nonce(c),
+        token,
+        langQuery: langQuery(c),
+        values,
+        error,
+      }),
+      status,
+    );
+  }
 
   app.notFound((c) => notFound(c));
 
