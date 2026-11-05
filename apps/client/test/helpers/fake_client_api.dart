@@ -92,6 +92,18 @@ class FakeClientApi extends ClientApi {
   @override
   Future<LocationLink> locationLink(String id) async => linkAfter ?? pendingLink(null);
 
+  /// Adresses retirées du carnet.
+  final deletedAddresses = <String>[];
+
+  @override
+  Future<void> deleteAddress(String id) async {
+    deletedAddresses.add(id);
+    saved = [
+      for (final address in saved)
+        if (address.id != id) address,
+    ];
+  }
+
   /// Adresses demandées depuis l'accueil.
   List<LocationLink> links = [];
 

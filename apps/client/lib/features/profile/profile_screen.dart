@@ -24,9 +24,12 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
+import '../common/error_text.dart';
 import '../common/scoped_page.dart';
 import '../home/home_screen.dart' show walletProvider;
 import '../legal/terms_screen.dart';
+import '../order/address_editor.dart';
+import '../order/pickup_step.dart' show pickupAddressesProvider;
 import '../wallet/wallet_screen.dart';
 
 /// Onglet Profil de l'expéditeur (non dessiné : style Tara) : identité et boutique, code de
@@ -132,6 +135,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ),
           ],
+          const SizedBox(height: 20),
+          SectionHeader(title: l.myAddresses),
+          const SizedBox(height: 8),
+          const _AddressesCard(),
           const SizedBox(height: 20),
           SectionHeader(title: l.displaySection),
           const SizedBox(height: 8),
@@ -407,6 +414,135 @@ class _WalletRow extends ConsumerWidget {
             context,
           ).push(scopedPage<void>(context, (route) => WalletScreen(me: me, onBack: () => Navigator.of(route).pop()))),
         ),
+      ),
+    );
+  }
+}
+
+/// Adresses favorites (A2) : celles qui portent un libellé (Boutique, Maison, Bureau),
+/// proposées à l'enlèvement. Ajout sur la carte, retrait après confirmation.
+class _AddressesCard extends ConsumerStatefulWidget {
+  const _AddressesCard();
+
+  @override
+  ConsumerState<_AddressesCard> createState() => _AddressesCardState();
+}
+
+class _AddressesCardState extends ConsumerState<_AddressesCard> {
+  String? _confirming;
+  bool _removing = false;
+  String? _error;
+
+  Future<void> _add() async {
+    final l = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
+    final added = await navigator.push<Address>(
+      scopedPage(
+        context,
+        (context) =>
+            AddressEditor(title: l.newAddressTitle, forPickup: true, onBack: navigator.pop, onSaved: navigator.pop),
+      ),
+    );
+    if (added != null && mounted) ref.invalidate(pickupAddressesProvider);
+  }
+
+  Future<void> _remove(Address address) async {
+    setState(() {
+      _removing = true;
+      _error = null;
+    });
+    try {
+      await ref.read(clientApiProvider).deleteAddress(address.id);
+      ref.invalidate(pickupAddressesProvider);
+      if (mounted) setState(() => _confirming = null);
+    } catch (error) {
+      if (mounted) setState(() => _error = errorMessage(context, error));
+    } finally {
+      if (mounted) setState(() => _removing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final addresses = ref.watch(pickupAddressesProvider).value ?? const <Address>[];
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (addresses.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(l.myAddressesEmpty, style: TaraText.label.copyWith(color: c.textSecondary, height: 1.4)),
+            ),
+          for (final (index, address) in addresses.indexed) ...[
+            if (index > 0) Divider(height: 1, color: c.glassBorder),
+            if (_confirming == address.id)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l.removeAddressConfirm(address.label ?? ''),
+                      style: TaraText.label.copyWith(color: c.textPrimary, height: 1.4),
+                    ),
+                    if (_error != null) ...[const SizedBox(height: 6), ErrorLine(_error!)],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GlassButton(
+                            label: l.cancel,
+                            height: 44,
+                            onPressed: _removing ? null : () => setState(() => _confirming = null),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GlassButton(
+                            label: l.removeYes,
+                            height: 44,
+                            color: c.dangerText,
+                            onPressed: _removing ? null : () => unawaited(_remove(address)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: ListRow(
+                      leading: const IconTile(icon: TaraIcons.mapPin),
+                      title: address.label ?? '',
+                      subtitle: [?address.neighborhood?.name, address.landmark].join(' · '),
+                    ),
+                  ),
+                  GlassIconButton(
+                    icon: TaraIcons.close,
+                    label: l.removeAddress(address.label ?? ''),
+                    size: 40,
+                    radius: 14,
+                    onPressed: () => setState(() {
+                      _confirming = address.id;
+                      _error = null;
+                    }),
+                  ),
+                ],
+              ),
+          ],
+          Center(
+            child: TaraLink(label: l.addAddress, onPressed: () => unawaited(_add())),
+          ),
+        ],
       ),
     );
   }

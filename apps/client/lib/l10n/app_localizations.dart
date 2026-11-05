@@ -2845,6 +2845,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{name} a placé son point : vous pouvez créer la livraison.'**
   String askArrived(String name);
+
+  /// No description provided for @myAddresses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes adresses'**
+  String get myAddresses;
+
+  /// No description provided for @myAddressesEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrez votre boutique ou votre maison : elles vous seront proposées pour l’enlèvement.'**
+  String get myAddressesEmpty;
+
+  /// No description provided for @addAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une adresse'**
+  String get addAddress;
+
+  /// No description provided for @newAddressTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle adresse'**
+  String get newAddressTitle;
+
+  /// No description provided for @removeAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer {label}'**
+  String removeAddress(String label);
+
+  /// No description provided for @removeAddressConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer « {label} » de vos adresses ? Les livraisons passées ne changent pas.'**
+  String removeAddressConfirm(String label);
+
+  /// No description provided for @removeYes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui, retirer'**
+  String get removeYes;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

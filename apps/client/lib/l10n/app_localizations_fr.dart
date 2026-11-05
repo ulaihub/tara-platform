@@ -1574,4 +1574,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String askArrived(String name) {
     return '$name a placé son point : vous pouvez créer la livraison.';
   }
+
+  @override
+  String get myAddresses => 'Mes adresses';
+
+  @override
+  String get myAddressesEmpty =>
+      'Enregistrez votre boutique ou votre maison : elles vous seront proposées pour l’enlèvement.';
+
+  @override
+  String get addAddress => 'Ajouter une adresse';
+
+  @override
+  String get newAddressTitle => 'Nouvelle adresse';
+
+  @override
+  String removeAddress(String label) {
+    return 'Retirer $label';
+  }
+
+  @override
+  String removeAddressConfirm(String label) {
+    return 'Retirer « $label » de vos adresses ? Les livraisons passées ne changent pas.';
+  }
+
+  @override
+  String get removeYes => 'Oui, retirer';
 }

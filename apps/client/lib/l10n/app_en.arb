@@ -533,5 +533,12 @@
   "askExpired": "Expired without reply",
   "askCreateOrder": "Create the delivery",
   "askResend": "Send again",
-  "askArrived": "{name} placed their point: you can create the delivery."
+  "askArrived": "{name} placed their point: you can create the delivery.",
+  "myAddresses": "My addresses",
+  "myAddressesEmpty": "Save your shop or your home: they will be offered for pickups.",
+  "addAddress": "Add an address",
+  "newAddressTitle": "New address",
+  "removeAddress": "Remove {label}",
+  "removeAddressConfirm": "Remove “{label}” from your addresses? Past deliveries are not affected.",
+  "removeYes": "Yes, remove"
 }

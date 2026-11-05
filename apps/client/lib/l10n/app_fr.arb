@@ -1075,5 +1075,26 @@
         "type": "String"
       }
     }
-  }
+  },
+  "myAddresses": "Mes adresses",
+  "myAddressesEmpty": "Enregistrez votre boutique ou votre maison : elles vous seront proposées pour l’enlèvement.",
+  "addAddress": "Ajouter une adresse",
+  "newAddressTitle": "Nouvelle adresse",
+  "removeAddress": "Retirer {label}",
+  "@removeAddress": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "removeAddressConfirm": "Retirer « {label} » de vos adresses ? Les livraisons passées ne changent pas.",
+  "@removeAddressConfirm": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "removeYes": "Oui, retirer"
 }

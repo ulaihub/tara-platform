@@ -1569,4 +1569,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String askArrived(String name) {
     return '$name placed their point: you can create the delivery.';
   }
+
+  @override
+  String get myAddresses => 'My addresses';
+
+  @override
+  String get myAddressesEmpty => 'Save your shop or your home: they will be offered for pickups.';
+
+  @override
+  String get addAddress => 'Add an address';
+
+  @override
+  String get newAddressTitle => 'New address';
+
+  @override
+  String removeAddress(String label) {
+    return 'Remove $label';
+  }
+
+  @override
+  String removeAddressConfirm(String label) {
+    return 'Remove “$label” from your addresses? Past deliveries are not affected.';
+  }
+
+  @override
+  String get removeYes => 'Yes, remove';
 }

@@ -52,6 +52,9 @@ class ClientApi {
   );
 
   /// Quartiers de Douala, pour le choix du quartier d'une adresse.
+  /// Retire une adresse du carnet ; elle reste attachée aux livraisons passées.
+  Future<void> deleteAddress(String id) => _api.delete('/addresses/$id');
+
   Future<List<Neighborhood>> neighborhoods() async => [
     for (final item in await _api.get('/zones', query: {'kind': 'NEIGHBORHOOD', 'city': 'Douala'}) as List<Object?>)
       Neighborhood.fromJson(item! as Json),
