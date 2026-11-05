@@ -7,6 +7,7 @@ import 'package:tara_rider/features/home/home_summary.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 import 'package:tara_rider/features/offer/offer_screen.dart';
 import 'package:tara_ui/components/swipe_button.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/harness.dart';
@@ -66,10 +67,14 @@ void main() {
 
   testWidgets('glissée jusqu’au bout, la course est acceptée une fois', (tester) async {
     await pumpOffer(tester);
+    // La sonnerie de la nouvelle course tourne jusqu'à la réponse.
+    expect(sounds.looping, {TaraSound.offer});
     await tester.drag(swipe, Offset(tester.getSize(swipe).width, 0));
     await settle(tester);
     expect(api.accepted, [offer.id]);
     expect(accepted, hasLength(1));
+    expect(sounds.looping, isEmpty);
+    expect(sounds.played, [TaraSound.offer, TaraSound.accepted]);
   });
 
   testWidgets('acceptation refusée : message, pastille revenue, nouvel essai possible', (tester) async {

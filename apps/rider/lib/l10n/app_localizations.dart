@@ -2467,6 +2467,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Glisser pour accepter'**
   String get slideToAccept;
+
+  /// No description provided for @soundsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sons'**
+  String get soundsLabel;
+
+  /// No description provided for @soundsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle course, colis livré, argent encaissé… Le mode silencieux du téléphone est respecté.'**
+  String get soundsHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

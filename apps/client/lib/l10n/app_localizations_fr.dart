@@ -686,4 +686,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get instructionsHint => 'Ex. Appeler en arrivant, sonner au portail vert';
+
+  @override
+  String get soundsLabel => 'Sons';
+
+  @override
+  String get soundsHint =>
+      'Commande envoyée, adresse reçue, colis livré… Le mode silencieux du téléphone est respecté.';
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
@@ -152,8 +153,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         _error = result.message ?? l.genericError;
         _code.clear();
       });
+      TaraFeedback.play(context, TaraSound.error);
       return;
     }
+    TaraFeedback.play(context, TaraSound.delivered);
     widget.onDelivered(result.outcome);
   }
 

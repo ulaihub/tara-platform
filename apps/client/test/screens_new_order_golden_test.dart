@@ -11,6 +11,7 @@ import 'package:tara_client/features/order/new_order_flow.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_client_api.dart';
 import 'helpers/harness.dart';
@@ -281,6 +282,7 @@ void main() {
     await settle(tester);
     expect(find.text('Maison jaune après le pont'), findsOneWidget);
     expect(find.text('Placée par le destinataire'), findsOneWidget);
+    expect(sounds.played, [TaraSound.received]);
   });
 
   testWidgets('le lien demande d’abord le nom et le numéro', (tester) async {

@@ -32,6 +32,7 @@ class AppSettings extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   Locale? _locale;
   EffectsPreference _effectsPreference = EffectsPreference.automatic;
+  bool _sounds = true;
 
   ThemeMode get themeMode => _themeMode;
   set themeMode(ThemeMode value) {
@@ -48,6 +49,14 @@ class AppSettings extends ChangeNotifier {
     _changed();
   }
 
+  /// Sons des moments clés (nouvelle course, colis livré…) ; vibrations toujours actives.
+  bool get sounds => _sounds;
+  set sounds(bool value) {
+    if (value == _sounds) return;
+    _sounds = value;
+    _changed();
+  }
+
   /// Code de langue pour le serveur : le choix du livreur, sinon celui du téléphone.
   String languageCode(Locale device) => (_locale ?? device).languageCode == 'en' ? 'en' : 'fr';
 
@@ -55,6 +64,7 @@ class AppSettings extends ChangeNotifier {
     _themeMode = ThemeMode.values.where((mode) => mode.name == json['theme']).firstOrNull ?? ThemeMode.system;
     final language = json['locale'];
     _locale = language is String && (language == 'fr' || language == 'en') ? Locale(language) : null;
+    _sounds = json['sounds'] != false;
     final preference = EffectsPreference.values.where((value) => value.name == json['effects']).firstOrNull;
     if (preference != null) {
       _effectsPreference = preference;
@@ -78,6 +88,7 @@ class AppSettings extends ChangeNotifier {
       'theme': _themeMode.name,
       'locale': _locale?.languageCode,
       'effects': _effectsPreference.name,
+      'sounds': _sounds,
     });
     unawaited(target.write(_key, json).catchError((Object _) {}));
   }

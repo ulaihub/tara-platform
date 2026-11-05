@@ -2,7 +2,9 @@
 
 Code partagé entre les applications :
 
-- `tara_ui` : design Tara (couleurs, typographie, composants, animations, icônes, polices) ;
+- `tara_ui` : design Tara (couleurs, typographie, composants, animations, icônes, polices,
+  transitions de page, sons de la marque et vibrations des moments clés — sons
+  synthétisés par `tool/make_sounds.py`, sans échantillon tiers) ;
 - `tara_core` : client de l'API, session, connexion par code SMS, temps réel, notifications,
   réseau, numéros camerounais ;
 - `tara_map` : carte Tara (styles MapLibre sombre et clair, tuiles, choix d'un point) ;

@@ -6,9 +6,11 @@ import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/app_settings.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -192,7 +194,7 @@ class _DisplayCard extends StatelessWidget {
       shadow: false,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
       child: ListenableBuilder(
-        listenable: effects,
+        listenable: Listenable.merge([effects, settings]),
         builder: (context, _) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -235,6 +237,32 @@ class _DisplayCard extends StatelessWidget {
               hint: effects.preference == EffectsPreference.automatic && effects.lowEndDevice
                   ? l.effectsAutoReduced
                   : l.effectsHint,
+            ),
+            const SizedBox(height: 16),
+            MergeSemantics(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _toggleSounds(context, settings),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.soundsLabel,
+                            style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(l.soundsHint, style: TaraText.small.copyWith(color: c.textTertiary)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GlassSwitch(value: settings.sounds, onChanged: (_) => _toggleSounds(context, settings)),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -285,4 +313,10 @@ class _LogoutBlock extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Sons activés : un exemple se fait entendre aussitôt.
+void _toggleSounds(BuildContext context, AppSettings settings) {
+  settings.sounds = !settings.sounds;
+  if (settings.sounds) TaraFeedback.play(context, TaraSound.received);
 }

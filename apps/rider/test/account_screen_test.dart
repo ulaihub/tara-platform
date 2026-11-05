@@ -10,6 +10,7 @@ import 'package:tara_rider/features/account/account_screen.dart';
 import 'package:tara_rider/features/account/emergency_contact_screen.dart';
 import 'package:tara_rider/features/onboarding/documents_screen.dart';
 import 'package:tara_ui/app_settings.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/tara_effects.dart';
 
 import 'helpers/harness.dart';
@@ -65,9 +66,11 @@ void main() {
         ..themeMode = ThemeMode.dark
         ..locale = const Locale('en');
       first.effects.preference = EffectsPreference.reduced;
+      first.sounds = false;
       await Future<void>.delayed(Duration.zero);
 
       final next = await AppSettings.load(store);
+      expect(next.sounds, isFalse);
       expect(next.themeMode, ThemeMode.dark);
       expect(next.locale, const Locale('en'));
       expect(next.effects.preference, EffectsPreference.reduced);
@@ -78,6 +81,7 @@ void main() {
       final store = MemoryKeyValueStore()..values['settings.display'] = '{pas du json';
       final settings = await AppSettings.load(store);
       expect(settings.themeMode, ThemeMode.system);
+      expect(settings.sounds, isTrue);
       expect(settings.locale, isNull);
       expect(settings.languageCode(const Locale('en', 'CM')), 'en');
       expect(settings.languageCode(const Locale('de')), 'fr');
@@ -99,6 +103,23 @@ void main() {
 
     await tapText(tester, 'Réduites');
     expect(settingsOf(tester).effects.preference, EffectsPreference.reduced);
+  });
+
+  testWidgets('sons : coupés puis remis, un exemple se fait entendre', (tester) async {
+    final harness = AccountHarness();
+    await pumpVariant(tester, Variant.matrix.first, harness.screen());
+    await settle(tester);
+    await show(tester, 'Sons');
+
+    await tapText(tester, 'Sons');
+    expect(settingsOf(tester).sounds, isFalse);
+    final context = tester.element(find.byType(AccountScreen));
+    TaraFeedback.play(context, TaraSound.delivered);
+    expect(sounds.played, isEmpty);
+
+    await tapText(tester, 'Sons');
+    expect(settingsOf(tester).sounds, isTrue);
+    expect(sounds.played, [TaraSound.received]);
   });
 
   testWidgets('pièce refusée : signalée avec son motif, renvoyée depuis le profil', (tester) async {

@@ -1388,4 +1388,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get slideToAccept => 'Glisser pour accepter';
+
+  @override
+  String get soundsLabel => 'Sons';
+
+  @override
+  String get soundsHint =>
+      'Nouvelle course, colis livré, argent encaissé… Le mode silencieux du téléphone est respecté.';
 }

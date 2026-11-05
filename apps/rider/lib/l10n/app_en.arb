@@ -447,5 +447,7 @@
   "accountSuspended": "Account suspended",
   "accountRejected": "Application rejected",
   "profileError": "Could not load your profile.",
-  "slideToAccept": "Slide to accept"
+  "slideToAccept": "Slide to accept",
+  "soundsLabel": "Sounds",
+  "soundsHint": "New job, parcel delivered, cash collected… Your phone’s silent mode is respected."
 }

@@ -14,6 +14,7 @@ dependencies:
   tara_core:
     path: ../tara_core
   path_parsing: ^1.1.0
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -21,6 +22,9 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 flutter:
+  # Sons de la marque (tool/make_sounds.py) : « packages/tara_ui/assets/sounds/… ».
+  assets:
+    - assets/sounds/
   # Polices embarquées (licence OFL) : les apps fonctionnent sans connexion. Déclarées ici,
   # elles s'appellent « packages/tara_ui/Sora » et « packages/tara_ui/PlusJakartaSans ».
   fonts:

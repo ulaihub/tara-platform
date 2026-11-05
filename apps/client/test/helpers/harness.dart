@@ -4,7 +4,7 @@ import 'package:tara_client/l10n/app_localizations.dart';
 import 'package:tara_test/harness.dart' as shared;
 
 export 'package:tara_test/fonts.dart';
-export 'package:tara_test/harness.dart' show ScreenSize, Variant, capture, goldenTest, settle;
+export 'package:tara_test/harness.dart' show ScreenSize, Variant, capture, goldenTest, settle, sounds;
 
 /// Monte un écran de l'app expéditeur dans les conditions d'une variante.
 Future<void> pumpVariant(

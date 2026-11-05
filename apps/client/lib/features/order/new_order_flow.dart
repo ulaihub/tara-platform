@@ -6,6 +6,7 @@ import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
@@ -121,6 +122,7 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
         delivery
           ..link = fresh
           ..dropoff = fresh.address ?? delivery.dropoff;
+        if (fresh.address != null) TaraFeedback.play(context, TaraSound.received);
         _draft.touch();
       } catch (_) {
         // Réseau absent : nouvel essai au tour suivant.

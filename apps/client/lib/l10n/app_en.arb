@@ -288,5 +288,7 @@
   "valueHelp": "In FCFA. Shown to the rider, useful in case of dispute.",
   "valueTooHigh": "10,000,000 F at most.",
   "instructionsLabel": "Instructions for the rider (optional)",
-  "instructionsHint": "E.g. Call on arrival, ring at the green gate"
+  "instructionsHint": "E.g. Call on arrival, ring at the green gate",
+  "soundsLabel": "Sounds",
+  "soundsHint": "Order sent, address received, parcel delivered… Your phone’s silent mode is respected."
 }

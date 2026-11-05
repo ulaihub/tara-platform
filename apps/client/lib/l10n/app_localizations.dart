@@ -1375,6 +1375,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ex. Appeler en arrivant, sonner au portail vert'**
   String get instructionsHint;
+
+  /// No description provided for @soundsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sons'**
+  String get soundsLabel;
+
+  /// No description provided for @soundsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande envoyée, adresse reçue, colis livré… Le mode silencieux du téléphone est respecté.'**
+  String get soundsHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

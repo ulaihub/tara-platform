@@ -10,6 +10,7 @@ import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -140,8 +141,11 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
         _busy = false;
         _error = result.message ?? l.genericError;
       });
+      TaraFeedback.play(context, TaraSound.error);
       return;
     }
+    // Argent encaissé et colis livré : la pièce qui tinte.
+    TaraFeedback.play(context, TaraSound.cash);
     widget.onDone(result.outcome);
   }
 
@@ -250,8 +254,11 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
         _busy = false;
         _error = result.message ?? l.genericError;
       });
+      TaraFeedback.play(context, TaraSound.error);
       return;
     }
+    // Argent encaissé et colis livré : la pièce qui tinte.
+    TaraFeedback.play(context, TaraSound.cash);
     widget.onDone(result.outcome);
   }
 

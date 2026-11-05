@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'motion/page_transition.dart';
 import 'tara_colors.dart';
 import 'tara_typography.dart';
 
@@ -40,7 +41,9 @@ abstract final class TaraTheme {
       appBarTheme: AppBarTheme(systemOverlayStyle: c.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+          // Android : page qui se précise derrière un verre ; iOS : glissé natif (retour au
+          // geste depuis le bord).
+          TargetPlatform.android: GlassPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),

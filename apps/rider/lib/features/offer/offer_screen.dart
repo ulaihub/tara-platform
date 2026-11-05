@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/status.dart';
 import 'package:tara_ui/components/swipe_button.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -58,7 +58,10 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
   @override
   void initState() {
     super.initState();
-    HapticFeedback.heavyImpact();
+    // Sonnerie de la nouvelle course (balafon), répétée jusqu'à la réponse ou l'expiration.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) TaraFeedback.play(context, TaraSound.offer, loop: true);
+    });
     _ticker = Timer.periodic(const Duration(milliseconds: 500), (_) {
       if (!mounted) return;
       setState(() {});
@@ -72,6 +75,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
   @override
   void dispose() {
     _ticker?.cancel();
+    TaraFeedback.stop(TaraSound.offer);
     super.dispose();
   }
 
@@ -81,7 +85,8 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     try {
       final order = await ref.read(riderApiProvider).acceptOffer(widget.offer.id);
       _ticker?.cancel();
-      unawaited(HapticFeedback.mediumImpact());
+      TaraFeedback.stop(TaraSound.offer);
+      if (mounted) TaraFeedback.play(context, TaraSound.accepted);
       widget.onAccepted(order);
     } catch (error) {
       if (!mounted) return;
@@ -95,6 +100,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
   Future<void> _decline() async {
     setState(() => _busy = true);
     _ticker?.cancel();
+    TaraFeedback.stop(TaraSound.offer);
     try {
       await ref.read(riderApiProvider).declineOffer(widget.offer.id);
     } catch (_) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_ui/app_settings.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/tara_effects.dart';
 import 'package:tara_ui/tara_theme.dart';
 
@@ -53,6 +54,7 @@ Future<void> pumpVariant(
   required Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates,
   required Iterable<Locale> supportedLocales,
 }) async {
+  TaraFeedback.player = RecordingSoundPlayer();
   final size = surface ?? variant.screen.size;
   tester.view
     ..physicalSize = size
@@ -91,6 +93,9 @@ Future<void> pumpVariant(
 }
 
 final capture = find.byKey(const ValueKey('capture'));
+
+/// Sons du test en cours : enregistrés par [pumpVariant], jamais joués.
+RecordingSoundPlayer get sounds => TaraFeedback.player as RecordingSoundPlayer;
 
 /// Test de capture : `flutter test` remplace les ombres par des aplats, on veut le vrai
 /// rendu. La variable est rétablie avant la vérification des invariants du test.

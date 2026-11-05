@@ -5,7 +5,7 @@ import 'package:tara_test/harness.dart' as shared;
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/tara_icons.dart';
 
-export 'package:tara_test/harness.dart' show ScreenSize, Variant, capture, goldenTest;
+export 'package:tara_test/harness.dart' show ScreenSize, Variant, capture, goldenTest, sounds;
 
 /// Monte un écran de l'app livreur dans les conditions d'une variante.
 Future<void> pumpVariant(

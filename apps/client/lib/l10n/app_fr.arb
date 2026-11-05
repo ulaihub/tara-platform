@@ -323,5 +323,7 @@
   "valueHelp": "En FCFA. Indiquée au livreur, utile en cas de litige.",
   "valueTooHigh": "10 000 000 F au plus.",
   "instructionsLabel": "Instructions pour le livreur (facultatif)",
-  "instructionsHint": "Ex. Appeler en arrivant, sonner au portail vert"
+  "instructionsHint": "Ex. Appeler en arrivant, sonner au portail vert",
+  "soundsLabel": "Sons",
+  "soundsHint": "Commande envoyée, adresse reçue, colis livré… Le mode silencieux du téléphone est respecté."
 }

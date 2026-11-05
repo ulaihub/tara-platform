@@ -1381,4 +1381,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get slideToAccept => 'Slide to accept';
+
+  @override
+  String get soundsLabel => 'Sounds';
+
+  @override
+  String get soundsHint => 'New job, parcel delivered, cash collected… Your phone’s silent mode is respected.';
 }

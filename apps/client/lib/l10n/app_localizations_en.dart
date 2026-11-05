@@ -681,4 +681,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get instructionsHint => 'E.g. Call on arrival, ring at the green gate';
+
+  @override
+  String get soundsLabel => 'Sounds';
+
+  @override
+  String get soundsHint => 'Order sent, address received, parcel delivered… Your phone’s silent mode is respected.';
 }
