@@ -33,6 +33,7 @@ import {
   OfferDto,
 } from '../dispatch/dispatch.schemas.js';
 import { DispatchService } from '../dispatch/dispatch.service.js';
+import { LegalService } from '../legal/legal.service.js';
 import { RiderLocationService } from '../dispatch/rider-location.service.js';
 import { AuditService } from '../audit/audit.service.js';
 import { OrderDto, RateBody, RatingDto } from '../orders/orders.schemas.js';
@@ -95,6 +96,7 @@ export class RiderAppController {
     private readonly orders: RiderOrdersService,
     private readonly alerts: SafetyAlertsService,
     private readonly ratings: RatingsService,
+    private readonly legal: LegalService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -175,6 +177,7 @@ export class RiderAppController {
     @CurrentUser() user: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Out<typeof RiderOrderDto> {
+    await this.legal.assertAccepted(user.id, 'rider');
     const order = await this.dispatch.accept(id, user.id);
     return this.orders.get(user.id, order.id);
   }

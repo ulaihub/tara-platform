@@ -8,6 +8,7 @@ import { hashCode, randomDigits, randomReadableId, sha256, verifyCode } from '..
 import type { AppLocale } from '../common/i18n/locale.js';
 import { renderSms, type SmsTemplate } from '../common/i18n/sms-templates.js';
 import { maskPhone } from '../common/phone.js';
+import { signupConsents } from '../legal/legal-versions.js';
 import { addMinutes } from '../common/time.js';
 import type { OtpChallenge } from '../generated/prisma/client.js';
 import type { OtpPurpose } from '../generated/prisma/enums.js';
@@ -34,6 +35,7 @@ const TEMPLATES: Record<OtpPurpose, SmsTemplate> = {
   LOGIN: 'OTP',
   PHONE_CHANGE: 'OTP',
   ACCOUNT_DELETION: 'ACCOUNT_DELETION_OTP',
+  TERMS: 'TERMS_OTP',
 };
 
 /**
@@ -239,6 +241,7 @@ export class OtpService {
   async verify(
     input: z.output<typeof VerifyOtpBody>,
     locale: AppLocale,
+    evidence: { ip?: string | undefined; userAgent?: string | undefined } = {},
   ): Promise<z.output<typeof AuthSessionDto>> {
     const now = new Date();
     const challenge = await this.check(
@@ -249,8 +252,11 @@ export class OtpService {
     );
 
     const existing = await this.prisma.user.findUnique({ where: { phone: challenge.phone } });
-    // Vérifié avant de consommer le code : l'app affiche les conditions puis renvoie le même code.
-    if (!existing && !input.termsVersion) throw AppError.unprocessable('TERMS_REQUIRED');
+    // Vérifié avant de consommer le code : l'app affiche les conditions puis renvoie le même
+    // code, qui signe l'acceptation (case cochée + code reçu sur le numéro).
+    const consents = existing ? null : signupConsents(input.terms ?? {});
+    if (!existing && !input.terms) throw AppError.unprocessable('TERMS_REQUIRED');
+    if (!existing && !consents) throw AppError.conflict('TERMS_OUTDATED');
     if (existing?.status === 'SUSPENDED') throw AppError.forbidden('ACCOUNT_SUSPENDED');
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -271,13 +277,27 @@ export class OtpService {
             referralCode: `TARA-${randomReadableId(6)}`,
           },
         });
-        const version = input.termsVersion ?? '';
+        const userId = user.id;
         await tx.consent.createMany({
-          data: [
-            { userId: user.id, kind: 'TERMS', version, granted: true },
-            { userId: user.id, kind: 'PRIVACY', version, granted: true },
-          ],
+          data: (consents ?? []).map((consent) => ({
+            userId,
+            ...consent,
+            granted: true,
+            ip: evidence.ip ?? null,
+            userAgent: evidence.userAgent?.slice(0, 300) ?? null,
+            installationId: input.device.installationId,
+          })),
         });
+        await this.audit.record(
+          {
+            actor: null,
+            action: 'terms.accepted',
+            entityType: 'user',
+            entityId: user.id,
+            after: { versions: (consents ?? []).map((consent) => consent.version), signup: true },
+          },
+          tx,
+        );
         if (input.referralCode) {
           const referrer = await tx.user.findUnique({
             where: { referralCode: input.referralCode.trim().toUpperCase() },

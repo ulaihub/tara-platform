@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AppError } from '../common/errors/app-error.js';
 import { cameroonDate } from '../common/time.js';
 import type { RiderProfile } from '../generated/prisma/client.js';
+import { requiredVersions, termsAccepted } from '../legal/legal-versions.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CourseTrackService } from '../tracking/course-track.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
@@ -45,11 +46,24 @@ export class RiderLocationService {
   async blockers(userId: string): Promise<string[]> {
     const rider = await this.prisma.riderProfile.findUnique({
       where: { userId },
-      include: { documents: true },
+      include: {
+        documents: true,
+        user: {
+          select: {
+            consents: {
+              where: { granted: true, version: { in: requiredVersions('rider') } },
+              select: { version: true },
+            },
+          },
+        },
+      },
     });
     if (!rider) return ['NOT_A_RIDER'];
     const reasons: string[] = [];
     if (rider.status !== 'ACTIVE') reasons.push(`STATUS_${rider.status}`);
+    // Nouvelle version des conditions : à lire et signer dans l'app avant de reprendre.
+    const accepted = rider.user.consents.map((consent) => consent.version);
+    if (!termsAccepted('rider', accepted)) reasons.push('TERMS');
     // Espèces non déposées dans le délai (G5) : plus de courses jusqu'au dépôt.
     if (rider.cashOverdueSince) reasons.push('CASH_OVERDUE');
     const missing = uncoveredDocuments(rider.documents, ['APPROVED'], cameroonDate(new Date()));

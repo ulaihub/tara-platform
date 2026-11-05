@@ -27,10 +27,24 @@ npx @openapitools/openapi-generator-cli generate -i apps/api/openapi.json -g dar
 ## Connexion par code SMS (A1)
 
 1. `POST /v1/auth/otp` avec `{ phone }` : un code à 6 chiffres part par SMS, valable 5 minutes. Nouvelle demande possible après 60 secondes, 5 au plus par quart d'heure.
-2. `POST /v1/auth/otp/verify` avec `{ challengeId, code, device }`. Pour un nouveau compte, la réponse est `422 TERMS_REQUIRED` : afficher les conditions puis renvoyer **le même code** avec `termsVersion` (et `referralCode` si l'utilisateur en a un). Après 5 codes faux, il faut en demander un nouveau.
+2. `POST /v1/auth/otp/verify` avec `{ challengeId, code, device }`. Pour un nouveau compte, la réponse est `422 TERMS_REQUIRED` : afficher les conditions puis renvoyer **le même code** avec `terms` (et `referralCode` si l'utilisateur en a un). Après 5 codes faux, il faut en demander un nouveau.
 3. La réponse contient `accessToken` (15 minutes), `refreshToken` (30 jours) et `isNewUser`.
 4. `POST /v1/auth/refresh` remplace la paire de jetons. Un jeton de rafraîchissement ne sert qu'une fois : le réutiliser ferme toutes les sessions du compte. Stocker le nouveau jeton avant toute autre action.
 5. `POST /v1/auth/logout` ferme la session de l'appareil.
+
+## Conditions d’utilisation acceptées et signées
+
+Textes rédigés dans `docs/juridique` et copiés dans l’API par `pnpm --filter @tara/api legal` (un test vérifie la copie). Chaque app affiche **le texte complet**, une case à cocher non cochée par défaut, puis fait signer par un **code SMS**.
+
+| Étape                       | Route                                                                                                                      | Points d’attention                                                                                                                                                                                                                                               |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lire un texte (sans compte) | `GET /v1/legal/{expediteurs\|livreurs\|destinataires\|confidentialite}`                                                    | `version` (« 2026-11 »), `title`, `markdown` (titres `#`, listes `-`, tableaux, gras `**`).                                                                                                                                                                      |
+| Inscription                 | `POST /v1/auth/otp/verify` avec `terms: { expediteurs: "2026-11", confidentialite: "2026-11" }` (app livreur : `livreurs`) | Le code de connexion signe l’acceptation. Version qui n’est plus en vigueur, confidentialité manquante ou conditions des deux apps à la fois : `409 TERMS_OUTDATED`, le code reste valable.                                                                      |
+| À l’ouverture de l’app      | `GET /v1/me/terms?app=client\|rider`                                                                                       | `required` : textes à accepter (vide si tout est à jour) ; `accepted` : versions acceptées et date (copie consultable dans le profil).                                                                                                                           |
+| Signer                      | `POST /v1/me/terms/code` puis `POST /v1/me/terms?app=…` avec `{ challengeId, code, versions, installationId }`             | Code SMS dédié (« code pour SIGNER… », 3 par heure). `versions` : celles affichées ; une version dépassée entre-temps donne `409 TERMS_OUTDATED`.                                                                                                                |
+| Sans acceptation            | —                                                                                                                          | Expéditeur : `403 TERMS_ACCEPTANCE_REQUIRED` sur `POST /v1/orders` et `/batch`. Livreur : blocage `TERMS` dans `GET /v1/rider/presence`, passage en ligne refusé (`RIDER_NOT_ELIGIBLE`), plus aucune proposition de course, `403` sur l’acceptation d’une offre. |
+
+Preuve gardée sur chaque consentement : version (`expediteurs:2026-11`), date et heure, adresse IP, application et appareil (`user_agent`, `installation_id`), plus une ligne `terms.accepted` au journal d’audit. `POST /v1/me/consents` ne sert plus qu’aux choix `LOCATION` et `MARKETING`.
 
 ## Double authentification de l’équipe
 

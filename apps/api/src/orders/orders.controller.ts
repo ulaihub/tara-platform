@@ -16,6 +16,7 @@ import type { AuthUser } from '../auth/auth.types.js';
 import { CurrentUser, Roles } from '../auth/decorators.js';
 import { idempotencyKey } from '../common/idempotency.js';
 import { pageSchema } from '../common/pagination.js';
+import { LegalService } from '../legal/legal.service.js';
 import {
   ApiZodBody,
   ApiZodQuery,
@@ -56,18 +57,23 @@ export class OrdersController {
   constructor(
     private readonly orders: OrdersService,
     private readonly ratings: RatingsService,
+    private readonly legal: LegalService,
   ) {}
 
-  /** Nouvelle commande (C1) : le prix est recalculé côté serveur. */
+  /**
+   * Nouvelle commande (C1) : le prix est recalculé côté serveur. Les conditions des
+   * expéditeurs en vigueur doivent être acceptées (TERMS_ACCEPTANCE_REQUIRED sinon).
+   */
   @Post()
   @IDEMPOTENCY_HEADER
   @ApiZodBody(CreateOrderBody)
   @ApiZodResponse(CreatedOrderDto, HttpStatus.CREATED)
-  create(
+  async create(
     @CurrentUser() user: AuthUser,
     @ValidBody(CreateOrderBody) body: z.output<typeof CreateOrderBody>,
     @Headers('idempotency-key') key: string | undefined,
   ): Promise<z.output<typeof CreatedOrderDto>> {
+    await this.legal.assertAccepted(user.id, 'client');
     return this.orders.create(user, body, idempotencyKey(key));
   }
 
@@ -76,11 +82,12 @@ export class OrdersController {
   @IDEMPOTENCY_HEADER
   @ApiZodBody(CreateBatchBody)
   @ApiZodResponse(CreatedBatchDto, HttpStatus.CREATED)
-  createBatch(
+  async createBatch(
     @CurrentUser() user: AuthUser,
     @ValidBody(CreateBatchBody) body: z.output<typeof CreateBatchBody>,
     @Headers('idempotency-key') key: string | undefined,
   ): Promise<z.output<typeof CreatedBatchDto>> {
+    await this.legal.assertAccepted(user.id, 'client');
     return this.orders.createBatch(user, body, idempotencyKey(key));
   }
 

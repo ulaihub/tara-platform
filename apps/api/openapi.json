@@ -164,10 +164,12 @@
                   "device": {
                     "$ref": "#/components/schemas/DeviceInput"
                   },
-                  "termsVersion": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 32
+                  "terms": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/AcceptedVersions"
+                      }
+                    ]
                   },
                   "referralCode": {
                     "type": "string",
@@ -452,6 +454,164 @@
         ]
       }
     },
+    "/v1/legal/{document}": {
+      "get": {
+        "operationId": "Legal_document",
+        "parameters": [
+          {
+            "name": "document",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalDocument"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/v1/me/terms": {
+      "get": {
+        "operationId": "Terms_status",
+        "parameters": [
+          {
+            "name": "app",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "client",
+                "rider"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TermsStatus"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      },
+      "post": {
+        "operationId": "Terms_accept",
+        "parameters": [
+          {
+            "name": "app",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "client",
+                "rider"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challengeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "versions": {
+                    "$ref": "#/components/schemas/AcceptedVersions"
+                  },
+                  "installationId": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 64
+                  }
+                },
+                "required": [
+                  "challengeId",
+                  "code",
+                  "versions"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      }
+    },
+    "/v1/me/terms/code": {
+      "post": {
+        "operationId": "Terms_requestCode",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpChallenge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      }
+    },
     "/v1/me": {
       "get": {
         "operationId": "Me_me",
@@ -643,8 +803,6 @@
                   "kind": {
                     "type": "string",
                     "enum": [
-                      "TERMS",
-                      "PRIVACY",
                       "LOCATION",
                       "MARKETING"
                     ]
@@ -6782,6 +6940,13 @@
       }
     },
     "schemas": {
+      "AcceptedVersions": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 16
+        }
+      },
       "ActorRole": {
         "type": "string",
         "enum": [
@@ -7512,6 +7677,7 @@
               "type": "string",
               "enum": [
                 "DOCUMENTS",
+                "TERMS",
                 "BALANCE_TOO_LOW",
                 "CASH_OVERDUE",
                 "TOO_MANY_ORDERS",
@@ -7853,6 +8019,8 @@
                   "ACCOUNT_HAS_ACTIVE_ORDERS",
                   "ACCOUNT_DELETION_NOT_ALLOWED",
                   "SMS_SEND_FAILED",
+                  "TERMS_ACCEPTANCE_REQUIRED",
+                  "TERMS_OUTDATED",
                   "TERMS_REQUIRED",
                   "ACCOUNT_SUSPENDED",
                   "REFRESH_TOKEN_INVALID",
@@ -8088,6 +8256,36 @@
           "CRIMINAL_RECORD",
           "GUARANTOR_ID"
         ]
+      },
+      "LegalDocument": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "enum": [
+              "expediteurs",
+              "livreurs",
+              "destinataires",
+              "confidentialite"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "markdown": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "document",
+          "version",
+          "title",
+          "markdown"
+        ],
+        "additionalProperties": false
       },
       "LocationLink": {
         "type": "object",
@@ -10465,6 +10663,65 @@
           "RETURN",
           "WEATHER"
         ]
+      },
+      "TermsStatus": {
+        "type": "object",
+        "properties": {
+          "required": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "document": {
+                  "type": "string",
+                  "enum": [
+                    "expediteurs",
+                    "livreurs",
+                    "destinataires",
+                    "confidentialite"
+                  ]
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "accepted": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "document": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "acceptedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "document",
+                "version",
+                "acceptedAt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "required",
+          "accepted"
+        ],
+        "additionalProperties": false
       },
       "TrackBatchResult": {
         "type": "object",

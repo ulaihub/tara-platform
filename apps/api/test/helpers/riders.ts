@@ -5,6 +5,7 @@ import { REQUIRED_DOCUMENTS } from '../../src/riders/riders.schemas.js';
 import { type SignedIn, signIn, type TestContext } from './app.js';
 import { PLATFORM_ACCOUNTS, riderPayable } from '../../src/finance/ledger.accounts.js';
 import { LedgerService } from '../../src/finance/ledger.service.js';
+import { currentVersion } from '../../src/legal/legal-versions.js';
 
 /** Solde prépayé de départ d'un livreur de test (décision 36). */
 export const RIDER_START_BALANCE = 100_000;
@@ -26,6 +27,15 @@ export async function activeRider(
   await ctx.prisma.user.update({
     where: { id: user.userId },
     data: { roles: ['CUSTOMER', 'RIDER'], fullName: 'Livreur Test' },
+  });
+  // Conditions des livreurs signées dans l'app (l'inscription a signé celles des expéditeurs).
+  await ctx.prisma.consent.create({
+    data: {
+      userId: user.userId,
+      kind: 'TERMS',
+      version: currentVersion('livreurs'),
+      granted: true,
+    },
   });
   const expiresOn = new Date(Date.now() + (options.expiredDocuments ? -2 : 365) * 86_400_000);
   const rider = await ctx.prisma.riderProfile.create({

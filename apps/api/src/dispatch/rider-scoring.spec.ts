@@ -12,6 +12,7 @@ const base: RiderSnapshot = {
   activeOrders: 0,
   hasPendingOffer: false,
   documentsValid: true,
+  termsAccepted: true,
   cashOverdue: false,
   availableBalance: 20_000,
   ratingSum: 0,

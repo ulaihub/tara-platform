@@ -23,7 +23,8 @@
     "db:studio": "prisma studio",
     "db:check": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
     "openapi": "nest build && node dist/openapi/generate.js openapi.json",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "legal": "tsx src/legal/generate.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.3.2",

@@ -22,6 +22,8 @@ export interface RiderSnapshot {
   hasPendingOffer: boolean;
   /** Pièces obligatoires validées et non expirées (D4). */
   documentsValid: boolean;
+  /** Conditions des livreurs en vigueur acceptées (nouvelle version : plus de courses avant). */
+  termsAccepted: boolean;
   /** Solde prépayé disponible : doit couvrir l'argent à encaisser sur la course (G5). */
   availableBalance: number;
   /** Espèces non déposées dans le délai (ancien fonctionnement, G5). */
@@ -31,12 +33,13 @@ export interface RiderSnapshot {
 }
 
 export type Ineligibility =
-  'DOCUMENTS' | 'BALANCE_TOO_LOW' | 'CASH_OVERDUE' | 'TOO_MANY_ORDERS' | 'PENDING_OFFER';
+  'DOCUMENTS' | 'TERMS' | 'BALANCE_TOO_LOW' | 'CASH_OVERDUE' | 'TOO_MANY_ORDERS' | 'PENDING_OFFER';
 
 /** Raisons pour lesquelles le livreur ne peut pas recevoir cette course (vide si éligible). */
 export function ineligibilities(rider: RiderSnapshot, orderCash: number): Ineligibility[] {
   const reasons: Ineligibility[] = [];
   if (!rider.documentsValid) reasons.push('DOCUMENTS');
+  if (!rider.termsAccepted) reasons.push('TERMS');
   // Solde prépayé : l'argent encaissé est pris sur le solde, qui doit donc le couvrir.
   if (orderCash > 0 && rider.availableBalance < orderCash) reasons.push('BALANCE_TOO_LOW');
   if (rider.cashOverdue) reasons.push('CASH_OVERDUE');

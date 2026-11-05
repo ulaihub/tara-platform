@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CameroonMobile } from '../common/phone.js';
+import { AcceptedVersions } from '../legal/legal.schemas.js';
 
 export const LocaleParam = z.enum(['fr', 'en']);
 
@@ -30,8 +31,12 @@ export const VerifyOtpBody = z.object({
   challengeId: z.uuid(),
   code: z.string().regex(/^\d{6}$/, 'six chiffres attendus'),
   device: DeviceInput,
-  /** Version des conditions d'utilisation acceptées : obligatoire à la création du compte. */
-  termsVersion: z.string().min(1).max(32).optional(),
+  /**
+   * Textes lus et acceptés (case cochée) à la création du compte : les conditions de l'app et
+   * la politique de confidentialité, dans leur version en vigueur. Le code SMS signe
+   * l'acceptation. Ignoré pour un compte existant.
+   */
+  terms: AcceptedVersions.optional(),
   /** Code de parrainage saisi à l'inscription (C6). */
   referralCode: z.string().max(32).optional(),
   locale: LocaleParam.optional(),

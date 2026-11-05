@@ -73,7 +73,14 @@ export const CandidateDto = z
     rating: z.number().nullable(),
     /** Vide si le livreur peut recevoir la course. */
     ineligibleBecause: z.array(
-      z.enum(['DOCUMENTS', 'BALANCE_TOO_LOW', 'CASH_OVERDUE', 'TOO_MANY_ORDERS', 'PENDING_OFFER']),
+      z.enum([
+        'DOCUMENTS',
+        'TERMS',
+        'BALANCE_TOO_LOW',
+        'CASH_OVERDUE',
+        'TOO_MANY_ORDERS',
+        'PENDING_OFFER',
+      ]),
     ),
     position: z
       .object({ latitude: Latitude, longitude: Longitude, at: z.iso.datetime() })

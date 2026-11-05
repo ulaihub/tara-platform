@@ -84,6 +84,14 @@ export const ERROR_MESSAGES = {
     fr: 'Le SMS n’a pas pu être envoyé. Réessayez.',
     en: 'The SMS could not be sent. Please try again.',
   },
+  TERMS_ACCEPTANCE_REQUIRED: {
+    fr: 'Les conditions d’utilisation ont changé : lisez-les et acceptez-les pour continuer.',
+    en: 'The terms of use have changed: read and accept them to continue.',
+  },
+  TERMS_OUTDATED: {
+    fr: 'Une nouvelle version des conditions vient de paraître : relisez-la avant d’accepter.',
+    en: 'A new version of the terms was just published: read it again before accepting.',
+  },
   TERMS_REQUIRED: {
     fr: 'Acceptez les conditions d’utilisation pour créer votre compte.',
     en: 'Accept the terms of use to create your account.',

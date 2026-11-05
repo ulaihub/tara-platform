@@ -13,6 +13,7 @@ import { EventsModule } from './events/events.module.js';
 import { FinanceModule } from './finance/finance.module.js';
 import { GeoModule } from './geo/geo.module.js';
 import { HealthModule } from './health/health.module.js';
+import { LegalModule } from './legal/legal.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
@@ -53,6 +54,7 @@ import { UsersModule } from './users/users.module.js';
     StorageModule,
     AuthModule,
     HealthModule,
+    LegalModule,
     UsersModule,
     RidersModule,
     GeoModule,

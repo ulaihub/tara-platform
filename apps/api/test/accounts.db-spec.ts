@@ -4,6 +4,7 @@ import request from 'supertest';
 import { KycExpiryService } from '../src/riders/kyc-expiry.service.js';
 import { REQUIRED_DOCUMENTS } from '../src/riders/riders.schemas.js';
 import {
+  CLIENT_TERMS,
   createTestApp,
   randomPhone,
   signIn,
@@ -114,7 +115,7 @@ describe('Mon compte (A2, A4) et parrainage (C6)', () => {
         challengeId: challenge.body.challengeId,
         code,
         device: { installationId: 'installation-parrainage', platform: 'ANDROID' },
-        termsVersion: '2026-11',
+        terms: CLIENT_TERMS,
         referralCode: me.body.referralCode.toLowerCase(),
       })
       .expect(200);

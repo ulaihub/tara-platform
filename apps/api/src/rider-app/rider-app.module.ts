@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { DispatchModule } from '../dispatch/dispatch.module.js';
 import { FinanceModule } from '../finance/finance.module.js';
 import { GeoModule } from '../geo/geo.module.js';
+import { LegalModule } from '../legal/legal.module.js';
 import { OrdersModule } from '../orders/orders.module.js';
 import { PricingModule } from '../pricing/pricing.module.js';
 import { TrackingModule } from '../tracking/tracking.module.js';
@@ -17,7 +18,15 @@ import { RiderOrdersService } from './rider-orders.service.js';
 import { SafetyAlertsService } from './safety-alerts.service.js';
 
 @Module({
-  imports: [DispatchModule, OrdersModule, GeoModule, FinanceModule, PricingModule, TrackingModule],
+  imports: [
+    DispatchModule,
+    OrdersModule,
+    GeoModule,
+    FinanceModule,
+    PricingModule,
+    TrackingModule,
+    LegalModule,
+  ],
   controllers: [
     RiderAppController,
     SenderDecisionsController,

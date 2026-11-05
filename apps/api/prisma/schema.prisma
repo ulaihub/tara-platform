@@ -59,6 +59,8 @@ enum OtpPurpose {
   LOGIN
   PHONE_CHANGE
   ACCOUNT_DELETION
+  /// Acceptation d'une nouvelle version des conditions (signature par code SMS).
+  TERMS
 
   @@map("otp_purpose")
 }
@@ -555,12 +557,16 @@ model Device {
 
 /// Consentements horodatés et versionnés (loi n° 2024/017).
 model Consent {
-  id        String      @id @default(uuid(7)) @db.Uuid
-  userId    String      @map("user_id") @db.Uuid
-  kind      ConsentKind
-  version   String
-  granted   Boolean
-  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  id             String      @id @default(uuid(7)) @db.Uuid
+  userId         String      @map("user_id") @db.Uuid
+  kind           ConsentKind
+  version        String
+  granted        Boolean
+  /// Preuve de l'acceptation des conditions (version, heure, adresse, appareil).
+  ip             String?
+  userAgent      String?     @map("user_agent")
+  installationId String?     @map("installation_id")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

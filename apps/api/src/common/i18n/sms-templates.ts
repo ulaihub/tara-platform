@@ -13,6 +13,10 @@ const TEMPLATES = {
     fr: 'Tara : code de confirmation de SUPPRESSION de votre compte : {code}. Si vous n avez rien demande, ignorez ce message.',
     en: 'Tara: confirmation code to DELETE your account: {code}. If you did not request this, ignore this message.',
   },
+  TERMS_OTP: {
+    fr: 'Tara : code pour SIGNER votre acceptation des nouvelles conditions : {code}. Ne le partagez avec personne.',
+    en: 'Tara: code to SIGN your acceptance of the new terms: {code}. Do not share it with anyone.',
+  },
   MFA_ENABLED: {
     fr: 'Tara : la double authentification vient d etre activee sur votre compte. Si ce n est pas vous, prevenez immediatement un administrateur.',
     en: 'Tara: two-factor authentication was just enabled on your account. If this was not you, alert an administrator immediately.',
