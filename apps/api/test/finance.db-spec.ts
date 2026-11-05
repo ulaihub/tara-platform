@@ -135,6 +135,9 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     // montant pris sur son solde, gain crédité ; rien ne reste dû, rien n'est mis de côté.
     const expected = RIDER_START_BALANCE - o.totalPrice - 10_000 + o.riderEarning;
     expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(9_750);
+    // Accueil du marchand : encaissé aujourd'hui et livraisons du jour.
+    const shopWallet = await request(ctx.http).get('/v1/me/wallet').set(shop.auth).expect(200);
+    expect(shopWallet.body.merchant).toMatchObject({ todaySales: 10_000, todayDeliveries: 1 });
     expect(await ledger.balance(riderPayable(rider.riderId))).toBe(expected);
     expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(0);
     // Historique du livreur : montant encaissé et moyen.

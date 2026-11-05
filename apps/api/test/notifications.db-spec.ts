@@ -236,6 +236,33 @@ describe('Notifications push, WhatsApp et SMS (F3)', () => {
       ).toBe(false);
     });
 
+    it('choisit le canal Android au son de la marque : course, argent, suivi', async () => {
+      const rider = await activeRider(ctx);
+      const push = ctx.app.get<FakePushProvider>(PUSH_PROVIDER);
+      const notifications = ctx.app.get(NotificationService);
+      const channelOf = async (
+        template: 'PAYOUT_SENT' | 'ORDER_DELIVERED' | 'OFFER_NEW',
+        urgent = false,
+      ) => {
+        await notifications.toUser(rider.userId, {
+          template,
+          params: {
+            amount: '12 500',
+            reference: 'TR-CANAL1',
+            pickup: 'Akwa',
+            dropoff: 'Bali',
+            earning: 1500,
+          },
+          data: {},
+          urgent,
+        });
+        return push.outbox.filter((sent) => sent.token === rider.pushToken).at(-1)?.message.channel;
+      };
+      expect(await channelOf('PAYOUT_SENT')).toBe('money');
+      expect(await channelOf('ORDER_DELIVERED')).toBe('orders');
+      expect(await channelOf('OFFER_NEW', true)).toBe('offers');
+    });
+
     it('un jeton passe au dernier compte qui l’enregistre', async () => {
       const first = await activeRider(ctx);
       const second = await activeRider(ctx);

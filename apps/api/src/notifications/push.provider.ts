@@ -14,7 +14,14 @@ export interface PushMessage {
    */
   urgent?: boolean;
   ttlSeconds?: number;
+  /**
+   * Canal Android créé par les apps, avec le son de la marque : `offers` (nouvelle course),
+   * `money` (argent reçu ou reversé), `orders` (suivi, par défaut).
+   */
+  channel?: PushChannel;
 }
+
+export type PushChannel = 'offers' | 'orders' | 'money';
 
 /** Jeton d'appareil refusé définitivement (app désinstallée) : à effacer. */
 export class PushTokenInvalidError extends Error {}
@@ -127,7 +134,7 @@ export class FcmPushProvider implements PushProvider {
               priority: message.urgent ? 'HIGH' : 'NORMAL',
               ttl,
               notification: {
-                channel_id: message.urgent ? 'offers' : 'orders',
+                channel_id: message.channel ?? (message.urgent ? 'offers' : 'orders'),
                 sound: 'default',
               },
             },

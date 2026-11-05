@@ -1,4 +1,5 @@
 import { type AppLocale, interpolate } from '../common/i18n/locale.js';
+import type { PushChannel } from './push.provider.js';
 
 /** Titres et textes des notifications push, en français et en anglais. */
 const TEMPLATES = {
@@ -144,6 +145,14 @@ const TEMPLATES = {
 } as const satisfies Record<string, Record<AppLocale, { title: string; body: string }>>;
 
 export type PushTemplate = keyof typeof TEMPLATES;
+
+/** Notifications d'argent : canal Android au son de pièce (créé par les apps). */
+const MONEY_TEMPLATES = new Set<PushTemplate>(['PAYOUT_SENT']);
+
+export function pushChannel(template: PushTemplate, urgent: boolean): PushChannel {
+  if (urgent) return 'offers';
+  return MONEY_TEMPLATES.has(template) ? 'money' : 'orders';
+}
 
 export function renderPush(
   template: PushTemplate,

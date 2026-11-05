@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { bucketStarts, periodStart } from '../rider-app/rider-orders.service.js';
+import { periodStart } from '../common/time.js';
+import { bucketStarts } from '../rider-app/rider-orders.service.js';
 import { OnlineTimeService } from './online-time.service.js';
 
 const TTL_SECONDS = 90;

@@ -10095,13 +10095,21 @@
               },
               "payoutPhone": {
                 "type": "string"
+              },
+              "todaySales": {
+                "type": "integer"
+              },
+              "todayDeliveries": {
+                "type": "integer"
               }
             },
             "required": [
               "balance",
               "payoutSchedule",
               "plan",
-              "payoutPhone"
+              "payoutPhone",
+              "todaySales",
+              "todayDeliveries"
             ],
             "additionalProperties": false
           },

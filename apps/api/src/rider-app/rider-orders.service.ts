@@ -5,7 +5,7 @@ import type { Env } from '../config/env.js';
 import { verifyCode } from '../common/crypto.js';
 import { AppError } from '../common/errors/app-error.js';
 import { pageOf } from '../common/pagination.js';
-import { CAMEROON_TIME_ZONE, cameroonDate } from '../common/time.js';
+import { cameroonDate, periodStart } from '../common/time.js';
 import { ACTIVE_RIDER_STATUSES } from '../dispatch/dispatch.service.js';
 import { OnlineTimeService } from '../dispatch/online-time.service.js';
 import { OrderFinanceService } from '../finance/order-finance.service.js';
@@ -651,31 +651,5 @@ export function bucketStarts(period: 'day' | 'week' | 'month', from: Date): Date
       }
       return starts;
     }
-  }
-}
-
-export function periodStart(period: 'day' | 'week' | 'month', now: Date): Date {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: CAMEROON_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    weekday: 'short',
-  }).formatToParts(now);
-  const get = (type: string): string => parts.find((part) => part.type === type)?.value ?? '';
-  const year = Number(get('year'));
-  const month = Number(get('month'));
-  const day = Number(get('day'));
-  const weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(get('weekday'));
-  // Le Cameroun est à UTC+1 toute l'année (pas d'heure d'été).
-  const localMidnight = (y: number, m: number, d: number): Date =>
-    new Date(Date.UTC(y, m - 1, d) - 3_600_000);
-  switch (period) {
-    case 'day':
-      return localMidnight(year, month, day);
-    case 'week':
-      return localMidnight(year, month, day - weekday);
-    case 'month':
-      return localMidnight(year, month, 1);
   }
 }
