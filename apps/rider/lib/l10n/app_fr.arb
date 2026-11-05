@@ -865,5 +865,24 @@
         "type": "int"
       }
     }
+  },
+  "rateSenderTitle": "Notez {name}",
+  "rateSenderBody": "Expéditeur de votre dernière course",
+  "rateSenderThanks": "Merci ! Votre note aide Tara à bien choisir ses clients.",
+  "senderFallback": "l’expéditeur",
+  "starsLabel": "{count, plural, =1{1 étoile} other{{count} étoiles}}",
+  "@rateSenderTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@starsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

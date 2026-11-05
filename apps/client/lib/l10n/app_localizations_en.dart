@@ -1212,4 +1212,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failureBannerBody => 'Tap to choose: try again or return.';
+
+  @override
+  String get rateTitle => 'How did the delivery go?';
+
+  @override
+  String rateBody(String rider) {
+    return 'Rate $rider: the best-rated riders get more deliveries.';
+  }
+
+  @override
+  String starsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count stars', one: '1 star');
+    return '$_temp0';
+  }
+
+  @override
+  String get starWord1 => 'Very poor';
+
+  @override
+  String get starWord2 => 'Poor';
+
+  @override
+  String get starWord3 => 'Okay';
+
+  @override
+  String get starWord4 => 'Good';
+
+  @override
+  String get starWord5 => 'Perfect!';
+
+  @override
+  String get rateCommentHint => 'A word for the Tara team (optional)';
+
+  @override
+  String get rateSend => 'Send my rating';
+
+  @override
+  String get rateThanks => 'Thanks for your rating!';
+
+  @override
+  String get rateThanksBody => 'Your feedback stays between you and Tara.';
 }

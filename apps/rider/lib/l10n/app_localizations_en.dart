@@ -1395,4 +1395,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get milestoneBody => 'Great work, keep it up.';
+
+  @override
+  String rateSenderTitle(String name) {
+    return 'Rate $name';
+  }
+
+  @override
+  String get rateSenderBody => 'Sender of your last delivery';
+
+  @override
+  String get rateSenderThanks => 'Thanks! Your rating helps Tara pick its customers well.';
+
+  @override
+  String get senderFallback => 'the sender';
+
+  @override
+  String starsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count stars', one: '1 star');
+    return '$_temp0';
+  }
 }

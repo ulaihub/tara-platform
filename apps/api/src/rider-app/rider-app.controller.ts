@@ -35,8 +35,9 @@ import {
 import { DispatchService } from '../dispatch/dispatch.service.js';
 import { RiderLocationService } from '../dispatch/rider-location.service.js';
 import { AuditService } from '../audit/audit.service.js';
-import { OrderDto } from '../orders/orders.schemas.js';
+import { OrderDto, RateBody, RatingDto } from '../orders/orders.schemas.js';
 import { OrdersService } from '../orders/orders.service.js';
+import { RatingsService } from '../orders/ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppError } from '../common/errors/app-error.js';
 import { OrderSupportService } from './order-support.service.js';
@@ -93,6 +94,7 @@ export class RiderAppController {
     private readonly dispatch: DispatchService,
     private readonly orders: RiderOrdersService,
     private readonly alerts: SafetyAlertsService,
+    private readonly ratings: RatingsService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -271,6 +273,19 @@ export class RiderAppController {
     @ValidBody(FailBody) body: z.output<typeof FailBody>,
   ): Out<typeof RiderOrderDto> {
     return this.orders.fail(user.id, id, body);
+  }
+
+  /** Note de l'expéditeur après la course (F4), une fois, dans les 7 jours. */
+  @Post('orders/:id/rating')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(RateBody)
+  @ApiZodResponse(RatingDto)
+  rateSender(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(RateBody) body: z.output<typeof RateBody>,
+  ): Out<typeof RatingDto> {
+    return this.ratings.rateSender(user, id, body);
   }
 
   @Post('orders/:id/retry')

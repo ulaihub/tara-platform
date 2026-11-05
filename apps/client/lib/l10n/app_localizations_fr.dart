@@ -1217,4 +1217,45 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get failureBannerBody => 'Touchez pour choisir : nouvelle tentative ou retour.';
+
+  @override
+  String get rateTitle => 'Comment s’est passée la livraison ?';
+
+  @override
+  String rateBody(String rider) {
+    return 'Notez $rider : les livreurs les mieux notés reçoivent plus de courses.';
+  }
+
+  @override
+  String starsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count étoiles', one: '1 étoile');
+    return '$_temp0';
+  }
+
+  @override
+  String get starWord1 => 'Très décevant';
+
+  @override
+  String get starWord2 => 'Décevant';
+
+  @override
+  String get starWord3 => 'Correct';
+
+  @override
+  String get starWord4 => 'Bien';
+
+  @override
+  String get starWord5 => 'Parfait !';
+
+  @override
+  String get rateCommentHint => 'Un mot pour l’équipe Tara (facultatif)';
+
+  @override
+  String get rateSend => 'Envoyer ma note';
+
+  @override
+  String get rateThanks => 'Merci pour votre note !';
+
+  @override
+  String get rateThanksBody => 'Votre avis reste entre vous et Tara.';
 }

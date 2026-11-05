@@ -16,6 +16,12 @@ class FakeRiderApi extends RiderApi {
     cashLimit: 50000,
   );
 
+  /// Notes données aux expéditeurs : (course, étoiles).
+  final ratings = <(String, int)>[];
+
+  @override
+  Future<void> rateSender(String orderId, int score) async => ratings.add((orderId, score));
+
   /// Propositions acceptées ; erreur renvoyée à la prochaine acceptation.
   final accepted = <String>[];
   Object? acceptError;

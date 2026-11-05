@@ -436,5 +436,17 @@
   "riderNoteQuoted": "“{note}”",
   "returnToPickup": "Back to the pickup point",
   "failureBannerTitle": "Delivery failed · {reference}",
-  "failureBannerBody": "Tap to choose: try again or return."
+  "failureBannerBody": "Tap to choose: try again or return.",
+  "rateTitle": "How did the delivery go?",
+  "rateBody": "Rate {rider}: the best-rated riders get more deliveries.",
+  "starsLabel": "{count, plural, =1{1 star} other{{count} stars}}",
+  "starWord1": "Very poor",
+  "starWord2": "Poor",
+  "starWord3": "Okay",
+  "starWord4": "Good",
+  "starWord5": "Perfect!",
+  "rateCommentHint": "A word for the Tara team (optional)",
+  "rateSend": "Send my rating",
+  "rateThanks": "Thanks for your rating!",
+  "rateThanksBody": "Your feedback stays between you and Tara."
 }

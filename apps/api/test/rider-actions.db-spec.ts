@@ -214,6 +214,96 @@ describe('Actions du livreur (E2 à E9)', () => {
     expect(history.body.items[0].completedAt).toBe(history.body.items[0].deliveredAt);
   });
 
+  it('notation réciproque après la livraison : une fois chacun, dans les 7 jours (F4)', async () => {
+    const { rider, order } = await assigned();
+    // Pas avant la fin de la course.
+    const early = await request(ctx.http)
+      .post(`/v1/orders/${order.id}/rating`)
+      .set(shop.auth)
+      .send({ score: 5 })
+      .expect(422);
+    expect(early.body.error.code).toBe('RATING_NOT_OPEN');
+    await pickUp(rider, order);
+    const photoKey = await proofPhoto(ctx, rider);
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/deliver`)
+      .set(rider.auth)
+      .send({ deliveryCode: deliveryCodeFor(order), photoKey, ...HERE })
+      .expect(200);
+
+    // L'expéditeur note le livreur : la note entre dans son score d'attribution.
+    await request(ctx.http)
+      .post(`/v1/orders/${order.id}/rating`)
+      .set(shop.auth)
+      .send({ score: 6 })
+      .expect(400);
+    const given = await request(ctx.http)
+      .post(`/v1/orders/${order.id}/rating`)
+      .set(shop.auth)
+      .send({ score: 4, comment: '  Rapide, mais sans prévenir de son arrivée.  ' })
+      .expect(200);
+    expect(given.body).toMatchObject({
+      score: 4,
+      comment: 'Rapide, mais sans prévenir de son arrivée.',
+    });
+    const profile = await ctx.prisma.riderProfile.findUniqueOrThrow({
+      where: { id: rider.riderId },
+    });
+    expect(profile).toMatchObject({ ratingSum: 4, ratingCount: 1 });
+    const again = await request(ctx.http)
+      .post(`/v1/orders/${order.id}/rating`)
+      .set(shop.auth)
+      .send({ score: 1 })
+      .expect(409);
+    expect(again.body.error.code).toBe('RATING_ALREADY_GIVEN');
+    const seen = await request(ctx.http).get(`/v1/orders/${order.id}`).set(shop.auth).expect(200);
+    expect(seen.body.rating).toMatchObject({ score: 4 });
+
+    // Le livreur note l'expéditeur ; personne d'autre ne peut noter cette course.
+    const other = await activeRider(ctx);
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/rating`)
+      .set(other.auth)
+      .send({ score: 5 })
+      .expect(404);
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/rating`)
+      .set(rider.auth)
+      .send({ score: 5 })
+      .expect(200);
+    const mine = await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}`)
+      .set(rider.auth)
+      .expect(200);
+    expect(mine.body.rating).toMatchObject({ score: 5, comment: null });
+    expect(
+      await ctx.prisma.rating.findFirst({ where: { orderId: order.id, rateeId: shop.userId } }),
+    ).toMatchObject({ raterId: rider.userId, score: 5 });
+    // L'expéditeur ne voit que sa propre note.
+    const still = await request(ctx.http).get(`/v1/orders/${order.id}`).set(shop.auth).expect(200);
+    expect(still.body.rating).toMatchObject({ score: 4 });
+
+    // Au-delà de 7 jours, la course ne se note plus.
+    await resetPresence();
+    const late = await assigned();
+    await pickUp(late.rider, late.order);
+    const latePhoto = await proofPhoto(ctx, late.rider);
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${late.order.id}/deliver`)
+      .set(late.rider.auth)
+      .send({ deliveryCode: deliveryCodeFor(late.order), photoKey: latePhoto, ...HERE })
+      .expect(200);
+    await ctx.prisma.order.update({
+      where: { id: late.order.id },
+      data: { deliveredAt: new Date(Date.now() - 8 * 86_400_000) },
+    });
+    await request(ctx.http)
+      .post(`/v1/orders/${late.order.id}/rating`)
+      .set(shop.auth)
+      .send({ score: 5 })
+      .expect(422);
+  });
+
   it('sans code, le support valide après appel ; au-delà du plafond, un administrateur (E4)', async () => {
     const { rider, order } = await assigned({ codAmount: 5_000 });
     await pickUp(rider, order);

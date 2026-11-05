@@ -18,6 +18,7 @@ import {
   OrderTransitionsService,
   type TransitionOptions,
 } from '../orders/order-transitions.service.js';
+import { ratingDto } from '../orders/ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { DistanceService, type GeoPoint } from '../routing/distance.service.js';
@@ -47,6 +48,7 @@ const ORDER_INCLUDE = {
   sender: { select: { fullName: true, phone: true, merchant: { select: { shopName: true } } } },
   merchant: { select: { shopName: true } },
   codCollection: { select: { collectedAmount: true, method: true } },
+  ratings: { select: { raterId: true, score: true, comment: true, createdAt: true } },
 } as const satisfies Prisma.OrderInclude;
 
 type RiderOrder = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
@@ -216,6 +218,7 @@ export class RiderOrdersService {
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
         completedAt:
           (order.deliveredAt ?? order.returnedAt ?? order.cancelledAt)?.toISOString() ?? null,
+        rating: ratingDto(order.ratings.find((r) => r.raterId !== order.senderId)),
         collected: order.codCollection
           ? {
               amount: order.codCollection.collectedAmount,

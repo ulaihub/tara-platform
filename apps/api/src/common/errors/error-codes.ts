@@ -279,6 +279,14 @@ export const ERROR_MESSAGES = {
     fr: 'Appelez le destinataire au moins {required} fois depuis l’app, à {spacingMinutes} min d’écart, avant de déclarer l’échec.',
     en: 'Call the recipient at least {required} times from the app, {spacingMinutes} min apart, before reporting the failure.',
   },
+  RATING_NOT_OPEN: {
+    fr: 'Cette course ne peut pas ou plus être notée.',
+    en: 'This delivery can’t be rated (anymore).',
+  },
+  RATING_ALREADY_GIVEN: {
+    fr: 'Vous avez déjà noté cette course.',
+    en: 'You already rated this delivery.',
+  },
   FAILURE_DECISION_NOT_EXPECTED: {
     fr: 'Aucune décision n’est attendue pour cette commande.',
     en: 'No decision is expected for this order.',

@@ -211,6 +211,15 @@ class FakeClientApi extends ClientApi {
   @override
   Future<String> newPickupCode(String orderId) async => '5190';
 
+  /// Notes données : (commande, étoiles, mot).
+  final ratings = <(String, int, String?)>[];
+
+  @override
+  Future<OrderRating> rateRider(String orderId, {required int score, String? comment}) async {
+    ratings.add((orderId, score, comment));
+    return OrderRating(score: score, comment: comment, at: DateTime(2026, 11, 4, 10, 40));
+  }
+
   /// Choix après un échec : (commande, RETRY ou RETURN).
   final decisions = <(String, String)>[];
 

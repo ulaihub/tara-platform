@@ -451,5 +451,10 @@
   "soundsLabel": "Sounds",
   "soundsHint": "New job, parcel delivered, cash collected… Your phone’s silent mode is respected.",
   "milestoneTitle": "{count} deliveries today!",
-  "milestoneBody": "Great work, keep it up."
+  "milestoneBody": "Great work, keep it up.",
+  "rateSenderTitle": "Rate {name}",
+  "rateSenderBody": "Sender of your last delivery",
+  "rateSenderThanks": "Thanks! Your rating helps Tara pick its customers well.",
+  "senderFallback": "the sender",
+  "starsLabel": "{count, plural, =1{1 star} other{{count} stars}}"
 }

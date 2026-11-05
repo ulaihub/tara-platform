@@ -102,6 +102,21 @@ export const OrderEventDto = z
   })
   .meta({ id: 'OrderEvent' });
 
+/** Note après la course (F4) : 1 à 5 étoiles, mot facultatif pour l'équipe. */
+export const RateBody = z.object({
+  score: z.int().min(1).max(5),
+  /** Mot laissé à l'équipe Tara ; jamais montré à la personne notée. */
+  comment: z.string().trim().max(300).optional(),
+});
+
+export const RatingDto = z
+  .object({
+    score: z.int(),
+    comment: z.string().nullable(),
+    at: z.iso.datetime(),
+  })
+  .meta({ id: 'Rating' });
+
 export const OrderDto = z
   .object({
     id: z.uuid(),
@@ -163,6 +178,8 @@ export const OrderDto = z
       })
       .nullable(),
     cancelReason: z.string().nullable(),
+    /** Note donnée au livreur par l'expéditeur (F4), null tant qu'il n'a pas noté. */
+    rating: RatingDto.nullable(),
     timeline: z.array(OrderEventDto),
     createdAt: z.iso.datetime(),
   })

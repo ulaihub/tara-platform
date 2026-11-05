@@ -15,6 +15,7 @@ import { OrderTransitionHooks } from '../events/order-transition.hooks.js';
 import { AddressesService } from '../geo/addresses.service.js';
 import { type FullQuote, PricingService } from '../pricing/pricing.service.js';
 import { PromoService } from '../pricing/promo.service.js';
+import { ratingDto } from './ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BEFORE_PICKUP } from './order-state-machine.js';
 import { OrderTransitionsService } from './order-transitions.service.js';
@@ -50,6 +51,7 @@ const ORDER_INCLUDE = {
       user: { select: { fullName: true, phone: true } },
     },
   },
+  ratings: { select: { raterId: true, score: true, comment: true, createdAt: true } },
 } as const satisfies Prisma.OrderInclude;
 
 /** Statuts où l'expéditeur peut joindre le livreur. */
@@ -179,6 +181,7 @@ export class OrdersService {
       attemptCount: order.attemptCount,
       failure: this.failureOf(order),
       cancelReason: order.cancelReason,
+      rating: ratingDto(order.ratings.find((r) => r.raterId === order.senderId)),
       timeline: order.events.map((event: OrderEvent) => ({
         status: event.toStatus,
         at: event.occurredAt.toISOString(),

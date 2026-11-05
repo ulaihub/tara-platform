@@ -488,6 +488,7 @@ class TrackedOrder {
     required this.timeline,
     required this.createdAt,
     this.failure,
+    this.rating,
   });
 
   factory TrackedOrder.fromJson(Json json) {
@@ -495,6 +496,7 @@ class TrackedOrder {
     final pricing = _field<Json>(json, 'pricing');
     final rider = json['rider'] as Json?;
     final failure = json['failure'] as Json?;
+    final rating = json['rating'] as Json?;
     final scheduled = json['scheduledFor'] as String?;
     return TrackedOrder(
       id: _field(json, 'id'),
@@ -517,6 +519,7 @@ class TrackedOrder {
       ],
       createdAt: DateTime.parse(_field(json, 'createdAt')),
       failure: failure == null ? null : OrderFailure.fromJson(failure),
+      rating: rating == null ? null : OrderRating.fromJson(rating),
     );
   }
 
@@ -534,6 +537,7 @@ class TrackedOrder {
     'pricing',
     'rider',
     'failure',
+    'rating',
     'timeline',
     'createdAt',
   ];
@@ -560,13 +564,20 @@ class TrackedOrder {
   /// Livraison impossible (E6) : motif, choix et heure limite ; null hors de cet état.
   final OrderFailure? failure;
 
+  /// Note donnée au livreur (F4), null tant que l'expéditeur n'a pas noté.
+  final OrderRating? rating;
+
   /// Heure du premier passage à [status] (null s'il n'a pas eu lieu).
   DateTime? reachedAt(String status) => timeline.where((step) => step.status == status).firstOrNull?.at;
 
-  TrackedOrder withStatus(String next) => TrackedOrder(
+  TrackedOrder withStatus(String next) => _copy(status: next, failure: next == 'DELIVERY_FAILED' ? failure : null);
+
+  TrackedOrder withRating(OrderRating given) => _copy(rating: given);
+
+  TrackedOrder _copy({String? status, OrderFailure? failure, OrderRating? rating}) => TrackedOrder(
     id: id,
     reference: reference,
-    status: next,
+    status: status ?? this.status,
     trackingUrl: trackingUrl,
     scheduledFor: scheduledFor,
     pickup: pickup,
@@ -580,8 +591,26 @@ class TrackedOrder {
     rider: rider,
     timeline: timeline,
     createdAt: createdAt,
-    failure: next == 'DELIVERY_FAILED' ? failure : null,
+    failure: status == null ? this.failure : failure,
+    rating: rating ?? this.rating,
   );
+}
+
+/// Note donnée après une course (F4) : 1 à 5 étoiles, mot facultatif pour l'équipe.
+@immutable
+class OrderRating {
+  const OrderRating({required this.score, required this.comment, required this.at});
+  factory OrderRating.fromJson(Json json) => OrderRating(
+    score: _field<num>(json, 'score').toInt(),
+    comment: json['comment'] as String?,
+    at: DateTime.parse(_field(json, 'at')),
+  );
+
+  static const fields = ['score', 'comment', 'at'];
+
+  final int score;
+  final String? comment;
+  final DateTime at;
 }
 
 /// Échec de livraison vu par l'expéditeur (E6) : il choisit une nouvelle tentative ou le

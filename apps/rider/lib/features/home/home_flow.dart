@@ -33,6 +33,7 @@ import 'course_reward.dart';
 import 'home_offline_screen.dart';
 import 'home_online_screen.dart';
 import 'home_summary.dart';
+import 'rate_sender_card.dart';
 
 /// Accueil du livreur validé : hors ligne (05) ⇄ en ligne (06), propositions (07) reçues
 /// par le temps réel, les notifications ou au retour dans l'app, puis la course acceptée
@@ -69,6 +70,9 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Livraison qui vient d'aboutir : gain qui s'envole, palier du jour éventuel.
   ({String id, int earning, int deliveredToday})? _reward;
+
+  /// Course à noter après la récompense (F4) : l'expéditeur, d'un geste.
+  ({String id, String name})? _rate;
 
   void _selectTab(int tab) => setState(() => _tab = tab);
 
@@ -154,6 +158,13 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   void _closeOffer(String? message) {
     setState(() => _offer = null);
     if (message != null) _showNotice(message);
+  }
+
+  /// Note facultative : sans réseau, elle est simplement perdue.
+  Future<void> _rateSender(String orderId, int stars) async {
+    try {
+      await ref.read(riderApiProvider).rateSender(orderId, stars);
+    } catch (_) {}
   }
 
   void _showNotice(String message) {
@@ -261,6 +272,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
       setState(() {
         _collecting = null;
         _reward = (id: order.id, earning: order.riderEarning, deliveredToday: before + 1);
+        _rate = (id: order.id, name: order.sender.name ?? l.senderFallback);
       });
       ref.invalidate(homeSummaryProvider);
       if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
@@ -379,6 +391,18 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
               ),
             if (_notice != null)
               Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top + 64, child: _Notice(_notice!)),
+            if (_rate case final rate? when _reward == null)
+              Positioned(
+                left: 16,
+                right: 16,
+                top: MediaQuery.paddingOf(context).top + 76,
+                child: RateSenderCard(
+                  key: ValueKey('rate-${rate.id}'),
+                  name: rate.name,
+                  onRate: (stars) => unawaited(_rateSender(rate.id, stars)),
+                  onClose: () => setState(() => _rate = null),
+                ),
+              ),
             if (_reward case final reward?)
               Positioned.fill(
                 child: CourseReward(

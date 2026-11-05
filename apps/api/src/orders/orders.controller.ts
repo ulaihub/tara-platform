@@ -37,11 +37,14 @@ import {
   OrderSummaryDto,
   PickupCodeDto,
   PublicTrackingDto,
+  RateBody,
+  RatingDto,
   RecipientDto,
   RecipientQuery,
   RecipientResponseBody,
 } from './orders.schemas.js';
 import { OrdersService } from './orders.service.js';
+import { RatingsService } from './ratings.service.js';
 
 const IDEMPOTENCY_HEADER = ApiHeader({
   name: 'Idempotency-Key',
@@ -54,7 +57,10 @@ const IDEMPOTENCY_HEADER = ApiHeader({
 @ApiBearerAuth()
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly orders: OrdersService) {}
+  constructor(
+    private readonly orders: OrdersService,
+    private readonly ratings: RatingsService,
+  ) {}
 
   /** Nouvelle commande (C1) : le prix est recalculé côté serveur. */
   @Post()
@@ -111,6 +117,19 @@ export class OrdersController {
     @ValidBody(CancelOrderBody) body: z.output<typeof CancelOrderBody>,
   ): Promise<z.output<typeof OrderDto>> {
     return this.orders.cancel(user, id, body.reason);
+  }
+
+  /** Note du livreur après la course (F4), une fois, dans les 7 jours. */
+  @Post(':id/rating')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(RateBody)
+  @ApiZodResponse(RatingDto)
+  rate(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(RateBody) body: z.output<typeof RateBody>,
+  ): Promise<z.output<typeof RatingDto>> {
+    return this.ratings.rateRider(user, id, body);
   }
 
   /** Nouveau code d'enlèvement si l'expéditeur a perdu le précédent. */

@@ -2491,6 +2491,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Bravo, continuez comme ça.'**
   String get milestoneBody;
+
+  /// No description provided for @rateSenderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notez {name}'**
+  String rateSenderTitle(String name);
+
+  /// No description provided for @rateSenderBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expéditeur de votre dernière course'**
+  String get rateSenderBody;
+
+  /// No description provided for @rateSenderThanks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci ! Votre note aide Tara à bien choisir ses clients.'**
+  String get rateSenderThanks;
+
+  /// No description provided for @senderFallback.
+  ///
+  /// In fr, this message translates to:
+  /// **'l’expéditeur'**
+  String get senderFallback;
+
+  /// No description provided for @starsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 étoile} other{{count} étoiles}}'**
+  String starsLabel(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

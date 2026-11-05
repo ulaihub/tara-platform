@@ -141,6 +141,14 @@ class ClientApi {
   Future<void> failureDecision(String orderId, String decision) =>
       _api.post('/orders/$orderId/failure-decision', body: {'decision': decision});
 
+  /// Note du livreur après la course (F4), une fois, dans les 7 jours.
+  Future<OrderRating> rateRider(String orderId, {required int score, String? comment}) async => OrderRating.fromJson(
+    await _api.post(
+      '/orders/$orderId/rating',
+      body: {'score': score, if (comment != null && comment.isNotEmpty) 'comment': comment},
+    ) as Json,
+  );
+
   Future<void> cancelOrder(String orderId, String reason) =>
       _api.post('/orders/$orderId/cancel', body: {'reason': reason});
 

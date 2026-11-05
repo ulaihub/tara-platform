@@ -2263,6 +2263,78 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Touchez pour choisir : nouvelle tentative ou retour.'**
   String get failureBannerBody;
+
+  /// No description provided for @rateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment s’est passée la livraison ?'**
+  String get rateTitle;
+
+  /// No description provided for @rateBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notez {rider} : les livreurs les mieux notés reçoivent plus de courses.'**
+  String rateBody(String rider);
+
+  /// No description provided for @starsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 étoile} other{{count} étoiles}}'**
+  String starsLabel(int count);
+
+  /// No description provided for @starWord1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Très décevant'**
+  String get starWord1;
+
+  /// No description provided for @starWord2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décevant'**
+  String get starWord2;
+
+  /// No description provided for @starWord3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Correct'**
+  String get starWord3;
+
+  /// No description provided for @starWord4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bien'**
+  String get starWord4;
+
+  /// No description provided for @starWord5.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parfait !'**
+  String get starWord5;
+
+  /// No description provided for @rateCommentHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un mot pour l’équipe Tara (facultatif)'**
+  String get rateCommentHint;
+
+  /// No description provided for @rateSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer ma note'**
+  String get rateSend;
+
+  /// No description provided for @rateThanks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci pour votre note !'**
+  String get rateThanks;
+
+  /// No description provided for @rateThanksBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre avis reste entre vous et Tara.'**
+  String get rateThanksBody;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

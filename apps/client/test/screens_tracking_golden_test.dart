@@ -19,7 +19,7 @@ const orderId = '00000000-0000-4000-8000-000000000501';
 
 /// Commande d'Akwa à Bonapriso, à l'étape [status] ; après un échec, [decision] est le
 /// choix de l'expéditeur (null : à décider).
-TrackedOrder tracked(String status, {bool withRider = true, int cod = 12500, String? decision}) {
+TrackedOrder tracked(String status, {bool withRider = true, int cod = 12500, String? decision, int? rated}) {
   DateTime at(int h, int m) => DateTime(2026, 11, 4, h, m);
   const ridden = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED', 'DELIVERED'];
   final reached = <String, DateTime>{
@@ -78,6 +78,7 @@ TrackedOrder tracked(String status, {bool withRider = true, int cod = 12500, Str
             decisionDueAt: decision == null ? at(10, 33) : null,
           )
         : null,
+    rating: rated == null ? null : OrderRating(score: rated, comment: null, at: at(10, 40)),
   );
 }
 
@@ -171,6 +172,23 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_retour/${brightness.name}.png'));
     });
 
+    goldenTest('06 suivi livré étoiles ${brightness.name}', (tester) async {
+      await pumpVariant(tester, variant, screen(apiAt('DELIVERED'), FakeRealtime()), surface: const Size(390, 1000));
+      await settle(tester);
+      await tester.tap(find.bySemanticsLabel('5 étoiles'));
+      await settle(tester);
+      expect(find.text('Parfait !'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_etoiles/${brightness.name}.png'));
+    });
+
+    goldenTest('06 suivi livré noté ${brightness.name}', (tester) async {
+      final api = FakeClientApi()..tracked[orderId] = tracked('DELIVERED', rated: 5);
+      await pumpVariant(tester, variant, screen(api, FakeRealtime()), surface: const Size(390, 1100));
+      await settle(tester);
+      expect(find.text('Merci pour votre note !'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_note/${brightness.name}.png'));
+    });
+
     goldenTest('06 suivi livré ${brightness.name}', (tester) async {
       await pumpVariant(tester, variant, screen(apiAt('DELIVERED'), FakeRealtime()));
       await settle(tester);
@@ -221,6 +239,30 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
     expect(realtime.subscribed, isEmpty);
+  });
+
+  testWidgets('livré : noter le livreur, avec un mot pour l’équipe (F4)', (tester) async {
+    final api = apiAt('DELIVERED');
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1200));
+    await settle(tester);
+    expect(find.text('Comment s’est passée la livraison ?'), findsOneWidget);
+    expect(find.text('Envoyer ma note'), findsNothing);
+
+    await tester.ensureVisible(find.bySemanticsLabel('4 étoiles'));
+    await tester.tap(find.bySemanticsLabel('4 étoiles'));
+    await settle(tester);
+    expect(find.text('Bien'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('5 étoiles'));
+    await settle(tester);
+    expect(find.text('Parfait !'), findsOneWidget);
+    await tester.enterText(find.byType(EditableText), '  Très aimable  ');
+    await tester.ensureVisible(find.text('Envoyer ma note'));
+    await tester.tap(find.text('Envoyer ma note'));
+    await settle(tester);
+    expect(api.ratings, [(orderId, 5, 'Très aimable')]);
+    expect(sounds.played, [TaraSound.sent]);
+    expect(find.text('Merci pour votre note !'), findsOneWidget);
+    expect(find.text('Envoyer ma note'), findsNothing);
   });
 
   testWidgets('appeler le livreur, demander un nouveau code d’enlèvement', (tester) async {

@@ -774,5 +774,31 @@
         "type": "String"
       }
     }
+  },
+  "rateTitle": "Comment s’est passée la livraison ?",
+  "rateBody": "Notez {rider} : les livreurs les mieux notés reçoivent plus de courses.",
+  "starsLabel": "{count, plural, =1{1 étoile} other{{count} étoiles}}",
+  "starWord1": "Très décevant",
+  "starWord2": "Décevant",
+  "starWord3": "Correct",
+  "starWord4": "Bien",
+  "starWord5": "Parfait !",
+  "rateCommentHint": "Un mot pour l’équipe Tara (facultatif)",
+  "rateSend": "Envoyer ma note",
+  "rateThanks": "Merci pour votre note !",
+  "rateThanksBody": "Votre avis reste entre vous et Tara.",
+  "@rateBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      }
+    }
+  },
+  "@starsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

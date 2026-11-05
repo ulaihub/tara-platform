@@ -34,6 +34,7 @@ void main() {
     'CreatedOrder': Placement.singleFields,
     'CreatedBatch': Placement.batchFields,
     'Payment': Payment.fields,
+    'Rating': OrderRating.fields,
   };
   test('commande suivie et livreur conformes au contrat', () {
     expect(propertiesOf('Order'), containsAll(TrackedOrder.fields));

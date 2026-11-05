@@ -9,6 +9,7 @@ import {
   RecipientsController,
 } from './orders.controller.js';
 import { OrdersService } from './orders.service.js';
+import { RatingsService } from './ratings.service.js';
 
 @Module({
   imports: [GeoModule, PricingModule],
@@ -18,7 +19,7 @@ import { OrdersService } from './orders.service.js';
     PublicTrackingController,
     AdminOrdersController,
   ],
-  providers: [OrdersService, OrderTransitionsService],
-  exports: [OrdersService, OrderTransitionsService],
+  providers: [OrdersService, OrderTransitionsService, RatingsService],
+  exports: [OrdersService, OrderTransitionsService, RatingsService],
 })
 export class OrdersModule {}

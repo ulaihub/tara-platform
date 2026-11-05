@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/star_rating.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
@@ -61,6 +63,10 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
 
   /// Après un échec : RETRY ou RETURN, choisi avant de glisser pour confirmer.
   String? _choice;
+
+  /// Note du livreur une fois livré (F4) : étoiles et mot facultatif.
+  int _stars = 0;
+  final _comment = TextEditingController();
   StreamSubscription<RealtimeEvent>? _events;
   late final RealtimeClient _realtime;
   Timer? _refresh;
@@ -83,6 +89,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     unawaited(_events?.cancel());
     _refresh?.cancel();
     _realtime.unsubscribeOrder(widget.orderId);
+    _comment.dispose();
     super.dispose();
   }
 
@@ -185,6 +192,26 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     }
   }
 
+  Future<void> _rate() async {
+    if (_stars == 0) return;
+    setState(() => _busy = true);
+    try {
+      final given = await ref
+          .read(clientApiProvider)
+          .rateRider(widget.orderId, score: _stars, comment: _comment.text.trim());
+      if (!mounted) return;
+      TaraFeedback.play(context, TaraSound.sent);
+      setState(() {
+        _order = _order?.withRating(given);
+        _error = null;
+      });
+    } catch (error) {
+      if (mounted) setState(() => _error = errorMessage(context, error));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _cancel() async {
     final l = AppLocalizations.of(context);
     if (!_confirmCancel) {
@@ -233,7 +260,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     final height = MediaQuery.sizeOf(context).height;
     final delivered = order?.status == 'DELIVERED';
     final deciding = order != null && _deciding(order);
-    final panel = height * (delivered || deciding ? .62 : .48);
+    final panel = height * (delivered ? .66 : (deciding ? .62 : .48));
     final top = MediaQuery.paddingOf(context).top + 72;
     return PopScope(
       canPop: false,
@@ -301,6 +328,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                         rider: _rider,
                         pickupCode: _pickupCode,
                         choice: _choice,
+                        stars: _stars,
+                        comment: _comment,
                         confirmCancel: _confirmCancel,
                         busy: _busy,
                         error: _error,
@@ -308,6 +337,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                         onNewPickupCode: () => unawaited(_newPickupCode()),
                         onChoose: (choice) => setState(() => _choice = choice),
                         onDecide: () => unawaited(_decide()),
+                        onStars: (stars) => setState(() => _stars = stars),
+                        onRate: () => unawaited(_rate()),
                         onCancel: () => unawaited(_cancel()),
                         onShare: () => unawaited(_share(order)),
                         onCall: (phone) => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
@@ -339,6 +370,8 @@ class _Panel extends StatelessWidget {
     required this.rider,
     required this.pickupCode,
     required this.choice,
+    required this.stars,
+    required this.comment,
     required this.confirmCancel,
     required this.busy,
     required this.error,
@@ -346,6 +379,8 @@ class _Panel extends StatelessWidget {
     required this.onNewPickupCode,
     required this.onChoose,
     required this.onDecide,
+    required this.onStars,
+    required this.onRate,
     required this.onCancel,
     required this.onShare,
     required this.onCall,
@@ -356,6 +391,8 @@ class _Panel extends StatelessWidget {
   final MapPoint? rider;
   final String? pickupCode;
   final String? choice;
+  final int stars;
+  final TextEditingController comment;
   final bool confirmCancel;
   final bool busy;
   final String? error;
@@ -363,6 +400,8 @@ class _Panel extends StatelessWidget {
   final VoidCallback onNewPickupCode;
   final ValueChanged<String> onChoose;
   final VoidCallback onDecide;
+  final ValueChanged<int> onStars;
+  final VoidCallback onRate;
   final VoidCallback onCancel;
   final VoidCallback onShare;
   final ValueChanged<String> onCall;
@@ -438,8 +477,8 @@ class _Panel extends StatelessWidget {
         ),
       ],
       const SizedBox(height: 16),
-      _Steps(order: o),
-      const SizedBox(height: 16),
+      // Livré : le récapitulatif reprend les heures, la frise laisse la place à la note.
+      if (!delivered) ...[_Steps(order: o), const SizedBox(height: 16)],
       if (deciding) ...[
         AddressChoice(
           icon: TaraIcons.refresh,
@@ -460,12 +499,18 @@ class _Panel extends StatelessWidget {
         Text(l.failureDueBody, style: TaraText.small.copyWith(color: c.textTertiary)),
         const SizedBox(height: 12),
         _recipientRow(l, o, recipientFirst),
-      ] else if (delivered)
+      ] else if (delivered) ...[
         RepaintBoundary(
           key: recapKey,
           child: _Recap(order: o),
-        )
-      else ...[
+        ),
+        // Notation du livreur (F4) : dans les 7 jours, une seule fois.
+        if (o.rating != null ||
+            (o.rider != null && deliveredAt != null && now.difference(deliveredAt) < const Duration(days: 7))) ...[
+          const SizedBox(height: 12),
+          _RateCard(order: o, stars: stars, comment: comment, busy: busy, onStars: onStars, onSend: onRate),
+        ],
+      ] else ...[
         if (o.rider case final rider? when rider.phone != null) ...[
           _RiderCard(rider: rider, onCall: () => onCall(rider.phone!)),
           const SizedBox(height: 10),
@@ -812,5 +857,102 @@ class _Recap extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// « Comment s'est passée la livraison ? » : étoiles, mot pour l'équipe, envoi ; une fois
+/// notée, la note et un merci.
+class _RateCard extends StatelessWidget {
+  const _RateCard({
+    required this.order,
+    required this.stars,
+    required this.comment,
+    required this.busy,
+    required this.onStars,
+    required this.onSend,
+  });
+
+  final TrackedOrder order;
+  final int stars;
+  final TextEditingController comment;
+  final bool busy;
+  final ValueChanged<int> onStars;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final rating = order.rating;
+    final Widget child;
+    if (rating != null) {
+      child = Row(
+        children: [
+          StarRating(value: rating.score, onChanged: null, labelOf: l.starsLabel, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.rateThanks,
+                  style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                ),
+                Text(l.rateThanksBody, style: TaraText.small.copyWith(color: c.textSecondary)),
+              ],
+            ),
+          ),
+        ],
+      );
+    } else {
+      final word = switch (stars) {
+        1 => l.starWord1,
+        2 => l.starWord2,
+        3 => l.starWord3,
+        4 => l.starWord4,
+        _ => l.starWord5,
+      };
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.rateTitle, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
+          const SizedBox(height: 2),
+          Text(l.rateBody(order.rider?.name ?? ''), style: TaraText.small.copyWith(color: c.textSecondary)),
+          const SizedBox(height: 14),
+          Center(
+            child: StarRating(value: stars, onChanged: busy ? null : onStars, labelOf: l.starsLabel),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: stars == 0
+                ? const SizedBox(width: double.infinity)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 8),
+                      Text(
+                        word,
+                        textAlign: TextAlign.center,
+                        style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 12),
+                      TaraTextField(
+                        controller: comment,
+                        hint: l.rateCommentHint,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.done,
+                        inputFormatters: [LengthLimitingTextInputFormatter(300)],
+                      ),
+                      const SizedBox(height: 10),
+                      GlassButton(label: l.rateSend, icon: TaraIcons.send, onPressed: busy ? null : onSend),
+                    ],
+                  ),
+          ),
+        ],
+      );
+    }
+    return GlassCard(radius: 22, shadow: false, padding: const EdgeInsets.fromLTRB(16, 14, 16, 16), child: child);
   }
 }

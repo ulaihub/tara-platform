@@ -53,6 +53,15 @@ export class PrivacyService {
         consents: { orderBy: { createdAt: 'asc' } },
         addresses: true,
         locationLinks: true,
+        ratingsGiven: {
+          orderBy: { createdAt: 'asc' },
+          select: {
+            score: true,
+            comment: true,
+            createdAt: true,
+            order: { select: { reference: true } },
+          },
+        },
       },
     });
     const orders = await this.prisma.order.findMany({
@@ -150,6 +159,13 @@ export class PrivacyService {
         totalPrice: order.totalPrice,
         codAmount: order.codAmount,
       })),
+      // Notes données après ses courses (F4), avec le mot laissé à l'équipe.
+      ratingsGiven: user.ratingsGiven.map(({ score, comment, createdAt, order }) => ({
+        reference: order.reference,
+        score,
+        comment,
+        createdAt,
+      })),
       locationLinks: user.locationLinks.map(
         ({ recipientName, recipientPhone, createdAt, submittedAt }) => ({
           recipientName,
@@ -233,6 +249,11 @@ export class PrivacyService {
         data: { payoutPhone: '' },
       });
       await maskOrdersWhere(tx, Prisma.sql`sender_id = ${actor.id}::uuid`);
+      // Notes : les étoiles restent (score des livreurs), les mots libres disparaissent.
+      await tx.rating.updateMany({
+        where: { OR: [{ raterId: actor.id }, { rateeId: actor.id }] },
+        data: { comment: null },
+      });
       await tx.$executeRaw`
         UPDATE notifications SET recipient_phone = NULL
          WHERE order_id IN (SELECT id FROM orders WHERE sender_id = ${actor.id}::uuid)`;

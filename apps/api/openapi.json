@@ -2808,6 +2808,65 @@
         ]
       }
     },
+    "/v1/orders/{id}/rating": {
+      "post": {
+        "operationId": "Orders_rate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "score": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "comment": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "score"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rating"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
     "/v1/orders/{id}/pickup-code": {
       "post": {
         "operationId": "Orders_regeneratePickupCode",
@@ -3820,6 +3879,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
+    "/v1/rider/orders/{id}/rating": {
+      "post": {
+        "operationId": "RiderApp_rateSender",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "score": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "comment": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "score"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rating"
                 }
               }
             }
@@ -7781,6 +7899,8 @@
                   "RIDER_BALANCE_TOO_LOW",
                   "FAILURE_CALL_REQUIRED",
                   "FAILURE_CALLS_REQUIRED",
+                  "RATING_NOT_OPEN",
+                  "RATING_ALREADY_GIVEN",
                   "FAILURE_DECISION_NOT_EXPECTED",
                   "SAFETY_ALERT_NOT_FOUND",
                   "SAFETY_ALERT_CLOSED",
@@ -8533,6 +8653,14 @@
             "nullable": true,
             "type": "string"
           },
+          "rating": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Rating"
+              }
+            ]
+          },
           "timeline": {
             "type": "array",
             "items": {
@@ -8567,6 +8695,7 @@
           "attemptCount",
           "failure",
           "cancelReason",
+          "rating",
           "timeline",
           "createdAt"
         ],
@@ -9268,6 +9397,28 @@
         ],
         "additionalProperties": false
       },
+      "Rating": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "integer"
+          },
+          "comment": {
+            "nullable": true,
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "score",
+          "comment",
+          "at"
+        ],
+        "additionalProperties": false
+      },
       "Recipient": {
         "type": "object",
         "properties": {
@@ -9728,6 +9879,14 @@
               "method"
             ],
             "additionalProperties": false
+          },
+          "rating": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Rating"
+              }
+            ]
           }
         },
         "required": [
@@ -9757,7 +9916,8 @@
           "pickedUpAt",
           "deliveredAt",
           "completedAt",
-          "collected"
+          "collected",
+          "rating"
         ],
         "additionalProperties": false
       },

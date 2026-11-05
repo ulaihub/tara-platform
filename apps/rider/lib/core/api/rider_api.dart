@@ -159,6 +159,10 @@ class RiderApi {
         ) as Json,
       );
 
+  /// Note de l'expéditeur après la course (F4), une fois, dans les 7 jours.
+  Future<void> rateSender(String orderId, int score) =>
+      _api.post('/rider/orders/$orderId/rating', body: {'score': score});
+
   /// Positions de la course prises sans réseau, envoyées en lot.
   Future<void> uploadTrack(String orderId, List<Json> points) =>
       _api.post('/rider/orders/$orderId/track', body: {'points': points});

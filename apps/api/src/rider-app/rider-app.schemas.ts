@@ -5,6 +5,7 @@ import {
   FailureReasonEnum,
   OrderStatusEnum,
   PackageContentsEnum,
+  RatingDto,
 } from '../orders/orders.schemas.js';
 import { PackageSizeEnum } from '../pricing/pricing.schemas.js';
 
@@ -172,6 +173,8 @@ export const RiderOrderDto = z
     completedAt: z.iso.datetime().nullable(),
     /** Argent encaissé auprès du destinataire, et comment (historique, E9). */
     collected: z.object({ amount: z.int(), method: z.enum(['CASH', 'MOBILE_MONEY']) }).nullable(),
+    /** Note donnée à l'expéditeur par le livreur (F4), null tant qu'il n'a pas noté. */
+    rating: RatingDto.nullable(),
   })
   .meta({ id: 'RiderOrder' });
 
