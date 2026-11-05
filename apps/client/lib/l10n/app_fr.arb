@@ -647,5 +647,132 @@
     }
   },
   "trackOrderError": "Impossible de charger le suivi.",
-  "trackDelivery": "Suivre la livraison"
+  "trackDelivery": "Suivre la livraison",
+  "statusRetrying": "Nouvelle tentative en cours",
+  "statusReturning": "Retour en cours",
+  "failureReasonRecipientAbsent": "Destinataire absent",
+  "failureReasonRecipientUnreachable": "Destinataire injoignable",
+  "failureReasonRefused": "Colis refusé par le destinataire",
+  "failureReasonAddressNotFound": "Adresse introuvable",
+  "failureReasonPaymentRefused": "Le destinataire a refusé de payer",
+  "failureReasonOther": "Autre motif",
+  "failureReported": "{reason} · signalé par {rider} à {time}",
+  "@failureReported": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "rider": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureDue": "Avant {time}",
+  "@failureDue": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureDueBody": "Sans réponse d’ici là, le colis vous est rapporté.",
+  "failureRetryTitle": "Nouvelle tentative",
+  "failureRetryBody": "{rider} repasse chez {recipient}. Appelez d’abord pour convenir du moment.",
+  "@failureRetryBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      }
+    }
+  },
+  "failureReturnTitle": "Retour du colis",
+  "failureReturnBody": "{rider} vous rapporte le colis : {place}.",
+  "@failureReturnBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "failureChoose": "Choisissez une option",
+  "failureConfirmRetry": "Confirmer la tentative",
+  "failureConfirmReturn": "Confirmer le retour",
+  "failureConfirmRetrySemantics": "Glisser pour demander une nouvelle tentative",
+  "failureConfirmReturnSemantics": "Glisser pour demander le retour du colis",
+  "callRecipient": "Appeler {name}",
+  "@callRecipient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trackRetrying": "Nouvelle tentative",
+  "trackRetryingBody": "{rider} repart livrer {recipient}.",
+  "@trackRetryingBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      }
+    }
+  },
+  "trackReturning": "Retour du colis",
+  "trackReturningBody": "{rider} vous rapporte le colis.",
+  "@trackReturningBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      }
+    }
+  },
+  "returnCodeHint": "Quand le livreur vous rend le colis, donnez-lui le code de retour reçu par SMS : c’est la preuve que vous l’avez récupéré.",
+  "newReturnCode": "Nouveau code de retour",
+  "returnCodeShown": "Code de retour : {code}",
+  "@returnCodeShown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "trackReturnedBody": "Le colis vous a été rendu à {time}.",
+  "@trackReturnedBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "stepFailed": "Échec",
+  "stepReturned": "Retourné",
+  "riderNoteQuoted": "« {note} »",
+  "@riderNoteQuoted": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "returnToPickup": "Retour au point d’enlèvement",
+  "failureBannerTitle": "Livraison impossible · {reference}",
+  "failureBannerBody": "Touchez pour choisir : nouvelle tentative ou retour.",
+  "@failureBannerTitle": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  }
 }

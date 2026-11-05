@@ -32,19 +32,26 @@ const person = Me(
   merchant: null,
 );
 
-OrderSummary summary(String id, String status, String name, String? neighborhood, {DateTime? scheduledFor}) =>
-    OrderSummary(
-      id: '00000000-0000-4000-8000-00000000000$id',
-      reference: 'TR-4821$id',
-      status: status,
-      recipientName: name,
-      dropoffLandmark: 'Face pharmacie du Rond-point',
-      dropoffNeighborhood: neighborhood,
-      totalPrice: 1500,
-      codAmount: 12500,
-      scheduledFor: scheduledFor?.toUtc(),
-      createdAt: DateTime.utc(2026, 11, 4, 8),
-    );
+OrderSummary summary(
+  String id,
+  String status,
+  String name,
+  String? neighborhood, {
+  DateTime? scheduledFor,
+  String? failureDecision,
+}) => OrderSummary(
+  id: '00000000-0000-4000-8000-00000000000$id',
+  reference: 'TR-4821$id',
+  status: status,
+  recipientName: name,
+  dropoffLandmark: 'Face pharmacie du Rond-point',
+  dropoffNeighborhood: neighborhood,
+  totalPrice: 1500,
+  codAmount: 12500,
+  scheduledFor: scheduledFor?.toUtc(),
+  createdAt: DateTime.utc(2026, 11, 4, 8),
+  failureDecision: failureDecision,
+);
 
 FakeClientApi shopApi() => FakeClientApi()
   ..wallet0 = const Wallet(
@@ -125,4 +132,17 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/04_accueil_boutique/complet_${brightness.name}.png'));
     });
   }
+
+  testWidgets('échec : « à décider », puis la décision prise', (tester) async {
+    final api = shopApi();
+    await pumpVariant(tester, Variant.matrix.first, home(shopOwner, api), surface: const Size(390, 1180));
+    await settle(tester);
+    expect(find.text('Livraison impossible · à décider · TR-48213'), findsOneWidget);
+
+    api.active = [summary('3', 'DELIVERY_FAILED', 'Chantal Eyike', 'Bépanda', failureDecision: 'RETURN')];
+    await tester.pumpWidget(const SizedBox());
+    await pumpVariant(tester, Variant.matrix.first, home(shopOwner, api), surface: const Size(390, 1180));
+    await settle(tester);
+    expect(find.text('Retour en cours · TR-48213'), findsOneWidget);
+  });
 }

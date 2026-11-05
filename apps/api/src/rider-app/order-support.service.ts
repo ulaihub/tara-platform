@@ -98,7 +98,6 @@ export class OrderSupportService {
     await this.bus.publish(change);
   }
 
-  /** L'expéditeur choisit, après un échec : nouvelle tentative ou retour du colis. */
   /** Choix de l'expéditeur après un échec : nouvelle tentative ou retour (E6). */
   async failureDecision(
     user: AuthUser,
@@ -170,11 +169,12 @@ export class OrderSupportService {
     by: 'SENDER' | 'SUPPORT' | 'SYSTEM',
   ): Promise<boolean> {
     const { count } = await this.prisma.order.updateMany({
-      // Le retour automatique ne remplace jamais un choix déjà fait.
+      // Un choix fait est définitif pour l'expéditeur et le retour automatique (le livreur
+      // est déjà reparti) ; seul le support peut le changer.
       where: {
         id: orderId,
         status: 'DELIVERY_FAILED',
-        ...(by === 'SYSTEM' ? { failureDecision: null } : {}),
+        ...(by === 'SUPPORT' ? {} : { failureDecision: null }),
       },
       data: { failureDecision: decision },
     });
@@ -194,6 +194,8 @@ export class OrderSupportService {
       at: new Date().toISOString(),
     };
     this.realtime.toOrder(orderId, 'order.status', event);
+    // L'accueil de l'expéditeur suit aussi la décision (retour automatique, support).
+    this.realtime.toUser(order.senderId, 'order.status', event);
     const text = DECISION_TEXT[by][decision];
     if (order.rider) {
       this.realtime.toUser(order.rider.userId, 'order.status', event);

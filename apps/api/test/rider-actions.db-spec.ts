@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { type FakePushProvider, PUSH_PROVIDER } from '../src/notifications/push.provider.js';
+import { RealtimeService } from '../src/realtime/realtime.service.js';
 import { OrderSupportService } from '../src/rider-app/order-support.service.js';
 import {
   createTestApp,
@@ -334,6 +335,17 @@ describe('Actions du livreur (E2 à E9)', () => {
     });
     expect(far).not.toBeNull();
 
+    // L'expéditeur voit le motif et l'heure limite de son choix.
+    const asSender = await request(ctx.http)
+      .get(`/v1/orders/${order.id}`)
+      .set(shop.auth)
+      .expect(200);
+    expect(asSender.body.failure).toMatchObject({
+      reason: 'PAYMENT_REFUSED',
+      decision: null,
+      decisionDueAt: failed.body.failureDecisionDueAt,
+    });
+
     await request(ctx.http)
       .post(`/v1/orders/${order.id}/failure-decision`)
       .set(shop.auth)
@@ -347,6 +359,25 @@ describe('Actions du livreur (E2 à E9)', () => {
       .set(rider.auth)
       .expect(200);
     expect(seen.body).toMatchObject({ failureDecision: 'RETURN' });
+    const decided = await request(ctx.http)
+      .get(`/v1/orders/${order.id}`)
+      .set(shop.auth)
+      .expect(200);
+    expect(decided.body.failure).toMatchObject({ decision: 'RETURN', decisionDueAt: null });
+    const listed = await request(ctx.http)
+      .get('/v1/orders?scope=active')
+      .set(shop.auth)
+      .expect(200);
+    expect(listed.body.items.find((item: { id: string }) => item.id === order.id)).toMatchObject({
+      status: 'DELIVERY_FAILED',
+      failureDecision: 'RETURN',
+    });
+    // Un second choix n'est plus possible.
+    await request(ctx.http)
+      .post(`/v1/orders/${order.id}/failure-decision`)
+      .set(shop.auth)
+      .send({ decision: 'RETRY' })
+      .expect(409);
     expect(seen.body.navigation.waze).toContain(`${seen.body.pickup.latitude}`);
 
     // Le code d'enlèvement, connu du livreur, ne vaut pas pour le retour : un code neuf
@@ -402,7 +433,15 @@ describe('Actions du livreur (E2 à E9)', () => {
     await support$.sweepFailures(new Date(Date.now() + 14 * 60_000));
     const waiting = await ctx.prisma.order.findUniqueOrThrow({ where: { id: first.order.id } });
     expect(waiting.failureDecision).toBeNull();
+    const live = vi.spyOn(ctx.app.get(RealtimeService), 'toUser');
     await support$.sweepFailures(new Date(Date.now() + 16 * 60_000));
+    // L'accueil de l'expéditeur l'apprend en direct.
+    expect(live).toHaveBeenCalledWith(
+      shop.userId,
+      'order.status',
+      expect.objectContaining({ orderId: first.order.id, failureDecision: 'RETURN' }),
+    );
+    live.mockRestore();
     const back = await request(ctx.http)
       .get(`/v1/rider/orders/${first.order.id}`)
       .set(first.rider.auth)

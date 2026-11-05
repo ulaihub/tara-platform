@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_client/app/providers.dart';
 import 'package:tara_client/core/api/client_models.dart';
+import 'package:tara_client/core/location.dart';
 import 'package:tara_client/features/home/home_flow.dart';
 import 'package:tara_client/features/orders/orders_screen.dart';
 import 'package:tara_client/features/profile/profile_screen.dart';
+import 'package:tara_client/features/tracking/tracking_screen.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 
@@ -13,6 +15,7 @@ import 'helpers/fake_client_api.dart';
 import 'helpers/fake_realtime.dart';
 import 'helpers/harness.dart';
 import 'screens_home_golden_test.dart' show homeNow, shopApi, shopOwner, summary, tabs;
+import 'screens_tracking_golden_test.dart' show orderId, tracked;
 
 Widget scoped(Widget child, FakeClientApi api, {FakeRealtime? realtime}) => ProviderScope(
   overrides: [
@@ -20,6 +23,7 @@ Widget scoped(Widget child, FakeClientApi api, {FakeRealtime? realtime}) => Prov
     clientApiProvider.overrideWithValue(api),
     appVersionProvider.overrideWith((ref) async => '0.1.0 (1)'),
     realtimeProvider.overrideWithValue(realtime ?? FakeRealtime()),
+    realMapProvider.overrideWithValue(false),
   ],
   child: child,
 );
@@ -141,5 +145,60 @@ void main() {
     await tester.pump(const Duration(seconds: 6));
     await settle(tester);
     expect(find.textContaining('envoyés sur votre Mobile Money'), findsNothing);
+  });
+
+  for (final brightness in Brightness.values) {
+    goldenTest('04 accueil livraison impossible ${brightness.name}', (tester) async {
+      final realtime = FakeRealtime();
+      await pumpVariant(
+        tester,
+        Variant(brightness, ScreenSize.regular, 1),
+        scoped(
+          HomeFlow(me: shopOwner, now: () => homeNow),
+          shopApi(),
+          realtime: realtime,
+        ),
+      );
+      await settle(tester);
+      realtime.emit('order.status', {'orderId': orderId, 'reference': 'TR-48213', 'status': 'DELIVERY_FAILED'});
+      await settle(tester);
+      await expectLater(capture, matchesGoldenFile('goldens/04_accueil_echec/${brightness.name}.png'));
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
+
+  testWidgets('livraison impossible : bandeau rouge et son, le toucher ouvre le suivi', (tester) async {
+    final realtime = FakeRealtime();
+    final api = shopApi()..tracked[orderId] = tracked('DELIVERY_FAILED');
+    await pumpVariant(
+      tester,
+      Variant.matrix.first,
+      scoped(
+        HomeFlow(me: shopOwner, now: () => homeNow),
+        api,
+        realtime: realtime,
+      ),
+    );
+    await settle(tester);
+
+    realtime.emit('order.status', {'orderId': orderId, 'reference': 'TR-48301', 'status': 'DELIVERY_FAILED'});
+    await settle(tester);
+    expect(find.text('Livraison impossible · TR-48301'), findsOneWidget);
+    expect(sounds.played, [TaraSound.error]);
+
+    // Décidé ailleurs (retour automatique) : le bandeau disparaît.
+    realtime.emit('order.status', {'orderId': orderId, 'status': 'DELIVERY_FAILED', 'failureDecision': 'RETURN'});
+    await settle(tester);
+    expect(find.text('Livraison impossible · TR-48301'), findsNothing);
+
+    realtime.emit('order.status', {'orderId': orderId, 'reference': 'TR-48301', 'status': 'DELIVERY_FAILED'});
+    await settle(tester);
+    await tester.tap(find.text('Livraison impossible · TR-48301'));
+    await settle(tester);
+    expect(find.byType(TrackingScreen), findsOneWidget);
+    expect(find.text('Avant 10:33'), findsOneWidget);
+    expect(find.text('Livraison impossible · TR-48301'), findsNothing);
+    await tester.tap(find.bySemanticsLabel('Retour'));
+    await settle(tester);
   });
 }

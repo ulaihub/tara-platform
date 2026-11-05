@@ -124,6 +124,7 @@ class OrderSummary {
     required this.codAmount,
     required this.scheduledFor,
     required this.createdAt,
+    this.failureDecision,
   });
 
   factory OrderSummary.fromJson(Json json) => OrderSummary(
@@ -137,6 +138,7 @@ class OrderSummary {
     codAmount: _field<num>(json, 'codAmount').toInt(),
     scheduledFor: _date(json['scheduledFor']),
     createdAt: DateTime.parse(_field(json, 'createdAt')),
+    failureDecision: json['failureDecision'] as String?,
   );
 
   static const fields = [
@@ -149,6 +151,7 @@ class OrderSummary {
     'totalPrice',
     'codAmount',
     'scheduledFor',
+    'failureDecision',
     'createdAt',
   ];
 
@@ -167,6 +170,9 @@ class OrderSummary {
   final int codAmount;
   final DateTime? scheduledFor;
   final DateTime createdAt;
+
+  /// Après un échec : RETRY ou RETURN une fois choisi, null tant qu'il faut décider.
+  final String? failureDecision;
 }
 
 /// Portefeuille (GET /me/wallet) : solde Tara de l'expéditeur, solde de la boutique.
@@ -481,12 +487,14 @@ class TrackedOrder {
     required this.rider,
     required this.timeline,
     required this.createdAt,
+    this.failure,
   });
 
   factory TrackedOrder.fromJson(Json json) {
     final recipient = _field<Json>(json, 'recipient');
     final pricing = _field<Json>(json, 'pricing');
     final rider = json['rider'] as Json?;
+    final failure = json['failure'] as Json?;
     final scheduled = json['scheduledFor'] as String?;
     return TrackedOrder(
       id: _field(json, 'id'),
@@ -508,6 +516,7 @@ class TrackedOrder {
           (status: _field<String>(item! as Json, 'status'), at: DateTime.parse(_field(item as Json, 'at'))),
       ],
       createdAt: DateTime.parse(_field(json, 'createdAt')),
+      failure: failure == null ? null : OrderFailure.fromJson(failure),
     );
   }
 
@@ -524,6 +533,7 @@ class TrackedOrder {
     'packageSize',
     'pricing',
     'rider',
+    'failure',
     'timeline',
     'createdAt',
   ];
@@ -547,6 +557,9 @@ class TrackedOrder {
   final List<({String status, DateTime at})> timeline;
   final DateTime createdAt;
 
+  /// Livraison impossible (E6) : motif, choix et heure limite ; null hors de cet état.
+  final OrderFailure? failure;
+
   /// Heure du premier passage à [status] (null s'il n'a pas eu lieu).
   DateTime? reachedAt(String status) => timeline.where((step) => step.status == status).firstOrNull?.at;
 
@@ -567,5 +580,37 @@ class TrackedOrder {
     rider: rider,
     timeline: timeline,
     createdAt: createdAt,
+    failure: next == 'DELIVERY_FAILED' ? failure : null,
   );
+}
+
+/// Échec de livraison vu par l'expéditeur (E6) : il choisit une nouvelle tentative ou le
+/// retour du colis avant [decisionDueAt] ; sans réponse, le colis lui revient.
+@immutable
+class OrderFailure {
+  const OrderFailure({required this.reason, required this.note, required this.at, this.decision, this.decisionDueAt});
+
+  factory OrderFailure.fromJson(Json json) {
+    final due = json['decisionDueAt'] as String?;
+    return OrderFailure(
+      reason: json['reason'] as String?,
+      note: json['note'] as String?,
+      at: DateTime.parse(_field(json, 'at')),
+      decision: json['decision'] as String?,
+      decisionDueAt: due == null ? null : DateTime.parse(due),
+    );
+  }
+
+  static const fields = ['reason', 'note', 'at', 'decision', 'decisionDueAt'];
+
+  /// RECIPIENT_ABSENT, RECIPIENT_UNREACHABLE, REFUSED, ADDRESS_NOT_FOUND, PAYMENT_REFUSED, OTHER.
+  final String? reason;
+
+  /// Explication du livreur (motif « autre »).
+  final String? note;
+  final DateTime at;
+
+  /// RETRY ou RETURN ; null tant que l'expéditeur doit choisir.
+  final String? decision;
+  final DateTime? decisionDueAt;
 }

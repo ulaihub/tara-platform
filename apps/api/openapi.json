@@ -8486,6 +8486,49 @@
           "attemptCount": {
             "type": "integer"
           },
+          "failure": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "reason": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FailureReason"
+                  }
+                ]
+              },
+              "note": {
+                "nullable": true,
+                "type": "string"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "decision": {
+                "nullable": true,
+                "type": "string",
+                "enum": [
+                  "RETRY",
+                  "RETURN"
+                ]
+              },
+              "decisionDueAt": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "reason",
+              "note",
+              "at",
+              "decision",
+              "decisionDueAt"
+            ],
+            "additionalProperties": false
+          },
           "cancelReason": {
             "nullable": true,
             "type": "string"
@@ -8522,6 +8565,7 @@
           "riderId",
           "rider",
           "attemptCount",
+          "failure",
           "cancelReason",
           "timeline",
           "createdAt"
@@ -8611,6 +8655,14 @@
             "type": "string",
             "format": "date-time"
           },
+          "failureDecision": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "RETRY",
+              "RETURN"
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -8626,6 +8678,7 @@
           "totalPrice",
           "codAmount",
           "scheduledFor",
+          "failureDecision",
           "createdAt"
         ],
         "additionalProperties": false

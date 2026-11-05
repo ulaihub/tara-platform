@@ -29,7 +29,11 @@ class OrderRow extends StatelessWidget {
       'CREATED' || 'SEARCHING_RIDER' => (TaraIcons.timer, TintTone.accent, l.statusSearching),
       'ASSIGNED' => (TaraIcons.navigation, TintTone.accent, l.statusRiderComing),
       'PICKED_UP' || 'IN_DELIVERY' => (TaraIcons.package, TintTone.success, l.statusInDelivery),
-      'DELIVERY_FAILED' => (TaraIcons.alertCircle, TintTone.danger, l.statusFailed),
+      'DELIVERY_FAILED' => switch (order.failureDecision) {
+        'RETRY' => (TaraIcons.refresh, TintTone.accent, l.statusRetrying),
+        'RETURN' => (TaraIcons.returnArrow, TintTone.accent, l.statusReturning),
+        _ => (TaraIcons.alertCircle, TintTone.danger, l.statusFailed),
+      },
       'DELIVERED' => (TaraIcons.check, TintTone.success, l.statusDelivered(_day(l, order.createdAt.toLocal(), now))),
       'RETURNED' => (TaraIcons.returnArrow, TintTone.accent, l.statusReturned),
       'CANCELLED' => (TaraIcons.close, TintTone.danger, l.statusCancelled),

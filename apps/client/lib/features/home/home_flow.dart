@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
@@ -24,7 +25,8 @@ import 'home_screen.dart';
 /// Onglets de l'expéditeur (Accueil, Commandes, Profil) : le contenu défile sous la barre en
 /// verre, transition vitrée d'un onglet à l'autre. La nouvelle livraison s'ouvre en plein
 /// écran. Le temps réel garde l'accueil à jour (livraisons, ventes du jour) et annonce les
-/// reversements par un bandeau et le son de pièce.
+/// reversements par un bandeau et le son de pièce ; une livraison impossible, par un bandeau
+/// rouge qui ouvre son suivi (l'expéditeur n'a que quelques minutes pour choisir la suite).
 class HomeFlow extends ConsumerStatefulWidget {
   const HomeFlow({super.key, required this.me, this.now});
 
@@ -45,6 +47,10 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   int? _payout;
   Timer? _payoutTimer;
 
+  /// Livraison impossible à décider : (commande, référence), jusqu'au choix ou au toucher.
+  (String, String)? _failed;
+  Timer? _failedTimer;
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +62,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   void dispose() {
     unawaited(_events?.cancel());
     _payoutTimer?.cancel();
+    _failedTimer?.cancel();
     super.dispose();
   }
 
@@ -67,6 +74,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
           ..invalidate(activeOrdersProvider)
           ..invalidate(ordersProvider)
           ..invalidate(walletProvider);
+        _onStatus(event.payload);
       case 'payout.status' when event.payload['status'] == 'SUCCEEDED':
         ref.invalidate(walletProvider);
         final amount = (event.payload['amount'] as num?)?.toInt();
@@ -78,6 +86,29 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
           if (mounted) setState(() => _payout = null);
         });
     }
+  }
+
+  /// Échec à décider : son d'alerte et bandeau, sauf si un autre écran (le suivi) est
+  /// devant. Le choix fait, ici ou ailleurs, retire le bandeau.
+  void _onStatus(Json payload) {
+    final orderId = payload['orderId'];
+    if (orderId is! String || !mounted) return;
+    final failed = payload['status'] == 'DELIVERY_FAILED' && payload['failureDecision'] == null;
+    if (!failed) {
+      if (_failed?.$1 == orderId) _hideFailed();
+      return;
+    }
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+    TaraFeedback.play(context, TaraSound.error);
+    _failedTimer?.cancel();
+    setState(() => _failed = (orderId, payload['reference'] as String? ?? ''));
+    // Le bandeau s'efface ; la ligne « à décider » reste sur l'accueil.
+    _failedTimer = Timer(const Duration(seconds: 30), _hideFailed);
+  }
+
+  void _hideFailed() {
+    _failedTimer?.cancel();
+    if (mounted && _failed != null) setState(() => _failed = null);
   }
 
   /// Nouvelle livraison en plein écran, au-dessus des onglets ; « Suivre la livraison »
@@ -108,6 +139,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final payout = _payout;
+    final failed = _failed;
     return Stack(
       children: [
         Positioned.fill(
@@ -146,7 +178,18 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                 child: child,
               ),
             ),
-            child: payout == null ? const SizedBox.shrink() : _PayoutBanner(key: ValueKey(payout), amount: payout),
+            child: failed != null
+                ? _FailedBanner(
+                    key: ValueKey(failed),
+                    reference: failed.$2,
+                    onTap: () {
+                      _hideFailed();
+                      _openOrder(failed.$1);
+                    },
+                  )
+                : payout == null
+                ? const SizedBox.shrink()
+                : _PayoutBanner(key: ValueKey(payout), amount: payout),
           ),
         ),
       ],
@@ -182,6 +225,56 @@ class _PayoutBanner extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// « Livraison impossible · TR-48213 » : bandeau rouge qui ouvre le suivi pour choisir la
+/// suite (nouvelle tentative ou retour).
+class _FailedBanner extends StatelessWidget {
+  const _FailedBanner({super.key, required this.reference, required this.onTap});
+
+  final String reference;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return Semantics(
+      liveRegion: true,
+      button: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: GestureDetector(
+          onTap: onTap,
+          child: GlassCard(
+            radius: 20,
+            padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+            child: Row(
+              children: [
+                const IconTile(icon: TaraIcons.alertCircle, size: 40, tone: TintTone.danger),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.failureBannerTitle(reference),
+                        style: TaraText.text.copyWith(color: c.dangerText, fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(l.failureBannerBody, style: TaraText.small.copyWith(color: c.textSecondary)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
+              ],
+            ),
           ),
         ),
       ),

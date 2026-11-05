@@ -1084,4 +1084,132 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackDelivery => 'Track the delivery';
+
+  @override
+  String get statusRetrying => 'Trying again';
+
+  @override
+  String get statusReturning => 'Coming back to you';
+
+  @override
+  String get failureReasonRecipientAbsent => 'Recipient not there';
+
+  @override
+  String get failureReasonRecipientUnreachable => 'Recipient unreachable';
+
+  @override
+  String get failureReasonRefused => 'Parcel refused by the recipient';
+
+  @override
+  String get failureReasonAddressNotFound => 'Address not found';
+
+  @override
+  String get failureReasonPaymentRefused => 'The recipient refused to pay';
+
+  @override
+  String get failureReasonOther => 'Other reason';
+
+  @override
+  String failureReported(String reason, String rider, String time) {
+    return '$reason · reported by $rider at $time';
+  }
+
+  @override
+  String failureDue(String time) {
+    return 'Before $time';
+  }
+
+  @override
+  String get failureDueBody => 'No answer by then: the parcel is brought back to you.';
+
+  @override
+  String get failureRetryTitle => 'Try again';
+
+  @override
+  String failureRetryBody(String rider, String recipient) {
+    return '$rider goes back to $recipient. Call first to agree on a time.';
+  }
+
+  @override
+  String get failureReturnTitle => 'Return the parcel';
+
+  @override
+  String failureReturnBody(String rider, String place) {
+    return '$rider brings the parcel back to you: $place.';
+  }
+
+  @override
+  String get failureChoose => 'Choose an option';
+
+  @override
+  String get failureConfirmRetry => 'Confirm retry';
+
+  @override
+  String get failureConfirmReturn => 'Confirm return';
+
+  @override
+  String get failureConfirmRetrySemantics => 'Swipe to ask for another attempt';
+
+  @override
+  String get failureConfirmReturnSemantics => 'Swipe to have the parcel returned';
+
+  @override
+  String callRecipient(String name) {
+    return 'Call $name';
+  }
+
+  @override
+  String get trackRetrying => 'Trying again';
+
+  @override
+  String trackRetryingBody(String rider, String recipient) {
+    return '$rider is heading back to $recipient.';
+  }
+
+  @override
+  String get trackReturning => 'Parcel coming back';
+
+  @override
+  String trackReturningBody(String rider) {
+    return '$rider is bringing the parcel back to you.';
+  }
+
+  @override
+  String get returnCodeHint =>
+      'When the rider hands the parcel back, give them the return code you got by SMS: it proves you received it.';
+
+  @override
+  String get newReturnCode => 'New return code';
+
+  @override
+  String returnCodeShown(String code) {
+    return 'Return code: $code';
+  }
+
+  @override
+  String trackReturnedBody(String time) {
+    return 'The parcel was handed back to you at $time.';
+  }
+
+  @override
+  String get stepFailed => 'Failed';
+
+  @override
+  String get stepReturned => 'Returned';
+
+  @override
+  String riderNoteQuoted(String note) {
+    return '“$note”';
+  }
+
+  @override
+  String get returnToPickup => 'Back to the pickup point';
+
+  @override
+  String failureBannerTitle(String reference) {
+    return 'Delivery failed · $reference';
+  }
+
+  @override
+  String get failureBannerBody => 'Tap to choose: try again or return.';
 }

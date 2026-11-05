@@ -177,6 +177,7 @@ export class OrdersService {
           }
         : null,
       attemptCount: order.attemptCount,
+      failure: this.failureOf(order),
       cancelReason: order.cancelReason,
       timeline: order.events.map((event: OrderEvent) => ({
         status: event.toStatus,
@@ -186,6 +187,23 @@ export class OrdersService {
         note: event.note,
       })),
       createdAt: order.createdAt.toISOString(),
+    };
+  }
+
+  /** Dernier échec de livraison, tant que la course n'est pas repartie (E6). */
+  private failureOf(order: OrderFull): z.output<typeof OrderDto>['failure'] {
+    if (order.status !== 'DELIVERY_FAILED' || !order.failedAt) return null;
+    const event = order.events.findLast((e: OrderEvent) => e.toStatus === 'DELIVERY_FAILED');
+    return {
+      reason: order.failureReason,
+      note: event?.note ?? null,
+      at: order.failedAt.toISOString(),
+      decision: order.failureDecision,
+      decisionDueAt: order.failureDecision
+        ? null
+        : new Date(
+            order.failedAt.getTime() + this.env.FAILURE_DECISION_TIMEOUT_MINUTES * 60_000,
+          ).toISOString(),
     };
   }
 
@@ -249,6 +267,7 @@ export class OrdersService {
         totalPrice: order.totalPrice,
         codAmount: order.codAmount,
         scheduledFor: order.scheduledFor?.toISOString() ?? null,
+        failureDecision: order.status === 'DELIVERY_FAILED' ? order.failureDecision : null,
         createdAt: order.createdAt.toISOString(),
       })),
       nextCursor: page.nextCursor,

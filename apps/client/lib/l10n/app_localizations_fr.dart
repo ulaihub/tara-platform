@@ -1089,4 +1089,132 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get trackDelivery => 'Suivre la livraison';
+
+  @override
+  String get statusRetrying => 'Nouvelle tentative en cours';
+
+  @override
+  String get statusReturning => 'Retour en cours';
+
+  @override
+  String get failureReasonRecipientAbsent => 'Destinataire absent';
+
+  @override
+  String get failureReasonRecipientUnreachable => 'Destinataire injoignable';
+
+  @override
+  String get failureReasonRefused => 'Colis refusé par le destinataire';
+
+  @override
+  String get failureReasonAddressNotFound => 'Adresse introuvable';
+
+  @override
+  String get failureReasonPaymentRefused => 'Le destinataire a refusé de payer';
+
+  @override
+  String get failureReasonOther => 'Autre motif';
+
+  @override
+  String failureReported(String reason, String rider, String time) {
+    return '$reason · signalé par $rider à $time';
+  }
+
+  @override
+  String failureDue(String time) {
+    return 'Avant $time';
+  }
+
+  @override
+  String get failureDueBody => 'Sans réponse d’ici là, le colis vous est rapporté.';
+
+  @override
+  String get failureRetryTitle => 'Nouvelle tentative';
+
+  @override
+  String failureRetryBody(String rider, String recipient) {
+    return '$rider repasse chez $recipient. Appelez d’abord pour convenir du moment.';
+  }
+
+  @override
+  String get failureReturnTitle => 'Retour du colis';
+
+  @override
+  String failureReturnBody(String rider, String place) {
+    return '$rider vous rapporte le colis : $place.';
+  }
+
+  @override
+  String get failureChoose => 'Choisissez une option';
+
+  @override
+  String get failureConfirmRetry => 'Confirmer la tentative';
+
+  @override
+  String get failureConfirmReturn => 'Confirmer le retour';
+
+  @override
+  String get failureConfirmRetrySemantics => 'Glisser pour demander une nouvelle tentative';
+
+  @override
+  String get failureConfirmReturnSemantics => 'Glisser pour demander le retour du colis';
+
+  @override
+  String callRecipient(String name) {
+    return 'Appeler $name';
+  }
+
+  @override
+  String get trackRetrying => 'Nouvelle tentative';
+
+  @override
+  String trackRetryingBody(String rider, String recipient) {
+    return '$rider repart livrer $recipient.';
+  }
+
+  @override
+  String get trackReturning => 'Retour du colis';
+
+  @override
+  String trackReturningBody(String rider) {
+    return '$rider vous rapporte le colis.';
+  }
+
+  @override
+  String get returnCodeHint =>
+      'Quand le livreur vous rend le colis, donnez-lui le code de retour reçu par SMS : c’est la preuve que vous l’avez récupéré.';
+
+  @override
+  String get newReturnCode => 'Nouveau code de retour';
+
+  @override
+  String returnCodeShown(String code) {
+    return 'Code de retour : $code';
+  }
+
+  @override
+  String trackReturnedBody(String time) {
+    return 'Le colis vous a été rendu à $time.';
+  }
+
+  @override
+  String get stepFailed => 'Échec';
+
+  @override
+  String get stepReturned => 'Retourné';
+
+  @override
+  String riderNoteQuoted(String note) {
+    return '« $note »';
+  }
+
+  @override
+  String get returnToPickup => 'Retour au point d’enlèvement';
+
+  @override
+  String failureBannerTitle(String reference) {
+    return 'Livraison impossible · $reference';
+  }
+
+  @override
+  String get failureBannerBody => 'Touchez pour choisir : nouvelle tentative ou retour.';
 }

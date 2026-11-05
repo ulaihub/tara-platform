@@ -211,6 +211,18 @@ class FakeClientApi extends ClientApi {
   @override
   Future<String> newPickupCode(String orderId) async => '5190';
 
+  /// Choix après un échec : (commande, RETRY ou RETURN).
+  final decisions = <(String, String)>[];
+
+  /// Erreur renvoyée au choix (déjà décidé ailleurs…), null sinon.
+  Object? decisionError;
+
+  @override
+  Future<void> failureDecision(String orderId, String decision) async {
+    if (decisionError case final error?) throw error;
+    decisions.add((orderId, decision));
+  }
+
   @override
   Future<Merchant> becomeMerchant({
     required String shopName,

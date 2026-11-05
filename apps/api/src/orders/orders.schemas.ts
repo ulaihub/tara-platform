@@ -151,6 +151,17 @@ export const OrderDto = z
       })
       .nullable(),
     attemptCount: z.int(),
+    /** Après un échec (E6) : motif, choix de l'expéditeur et heure du retour automatique. */
+    failure: z
+      .object({
+        reason: FailureReasonEnum.nullable(),
+        note: z.string().nullable(),
+        at: z.iso.datetime(),
+        decision: z.enum(['RETRY', 'RETURN']).nullable(),
+        /** Sans choix d'ici là, le colis repart chez l'expéditeur (null une fois choisi). */
+        decisionDueAt: z.iso.datetime().nullable(),
+      })
+      .nullable(),
     cancelReason: z.string().nullable(),
     timeline: z.array(OrderEventDto),
     createdAt: z.iso.datetime(),
@@ -188,6 +199,8 @@ export const OrderSummaryDto = z
     totalPrice: z.int(),
     codAmount: z.int(),
     scheduledFor: z.iso.datetime().nullable(),
+    /** Après un échec : choix fait (null tant que l'expéditeur doit décider). */
+    failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
     createdAt: z.iso.datetime(),
   })
   .meta({ id: 'OrderSummary' });

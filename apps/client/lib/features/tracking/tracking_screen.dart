@@ -11,6 +11,7 @@ import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/confetti.dart';
@@ -25,6 +26,7 @@ import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../home/home_screen.dart';
 import '../order/address_editor.dart' show SheetPanel;
+import '../order/pickup_step.dart' show AddressChoice;
 import 'tracking_map.dart';
 
 /// Vitesse moyenne d'une moto dans Douala, pour une estimation prudente de l'arrivée.
@@ -56,6 +58,9 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   String? _pickupCode;
   bool _confirmCancel = false;
   bool _busy = false;
+
+  /// Après un échec : RETRY ou RETURN, choisi avant de glisser pour confirmer.
+  String? _choice;
   StreamSubscription<RealtimeEvent>? _events;
   late final RealtimeClient _realtime;
   Timer? _refresh;
@@ -158,6 +163,28 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     }
   }
 
+  /// Choix de l'expéditeur après un échec (E6). Déjà décidé ailleurs (retour automatique,
+  /// support) : l'écran relu montre la décision prise.
+  Future<void> _decide() async {
+    final choice = _choice;
+    if (choice == null) return;
+    setState(() => _busy = true);
+    try {
+      await ref.read(clientApiProvider).failureDecision(widget.orderId, choice);
+      if (!mounted) return;
+      TaraFeedback.play(context, TaraSound.sent);
+      ref.invalidate(activeOrdersProvider);
+      await _load();
+    } catch (error) {
+      if (!mounted) return;
+      final message = errorMessage(context, error);
+      await _load();
+      if (mounted) setState(() => _error = message);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _cancel() async {
     final l = AppLocalizations.of(context);
     if (!_confirmCancel) {
@@ -205,7 +232,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     final order = _order;
     final height = MediaQuery.sizeOf(context).height;
     final delivered = order?.status == 'DELIVERED';
-    final panel = height * (delivered ? .62 : .48);
+    final deciding = order != null && _deciding(order);
+    final panel = height * (delivered || deciding ? .62 : .48);
     final top = MediaQuery.paddingOf(context).top + 72;
     return PopScope(
       canPop: false,
@@ -224,7 +252,9 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                   rider: _riderShown(order),
                   heading: _heading,
                   searching: order.status == 'SEARCHING_RIDER' && !_scheduledLater(order),
-                  toDropoff: const ['PICKED_UP', 'IN_DELIVERY', 'DELIVERED'].contains(order.status),
+                  toDropoff:
+                      const ['PICKED_UP', 'IN_DELIVERY', 'DELIVERED'].contains(order.status) ||
+                      (order.status == 'DELIVERY_FAILED' && order.failure?.decision != 'RETURN'),
                   framePadding: EdgeInsets.only(top: top, bottom: panel - 20),
                 ),
         ),
@@ -270,11 +300,14 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                         now: _now,
                         rider: _rider,
                         pickupCode: _pickupCode,
+                        choice: _choice,
                         confirmCancel: _confirmCancel,
                         busy: _busy,
                         error: _error,
                         recapKey: _recap,
                         onNewPickupCode: () => unawaited(_newPickupCode()),
+                        onChoose: (choice) => setState(() => _choice = choice),
+                        onDecide: () => unawaited(_decide()),
                         onCancel: () => unawaited(_cancel()),
                         onShare: () => unawaited(_share(order)),
                         onCall: (phone) => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
@@ -293,6 +326,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       const ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED'].contains(order.status) ? _rider : null;
 
   bool _scheduledLater(TrackedOrder order) => order.scheduledFor?.isAfter(_now) ?? false;
+
+  static bool _deciding(TrackedOrder order) => order.status == 'DELIVERY_FAILED' && order.failure?.decision == null;
 }
 
 /// Panneau du bas : étape en cours, progression, livreur, destinataire, actions ; une fois
@@ -303,11 +338,14 @@ class _Panel extends StatelessWidget {
     required this.now,
     required this.rider,
     required this.pickupCode,
+    required this.choice,
     required this.confirmCancel,
     required this.busy,
     required this.error,
     required this.recapKey,
     required this.onNewPickupCode,
+    required this.onChoose,
+    required this.onDecide,
     required this.onCancel,
     required this.onShare,
     required this.onCall,
@@ -317,11 +355,14 @@ class _Panel extends StatelessWidget {
   final DateTime now;
   final MapPoint? rider;
   final String? pickupCode;
+  final String? choice;
   final bool confirmCancel;
   final bool busy;
   final String? error;
   final GlobalKey recapKey;
   final VoidCallback onNewPickupCode;
+  final ValueChanged<String> onChoose;
+  final VoidCallback onDecide;
   final VoidCallback onCancel;
   final VoidCallback onShare;
   final ValueChanged<String> onCall;
@@ -336,6 +377,9 @@ class _Panel extends StatelessWidget {
     final pickedUpAt = o.reachedAt('PICKED_UP');
     final deliveredAt = o.reachedAt('DELIVERED');
     final scheduled = o.scheduledFor != null && o.scheduledFor!.isAfter(now);
+    final failure = o.status == 'DELIVERY_FAILED' ? o.failure : null;
+    final deciding = o.status == 'DELIVERY_FAILED' && failure?.decision == null;
+    final returning = failure?.decision == 'RETURN';
     final (title, body) = switch (o.status) {
       'CREATED' => (l.trackAwaitingPayment, l.trackAwaitingPaymentBody),
       _ when scheduled && const ['CREATED', 'SEARCHING_RIDER'].contains(o.status) => (
@@ -346,9 +390,18 @@ class _Panel extends StatelessWidget {
       'ASSIGNED' => (l.trackAssigned(riderName), l.trackAssignedBody),
       'PICKED_UP' ||
       'IN_DELIVERY' => (l.trackOnTheWay(recipientFirst), l.trackOnTheWayBody(formatClock(pickedUpAt ?? now))),
+      'DELIVERY_FAILED' when failure?.decision == 'RETRY' => (
+        l.trackRetrying,
+        l.trackRetryingBody(riderName, recipientFirst),
+      ),
+      'DELIVERY_FAILED' when returning => (l.trackReturning, l.trackReturningBody(riderName)),
+      'DELIVERY_FAILED' when failure != null => (
+        l.trackFailed,
+        l.failureReported(_reason(l, failure.reason), riderName, formatClock(failure.at)),
+      ),
       'DELIVERY_FAILED' => (l.trackFailed, l.trackFailedBody),
       'DELIVERED' => (l.trackDelivered, l.trackDeliveredBody(recipientFirst, formatClock(deliveredAt ?? now))),
-      'RETURNED' => (l.trackReturned, ''),
+      'RETURNED' => (l.trackReturned, l.trackReturnedBody(formatClock(o.reachedAt('RETURNED') ?? now))),
       _ => (l.trackCancelled, ''),
     };
     final eta = _eta(o);
@@ -364,17 +417,50 @@ class _Panel extends StatelessWidget {
               child: Text(title, style: TaraText.titlePanel.copyWith(color: c.textPrimary)),
             ),
           ),
-          if (eta != null) ...[const SizedBox(width: 10), InfoPill(label: l.trackEta(eta), icon: TaraIcons.clock)],
+          if (deciding && failure?.decisionDueAt != null) ...[
+            const SizedBox(width: 10),
+            InfoPill(label: l.failureDue(formatClock(failure!.decisionDueAt!)), icon: TaraIcons.clock),
+          ] else if (eta != null) ...[
+            const SizedBox(width: 10),
+            InfoPill(label: l.trackEta(eta), icon: TaraIcons.clock),
+          ],
         ],
       ),
       if (body.isNotEmpty) ...[
         const SizedBox(height: 4),
         Text(body, style: TaraText.label.copyWith(color: c.textSecondary)),
       ],
+      if (deciding && (failure?.note?.isNotEmpty ?? false)) ...[
+        const SizedBox(height: 4),
+        Text(
+          l.riderNoteQuoted(failure!.note!),
+          style: TaraText.label.copyWith(color: c.textPrimary, fontStyle: FontStyle.italic),
+        ),
+      ],
       const SizedBox(height: 16),
       _Steps(order: o),
       const SizedBox(height: 16),
-      if (delivered)
+      if (deciding) ...[
+        AddressChoice(
+          icon: TaraIcons.refresh,
+          title: l.failureRetryTitle,
+          subtitle: l.failureRetryBody(riderName, recipientFirst),
+          selected: choice == 'RETRY',
+          onTap: () => onChoose('RETRY'),
+        ),
+        const SizedBox(height: 10),
+        AddressChoice(
+          icon: TaraIcons.returnArrow,
+          title: l.failureReturnTitle,
+          subtitle: l.failureReturnBody(riderName, o.pickup.summary),
+          selected: choice == 'RETURN',
+          onTap: () => onChoose('RETURN'),
+        ),
+        const SizedBox(height: 8),
+        Text(l.failureDueBody, style: TaraText.small.copyWith(color: c.textTertiary)),
+        const SizedBox(height: 12),
+        _recipientRow(l, o, recipientFirst),
+      ] else if (delivered)
         RepaintBoundary(
           key: recapKey,
           child: _Recap(order: o),
@@ -384,21 +470,29 @@ class _Panel extends StatelessWidget {
           _RiderCard(rider: rider, onCall: () => onCall(rider.phone!)),
           const SizedBox(height: 10),
         ],
-        ListRow(
-          leading: const IconTile(icon: TaraIcons.mapPin, size: 40),
-          title: l.forRecipient(o.recipientName),
-          subtitle: o.dropoff.summary,
-        ),
+        _recipientRow(l, o, recipientFirst),
+        if (returning) ...[
+          const SizedBox(height: 8),
+          TintBox(
+            tone: TintTone.accent,
+            child: Text(l.returnCodeHint, style: TaraText.label.copyWith(color: c.textPrimary)),
+          ),
+        ],
         if (pickupCode != null) ...[
           const SizedBox(height: 8),
           TintBox(
             tone: TintTone.accent,
             child: Text(
-              l.pickupCodeShown(pickupCode!.split('').join(' ')),
+              (returning ? l.returnCodeShown : l.pickupCodeShown)(pickupCode!.split('').join(' ')),
               style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w800),
             ),
           ),
         ],
+        if (returning && pickupCode == null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TaraLink(label: l.newReturnCode, onPressed: busy ? null : onNewPickupCode),
+          ),
         if (const ['SEARCHING_RIDER', 'ASSIGNED'].contains(o.status) && pickupCode == null)
           Align(
             alignment: Alignment.centerLeft,
@@ -414,6 +508,29 @@ class _Panel extends StatelessWidget {
       ],
       if (error != null) ...[const SizedBox(height: 8), ErrorLine(error!)],
     ];
+    // Échec : on choisit la suite, puis on glisse pour confirmer.
+    if (deciding) {
+      return ScrollWithFooter(
+        horizontal: 20,
+        top: 4,
+        content: content,
+        footer: SwipeButton(
+          label: switch (choice) {
+            'RETRY' => l.failureConfirmRetry,
+            'RETURN' => l.failureConfirmReturn,
+            _ => l.failureChoose,
+          },
+          semanticLabel: switch (choice) {
+            'RETRY' => l.failureConfirmRetrySemantics,
+            'RETURN' => l.failureConfirmReturnSemantics,
+            _ => null,
+          },
+          icon: choice == 'RETURN' ? TaraIcons.returnArrow : TaraIcons.refresh,
+          loading: busy,
+          onConfirmed: choice == null ? null : onDecide,
+        ),
+      );
+    }
     // Un bouton seulement une fois livré (« Partager ») : sinon, pas de socle vide.
     if (delivered) {
       return ScrollWithFooter(
@@ -429,6 +546,45 @@ class _Panel extends StatelessWidget {
     );
   }
 
+  /// Destinataire : adresse, et son numéro à appeler quand la livraison bute (bouton à
+  /// part : la ligne fusionne sa sémantique).
+  Widget _recipientRow(AppLocalizations l, TrackedOrder o, String first) {
+    // Retour décidé : c'est l'adresse d'enlèvement qui compte désormais.
+    if (o.status == 'DELIVERY_FAILED' && o.failure?.decision == 'RETURN') {
+      return ListRow(
+        leading: const IconTile(icon: TaraIcons.returnArrow, size: 40),
+        title: l.returnToPickup,
+        subtitle: o.pickup.summary,
+      );
+    }
+    final row = ListRow(
+      leading: const IconTile(icon: TaraIcons.mapPin, size: 40),
+      title: l.forRecipient(o.recipientName),
+      subtitle: o.dropoff.summary,
+    );
+    if (o.status != 'DELIVERY_FAILED') return row;
+    return Row(
+      children: [
+        Expanded(child: row),
+        const SizedBox(width: 10),
+        GlassIconButton(
+          icon: TaraIcons.phone,
+          label: l.callRecipient(first),
+          onPressed: () => onCall(o.recipientPhone),
+        ),
+      ],
+    );
+  }
+
+  static String _reason(AppLocalizations l, String? reason) => switch (reason) {
+    'RECIPIENT_ABSENT' => l.failureReasonRecipientAbsent,
+    'RECIPIENT_UNREACHABLE' => l.failureReasonRecipientUnreachable,
+    'REFUSED' => l.failureReasonRefused,
+    'ADDRESS_NOT_FOUND' => l.failureReasonAddressNotFound,
+    'PAYMENT_REFUSED' => l.failureReasonPaymentRefused,
+    _ => l.failureReasonOther,
+  };
+
   /// Arrivée estimée (prudente) du livreur à l'étape visée, en minutes.
   int? _eta(TrackedOrder o) {
     final position = rider;
@@ -436,6 +592,11 @@ class _Panel extends StatelessWidget {
     final target = switch (o.status) {
       'ASSIGNED' => o.pickup,
       'PICKED_UP' || 'IN_DELIVERY' => o.dropoff,
+      'DELIVERY_FAILED' => switch (o.failure?.decision) {
+        'RETURN' => o.pickup,
+        'RETRY' => o.dropoff,
+        _ => null,
+      },
       _ => null,
     };
     if (target == null) return null;
@@ -465,11 +626,18 @@ class _Steps extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
+    // Échec ou retour : la dernière étape le dit, en rouge tant que rien n'est décidé.
+    final failed = order.status == 'DELIVERY_FAILED';
+    final last = switch (order.status) {
+      'DELIVERY_FAILED' => (l.stepFailed, order.failure?.at ?? order.timeline.lastOrNull?.at),
+      'RETURNED' => (l.stepReturned, order.reachedAt('RETURNED')),
+      _ => (l.stepDelivered, order.reachedAt('DELIVERED')),
+    };
     final steps = [
       (l.stepOrdered, order.createdAt),
       (l.stepRiderFound, order.reachedAt('ASSIGNED')),
       (l.stepPickedUp, order.reachedAt('PICKED_UP')),
-      (l.stepDelivered, order.reachedAt('DELIVERED')),
+      last,
     ];
     final done = steps.lastIndexWhere((step) => step.$2 != null);
     return Row(
@@ -491,8 +659,8 @@ class _Steps extends StatelessWidget {
                       height: 18,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: i <= done ? TaraBrand.gradient : null,
-                        color: i <= done ? null : c.track,
+                        gradient: i <= done && !(failed && i == 3) ? TaraBrand.gradient : null,
+                        color: failed && i == 3 ? c.dangerText : (i <= done ? null : c.track),
                         border: i == done + 1 ? Border.all(color: TaraBrand.orange, width: 2) : null,
                       ),
                     ),
@@ -509,7 +677,7 @@ class _Steps extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TaraText.small.copyWith(
-                    color: i <= done ? c.textPrimary : c.textTertiary,
+                    color: failed && i == 3 ? c.dangerText : (i <= done ? c.textPrimary : c.textTertiary),
                     fontWeight: FontWeight.w700,
                   ),
                 ),

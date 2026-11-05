@@ -137,6 +137,10 @@ class ClientApi {
   Future<String> newPickupCode(String orderId) async =>
       (await _api.post('/orders/$orderId/pickup-code') as Json)['pickupCode']! as String;
 
+  /// Après un échec de livraison (E6) : `RETRY` (nouvelle tentative) ou `RETURN` (retour).
+  Future<void> failureDecision(String orderId, String decision) =>
+      _api.post('/orders/$orderId/failure-decision', body: {'decision': decision});
+
   Future<void> cancelOrder(String orderId, String reason) =>
       _api.post('/orders/$orderId/cancel', body: {'reason': reason});
 

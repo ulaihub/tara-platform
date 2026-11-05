@@ -38,6 +38,15 @@ void main() {
   test('commande suivie et livreur conformes au contrat', () {
     expect(propertiesOf('Order'), containsAll(TrackedOrder.fields));
     expect(jsonEncode(schemas['Order']), allOf(contains('"vehicleType"'), contains('"plateNumber"')));
+    final failure = Map<String, Object?>.from(((schemas['Order']! as Map)['properties']! as Map)['failure']! as Map);
+    final variants = [
+      failure,
+      ...((failure['anyOf'] ?? failure['oneOf'] ?? <Object?>[]) as List).cast<Map<String, Object?>>(),
+    ];
+    final properties = {
+      for (final v in variants) ...((v['properties'] ?? <String, Object?>{}) as Map).keys.cast<String>(),
+    };
+    expect(properties, containsAll(OrderFailure.fields));
   });
 
   test('portefeuille : ventes du jour de la boutique', () {
