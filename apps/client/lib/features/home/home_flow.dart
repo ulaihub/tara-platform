@@ -16,9 +16,12 @@ import 'home_screen.dart';
 /// verre, transition vitrée d'un onglet à l'autre. La nouvelle livraison s'ouvre en plein
 /// écran ; le lien de localisation et le suivi se branchent ici au fil de la phase 5.
 class HomeFlow extends StatefulWidget {
-  const HomeFlow({super.key, required this.me});
+  const HomeFlow({super.key, required this.me, this.now});
 
   final Me me;
+
+  /// Horloge des onglets (tests).
+  final DateTime Function()? now;
 
   @override
   State<HomeFlow> createState() => _HomeFlowState();
@@ -46,7 +49,7 @@ class _HomeFlowState extends State<HomeFlow> {
       current: _tab,
       onSelected: (tab) => setState(() => _tab = tab),
       child: switch (_tab) {
-        1 => OrdersScreen(onOpenOrder: (_) {}),
+        1 => OrdersScreen(onOpenOrder: (_) {}, now: widget.now),
         2 => ProfileScreen(me: widget.me),
         _ => HomeScreen(
           me: widget.me,

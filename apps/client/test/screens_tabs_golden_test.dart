@@ -71,7 +71,7 @@ void main() {
       await pumpVariant(
         tester,
         Variant(brightness, ScreenSize.regular, 1),
-        scoped(const HomeFlow(me: shopOwner), shopApi()),
+        scoped(HomeFlow(me: shopOwner, now: () => homeNow), shopApi()),
       );
       await settle(tester);
       await tester.tap(find.text('Commandes'));
