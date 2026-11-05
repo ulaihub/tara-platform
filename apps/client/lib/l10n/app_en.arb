@@ -304,5 +304,10 @@
   "dateAt": "{date} at {time}",
   "scheduledSummary": "Pickup planned {when}.",
   "nightSurcharge": "Between 8 pm and 6 am, a night surcharge applies.",
-  "slotRequired": "Choose a pickup time."
+  "slotRequired": "Choose a pickup time.",
+  "salesToday": "Collected today",
+  "salesDeliveries": "{count, plural, =0{No delivery} =1{1 delivery} other{{count} deliveries}}",
+  "toReceiveDaily": "{amount} to receive tonight",
+  "toReceiveOnDemand": "{amount} to receive",
+  "payoutSent": "{amount} sent to your Mobile Money"
 }

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sons des canaux de notification, lus par leur adresse : à garder à la réduction. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@raw/tara_offer,@raw/tara_received,@raw/tara_cash" />

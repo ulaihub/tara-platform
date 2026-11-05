@@ -7,7 +7,7 @@ import '../api/models.dart';
 import '../session/session_store.dart';
 
 /// Événement reçu du serveur : `offer.new`, `offer.closed`, `order.status`,
-/// `payment.status`, `payout.status`, `session.expired`.
+/// `payment.status`, `payout.status`, `location-link.submitted`, `session.expired`.
 @immutable
 class RealtimeEvent {
   const RealtimeEvent(this.name, this.payload);
@@ -21,7 +21,14 @@ class RealtimeEvent {
 class RealtimeClient {
   RealtimeClient({required this.baseUrl, required this.store, this.onTokenRejected});
 
-  static const events = ['offer.new', 'offer.closed', 'order.status', 'payment.status', 'payout.status'];
+  static const events = [
+    'offer.new',
+    'offer.closed',
+    'order.status',
+    'payment.status',
+    'payout.status',
+    'location-link.submitted',
+  ];
 
   final String baseUrl;
   final SessionStore store;

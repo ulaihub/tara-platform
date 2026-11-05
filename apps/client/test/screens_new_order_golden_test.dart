@@ -15,6 +15,7 @@ import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_client_api.dart';
+import 'helpers/fake_realtime.dart';
 import 'helpers/harness.dart';
 import 'screens_home_golden_test.dart' show homeNow, person, shopOwner;
 
@@ -47,12 +48,13 @@ FakeClientApi orderApi() => FakeClientApi()
     ),
   ];
 
-List<Override> overrides(FakeClientApi api, {Future<bool> Function(Uri uri)? launcher}) => [
+List<Override> overrides(FakeClientApi api, {Future<bool> Function(Uri uri)? launcher, FakeRealtime? realtime}) => [
   keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
   clientApiProvider.overrideWithValue(api),
   realMapProvider.overrideWithValue(false),
   currentPositionProvider.overrideWithValue(() async => MapPoint.douala),
   launcherProvider.overrideWithValue(launcher ?? (_) async => true),
+  realtimeProvider.overrideWithValue(realtime ?? FakeRealtime()),
 ];
 
 Widget flow(FakeClientApi api, {Me me = shopOwner, VoidCallback? onClose, Future<bool> Function(Uri uri)? launcher}) =>

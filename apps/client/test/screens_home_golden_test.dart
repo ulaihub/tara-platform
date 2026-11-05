@@ -47,7 +47,13 @@ OrderSummary summary(String id, String status, String name, String? neighborhood
     );
 
 FakeClientApi shopApi() => FakeClientApi()
-  ..wallet0 = const Wallet(customerBalance: 0, merchantBalance: 128500, payoutSchedule: 'DAILY')
+  ..wallet0 = const Wallet(
+    customerBalance: 0,
+    merchantBalance: 128500,
+    payoutSchedule: 'DAILY',
+    todaySales: 37500,
+    todayDeliveries: 3,
+  )
   ..active = [
     summary('1', 'IN_DELIVERY', 'Marie Ngo', 'Bonapriso'),
     summary('2', 'ASSIGNED', 'Jean Mbarga', 'Akwa'),
@@ -114,7 +120,8 @@ void main() {
       );
       await settle(tester);
       expect(find.text('Prévue demain à 09:30 · TR-48214'), findsOneWidget);
-      expect(find.text('128 500 F'), findsOneWidget);
+      expect(find.text('37 500 F'), findsOneWidget);
+      expect(find.text('3 livraisons · 128 500 F à recevoir cette nuit'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/04_accueil_boutique/complet_${brightness.name}.png'));
     });
   }

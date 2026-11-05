@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/layout.dart';
@@ -55,11 +56,16 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
   int _step = 0;
   bool _tried = false;
   Timer? _linkTimer;
+  StreamSubscription<RealtimeEvent>? _events;
 
   @override
   void initState() {
     super.initState();
     _draft.addListener(_watchLinks);
+    // Le serveur annonce l'adresse placée par le destinataire : relue aussitôt.
+    _events = ref.read(realtimeProvider).stream.listen((event) {
+      if (event.name == 'location-link.submitted') unawaited(_checkLinks());
+    });
     // Retour de WhatsApp ou des SMS : le destinataire a peut-être déjà répondu.
     _lifecycle = AppLifecycleListener(onResume: () => unawaited(_checkLinks()));
   }
@@ -67,6 +73,7 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
   @override
   void dispose() {
     _linkTimer?.cancel();
+    unawaited(_events?.cancel());
     _lifecycle.dispose();
     _draft.dispose();
     super.dispose();

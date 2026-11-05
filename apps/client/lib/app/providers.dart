@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/app_settings.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -66,6 +67,25 @@ final authApiProvider = Provider<AuthApi>(
 );
 
 final clientApiProvider = Provider<ClientApi>((ref) => ClientApi(ref.watch(apiClientProvider)));
+
+/// Temps réel (Socket.IO) : statut des commandes, reversements, adresse placée par un
+/// destinataire. Accélère l'app ; l'API REST reste la référence.
+final realtimeProvider = Provider<RealtimeClient>((ref) {
+  final api = ref.watch(apiClientProvider);
+  final client = RealtimeClient(
+    baseUrl: ref.watch(apiUrlProvider),
+    store: ref.watch(sessionStoreProvider),
+    onTokenRejected: () async {
+      try {
+        await api.get('/me');
+      } catch (_) {
+        // Session refusée : AuthController repasse à la connexion.
+      }
+    },
+  );
+  ref.onDispose(() => unawaited(client.dispose()));
+  return client;
+});
 
 enum AuthStatus { signedOut, signedIn }
 

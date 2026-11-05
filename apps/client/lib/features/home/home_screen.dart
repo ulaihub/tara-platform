@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -194,30 +197,97 @@ class _SendCard extends StatelessWidget {
   }
 }
 
-/// Ventes encaissées de la boutique, pas encore reversées.
-class _ShopBalance extends StatelessWidget {
+/// Boutique : encaissé aujourd'hui, qui s'additionne en direct à chaque livraison (le
+/// montant monte, la pièce tinte), et ce qui reste à recevoir.
+class _ShopBalance extends StatefulWidget {
   const _ShopBalance({required this.wallet, required this.onTap});
   final Wallet? wallet;
   final VoidCallback onTap;
 
   @override
+  State<_ShopBalance> createState() => _ShopBalanceState();
+}
+
+class _ShopBalanceState extends State<_ShopBalance> with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 650));
+
+  @override
+  void didUpdateWidget(_ShopBalance old) {
+    super.didUpdateWidget(old);
+    final before = old.wallet?.todaySales;
+    final now = widget.wallet?.todaySales;
+    if (before != null && now != null && now > before) {
+      TaraFeedback.play(context, TaraSound.cash);
+      unawaited(_pulse.forward(from: 0));
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    final data = wallet;
-    return TintBox(
-      tone: TintTone.success,
-      padding: const EdgeInsets.fromLTRB(14, 6, 10, 6),
-      child: ListRow(
-        leading: TaraIcon(TaraIcons.wallet, size: 22, color: c.success),
-        title: data == null ? l.shopBalance : '${formatAmount(data.merchantBalance ?? 0)} F',
-        subtitle: data == null
-            ? null
-            : data.payoutSchedule == 'DAILY'
-            ? l.shopBalanceDaily
-            : l.shopBalanceOnDemand,
-        trailing: TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
-        onTap: onTap,
+    final data = widget.wallet;
+    final pending = data?.merchantBalance ?? 0;
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _pulse,
+          builder: (context, child) {
+            // Petit rebond quand une vente s'ajoute.
+            final t = Curves.easeOut.transform(_pulse.value);
+            return Transform.scale(scale: 1 + .04 * (t < .5 ? t * 2 : (1 - t) * 2), child: child);
+          },
+          child: TintBox(
+            tone: TintTone.success,
+            padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+            child: Row(
+              children: [
+                TaraIcon(TaraIcons.wallet, size: 24, color: c.success),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l.salesToday, style: TaraText.small.copyWith(color: c.textSecondary)),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(end: (data?.todaySales ?? 0).toDouble()),
+                        duration: const Duration(milliseconds: 900),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, _) => Text(
+                          '${formatAmount(value.round())}\u00a0F',
+                          style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontFeatures: TaraText.tabular),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        data == null
+                            ? l.shopBalance
+                            : [
+                                l.salesDeliveries(data.todayDeliveries),
+                                if (data.payoutSchedule == 'DAILY')
+                                  l.toReceiveDaily('${formatAmount(pending)}\u00a0F')
+                                else
+                                  l.toReceiveOnDemand('${formatAmount(pending)}\u00a0F'),
+                              ].join(' · '),
+                        style: TaraText.small.copyWith(color: c.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -31,6 +31,11 @@ void main() {
     'LocationLink': LocationLink.fields,
     'Quote': Quote.fields,
   };
+  test('portefeuille : ventes du jour de la boutique', () {
+    final wallet = jsonEncode(schemas['Wallet']);
+    expect(wallet, allOf(contains('"todaySales"'), contains('"todayDeliveries"')));
+  });
+
   for (final MapEntry(key: schema, value: fields) in models.entries) {
     test('modèle $schema conforme au contrat', () {
       expect(propertiesOf(schema), containsAll(fields));

@@ -356,5 +356,38 @@
     }
   },
   "nightSurcharge": "Entre 20 h et 6 h, un supplément de nuit s’applique.",
-  "slotRequired": "Choisissez une heure de passage."
+  "slotRequired": "Choisissez une heure de passage.",
+  "salesToday": "Encaissé aujourd’hui",
+  "salesDeliveries": "{count, plural, =0{Aucune livraison} =1{1 livraison} other{{count} livraisons}}",
+  "@salesDeliveries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "toReceiveDaily": "{amount} à recevoir cette nuit",
+  "@toReceiveDaily": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "toReceiveOnDemand": "{amount} à recevoir",
+  "@toReceiveOnDemand": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutSent": "{amount} envoyés sur votre Mobile Money",
+  "@payoutSent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

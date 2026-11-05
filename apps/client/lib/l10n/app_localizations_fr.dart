@@ -739,4 +739,34 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get slotRequired => 'Choisissez une heure de passage.';
+
+  @override
+  String get salesToday => 'Encaissé aujourd’hui';
+
+  @override
+  String salesDeliveries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count livraisons',
+      one: '1 livraison',
+      zero: 'Aucune livraison',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String toReceiveDaily(String amount) {
+    return '$amount à recevoir cette nuit';
+  }
+
+  @override
+  String toReceiveOnDemand(String amount) {
+    return '$amount à recevoir';
+  }
+
+  @override
+  String payoutSent(String amount) {
+    return '$amount envoyés sur votre Mobile Money';
+  }
 }

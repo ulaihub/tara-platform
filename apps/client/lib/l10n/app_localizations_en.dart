@@ -733,4 +733,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get slotRequired => 'Choose a pickup time.';
+
+  @override
+  String get salesToday => 'Collected today';
+
+  @override
+  String salesDeliveries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count deliveries',
+      one: '1 delivery',
+      zero: 'No delivery',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String toReceiveDaily(String amount) {
+    return '$amount to receive tonight';
+  }
+
+  @override
+  String toReceiveOnDemand(String amount) {
+    return '$amount to receive';
+  }
+
+  @override
+  String payoutSent(String amount) {
+    return '$amount sent to your Mobile Money';
+  }
 }

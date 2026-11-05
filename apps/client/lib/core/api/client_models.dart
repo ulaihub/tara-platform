@@ -172,7 +172,13 @@ class OrderSummary {
 /// Portefeuille (GET /me/wallet) : solde Tara de l'expéditeur, solde de la boutique.
 @immutable
 class Wallet {
-  const Wallet({required this.customerBalance, required this.merchantBalance, required this.payoutSchedule});
+  const Wallet({
+    required this.customerBalance,
+    required this.merchantBalance,
+    required this.payoutSchedule,
+    this.todaySales = 0,
+    this.todayDeliveries = 0,
+  });
 
   factory Wallet.fromJson(Json json) {
     final merchant = json['merchant'] as Json?;
@@ -180,6 +186,8 @@ class Wallet {
       customerBalance: _field<num>(_field<Json>(json, 'customer'), 'balance').toInt(),
       merchantBalance: merchant == null ? null : _field<num>(merchant, 'balance').toInt(),
       payoutSchedule: merchant == null ? null : _field<String>(merchant, 'payoutSchedule'),
+      todaySales: merchant == null ? 0 : _field<num>(merchant, 'todaySales').toInt(),
+      todayDeliveries: merchant == null ? 0 : _field<num>(merchant, 'todayDeliveries').toInt(),
     );
   }
 
@@ -192,6 +200,10 @@ class Wallet {
 
   /// DAILY (chaque jour) ou ON_DEMAND (à la demande).
   final String? payoutSchedule;
+
+  /// Boutique : encaissé à la livraison aujourd'hui, et livraisons du jour.
+  final int todaySales;
+  final int todayDeliveries;
 }
 
 /// Quartier de Douala (liste des zones, B1).

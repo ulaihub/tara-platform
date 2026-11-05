@@ -1471,6 +1471,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Choisissez une heure de passage.'**
   String get slotRequired;
+
+  /// No description provided for @salesToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé aujourd’hui'**
+  String get salesToday;
+
+  /// No description provided for @salesDeliveries.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune livraison} =1{1 livraison} other{{count} livraisons}}'**
+  String salesDeliveries(int count);
+
+  /// No description provided for @toReceiveDaily.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} à recevoir cette nuit'**
+  String toReceiveDaily(String amount);
+
+  /// No description provided for @toReceiveOnDemand.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} à recevoir'**
+  String toReceiveOnDemand(String amount);
+
+  /// No description provided for @payoutSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} envoyés sur votre Mobile Money'**
+  String payoutSent(String amount);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
