@@ -32,10 +32,9 @@ export const Layout: FC<{
           <header>
             <span class="brand">
               <picture>
-                <source srcset="/static/marque-sombre.svg" media="(prefers-color-scheme: dark)" />
-                <img src="/static/marque-clair.svg" alt="" width="34" height="24" />
+                <source srcset="/static/logo-sombre.svg" media="(prefers-color-scheme: dark)" />
+                <img src="/static/logo-clair.svg" alt={t.logoAlt} width="128" height="48" />
               </picture>
-              Tara
             </span>
             {reference ? <span class="ref">{reference}</span> : null}
           </header>

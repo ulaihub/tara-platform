@@ -66,7 +66,7 @@ describe('page de suivi du destinataire (F2)', () => {
   it('reste légère : bien moins de 200 Ko avec polices et pictogramme', async () => {
     const { app } = setup();
     const { html } = await page(app);
-    const assets = ['jakarta-500.woff', 'jakarta-800.woff', 'marque-clair.svg'].map(
+    const assets = ['jakarta-500.woff', 'jakarta-800.woff', 'logo-clair.svg'].map(
       (name) => readFileSync(new URL(`../public/${name}`, import.meta.url)).byteLength,
     );
     const total = gzipSync(html).byteLength + assets.reduce((a, b) => a + b, 0);

@@ -9,7 +9,9 @@ payer à la porte et demande Mobile Money en cours, confirmation de disponibilit
   l'état (`/t/{jeton}/etat`) et recharge la page quand elle change, sauf pendant une saisie.
   Sans JavaScript, tout fonctionne (lien « Actualiser », formulaires classiques).
 - **Légère** : environ 4 Ko compressés pour la page, 12 Ko par police (Plus Jakarta Sans 500
-  et 800, sous-ensemble latin), 7 Ko pour le pictogramme. Un test garde le total sous 200 Ko.
+  et 800, sous-ensemble latin), 2,5 Ko pour le logo complet (tracés simplifiés depuis
+  `docs/design/brand`, version claire ou sombre selon le téléphone). Un test garde le total
+  sous 200 Ko.
 - **Thème clair ou sombre** selon le téléphone ; français ou anglais selon le navigateur,
   ou `?lang=fr|en`.
 - **Sécurité** : CSP stricte à nonce, `Referrer-Policy: no-referrer` (le jeton est dans

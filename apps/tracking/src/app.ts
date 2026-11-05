@@ -18,12 +18,13 @@ export interface AppOptions {
   clientIp?: (c: Context) => string | undefined;
 }
 
-/** Fichiers servis tels quels : polices de la marque et pictogramme (7 jours en cache). */
+/** Fichiers servis tels quels : polices, logo complet (clair, sombre) et pictogramme de l'onglet (7 jours en cache). */
 const ASSETS: Record<string, string> = {
   'jakarta-500.woff': 'font/woff',
   'jakarta-800.woff': 'font/woff',
+  'logo-clair.svg': 'image/svg+xml',
+  'logo-sombre.svg': 'image/svg+xml',
   'marque-clair.svg': 'image/svg+xml',
-  'marque-sombre.svg': 'image/svg+xml',
 };
 
 const FINAL = new Set(['DELIVERED', 'RETURNED', 'CANCELLED']);

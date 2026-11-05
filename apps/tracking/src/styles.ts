@@ -12,8 +12,8 @@ html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:500 15px/1.45 Jakarta,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .wrap{max-width:480px;margin:0 auto;padding:14px 16px 28px}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px 2px}
-.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:21px;letter-spacing:-.01em;color:var(--text);text-decoration:none}
-.brand img{display:block;height:24px;width:auto}
+.brand{display:block;line-height:0}
+.brand img{display:block;height:48px;width:auto}
 .ref{font-weight:800;font-size:13px;padding:7px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-top:12px;box-shadow:var(--shadow)}
 .hero{display:flex;gap:14px;align-items:flex-start}

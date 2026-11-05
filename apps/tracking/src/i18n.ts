@@ -11,6 +11,7 @@ export function pickLocale(query: string | undefined, acceptLanguage: string | u
 
 const fr: Strings = {
   lang: 'fr',
+  logoAlt: 'Tara, livraison à la demande',
   title: 'Suivi de votre colis',
   from: (sender: string) => `${sender} vous envoie un colis`,
   fromUnknown: 'Un colis est en route pour vous',
@@ -78,6 +79,7 @@ const fr: Strings = {
 
 const en: Strings = {
   lang: 'en',
+  logoAlt: 'Tara, on-demand delivery',
   title: 'Track your parcel',
   from: (sender: string) => `${sender} is sending you a parcel`,
   fromUnknown: 'A parcel is on its way to you',
@@ -153,6 +155,7 @@ type Template = (...args: string[]) => string;
 /** Textes de la page, dans chaque langue. */
 export interface Strings {
   lang: Locale;
+  logoAlt: Text;
   title: Text;
   from: Template;
   fromUnknown: Text;
