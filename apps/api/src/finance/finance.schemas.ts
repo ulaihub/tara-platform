@@ -70,6 +70,8 @@ export const CollectBody = z.discriminatedUnion('method', [
 export const CollectionDto = z
   .object({
     due: z.object({ fee: z.int(), cod: z.int(), total: z.int() }),
+    /** DELIVERY : auprès du destinataire ; RETURN : frais de retour, auprès de l'expéditeur. */
+    reason: z.enum(['DELIVERY', 'RETURN']),
     complete: z.boolean(),
     payment: z.object({ id: z.uuid(), status: z.string(), amount: z.int() }).nullable(),
   })

@@ -1,4 +1,6 @@
-import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { ENV } from '../config/config.module.js';
+import type { Env } from '../config/env.js';
 import { AppError } from '../common/errors/app-error.js';
 import type { OrderChange } from '../events/order-events.bus.js';
 import {
@@ -20,6 +22,7 @@ import {
   riderPayable,
 } from './ledger.accounts.js';
 import { LedgerService, type PostingInput } from './ledger.service.js';
+import { RiderBalanceService } from './rider-balance.service.js';
 
 export interface CollectionDue {
   /** Frais de livraison à payer par le destinataire. */
@@ -31,9 +34,15 @@ export interface CollectionDue {
 
 export interface CollectionState {
   due: CollectionDue;
+  reason: 'DELIVERY' | 'RETURN';
   /** Tout ce qui devait être encaissé l'a été. */
   complete: boolean;
   payment: { id: string; status: string; amount: number } | null;
+}
+
+/** Colis qui repart chez l'expéditeur (retour décidé, pas encore rendu). */
+export function isReturning(order: Pick<Order, 'status' | 'failureDecision'>): boolean {
+  return order.status === 'DELIVERY_FAILED' && order.failureDecision === 'RETURN';
 }
 
 /** Compte qui paie pour l'expéditeur : portefeuille marchand ou solde client. */
@@ -62,6 +71,8 @@ export class OrderFinanceService implements OnModuleInit {
     private readonly hooks: OrderTransitionHooks,
     private readonly transitions: OrderTransitionsService,
     private readonly realtime: RealtimeService,
+    private readonly riderBalance: RiderBalanceService,
+    @Inject(ENV) private readonly env: Env,
   ) {}
 
   onModuleInit(): void {
@@ -70,16 +81,16 @@ export class OrderFinanceService implements OnModuleInit {
     this.payments.on('COD', (tx, payment) => this.onCollectionPaid(tx, payment));
   }
 
-  private onTransition({ tx, after, to }: TransitionHookContext): Promise<void> {
+  private onTransition({ tx, after, to, actor }: TransitionHookContext): Promise<void> {
     switch (to) {
       case 'CREATED':
         return this.onCreated(tx, after);
       case 'PICKED_UP':
         return this.onPickedUp(tx, after);
       case 'DELIVERED':
-        return this.onCompleted(tx, after, false);
+        return this.onCompleted(tx, after, false, actor.role);
       case 'RETURNED':
-        return this.onCompleted(tx, after, true);
+        return this.onCompleted(tx, after, true, actor.role);
       case 'CANCELLED':
         return this.onCancelled(tx, after);
       default:
@@ -109,9 +120,15 @@ export class OrderFinanceService implements OnModuleInit {
       await tx.order.update({ where: { id: order.id }, data: { feePaidAt: new Date() } });
       return;
     }
-    // Un client qui doit de l'argent à Tara (frais d'un retour) règle d'abord sa dette.
-    if (!order.merchantId && (await this.ledger.balance(wallet, tx)) < 0) {
-      throw AppError.unprocessable('WALLET_IN_DEBT');
+    // Un client qui doit de l'argent à Tara (frais d'un retour) règle d'abord sa dette ; un
+    // marchand peut devoir jusqu'au plafond (MERCHANT_DEBT_LIMIT), pas au-delà.
+    const balance = await this.ledger.balance(wallet, tx);
+    if (!order.merchantId && balance < 0) throw AppError.unprocessable('WALLET_IN_DEBT');
+    if (order.merchantId && balance <= -this.env.MERCHANT_DEBT_LIMIT) {
+      throw AppError.unprocessable('MERCHANT_DEBT_LIMIT', {
+        debt: -balance,
+        limit: this.env.MERCHANT_DEBT_LIMIT,
+      });
     }
   }
 
@@ -340,6 +357,20 @@ export class OrderFinanceService implements OnModuleInit {
     order: Order,
     db: Prisma.TransactionClient | PrismaService = this.prisma,
   ): Promise<CollectionState> {
+    // Retour : ce que l'expéditeur doit payer avant de récupérer son colis (E6).
+    if (isReturning(order)) {
+      const total = await this.returnShortfall(order, db);
+      const topUp = await db.payment.findFirst({
+        where: { orderId: order.id, purpose: 'WALLET_TOPUP', status: 'PENDING' },
+        orderBy: { createdAt: 'desc' },
+      });
+      return {
+        due: { fee: total, cod: 0, total },
+        reason: 'RETURN',
+        complete: total === 0,
+        payment: topUp ? { id: topUp.id, status: topUp.status, amount: topUp.amount } : null,
+      };
+    }
     // Une requête après l'autre : `db` peut être une transaction (une seule connexion).
     const collection = await db.codCollection.findUnique({ where: { orderId: order.id } });
     const payment = await db.payment.findFirst({
@@ -350,6 +381,7 @@ export class OrderFinanceService implements OnModuleInit {
     const cod = order.codAmount > 0 && !collection ? order.codAmount : 0;
     return {
       due: { fee, cod, total: fee + cod },
+      reason: 'DELIVERY',
       complete: fee + cod === 0,
       payment: payment ? { id: payment.id, status: payment.status, amount: payment.amount } : null,
     };
@@ -369,18 +401,22 @@ export class OrderFinanceService implements OnModuleInit {
     if (!rider || order?.riderId !== rider.id) throw AppError.notFound('ORDER_NOT_FOUND');
     // Encaissement en espèces renvoyé par la file hors connexion (réponse perdue) : déjà
     // enregistré, il est sans effet et ne bloque pas la livraison qui suit.
+    const returning = isReturning(order);
     if (method.kind === 'CASH') {
       const recorded = await this.prisma.journalEntry.findUnique({
-        where: { idempotencyKey: `order:${orderId}:collect-cash` },
+        where: {
+          idempotencyKey: `order:${orderId}:${returning ? 'return-cash' : 'collect-cash'}`,
+        },
         select: { id: true },
       });
       if (recorded) return this.collectionState(order);
     }
-    if (order.status !== 'IN_DELIVERY') {
+    if (!returning && order.status !== 'IN_DELIVERY') {
       throw AppError.conflict('ORDER_TRANSITION_INVALID', { from: order.status, to: 'DELIVERED' });
     }
     const state = await this.collectionState(order);
     if (state.complete) throw AppError.conflict('COLLECTION_NOT_EXPECTED');
+    if (returning) return this.collectReturn(order, rider.id, method, state.due.total);
 
     if (method.kind === 'MOBILE_MONEY') {
       const attempts = await this.prisma.payment.count({
@@ -418,6 +454,61 @@ export class OrderFinanceService implements OnModuleInit {
     });
     return this.collectionState(
       await this.prisma.order.findUniqueOrThrow({ where: { id: orderId } }),
+    );
+  }
+
+  /**
+   * Retour contre paiement (E6) : le livreur encaisse auprès de l'expéditeur ce que son solde
+   * ne couvre pas, en espèces (pris sur le solde prépayé du livreur, qui garde les espèces) ou
+   * par Mobile Money (recharge du solde de l'expéditeur, confirmée automatiquement).
+   */
+  private async collectReturn(
+    order: Order,
+    riderId: string,
+    method: { kind: 'CASH' } | { kind: 'MOBILE_MONEY'; phone: string; operator: 'MTN' | 'ORANGE' },
+    amount: number,
+  ): Promise<CollectionState> {
+    if (method.kind === 'MOBILE_MONEY') {
+      const attempts = await this.prisma.payment.count({
+        where: { orderId: order.id, purpose: 'WALLET_TOPUP' },
+      });
+      await this.payments.request({
+        purpose: 'WALLET_TOPUP',
+        amount,
+        phone: method.phone,
+        method: method.operator === 'ORANGE' ? 'MOMO_ORANGE' : 'MOMO_MTN',
+        payerId: order.senderId,
+        orderId: order.id,
+        riderId,
+        idempotencyKey: `order:${order.id}:return-collect:${attempts + 1}`,
+        description: `Tara retour ${order.reference}`,
+      });
+      return this.collectionState(order);
+    }
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT id FROM orders WHERE id = ${order.id}::uuid FOR UPDATE`;
+      const fresh = await tx.order.findUniqueOrThrow({ where: { id: order.id } });
+      const due = await this.returnShortfall(fresh, tx);
+      if (due === 0) throw AppError.conflict('ALREADY_COLLECTED');
+      // Le livreur garde les espèces : le montant est pris sur son solde prépayé, qui ne
+      // peut pas devenir négatif (G5).
+      const { available } = await this.riderBalance.overview(riderId, tx);
+      if (available < due) {
+        throw AppError.unprocessable('RIDER_BALANCE_TOO_LOW', { available, required: due });
+      }
+      await this.ledger.post(tx, {
+        kind: 'PAYMENT_RECEIVED',
+        description: `Frais de retour ${fresh.reference} payés en espèces au livreur`,
+        idempotencyKey: `order:${order.id}:return-cash`,
+        orderId: order.id,
+        postings: [
+          { account: riderPayable(riderId), amount: due },
+          { account: senderAccount(fresh), amount: -due },
+        ],
+      });
+    });
+    return this.collectionState(
+      await this.prisma.order.findUniqueOrThrow({ where: { id: order.id } }),
     );
   }
 
@@ -498,13 +589,14 @@ export class OrderFinanceService implements OnModuleInit {
     tx: Prisma.TransactionClient,
     order: Order,
     returned: boolean,
+    actorRole: string,
   ): Promise<void> {
     if (!order.riderId) throw new Error(`Course terminée sans livreur (${order.reference})`);
     if (!order.feePaidAt) {
       if (!returned) {
         throw AppError.conflict('COLLECTION_REQUIRED', { amount: order.totalPrice });
       }
-      // Retour : le destinataire n'a rien payé, l'expéditeur règle la course (solde, au besoin négatif).
+      // Retour : le destinataire n'a rien payé, l'expéditeur règle la course.
       await this.ledger.post(tx, {
         kind: 'ORDER_CHARGED',
         description: `Frais de livraison ${order.reference} facturés à l'expéditeur (retour)`,
@@ -516,6 +608,25 @@ export class OrderFinanceService implements OnModuleInit {
         ],
       });
       await tx.order.update({ where: { id: order.id }, data: { feePaidAt: new Date() } });
+    }
+    if (returned && order.returnFee > 0) {
+      await this.ledger.post(tx, {
+        kind: 'FAILURE_FEE_CHARGED',
+        description: `Frais de retour ${order.reference}`,
+        idempotencyKey: `order:${order.id}:return-fee`,
+        orderId: order.id,
+        postings: [
+          { account: senderAccount(order), amount: order.returnFee },
+          { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.returnFee },
+        ],
+      });
+    }
+    // Pas de paiement, pas de colis : le livreur ne rend le colis qu'une fois couvert ce que
+    // le solde de l'expéditeur ne couvre pas (le support peut passer outre : colis au bureau).
+    if (returned && actorRole === 'RIDER') {
+      const balance = await this.ledger.balance(senderAccount(order), tx);
+      const missing = -balance - this.debtLimit(order);
+      if (missing > 0) throw AppError.conflict('RETURN_COLLECTION_REQUIRED', { amount: missing });
     }
     if (!returned && order.codAmount > 0) {
       const collected = await tx.codCollection.findUnique({ where: { orderId: order.id } });
@@ -538,6 +649,7 @@ export class OrderFinanceService implements OnModuleInit {
       orderId: order.id,
       postings,
     });
+    await this.shareFailureFees(tx, order);
 
     // Le livreur garde sa part sur les espèces encaissées pour cette course (G4).
     const cash = await this.orderSum(tx, order.id, riderCashHeld(order.riderId).code);
@@ -554,6 +666,77 @@ export class OrderFinanceService implements OnModuleInit {
         ],
       });
     }
+  }
+
+  // --- Frais d'échec (E6) ------------------------------------------------------------------
+
+  /** Dette tolérée : rien pour un particulier, MERCHANT_DEBT_LIMIT pour une boutique. */
+  private debtLimit(order: Pick<Order, 'merchantId'>): number {
+    return order.merchantId ? this.env.MERCHANT_DEBT_LIMIT : 0;
+  }
+
+  /**
+   * Nouvelle tentative : ses frais sont pris sur le solde de l'expéditeur, jusqu'à son
+   * plafond de dette. Au-delà, il recharge d'abord son solde (RETRY_PAYMENT_REQUIRED) ; le
+   * support, qui décide à sa place, n'est pas bloqué.
+   */
+  async chargeRetry(tx: Prisma.TransactionClient, order: Order, checkBalance: boolean) {
+    if (order.retryFee === 0) return;
+    const account = senderAccount(order);
+    await this.ledger.lock(tx, [account]);
+    if (checkBalance) {
+      const balance = await this.ledger.balance(account, tx);
+      const missing = order.retryFee - balance - this.debtLimit(order);
+      if (missing > 0) {
+        throw AppError.unprocessable('RETRY_PAYMENT_REQUIRED', {
+          amount: missing,
+          fee: order.retryFee,
+        });
+      }
+    }
+    await this.ledger.post(tx, {
+      kind: 'FAILURE_FEE_CHARGED',
+      description: `Nouvelle tentative ${order.reference}`,
+      idempotencyKey: `order:${order.id}:retry-fee:${order.attemptCount}`,
+      orderId: order.id,
+      postings: [
+        { account, amount: order.retryFee },
+        { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.retryFee },
+      ],
+    });
+  }
+
+  /** Ce que l'expéditeur doit payer à la remise du colis retourné (non couvert par son solde). */
+  async returnShortfall(
+    order: Order,
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<number> {
+    const charges = order.returnFee + (order.feePaidAt ? 0 : order.totalPrice);
+    const balance = await this.ledger.balance(senderAccount(order), db);
+    return Math.max(0, charges - balance - this.debtLimit(order));
+  }
+
+  /** Frais d'échec gardés pour la course, partagés comme elle entre le livreur et Tara. */
+  private async shareFailureFees(tx: Prisma.TransactionClient, order: Order): Promise<void> {
+    if (!order.riderId) return;
+    const held = -(await this.orderSum(tx, order.id, PLATFORM_ACCOUNTS.ordersPrepaid.code));
+    if (held <= 0) return;
+    const grid = await tx.pricingGrid.findUniqueOrThrow({
+      where: { id: order.pricingGridId },
+      select: { riderShareBps: true },
+    });
+    const riderPart = Math.floor((held * grid.riderShareBps) / 10_000);
+    await this.ledger.post(tx, {
+      kind: 'DELIVERY_COMPLETED',
+      description: `Frais d'échec de ${order.reference} partagés`,
+      idempotencyKey: `order:${order.id}:complete-fees`,
+      orderId: order.id,
+      postings: [
+        { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: held },
+        { account: riderPayable(order.riderId), amount: -riderPart },
+        { account: PLATFORM_ACCOUNTS.commission, amount: -(held - riderPart) },
+      ],
+    });
   }
 
   // --- Annulation ---------------------------------------------------------------------------

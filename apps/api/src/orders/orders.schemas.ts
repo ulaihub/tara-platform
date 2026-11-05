@@ -151,6 +151,9 @@ export const OrderDto = z
       feePayer: FeePayerEnum,
       feePaymentMethod: PaymentMethodEnum,
       codAmount: z.int(),
+      /** Frais d'échec figés à la commande (E6), à la charge de l'expéditeur. */
+      retryFee: z.int(),
+      returnFee: z.int(),
     }),
     riderId: z.uuid().nullable(),
     /**
@@ -175,6 +178,8 @@ export const OrderDto = z
         decision: z.enum(['RETRY', 'RETURN']).nullable(),
         /** Sans choix d'ici là, le colis repart chez l'expéditeur (null une fois choisi). */
         decisionDueAt: z.iso.datetime().nullable(),
+        /** Une seule nouvelle tentative : false après un deuxième échec. */
+        retryAllowed: z.boolean(),
       })
       .nullable(),
     cancelReason: z.string().nullable(),

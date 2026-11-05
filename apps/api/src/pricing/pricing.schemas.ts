@@ -160,5 +160,8 @@ export const QuoteDto = z
     discountTotal: z.int(),
     totalPrice: z.int(),
     promoCode: z.string().nullable(),
+    /** Seulement si la livraison échoue (E6) : nouvelle tentative, retour à l'expéditeur. */
+    retryFee: z.int(),
+    returnFee: z.int(),
   })
   .meta({ id: 'Quote' });

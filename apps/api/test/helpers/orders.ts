@@ -16,7 +16,7 @@ export const DOUALA_GRID = {
   surcharges: [
     { code: 'EXPRESS', amount: 500 },
     { code: 'NIGHT', amount: 500 },
-    { code: 'FAILED_ATTEMPT', percentBps: 5000 },
+    { code: 'FAILED_ATTEMPT', amount: 500 },
     { code: 'RETURN', percentBps: 5000 },
   ],
   activate: true,

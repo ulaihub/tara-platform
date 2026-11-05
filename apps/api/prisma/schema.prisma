@@ -362,6 +362,8 @@ enum JournalEntryKind {
   CASH_COMPENSATED
   /// Avoir accordé par l'équipe.
   CREDIT_GRANTED
+  /// Frais de nouvelle tentative ou de retour pris à l'expéditeur (E6).
+  FAILURE_FEE_CHARGED
   PAYMENT_RECEIVED
   DELIVERY_COMPLETED
   COD_COLLECTED
@@ -906,6 +908,10 @@ model Order {
   totalPrice       Int           @map("total_price")
   riderEarning     Int           @map("rider_earning")
   platformFee      Int           @map("platform_fee")
+  /// Frais d'échec figés à la commande (E6), annoncés avant de commander : nouvelle tentative
+  /// et retour à l'expéditeur, à sa charge, partagés comme la course.
+  retryFee         Int           @default(0) @map("retry_fee")
+  returnFee        Int           @default(0) @map("return_fee")
   feePayer         FeePayer      @default(SENDER) @map("fee_payer")
   feePaymentMethod PaymentMethod @map("fee_payment_method")
   /// Montant à encaisser auprès du destinataire, 0 si aucun (C1, E5).

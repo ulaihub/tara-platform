@@ -390,9 +390,13 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     await go('DELIVERY_FAILED', { failureReason: 'REFUSED' });
     await go('RETURNED');
     const o = await order(placed.id);
-    expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(-o.totalPrice);
+    // La course et les frais de retour (E6), pris sur le portefeuille de la boutique ; le
+    // livreur touche sa part des deux.
+    expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(
+      -(o.totalPrice + o.returnFee),
+    );
     expect(await ledger.balance(riderPayable(rider.riderId))).toBe(
-      RIDER_START_BALANCE + o.riderEarning,
+      RIDER_START_BALANCE + o.riderEarning + Math.floor((o.returnFee * 8000) / 10_000),
     );
   });
 
@@ -668,6 +672,48 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       })
       .expect(422);
     expect(blocked.body.error.code).toBe('WALLET_IN_DEBT');
+    // La dette ne disparaît pas avec le compte : suppression refusée tant qu'elle reste.
+    const deletion = await request(ctx.http)
+      .post('/v1/me/deletion/code')
+      .set(customer.auth)
+      .expect(422);
+    expect(deletion.body.error).toMatchObject({ code: 'ACCOUNT_HAS_DEBT' });
+    expect(deletion.body.error.message).toContain('1000');
+  });
+
+  it('marchand : dette tolérée jusqu’au plafond (3 000 F), puis nouvelles commandes bloquées', async () => {
+    const shop = await merchant(ctx);
+    const profile = await ctx.prisma.merchantProfile.findUniqueOrThrow({
+      where: { userId: shop.userId },
+    });
+    const owe = (amount: number, tag: string) =>
+      ctx.prisma.$transaction((tx) =>
+        ledger.post(tx, {
+          kind: 'ADJUSTMENT',
+          description: 'Dette de test',
+          idempotencyKey: `test-debt:${profile.id}:${tag}`,
+          postings: [
+            { account: merchantPayable(profile.id), amount },
+            { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -amount },
+          ],
+        }),
+      );
+    await owe(2_999, 'a');
+    await placeOrder(ctx, shop);
+    await owe(1, 'b');
+    const blocked = await request(ctx.http)
+      .post('/v1/orders')
+      .set(shop.auth)
+      .send({
+        pickupAddressId: shop.pickupId,
+        dropoffAddressId: shop.dropoffId,
+        recipientName: 'Client',
+        recipientPhone: '+237677000333',
+        packageSize: 'S',
+        feePaymentMethod: 'CASH',
+      })
+      .expect(422);
+    expect(blocked.body.error).toMatchObject({ code: 'MERCHANT_DEBT_LIMIT' });
   });
 
   it('vire de la trésorerie du bureau vers l’agrégateur, une seule fois par clé', async () => {

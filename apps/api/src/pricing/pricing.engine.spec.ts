@@ -56,6 +56,8 @@ describe('prix complet', () => {
       totalPrice: 1500,
       riderEarning: 1200,
       platformFee: 300,
+      retryFee: 750,
+      returnFee: 750,
     });
   });
 
@@ -110,6 +112,23 @@ describe('prix complet', () => {
       at: DAY,
     });
     expect(price.surcharges).toEqual([]);
+    expect(price.totalPrice).toBe(1000);
+  });
+
+  it('annonce les frais d’échec : tentative fixe ou en part du prix de base, retour à 50 %', () => {
+    const at7km = { distanceMeters: 7_000, packageSize: 'S' as const, isExpress: false, at: DAY };
+    expect(computePrice(DOUALA, at7km)).toMatchObject({ retryFee: 750, returnFee: 750 });
+    const grid: GridRules = {
+      ...DOUALA,
+      surcharges: [
+        { code: 'FAILED_ATTEMPT', amount: 500, percentBps: null, active: true },
+        { code: 'RETURN', amount: null, percentBps: 5000, active: true },
+      ],
+    };
+    expect(computePrice(grid, at7km)).toMatchObject({ retryFee: 500, returnFee: 750 });
+    // Frais désactivés dans la grille : rien à payer en cas d'échec.
+    const none: GridRules = { ...DOUALA, surcharges: [] };
+    expect(computePrice(none, at7km)).toMatchObject({ retryFee: 0, returnFee: 0 });
   });
 
   it('calcule un supplément en pourcentage du prix de base', () => {

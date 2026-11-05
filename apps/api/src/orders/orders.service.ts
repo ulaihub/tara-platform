@@ -167,6 +167,8 @@ export class OrdersService {
         feePayer: order.feePayer,
         feePaymentMethod: order.feePaymentMethod,
         codAmount: order.codAmount,
+        retryFee: order.retryFee,
+        returnFee: order.returnFee,
       },
       riderId: order.riderId,
       rider: order.rider
@@ -201,6 +203,7 @@ export class OrdersService {
       note: event?.note ?? null,
       at: order.failedAt.toISOString(),
       decision: order.failureDecision,
+      retryAllowed: order.attemptCount < 2,
       decisionDueAt: order.failureDecision
         ? null
         : new Date(
@@ -344,6 +347,8 @@ export class OrdersService {
       totalPrice: quote.price.totalPrice,
       riderEarning: quote.price.riderEarning,
       platformFee: quote.price.platformFee,
+      retryFee: quote.price.retryFee,
+      returnFee: quote.price.returnFee,
       feePayer: shared.feePayer,
       feePaymentMethod: shared.feePaymentMethod,
       codAmount: item.codAmount,

@@ -8,6 +8,7 @@ import { pageOf } from '../common/pagination.js';
 import { cameroonDate, periodStart } from '../common/time.js';
 import { ACTIVE_RIDER_STATUSES } from '../dispatch/dispatch.service.js';
 import { OnlineTimeService } from '../dispatch/online-time.service.js';
+import { riderPayable } from '../finance/ledger.accounts.js';
 import { OrderFinanceService } from '../finance/order-finance.service.js';
 import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js';
 import type { Order, Prisma, RiderProfile } from '../generated/prisma/client.js';
@@ -422,6 +423,12 @@ export class RiderOrdersService {
     const { order } = await this.load(userId, orderId);
     assertTransition(order, 'RETURNED');
     if (body.photoKey) await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
+    // Pas de paiement, pas de colis (E6) : ce que le solde de l'expéditeur ne couvre pas est
+    // encaissé avant de rendre le colis (le code n'est pas vérifié, donc pas consommé, avant).
+    const collection = await this.finance.collectionState(order);
+    if (!collection.complete) {
+      throw AppError.conflict('RETURN_COLLECTION_REQUIRED', { amount: collection.due.total });
+    }
     await this.checkCode(order, 'pickup', body.senderCode);
     await this.act(userId, order, 'RETURNED', body, {
       kind: 'RETURN',
@@ -452,6 +459,16 @@ export class RiderOrdersService {
   ): Promise<z.output<typeof EarningsDto>> {
     const rider = await this.riderOf(userId);
     const from = periodStart(period, now);
+    // Gains réels : ce que le grand livre a crédité au livreur à la fin de ses courses
+    // (livrées ou rendues), part des frais d'échec comprise.
+    const credited = await this.prisma.$queryRaw<{ at: Date; amount: bigint }[]>`
+      SELECT e.posted_at AS at, (-p.amount)::bigint AS amount
+        FROM ledger_postings p
+        JOIN journal_entries e ON e.id = p.entry_id
+        JOIN ledger_accounts a ON a.id = p.account_id
+       WHERE a.code = ${riderPayable(rider.id).code}
+         AND e.kind = 'DELIVERY_COMPLETED'
+         AND e.posted_at >= ${from} AND e.posted_at <= ${now}`;
     const [delivered, failed, returned, cash, onlineSeconds] = await Promise.all([
       this.prisma.order.findMany({
         where: { riderId: rider.id, status: 'DELIVERED', deliveredAt: { gte: from, lte: now } },
@@ -479,16 +496,19 @@ export class RiderOrdersService {
       earnings: 0,
       delivered: 0,
     }));
-    for (const order of delivered) {
-      if (!order.deliveredAt) continue;
-      // Dernière tranche commencée avant la livraison (les heures hors 6 h-22 h vont aux bords).
+    // Dernière tranche commencée avant l'instant donné (les heures hors 6 h-22 h vont aux bords).
+    const bucketOf = (at: Date) => {
       let index = 0;
-      while (index + 1 < starts.length && (starts[index + 1] as Date) <= order.deliveredAt) index++;
-      const bucket = series[index];
-      if (bucket) {
-        bucket.earnings += order.riderEarning;
-        bucket.delivered += 1;
-      }
+      while (index + 1 < starts.length && (starts[index + 1] as Date) <= at) index++;
+      return series[index];
+    };
+    for (const order of delivered) {
+      const bucket = order.deliveredAt ? bucketOf(order.deliveredAt) : undefined;
+      if (bucket) bucket.delivered += 1;
+    }
+    for (const credit of credited) {
+      const bucket = bucketOf(credit.at);
+      if (bucket) bucket.earnings += Number(credit.amount);
     }
     return {
       period,
@@ -497,7 +517,7 @@ export class RiderOrdersService {
       delivered: delivered.length,
       failed,
       returned,
-      earnings: delivered.reduce((sum, order) => sum + order.riderEarning, 0),
+      earnings: credited.reduce((sum, credit) => sum + Number(credit.amount), 0),
       cashCollected: cash._sum.collectedAmount ?? 0,
       onlineSeconds,
       bucket: period === 'day' ? 'two_hours' : period === 'week' ? 'day' : 'week',

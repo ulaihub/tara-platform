@@ -121,6 +121,12 @@ const envSchema = z
     FAILURE_CALL_SPACING_MINUTES: z.coerce.number().min(0).max(60).default(5),
     FAILURE_DECISION_TIMEOUT_MINUTES: z.coerce.number().min(0.05).max(240).default(15),
     /**
+     * Dette maximale d'un marchand envers Tara (frais d'échec non couverts par son solde), en
+     * FCFA : au-delà, les frais se paient sur le moment et les nouvelles commandes attendent
+     * le règlement. Un particulier ne peut rien devoir.
+     */
+    MERCHANT_DEBT_LIMIT: z.coerce.number().int().min(0).max(100_000).default(3_000),
+    /**
      * Espèces encore dues d'avant le solde prépayé (G5) : délai de dépôt, puis retard au-delà
      * duquel le compte est suspendu (gains retenus).
      */

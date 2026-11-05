@@ -73,7 +73,8 @@ async function seedPricing(): Promise<void> {
           { code: 'HEAVY_PARCEL', amount: 1000 },
           { code: 'NIGHT', amount: 500 },
           { code: 'WEATHER', amount: 300, active: false },
-          { code: 'FAILED_ATTEMPT', percentBps: 5000 },
+          // Frais d'échec (E6) : nouvelle tentative 500 F, retour la moitié du prix de base.
+          { code: 'FAILED_ATTEMPT', amount: 500 },
           { code: 'RETURN', percentBps: 5000 },
         ],
       },

@@ -7,6 +7,7 @@ import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { AppError } from '../common/errors/app-error.js';
 import { OrderEventsBus } from '../events/order-events.bus.js';
+import { OrderFinanceService } from '../finance/order-finance.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
 import { OrderTransitionsService } from '../orders/order-transitions.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -39,6 +40,7 @@ export class OrderSupportService {
     private readonly notifications: NotificationService,
     private readonly realtime: RealtimeService,
     private readonly audit: AuditService,
+    private readonly finance: OrderFinanceService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -168,17 +170,32 @@ export class OrderSupportService {
     decision: 'RETRY' | 'RETURN',
     by: 'SENDER' | 'SUPPORT' | 'SYSTEM',
   ): Promise<boolean> {
-    const { count } = await this.prisma.order.updateMany({
-      // Un choix fait est définitif pour l'expéditeur et le retour automatique (le livreur
-      // est déjà reparti) ; seul le support peut le changer.
-      where: {
-        id: orderId,
-        status: 'DELIVERY_FAILED',
-        ...(by === 'SUPPORT' ? {} : { failureDecision: null }),
-      },
-      data: { failureDecision: decision },
+    const recorded = await this.prisma.$transaction(async (tx) => {
+      const current = await tx.order.findUnique({ where: { id: orderId } });
+      // Une seule nouvelle tentative : au deuxième échec, le colis revient (le support peut
+      // passer outre).
+      if (decision === 'RETRY' && by === 'SENDER' && (current?.attemptCount ?? 0) >= 2) {
+        throw AppError.conflict('RETRY_LIMIT_REACHED');
+      }
+      const { count } = await tx.order.updateMany({
+        // Un choix fait est définitif pour l'expéditeur et le retour automatique (le livreur
+        // est déjà reparti) ; seul le support peut le changer.
+        where: {
+          id: orderId,
+          status: 'DELIVERY_FAILED',
+          ...(by === 'SUPPORT' ? {} : { failureDecision: null }),
+        },
+        data: { failureDecision: decision },
+      });
+      if (count !== 1) return false;
+      // Frais de la nouvelle tentative, pris sur le solde de l'expéditeur : s'il ne suffit
+      // pas, rien n'est enregistré et il recharge d'abord.
+      if (decision === 'RETRY' && current) {
+        await this.finance.chargeRetry(tx, current, by === 'SENDER');
+      }
+      return true;
     });
-    if (count !== 1) {
+    if (!recorded) {
       if (by === 'SYSTEM') return false;
       throw AppError.conflict('FAILURE_DECISION_NOT_EXPECTED');
     }

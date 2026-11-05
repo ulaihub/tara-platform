@@ -315,6 +315,22 @@ export const ERROR_MESSAGES = {
     fr: 'Solde insuffisant ({balance} FCFA disponibles).',
     en: 'Insufficient balance ({balance} XAF available).',
   },
+  RETRY_PAYMENT_REQUIRED: {
+    fr: 'Solde insuffisant pour la nouvelle tentative ({fee} FCFA) : rechargez au moins {amount} FCFA, ou choisissez le retour.',
+    en: 'Not enough balance for another attempt ({fee} XAF): top up at least {amount} XAF, or choose the return.',
+  },
+  RETRY_LIMIT_REACHED: {
+    fr: 'Une seule nouvelle tentative est possible : le colis vous sera rapporté.',
+    en: 'Only one more attempt is possible: the parcel will be brought back to you.',
+  },
+  MERCHANT_DEBT_LIMIT: {
+    fr: 'Votre boutique doit {debt} FCFA à Tara (plafond {limit} FCFA) : rechargez votre solde pour commander de nouveau.',
+    en: 'Your shop owes Tara {debt} XAF (limit {limit} XAF): top up your balance to order again.',
+  },
+  ACCOUNT_HAS_DEBT: {
+    fr: 'Votre solde Tara est négatif ({debt} FCFA dus) : réglez-le avant de supprimer le compte.',
+    en: 'Your Tara balance is negative ({debt} XAF due): settle it before deleting the account.',
+  },
   WALLET_IN_DEBT: {
     fr: 'Votre solde Tara est négatif : réglez-le avant une nouvelle commande.',
     en: 'Your Tara balance is negative: settle it before placing a new order.',
@@ -322,6 +338,10 @@ export const ERROR_MESSAGES = {
   COLLECTION_REQUIRED: {
     fr: 'Encaissez d’abord {amount} FCFA auprès du destinataire.',
     en: 'Collect {amount} XAF from the recipient first.',
+  },
+  RETURN_COLLECTION_REQUIRED: {
+    fr: 'Encaissez d’abord {amount} FCFA auprès de l’expéditeur : le colis n’est rendu qu’une fois les frais réglés.',
+    en: 'Collect {amount} XAF from the sender first: the parcel is handed back only once the fees are paid.',
   },
   COLLECTION_NOT_EXPECTED: {
     fr: 'Rien à encaisser pour cette commande.',

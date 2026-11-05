@@ -64,7 +64,11 @@ export class PublicTrackingService {
       COMING.includes(order.status) &&
       !(order.status === 'DELIVERY_FAILED' && order.failureDecision === 'RETURN');
     const collection = await this.finance.collectionState(order);
-    const settled = ['DELIVERED', 'RETURNED', 'CANCELLED'].includes(order.status);
+    // Course finie, ou colis qui repart chez l'expéditeur : plus rien à payer pour le
+    // destinataire (les frais de retour ne regardent que l'expéditeur).
+    const settled =
+      ['DELIVERED', 'RETURNED', 'CANCELLED'].includes(order.status) ||
+      (order.status === 'DELIVERY_FAILED' && order.failureDecision === 'RETURN');
     return {
       reference: order.reference,
       status: order.status,
@@ -92,7 +96,6 @@ export class PublicTrackingService {
         coming && order.status !== 'DELIVERY_FAILED' && order.rider
           ? await this.eta(order.rider.id, order.pickupAddress, order.dropoffAddress, now)
           : null,
-      // Course terminée : plus rien à payer à la porte.
       due: settled ? { fee: 0, cod: 0, total: 0 } : collection.due,
       paymentPending: !settled && collection.payment ? { amount: collection.payment.amount } : null,
       failureDecision: order.status === 'DELIVERY_FAILED' ? order.failureDecision : null,

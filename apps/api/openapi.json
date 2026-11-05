@@ -7122,6 +7122,13 @@
             ],
             "additionalProperties": false
           },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "DELIVERY",
+              "RETURN"
+            ]
+          },
           "complete": {
             "type": "boolean"
           },
@@ -7150,6 +7157,7 @@
         },
         "required": [
           "due",
+          "reason",
           "complete",
           "payment"
         ],
@@ -7909,8 +7917,13 @@
                   "PAYMENT_NOT_FOUND",
                   "PAYMENT_NOT_EXPECTED",
                   "INSUFFICIENT_BALANCE",
+                  "RETRY_PAYMENT_REQUIRED",
+                  "RETRY_LIMIT_REACHED",
+                  "MERCHANT_DEBT_LIMIT",
+                  "ACCOUNT_HAS_DEBT",
                   "WALLET_IN_DEBT",
                   "COLLECTION_REQUIRED",
+                  "RETURN_COLLECTION_REQUIRED",
                   "COLLECTION_NOT_EXPECTED",
                   "ALREADY_COLLECTED",
                   "PAYOUT_TOO_SMALL",
@@ -8551,6 +8564,12 @@
               },
               "codAmount": {
                 "type": "integer"
+              },
+              "retryFee": {
+                "type": "integer"
+              },
+              "returnFee": {
+                "type": "integer"
               }
             },
             "required": [
@@ -8562,7 +8581,9 @@
               "totalPrice",
               "feePayer",
               "feePaymentMethod",
-              "codAmount"
+              "codAmount",
+              "retryFee",
+              "returnFee"
             ],
             "additionalProperties": false
           },
@@ -8638,6 +8659,9 @@
                 "nullable": true,
                 "type": "string",
                 "format": "date-time"
+              },
+              "retryAllowed": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -8645,7 +8669,8 @@
               "note",
               "at",
               "decision",
-              "decisionDueAt"
+              "decisionDueAt",
+              "retryAllowed"
             ],
             "additionalProperties": false
           },
@@ -9487,6 +9512,12 @@
           "promoCode": {
             "nullable": true,
             "type": "string"
+          },
+          "retryFee": {
+            "type": "integer"
+          },
+          "returnFee": {
+            "type": "integer"
           }
         },
         "required": [
@@ -9499,7 +9530,9 @@
           "surcharges",
           "discountTotal",
           "totalPrice",
-          "promoCode"
+          "promoCode",
+          "retryFee",
+          "returnFee"
         ],
         "additionalProperties": false
       },
