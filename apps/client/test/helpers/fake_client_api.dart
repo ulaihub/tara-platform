@@ -1,6 +1,7 @@
 import 'package:tara_client/core/api/client_api.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_core/api/api_client.dart';
+import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
 
 /// API expéditeur sans réseau : compte, nom et boutique enregistrés.
@@ -88,6 +89,105 @@ class FakeClientApi extends ClientApi {
 
   @override
   Future<LocationLink> locationLink(String id) async => linkAfter ?? pendingLink(null);
+
+  // --- Prix, commande, paiement ------------------------------------------------------
+
+  final quotes = <Map<String, Object?>>[];
+  final created = <({String key, Map<String, Object?> body, bool batch})>[];
+  final paid = <({String orderId, String phone, String operator})>[];
+  final cancelled = <String>[];
+
+  /// Refus renvoyé à la prochaine création de commande.
+  ApiException? createError;
+
+  /// États successifs du paiement relu (le dernier est répété).
+  List<String> paymentStatuses = ['PENDING'];
+
+  @override
+  Future<Quote> quote({
+    required String pickupAddressId,
+    required String dropoffAddressId,
+    required String packageSize,
+    DateTime? scheduledFor,
+    String? promoCode,
+  }) async {
+    quotes.add({'dropoff': dropoffAddressId, 'size': packageSize, 'promo': promoCode, 'at': scheduledFor});
+    if (promoCode != null && promoCode != 'BIENVENUE') {
+      throw const ApiException(code: 'PROMO_INVALID', message: 'Code promo inconnu.', status: 422);
+    }
+    final surcharges = [
+      if (packageSize == 'XL') (code: 'HEAVY_PARCEL', amount: 500),
+      if (scheduledFor != null && (scheduledFor.hour >= 20 || scheduledFor.hour < 6)) (code: 'NIGHT', amount: 300),
+    ];
+    final discount = promoCode == null ? 0 : 500;
+    const base = 1200;
+    return Quote(
+      distanceMeters: 4200,
+      estimatedMinutes: 18,
+      basePrice: base,
+      surcharges: surcharges,
+      discountTotal: discount,
+      totalPrice: base + surcharges.fold<int>(0, (sum, s) => sum + s.amount) - discount,
+      promoCode: promoCode,
+    );
+  }
+
+  PlacedOrder _placed(int i, Map<String, Object?> item) => PlacedOrder(
+    id: '00000000-0000-4000-8000-00000000050$i',
+    reference: 'TR-4830$i',
+    status: 'SEARCHING_RIDER',
+    totalPrice: item['packageSize'] == 'XL' ? 1700 : 1200,
+  );
+
+  @override
+  Future<Placement> createOrder({
+    required String idempotencyKey,
+    required Map<String, Object?> shared,
+    required Map<String, Object?> delivery,
+    String? promoCode,
+  }) async {
+    created.add((key: idempotencyKey, body: {...shared, ...delivery, 'promoCode': ?promoCode}, batch: false));
+    final error = createError;
+    if (error != null) {
+      createError = null;
+      throw error;
+    }
+    return Placement(orders: [_placed(1, delivery)], pickupCode: '4821');
+  }
+
+  @override
+  Future<Placement> createBatch({
+    required String idempotencyKey,
+    required Map<String, Object?> shared,
+    required List<Map<String, Object?>> deliveries,
+  }) async {
+    created.add((key: idempotencyKey, body: {...shared, 'items': deliveries}, batch: true));
+    return Placement(
+      orders: [for (final (i, d) in deliveries.indexed) _placed(i + 1, d)],
+      pickupCode: '7302',
+      batchId: '00000000-0000-4000-8000-000000000600',
+    );
+  }
+
+  @override
+  Future<Payment> payOrder(String orderId, {required String phone, required String operator}) async {
+    paid.add((orderId: orderId, phone: phone, operator: operator));
+    return const Payment(
+      id: '00000000-0000-4000-8000-000000000700',
+      status: 'PENDING',
+      amount: 1200,
+      failureReason: null,
+    );
+  }
+
+  @override
+  Future<Payment> payment(String id) async {
+    final status = paymentStatuses.length > 1 ? paymentStatuses.removeAt(0) : paymentStatuses.first;
+    return Payment(id: id, status: status, amount: 1200, failureReason: null);
+  }
+
+  @override
+  Future<void> cancelOrder(String orderId, String reason) async => cancelled.add(orderId);
 
   @override
   Future<Merchant> becomeMerchant({

@@ -40,6 +40,10 @@ class DeliveryDraft {
   int codAmount = 0;
   String instructions = '';
 
+  /// Prix calculé au récapitulatif (null tant qu'il ne l'est pas).
+  Quote? quote;
+  String? quoteError;
+
   bool get hasRecipient => recipientName.trim().length >= 2 && RegExp(r'^6\d{8}$').hasMatch(recipientPhone);
 
   /// Adresse connue, ou demandée par lien (la commande attend alors qu'elle arrive).
@@ -55,6 +59,20 @@ class DeliveryDraft {
       (contents != 'OTHER' || description.trim().length >= 2) &&
       codAmount <= maxCod &&
       (declaredValue ?? 0) <= maxDeclaredValue;
+
+  /// Corps de la livraison pour l'API (C1). L'adresse doit être connue.
+  Map<String, Object?> toJson() => {
+    'dropoffAddressId': dropoff!.id,
+    'recipientName': recipientName.trim(),
+    'recipientPhone': '+237$recipientPhone',
+    'packageSize': size,
+    'packageContents': contents ?? 'OTHER',
+    if (description.trim().isNotEmpty) 'packageDescription': description.trim(),
+    'isFragile': fragile,
+    'declaredValue': ?declaredValue,
+    'codAmount': codAmount,
+    if (instructions.trim().isNotEmpty) 'instructions': instructions.trim(),
+  };
 }
 
 /// Brouillon de la nouvelle livraison, rempli étape par étape (enlèvement, destinataire,
@@ -70,6 +88,51 @@ class OrderDraft extends ChangeNotifier {
   DateTime? scheduledFor;
 
   bool get hasWhen => !later || scheduledFor != null;
+
+  /// Qui paie la course : l'expéditeur (SENDER) ou le destinataire à la livraison.
+  String feePayer = 'SENDER';
+
+  /// MOMO_MTN, MOMO_ORANGE, WALLET (solde Tara ou ventes de la boutique) ou CASH.
+  String? paymentMethod;
+
+  /// Numéro Mobile Money qui paie (chiffres nationaux).
+  String payerPhone = '';
+
+  /// Code promo appliqué (une seule livraison).
+  String? promoCode;
+
+  bool get senderPays => feePayer == 'SENDER';
+  bool get momo => senderPays && (paymentMethod?.startsWith('MOMO_') ?? false);
+
+  /// Toutes les livraisons ont leur adresse et leur prix.
+  bool get allQuoted => deliveries.every((d) => d.dropoff != null && d.quote != null);
+  int get total => deliveries.fold(0, (sum, d) => sum + (d.quote?.totalPrice ?? 0));
+
+  /// Moyen de paiement choisi et utilisable (Mobile Money : numéro valide, une livraison).
+  bool get hasPayment =>
+      !senderPays ||
+      switch (paymentMethod) {
+        'MOMO_MTN' || 'MOMO_ORANGE' => deliveries.length == 1 && RegExp(r'^6\d{8}$').hasMatch(payerPhone),
+        'WALLET' || 'CASH' => true,
+        _ => false,
+      };
+
+  /// Partie commune à toutes les livraisons pour l'API (C1, C3, C4).
+  Map<String, Object?> sharedJson() => {
+    'pickupAddressId': pickup!.id,
+    'isExpress': false,
+    if (later && scheduledFor != null) 'scheduledFor': scheduledFor!.toUtc().toIso8601String(),
+    'feePayer': feePayer,
+    // Le destinataire règle à la porte (espèces ou Mobile Money) : jamais le solde.
+    'feePaymentMethod': senderPays ? paymentMethod : 'CASH',
+  };
+
+  void removeDelivery(int index) {
+    if (deliveries.length <= 1) return;
+    deliveries.removeAt(index);
+    _current = _current.clamp(0, deliveries.length - 1);
+    notifyListeners();
+  }
 
   Address? get pickup => _pickup;
   set pickup(Address? value) {

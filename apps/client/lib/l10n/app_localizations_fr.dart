@@ -769,4 +769,187 @@ class AppLocalizationsFr extends AppLocalizations {
   String payoutSent(String amount) {
     return '$amount envoyés sur votre Mobile Money';
   }
+
+  @override
+  String get summaryTitle => 'Vérifiez et commandez';
+
+  @override
+  String get summaryBody => 'Le prix est calculé pour ce trajet et cette heure.';
+
+  @override
+  String get whenNowShort => 'Dès que possible';
+
+  @override
+  String deliveryNumber(int n) {
+    return 'Livraison $n';
+  }
+
+  @override
+  String waitingPoint(String name) {
+    return 'En attente du point de $name';
+  }
+
+  @override
+  String get removeDelivery => 'Retirer';
+
+  @override
+  String get addDelivery => 'Ajouter une livraison';
+
+  @override
+  String get addDeliveryHint => 'Jusqu’à 10 livraisons depuis le même enlèvement : un seul passage du livreur.';
+
+  @override
+  String get priceBase => 'Course';
+
+  @override
+  String get surchargeExpress => 'Express';
+
+  @override
+  String get surchargeHeavy => 'Colis XL';
+
+  @override
+  String get surchargeNight => 'Supplément de nuit';
+
+  @override
+  String get surchargeWeather => 'Supplément météo';
+
+  @override
+  String get surchargeOther => 'Supplément';
+
+  @override
+  String get discount => 'Réduction';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String get quoting => 'Calcul du prix…';
+
+  @override
+  String get promoLabel => 'Code promo';
+
+  @override
+  String get promoHint => 'Ex. BIENVENUE';
+
+  @override
+  String get applyPromo => 'Appliquer';
+
+  @override
+  String promoApplied(String code) {
+    return 'Code $code appliqué';
+  }
+
+  @override
+  String get whoPays => 'Qui paie la course ?';
+
+  @override
+  String get payerMe => 'Moi';
+
+  @override
+  String get payerRecipient => 'Le destinataire';
+
+  @override
+  String get recipientPaysBody => 'Le destinataire paie la course à la livraison, en espèces ou par Mobile Money.';
+
+  @override
+  String get paymentLabel => 'Moyen de paiement';
+
+  @override
+  String get payMtn => 'MTN Mobile Money';
+
+  @override
+  String get payOrange => 'Orange Money';
+
+  @override
+  String get payMomoBody => 'Vous validez le paiement sur votre téléphone.';
+
+  @override
+  String get payWallet => 'Solde Tara';
+
+  @override
+  String get payWalletShop => 'Mes ventes';
+
+  @override
+  String payWalletBody(String amount) {
+    return 'Disponible : $amount';
+  }
+
+  @override
+  String walletTooLow(String amount) {
+    return 'Disponible : $amount, pas assez pour cette commande.';
+  }
+
+  @override
+  String get payCash => 'Espèces à l’enlèvement';
+
+  @override
+  String get payCashBody => 'Vous payez le livreur quand il récupère le colis.';
+
+  @override
+  String get momoBatchOff => 'Mobile Money : une livraison à la fois pour l’instant.';
+
+  @override
+  String get payerPhoneLabel => 'Numéro qui paie';
+
+  @override
+  String orderFor(String amount) {
+    return 'Commander · $amount';
+  }
+
+  @override
+  String get orderSlide => 'Glisser pour commander';
+
+  @override
+  String get paymentRequired => 'Choisissez comment payer.';
+
+  @override
+  String linkPendingBlock(String name) {
+    return 'Attendez que $name place son point, ou placez-le vous-même.';
+  }
+
+  @override
+  String get payingTitle => 'Validez le paiement sur votre téléphone';
+
+  @override
+  String payingBody(String amount, String phone) {
+    return 'Une demande de $amount arrive sur le $phone : entrez votre code secret Mobile Money pour la valider.';
+  }
+
+  @override
+  String get paymentFailed => 'Le paiement n’a pas abouti.';
+
+  @override
+  String get retryPayment => 'Renvoyer la demande';
+
+  @override
+  String get cancelOrder => 'Annuler la commande';
+
+  @override
+  String get cancelReasonUnpaid => 'Paiement Mobile Money non abouti';
+
+  @override
+  String get placedTitle => 'Commande envoyée !';
+
+  @override
+  String get placedScheduledTitle => 'Livraison programmée !';
+
+  @override
+  String get pickupCodeLabel => 'Code d’enlèvement';
+
+  @override
+  String get pickupCodeHelp => 'Donnez-le au livreur quand il récupère le colis. Notez-le : il ne sera plus affiché.';
+
+  @override
+  String get searchingRider => 'Recherche d’un livreur…';
+
+  @override
+  String get riderFound => 'Livreur trouvé ! Il vient chercher le colis.';
+
+  @override
+  String scheduledPickup(String when) {
+    return 'Le livreur passera $when.';
+  }
+
+  @override
+  String get backHome => 'Retour à l’accueil';
 }

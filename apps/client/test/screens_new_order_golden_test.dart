@@ -9,9 +9,11 @@ import 'package:tara_client/features/home/home_flow.dart';
 import 'package:tara_client/features/order/address_editor.dart';
 import 'package:tara_client/features/order/new_order_flow.dart';
 import 'package:tara_client/features/order/when_step.dart';
+import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_client_api.dart';
@@ -21,6 +23,7 @@ import 'screens_home_golden_test.dart' show homeNow, person, shopOwner;
 
 /// Marchande avec sa boutique et sa maison enregistrées, et trois destinataires habituels.
 FakeClientApi orderApi() => FakeClientApi()
+  ..wallet0 = const Wallet(customerBalance: 0, merchantBalance: 128500, payoutSchedule: 'DAILY')
   ..saved = [
     fakeAddress('1', 'Rue Joss, immeuble Socar, 2e étage', label: 'Boutique', neighborhood: 'Akwa', verified: true),
     fakeAddress('2', 'Portail vert face à l’école publique', label: 'Maison', neighborhood: 'Bonapriso'),
@@ -57,11 +60,16 @@ List<Override> overrides(FakeClientApi api, {Future<bool> Function(Uri uri)? lau
   realtimeProvider.overrideWithValue(realtime ?? FakeRealtime()),
 ];
 
-Widget flow(FakeClientApi api, {Me me = shopOwner, VoidCallback? onClose, Future<bool> Function(Uri uri)? launcher}) =>
-    ProviderScope(
-      overrides: overrides(api, launcher: launcher),
-      child: NewOrderFlow(me: me, onClose: onClose ?? () {}, now: () => homeNow),
-    );
+Widget flow(
+  FakeClientApi api, {
+  Me me = shopOwner,
+  VoidCallback? onClose,
+  Future<bool> Function(Uri uri)? launcher,
+  FakeRealtime? realtime,
+}) => ProviderScope(
+  overrides: overrides(api, launcher: launcher, realtime: realtime),
+  child: NewOrderFlow(me: me, onClose: onClose ?? () {}, now: () => homeNow),
+);
 
 /// Étape 3 : enlèvement choisi d'office, destinataire pris dans les récents.
 Future<void> toPackage(WidgetTester tester) async {
@@ -77,6 +85,25 @@ Future<void> toWhen(WidgetTester tester) async {
   await toPackage(tester);
   await tester.tap(find.text('Documents'));
   await tester.tap(find.text('Continuer'));
+  await settle(tester);
+}
+
+/// Étape 5 : livraison « Documents » tout de suite, prix calculé.
+Future<void> toSummary(WidgetTester tester) async {
+  await toWhen(tester);
+  await tester.tap(find.text('Continuer'));
+  await settle(tester);
+}
+
+/// Glisser pour commander.
+Future<void> slideToOrder(WidgetTester tester) async {
+  await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
+  await settle(tester);
+}
+
+Future<void> tapVisible(WidgetTester tester, String text) async {
+  await tester.ensureVisible(find.text(text).last);
+  await tester.tap(find.text(text).last);
   await settle(tester);
 }
 
@@ -131,6 +158,15 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Étape 4 sur 5 · Quand'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_quand/${variant.name}.png'));
+    });
+
+    goldenTest('05 récapitulatif ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, flow(orderApi()));
+      await toSummary(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Étape 5 sur 5 · Récapitulatif'), findsOneWidget);
+      expect(find.text('Commander · 1\u00a0200\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/${variant.name}.png'));
     });
 
     goldenTest('05 colis ${variant.name}', (tester) async {
@@ -203,6 +239,30 @@ void main() {
         findsOneWidget,
       );
       await expectLater(capture, matchesGoldenFile('goldens/05_quand/programme_${brightness.name}.png'));
+    });
+
+    goldenTest('05 récapitulatif complet ${brightness.name}', (tester) async {
+      await pumpVariant(tester, variant, flow(orderApi()), surface: const Size(390, 1500));
+      await toSummary(tester);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/complet_${brightness.name}.png'));
+    });
+
+    goldenTest('05 paiement puis commande envoyée ${brightness.name}', (tester) async {
+      final api = orderApi();
+      final realtime = FakeRealtime();
+      await pumpVariant(tester, variant, flow(api, realtime: realtime));
+      await toSummary(tester);
+      await slideToOrder(tester);
+      expect(find.text('Validez le paiement sur votre téléphone'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_paiement/${brightness.name}.png'));
+
+      api.paymentStatuses = ['SUCCEEDED'];
+      await tester.pump(const Duration(seconds: 4));
+      await settle(tester);
+      realtime.emit('order.status', {'orderId': '00000000-0000-4000-8000-000000000501', 'status': 'ASSIGNED'});
+      await settle(tester);
+      expect(find.text('Livreur trouvé ! Il vient chercher le colis.'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_commande_envoyee/${brightness.name}.png'));
     });
 
     goldenTest('05 destinataire incomplet ${brightness.name}', (tester) async {
@@ -473,5 +533,205 @@ void main() {
     await tester.tap(find.text('Maintenant'));
     await settle(tester);
     expect(find.text('Jour'), findsNothing);
+  });
+
+  group('récapitulatif et commande (étape 5)', () {
+    testWidgets('Mobile Money : commande, demande de paiement, confirmation, livreur trouvé', (tester) async {
+      final api = orderApi();
+      final realtime = FakeRealtime();
+      var closed = 0;
+      await pumpVariant(tester, Variant.matrix.first, flow(api, realtime: realtime, onClose: () => closed++));
+      await toSummary(tester);
+      expect(api.quotes.single, {
+        'dropoff': '00000000-0000-4000-8000-000000000204',
+        'size': 'S',
+        'promo': null,
+        'at': null,
+      });
+      await slideToOrder(tester);
+
+      final order = api.created.single;
+      expect(order.batch, isFalse);
+      expect(order.key, hasLength(32));
+      expect(order.body, {
+        'pickupAddressId': '00000000-0000-4000-8000-000000000201',
+        'isExpress': false,
+        'feePayer': 'SENDER',
+        'feePaymentMethod': 'MOMO_MTN',
+        'dropoffAddressId': '00000000-0000-4000-8000-000000000204',
+        'recipientName': 'Marie Ngo',
+        'recipientPhone': '+237690112233',
+        'packageSize': 'S',
+        'packageContents': 'DOCUMENTS',
+        'isFragile': false,
+        'codAmount': 0,
+      });
+      expect(api.paid.single, (
+        orderId: '00000000-0000-4000-8000-000000000501',
+        phone: '+237677123456',
+        operator: 'MTN',
+      ));
+      expect(find.text('Validez le paiement sur votre téléphone'), findsOneWidget);
+      expect(find.textContaining('6\u00a077\u00a012\u00a034\u00a056'), findsOneWidget);
+
+      // Validé sur le téléphone : la relecture suivante le voit.
+      api.paymentStatuses = ['SUCCEEDED'];
+      await tester.pump(const Duration(seconds: 4));
+      await settle(tester);
+      expect(find.text('Commande envoyée !'), findsOneWidget);
+      expect(find.text('4 8 2 1'), findsOneWidget);
+      expect(find.text('TR-48301 · Marie Ngo'), findsOneWidget);
+      expect(find.text('Recherche d’un livreur…'), findsOneWidget);
+      expect(sounds.played, [TaraSound.sent]);
+
+      realtime.emit('order.status', {'orderId': '00000000-0000-4000-8000-000000000501', 'status': 'ASSIGNED'});
+      await settle(tester);
+      expect(find.text('Livreur trouvé ! Il vient chercher le colis.'), findsOneWidget);
+      expect(sounds.played, [TaraSound.sent, TaraSound.received]);
+
+      await tester.tap(find.text('Retour à l’accueil'));
+      await settle(tester);
+      expect(closed, 1);
+    });
+
+    testWidgets('paiement refusé : nouvelle demande, ou annulation de la commande', (tester) async {
+      final api = orderApi()..paymentStatuses = ['FAILED'];
+      var closed = 0;
+      await pumpVariant(tester, Variant.matrix.first, flow(api, onClose: () => closed++));
+      await toSummary(tester);
+      await slideToOrder(tester);
+      await tester.pump(const Duration(seconds: 4));
+      await settle(tester);
+      expect(find.text('Le paiement n’a pas abouti.'), findsOneWidget);
+      expect(sounds.played, [TaraSound.error]);
+
+      api.paymentStatuses = ['PENDING'];
+      await tester.tap(find.text('Renvoyer la demande'));
+      await settle(tester);
+      expect(api.paid, hasLength(2));
+      expect(find.text('Validez le paiement sur votre téléphone'), findsOneWidget);
+
+      api.paymentStatuses = ['FAILED'];
+      await tester.pump(const Duration(seconds: 4));
+      await settle(tester);
+      await tester.tap(find.text('Annuler la commande'));
+      await settle(tester);
+      expect(api.cancelled, ['00000000-0000-4000-8000-000000000501']);
+      expect(closed, 1);
+    });
+
+    testWidgets('espèces à l’enlèvement : commande envoyée sans paiement en ligne', (tester) async {
+      final api = orderApi();
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toSummary(tester);
+      await tapVisible(tester, 'Espèces à l’enlèvement');
+      await slideToOrder(tester);
+      expect(api.created.single.body['feePaymentMethod'], 'CASH');
+      expect(api.paid, isEmpty);
+      expect(find.text('Commande envoyée !'), findsOneWidget);
+    });
+
+    testWidgets('le destinataire paie : à la livraison, jamais par le solde', (tester) async {
+      final api = orderApi();
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toSummary(tester);
+      await tapVisible(tester, 'Mes ventes');
+      await tapVisible(tester, 'Le destinataire');
+      expect(find.text('Moyen de paiement'), findsNothing);
+      await slideToOrder(tester);
+      expect(api.created.single.body, containsPair('feePayer', 'RECIPIENT'));
+      expect(api.created.single.body, containsPair('feePaymentMethod', 'CASH'));
+    });
+
+    testWidgets('code promo : refusé avec le message du serveur, puis appliqué', (tester) async {
+      final api = orderApi();
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toSummary(tester);
+      await tester.enterText(find.widgetWithText(TextField, 'Ex. BIENVENUE'), 'faux');
+      await tapVisible(tester, 'Appliquer');
+      expect(find.text('Code promo inconnu.'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).first, 'bienvenue');
+      await tapVisible(tester, 'Appliquer');
+      expect(find.text('Code BIENVENUE appliqué'), findsOneWidget);
+      expect(find.text('−500\u00a0F'), findsOneWidget);
+      expect(find.text('Commander · 700\u00a0F'), findsOneWidget);
+      await slideToOrder(tester);
+      expect(api.created.single.body['promoCode'], 'BIENVENUE');
+    });
+
+    testWidgets('plusieurs livraisons : un lot, un seul code, Mobile Money remplacé', (tester) async {
+      final api = orderApi();
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1700));
+      await toSummary(tester);
+      await tapVisible(tester, 'Ajouter une livraison');
+      expect(find.text('Étape 2 sur 5 · Destinataire'), findsOneWidget);
+      await tester.tap(find.text('Jean'));
+      await settle(tester);
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      await tester.tap(find.text('Linge'));
+      await tester.tap(find.text('XL'));
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+
+      expect(find.text('Étape 5 sur 5 · Récapitulatif'), findsOneWidget);
+      expect(find.text('LIVRAISON 2'), findsOneWidget);
+      expect(find.text('Total · 2 livraisons'), findsOneWidget);
+      expect(find.text('Commander · 2\u00a0900\u00a0F'), findsOneWidget);
+      expect(find.text('Mobile Money : une livraison à la fois pour l’instant.'), findsNWidgets(2));
+      expect(find.text('Code promo'), findsNothing);
+
+      await slideToOrder(tester);
+      final batch = api.created.single;
+      expect(batch.batch, isTrue);
+      expect(batch.body['feePaymentMethod'], 'CASH');
+      expect(
+        [for (final item in batch.body['items']! as List) (item as Map)['recipientName']],
+        ['Marie Ngo', 'Jean Mbarga'],
+      );
+      expect(find.text('2 livraisons · TR-48301 → TR-48302'), findsOneWidget);
+      expect(find.text('7 3 0 2'), findsOneWidget);
+    });
+
+    testWidgets('ajout abandonné : retour au récapitulatif, sans livraison vide', (tester) async {
+      await pumpVariant(tester, Variant.matrix.first, flow(orderApi()), surface: const Size(390, 1500));
+      await toSummary(tester);
+      await tapVisible(tester, 'Ajouter une livraison');
+      await tester.tap(find.bySemanticsLabel('Retour'));
+      await settle(tester);
+      expect(find.text('Étape 5 sur 5 · Récapitulatif'), findsOneWidget);
+      expect(find.text('LIVRAISON 2'), findsNothing);
+    });
+
+    testWidgets('coupure pendant la commande : nouvel essai avec la même clé, sans doublon', (tester) async {
+      final api = orderApi()..createError = const ApiException(code: 'NETWORK', message: '');
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toSummary(tester);
+      await tapVisible(tester, 'Espèces à l’enlèvement');
+      await slideToOrder(tester);
+      expect(find.text('Commande envoyée !'), findsNothing);
+      await slideToOrder(tester);
+      expect(api.created, hasLength(2));
+      expect(api.created.first.key, api.created.last.key);
+      expect(find.text('Commande envoyée !'), findsOneWidget);
+    });
+
+    testWidgets('créneau dépassé au moment de commander : retour à l’heure de passage', (tester) async {
+      final api = orderApi()
+        ..createError = const ApiException(code: 'SCHEDULE_INVALID', message: 'Créneau invalide.', status: 422);
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toWhen(tester);
+      await tester.tap(find.text('Programmer'));
+      await settle(tester);
+      await tapVisible(tester, '11:00');
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      await tapVisible(tester, 'Espèces à l’enlèvement');
+      await slideToOrder(tester);
+      expect(find.text('Étape 4 sur 5 · Quand'), findsOneWidget);
+      await tester.ensureVisible(find.text('Choisissez une heure de passage.'));
+      expect(find.text('Choisissez une heure de passage.'), findsOneWidget);
+    });
   });
 }

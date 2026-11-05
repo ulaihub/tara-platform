@@ -30,6 +30,10 @@ void main() {
     'Recipient': Recipient.fields,
     'LocationLink': LocationLink.fields,
     'Quote': Quote.fields,
+    'Order': PlacedOrder.fields,
+    'CreatedOrder': Placement.singleFields,
+    'CreatedBatch': Placement.batchFields,
+    'Payment': Payment.fields,
   };
   test('portefeuille : ventes du jour de la boutique', () {
     final wallet = jsonEncode(schemas['Wallet']);

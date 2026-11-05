@@ -71,6 +71,63 @@ class ClientApi {
   Future<LocationLink> locationLink(String id) async =>
       LocationLink.fromJson(await _api.get('/location-links/$id') as Json);
 
+  /// Prix d'une livraison (C2), recalculé ensuite par le serveur à la création.
+  Future<Quote> quote({
+    required String pickupAddressId,
+    required String dropoffAddressId,
+    required String packageSize,
+    DateTime? scheduledFor,
+    String? promoCode,
+  }) async => Quote.fromJson(
+    await _api.post(
+      '/orders/quote',
+      body: {
+        'pickup': {'addressId': pickupAddressId},
+        'dropoff': {'addressId': dropoffAddressId},
+        'packageSize': packageSize,
+        'scheduledFor': ?scheduledFor?.toUtc().toIso8601String(),
+        'promoCode': ?promoCode,
+      },
+    ) as Json,
+  );
+
+  /// Nouvelle commande (C1). La même [idempotencyKey] renvoyée après une coupure rend la
+  /// commande déjà créée au lieu d'en créer une seconde.
+  Future<Placement> createOrder({
+    required String idempotencyKey,
+    required Json shared,
+    required Json delivery,
+    String? promoCode,
+  }) async => Placement.single(
+    await _api.post(
+      '/orders',
+      body: {...shared, ...delivery, 'promoCode': ?promoCode},
+      headers: {'Idempotency-Key': idempotencyKey},
+    ) as Json,
+  );
+
+  /// Jusqu'à 10 livraisons depuis le même enlèvement (C4), un seul code d'enlèvement.
+  Future<Placement> createBatch({
+    required String idempotencyKey,
+    required Json shared,
+    required List<Json> deliveries,
+  }) async => Placement.batch(
+    await _api.post(
+      '/orders/batch',
+      body: {...shared, 'items': deliveries},
+      headers: {'Idempotency-Key': idempotencyKey},
+    ) as Json,
+  );
+
+  /// Demande de paiement Mobile Money des frais d'une commande (validée sur le téléphone).
+  Future<Payment> payOrder(String orderId, {required String phone, required String operator}) async =>
+      Payment.fromJson(await _api.post('/orders/$orderId/pay', body: {'phone': phone, 'operator': operator}) as Json);
+
+  Future<Payment> payment(String id) async => Payment.fromJson(await _api.get('/payments/$id') as Json);
+
+  Future<void> cancelOrder(String orderId, String reason) =>
+      _api.post('/orders/$orderId/cancel', body: {'reason': reason});
+
   /// Nom affiché aux livreurs et dans les SMS des destinataires.
   Future<void> updateName(String fullName) => _api.send('PATCH', '/me', body: {'fullName': fullName});
 

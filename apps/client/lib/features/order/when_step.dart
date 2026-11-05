@@ -39,6 +39,16 @@ List<DateTime> scheduleDays(DateTime now) =>
         .where((day) => scheduleSlots(day, now).isNotEmpty)
         .toList();
 
+/// « aujourd'hui à 14:30 », « demain à 09:00 », « samedi 7 novembre à 20:00 ».
+String scheduleText(AppLocalizations l, String locale, DateTime slot, DateTime now) {
+  final today = DateTime(now.year, now.month, now.day);
+  return switch (DateTime(slot.year, slot.month, slot.day).difference(today).inDays) {
+    0 => l.todayAt(formatClock(slot)),
+    1 => l.tomorrowAt(formatClock(slot)),
+    _ => l.dateAt(DateFormat.MMMMEEEEd(locale).format(slot), formatClock(slot)),
+  };
+}
+
 /// Étape 4 · Quand : tout de suite, ou programmée sur un créneau jusqu'à J+7.
 class WhenStep extends StatefulWidget {
   const WhenStep({super.key, required this.draft, required this.showErrors, required this.now});
@@ -157,11 +167,7 @@ class _WhenStepState extends State<WhenStep> {
             InfoNote(
               icon: TaraIcons.clock,
               text: [
-                l.scheduledSummary(switch (DateTime(chosen.year, chosen.month, chosen.day).difference(today).inDays) {
-                  0 => l.todayAt(formatClock(chosen)),
-                  1 => l.tomorrowAt(formatClock(chosen)),
-                  _ => l.dateAt(DateFormat.MMMMEEEEd(locale).format(chosen), formatClock(chosen)),
-                }),
+                l.scheduledSummary(scheduleText(l, locale, chosen, now)),
                 if (isNightSlot(chosen)) l.nightSurcharge,
               ].join('\n'),
             )

@@ -375,3 +375,68 @@ class Quote {
   final int totalPrice;
   final String? promoCode;
 }
+
+/// Commande créée (C1) : de quoi la suivre et afficher son prix.
+@immutable
+class PlacedOrder {
+  const PlacedOrder({required this.id, required this.reference, required this.status, required this.totalPrice});
+  factory PlacedOrder.fromJson(Json json) => PlacedOrder(
+    id: _field(json, 'id'),
+    reference: _field(json, 'reference'),
+    status: _field(json, 'status'),
+    totalPrice: _field<num>(_field<Json>(json, 'pricing'), 'totalPrice').toInt(),
+  );
+  static const fields = ['id', 'reference', 'status', 'pricing'];
+
+  final String id;
+  final String reference;
+
+  /// CREATED tant que le paiement Mobile Money est attendu, puis SEARCHING_RIDER.
+  final String status;
+  final int totalPrice;
+}
+
+/// Résultat d'une création (une commande ou un lot) : commandes et code d'enlèvement,
+/// affiché une seule fois.
+@immutable
+class Placement {
+  const Placement({required this.orders, required this.pickupCode, this.batchId});
+
+  factory Placement.single(Json json) =>
+      Placement(orders: [PlacedOrder.fromJson(_field<Json>(json, 'order'))], pickupCode: _field(json, 'pickupCode'));
+
+  factory Placement.batch(Json json) => Placement(
+    orders: [for (final item in _field<List<Object?>>(json, 'orders')) PlacedOrder.fromJson(item! as Json)],
+    pickupCode: _field(json, 'pickupCode'),
+    batchId: _field(json, 'batchId'),
+  );
+
+  static const singleFields = ['order', 'pickupCode', 'replayed'];
+  static const batchFields = ['batchId', 'pickupCode', 'replayed', 'orders'];
+
+  final List<PlacedOrder> orders;
+  final String? pickupCode;
+  final String? batchId;
+
+  int get total => orders.fold(0, (sum, order) => sum + order.totalPrice);
+}
+
+/// Paiement Mobile Money (G1) : en attente de validation sur le téléphone, réussi ou refusé.
+@immutable
+class Payment {
+  const Payment({required this.id, required this.status, required this.amount, required this.failureReason});
+  factory Payment.fromJson(Json json) => Payment(
+    id: _field(json, 'id'),
+    status: _field(json, 'status'),
+    amount: _field<num>(json, 'amount').toInt(),
+    failureReason: _field(json, 'failureReason'),
+  );
+  static const fields = ['id', 'status', 'amount', 'failureReason'];
+
+  final String id;
+
+  /// PENDING, SUCCEEDED, FAILED ou CANCELLED.
+  final String status;
+  final int amount;
+  final String? failureReason;
+}

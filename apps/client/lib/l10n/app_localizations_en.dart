@@ -763,4 +763,188 @@ class AppLocalizationsEn extends AppLocalizations {
   String payoutSent(String amount) {
     return '$amount sent to your Mobile Money';
   }
+
+  @override
+  String get summaryTitle => 'Check and order';
+
+  @override
+  String get summaryBody => 'The price is worked out for this route and time.';
+
+  @override
+  String get whenNowShort => 'As soon as possible';
+
+  @override
+  String deliveryNumber(int n) {
+    return 'Delivery $n';
+  }
+
+  @override
+  String waitingPoint(String name) {
+    return 'Waiting for $name to place their point';
+  }
+
+  @override
+  String get removeDelivery => 'Remove';
+
+  @override
+  String get addDelivery => 'Add a delivery';
+
+  @override
+  String get addDeliveryHint => 'Up to 10 deliveries from the same pickup: one rider visit.';
+
+  @override
+  String get priceBase => 'Delivery';
+
+  @override
+  String get surchargeExpress => 'Express';
+
+  @override
+  String get surchargeHeavy => 'XL parcel';
+
+  @override
+  String get surchargeNight => 'Night surcharge';
+
+  @override
+  String get surchargeWeather => 'Weather surcharge';
+
+  @override
+  String get surchargeOther => 'Surcharge';
+
+  @override
+  String get discount => 'Discount';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String get quoting => 'Working out the price…';
+
+  @override
+  String get promoLabel => 'Promo code';
+
+  @override
+  String get promoHint => 'E.g. WELCOME';
+
+  @override
+  String get applyPromo => 'Apply';
+
+  @override
+  String promoApplied(String code) {
+    return 'Code $code applied';
+  }
+
+  @override
+  String get whoPays => 'Who pays for the delivery?';
+
+  @override
+  String get payerMe => 'Me';
+
+  @override
+  String get payerRecipient => 'The recipient';
+
+  @override
+  String get recipientPaysBody => 'The recipient pays on delivery, in cash or by Mobile Money.';
+
+  @override
+  String get paymentLabel => 'Payment method';
+
+  @override
+  String get payMtn => 'MTN Mobile Money';
+
+  @override
+  String get payOrange => 'Orange Money';
+
+  @override
+  String get payMomoBody => 'You confirm the payment on your phone.';
+
+  @override
+  String get payWallet => 'Tara balance';
+
+  @override
+  String get payWalletShop => 'My sales';
+
+  @override
+  String payWalletBody(String amount) {
+    return 'Available: $amount';
+  }
+
+  @override
+  String walletTooLow(String amount) {
+    return 'Available: $amount, not enough for this order.';
+  }
+
+  @override
+  String get payCash => 'Cash at pickup';
+
+  @override
+  String get payCashBody => 'You pay the rider when they collect the parcel.';
+
+  @override
+  String get momoBatchOff => 'Mobile Money: one delivery at a time for now.';
+
+  @override
+  String get payerPhoneLabel => 'Paying number';
+
+  @override
+  String orderFor(String amount) {
+    return 'Order · $amount';
+  }
+
+  @override
+  String get orderSlide => 'Slide to order';
+
+  @override
+  String get paymentRequired => 'Choose how to pay.';
+
+  @override
+  String linkPendingBlock(String name) {
+    return 'Wait for $name to place their point, or place it yourself.';
+  }
+
+  @override
+  String get payingTitle => 'Confirm the payment on your phone';
+
+  @override
+  String payingBody(String amount, String phone) {
+    return 'A $amount request is arriving on $phone: enter your Mobile Money PIN to confirm it.';
+  }
+
+  @override
+  String get paymentFailed => 'The payment didn’t go through.';
+
+  @override
+  String get retryPayment => 'Send the request again';
+
+  @override
+  String get cancelOrder => 'Cancel the order';
+
+  @override
+  String get cancelReasonUnpaid => 'Mobile Money payment not completed';
+
+  @override
+  String get placedTitle => 'Order sent!';
+
+  @override
+  String get placedScheduledTitle => 'Delivery scheduled!';
+
+  @override
+  String get pickupCodeLabel => 'Pickup code';
+
+  @override
+  String get pickupCodeHelp =>
+      'Give it to the rider when they collect the parcel. Note it down: it won’t be shown again.';
+
+  @override
+  String get searchingRider => 'Looking for a rider…';
+
+  @override
+  String get riderFound => 'Rider found! They’re coming for the parcel.';
+
+  @override
+  String scheduledPickup(String when) {
+    return 'The rider will come $when.';
+  }
+
+  @override
+  String get backHome => 'Back to home';
 }

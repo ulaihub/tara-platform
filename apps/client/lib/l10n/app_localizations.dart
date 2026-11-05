@@ -1501,6 +1501,336 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{amount} envoyés sur votre Mobile Money'**
   String payoutSent(String amount);
+
+  /// No description provided for @summaryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez et commandez'**
+  String get summaryTitle;
+
+  /// No description provided for @summaryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le prix est calculé pour ce trajet et cette heure.'**
+  String get summaryBody;
+
+  /// No description provided for @whenNowShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dès que possible'**
+  String get whenNowShort;
+
+  /// No description provided for @deliveryNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison {n}'**
+  String deliveryNumber(int n);
+
+  /// No description provided for @waitingPoint.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente du point de {name}'**
+  String waitingPoint(String name);
+
+  /// No description provided for @removeDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get removeDelivery;
+
+  /// No description provided for @addDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une livraison'**
+  String get addDelivery;
+
+  /// No description provided for @addDeliveryHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jusqu’à 10 livraisons depuis le même enlèvement : un seul passage du livreur.'**
+  String get addDeliveryHint;
+
+  /// No description provided for @priceBase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course'**
+  String get priceBase;
+
+  /// No description provided for @surchargeExpress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Express'**
+  String get surchargeExpress;
+
+  /// No description provided for @surchargeHeavy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis XL'**
+  String get surchargeHeavy;
+
+  /// No description provided for @surchargeNight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supplément de nuit'**
+  String get surchargeNight;
+
+  /// No description provided for @surchargeWeather.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supplément météo'**
+  String get surchargeWeather;
+
+  /// No description provided for @surchargeOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supplément'**
+  String get surchargeOther;
+
+  /// No description provided for @discount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduction'**
+  String get discount;
+
+  /// No description provided for @totalLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get totalLabel;
+
+  /// No description provided for @quoting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calcul du prix…'**
+  String get quoting;
+
+  /// No description provided for @promoLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code promo'**
+  String get promoLabel;
+
+  /// No description provided for @promoHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. BIENVENUE'**
+  String get promoHint;
+
+  /// No description provided for @applyPromo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer'**
+  String get applyPromo;
+
+  /// No description provided for @promoApplied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code {code} appliqué'**
+  String promoApplied(String code);
+
+  /// No description provided for @whoPays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui paie la course ?'**
+  String get whoPays;
+
+  /// No description provided for @payerMe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moi'**
+  String get payerMe;
+
+  /// No description provided for @payerRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le destinataire'**
+  String get payerRecipient;
+
+  /// No description provided for @recipientPaysBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le destinataire paie la course à la livraison, en espèces ou par Mobile Money.'**
+  String get recipientPaysBody;
+
+  /// No description provided for @paymentLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyen de paiement'**
+  String get paymentLabel;
+
+  /// No description provided for @payMtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'MTN Mobile Money'**
+  String get payMtn;
+
+  /// No description provided for @payOrange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Orange Money'**
+  String get payOrange;
+
+  /// No description provided for @payMomoBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous validez le paiement sur votre téléphone.'**
+  String get payMomoBody;
+
+  /// No description provided for @payWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara'**
+  String get payWallet;
+
+  /// No description provided for @payWalletShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes ventes'**
+  String get payWalletShop;
+
+  /// No description provided for @payWalletBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible : {amount}'**
+  String payWalletBody(String amount);
+
+  /// No description provided for @walletTooLow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible : {amount}, pas assez pour cette commande.'**
+  String walletTooLow(String amount);
+
+  /// No description provided for @payCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces à l’enlèvement'**
+  String get payCash;
+
+  /// No description provided for @payCashBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous payez le livreur quand il récupère le colis.'**
+  String get payCashBody;
+
+  /// No description provided for @momoBatchOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money : une livraison à la fois pour l’instant.'**
+  String get momoBatchOff;
+
+  /// No description provided for @payerPhoneLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro qui paie'**
+  String get payerPhoneLabel;
+
+  /// No description provided for @orderFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commander · {amount}'**
+  String orderFor(String amount);
+
+  /// No description provided for @orderSlide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser pour commander'**
+  String get orderSlide;
+
+  /// No description provided for @paymentRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez comment payer.'**
+  String get paymentRequired;
+
+  /// No description provided for @linkPendingBlock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attendez que {name} place son point, ou placez-le vous-même.'**
+  String linkPendingBlock(String name);
+
+  /// No description provided for @payingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validez le paiement sur votre téléphone'**
+  String get payingTitle;
+
+  /// No description provided for @payingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une demande de {amount} arrive sur le {phone} : entrez votre code secret Mobile Money pour la valider.'**
+  String payingBody(String amount, String phone);
+
+  /// No description provided for @paymentFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le paiement n’a pas abouti.'**
+  String get paymentFailed;
+
+  /// No description provided for @retryPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer la demande'**
+  String get retryPayment;
+
+  /// No description provided for @cancelOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la commande'**
+  String get cancelOrder;
+
+  /// No description provided for @cancelReasonUnpaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement Mobile Money non abouti'**
+  String get cancelReasonUnpaid;
+
+  /// No description provided for @placedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande envoyée !'**
+  String get placedTitle;
+
+  /// No description provided for @placedScheduledTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison programmée !'**
+  String get placedScheduledTitle;
+
+  /// No description provided for @pickupCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d’enlèvement'**
+  String get pickupCodeLabel;
+
+  /// No description provided for @pickupCodeHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez-le au livreur quand il récupère le colis. Notez-le : il ne sera plus affiché.'**
+  String get pickupCodeHelp;
+
+  /// No description provided for @searchingRider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche d’un livreur…'**
+  String get searchingRider;
+
+  /// No description provided for @riderFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur trouvé ! Il vient chercher le colis.'**
+  String get riderFound;
+
+  /// No description provided for @scheduledPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur passera {when}.'**
+  String scheduledPickup(String when);
+
+  /// No description provided for @backHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à l’accueil'**
+  String get backHome;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
