@@ -13,6 +13,7 @@ import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/components/terms_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
+import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -24,7 +25,9 @@ import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/scoped_page.dart';
+import '../home/home_screen.dart' show walletProvider;
 import '../legal/terms_screen.dart';
+import '../wallet/wallet_screen.dart';
 
 /// Onglet Profil de l'expéditeur (non dessiné : style Tara) : identité et boutique, code de
 /// parrainage à partager (C6), affichage (thème, langue, animations), support, déconnexion.
@@ -106,6 +109,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          _WalletRow(me: me),
           if (me.referralCode case final code?) ...[
             const SizedBox(height: 20),
             SectionHeader(title: l.referralTitle),
@@ -372,6 +377,36 @@ class _TermsCard extends ConsumerWidget {
           row('expediteurs', l.termsTitle),
           row(LegalApi.privacyDocument, l.termsPrivacyTitle),
         ],
+      ),
+    );
+  }
+}
+
+/// Accès au portefeuille : solde Tara (et ventes à recevoir d'une boutique).
+class _WalletRow extends ConsumerWidget {
+  const _WalletRow({required this.me});
+
+  final Me me;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final wallet = ref.watch(walletProvider).value;
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      child: ListRow(
+        leading: const IconTile(icon: TaraIcons.wallet),
+        title: l.walletTitle,
+        subtitle: wallet == null ? null : l.walletBalanceTile('${formatAmount(wallet.customerBalance)}\u00a0F'),
+        trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+        onTap: () => unawaited(
+          Navigator.of(
+            context,
+          ).push(scopedPage<void>(context, (route) => WalletScreen(me: me, onBack: () => Navigator.of(route).pop()))),
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 /// Erreur renvoyée par l'API (`{ error: { code, message, details } }`) ou par le réseau.
@@ -10,7 +12,7 @@ class ApiException implements Exception {
     if (response == null) {
       return ApiException(code: network, message: error.message ?? 'Réseau indisponible');
     }
-    final body = response.data;
+    final body = _decoded(response.data);
     final payload = body is Map ? body['error'] : null;
     if (payload is Map) {
       final details = payload['details'];
@@ -22,6 +24,16 @@ class ApiException implements Exception {
       );
     }
     return ApiException(code: 'HTTP_${response.statusCode}', message: '', status: response.statusCode);
+  }
+
+  /// Réponse en octets (téléchargement d'un fichier) : l'erreur JSON est relue.
+  static Object? _decoded(Object? data) {
+    if (data is! List<int>) return data;
+    try {
+      return jsonDecode(utf8.decode(data));
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Pas de réseau, délai dépassé : l'action peut être mise en file et rejouée.

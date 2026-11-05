@@ -1364,4 +1364,161 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsPrivacyTitle => 'Privacy policy';
+
+  @override
+  String get walletTitle => 'Wallet';
+
+  @override
+  String get shopToReceive => 'Sales to receive';
+
+  @override
+  String shopPayoutDaily(String hour, String phone) {
+    return 'Paid out every day at $hour:00 to $phone.';
+  }
+
+  @override
+  String shopPayoutOnDemand(String phone) {
+    return 'Paid out on request to $phone.';
+  }
+
+  @override
+  String shopToday(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count deliveries',
+      one: '1 delivery',
+      zero: 'no deliveries',
+    );
+    return 'Today: $amount collected · $_temp0';
+  }
+
+  @override
+  String shopDebt(String amount) {
+    return 'Failure fees due: $amount. They will be taken from your next sales; above 3,000 F, new orders wait until they are paid.';
+  }
+
+  @override
+  String payoutOpen(String amount) {
+    return 'Payout in progress: $amount';
+  }
+
+  @override
+  String payoutNow(String amount) {
+    return 'Receive $amount now';
+  }
+
+  @override
+  String get payoutRequested => 'Payout requested: the money is on its way to your Mobile Money.';
+
+  @override
+  String get taraBalance => 'Tara balance';
+
+  @override
+  String get taraBalanceBody => 'Pays for your deliveries and any failure fees.';
+
+  @override
+  String get topUpAction => 'Top up';
+
+  @override
+  String get withdrawAction => 'Withdraw';
+
+  @override
+  String get topUpHowMuch => 'How much do you want to add?';
+
+  @override
+  String topUpDone(String amount) {
+    return 'Balance topped up by $amount.';
+  }
+
+  @override
+  String withdrawBody(String amount, String phone) {
+    return 'Your whole balance ($amount) goes to your number $phone.';
+  }
+
+  @override
+  String withdrawConfirm(String amount) {
+    return 'Withdraw $amount';
+  }
+
+  @override
+  String get withdrawDone => 'Withdrawal requested: the money is on its way to your Mobile Money.';
+
+  @override
+  String get movements => 'Activity';
+
+  @override
+  String get movementsShop => 'Shop';
+
+  @override
+  String get movementsBalance => 'Tara balance';
+
+  @override
+  String get movementsEmpty => 'No activity yet.';
+
+  @override
+  String get seeMore => 'See more';
+
+  @override
+  String get lineCodCollected => 'Sale collected';
+
+  @override
+  String get lineOrderCharged => 'Delivery paid';
+
+  @override
+  String get lineOrderReleased => 'Fees returned (cancelled)';
+
+  @override
+  String get lineFailureFee => 'Failure fee';
+
+  @override
+  String get lineCredit => 'Credit from Tara';
+
+  @override
+  String get lineTopUp => 'Top-up';
+
+  @override
+  String get linePayout => 'Payout';
+
+  @override
+  String get lineWithdrawal => 'Withdrawal';
+
+  @override
+  String get linePayoutFailed => 'Payout failed, amount returned';
+
+  @override
+  String get lineRefund => 'Refund';
+
+  @override
+  String get payoutsTitle => 'Payouts';
+
+  @override
+  String get payoutStatusDone => 'Received';
+
+  @override
+  String get payoutStatusOpen => 'In progress';
+
+  @override
+  String get payoutStatusFailed => 'Failed, amount returned';
+
+  @override
+  String get statementsTitle => 'Monthly statements';
+
+  @override
+  String get statementsBody => 'Each month’s PDF statement: sales, fees, payouts, balances.';
+
+  @override
+  String statementCurrent(String month) {
+    return '$month (in progress)';
+  }
+
+  @override
+  String statementShare(String month) {
+    return 'Tara statement for $month';
+  }
+
+  @override
+  String walletBalanceTile(String amount) {
+    return 'Tara balance: $amount';
+  }
 }

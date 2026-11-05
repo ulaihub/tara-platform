@@ -89,6 +89,8 @@ export const WalletDto = z
         payoutSchedule: z.enum(['DAILY', 'ON_DEMAND']),
         plan: z.enum(['FREE', 'PRO', 'BUSINESS']),
         payoutPhone: z.string(),
+        /** Heure du reversement quotidien (heure du Cameroun), 18 par défaut. */
+        payoutHour: z.int(),
         /** Encaissé à la livraison aujourd'hui (heure du Cameroun) et livraisons du jour. */
         todaySales: z.int(),
         todayDeliveries: z.int(),

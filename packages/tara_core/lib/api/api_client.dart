@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
@@ -49,6 +50,12 @@ class ApiClient {
 
   Future<Object?> put(String path, {Object? body}) => send('PUT', path, body: body);
 
+  /// Fichier (relevé PDF) : octets bruts de la réponse.
+  Future<Uint8List> getBytes(String path, {Map<String, Object?>? query}) async {
+    final data = await send('GET', path, query: query, responseType: ResponseType.bytes);
+    return data is Uint8List ? data : Uint8List.fromList((data! as List).cast<int>());
+  }
+
   Future<Object?> delete(String path) => send('DELETE', path);
 
   Future<Object?> send(
@@ -59,20 +66,21 @@ class ApiClient {
     bool auth = true,
     Map<String, String>? headers,
     void Function(int sent, int total)? onSendProgress,
+    ResponseType? responseType,
   }) async {
     var session = auth ? await store.read() : null;
     if (session != null && session.accessExpiresAt.isBefore(DateTime.now().add(_refreshMargin))) {
       session = await _refresh(session);
     }
     try {
-      return await _request(method, path, body, query, session, headers, onSendProgress);
+      return await _request(method, path, body, query, session, headers, onSendProgress, responseType);
     } on ApiException catch (error) {
       if (error.status != 401 || session == null) rethrow;
       // Jeton refusé (révoqué, horloge du téléphone décalée) : un renouvellement, un essai.
       session = await _refresh(session);
       // Un formulaire (photo) ne s'envoie qu'une fois : on en rejoue une copie.
       final retryBody = body is FormData ? body.clone() : body;
-      return _request(method, path, retryBody, query, session, headers, onSendProgress);
+      return _request(method, path, retryBody, query, session, headers, onSendProgress, responseType);
     }
   }
 
@@ -84,6 +92,7 @@ class ApiClient {
     StoredSession? session,
     Map<String, String>? headers, [
     void Function(int sent, int total)? onSendProgress,
+    ResponseType? responseType,
   ]) async {
     try {
       final response = await dio.request<Object?>(
@@ -93,6 +102,7 @@ class ApiClient {
         onSendProgress: onSendProgress,
         options: Options(
           method: method,
+          responseType: responseType,
           headers: {
             'Accept-Language': _locale(),
             if (session != null) 'Authorization': 'Bearer ${session.accessToken}',

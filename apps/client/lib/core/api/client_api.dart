@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:tara_core/api/api_client.dart';
 
 import 'client_models.dart';
@@ -151,6 +153,45 @@ class ClientApi {
       headers: {'Idempotency-Key': key},
     ) as Json,
   );
+
+  /// Historique ligne par ligne (G2) : [account] `customer` (solde Tara) ou `merchant`.
+  Future<({List<WalletLine> items, String? nextCursor})> walletLines({
+    required String account,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    final json = await _api.get(
+      '/me/wallet/transactions',
+      query: {'account': account, 'limit': limit, 'cursor': ?cursor},
+    ) as Json;
+    return (
+      items: [for (final item in (json['items']! as List).cast<Json>()) WalletLine.fromJson(item)],
+      nextCursor: json['nextCursor'] as String?,
+    );
+  }
+
+  /// Reversements de la boutique et retraits du solde, les plus récents d'abord.
+  Future<List<Payout>> payouts({int limit = 10}) async {
+    final json = await _api.get('/me/payouts', query: {'limit': limit}) as Json;
+    return [for (final item in (json['items']! as List).cast<Json>()) Payout.fromJson(item)];
+  }
+
+  /// Reversement immédiat de la boutique (offres Pro et Business, G3).
+  Future<Payout> payoutNow({required String key}) async =>
+      Payout.fromJson(await _api.post('/me/merchant/payouts', headers: {'Idempotency-Key': key}) as Json);
+
+  /// Retrait du solde Tara vers le Mobile Money de l'expéditeur (G8) : tout le disponible.
+  Future<Payout> withdraw({required String phone, required String operator, required String key}) async =>
+      Payout.fromJson(
+        await _api.post(
+          '/me/wallet/refund',
+          body: {'phone': phone, 'operator': operator},
+          headers: {'Idempotency-Key': key},
+        ) as Json,
+      );
+
+  /// Relevé mensuel PDF de la boutique (G7), [month] au format AAAA-MM.
+  Future<Uint8List> statement(String month) => _api.getBytes('/me/merchant/statements/$month');
 
   /// Après un échec de livraison (E6) : `RETRY` (nouvelle tentative) ou `RETURN` (retour).
   Future<void> failureDecision(String orderId, String decision) =>

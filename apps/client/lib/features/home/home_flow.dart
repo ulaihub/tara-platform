@@ -21,6 +21,7 @@ import '../order/new_order_flow.dart';
 import '../orders/orders_screen.dart';
 import '../profile/profile_screen.dart';
 import '../tracking/tracking_screen.dart';
+import '../wallet/wallet_screen.dart';
 import 'home_screen.dart';
 
 /// Onglets de l'expéditeur (Accueil, Commandes, Profil) : le contenu défile sous la barre en
@@ -153,6 +154,16 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     ),
   );
 
+  /// Portefeuille (G1, G2, G3, G7), en plein écran.
+  void _openWallet() => unawaited(
+    Navigator.of(context).push(
+      scopedPage<void>(
+        context,
+        (route) => WalletScreen(me: widget.me, onBack: () => Navigator.of(route).pop(), now: widget.now),
+      ),
+    ),
+  );
+
   /// Suivi d'une commande (F1), en plein écran.
   void _openOrder(String orderId) =>
       unawaited(Navigator.of(context).push(scopedPage<void>(context, (c) => _tracking(c, orderId))));
@@ -184,7 +195,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                 onNewOrder: _newOrder,
                 onLocationLink: () {},
                 onOpenOrder: (order) => _openOrder(order.id),
-                onWallet: () {},
+                onWallet: _openWallet,
                 now: widget.now,
               ),
             },

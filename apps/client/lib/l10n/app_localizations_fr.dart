@@ -1369,4 +1369,161 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get termsPrivacyTitle => 'Politique de confidentialité';
+
+  @override
+  String get walletTitle => 'Portefeuille';
+
+  @override
+  String get shopToReceive => 'Ventes à recevoir';
+
+  @override
+  String shopPayoutDaily(String hour, String phone) {
+    return 'Reversées chaque jour à $hour h sur le $phone.';
+  }
+
+  @override
+  String shopPayoutOnDemand(String phone) {
+    return 'Reversées à votre demande sur le $phone.';
+  }
+
+  @override
+  String shopToday(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count livraisons',
+      one: '1 livraison',
+      zero: 'aucune livraison',
+    );
+    return 'Aujourd’hui : $amount encaissés · $_temp0';
+  }
+
+  @override
+  String shopDebt(String amount) {
+    return 'Frais d’échec à régler : $amount. Ils seront pris sur vos prochaines ventes ; au-delà de 3 000 F, vos nouvelles commandes attendent le règlement.';
+  }
+
+  @override
+  String payoutOpen(String amount) {
+    return 'Reversement en cours : $amount';
+  }
+
+  @override
+  String payoutNow(String amount) {
+    return 'Recevoir $amount maintenant';
+  }
+
+  @override
+  String get payoutRequested => 'Reversement demandé : l’argent arrive sur votre Mobile Money.';
+
+  @override
+  String get taraBalance => 'Solde Tara';
+
+  @override
+  String get taraBalanceBody => 'Sert à payer vos livraisons et, s’il y en a, les frais d’échec.';
+
+  @override
+  String get topUpAction => 'Recharger';
+
+  @override
+  String get withdrawAction => 'Retirer';
+
+  @override
+  String get topUpHowMuch => 'Combien voulez-vous ajouter ?';
+
+  @override
+  String topUpDone(String amount) {
+    return 'Solde rechargé de $amount.';
+  }
+
+  @override
+  String withdrawBody(String amount, String phone) {
+    return 'Tout votre solde ($amount) part sur votre numéro $phone.';
+  }
+
+  @override
+  String withdrawConfirm(String amount) {
+    return 'Retirer $amount';
+  }
+
+  @override
+  String get withdrawDone => 'Retrait demandé : l’argent arrive sur votre Mobile Money.';
+
+  @override
+  String get movements => 'Mouvements';
+
+  @override
+  String get movementsShop => 'Boutique';
+
+  @override
+  String get movementsBalance => 'Solde Tara';
+
+  @override
+  String get movementsEmpty => 'Aucun mouvement pour l’instant.';
+
+  @override
+  String get seeMore => 'Voir plus';
+
+  @override
+  String get lineCodCollected => 'Vente encaissée';
+
+  @override
+  String get lineOrderCharged => 'Livraison payée';
+
+  @override
+  String get lineOrderReleased => 'Frais rendus (annulation)';
+
+  @override
+  String get lineFailureFee => 'Frais d’échec';
+
+  @override
+  String get lineCredit => 'Avoir de Tara';
+
+  @override
+  String get lineTopUp => 'Recharge';
+
+  @override
+  String get linePayout => 'Reversement';
+
+  @override
+  String get lineWithdrawal => 'Retrait';
+
+  @override
+  String get linePayoutFailed => 'Reversement échoué, montant rendu';
+
+  @override
+  String get lineRefund => 'Remboursement';
+
+  @override
+  String get payoutsTitle => 'Reversements';
+
+  @override
+  String get payoutStatusDone => 'Reçu';
+
+  @override
+  String get payoutStatusOpen => 'En cours';
+
+  @override
+  String get payoutStatusFailed => 'Échoué, montant rendu';
+
+  @override
+  String get statementsTitle => 'Relevés mensuels';
+
+  @override
+  String get statementsBody => 'Le relevé PDF de chaque mois : encaissements, frais, reversements, soldes.';
+
+  @override
+  String statementCurrent(String month) {
+    return '$month (en cours)';
+  }
+
+  @override
+  String statementShare(String month) {
+    return 'Relevé Tara de $month';
+  }
+
+  @override
+  String walletBalanceTile(String amount) {
+    return 'Solde Tara : $amount';
+  }
 }

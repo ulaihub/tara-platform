@@ -10805,6 +10805,9 @@
               "payoutPhone": {
                 "type": "string"
               },
+              "payoutHour": {
+                "type": "integer"
+              },
               "todaySales": {
                 "type": "integer"
               },
@@ -10817,6 +10820,7 @@
               "payoutSchedule",
               "plan",
               "payoutPhone",
+              "payoutHour",
               "todaySales",
               "todayDeliveries"
             ],

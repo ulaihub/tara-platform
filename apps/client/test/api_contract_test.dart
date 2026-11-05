@@ -36,6 +36,8 @@ void main() {
     'Payment': Payment.fields,
     'Rating': OrderRating.fields,
     'LegalDocument': LegalDocument.fields,
+    'WalletLine': WalletLine.fields,
+    'Payout': Payout.fields,
     'TermsStatus': TermsStatus.fields,
   };
   test('commande suivie et livreur conformes au contrat', () {
@@ -52,9 +54,17 @@ void main() {
     expect(properties, containsAll(OrderFailure.fields));
   });
 
-  test('portefeuille : ventes du jour de la boutique', () {
-    final wallet = jsonEncode(schemas['Wallet']);
-    expect(wallet, allOf(contains('"todaySales"'), contains('"todayDeliveries"')));
+  test('portefeuille : champs de la boutique lus par l’app', () {
+    final wallet = Map<String, Object?>.from(schemas['Wallet']! as Map);
+    final merchant = Map<String, Object?>.from((wallet['properties']! as Map)['merchant']! as Map);
+    final variants = [
+      merchant,
+      ...((merchant['anyOf'] ?? merchant['oneOf'] ?? <Object?>[]) as List).cast<Map<String, Object?>>(),
+    ];
+    final properties = {
+      for (final v in variants) ...((v['properties'] ?? <String, Object?>{}) as Map).keys.cast<String>(),
+    };
+    expect(properties, containsAll(Wallet.merchantFields));
   });
 
   for (final MapEntry(key: schema, value: fields) in models.entries) {

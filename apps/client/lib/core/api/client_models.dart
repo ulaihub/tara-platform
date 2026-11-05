@@ -184,24 +184,46 @@ class Wallet {
     required this.payoutSchedule,
     this.todaySales = 0,
     this.todayDeliveries = 0,
+    this.plan,
+    this.payoutPhone,
+    this.payoutHour = 18,
+    this.openPayout,
   });
 
   factory Wallet.fromJson(Json json) {
     final merchant = json['merchant'] as Json?;
+    final open = json['openPayout'] as Json?;
     return Wallet(
       customerBalance: _field<num>(_field<Json>(json, 'customer'), 'balance').toInt(),
       merchantBalance: merchant == null ? null : _field<num>(merchant, 'balance').toInt(),
       payoutSchedule: merchant == null ? null : _field<String>(merchant, 'payoutSchedule'),
       todaySales: merchant == null ? 0 : _field<num>(merchant, 'todaySales').toInt(),
       todayDeliveries: merchant == null ? 0 : _field<num>(merchant, 'todayDeliveries').toInt(),
+      plan: merchant == null ? null : _field<String>(merchant, 'plan'),
+      payoutPhone: merchant == null ? null : _field<String>(merchant, 'payoutPhone'),
+      payoutHour: merchant == null ? 18 : _field<num>(merchant, 'payoutHour').toInt(),
+      openPayout: open == null
+          ? null
+          : (amount: _field<num>(open, 'amount').toInt(), status: _field<String>(open, 'status')),
     );
   }
 
-  static const fields = ['customer', 'merchant'];
+  static const fields = ['customer', 'merchant', 'openPayout'];
+
+  /// Champs lus dans `merchant` (vérifiés contre le contrat de l'API).
+  static const merchantFields = [
+    'balance',
+    'payoutSchedule',
+    'plan',
+    'payoutPhone',
+    'payoutHour',
+    'todaySales',
+    'todayDeliveries',
+  ];
 
   final int customerBalance;
 
-  /// Ventes encaissées pas encore reversées (null sans boutique).
+  /// Ventes encaissées pas encore reversées (null sans boutique). Négatif : frais d'échec dus.
   final int? merchantBalance;
 
   /// DAILY (chaque jour) ou ON_DEMAND (à la demande).
@@ -210,6 +232,90 @@ class Wallet {
   /// Boutique : encaissé à la livraison aujourd'hui, et livraisons du jour.
   final int todaySales;
   final int todayDeliveries;
+
+  /// FREE, PRO ou BUSINESS : le reversement à la demande est réservé aux offres payantes.
+  final String? plan;
+
+  /// Numéro Mobile Money des reversements de la boutique.
+  final String? payoutPhone;
+
+  /// Heure du reversement quotidien (heure du Cameroun).
+  final int payoutHour;
+
+  /// Reversement ou retrait en cours.
+  final ({int amount, String status})? openPayout;
+
+  bool get canPayoutNow => plan != null && plan != 'FREE';
+}
+
+/// Ligne du portefeuille (G2) : recharge, vente encaissée, frais, reversement…
+@immutable
+class WalletLine {
+  const WalletLine({
+    required this.id,
+    required this.at,
+    required this.kind,
+    required this.description,
+    required this.amount,
+    required this.orderReference,
+  });
+  factory WalletLine.fromJson(Json json) => WalletLine(
+    id: _field(json, 'id'),
+    at: DateTime.parse(_field(json, 'at')),
+    kind: _field(json, 'kind'),
+    description: _field(json, 'description'),
+    amount: _field<num>(json, 'amount').toInt(),
+    orderReference: _field(json, 'orderReference'),
+  );
+  static const fields = ['id', 'at', 'kind', 'description', 'amount', 'orderReference'];
+
+  final String id;
+  final DateTime at;
+
+  /// Nature de l'écriture (COD_COLLECTED, PAYOUT_REQUESTED…).
+  final String kind;
+
+  /// Libellé du serveur (en français), repris si la nature n'a pas de libellé dans l'app.
+  final String description;
+
+  /// Positif : le solde augmente.
+  final int amount;
+  final String? orderReference;
+}
+
+/// Reversement de la boutique ou retrait du solde vers Mobile Money (G3, G8).
+@immutable
+class Payout {
+  const Payout({
+    required this.id,
+    required this.beneficiary,
+    required this.amount,
+    required this.status,
+    required this.requestedAt,
+    required this.completedAt,
+  });
+  factory Payout.fromJson(Json json) => Payout(
+    id: _field(json, 'id'),
+    beneficiary: _field(json, 'beneficiary'),
+    amount: _field<num>(json, 'amount').toInt(),
+    status: _field(json, 'status'),
+    requestedAt: DateTime.parse(_field(json, 'requestedAt')),
+    completedAt: json['completedAt'] == null ? null : DateTime.parse(_field(json, 'completedAt')),
+  );
+  static const fields = ['id', 'beneficiary', 'amount', 'status', 'requestedAt', 'completedAt'];
+
+  final String id;
+
+  /// MERCHANT (reversement de la boutique) ou CUSTOMER (retrait du solde).
+  final String beneficiary;
+  final int amount;
+
+  /// PENDING, AWAITING_APPROVAL, PROCESSING, SUCCEEDED, FAILED ou CANCELLED.
+  final String status;
+  final DateTime requestedAt;
+  final DateTime? completedAt;
+
+  bool get open => const {'PENDING', 'AWAITING_APPROVAL', 'PROCESSING'}.contains(status);
 }
 
 /// Quartier de Douala (liste des zones, B1).

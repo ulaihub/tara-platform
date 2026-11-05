@@ -56,6 +56,20 @@ final shareProvider = Provider<Future<void> Function(String text, Uint8List? png
   },
 );
 
+/// Partage d'un fichier (relevé PDF) par la feuille de partage du téléphone : WhatsApp,
+/// e-mail, enregistrement… (remplacé dans les tests).
+final shareFileProvider = Provider<Future<void> Function(Uint8List bytes, String name, String mimeType, String text)>(
+  (ref) => (bytes, name, mimeType, text) async {
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        files: [XFile.fromData(bytes, name: name, mimeType: mimeType)],
+        fileNameOverrides: [name],
+      ),
+    );
+  },
+);
+
 /// Version de l'app (remplacée dans les tests).
 final appVersionProvider = FutureProvider<String>((ref) async {
   final info = await PackageInfo.fromPlatform();

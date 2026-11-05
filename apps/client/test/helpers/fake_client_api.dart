@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:tara_client/core/api/client_api.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_core/api/api_client.dart';
@@ -235,6 +237,67 @@ class FakeClientApi extends ClientApi {
       throw error;
     }
     decisions.add((orderId, decision));
+  }
+
+  /// Mouvements par compte (`customer`, `merchant`), servis par pages de [linesPage].
+  final lines = <String, List<WalletLine>>{'customer': [], 'merchant': []};
+  int linesPage = 20;
+
+  @override
+  Future<({List<WalletLine> items, String? nextCursor})> walletLines({
+    required String account,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    final all = lines[account]!;
+    final start = cursor == null ? 0 : all.indexWhere((line) => line.id == cursor) + 1;
+    final page = all.skip(start).take(linesPage).toList();
+    final more = start + page.length < all.length;
+    return (items: page, nextCursor: more ? page.last.id : null);
+  }
+
+  List<Payout> payoutList = [];
+
+  @override
+  Future<List<Payout>> payouts({int limit = 10}) async => payoutList;
+
+  /// Reversements immédiats et retraits demandés : (numéro, opérateur) pour un retrait.
+  int payoutsNow = 0;
+  final withdrawals = <(String, String)>[];
+
+  @override
+  Future<Payout> payoutNow({required String key}) async {
+    payoutsNow++;
+    return Payout(
+      id: 'payout-now',
+      beneficiary: 'MERCHANT',
+      amount: wallet0.merchantBalance ?? 0,
+      status: 'PENDING',
+      requestedAt: DateTime(2026, 11, 4, 10, 30),
+      completedAt: null,
+    );
+  }
+
+  @override
+  Future<Payout> withdraw({required String phone, required String operator, required String key}) async {
+    withdrawals.add((phone, operator));
+    return Payout(
+      id: 'withdraw',
+      beneficiary: 'CUSTOMER',
+      amount: wallet0.customerBalance,
+      status: 'PENDING',
+      requestedAt: DateTime(2026, 11, 4, 10, 30),
+      completedAt: null,
+    );
+  }
+
+  /// Relevés téléchargés (mois AAAA-MM).
+  final statements = <String>[];
+
+  @override
+  Future<Uint8List> statement(String month) async {
+    statements.add(month);
+    return Uint8List.fromList('%PDF-1.4 relevé $month'.codeUnits);
   }
 
   /// Recharges demandées : (montant, numéro, opérateur).

@@ -899,5 +899,140 @@
   "termsSection": "Conditions et confidentialité",
   "termsToSign": "Nouvelle version à lire et signer",
   "termsSigned": "Conditions signées. Merci !",
-  "termsPrivacyTitle": "Politique de confidentialité"
+  "termsPrivacyTitle": "Politique de confidentialité",
+  "walletTitle": "Portefeuille",
+  "shopToReceive": "Ventes à recevoir",
+  "shopPayoutDaily": "Reversées chaque jour à {hour} h sur le {phone}.",
+  "@shopPayoutDaily": {
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "shopPayoutOnDemand": "Reversées à votre demande sur le {phone}.",
+  "@shopPayoutOnDemand": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "shopToday": "Aujourd’hui : {amount} encaissés · {count, plural, =0{aucune livraison} =1{1 livraison} other{{count} livraisons}}",
+  "@shopToday": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shopDebt": "Frais d’échec à régler : {amount}. Ils seront pris sur vos prochaines ventes ; au-delà de 3 000 F, vos nouvelles commandes attendent le règlement.",
+  "@shopDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutOpen": "Reversement en cours : {amount}",
+  "@payoutOpen": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutNow": "Recevoir {amount} maintenant",
+  "@payoutNow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutRequested": "Reversement demandé : l’argent arrive sur votre Mobile Money.",
+  "taraBalance": "Solde Tara",
+  "taraBalanceBody": "Sert à payer vos livraisons et, s’il y en a, les frais d’échec.",
+  "topUpAction": "Recharger",
+  "withdrawAction": "Retirer",
+  "topUpHowMuch": "Combien voulez-vous ajouter ?",
+  "topUpDone": "Solde rechargé de {amount}.",
+  "@topUpDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawBody": "Tout votre solde ({amount}) part sur votre numéro {phone}.",
+  "@withdrawBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawConfirm": "Retirer {amount}",
+  "@withdrawConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawDone": "Retrait demandé : l’argent arrive sur votre Mobile Money.",
+  "movements": "Mouvements",
+  "movementsShop": "Boutique",
+  "movementsBalance": "Solde Tara",
+  "movementsEmpty": "Aucun mouvement pour l’instant.",
+  "seeMore": "Voir plus",
+  "lineCodCollected": "Vente encaissée",
+  "lineOrderCharged": "Livraison payée",
+  "lineOrderReleased": "Frais rendus (annulation)",
+  "lineFailureFee": "Frais d’échec",
+  "lineCredit": "Avoir de Tara",
+  "lineTopUp": "Recharge",
+  "linePayout": "Reversement",
+  "lineWithdrawal": "Retrait",
+  "linePayoutFailed": "Reversement échoué, montant rendu",
+  "lineRefund": "Remboursement",
+  "payoutsTitle": "Reversements",
+  "payoutStatusDone": "Reçu",
+  "payoutStatusOpen": "En cours",
+  "payoutStatusFailed": "Échoué, montant rendu",
+  "statementsTitle": "Relevés mensuels",
+  "statementsBody": "Le relevé PDF de chaque mois : encaissements, frais, reversements, soldes.",
+  "statementCurrent": "{month} (en cours)",
+  "@statementCurrent": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "statementShare": "Relevé Tara de {month}",
+  "@statementShare": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "walletBalanceTile": "Solde Tara : {amount}",
+  "@walletBalanceTile": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -2515,6 +2515,258 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Politique de confidentialité'**
   String get termsPrivacyTitle;
+
+  /// No description provided for @walletTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Portefeuille'**
+  String get walletTitle;
+
+  /// No description provided for @shopToReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes à recevoir'**
+  String get shopToReceive;
+
+  /// No description provided for @shopPayoutDaily.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversées chaque jour à {hour} h sur le {phone}.'**
+  String shopPayoutDaily(String hour, String phone);
+
+  /// No description provided for @shopPayoutOnDemand.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversées à votre demande sur le {phone}.'**
+  String shopPayoutOnDemand(String phone);
+
+  /// No description provided for @shopToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd’hui : {amount} encaissés · {count, plural, =0{aucune livraison} =1{1 livraison} other{{count} livraisons}}'**
+  String shopToday(String amount, int count);
+
+  /// No description provided for @shopDebt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais d’échec à régler : {amount}. Ils seront pris sur vos prochaines ventes ; au-delà de 3 000 F, vos nouvelles commandes attendent le règlement.'**
+  String shopDebt(String amount);
+
+  /// No description provided for @payoutOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversement en cours : {amount}'**
+  String payoutOpen(String amount);
+
+  /// No description provided for @payoutNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir {amount} maintenant'**
+  String payoutNow(String amount);
+
+  /// No description provided for @payoutRequested.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversement demandé : l’argent arrive sur votre Mobile Money.'**
+  String get payoutRequested;
+
+  /// No description provided for @taraBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara'**
+  String get taraBalance;
+
+  /// No description provided for @taraBalanceBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sert à payer vos livraisons et, s’il y en a, les frais d’échec.'**
+  String get taraBalanceBody;
+
+  /// No description provided for @topUpAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharger'**
+  String get topUpAction;
+
+  /// No description provided for @withdrawAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get withdrawAction;
+
+  /// No description provided for @topUpHowMuch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Combien voulez-vous ajouter ?'**
+  String get topUpHowMuch;
+
+  /// No description provided for @topUpDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde rechargé de {amount}.'**
+  String topUpDone(String amount);
+
+  /// No description provided for @withdrawBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout votre solde ({amount}) part sur votre numéro {phone}.'**
+  String withdrawBody(String amount, String phone);
+
+  /// No description provided for @withdrawConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer {amount}'**
+  String withdrawConfirm(String amount);
+
+  /// No description provided for @withdrawDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait demandé : l’argent arrive sur votre Mobile Money.'**
+  String get withdrawDone;
+
+  /// No description provided for @movements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mouvements'**
+  String get movements;
+
+  /// No description provided for @movementsShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique'**
+  String get movementsShop;
+
+  /// No description provided for @movementsBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara'**
+  String get movementsBalance;
+
+  /// No description provided for @movementsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun mouvement pour l’instant.'**
+  String get movementsEmpty;
+
+  /// No description provided for @seeMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir plus'**
+  String get seeMore;
+
+  /// No description provided for @lineCodCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vente encaissée'**
+  String get lineCodCollected;
+
+  /// No description provided for @lineOrderCharged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison payée'**
+  String get lineOrderCharged;
+
+  /// No description provided for @lineOrderReleased.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais rendus (annulation)'**
+  String get lineOrderReleased;
+
+  /// No description provided for @lineFailureFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais d’échec'**
+  String get lineFailureFee;
+
+  /// No description provided for @lineCredit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avoir de Tara'**
+  String get lineCredit;
+
+  /// No description provided for @lineTopUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharge'**
+  String get lineTopUp;
+
+  /// No description provided for @linePayout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversement'**
+  String get linePayout;
+
+  /// No description provided for @lineWithdrawal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait'**
+  String get lineWithdrawal;
+
+  /// No description provided for @linePayoutFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversement échoué, montant rendu'**
+  String get linePayoutFailed;
+
+  /// No description provided for @lineRefund.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement'**
+  String get lineRefund;
+
+  /// No description provided for @payoutsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversements'**
+  String get payoutsTitle;
+
+  /// No description provided for @payoutStatusDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçu'**
+  String get payoutStatusDone;
+
+  /// No description provided for @payoutStatusOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get payoutStatusOpen;
+
+  /// No description provided for @payoutStatusFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échoué, montant rendu'**
+  String get payoutStatusFailed;
+
+  /// No description provided for @statementsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevés mensuels'**
+  String get statementsTitle;
+
+  /// No description provided for @statementsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le relevé PDF de chaque mois : encaissements, frais, reversements, soldes.'**
+  String get statementsBody;
+
+  /// No description provided for @statementCurrent.
+  ///
+  /// In fr, this message translates to:
+  /// **'{month} (en cours)'**
+  String statementCurrent(String month);
+
+  /// No description provided for @statementShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevé Tara de {month}'**
+  String statementShare(String month);
+
+  /// No description provided for @walletBalanceTile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara : {amount}'**
+  String walletBalanceTile(String amount);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
