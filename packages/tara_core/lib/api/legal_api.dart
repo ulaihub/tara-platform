@@ -20,11 +20,9 @@ class LegalApi {
       LegalDocument.fromJson(await _api.get('/legal/$name', auth: false) as Json);
 
   /// Conditions de l'app puis politique de confidentialité, à afficher pour accepter.
-  Future<List<LegalDocument>> appDocuments() async =>
-      Future.wait([document(termsDocument), document(privacyDocument)]);
+  Future<List<LegalDocument>> appDocuments() async => Future.wait([document(termsDocument), document(privacyDocument)]);
 
-  Future<TermsStatus> status() async =>
-      TermsStatus.fromJson(await _api.get('/me/terms', query: {'app': app}) as Json);
+  Future<TermsStatus> status() async => TermsStatus.fromJson(await _api.get('/me/terms', query: {'app': app}) as Json);
 
   /// Code SMS qui signe l'acceptation d'une nouvelle version.
   Future<OtpChallenge> requestCode() async => OtpChallenge.fromJson(await _api.post('/me/terms/code') as Json);

@@ -52,6 +52,8 @@ void main() {
 
   Future<void> tapText(WidgetTester tester, String text) async {
     await tester.ensureVisible(find.text(text).last);
+    // Défilement terminé : sinon le toucher arrête la liste au lieu d'atteindre le bouton.
+    await settle(tester);
     await tester.tap(find.text(text).last);
     await settle(tester);
   }
@@ -92,7 +94,8 @@ void main() {
     final harness = AccountHarness();
     await pumpVariant(tester, Variant.matrix.first, harness.screen());
     await settle(tester);
-    await show(tester, 'English');
+    // Réglages d'affichage au-dessus de la barre d'onglets : section suivante à l'écran.
+    await show(tester, 'Conditions et confidentialité');
 
     await tapText(tester, 'Clair');
     expect(settingsOf(tester).themeMode, ThemeMode.light);

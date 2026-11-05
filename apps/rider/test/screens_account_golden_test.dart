@@ -14,6 +14,7 @@ import 'package:tara_rider/features/account/account_screen.dart';
 import 'package:tara_rider/features/account/emergency_contact_screen.dart';
 import 'package:tara_rider/features/onboarding/documents_controller.dart';
 import 'package:tara_rider/features/onboarding/documents_screen.dart';
+import 'package:tara_test/fake_legal_api.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/fonts.dart';
@@ -92,6 +93,7 @@ class AccountHarness {
     appVersionProvider.overrideWith((ref) async => '1.0.0 (12)'),
     actionQueueProvider.overrideWithValue(queue),
     activeOrderProvider.overrideWithValue(active),
+    legalApiProvider.overrideWithValue(FakeLegalApi(app: 'rider')),
   ];
 
   Widget screen({List<Override> extra = const []}) => ProviderScope(

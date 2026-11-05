@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -15,6 +17,7 @@ import '../../app/providers.dart';
 import '../../core/location/online_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../legal/terms_screen.dart';
 import 'home_summary.dart';
 
 /// 05 · Accueil — hors ligne : gains du jour, bouton « Passer en ligne ». Pas de cloche de
@@ -36,6 +39,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
   bool _switching = false;
   String? _error;
   List<String> _blockers = const [];
+  final _bottom = GlobalKey();
 
   static const _blobs = [BlobSpec(alignment: Alignment(0, -.05), size: 360, colors: BlobSpec.brand, blur: 80)];
 
@@ -54,6 +58,13 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
         widget.onWentOnline();
       } else {
         setState(() => _blockers = blockers);
+        // Les blocages s'affichent sous le bouton : l'écran défile pour les montrer en entier.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final bottom = _bottom.currentContext;
+          if (bottom != null && bottom.mounted) {
+            unawaited(Scrollable.ensureVisible(bottom, duration: const Duration(milliseconds: 300)));
+          }
+        });
       }
     } on LocationAccessException {
       if (mounted) setState(() => _error = l.locationNeeded);
@@ -62,6 +73,12 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
     } finally {
       if (mounted) setState(() => _switching = false);
     }
+  }
+
+  /// Nouvelles conditions : lues et signées, puis le livreur repasse en ligne.
+  Future<void> _openTerms() async {
+    await openTermsUpdate(context, ref);
+    if (mounted) setState(() => _blockers = _blockers.where((blocker) => blocker != 'TERMS').toList());
   }
 
   @override
@@ -156,7 +173,26 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                         ),
                       ),
                       if (_error != null) ...[const SizedBox(height: 14), ErrorLine(_error!)],
-                      if (_blockers.isNotEmpty) ...[
+                      if (_blockers.contains('TERMS')) ...[
+                        const SizedBox(height: 14),
+                        TintBox(
+                          tone: TintTone.accent,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(l.blockerTerms, style: TaraText.text.copyWith(color: c.textPrimary)),
+                              const SizedBox(height: 10),
+                              GlassButton(
+                                label: l.readAndSign,
+                                height: 48,
+                                radius: 14,
+                                onPressed: () => unawaited(_openTerms()),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (_blockers.any((blocker) => blocker != 'TERMS')) ...[
                         const SizedBox(height: 14),
                         TintBox(
                           tone: TintTone.danger,
@@ -165,7 +201,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                             children: [
                               Text(l.blockersTitle, style: TaraText.text.copyWith(color: c.dangerTextStrong)),
                               const SizedBox(height: 6),
-                              for (final blocker in _blockers)
+                              for (final blocker in _blockers.where((blocker) => blocker != 'TERMS'))
                                 Text(
                                   '• ${switch (blocker) {
                                     'CASH_OVERDUE' => l.blockerCashOverdue,
@@ -179,7 +215,8 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                           ),
                         ),
                       ],
-                      SizedBox(height: 16 + inset),
+                      // Bas de l'écran, sous la barre d'onglets : amené à l'écran avec les blocages.
+                      SizedBox(key: _bottom, height: 16 + inset),
                     ],
                   ),
                 ),

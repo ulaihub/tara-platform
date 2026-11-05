@@ -10,7 +10,11 @@ Chaque point qui demande son avis est marqué **[À VALIDER]**.
 | [À savoir pour le destinataire](conditions-destinataires.md) | destinataires (sans compte) | page de suivi web, lien des SMS               |
 | [Politique de confidentialité](politique-confidentialite.md) | tous                        | les deux apps et la page de suivi             |
 
-## Acceptation « dûment signée » (proposition)
+## Acceptation « dûment signée » (en place dans les deux apps)
+
+Les textes de ce dossier sont ceux que les apps affichent : après une modification, lancer
+`pnpm --filter @tara/api legal` (un test refuse une copie pas à jour). Changer la ligne
+« Version AAAA-MM » d'un texte le fait accepter de nouveau par tous.
 
 1. **Texte complet dans l'app**, pas seulement un lien : l'utilisateur fait défiler le texte.
 2. **Case à cocher explicite**, non cochée par défaut : « J'ai lu et j'accepte les conditions

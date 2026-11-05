@@ -173,7 +173,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get getCode => 'Get the code';
 
   @override
-  String get legalPrefix => 'By continuing, you accept the ';
+  String get legalPrefix => 'New account: you will read and accept the ';
 
   @override
   String get terms => 'terms of use';
@@ -1449,4 +1449,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get returnFeesOffline => 'A connection is needed to check the return fees.';
+
+  @override
+  String get termsTitle => 'Rider terms';
+
+  @override
+  String get termsUpdateTitle => 'Our terms have changed';
+
+  @override
+  String get termsSignupIntro =>
+      'Before creating your account, read the rider terms and the privacy policy to the end. They explain your status, your earnings, cash collection and what we do with your data.';
+
+  @override
+  String get termsUpdateIntro =>
+      'Read the new version to the end, then sign it with the code sent by SMS. Until you sign, you can finish your current delivery but will not receive new ones.';
+
+  @override
+  String get termsLater => 'Later';
+
+  @override
+  String get termsEnd => 'You have reached the end of the texts.';
+
+  @override
+  String get termsScrollFirst => 'Scroll to the end of the texts to be able to accept them.';
+
+  @override
+  String get termsCheckPrefix => 'I have read and accept the ';
+
+  @override
+  String termsCheckTerms(String version) {
+    return 'rider terms (version $version)';
+  }
+
+  @override
+  String get termsCheckAnd => ' and the ';
+
+  @override
+  String get termsCheckPrivacy => 'privacy policy';
+
+  @override
+  String get termsCreateAccount => 'Accept and create my account';
+
+  @override
+  String get termsGetCode => 'Get the code to sign';
+
+  @override
+  String termsCodeSent(String phone) {
+    return 'Code sent to $phone. It serves as your signature.';
+  }
+
+  @override
+  String get termsSign => 'Sign';
+
+  @override
+  String termsAcceptedOn(String version, String date) {
+    return 'Version $version accepted on $date';
+  }
+
+  @override
+  String termsVersionLine(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get termsSection => 'Terms and privacy';
+
+  @override
+  String get termsPrivacyTitle => 'Privacy policy';
+
+  @override
+  String get termsToSign => 'New version to read and sign';
+
+  @override
+  String get blockerTerms => 'Our terms have changed: read and sign them to receive deliveries.';
+
+  @override
+  String get readAndSign => 'Read and sign';
 }

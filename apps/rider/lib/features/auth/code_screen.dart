@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
@@ -16,7 +17,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
-import '../../core/env.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 
@@ -29,12 +29,17 @@ class CodeScreen extends ConsumerStatefulWidget {
     required this.challenge,
     required this.onBack,
     required this.onSignedIn,
+    required this.onTermsRequired,
   });
 
   final String phone;
   final OtpChallenge challenge;
   final VoidCallback onBack;
   final void Function(AuthSession session) onSignedIn;
+
+  /// Nouveau compte : les conditions sont à lire et accepter, puis ce même code (juste)
+  /// les signe. Reçoit le défi et le code saisi.
+  final void Function(OtpChallenge challenge, String code) onTermsRequired;
 
   @override
   ConsumerState<CodeScreen> createState() => _CodeScreenState();
@@ -81,8 +86,16 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     try {
       final session = await ref
           .read(authControllerProvider.notifier)
-          .verifyCode(challengeId: _challenge.challengeId, code: _code.text, termsVersion: Env.termsVersion);
+          .verifyCode(challengeId: _challenge.challengeId, code: _code.text);
       if (mounted) widget.onSignedIn(session);
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      if (error.code == 'TERMS_REQUIRED') {
+        widget.onTermsRequired(_challenge, _code.text);
+        return;
+      }
+      setState(() => _error = errorMessage(context, error));
+      _code.clear();
     } catch (error) {
       if (mounted) {
         setState(() => _error = errorMessage(context, error));

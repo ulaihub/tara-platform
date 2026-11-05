@@ -196,7 +196,7 @@ class _LegalState extends State<_Legal> {
   late final _privacy = TapGestureRecognizer()..onTap = () => _open(LegalApi.privacyDocument);
 
   void _open(String document) =>
-      unawaited(Navigator.of(context).push(scopedPage<void>(context, (_) => LegalDocumentScreen(document: document))));
+      unawaited(Navigator.of(context).push(scopedPage<void>(context, (_) => LegalTextScreen(document: document))));
 
   @override
   void dispose() {

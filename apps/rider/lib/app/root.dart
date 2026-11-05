@@ -10,14 +10,17 @@ import '../features/common/error_text.dart';
 import '../features/common/splash_screen.dart';
 import '../features/common/status_screen.dart';
 import '../features/home/home_flow.dart';
+import '../features/legal/terms_screen.dart';
 import '../features/onboarding/documents_controller.dart';
 import '../features/onboarding/documents_screen.dart';
 import '../features/onboarding/profile_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'providers.dart';
 
-/// Dossier livreur du compte connecté ; null s'il n'a pas encore postulé.
+/// Dossier livreur du compte connecté ; null s'il n'a pas encore postulé. Relu à chaque
+/// changement de session (jamais celui du compte précédent).
 final riderProfileProvider = FutureProvider<RiderProfile?>((ref) async {
+  ref.watch(authControllerProvider.select((auth) => auth.value));
   try {
     return await ref.read(riderApiProvider).profile();
   } on ApiException catch (error) {
@@ -45,28 +48,46 @@ class RootGate extends ConsumerWidget {
   }
 }
 
-class _AuthFlow extends StatefulWidget {
+class _AuthFlow extends ConsumerStatefulWidget {
   const _AuthFlow();
 
   @override
-  State<_AuthFlow> createState() => _AuthFlowState();
+  ConsumerState<_AuthFlow> createState() => _AuthFlowState();
 }
 
-class _AuthFlowState extends State<_AuthFlow> {
+class _AuthFlowState extends ConsumerState<_AuthFlow> {
   OtpChallenge? _challenge;
   String? _phone;
+
+  /// Code juste d'un nouveau compte : il signera les conditions une fois acceptées.
+  String? _signupCode;
 
   @override
   Widget build(BuildContext context) {
     final challenge = _challenge;
+    final signupCode = _signupCode;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
-      child: challenge == null
+      child: challenge != null && signupCode != null
+          ? PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, _) => setState(() => _signupCode = null),
+              child: TermsScreen.signup(
+                key: const ValueKey('terms'),
+                onBack: () => setState(() => _signupCode = null),
+                // Le code de connexion signe : la session s'ouvre et RootGate passe au dossier.
+                onAccept: (versions) => ref
+                    .read(authControllerProvider.notifier)
+                    .verifyCode(challengeId: challenge.challengeId, code: signupCode, terms: versions),
+              ),
+            )
+          : challenge == null
           ? SignInScreen(
               key: const ValueKey('sign-in'),
               initialPhone: _phone,
               onCodeSent: (challenge, phone) => setState(() {
                 _challenge = challenge;
+                _signupCode = null;
                 _phone = phone;
               }),
             )
@@ -80,6 +101,10 @@ class _AuthFlowState extends State<_AuthFlow> {
                 onBack: () => setState(() => _challenge = null),
                 // La session change d'état : RootGate passe au dossier du livreur.
                 onSignedIn: (_) {},
+                onTermsRequired: (challenge, code) => setState(() {
+                  _challenge = challenge;
+                  _signupCode = code;
+                }),
               ),
             ),
     );
@@ -95,6 +120,9 @@ class _RiderGate extends ConsumerStatefulWidget {
 
 class _RiderGateState extends ConsumerState<_RiderGate> {
   bool _profileStepDone = false;
+
+  /// « Plus tard » : la nouvelle version sera redemandée pour passer en ligne.
+  bool _termsPostponed = false;
 
   void _reload() {
     ref
@@ -122,6 +150,15 @@ class _RiderGateState extends ConsumerState<_RiderGate> {
         linkLabel: l.logout,
         onLink: logout,
       );
+    }
+    // Nouvelle version des conditions : présentée à l'ouverture (sans réseau, plus tard). Une
+    // course en cours se termine sans signature : « Plus tard » ramène à l'app.
+    final terms = ref.watch(termsStatusProvider).value;
+    if (terms != null && !terms.upToDate && !_termsPostponed) {
+      final phone = ref.watch(accountPhoneProvider).value;
+      if (phone != null) {
+        return TermsScreen.update(phone: phone, onLater: () => setState(() => _termsPostponed = true), onSigned: () {});
+      }
     }
     final rider = profile.value;
     if (rider == null) {

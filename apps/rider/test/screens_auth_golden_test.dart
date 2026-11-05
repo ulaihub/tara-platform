@@ -7,13 +7,28 @@ import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/features/auth/code_screen.dart';
 import 'package:tara_rider/features/auth/sign_in_screen.dart';
 import 'package:tara_rider/features/common/splash_screen.dart';
+import 'package:tara_rider/features/legal/terms_screen.dart';
+import 'package:tara_test/fake_legal_api.dart';
+import 'package:tara_ui/components/check_row.dart';
 
 import 'helpers/fonts.dart';
 import 'helpers/harness.dart';
 
-/// Écrans sans réseau : stockage en mémoire, réglages par défaut.
-Widget scoped(Widget child) =>
-    ProviderScope(overrides: [keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore())], child: child);
+/// Écrans sans réseau : stockage en mémoire, réglages par défaut, conditions d'exemple.
+Widget scoped(Widget child, {FakeLegalApi? legal}) => ProviderScope(
+  overrides: [
+    keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
+    legalApiProvider.overrideWithValue(legal ?? FakeLegalApi(app: 'rider')),
+    accountPhoneProvider.overrideWith((ref) async => '+237677123456'),
+  ],
+  child: child,
+);
+
+/// Fait défiler les textes jusqu'en bas : la case à cocher devient active.
+Future<void> readToEnd(WidgetTester tester) async {
+  await tester.drag(find.byType(Scrollable).first, const Offset(0, -4000));
+  await settle(tester);
+}
 
 Future<void> settle(WidgetTester tester) async {
   for (var i = 0; i < 12; i++) {
@@ -42,7 +57,15 @@ void main() {
       await pumpVariant(
         tester,
         variant,
-        scoped(CodeScreen(phone: '+237690123456', challenge: challenge, onBack: () {}, onSignedIn: (_) {})),
+        scoped(
+          CodeScreen(
+            phone: '+237690123456',
+            challenge: challenge,
+            onBack: () {},
+            onSignedIn: (_) {},
+            onTermsRequired: (_, _) {},
+          ),
+        ),
       );
       await tester.enterText(find.byType(EditableText).first, '4821');
       await settle(tester);
@@ -50,6 +73,67 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/02_code/${variant.name}.png'));
     });
   }
+
+  for (final variant in Variant.matrix) {
+    goldenTest('02 conditions inscription ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scoped(TermsScreen.signup(onAccept: (_) async {}, onBack: () {})));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      await expectLater(capture, matchesGoldenFile('goldens/02_conditions/${variant.name}.png'));
+    });
+
+    goldenTest('02 conditions lues et cochées ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scoped(TermsScreen.signup(onAccept: (_) async {}, onBack: () {})));
+      await settle(tester);
+      await readToEnd(tester);
+      await tester.tap(find.byType(TaraCheckRow));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      await expectLater(capture, matchesGoldenFile('goldens/02_conditions_cochees/${variant.name}.png'));
+    });
+  }
+
+  goldenTest('02 nouvelle version à signer', (tester) async {
+    const variant = Variant(Brightness.dark, ScreenSize.regular, 1);
+    await pumpVariant(
+      tester,
+      variant,
+      scoped(TermsScreen.update(phone: '+237677123456', onLater: () {}, onSigned: () {})),
+    );
+    await settle(tester);
+    await readToEnd(tester);
+    await tester.tap(find.byType(TaraCheckRow));
+    await settle(tester);
+    await tester.tap(find.text('Recevoir le code pour signer'));
+    await settle(tester);
+    expect(tester.takeException(), isNull);
+    await expectLater(capture, matchesGoldenFile('goldens/02_conditions_signature/${variant.name}.png'));
+  });
+
+  testWidgets('une nouvelle version se signe avec le code reçu, aux versions affichées', (tester) async {
+    final legal = FakeLegalApi(app: 'rider', status: newVersion('rider'));
+    var signed = 0;
+    await pumpVariant(
+      tester,
+      const Variant(Brightness.dark, ScreenSize.regular, 1),
+      scoped(
+        TermsScreen.update(phone: '+237677123456', onLater: () {}, onSigned: () => signed++),
+        legal: legal,
+      ),
+    );
+    await settle(tester);
+    expect(find.byType(TaraCheckRow), findsNothing);
+    await readToEnd(tester);
+    await tester.tap(find.byType(TaraCheckRow));
+    await settle(tester);
+    await tester.tap(find.text('Recevoir le code pour signer'));
+    await settle(tester);
+    await tester.enterText(find.byType(EditableText).first, '654321');
+    await settle(tester);
+    expect(legal.codes, 1);
+    expect(legal.signed.single.versions, {'livreurs': '2026-11', 'confidentialite': '2026-11'});
+    expect(signed, 1);
+  });
 
   for (final variant in Variant.matrix.where((v) => v.textScale == 1 && v.screen == ScreenSize.regular)) {
     goldenTest('démarrage ${variant.name}', (tester) async {

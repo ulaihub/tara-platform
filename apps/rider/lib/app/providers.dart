@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
+import 'package:tara_core/api/legal_api.dart';
 import 'package:tara_core/network/network_status.dart';
 import 'package:tara_core/push/push_service.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
@@ -73,6 +74,23 @@ final authApiProvider = Provider<AuthApi>(
 );
 
 final riderApiProvider = Provider<RiderApi>((ref) => RiderApi(ref.watch(apiClientProvider)));
+
+final legalApiProvider = Provider<LegalApi>(
+  (ref) => LegalApi(ref.watch(apiClientProvider), ref.watch(sessionStoreProvider), app: 'rider'),
+);
+
+/// Numéro du compte connecté (rappel « code envoyé au … » de la signature).
+final accountPhoneProvider = FutureProvider<String?>((ref) async {
+  ref.watch(authControllerProvider.select((auth) => auth.value));
+  return (await ref.read(riderApiProvider).me())['phone'] as String?;
+});
+
+/// Conditions à signer (nouvelle version) et versions acceptées ; relu après chaque signature
+/// et à chaque changement de session.
+final termsStatusProvider = FutureProvider<TermsStatus>((ref) {
+  ref.watch(authControllerProvider.select((auth) => auth.value));
+  return ref.read(legalApiProvider).status();
+});
 
 /// File des actions de course faites sans réseau.
 final actionQueueProvider = Provider<ActionQueue>((ref) {
@@ -143,15 +161,15 @@ class AuthController extends AsyncNotifier<AuthStatus> {
   Future<OtpChallenge> requestCode(String phone) =>
       ref.read(authApiProvider).requestOtp(phone, locale: ref.read(languageCodeProvider));
 
-  Future<AuthSession> verifyCode({required String challengeId, required String code, String? termsVersion}) async {
+  /// Nouveau compte : `TERMS_REQUIRED`, puis le même code avec [terms] (versions acceptées).
+  Future<AuthSession> verifyCode({
+    required String challengeId,
+    required String code,
+    Map<String, String>? terms,
+  }) async {
     final session = await ref
         .read(authApiProvider)
-        .verifyOtp(
-          challengeId: challengeId,
-          code: code,
-          locale: ref.read(languageCodeProvider),
-          termsVersion: termsVersion,
-        );
+        .verifyOtp(challengeId: challengeId, code: code, locale: ref.read(languageCodeProvider), terms: terms);
     state = const AsyncData(AuthStatus.signedIn);
     return session;
   }

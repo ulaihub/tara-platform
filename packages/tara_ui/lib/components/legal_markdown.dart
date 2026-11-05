@@ -173,8 +173,7 @@ List<LegalBlock> parseLegalMarkdown(String markdown) {
     rows.clear();
   }
 
-  List<String> cells(String line) =>
-      line.substring(1, line.length - 1).split('|').map((cell) => cell.trim()).toList();
+  List<String> cells(String line) => line.substring(1, line.length - 1).split('|').map((cell) => cell.trim()).toList();
 
   for (final raw in markdown.split('\n')) {
     final line = raw.trimRight();

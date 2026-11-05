@@ -383,7 +383,7 @@ abstract class AppLocalizations {
   /// No description provided for @legalPrefix.
   ///
   /// In fr, this message translates to:
-  /// **'En continuant, vous acceptez les '**
+  /// **'Nouveau compte : vous lirez et accepterez les '**
   String get legalPrefix;
 
   /// No description provided for @terms.
@@ -2581,6 +2581,138 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Connexion nécessaire pour vérifier les frais de retour.'**
   String get returnFeesOffline;
+
+  /// No description provided for @termsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions des livreurs'**
+  String get termsTitle;
+
+  /// No description provided for @termsUpdateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nos conditions ont changé'**
+  String get termsUpdateTitle;
+
+  /// No description provided for @termsSignupIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant de créer votre compte, lisez les conditions des livreurs et la politique de confidentialité jusqu’en bas. Elles expliquent votre statut, vos gains, l’encaissement et ce que nous faisons de vos données.'**
+  String get termsSignupIntro;
+
+  /// No description provided for @termsUpdateIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lisez la nouvelle version jusqu’en bas, puis signez-la avec le code reçu par SMS. Sans signature, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.'**
+  String get termsUpdateIntro;
+
+  /// No description provided for @termsLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get termsLater;
+
+  /// No description provided for @termsEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes arrivé au bout des textes.'**
+  String get termsEnd;
+
+  /// No description provided for @termsScrollFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.'**
+  String get termsScrollFirst;
+
+  /// No description provided for @termsCheckPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai lu et j’accepte les '**
+  String get termsCheckPrefix;
+
+  /// No description provided for @termsCheckTerms.
+  ///
+  /// In fr, this message translates to:
+  /// **'conditions des livreurs (version {version})'**
+  String termsCheckTerms(String version);
+
+  /// No description provided for @termsCheckAnd.
+  ///
+  /// In fr, this message translates to:
+  /// **' et la '**
+  String get termsCheckAnd;
+
+  /// No description provided for @termsCheckPrivacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'politique de confidentialité'**
+  String get termsCheckPrivacy;
+
+  /// No description provided for @termsCreateAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter et créer mon compte'**
+  String get termsCreateAccount;
+
+  /// No description provided for @termsGetCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir le code pour signer'**
+  String get termsGetCode;
+
+  /// No description provided for @termsCodeSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code envoyé au {phone}. Il vaut signature de votre acceptation.'**
+  String termsCodeSent(String phone);
+
+  /// No description provided for @termsSign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signer'**
+  String get termsSign;
+
+  /// No description provided for @termsAcceptedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version {version} acceptée le {date}'**
+  String termsAcceptedOn(String version, String date);
+
+  /// No description provided for @termsVersionLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version {version}'**
+  String termsVersionLine(String version);
+
+  /// No description provided for @termsSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions et confidentialité'**
+  String get termsSection;
+
+  /// No description provided for @termsPrivacyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get termsPrivacyTitle;
+
+  /// No description provided for @termsToSign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle version à lire et signer'**
+  String get termsToSign;
+
+  /// No description provided for @blockerTerms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nos conditions ont changé : lisez-les et signez-les pour recevoir des courses.'**
+  String get blockerTerms;
+
+  /// No description provided for @readAndSign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire et signer'**
+  String get readAndSign;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

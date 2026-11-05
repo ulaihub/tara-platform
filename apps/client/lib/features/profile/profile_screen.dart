@@ -11,6 +11,7 @@ import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/components/terms_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -349,9 +350,9 @@ class _TermsCard extends ConsumerWidget {
         title: title,
         subtitle: accepted == null
             ? null
-            : l.termsAcceptedOn(accepted.version, formatDay(context, accepted.acceptedAt)),
+            : l.termsAcceptedOn(accepted.version, formatLegalDay(context, accepted.acceptedAt)),
         trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-        onTap: () => open((_) => LegalDocumentScreen(document: document, acceptedAt: accepted?.acceptedAt)),
+        onTap: () => open((_) => LegalTextScreen(document: document, acceptedAt: accepted?.acceptedAt)),
       );
     }
 

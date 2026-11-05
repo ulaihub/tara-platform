@@ -26,6 +26,7 @@ import 'package:tara_rider/features/home/home_summary.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 import 'package:tara_rider/features/offline/pending_actions_screen.dart';
 import 'package:tara_rider/features/safety/sos_screen.dart';
+import 'package:tara_test/fake_legal_api.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 
 import 'helpers/fake_rider_api.dart';
@@ -89,6 +90,7 @@ Future<({ActiveOrderController active, ActionQueue queue})> pumpHome(
         safetyAlertProvider.overrideWithValue(safetyAlert()),
         networkStatusProvider.overrideWithValue(network ?? NetworkStatus.fixed(offline: false)),
         callJournalProvider.overrideWithValue(CallJournal(store: store, dial: (_) async {})),
+        legalApiProvider.overrideWithValue(FakeLegalApi(app: 'rider')),
       ],
       child: const HomeFlow(),
     ),

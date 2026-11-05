@@ -106,7 +106,7 @@ void main() {
   });
 
   testWidgets('une nouvelle version se signe avec un code SMS dédié', (tester) async {
-    final legal = FakeLegalApi(status: newVersion);
+    final legal = FakeLegalApi(status: newVersion());
     var signed = 0;
     await pumpVariant(
       tester,

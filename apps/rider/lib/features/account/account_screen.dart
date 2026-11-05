@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/legal_api.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/app_settings.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -10,6 +11,7 @@ import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/components/terms_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -21,6 +23,8 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
+import '../common/scoped_page.dart';
+import '../legal/terms_screen.dart';
 import '../onboarding/documents_controller.dart';
 import '../onboarding/documents_screen.dart';
 import 'emergency_contact_screen.dart';
@@ -145,6 +149,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   SectionHeader(title: l.displaySection),
                   const SizedBox(height: 8),
                   _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.termsSection),
+                  const SizedBox(height: 8),
+                  const _TermsCard(),
                   if (config?.supportPhone case final support?) ...[
                     const SizedBox(height: 20),
                     SectionHeader(title: l.helpSection),
@@ -591,4 +599,52 @@ class _Failed extends StatelessWidget {
 void _toggleSounds(BuildContext context, AppSettings settings) {
   settings.sounds = !settings.sounds;
   if (settings.sounds) TaraFeedback.play(context, TaraSound.received);
+}
+
+/// Conditions et confidentialité : version acceptée et date (copie consultable), nouvelle
+/// version à signer.
+class _TermsCard extends ConsumerWidget {
+  const _TermsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final status = ref.watch(termsStatusProvider).value;
+    Widget row(String document, String title) {
+      final accepted = status?.accepted.where((item) => item.document == document).firstOrNull;
+      return ListRow(
+        leading: const IconTile(icon: TaraIcons.shieldCheck),
+        title: title,
+        subtitle: accepted == null
+            ? null
+            : l.termsAcceptedOn(accepted.version, formatLegalDay(context, accepted.acceptedAt)),
+        trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+        onTap: () => unawaited(
+          Navigator.of(context).push(
+            scopedPage<void>(context, (_) => LegalTextScreen(document: document, acceptedAt: accepted?.acceptedAt)),
+          ),
+        ),
+      );
+    }
+
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      child: Column(
+        children: [
+          if (status != null && !status.upToDate)
+            ListRow(
+              leading: const IconTile(icon: TaraIcons.alertCircle),
+              title: l.termsToSign,
+              trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.accentText),
+              onTap: () => unawaited(openTermsUpdate(context, ref)),
+            ),
+          row('livreurs', l.termsTitle),
+          row(LegalApi.privacyDocument, l.termsPrivacyTitle),
+        ],
+      ),
+    );
+  }
 }

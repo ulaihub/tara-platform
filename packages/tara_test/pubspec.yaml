@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  tara_core:
+    path: ../tara_core
   tara_ui:
     path: ../tara_ui
 

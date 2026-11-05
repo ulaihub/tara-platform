@@ -87,9 +87,6 @@ final legalApiProvider = Provider<LegalApi>(
   (ref) => LegalApi(ref.watch(apiClientProvider), ref.watch(sessionStoreProvider), app: 'client'),
 );
 
-/// Textes à lire avant d'accepter : conditions des expéditeurs, puis confidentialité.
-final termsDocumentsProvider = FutureProvider<List<LegalDocument>>((ref) => ref.read(legalApiProvider).appDocuments());
-
 /// Conditions à signer (nouvelle version) et versions acceptées ; relu après chaque signature
 /// et à chaque changement de session.
 final termsStatusProvider = FutureProvider<TermsStatus>((ref) {
