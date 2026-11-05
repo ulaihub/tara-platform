@@ -139,7 +139,8 @@ describe('page de suivi du destinataire (F2)', () => {
       method: 'POST',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
-        'x-forwarded-for': '41.202.1.9, 10.0.0.1',
+        // Première adresse falsifiée par le visiteur, dernière écrite par le relais.
+        'x-forwarded-for': '6.6.6.6, 41.202.1.9',
       },
       body: new URLSearchParams({ available: 'no', note: '  Après 17 h  ' }).toString(),
     });

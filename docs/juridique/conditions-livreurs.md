@@ -30,6 +30,9 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
   photographiez.
 - Vous remettez le colis contre le **code de livraison** que le destinataire a reçu par SMS, et
   vous photographiez la remise.
+- Votre prénom, l'initiale de votre nom, votre véhicule et sa plaque sont montrés à
+  l'expéditeur et au destinataire. Votre numéro leur est visible seulement pendant la course
+  (au destinataire, pendant que vous lui apportez le colis), pour qu'ils puissent vous appeler.
 - Pendant la course, votre position est enregistrée pour le suivi du client et la sécurité. Le
   trajet est gardé 90 jours, consultable par l'équipe Tara seulement (litiges, incidents).
 - Sans réseau, vos actions sont gardées sur le téléphone et envoyées au retour du réseau, avec

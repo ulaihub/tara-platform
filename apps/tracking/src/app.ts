@@ -18,6 +18,15 @@ export interface AppOptions {
   clientIp?: (c: Context) => string | undefined;
 }
 
+/**
+ * Adresse ajoutée par le relais de confiance : la dernière de X-Forwarded-For. Les premières
+ * peuvent venir du visiteur lui-même (falsifiables), la dernière est écrite par le relais.
+ */
+export function forwardedClientIp(header: string | undefined): string | undefined {
+  const last = header?.split(',').at(-1)?.trim();
+  return last ? last : undefined;
+}
+
 /** Fichiers servis tels quels : polices, logo complet (clair, sombre) et pictogramme de l'onglet (7 jours en cache). */
 const ASSETS: Record<string, string> = {
   'jakarta-500.woff': 'font/woff',
@@ -50,7 +59,7 @@ export function createApp(options: AppOptions): Hono {
   const { api } = options;
   const now = options.now ?? (() => new Date());
   const clientIp =
-    options.clientIp ?? ((c: Context) => c.req.header('x-forwarded-for')?.split(',')[0]?.trim());
+    options.clientIp ?? ((c: Context) => forwardedClientIp(c.req.header('x-forwarded-for')));
   const assets = new Map(
     Object.entries(ASSETS).map(([name, type]) => [
       name,
