@@ -7,6 +7,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/status.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -75,6 +76,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
   }
 
   Future<void> _accept() async {
+    if (_busy) return;
     setState(() => _busy = true);
     try {
       final order = await ref.read(riderApiProvider).acceptOffer(widget.offer.id);
@@ -188,20 +190,24 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
           ),
           if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
         ],
+        // Accepter engage le livreur : on glisse la pastille plutôt que toucher, pour
+        // éviter l'acceptation par mégarde. Refuser reste à portée de pouce.
         footer: Row(
           children: [
-            Expanded(
-              child: GlassButton(label: l.decline, height: 58, radius: 20, onPressed: _busy ? null : _decline),
+            GlassIconButton(
+              icon: TaraIcons.close,
+              label: l.decline,
+              size: 58,
+              radius: 20,
+              onPressed: _busy ? null : _decline,
             ),
             const SizedBox(width: 10),
             Expanded(
-              flex: 2,
-              child: PrimaryButton(
+              child: SwipeButton(
                 label: l.accept,
-                icon: TaraIcons.check,
-                strong: true,
+                semanticLabel: l.slideToAccept,
                 loading: _busy,
-                onPressed: remaining == 0 ? null : _accept,
+                onConfirmed: remaining == 0 ? null : _accept,
               ),
             ),
           ],

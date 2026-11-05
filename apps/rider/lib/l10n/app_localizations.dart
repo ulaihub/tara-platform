@@ -2461,6 +2461,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de charger votre profil.'**
   String get profileError;
+
+  /// No description provided for @slideToAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser pour accepter'**
+  String get slideToAccept;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

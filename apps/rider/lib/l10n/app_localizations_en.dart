@@ -1378,4 +1378,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileError => 'Could not load your profile.';
+
+  @override
+  String get slideToAccept => 'Slide to accept';
 }

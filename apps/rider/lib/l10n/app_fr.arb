@@ -853,5 +853,6 @@
   "accountPending": "Dossier en vérification",
   "accountSuspended": "Compte suspendu",
   "accountRejected": "Dossier refusé",
-  "profileError": "Impossible de charger votre profil."
+  "profileError": "Impossible de charger votre profil.",
+  "slideToAccept": "Glisser pour accepter"
 }

@@ -16,6 +16,21 @@ class FakeRiderApi extends RiderApi {
     cashLimit: 50000,
   );
 
+  /// Propositions acceptées ; erreur renvoyée à la prochaine acceptation.
+  final accepted = <String>[];
+  Object? acceptError;
+
+  @override
+  Future<Json> acceptOffer(String offerId) async {
+    accepted.add(offerId);
+    final error = acceptError;
+    if (error != null) {
+      acceptError = null;
+      throw error;
+    }
+    return {'id': offerId};
+  }
+
   /// États successifs renvoyés par GET /collection (le dernier est répété).
   List<Collection> collections = [const Collection(total: 12500, complete: false, paymentId: 'p1')];
   final requests = <(String phone, String operator)>[];

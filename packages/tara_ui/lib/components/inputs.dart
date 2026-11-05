@@ -558,6 +558,9 @@ class AmountInputFormatter extends TextInputFormatter {
       out.write(digits[i]);
     }
     final text = out.toString();
-    return TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length));
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
   }
 }

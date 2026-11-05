@@ -446,5 +446,6 @@
   "accountPending": "Application being checked",
   "accountSuspended": "Account suspended",
   "accountRejected": "Application rejected",
-  "profileError": "Could not load your profile."
+  "profileError": "Could not load your profile.",
+  "slideToAccept": "Slide to accept"
 }

@@ -1385,4 +1385,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profileError => 'Impossible de charger votre profil.';
+
+  @override
+  String get slideToAccept => 'Glisser pour accepter';
 }
