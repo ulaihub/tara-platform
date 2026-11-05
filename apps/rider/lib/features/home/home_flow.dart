@@ -29,6 +29,7 @@ import '../offer/offer_screen.dart';
 import '../offline/pending_actions_screen.dart';
 import '../onboarding/documents_controller.dart';
 import '../safety/sos_screen.dart';
+import 'course_reward.dart';
 import 'home_offline_screen.dart';
 import 'home_online_screen.dart';
 import 'home_summary.dart';
@@ -65,6 +66,9 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Écran des actions en attente (15), ouvert depuis le bandeau.
   bool _pending = false;
+
+  /// Livraison qui vient d'aboutir : gain qui s'envole, palier du jour éventuel.
+  ({String id, int earning, int deliveredToday})? _reward;
 
   void _selectTab(int tab) => setState(() => _tab = tab);
 
@@ -252,7 +256,13 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     }
     final collecting = _collecting?.orderId == order.id ? _collecting : null;
     void onDone(ActionOutcome outcome) {
-      setState(() => _collecting = null);
+      // Courses du jour avant celle-ci, relues ensuite avec les gains à jour.
+      final before = ref.read(homeSummaryProvider).value?.delivered ?? 0;
+      setState(() {
+        _collecting = null;
+        _reward = (id: order.id, earning: order.riderEarning, deliveredToday: before + 1);
+      });
+      ref.invalidate(homeSummaryProvider);
       if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
     }
 
@@ -369,6 +379,15 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
               ),
             if (_notice != null)
               Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top + 64, child: _Notice(_notice!)),
+            if (_reward case final reward?)
+              Positioned.fill(
+                child: CourseReward(
+                  key: ValueKey('reward-${reward.id}'),
+                  earning: reward.earning,
+                  deliveredToday: reward.deliveredToday,
+                  onDone: () => setState(() => _reward = null),
+                ),
+              ),
             if (_pending)
               Positioned.fill(child: PendingActionsScreen(onContinue: () => setState(() => _pending = false))),
             if (offer != null)

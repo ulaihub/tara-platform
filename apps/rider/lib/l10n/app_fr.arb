@@ -856,5 +856,14 @@
   "profileError": "Impossible de charger votre profil.",
   "slideToAccept": "Glisser pour accepter",
   "soundsLabel": "Sons",
-  "soundsHint": "Nouvelle course, colis livré, argent encaissé… Le mode silencieux du téléphone est respecté."
+  "soundsHint": "Nouvelle course, colis livré, argent encaissé… Le mode silencieux du téléphone est respecté.",
+  "milestoneTitle": "{count} courses aujourd’hui !",
+  "milestoneBody": "Bravo, continuez comme ça.",
+  "@milestoneTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

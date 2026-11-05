@@ -198,6 +198,16 @@ class _TodayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Le montant monte jusqu'au nouveau total quand une course vient de s'ajouter.
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: amount.toDouble()),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOutCubic,
+      builder: (context, shown, _) => _card(context, shown.round()),
+    );
+  }
+
+  Widget _card(BuildContext context, int amount) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final value = '${formatAmount(amount)} F';

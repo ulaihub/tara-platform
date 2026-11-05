@@ -1387,4 +1387,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get soundsHint => 'New job, parcel delivered, cash collected… Your phone’s silent mode is respected.';
+
+  @override
+  String milestoneTitle(int count) {
+    return '$count deliveries today!';
+  }
+
+  @override
+  String get milestoneBody => 'Great work, keep it up.';
 }

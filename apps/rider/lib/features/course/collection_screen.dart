@@ -144,8 +144,8 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
       TaraFeedback.play(context, TaraSound.error);
       return;
     }
-    // Argent encaissé et colis livré : la pièce qui tinte.
-    TaraFeedback.play(context, TaraSound.cash);
+    // Colis livré : la fanfare ; la pièce tinte quand le gain rejoint ceux du jour.
+    TaraFeedback.play(context, TaraSound.delivered);
     widget.onDone(result.outcome);
   }
 
@@ -257,8 +257,8 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
       TaraFeedback.play(context, TaraSound.error);
       return;
     }
-    // Argent encaissé et colis livré : la pièce qui tinte.
-    TaraFeedback.play(context, TaraSound.cash);
+    // Colis livré : la fanfare ; la pièce tinte quand le gain rejoint ceux du jour.
+    TaraFeedback.play(context, TaraSound.delivered);
     widget.onDone(result.outcome);
   }
 

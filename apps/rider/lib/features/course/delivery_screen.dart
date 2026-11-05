@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -191,11 +192,12 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PrimaryButton(
+          // Livraison définitive : on glisse plutôt que toucher, pour éviter l'erreur.
+          SwipeButton(
             label: l.confirmDelivery,
             icon: TaraIcons.check,
             loading: _busy,
-            onPressed: _ready ? _submit : null,
+            onConfirmed: _ready ? _submit : null,
           ),
           Center(
             child: TaraLink(label: l.cantDeliver, onPressed: _busy ? null : widget.onFailure),

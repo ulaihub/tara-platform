@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
@@ -41,6 +42,7 @@ class OfferScreen extends ConsumerStatefulWidget {
 
 class _OfferScreenState extends ConsumerState<OfferScreen> {
   Timer? _ticker;
+  int? _lastPulse;
   bool _busy = false;
   String? _error;
 
@@ -65,6 +67,12 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     _ticker = Timer.periodic(const Duration(milliseconds: 500), (_) {
       if (!mounted) return;
       setState(() {});
+      // Les 5 dernières secondes se sentent dans la main : une impulsion par seconde.
+      final left = _remaining;
+      if (left > 0 && left <= 5 && left != _lastPulse && !_busy) {
+        _lastPulse = left;
+        unawaited(HapticFeedback.mediumImpact());
+      }
       if (_remaining == 0 && !_busy) {
         _ticker?.cancel();
         widget.onClosed(AppLocalizations.of(context).offerExpired);

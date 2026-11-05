@@ -26,6 +26,7 @@ import 'package:tara_rider/features/home/home_summary.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 import 'package:tara_rider/features/offline/pending_actions_screen.dart';
 import 'package:tara_rider/features/safety/sos_screen.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/harness.dart';
@@ -139,7 +140,7 @@ void main() {
     await tester.ensureVisible(find.text('Photographier la remise'));
     await tester.tap(find.text('Photographier la remise'));
     await settle(tester);
-    await tester.tap(find.text('Confirmer la livraison'));
+    await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
     await settle(tester);
     expect(find.byType(CollectionScreen), findsOneWidget);
     expect(find.text('À encaisser auprès du client'), findsOneWidget);

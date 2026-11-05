@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/tara_icons.dart';
 
@@ -132,11 +132,12 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
       title: (route, _) => route?.minutes == null ? l.toPickup : l.toPickupMinutes(route!.minutes!),
       onBack: widget.onBack,
       onSos: widget.onSos,
-      footer: PrimaryButton(
+      // Enlèvement définitif : on glisse plutôt que toucher, pour éviter l'erreur.
+      footer: SwipeButton(
         label: l.parcelCollected,
-        icon: TaraIcons.check,
+        icon: TaraIcons.package,
         loading: _busy,
-        onPressed: ready ? _submit : null,
+        onConfirmed: ready ? _submit : null,
       ),
       children: [
         CourseStepper(labels: steps, activeIndex: 0, stateLabels: stepStateLabels(l)),

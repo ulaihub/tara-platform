@@ -1395,4 +1395,12 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get soundsHint =>
       'Nouvelle course, colis livré, argent encaissé… Le mode silencieux du téléphone est respecté.';
+
+  @override
+  String milestoneTitle(int count) {
+    return '$count courses aujourd’hui !';
+  }
+
+  @override
+  String get milestoneBody => 'Bravo, continuez comme ça.';
 }

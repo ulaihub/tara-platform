@@ -449,5 +449,7 @@
   "profileError": "Could not load your profile.",
   "slideToAccept": "Slide to accept",
   "soundsLabel": "Sounds",
-  "soundsHint": "New job, parcel delivered, cash collected… Your phone’s silent mode is respected."
+  "soundsHint": "New job, parcel delivered, cash collected… Your phone’s silent mode is respected.",
+  "milestoneTitle": "{count} deliveries today!",
+  "milestoneBody": "Great work, keep it up."
 }

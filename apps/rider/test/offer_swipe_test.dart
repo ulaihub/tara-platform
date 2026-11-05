@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_core/session/session_store.dart';
@@ -19,7 +20,7 @@ void main() {
   late FakeRiderApi api;
   late List<Object> accepted;
 
-  Future<void> pumpOffer(WidgetTester tester) async {
+  Future<void> pumpOffer(WidgetTester tester, {DateTime Function()? now}) async {
     api = FakeRiderApi();
     accepted = [];
     await pumpVariant(
@@ -36,7 +37,7 @@ void main() {
           offer: offer,
           onAccepted: accepted.add,
           onClosed: (_) {},
-          now: () => expiresAt.subtract(const Duration(seconds: 18)),
+          now: now ?? () => expiresAt.subtract(const Duration(seconds: 18)),
         ),
       ),
     );
@@ -91,6 +92,24 @@ void main() {
     await settle(tester);
     expect(api.accepted, hasLength(2));
     expect(accepted, hasLength(1));
+  });
+
+  testWidgets('les 5 dernières secondes : une impulsion par seconde', (tester) async {
+    final pulses = <Object?>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'HapticFeedback.vibrate') pulses.add(call.arguments);
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+    var now = expiresAt.subtract(const Duration(seconds: 8));
+    await pumpOffer(tester, now: () => now);
+    pulses.clear();
+    for (var i = 0; i < 8; i++) {
+      now = now.add(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    expect(pulses.where((type) => type == 'HapticFeedbackType.mediumImpact'), hasLength(5));
   });
 
   testWidgets('les lecteurs d’écran acceptent d’un double toucher', (tester) async {

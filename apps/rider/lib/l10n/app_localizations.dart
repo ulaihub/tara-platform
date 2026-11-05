@@ -2479,6 +2479,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nouvelle course, colis livré, argent encaissé… Le mode silencieux du téléphone est respecté.'**
   String get soundsHint;
+
+  /// No description provided for @milestoneTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} courses aujourd’hui !'**
+  String milestoneTitle(int count);
+
+  /// No description provided for @milestoneBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bravo, continuez comme ça.'**
+  String get milestoneBody;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
