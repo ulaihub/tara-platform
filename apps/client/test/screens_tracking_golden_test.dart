@@ -6,6 +6,7 @@ import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/core/location.dart';
 import 'package:tara_client/features/home/home_flow.dart';
 import 'package:tara_client/features/tracking/tracking_screen.dart';
+import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
@@ -19,7 +20,14 @@ const orderId = '00000000-0000-4000-8000-000000000501';
 
 /// Commande d'Akwa à Bonapriso, à l'étape [status] ; après un échec, [decision] est le
 /// choix de l'expéditeur (null : à décider).
-TrackedOrder tracked(String status, {bool withRider = true, int cod = 12500, String? decision, int? rated}) {
+TrackedOrder tracked(
+  String status, {
+  bool withRider = true,
+  int cod = 12500,
+  String? decision,
+  int? rated,
+  bool retryAllowed = true,
+}) {
   DateTime at(int h, int m) => DateTime(2026, 11, 4, h, m);
   const ridden = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED', 'DELIVERED'];
   final reached = <String, DateTime>{
@@ -76,8 +84,11 @@ TrackedOrder tracked(String status, {bool withRider = true, int cod = 12500, Str
             at: at(10, 18),
             decision: decision,
             decisionDueAt: decision == null ? at(10, 33) : null,
+            retryAllowed: retryAllowed,
           )
         : null,
+    retryFee: 500,
+    returnFee: 750,
     rating: rated == null ? null : OrderRating(score: rated, comment: null, at: at(10, 40)),
   );
 }
@@ -327,7 +338,7 @@ void main() {
     await settle(tester);
     expect(launched.single, Uri(scheme: 'tel', path: '+237690112233'));
 
-    await tester.tap(find.text('Retour du colis'));
+    await tester.tap(find.text('Retour du colis · 750\u00a0F'));
     await settle(tester);
     expect(find.text('Confirmer le retour'), findsOneWidget);
     api.tracked[orderId] = tracked('DELIVERY_FAILED', decision: 'RETURN');
@@ -345,11 +356,54 @@ void main() {
     expect(find.text('Code de retour : 5 1 9 0'), findsOneWidget);
   });
 
+  testWidgets('échec : solde insuffisant, recharge Mobile Money puis nouvelle tentative', (tester) async {
+    final api = apiAt('DELIVERY_FAILED')
+      ..decisionError = const ApiException(
+        code: 'RETRY_PAYMENT_REQUIRED',
+        message: 'Solde insuffisant',
+        status: 422,
+        details: {'amount': 500},
+      )
+      ..paymentStatuses = ['PENDING', 'SUCCEEDED'];
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1100));
+    await settle(tester);
+    expect(find.text('Nouvelle tentative · 500\u00a0F'), findsOneWidget);
+    expect(find.text('Retour du colis · 750\u00a0F'), findsOneWidget);
+    await tester.tap(find.text('Nouvelle tentative · 500\u00a0F'));
+    await settle(tester);
+    await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
+    await settle(tester);
+    expect(api.decisions, isEmpty);
+    expect(find.text('Rechargez 500 F pour la nouvelle tentative'), findsOneWidget);
+
+    await tester.enterText(find.byType(EditableText), '677 11 22 33');
+    await tester.tap(find.text('Payer 500 F'));
+    await settle(tester);
+    expect(api.topUps, [(500, '677112233', 'MTN')]);
+    expect(find.textContaining('Validez le paiement de 500 F'), findsOneWidget);
+
+    // Paiement validé : la nouvelle tentative est confirmée sans autre geste.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(seconds: 3));
+    await settle(tester);
+    expect(api.decisions, [(orderId, 'RETRY')]);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('deuxième échec : plus de nouvelle tentative, seul le retour reste', (tester) async {
+    final api = FakeClientApi()..tracked[orderId] = tracked('DELIVERY_FAILED', retryAllowed: false);
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1100));
+    await settle(tester);
+    expect(find.textContaining('Nouvelle tentative ·'), findsNothing);
+    expect(find.textContaining('Une seule nouvelle tentative est possible'), findsOneWidget);
+    expect(find.text('Retour du colis · 750\u00a0F'), findsOneWidget);
+  });
+
   testWidgets('échec : déjà décidé ailleurs, l’écran montre la décision prise', (tester) async {
     final api = apiAt('DELIVERY_FAILED')..decisionError = Exception('conflit');
     await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1100));
     await settle(tester);
-    await tester.tap(find.text('Nouvelle tentative'));
+    await tester.tap(find.text('Nouvelle tentative · 500\u00a0F'));
     await settle(tester);
     expect(find.text('Confirmer la tentative'), findsOneWidget);
     // Retour automatique passé entre-temps : la décision relue remplace le choix.

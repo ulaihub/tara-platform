@@ -448,5 +448,14 @@
   "rateCommentHint": "A word for the Tara team (optional)",
   "rateSend": "Send my rating",
   "rateThanks": "Thanks for your rating!",
-  "rateThanksBody": "Your feedback stays between you and Tara."
+  "rateThanksBody": "Your feedback stays between you and Tara.",
+  "failureFeesNote": "If delivery fails: another attempt {retry}, return of the parcel {ret}, charged to you. A returned parcel is handed back against payment of what your Tara balance doesn’t cover.",
+  "retryUsed": "Only one more attempt is possible: the parcel will be brought back to you.",
+  "returnFeeHint": "Return fee: {amount}, taken from your Tara balance. If it isn’t enough, you pay the rest to the rider when the parcel is handed back (cash or Mobile Money).",
+  "topUpTitle": "Top up {amount} for another attempt",
+  "topUpBody": "Your Tara balance doesn’t cover the fee. Pay by Mobile Money: the new attempt is confirmed as soon as the payment goes through.",
+  "topUpPay": "Pay {amount}",
+  "topUpPending": "Approve the {amount} payment on your phone with your Mobile Money PIN.",
+  "topUpFailed": "The payment didn’t go through. Try again, or choose the return.",
+  "topUpCancel": "Choose the return instead"
 }

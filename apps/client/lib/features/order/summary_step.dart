@@ -257,6 +257,15 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
         ],
         const SizedBox(height: 18),
         _PriceCard(draft: draft),
+        // Frais d'échec (E6), annoncés avant de commander : rien ne se découvre après.
+        if (draft.deliveries.map((d) => d.quote).whereType<Quote>().firstOrNull case final quote?
+            when quote.retryFee > 0 || quote.returnFee > 0) ...[
+          const SizedBox(height: 8),
+          Text(
+            l.failureFeesNote('${formatAmount(quote.retryFee)} F', '${formatAmount(quote.returnFee)} F'),
+            style: TaraText.small.copyWith(color: c.textTertiary),
+          ),
+        ],
         if (!_batch) ...[
           const SizedBox(height: 18),
           if (draft.promoCode case final code?)

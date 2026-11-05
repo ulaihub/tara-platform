@@ -137,6 +137,21 @@ class ClientApi {
   Future<String> newPickupCode(String orderId) async =>
       (await _api.post('/orders/$orderId/pickup-code') as Json)['pickupCode']! as String;
 
+  /// Recharge du solde Tara par Mobile Money (G1) ; [key] : la même demande renvoyée n'en
+  /// crée pas une seconde.
+  Future<Payment> topUp({
+    required int amount,
+    required String phone,
+    required String operator,
+    required String key,
+  }) async => Payment.fromJson(
+    await _api.post(
+      '/me/wallet/topup',
+      body: {'amount': amount, 'phone': phone, 'operator': operator},
+      headers: {'Idempotency-Key': key},
+    ) as Json,
+  );
+
   /// Après un échec de livraison (E6) : `RETRY` (nouvelle tentative) ou `RETURN` (retour).
   Future<void> failureDecision(String orderId, String decision) =>
       _api.post('/orders/$orderId/failure-decision', body: {'decision': decision});

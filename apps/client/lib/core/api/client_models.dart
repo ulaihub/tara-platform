@@ -350,6 +350,8 @@ class Quote {
     required this.discountTotal,
     required this.totalPrice,
     required this.promoCode,
+    this.retryFee = 0,
+    this.returnFee = 0,
   });
   factory Quote.fromJson(Json json) => Quote(
     distanceMeters: _field<num>(json, 'distanceMeters').toInt(),
@@ -362,6 +364,8 @@ class Quote {
     discountTotal: _field<num>(json, 'discountTotal').toInt(),
     totalPrice: _field<num>(json, 'totalPrice').toInt(),
     promoCode: _field(json, 'promoCode'),
+    retryFee: _field<num>(json, 'retryFee').toInt(),
+    returnFee: _field<num>(json, 'returnFee').toInt(),
   );
   static const fields = [
     'distanceMeters',
@@ -371,6 +375,8 @@ class Quote {
     'discountTotal',
     'totalPrice',
     'promoCode',
+    'retryFee',
+    'returnFee',
   ];
 
   final int distanceMeters;
@@ -380,6 +386,10 @@ class Quote {
   final int discountTotal;
   final int totalPrice;
   final String? promoCode;
+
+  /// Seulement si la livraison échoue (E6) : nouvelle tentative, retour à l'expéditeur.
+  final int retryFee;
+  final int returnFee;
 }
 
 /// Commande créée (C1) : de quoi la suivre et afficher son prix.
@@ -489,6 +499,8 @@ class TrackedOrder {
     required this.createdAt,
     this.failure,
     this.rating,
+    this.retryFee = 0,
+    this.returnFee = 0,
   });
 
   factory TrackedOrder.fromJson(Json json) {
@@ -512,6 +524,8 @@ class TrackedOrder {
       size: _field(json, 'packageSize'),
       totalPrice: _field<num>(pricing, 'totalPrice').toInt(),
       codAmount: _field<num>(pricing, 'codAmount').toInt(),
+      retryFee: _field<num>(pricing, 'retryFee').toInt(),
+      returnFee: _field<num>(pricing, 'returnFee').toInt(),
       rider: rider == null ? null : OrderRider.fromJson(rider),
       timeline: [
         for (final item in _field<List<Object?>>(json, 'timeline'))
@@ -567,6 +581,10 @@ class TrackedOrder {
   /// Note donnée au livreur (F4), null tant que l'expéditeur n'a pas noté.
   final OrderRating? rating;
 
+  /// Frais d'échec figés à la commande (E6) : nouvelle tentative, retour.
+  final int retryFee;
+  final int returnFee;
+
   /// Heure du premier passage à [status] (null s'il n'a pas eu lieu).
   DateTime? reachedAt(String status) => timeline.where((step) => step.status == status).firstOrNull?.at;
 
@@ -593,6 +611,8 @@ class TrackedOrder {
     createdAt: createdAt,
     failure: status == null ? this.failure : failure,
     rating: rating ?? this.rating,
+    retryFee: retryFee,
+    returnFee: returnFee,
   );
 }
 
@@ -617,7 +637,14 @@ class OrderRating {
 /// retour du colis avant [decisionDueAt] ; sans réponse, le colis lui revient.
 @immutable
 class OrderFailure {
-  const OrderFailure({required this.reason, required this.note, required this.at, this.decision, this.decisionDueAt});
+  const OrderFailure({
+    required this.reason,
+    required this.note,
+    required this.at,
+    this.decision,
+    this.decisionDueAt,
+    this.retryAllowed = true,
+  });
 
   factory OrderFailure.fromJson(Json json) {
     final due = json['decisionDueAt'] as String?;
@@ -627,10 +654,11 @@ class OrderFailure {
       at: DateTime.parse(_field(json, 'at')),
       decision: json['decision'] as String?,
       decisionDueAt: due == null ? null : DateTime.parse(due),
+      retryAllowed: _field<bool>(json, 'retryAllowed'),
     );
   }
 
-  static const fields = ['reason', 'note', 'at', 'decision', 'decisionDueAt'];
+  static const fields = ['reason', 'note', 'at', 'decision', 'decisionDueAt', 'retryAllowed'];
 
   /// RECIPIENT_ABSENT, RECIPIENT_UNREACHABLE, REFUSED, ADDRESS_NOT_FOUND, PAYMENT_REFUSED, OTHER.
   final String? reason;
@@ -642,4 +670,7 @@ class OrderFailure {
   /// RETRY ou RETURN ; null tant que l'expéditeur doit choisir.
   final String? decision;
   final DateTime? decisionDueAt;
+
+  /// Une seule nouvelle tentative : false après un deuxième échec.
+  final bool retryAllowed;
 }

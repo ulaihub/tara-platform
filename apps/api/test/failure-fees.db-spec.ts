@@ -114,6 +114,7 @@ describe('Frais de nouvelle tentative et de retour (E6)', () => {
     const refused = await decide(sender, placed, 'RETRY').expect(422);
     expect(refused.body.error).toMatchObject({ code: 'RETRY_PAYMENT_REQUIRED' });
     expect(refused.body.error.message).toContain('500');
+    expect(refused.body.error.details).toEqual({ amount: 500 });
     const topUp = await request(ctx.http)
       .post('/v1/me/wallet/topup')
       .set(sender.auth)

@@ -1253,4 +1253,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rateThanksBody => 'Your feedback stays between you and Tara.';
+
+  @override
+  String failureFeesNote(String retry, String ret) {
+    return 'If delivery fails: another attempt $retry, return of the parcel $ret, charged to you. A returned parcel is handed back against payment of what your Tara balance doesn’t cover.';
+  }
+
+  @override
+  String get retryUsed => 'Only one more attempt is possible: the parcel will be brought back to you.';
+
+  @override
+  String returnFeeHint(String amount) {
+    return 'Return fee: $amount, taken from your Tara balance. If it isn’t enough, you pay the rest to the rider when the parcel is handed back (cash or Mobile Money).';
+  }
+
+  @override
+  String topUpTitle(String amount) {
+    return 'Top up $amount for another attempt';
+  }
+
+  @override
+  String get topUpBody =>
+      'Your Tara balance doesn’t cover the fee. Pay by Mobile Money: the new attempt is confirmed as soon as the payment goes through.';
+
+  @override
+  String topUpPay(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String topUpPending(String amount) {
+    return 'Approve the $amount payment on your phone with your Mobile Money PIN.';
+  }
+
+  @override
+  String get topUpFailed => 'The payment didn’t go through. Try again, or choose the return.';
+
+  @override
+  String get topUpCancel => 'Choose the return instead';
 }

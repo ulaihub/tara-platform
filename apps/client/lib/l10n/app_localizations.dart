@@ -2335,6 +2335,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Votre avis reste entre vous et Tara.'**
   String get rateThanksBody;
+
+  /// No description provided for @failureFeesNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cas d’échec de livraison : nouvelle tentative {retry}, retour du colis {ret}, à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.'**
+  String failureFeesNote(String retry, String ret);
+
+  /// No description provided for @retryUsed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une seule nouvelle tentative est possible : le colis vous sera rapporté.'**
+  String get retryUsed;
+
+  /// No description provided for @returnFeeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de retour : {amount}, pris sur votre solde Tara. S’il ne suffit pas, vous réglez le reste au livreur à la remise du colis (espèces ou Mobile Money).'**
+  String returnFeeHint(String amount);
+
+  /// No description provided for @topUpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechargez {amount} pour la nouvelle tentative'**
+  String topUpTitle(String amount);
+
+  /// No description provided for @topUpBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre solde Tara ne couvre pas les frais. Payez par Mobile Money : la nouvelle tentative est confirmée dès le paiement validé.'**
+  String get topUpBody;
+
+  /// No description provided for @topUpPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount}'**
+  String topUpPay(String amount);
+
+  /// No description provided for @topUpPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validez le paiement de {amount} sur votre téléphone avec votre code secret Mobile Money.'**
+  String topUpPending(String amount);
+
+  /// No description provided for @topUpFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le paiement n’a pas abouti. Réessayez, ou choisissez le retour du colis.'**
+  String get topUpFailed;
+
+  /// No description provided for @topUpCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir le retour à la place'**
+  String get topUpCancel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

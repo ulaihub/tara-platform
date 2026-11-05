@@ -129,6 +129,8 @@ class FakeClientApi extends ClientApi {
       discountTotal: discount,
       totalPrice: base + surcharges.fold<int>(0, (sum, s) => sum + s.amount) - discount,
       promoCode: promoCode,
+      retryFee: 500,
+      returnFee: base ~/ 2,
     );
   }
 
@@ -223,13 +225,30 @@ class FakeClientApi extends ClientApi {
   /// Choix après un échec : (commande, RETRY ou RETURN).
   final decisions = <(String, String)>[];
 
-  /// Erreur renvoyée au choix (déjà décidé ailleurs…), null sinon.
+  /// Erreur renvoyée au prochain choix (déjà décidé ailleurs, solde insuffisant…), null sinon.
   Object? decisionError;
 
   @override
   Future<void> failureDecision(String orderId, String decision) async {
-    if (decisionError case final error?) throw error;
+    if (decisionError case final error?) {
+      decisionError = null;
+      throw error;
+    }
     decisions.add((orderId, decision));
+  }
+
+  /// Recharges demandées : (montant, numéro, opérateur).
+  final topUps = <(int, String, String)>[];
+
+  @override
+  Future<Payment> topUp({
+    required int amount,
+    required String phone,
+    required String operator,
+    required String key,
+  }) async {
+    topUps.add((amount, phone, operator));
+    return Payment(id: 'topup-${topUps.length}', status: 'PENDING', amount: amount, failureReason: null);
   }
 
   @override

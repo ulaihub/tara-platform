@@ -688,10 +688,12 @@ export class OrderFinanceService implements OnModuleInit {
       const balance = await this.ledger.balance(account, tx);
       const missing = order.retryFee - balance - this.debtLimit(order);
       if (missing > 0) {
-        throw AppError.unprocessable('RETRY_PAYMENT_REQUIRED', {
-          amount: missing,
-          fee: order.retryFee,
-        });
+        throw AppError.unprocessable(
+          'RETRY_PAYMENT_REQUIRED',
+          { amount: missing, fee: order.retryFee },
+          // L'app propose la recharge de ce montant.
+          { amount: missing },
+        );
       }
     }
     await this.ledger.post(tx, {

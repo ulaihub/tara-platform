@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:math' show Random;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -67,6 +70,15 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   /// Note du livreur une fois livré (F4) : étoiles et mot facultatif.
   int _stars = 0;
   final _comment = TextEditingController();
+
+  /// Nouvelle tentative que le solde ne couvre pas (E6) : montant à recharger d'abord, puis
+  /// la tentative est confirmée dès le paiement validé.
+  int? _topUp;
+  String _topUpOperator = 'MTN';
+  final _topUpPhone = TextEditingController();
+  String? _topUpPayment;
+  bool _topUpFailed = false;
+  Timer? _topUpPoll;
   StreamSubscription<RealtimeEvent>? _events;
   late final RealtimeClient _realtime;
   Timer? _refresh;
@@ -90,6 +102,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     _refresh?.cancel();
     _realtime.unsubscribeOrder(widget.orderId);
     _comment.dispose();
+    _topUpPhone.dispose();
+    _topUpPoll?.cancel();
     super.dispose();
   }
 
@@ -184,12 +198,101 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       await _load();
     } catch (error) {
       if (!mounted) return;
+      if (error is ApiException && error.code == 'RETRY_PAYMENT_REQUIRED') {
+        _askTopUp((error.details['amount'] as num?)?.toInt() ?? _order?.retryFee ?? 0);
+        return;
+      }
       final message = errorMessage(context, error);
       await _load();
       if (mounted) setState(() => _error = message);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  void _askTopUp(int amount) {
+    final me = ref.read(meProvider).value;
+    if (_topUpPhone.text.isEmpty && me != null) {
+      final local = digitsOf(me.phone).replaceFirst(RegExp(r'^237(?=\d{9}$)'), '');
+      _topUpPhone.text = PhoneInputFormatter()
+          .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: local))
+          .text;
+    }
+    setState(() {
+      _topUp = amount;
+      _topUpFailed = false;
+      _error = null;
+    });
+  }
+
+  Future<void> _payTopUp() async {
+    final amount = _topUp;
+    final phone = digitsOf(_topUpPhone.text);
+    if (amount == null) return;
+    if (!isCameroonMobile(phone)) {
+      setState(() => _error = AppLocalizations.of(context).phoneInvalid);
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _topUpFailed = false;
+      _error = null;
+    });
+    try {
+      final random = Random.secure();
+      final key = List.generate(16, (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0')).join();
+      final payment = await ref
+          .read(clientApiProvider)
+          .topUp(amount: amount, phone: phone, operator: _topUpOperator, key: key);
+      if (!mounted) return;
+      setState(() => _topUpPayment = payment.id);
+      _topUpPoll?.cancel();
+      _topUpPoll = Timer.periodic(const Duration(seconds: 3), (_) => unawaited(_checkTopUp()));
+      if (payment.status != 'PENDING') unawaited(_checkTopUp());
+    } catch (error) {
+      if (mounted) setState(() => _error = errorMessage(context, error));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// Recharge validée : la nouvelle tentative est confirmée dans la foulée.
+  Future<void> _checkTopUp() async {
+    final id = _topUpPayment;
+    if (id == null) return;
+    final Payment payment;
+    try {
+      payment = await ref.read(clientApiProvider).payment(id);
+    } on ApiException {
+      return; // Réseau : nouvel essai au prochain tour.
+    }
+    if (!mounted || _topUpPayment != id) return;
+    switch (payment.status) {
+      case 'SUCCEEDED':
+        _topUpPoll?.cancel();
+        setState(() {
+          _topUp = null;
+          _topUpPayment = null;
+          _choice = 'RETRY';
+        });
+        await _decide();
+      case 'FAILED' || 'CANCELLED':
+        _topUpPoll?.cancel();
+        setState(() {
+          _topUpPayment = null;
+          _topUpFailed = true;
+        });
+    }
+  }
+
+  void _cancelTopUp() {
+    _topUpPoll?.cancel();
+    setState(() {
+      _topUp = null;
+      _topUpPayment = null;
+      _topUpFailed = false;
+      _choice = 'RETURN';
+    });
   }
 
   Future<void> _rate() async {
@@ -339,6 +442,18 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                         onDecide: () => unawaited(_decide()),
                         onStars: (stars) => setState(() => _stars = stars),
                         onRate: () => unawaited(_rate()),
+                        topUp: _topUp == null
+                            ? null
+                            : _TopUpState(
+                                amount: _topUp!,
+                                operator: _topUpOperator,
+                                phone: _topUpPhone,
+                                pending: _topUpPayment != null,
+                                failed: _topUpFailed,
+                                onOperator: (value) => setState(() => _topUpOperator = value),
+                                onPay: () => unawaited(_payTopUp()),
+                                onCancel: _cancelTopUp,
+                              ),
                         onCancel: () => unawaited(_cancel()),
                         onShare: () => unawaited(_share(order)),
                         onCall: (phone) => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
@@ -382,6 +497,7 @@ class _Panel extends StatelessWidget {
     required this.onStars,
     required this.onRate,
     required this.onCancel,
+    this.topUp,
     required this.onShare,
     required this.onCall,
   });
@@ -403,6 +519,9 @@ class _Panel extends StatelessWidget {
   final ValueChanged<int> onStars;
   final VoidCallback onRate;
   final VoidCallback onCancel;
+
+  /// Recharge demandée avant la nouvelle tentative (solde insuffisant).
+  final _TopUpState? topUp;
   final VoidCallback onShare;
   final ValueChanged<String> onCall;
 
@@ -479,18 +598,31 @@ class _Panel extends StatelessWidget {
       const SizedBox(height: 16),
       // Livré : le récapitulatif reprend les heures, la frise laisse la place à la note.
       if (!delivered) ...[_Steps(order: o), const SizedBox(height: 16)],
-      if (deciding) ...[
-        AddressChoice(
-          icon: TaraIcons.refresh,
-          title: l.failureRetryTitle,
-          subtitle: l.failureRetryBody(riderName, recipientFirst),
-          selected: choice == 'RETRY',
-          onTap: () => onChoose('RETRY'),
-        ),
-        const SizedBox(height: 10),
+      if (deciding && topUp != null) ...[
+        _TopUpCard(state: topUp!),
+      ] else if (deciding) ...[
+        // Une seule nouvelle tentative (E6) ; chaque choix annonce ses frais.
+        if (failure?.retryAllowed ?? true) ...[
+          AddressChoice(
+            icon: TaraIcons.refresh,
+            title: o.retryFee > 0 ? '${l.failureRetryTitle} · ${formatAmount(o.retryFee)}\u00a0F' : l.failureRetryTitle,
+            subtitle: l.failureRetryBody(riderName, recipientFirst),
+            selected: choice == 'RETRY',
+            onTap: () => onChoose('RETRY'),
+          ),
+          const SizedBox(height: 10),
+        ] else ...[
+          TintBox(
+            tone: TintTone.accent,
+            child: Text(l.retryUsed, style: TaraText.label.copyWith(color: c.textPrimary)),
+          ),
+          const SizedBox(height: 10),
+        ],
         AddressChoice(
           icon: TaraIcons.returnArrow,
-          title: l.failureReturnTitle,
+          title: o.returnFee > 0
+              ? '${l.failureReturnTitle} · ${formatAmount(o.returnFee)}\u00a0F'
+              : l.failureReturnTitle,
           subtitle: l.failureReturnBody(riderName, o.pickup.summary),
           selected: choice == 'RETURN',
           onTap: () => onChoose('RETURN'),
@@ -516,6 +648,13 @@ class _Panel extends StatelessWidget {
           const SizedBox(height: 10),
         ],
         _recipientRow(l, o, recipientFirst),
+        if (returning && o.returnFee > 0) ...[
+          const SizedBox(height: 8),
+          Text(
+            l.returnFeeHint('${formatAmount(o.returnFee)} F'),
+            style: TaraText.small.copyWith(color: c.textSecondary),
+          ),
+        ],
         if (returning) ...[
           const SizedBox(height: 8),
           TintBox(
@@ -553,6 +692,21 @@ class _Panel extends StatelessWidget {
       ],
       if (error != null) ...[const SizedBox(height: 8), ErrorLine(error!)],
     ];
+    // Solde insuffisant pour la nouvelle tentative : on paie d'abord la recharge.
+    if (deciding && topUp != null) {
+      final state = topUp!;
+      return ScrollWithFooter(
+        horizontal: 20,
+        top: 4,
+        content: content,
+        footer: PrimaryButton(
+          label: l.topUpPay('${formatAmount(state.amount)} F'),
+          icon: TaraIcons.phone,
+          loading: busy || state.pending,
+          onPressed: busy || state.pending ? null : state.onPay,
+        ),
+      );
+    }
     // Échec : on choisit la suite, puis on glisse pour confirmer.
     if (deciding) {
       return ScrollWithFooter(
@@ -954,5 +1108,86 @@ class _RateCard extends StatelessWidget {
       );
     }
     return GlassCard(radius: 22, shadow: false, padding: const EdgeInsets.fromLTRB(16, 14, 16, 16), child: child);
+  }
+}
+
+/// Recharge Mobile Money demandée avant une nouvelle tentative (solde insuffisant).
+class _TopUpState {
+  const _TopUpState({
+    required this.amount,
+    required this.operator,
+    required this.phone,
+    required this.pending,
+    required this.failed,
+    required this.onOperator,
+    required this.onPay,
+    required this.onCancel,
+  });
+
+  final int amount;
+  final String operator;
+  final TextEditingController phone;
+
+  /// Demande envoyée au téléphone, en attente de validation.
+  final bool pending;
+  final bool failed;
+  final ValueChanged<String> onOperator;
+  final VoidCallback onPay;
+  final VoidCallback onCancel;
+}
+
+/// « Rechargez 500 F pour la nouvelle tentative » : opérateur, numéro, puis validation sur
+/// le téléphone ; ou le retour à la place.
+class _TopUpCard extends StatelessWidget {
+  const _TopUpCard({required this.state});
+
+  final _TopUpState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final amount = '${formatAmount(state.amount)} F';
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.topUpTitle(amount), style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
+          const SizedBox(height: 4),
+          Text(l.topUpBody, style: TaraText.small.copyWith(color: c.textSecondary)),
+          const SizedBox(height: 12),
+          ChoiceChips<String>(
+            options: [ChoiceOption('MTN', l.payMtn), ChoiceOption('ORANGE', l.payOrange)],
+            selected: state.operator,
+            onSelected: state.pending ? (_) {} : state.onOperator,
+          ),
+          const SizedBox(height: 10),
+          TaraTextField(
+            label: l.payerPhoneLabel,
+            hint: l.phoneHint,
+            controller: state.phone,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [PhoneInputFormatter()],
+            leading: PhonePrefixButton(prefix: '+237', semanticLabel: l.countryCodeLabel('+237')),
+          ),
+          if (state.pending) ...[
+            const SizedBox(height: 10),
+            TintBox(
+              tone: TintTone.accent,
+              child: Text(l.topUpPending(amount), style: TaraText.label.copyWith(color: c.textPrimary)),
+            ),
+          ],
+          if (state.failed) ...[const SizedBox(height: 10), ErrorLine(l.topUpFailed)],
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TaraLink(label: l.topUpCancel, onPressed: state.onCancel),
+          ),
+        ],
+      ),
+    );
   }
 }

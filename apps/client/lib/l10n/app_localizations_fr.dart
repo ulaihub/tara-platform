@@ -1258,4 +1258,42 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rateThanksBody => 'Votre avis reste entre vous et Tara.';
+
+  @override
+  String failureFeesNote(String retry, String ret) {
+    return 'En cas d’échec de livraison : nouvelle tentative $retry, retour du colis $ret, à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.';
+  }
+
+  @override
+  String get retryUsed => 'Une seule nouvelle tentative est possible : le colis vous sera rapporté.';
+
+  @override
+  String returnFeeHint(String amount) {
+    return 'Frais de retour : $amount, pris sur votre solde Tara. S’il ne suffit pas, vous réglez le reste au livreur à la remise du colis (espèces ou Mobile Money).';
+  }
+
+  @override
+  String topUpTitle(String amount) {
+    return 'Rechargez $amount pour la nouvelle tentative';
+  }
+
+  @override
+  String get topUpBody =>
+      'Votre solde Tara ne couvre pas les frais. Payez par Mobile Money : la nouvelle tentative est confirmée dès le paiement validé.';
+
+  @override
+  String topUpPay(String amount) {
+    return 'Payer $amount';
+  }
+
+  @override
+  String topUpPending(String amount) {
+    return 'Validez le paiement de $amount sur votre téléphone avec votre code secret Mobile Money.';
+  }
+
+  @override
+  String get topUpFailed => 'Le paiement n’a pas abouti. Réessayez, ou choisissez le retour du colis.';
+
+  @override
+  String get topUpCancel => 'Choisir le retour à la place';
 }
