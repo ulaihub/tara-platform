@@ -134,9 +134,11 @@ export function LoginFlow({ initial, expired }: { initial: LoginState; expired: 
               width={150}
               height={150}
             />
-            <p className="text-[13px] break-all text-[#16120e]/70">
+            <p className="text-[13px] text-[#16120e]/70">
               Pas d’appareil photo ? Saisissez cette clé à la main :<br />
-              <span className="font-mono text-[14px] font-bold text-[#16120e]">{state.secret}</span>
+              <span className="mt-1 block font-mono text-[14px] font-bold text-[#16120e]">
+                {state.secret?.match(/.{1,4}/g)?.join(' ')}
+              </span>
             </p>
           </div>
         </>
