@@ -14,16 +14,15 @@ import {
 /** Politique de sécurité du contenu : scripts et styles de la page seulement (nonce). */
 function contentSecurityPolicy(nonce: string): string {
   const dev = process.env['NODE_ENV'] !== 'production';
-  const realtime = process.env['NEXT_PUBLIC_TARA_REALTIME_URL'] ?? '';
-  const socket = realtime.replace(/^http/, 'ws');
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ''}`,
     `style-src 'self' 'nonce-${nonce}'${dev ? " 'unsafe-inline'" : ''}`,
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https://tiles.openfreemap.org",
     "font-src 'self'",
-    // Carte (tuiles vectorielles OpenFreeMap) et temps réel de l'API.
-    `connect-src 'self' https://tiles.openfreemap.org ${realtime} ${socket}`.trim(),
+    // Carte : tuiles vectorielles et polices des libellés (OpenFreeMap). Les données de
+    // l'équipe passent par le serveur du back-office, jamais directement vers l'API.
+    "connect-src 'self' https://tiles.openfreemap.org",
     "worker-src 'self' blob:",
     "frame-ancestors 'none'",
     "form-action 'self'",
@@ -102,7 +101,7 @@ export const config = {
   matcher: [
     {
       source:
-        '/((?!_next/static|_next/image|favicon.ico|logo-clair.svg|logo-sombre.svg|marque-clair.svg).*)',
+        '/((?!_next/static|_next/image|favicon.ico|logo-clair.svg|logo-sombre.svg|marque-clair.svg|maplibre-gl-worker.mjs).*)',
       missing: [{ type: 'header', key: 'next-router-prefetch' }],
     },
   ],

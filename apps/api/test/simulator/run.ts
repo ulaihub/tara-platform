@@ -30,7 +30,10 @@ process.env['NODE_ENV'] = 'test';
 process.env['SMS_PROVIDER'] = 'fake';
 process.env['PUSH_PROVIDER'] = 'fake';
 process.env['WHATSAPP_PROVIDER'] = 'none';
-process.env['OSRM_URL'] = '';
+// Plafonds anti-pompage relevés : tous les comptes virtuels se connectent depuis la même IP.
+process.env['OTP_MAX_PER_IP_PER_HOUR'] = '1000000';
+process.env['OTP_DAILY_GLOBAL_LIMIT'] = '1000000';
+delete process.env['OSRM_URL']; // Distances à vol d'oiseau corrigées, sans serveur d'itinéraires.
 
 const report = await runSimulation({
   riders: number(values.riders, DEFAULT_SIMULATION.riders),

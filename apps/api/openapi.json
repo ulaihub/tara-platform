@@ -7003,6 +7003,32 @@
           "Mon compte"
         ]
       }
+    },
+    "/v1/admin/live-map": {
+      "get": {
+        "operationId": "Ops_map",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveMap"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · pilotage"
+        ]
+      }
     }
   },
   "info": {
@@ -7688,6 +7714,15 @@
         "additionalProperties": {},
         "description": "Toutes les données personnelles du compte (JSON)"
       },
+      "DelayKind": {
+        "type": "string",
+        "enum": [
+          "NO_RIDER",
+          "PICKUP",
+          "DELIVERY"
+        ],
+        "description": "Sans livreur, enlèvement en retard, livraison en retard"
+      },
       "DeviceInput": {
         "type": "object",
         "properties": {
@@ -8368,6 +8403,303 @@
           "markdown"
         ],
         "additionalProperties": false
+      },
+      "LiveMap": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "riders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveRider"
+            }
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveOrder"
+            }
+          },
+          "safetyAlerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyAlert"
+            }
+          },
+          "courseAlerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CourseAlert"
+            }
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "searchingMinutes": {
+                "type": "number"
+              },
+              "pickupMinutes": {
+                "type": "integer"
+              },
+              "deliveryMarginMinutes": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "searchingMinutes",
+              "pickupMinutes",
+              "deliveryMarginMinutes"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "generatedAt",
+          "riders",
+          "orders",
+          "safetyAlerts",
+          "courseAlerts",
+          "rules"
+        ],
+        "additionalProperties": false
+      },
+      "LiveOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "isExpress": {
+            "type": "boolean"
+          },
+          "scheduledFor": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "senderName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "riderId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "pickup": {
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              },
+              "neighborhood": {
+                "nullable": true,
+                "type": "string"
+              },
+              "landmark": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude",
+              "neighborhood",
+              "landmark"
+            ],
+            "additionalProperties": false
+          },
+          "dropoff": {
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              },
+              "neighborhood": {
+                "nullable": true,
+                "type": "string"
+              },
+              "landmark": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude",
+              "neighborhood",
+              "landmark"
+            ],
+            "additionalProperties": false
+          },
+          "codAmount": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "assignedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickedUpAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "delay": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "kind": {
+                "$ref": "#/components/schemas/DelayKind"
+              },
+              "dueAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "minutes": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "kind",
+              "dueAt",
+              "minutes"
+            ],
+            "additionalProperties": false
+          },
+          "awaitingValidation": {
+            "type": "boolean"
+          },
+          "awaitingDecision": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "isExpress",
+          "scheduledFor",
+          "senderName",
+          "riderId",
+          "pickup",
+          "dropoff",
+          "codAmount",
+          "createdAt",
+          "assignedAt",
+          "pickedUpAt",
+          "delay",
+          "awaitingValidation",
+          "awaitingDecision"
+        ],
+        "additionalProperties": false
+      },
+      "LiveRider": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "vehicleType": {
+            "$ref": "#/components/schemas/VehicleType"
+          },
+          "plateNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/LiveRiderState"
+          },
+          "signalLost": {
+            "type": "boolean"
+          },
+          "position": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              },
+              "heading": {
+                "nullable": true,
+                "type": "number"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude",
+              "heading",
+              "at"
+            ],
+            "additionalProperties": false
+          },
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "rating": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "vehicleType",
+          "plateNumber",
+          "state",
+          "signalLost",
+          "position",
+          "orderIds",
+          "rating"
+        ],
+        "additionalProperties": false
+      },
+      "LiveRiderState": {
+        "type": "string",
+        "enum": [
+          "FREE",
+          "ON_COURSE",
+          "OFFLINE"
+        ],
+        "description": "Libre, en course ou hors ligne"
       },
       "LocationLink": {
         "type": "object",

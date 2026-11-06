@@ -22,6 +22,30 @@ Les autres membres et leurs rôles (`DISPATCHER`, `SUPPORT`, `FINANCE`, `ADMIN`)
 ensuite depuis la section Équipe (H8). En local, le code SMS s'affiche dans le journal de
 l'API.
 
+### Ville fictive (démonstration)
+
+Pour voir le back-office vivre sans vrais clients : boutiques, livreurs qui roulent dans
+Douala, commandes qui arrivent, et quelques incidents mis en scène (commande sans livreur,
+retards, livreur sans signal, SOS, remise sans code). Données entièrement fictives, sur la
+base de développement uniquement (refusé en production) :
+
+```bash
+pnpm --filter @tara/api demo:city -- --riders 30 --minutes 30
+```
+
+## Carte en direct (H1)
+
+La carte relit l'état de la ville toutes les 5 secondes (en pause quand l'onglet est caché) :
+livreurs libres (vert), en course (orange), hors ligne avec leur dernière position (gris),
+prochain arrêt de chaque commande, SOS qui clignotent. Le panneau de droite classe les
+alertes : SOS (avec un son et le nombre de SOS dans le titre de l'onglet), commandes sans
+livreur ou en retard, livreur en course qui ne répond plus, remises sans code et décisions
+attendues, alertes de trajet. Un clic montre l'élément sur la carte et ouvre sa fiche.
+
+Fonds de carte : style Tara des apps (`packages/tara_map`), tuiles OpenFreeMap en attendant
+les nôtres. Le fichier de calcul de la carte est copié dans `public/` avant `dev` et `build`
+(`scripts/copy-map-worker.mjs`).
+
 ## Connexion
 
 1. Numéro de mobile, puis code reçu par SMS (comme dans les apps).
@@ -46,11 +70,16 @@ Un numéro sans rôle d'équipe est refusé et sa session aussitôt fermée.
 
 ## Réglages (`.env.example`)
 
-| Variable                        | Rôle                                                 |
-| ------------------------------- | ---------------------------------------------------- |
-| `TARA_API_URL`                  | Adresse de l'API, vue du serveur du back-office      |
-| `NEXT_PUBLIC_TARA_REALTIME_URL` | Adresse du temps réel (Socket.IO), vue du navigateur |
-| `SESSION_SECRET`                | Clé des cookies, 32 caractères au moins, secrète     |
+| Variable         | Rôle                                             |
+| ---------------- | ------------------------------------------------ |
+| `TARA_API_URL`   | Adresse de l'API, vue du serveur du back-office  |
+| `SESSION_SECRET` | Clé des cookies, 32 caractères au moins, secrète |
+
+## Types de l'API
+
+Les types des réponses viennent du contrat OpenAPI de l'API (`apps/api/openapi.json`) :
+`pnpm --filter @tara/backoffice api:types` régénère `src/lib/api-schema.d.ts`. La CI
+vérifie qu'ils sont à jour.
 
 ## Vérifications
 

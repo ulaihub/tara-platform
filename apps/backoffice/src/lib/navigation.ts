@@ -15,6 +15,9 @@ export interface Section {
 
 const ALL: readonly StaffRole[] = ['ADMIN', 'DISPATCHER', 'SUPPORT', 'FINANCE'];
 
+/** Carte en direct : dispatch, support et administrateurs (comme l'API). */
+export const CARTE_ROLES: readonly StaffRole[] = ['ADMIN', 'DISPATCHER', 'SUPPORT'];
+
 /** Sections du back-office, dans l'ordre du menu, avec les rôles qui y ont accès. */
 export const SECTIONS: readonly Section[] = [
   {
@@ -24,8 +27,8 @@ export const SECTIONS: readonly Section[] = [
     requirement: 'H1',
     description:
       'Livreurs libres, en course ou hors ligne, commandes en cours, retards et alertes.',
-    roles: ['ADMIN', 'DISPATCHER', 'SUPPORT'],
-    ready: false,
+    roles: CARTE_ROLES,
+    ready: true,
   },
   {
     href: '/commandes',

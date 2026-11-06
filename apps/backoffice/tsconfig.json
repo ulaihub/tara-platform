@@ -22,7 +22,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@tara-map/*": ["../../packages/tara_map/assets/*"]
     },
     "esModuleInterop": true
   },

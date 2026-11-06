@@ -142,6 +142,13 @@ const envSchema = z
     DISPATCH_RADII_METERS: z.string().default('3000,5000,8000,12000'),
     DISPATCH_RETRY_SECONDS: z.coerce.number().min(0.2).max(300).default(20),
     DISPATCH_ALERT_AFTER_SECONDS: z.coerce.number().min(1).max(3600).default(300),
+    /**
+     * Retards signalés sur la carte du back-office (H1) : livreur pas encore au vendeur
+     * [LATE_PICKUP_MINUTES] après l'attribution ; colis pas livré après le trajet estimé
+     * (300 m par minute) plus [LATE_DELIVERY_MARGIN_MINUTES].
+     */
+    LATE_PICKUP_MINUTES: z.coerce.number().int().min(1).max(240).default(25),
+    LATE_DELIVERY_MARGIN_MINUTES: z.coerce.number().int().min(0).max(240).default(15),
     /** Position considérée comme périmée au-delà de ce délai (livreur hors ligne de fait). */
     RIDER_POSITION_TTL_SECONDS: z.coerce.number().int().min(10).max(600).default(90),
     /** Au-delà de ce montant à encaisser, une livraison sans code exige un administrateur. */

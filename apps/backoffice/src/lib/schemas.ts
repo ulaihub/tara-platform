@@ -1,0 +1,11 @@
+import type { components } from './api-schema';
+
+/** Types des réponses de l'API, générés depuis son contrat OpenAPI (`pnpm api:types`). */
+export type Schemas = components['schemas'];
+
+export type LiveMap = Schemas['LiveMap'];
+export type LiveRider = Schemas['LiveRider'];
+export type LiveOrder = Schemas['LiveOrder'];
+export type SafetyAlert = Schemas['SafetyAlert'];
+export type CourseAlert = Schemas['CourseAlert'];
+export type OrderStatus = Schemas['OrderStatus'];

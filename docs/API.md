@@ -73,6 +73,26 @@ Chaque position reçue pendant une course (de l'acceptation à la livraison, au 
 | Équipe  | `GET /v1/admin/orders/{id}/track`                                                                                  | Support, dispatch, administrateur : points, résumé et alertes. Chaque consultation est tracée dans le journal d'audit.                                                                                                                                                                                                                                    |
 | Équipe  | `GET /v1/admin/course-alerts?status=open\|all`, `POST /v1/admin/course-alerts/{id}/acknowledge`                    | Alertes (une par sujet et par course, aussi en temps réel : `ops.course-alert`) : `ACTION_FAR` (enlèvement, livraison, échec ou retour déclaré à plus de 200 m de l'adresse), `LONG_STOP` (plus de 15 min au même endroit avec le colis, loin du vendeur et du client), `MOCK_LOCATION` (position simulée), `TRACK_GAP` (aucune position pendant 20 min). |
 
+## Back-office d'exploitation (H1 à H8)
+
+Le back-office (`apps/backoffice`) appelle l'API depuis son serveur avec le jeton du membre
+de l'équipe (second facteur vérifié) ; le navigateur ne voit jamais ce jeton. `GET /me`
+indique où en est le second facteur (`staff.mfaEnrolled`, `staff.mfaVerified`).
+
+**Carte en direct (H1)** : `GET /admin/live-map` (`ADMIN`, `DISPATCHER`, `SUPPORT`), lue
+toutes les 5 secondes par le back-office. Elle donne :
+
+- les livreurs validés et ceux en course : `FREE` (en ligne, sans course), `ON_COURSE`,
+  `OFFLINE`, dernière position (gardée 15 min), `signalLost` quand un livreur en ligne
+  n'envoie plus de position depuis `RIDER_POSITION_TTL_SECONDS` ;
+- les commandes en cours (les programmées une heure avant leur départ) avec leur retard :
+  `NO_RIDER` (recherche au-delà de `DISPATCH_ALERT_AFTER_SECONDS`), `PICKUP` (pas enlevée
+  `LATE_PICKUP_MINUTES` après l'attribution, 25 par défaut), `DELIVERY` (pas livrée après
+  le trajet estimé à 300 m/min plus `LATE_DELIVERY_MARGIN_MINUTES`, 15 par défaut ; après
+  un échec, le compte repart de l'échec) ; `awaitingValidation` (remise sans code à valider)
+  et `awaitingDecision` (échec, choix de l'expéditeur attendu) ;
+- les alertes de sécurité non closes et les alertes de trajet pas encore vues.
+
 ## Couverture des exigences de la phase 1
 
 | Exigence | Routes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |

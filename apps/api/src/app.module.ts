@@ -15,6 +15,7 @@ import { GeoModule } from './geo/geo.module.js';
 import { HealthModule } from './health/health.module.js';
 import { LegalModule } from './legal/legal.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
+import { OpsModule } from './ops/ops.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrivacyModule } from './privacy/privacy.module.js';
@@ -64,6 +65,7 @@ import { UsersModule } from './users/users.module.js';
     RiderAppModule,
     FinanceModule,
     PrivacyModule,
+    OpsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },
