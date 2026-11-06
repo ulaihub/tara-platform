@@ -5,6 +5,8 @@ import type { Env } from '../config/env.js';
 import { PresenceService } from '../dispatch/presence.service.js';
 import type { OrderStatus } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import type { GeoPoint } from '../routing/distance.service.js';
+import { RoadService } from '../routing/road.service.js';
 import { SafetyAlertsService } from '../rider-app/safety-alerts.service.js';
 import { CourseTrackService } from '../tracking/course-track.service.js';
 import { type LatenessRules, lateness } from './lateness.js';
@@ -21,6 +23,10 @@ const LIVE_STATUSES: OrderStatus[] = [
 ];
 /** Statuts où le colis est confié au livreur (ou en passe de l'être). */
 const WITH_RIDER: OrderStatus[] = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED'];
+/** Positions recalées sur la rue en même temps, et temps laissé à OSRM pour la carte. */
+const SNAP_CONCURRENCY = 16;
+const SNAP_BUDGET_MS = 1_500;
+
 /** Une commande programmée apparaît une heure avant son départ. */
 const SCHEDULED_HORIZON_MS = 60 * 60_000;
 
@@ -45,8 +51,41 @@ export class LiveMapService {
     private readonly presence: PresenceService,
     private readonly safety: SafetyAlertsService,
     private readonly tracks: CourseTrackService,
+    private readonly roads: RoadService,
     @Inject(ENV) private readonly env: Env,
   ) {}
+
+  /** Dernière position de chaque livreur ramenée sur la rue, recalculée quand elle change. */
+  private readonly snapped = new Map<string, { at: number; road: GeoPoint | null }>();
+
+  /**
+   * Positions sur la chaussée : une demande à OSRM par nouvelle position seulement (les
+   * autres viennent du cache), dans un temps borné pour ne jamais ralentir la carte.
+   */
+  private async roadPositions(
+    positions: Map<string, { latitude: number; longitude: number; at: Date }>,
+  ): Promise<Map<string, GeoPoint | null>> {
+    const result = new Map<string, GeoPoint | null>();
+    if (!this.roads.available) return result;
+    for (const id of this.snapped.keys()) if (!positions.has(id)) this.snapped.delete(id);
+    const todo: [string, { latitude: number; longitude: number; at: Date }][] = [];
+    for (const [id, position] of positions) {
+      const cached = this.snapped.get(id);
+      if (cached?.at === position.at.getTime()) result.set(id, cached.road);
+      else todo.push([id, position]);
+    }
+    const deadline = Date.now() + SNAP_BUDGET_MS;
+    const worker = async () => {
+      for (let next = todo.shift(); next && Date.now() < deadline; next = todo.shift()) {
+        const [id, position] = next;
+        const road = await this.roads.snap(position);
+        this.snapped.set(id, { at: position.at.getTime(), road });
+        result.set(id, road);
+      }
+    };
+    await Promise.all(Array.from({ length: SNAP_CONCURRENCY }, worker));
+    return result;
+  }
 
   private get rules(): LatenessRules {
     return {
@@ -104,6 +143,7 @@ export class LiveMapService {
       },
     });
     const positions = await this.presence.positions(riders.map((rider) => rider.id));
+    const onRoad = await this.roadPositions(positions);
     const staleBefore = now.getTime() - this.presence.staleAfterMs;
 
     const liveRiders = riders.map((rider): z.output<typeof LiveRiderDto> => {
@@ -127,6 +167,7 @@ export class LiveMapService {
               at: position.at.toISOString(),
             }
           : null,
+        roadPosition: onRoad.get(rider.id) ?? null,
         orderIds,
         rating:
           rider.ratingCount > 0

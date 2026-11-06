@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { Icon, type IconName } from '@/components/icon';
 import { cx } from '@/components/ui';
-import { ago, duration, firstName, money, time } from '@/lib/format';
+import { ago, distance, duration, firstName, money, time } from '@/lib/format';
 import {
   type AlertItem,
   REFRESH_MS,
@@ -15,9 +15,9 @@ import {
   place,
   type Point,
 } from '@/lib/live';
-import { type Selection, pointsOf } from '@/lib/map-data';
+import { type Selection, pointsOf, trailPoints, trailRequest } from '@/lib/map-data';
 import { displayPhone } from '@/lib/phone';
-import type { LiveMap as LiveMapData, LiveOrder, LiveRider } from '@/lib/schemas';
+import type { LiveMap as LiveMapData, LiveOrder, LiveRider, RiderTrail } from '@/lib/schemas';
 import { acknowledgeSos } from './actions';
 import { MapView } from './map-view';
 
@@ -97,6 +97,41 @@ function useLiveMap(initial: LiveMapData) {
   return { data, failing, receivedAt, refresh: () => refresh.current() };
 }
 
+/** Tracé de la course choisie, relu toutes les 10 s (chemin parcouru, itinéraire restant). */
+const TRAIL_REFRESH_MS = 10_000;
+
+function useTrail(data: LiveMapData, selection: Selection): RiderTrail | null {
+  const request = trailRequest(data, selection);
+  const key = request ? `${request.riderId}:${request.orderId ?? ''}` : null;
+  const [trail, setTrail] = useState<{ key: string; trail: RiderTrail } | null>(null);
+  useEffect(() => {
+    if (!key) return;
+    const [riderId, orderId] = key.split(':');
+    const query = new URLSearchParams({ livreur: riderId ?? '' });
+    if (orderId) query.set('commande', orderId);
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const load = async () => {
+      try {
+        const response = await fetch(`/carte/trajet?${query.toString()}`, { cache: 'no-store' });
+        if (response.ok && !response.redirected) {
+          const next = (await response.json()) as RiderTrail;
+          if (!stopped) setTrail({ key, trail: next });
+        }
+      } catch {
+        // Réseau coupé : le trait pointillé reste affiché, nouvel essai au prochain tour.
+      }
+      if (!stopped) timer = setTimeout(() => void load(), TRAIL_REFRESH_MS);
+    };
+    void load();
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [key]);
+  return trail && trail.key === key ? trail.trail : null;
+}
+
 /** Horloge à la seconde, pour « il y a … ». */
 function useNow(): number {
   const [now, setNow] = useState(() => Date.now());
@@ -119,6 +154,18 @@ export function LiveMap({ initial }: { initial: LiveMapData }) {
   const [focus, setFocus] = useState<{ points: Point[] } | null>(null);
   const alerts = useMemo(() => alertsOf(data, now), [data, now]);
   const counts = useMemo(() => countsOf(data), [data]);
+  const trail = useTrail(data, selection);
+
+  // Premier tracé reçu pour la course choisie : la carte la montre entière.
+  const framed = useRef<string | null>(null);
+  useEffect(() => {
+    if (!trail?.order) return;
+    const key = `${trail.riderId}:${trail.order.id}`;
+    if (framed.current === key) return;
+    framed.current = key;
+    const points = trailPoints(trail);
+    if (points.length > 1) setFocus({ points });
+  }, [trail]);
 
   // Nouveau SOS : son et titre de l'onglet, même si l'agent regarde ailleurs.
   const seenSos = useRef(new Set(initial.safetyAlerts.map((alert) => alert.id)));
@@ -137,6 +184,7 @@ export function LiveMap({ initial }: { initial: LiveMapData }) {
   const choose = useCallback(
     (next: Selection) => {
       setSelection(next);
+      framed.current = null;
       const points = pointsOf(data, next);
       if (points.length > 0) setFocus({ points });
     },
@@ -146,7 +194,13 @@ export function LiveMap({ initial }: { initial: LiveMapData }) {
   return (
     <div className="-mx-10 -my-8 flex h-screen">
       <section className="relative min-w-0 flex-1" aria-label="Carte de Douala">
-        <MapView data={data} selection={selection} focus={focus} onSelect={setSelection} />
+        <MapView
+          data={data}
+          selection={selection}
+          trail={trail}
+          focus={focus}
+          onSelect={setSelection}
+        />
         <div className="pointer-events-none absolute inset-x-4 top-4 flex flex-wrap items-start gap-2">
           <Counter tone="free" label="Libres" value={counts.free} />
           <Counter tone="course" label="En course" value={counts.onCourse} />
@@ -221,6 +275,7 @@ export function LiveMap({ initial }: { initial: LiveMapData }) {
         <Details
           data={data}
           selection={selection}
+          trail={trail}
           now={now}
           onClose={() => setSelection(null)}
           onChoose={choose}
@@ -621,15 +676,29 @@ function RiderList({
 }
 
 /** Fiche de l'élément choisi, en bas du panneau. */
+/** « Reste 2,4 km · environ 9 min » jusqu'au prochain arrêt, d'après l'itinéraire. */
+function remainingLine(trail: RiderTrail | null, orderId: string | undefined): string | null {
+  const remaining = trail?.order?.id === orderId ? trail?.remaining : null;
+  if (!remaining) return null;
+  const where = trail?.order?.target === 'pickup' ? 'jusqu’au vendeur' : 'jusqu’au client';
+  const minutes =
+    remaining.seconds !== null
+      ? ` · environ ${duration(Math.max(1, Math.round(remaining.seconds / 60)))}`
+      : '';
+  return `Reste ${distance(remaining.meters)} ${where}${minutes}${remaining.onRoads ? '' : ' (estimation à vol d’oiseau)'}`;
+}
+
 function Details({
   data,
   selection,
+  trail,
   now,
   onClose,
   onChoose,
 }: {
   data: LiveMapData;
   selection: Selection;
+  trail: RiderTrail | null;
   now: number;
   onClose: () => void;
   onChoose: (selection: Selection) => void;
@@ -650,6 +719,7 @@ function Details({
       [rider.plateNumber, rider.rating !== null ? `★ ${rider.rating.toFixed(1)}` : null]
         .filter(Boolean)
         .join(' · ') || null,
+      remainingLine(trail, trail?.riderId === rider.id ? trail.order?.id : undefined),
     ];
     const orderId = rider.orderIds[0];
     if (orderId) {
@@ -670,6 +740,7 @@ function Details({
       `Créée à ${time(order.createdAt)}${order.assignedAt ? ` · attribuée à ${time(order.assignedAt)}` : ''}${order.pickedUpAt ? ` · récupérée à ${time(order.pickedUpAt)}` : ''}`,
       order.codAmount > 0 ? `À encaisser : ${money(order.codAmount)}` : null,
       order.delay ? `En retard de ${duration(order.delay.minutes)}` : null,
+      remainingLine(trail, order.id),
     ];
     if (rider) {
       phone = rider.phone;

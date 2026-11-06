@@ -21,6 +21,12 @@ interface LiveRider {
   position: { latitude: number; longitude: number } | null;
   orderIds: string[];
 }
+interface Trail {
+  order: { id: string; target: string | null } | null;
+  position: { latitude: number; longitude: number } | null;
+  traveled: { path: [number, number][]; onRoads: boolean } | null;
+  remaining: { path: [number, number][]; meters: number; onRoads: boolean } | null;
+}
 interface LiveOrder {
   id: string;
   status: string;
@@ -118,6 +124,66 @@ describe('Carte en direct du back-office (H1)', () => {
     const res = await request(ctx.http).get('/v1/admin/live-map').set(dispatcher.auth).expect(200);
     const live = (res.body.riders as LiveRider[]).find((item) => item.id === rider.riderId);
     expect(live).toMatchObject({ state: 'FREE', signalLost: true });
+  });
+
+  it('trace la course d’un livreur : chemin parcouru et itinéraire jusqu’au vendeur', async () => {
+    // Seul livreur en ligne : la proposition lui revient.
+    await resetPresence();
+    const rider = await activeRider(ctx);
+    const start = nearAkwa(0.02);
+    await goOnline(ctx, rider, start);
+    const placed = await placeOrder(ctx, shop);
+    const offer = await ctx.prisma.dispatchOffer.findFirstOrThrow({
+      where: { orderId: placed.id, riderId: rider.riderId },
+    });
+    await request(ctx.http).post(`/v1/rider/offers/${offer.id}/accept`).set(rider.auth).expect(200);
+    // Trois positions de la course enregistrées (une toutes les 8 s au plus en direct).
+    const order = await ctx.prisma.order.findUniqueOrThrow({ where: { id: placed.id } });
+    await ctx.prisma.courseTrackPoint.createMany({
+      data: [0.02, 0.015, 0.01].map((offset, index) => ({
+        orderId: placed.id,
+        riderId: rider.riderId,
+        recordedAt: new Date((order.assignedAt ?? new Date()).getTime() + (index + 1) * 10_000),
+        ...nearAkwa(offset),
+      })),
+    });
+
+    const res = await request(ctx.http)
+      .get(`/v1/admin/riders/${rider.riderId}/trail`)
+      .set(dispatcher.auth)
+      .expect(200);
+    const trail = res.body as Trail;
+    expect(trail.order).toMatchObject({ id: placed.id, target: 'pickup' });
+    // Sans serveur d'itinéraires dans les tests : positions GPS reliées, ligne droite estimée.
+    expect(trail.traveled?.onRoads).toBe(false);
+    expect(trail.traveled?.path.length).toBeGreaterThanOrEqual(3);
+    expect(trail.remaining).toMatchObject({ onRoads: false });
+    expect(trail.remaining?.path[0]).toEqual([start.longitude, start.latitude]);
+    expect(trail.remaining?.meters).toBeGreaterThan(0);
+  });
+
+  it('ne trace rien pour un livreur sans course, refuse un livreur inconnu', async () => {
+    const rider = await activeRider(ctx);
+    await goOnline(ctx, rider, HERE);
+    const res = await request(ctx.http)
+      .get(`/v1/admin/riders/${rider.riderId}/trail`)
+      .set(dispatcher.auth)
+      .expect(200);
+    expect(res.body).toMatchObject({
+      order: null,
+      traveled: null,
+      remaining: null,
+      position: { latitude: HERE.latitude, longitude: HERE.longitude },
+    });
+    await request(ctx.http)
+      .get('/v1/admin/riders/00000000-0000-4000-8000-000000000000/trail')
+      .set(dispatcher.auth)
+      .expect(404);
+    const finance = await staffUser(ctx, ['FINANCE']);
+    await request(ctx.http)
+      .get(`/v1/admin/riders/${rider.riderId}/trail`)
+      .set(finance.auth)
+      .expect(403);
   });
 
   it('remonte les alertes de sécurité ouvertes', async () => {

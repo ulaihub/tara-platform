@@ -1940,6 +1940,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/riders/{riderId}/trail': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Ops_trail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2463,6 +2479,10 @@ export interface components {
         heading: number | null;
         /** Format: date-time */
         at: string;
+      } | null;
+      roadPosition: {
+        latitude: number;
+        longitude: number;
       } | null;
       orderIds: string[];
       rating: number | null;
@@ -3030,6 +3050,34 @@ export interface components {
     };
     /** @enum {string} */
     RiderStatus: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED';
+    RiderTrail: {
+      /** Format: uuid */
+      riderId: string;
+      order: {
+        /** Format: uuid */
+        id: string;
+        reference: string;
+        status: components['schemas']['OrderStatus'];
+        /** @enum {string|null} */
+        target: 'pickup' | 'dropoff' | null;
+      } | null;
+      position: {
+        latitude: number;
+        longitude: number;
+      } | null;
+      traveled: {
+        /** @description Tracé en paires [longitude, latitude] */
+        path: number[][];
+        onRoads: boolean;
+      } | null;
+      remaining: {
+        /** @description Tracé en paires [longitude, latitude] */
+        path: number[][];
+        meters: number;
+        seconds: number | null;
+        onRoads: boolean;
+      } | null;
+    };
     RiderWallet: {
       /** @enum {string} */
       currency: 'XAF';
@@ -6796,6 +6844,30 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['LiveMap'];
+        };
+      };
+    };
+  };
+  Ops_trail: {
+    parameters: {
+      query?: {
+        orderId?: string;
+      };
+      header?: never;
+      path: {
+        riderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderTrail'];
         };
       };
     };

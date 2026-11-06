@@ -26,7 +26,7 @@ export interface RoutePath extends RouteEstimate {
 export const ROAD_DETOUR_FACTOR = 1.3;
 
 /** Vitesse moyenne d'une moto en ville, embouteillages compris (hypothèse : 18 km/h). */
-const URBAN_SPEED_METERS_PER_SECOND = 5;
+export const URBAN_SPEED_METERS_PER_SECOND = 5;
 
 /** Plafond du tracé renvoyé à l'app (un trajet urbain simplifié en compte bien moins). */
 const MAX_PATH_POINTS = 1_000;
@@ -70,10 +70,15 @@ export class DistanceService {
    * Itinéraire à dessiner sur la carte du livreur (E2) : tracé routier simplifié par OSRM,
    * ou ligne droite si OSRM est absent ou indisponible (la distance est alors estimée).
    */
-  async path(from: GeoPoint, to: GeoPoint): Promise<RoutePath> {
+  async path(
+    from: GeoPoint,
+    to: GeoPoint,
+    /** « full » : tracé complet, qui suit chaque virage (carte du back-office zoomée). */
+    detail: 'simplified' | 'full' = 'simplified',
+  ): Promise<RoutePath> {
     if (this.env.OSRM_URL) {
       try {
-        return await this.osrmPath(this.env.OSRM_URL, from, to);
+        return await this.osrmPath(this.env.OSRM_URL, from, to, detail);
       } catch (error) {
         this.logger.warn(`OSRM indisponible, itinéraire estimé : ${String(error)}`);
       }
@@ -90,10 +95,15 @@ export class DistanceService {
     };
   }
 
-  private async osrmPath(baseUrl: string, from: GeoPoint, to: GeoPoint): Promise<RoutePath> {
+  private async osrmPath(
+    baseUrl: string,
+    from: GeoPoint,
+    to: GeoPoint,
+    detail: 'simplified' | 'full',
+  ): Promise<RoutePath> {
     const coordinates = `${from.longitude},${from.latitude};${to.longitude},${to.latitude}`;
     const response = await fetch(
-      `${baseUrl.replace(/\/$/, '')}/route/v1/driving/${coordinates}?overview=simplified&geometries=geojson`,
+      `${baseUrl.replace(/\/$/, '')}/route/v1/driving/${coordinates}?overview=${detail}&geometries=geojson`,
       { signal: AbortSignal.timeout(2_500) },
     );
     if (!response.ok) throw new Error(`HTTP ${response.status}`);

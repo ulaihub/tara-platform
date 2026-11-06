@@ -10,6 +10,7 @@
  *
  * Options : --riders (30), --minutes de vie de la ville (20), --speed (6 : les livreurs
  * roulent 6 fois plus vite qu'en vrai), --every (45 s entre deux commandes), --seed.
+ * Avec DEMO_OSRM_URL (ex. http://localhost:5000), les livreurs suivent les rues.
  */
 import { randomUUID } from 'node:crypto';
 import { parseArgs } from 'node:util';
@@ -18,6 +19,7 @@ import { createTestApp, type SignedIn, signIn, staffUser } from '../helpers/app.
 import { createAddress, square } from '../helpers/geo.js';
 import { DOUALA_GRID, placeOrder, type PlacedOrder } from '../helpers/orders.js';
 import { activeRider, proofPhoto, type TestRider } from '../helpers/riders.js';
+import { DistanceService } from '../../src/routing/distance.service.js';
 import { random } from './simulation.js';
 
 const { values } = parseArgs({
@@ -48,7 +50,8 @@ process.env['WHATSAPP_PROVIDER'] = 'none';
 // Plafonds anti-pompage relevés : tous les comptes virtuels se connectent depuis la même IP.
 process.env['OTP_MAX_PER_IP_PER_HOUR'] = '1000000';
 process.env['OTP_DAILY_GLOBAL_LIMIT'] = '1000000';
-delete process.env['OSRM_URL']; // Distances à vol d'oiseau corrigées, sans serveur d'itinéraires.
+// Serveur d'itinéraires facultatif (DEMO_OSRM_URL) : les livreurs suivent alors les rues.
+const OSRM_URL = process.env['DEMO_OSRM_URL'];
 
 /** Quartiers de Douala, centres approximatifs (données de démonstration). */
 const QUARTIERS = [
@@ -180,13 +183,47 @@ interface Bot {
   course: Course | null;
   /** Livreur immobile (SOS mis en scène) : il garde sa position sans prendre de course. */
   paused?: boolean;
+  /** Itinéraire en cours (sur les rues si OSRM répond), et sa destination. */
+  route?: { to: Point; path: Point[] };
 }
 
 const ctx = await createTestApp({
   JOBS_ENABLED: 'true',
   // File de tâches propre à la ville fictive : ses SMS (codes de livraison) restent ici.
   QUEUE_PREFIX: `tara-demo-${Date.now()}`,
+  ...(OSRM_URL ? { OSRM_URL } : {}),
 });
+const distance = ctx.app.get(DistanceService);
+
+/**
+ * Avance le livreur vers [to] le long des rues (itinéraire OSRM, calculé une fois par
+ * destination) ou en ligne droite sans OSRM. Renvoie le cap pour la position envoyée.
+ */
+async function drive(bot: Bot, to: Point): Promise<number> {
+  if (!bot.route || bot.route.to !== to) {
+    const route = await distance.path(bot.at, to, 'full');
+    bot.route = {
+      to,
+      path: route.path.map(([longitude, latitude]) => ({ latitude, longitude })).concat([to]),
+    };
+  }
+  let budget = STEP_M;
+  let heading = 0;
+  while (budget > 0 && bot.route.path.length > 0) {
+    const next = bot.route.path[0] as Point;
+    const gap = metersBetween(bot.at, next);
+    const step = stepToward(bot.at, next, budget);
+    heading = step.heading;
+    bot.at = step.at;
+    if (gap <= budget) {
+      bot.route.path.shift();
+      budget -= gap;
+    } else {
+      budget = 0;
+    }
+  }
+  return heading;
+}
 const log = (line: string) =>
   process.stdout.write(`${new Date().toLocaleTimeString('fr-FR')} ${line}\n`);
 
@@ -518,8 +555,8 @@ try {
         continue;
       }
       if (!course) {
-        // Livreur libre : quelques mètres de temps en temps, position toujours fraîche.
-        if (ticks % 3 === 0) bot.at = near(bot.at, 0.0008);
+        // Livreur libre : il attend près de là où il est, position toujours fraîche.
+        if (ticks % 15 === 0 && rng() < 0.3) bot.at = near(bot.at, 0.0003);
         await send(bot);
         continue;
       }
@@ -534,14 +571,10 @@ try {
         })
       )?.status;
       if (status === 'ASSIGNED') {
-        const step = stepToward(bot.at, course.pickup, STEP_M);
-        bot.at = step.at;
-        await send(bot, step.heading);
+        await send(bot, await drive(bot, course.pickup));
         if (metersBetween(bot.at, course.pickup) < 30) await pickUp(bot, course);
       } else if (status === 'IN_DELIVERY' || status === 'PICKED_UP') {
-        const step = stepToward(bot.at, course.dropoff, STEP_M);
-        bot.at = step.at;
-        await send(bot, step.heading);
+        await send(bot, await drive(bot, course.dropoff));
         if (metersBetween(bot.at, course.dropoff) < 30) {
           await deliver(bot, course);
           log(`${bot.name} a livré ${course.order.reference}`);

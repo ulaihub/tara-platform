@@ -4,6 +4,11 @@
 #
 # Source : extrait OpenStreetMap du Cameroun publié par Geofabrik.
 # Profil : « car » d'OSRM en attendant un profil moto dédié (voir docs/ARCHITECTURE.md).
+#
+# Sans Docker (poste de développement) : le paquet Python officiel « osrm-bindings »
+# contient les mêmes outils (osrm-extract, osrm-partition, osrm-customize, osrm-routed) :
+#   python3 -m venv .osrm && .osrm/bin/pip install osrm-bindings
+#   puis les commandes ci-dessous avec .osrm/lib/python3*/site-packages/osrm/bin/…
 set -euo pipefail
 
 cd "$(dirname "$0")"

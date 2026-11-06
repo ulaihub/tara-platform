@@ -40,3 +40,9 @@ export function firstName(name: string | null, phone: string): string {
   const first = name?.trim().split(/\s+/)[0];
   return first || `…${phone.slice(-4)}`;
 }
+
+/** « 850 m », « 2,4 km ». */
+export function distance(meters: number): string {
+  if (meters < 1000) return `${Math.round(meters / 10) * 10} m`;
+  return `${(meters / 1000).toFixed(1).replace('.', ',')} km`;
+}

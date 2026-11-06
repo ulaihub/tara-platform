@@ -42,6 +42,13 @@ alertes : SOS (avec un son et le nombre de SOS dans le titre de l'onglet), comma
 livreur ou en retard, livreur en course qui ne répond plus, remises sans code et décisions
 attendues, alertes de trajet. Un clic montre l'élément sur la carte et ouvre sa fiche.
 
+Avec le serveur d'itinéraires (OSRM) : les livreurs sont posés sur la rue où ils roulent
+et glissent d'une position à la suivante ; un clic sur une commande ou sur un livreur en
+course dessine le chemin déjà parcouru (brun) et l'itinéraire restant sur les rues
+(orange), avec la distance et le temps qui restent. Sans OSRM, la carte montre les
+positions GPS et un trait pointillé jusqu'au prochain arrêt. Pour la ville fictive :
+`DEMO_OSRM_URL=http://localhost:5000 pnpm --filter @tara/api demo:city`.
+
 Fonds de carte : style Tara des apps (`packages/tara_map`), tuiles OpenFreeMap en attendant
 les nôtres. Le fichier de calcul de la carte est copié dans `public/` avant `dev` et `build`
 (`scripts/copy-map-worker.mjs`).

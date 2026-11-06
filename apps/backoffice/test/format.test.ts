@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ago, duration, firstName, money, time } from '@/lib/format';
+import { ago, distance, duration, firstName, money, time } from '@/lib/format';
 
 describe('mise en forme', () => {
   it('donne l’heure de Douala', () => {
@@ -30,5 +30,10 @@ describe('mise en forme', () => {
     expect(firstName('Awa Mbappé', '+237690000777')).toBe('Awa');
     expect(firstName(null, '+237690000777')).toBe('…0777');
     expect(firstName('  ', '+237690000777')).toBe('…0777');
+  });
+
+  it('écrit les distances', () => {
+    expect(distance(846)).toBe('850 m');
+    expect(distance(2_430)).toBe('2,4 km');
   });
 });

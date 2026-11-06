@@ -93,6 +93,17 @@ toutes les 5 secondes par le back-office. Elle donne :
   et `awaitingDecision` (échec, choix de l'expéditeur attendu) ;
 - les alertes de sécurité non closes et les alertes de trajet pas encore vues.
 
+Avec OSRM (`OSRM_URL`), chaque livreur porte aussi `roadPosition` : sa position ramenée sur
+la rue la plus proche (à moins de 40 m, sinon null), calculée une fois par nouvelle position.
+
+**Course d'un livreur sur la carte** : `GET /admin/riders/{riderId}/trail?orderId=`
+(mêmes rôles). Pour la course en cours (la plus récente, ou `orderId`) : `traveled`, le
+chemin parcouru depuis l'acceptation, recalé sur les rues par OSRM (`match`) ou, à défaut,
+les positions GPS reliées (`onRoads: false`) ; `remaining`, l'itinéraire routier jusqu'au
+prochain arrêt (vendeur, client, ou rien si une décision est attendue après un échec), avec
+distance et durée prudente (au moins 18 km/h de moyenne). Rien en dehors des courses : seul
+le trajet enregistré pendant la course est lu.
+
 ## Couverture des exigences de la phase 1
 
 | Exigence | Routes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |

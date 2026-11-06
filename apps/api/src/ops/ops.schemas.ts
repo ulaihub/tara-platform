@@ -27,6 +27,11 @@ export const LiveRiderDto = z
         at: z.iso.datetime(),
       })
       .nullable(),
+    /**
+     * Même position ramenée sur la rue la plus proche (à moins de 40 m), pour l'afficher sur
+     * la chaussée. Null sans serveur d'itinéraires ou loin de toute rue.
+     */
+    roadPosition: z.object({ latitude: z.number(), longitude: z.number() }).nullable(),
     /** Commandes en cours du livreur. */
     orderIds: z.array(z.uuid()),
     /** Note moyenne sur 5, null sans note. */
@@ -88,3 +93,49 @@ export const LiveMapDto = z
     }),
   })
   .meta({ id: 'LiveMap' });
+
+const PathDto = z
+  .array(z.tuple([z.number(), z.number()]))
+  .meta({ description: 'Tracé en paires [longitude, latitude]' });
+
+/** Course en cours d'un livreur sur la carte : chemin parcouru et itinéraire restant. */
+export const RiderTrailDto = z
+  .object({
+    riderId: z.uuid(),
+    /** Course suivie (la plus récente s'il en a plusieurs), null s'il n'en a pas. */
+    order: z
+      .object({
+        id: z.uuid(),
+        reference: z.string(),
+        status: OrderStatusEnum,
+        /** Prochain arrêt : vendeur, client, ou aucun (décision attendue après un échec). */
+        target: z.enum(['pickup', 'dropoff']).nullable(),
+      })
+      .nullable(),
+    /** Position actuelle, sur la rue si possible. */
+    position: z.object({ latitude: z.number(), longitude: z.number() }).nullable(),
+    /** Chemin parcouru depuis l'acceptation de la course. */
+    traveled: z
+      .object({
+        path: PathDto,
+        /** Recalé sur les rues ; sinon positions GPS reliées entre elles. */
+        onRoads: z.boolean(),
+      })
+      .nullable(),
+    /** Itinéraire jusqu'au prochain arrêt. */
+    remaining: z
+      .object({
+        path: PathDto,
+        meters: z.int(),
+        seconds: z.int().nullable(),
+        /** Itinéraire routier ; sinon ligne droite et distance estimée. */
+        onRoads: z.boolean(),
+      })
+      .nullable(),
+  })
+  .meta({ id: 'RiderTrail' });
+
+export const RiderTrailQuery = z.object({
+  /** Course à suivre parmi celles du livreur (par défaut la plus récente). */
+  orderId: z.uuid().optional(),
+});

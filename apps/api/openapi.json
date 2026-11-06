@@ -7029,6 +7029,50 @@
           "Back-office · pilotage"
         ]
       }
+    },
+    "/v1/admin/riders/{riderId}/trail": {
+      "get": {
+        "operationId": "Ops_trail",
+        "parameters": [
+          {
+            "name": "riderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderTrail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · pilotage"
+        ]
+      }
     }
   },
   "info": {
@@ -8666,6 +8710,23 @@
             ],
             "additionalProperties": false
           },
+          "roadPosition": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude"
+            ],
+            "additionalProperties": false
+          },
           "orderIds": {
             "type": "array",
             "items": {
@@ -8687,6 +8748,7 @@
           "state",
           "signalLost",
           "position",
+          "roadPosition",
           "orderIds",
           "rating"
         ],
@@ -10854,6 +10916,146 @@
           "SUSPENDED",
           "REJECTED"
         ]
+      },
+      "RiderTrail": {
+        "type": "object",
+        "properties": {
+          "riderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "order": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "reference": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/OrderStatus"
+              },
+              "target": {
+                "nullable": true,
+                "type": "string",
+                "enum": [
+                  "pickup",
+                  "dropoff"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "reference",
+              "status",
+              "target"
+            ],
+            "additionalProperties": false
+          },
+          "position": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude"
+            ],
+            "additionalProperties": false
+          },
+          "traveled": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "description": "Tracé en paires [longitude, latitude]"
+              },
+              "onRoads": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "path",
+              "onRoads"
+            ],
+            "additionalProperties": false
+          },
+          "remaining": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "description": "Tracé en paires [longitude, latitude]"
+              },
+              "meters": {
+                "type": "integer"
+              },
+              "seconds": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "onRoads": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "path",
+              "meters",
+              "seconds",
+              "onRoads"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "riderId",
+          "order",
+          "position",
+          "traveled",
+          "remaining"
+        ],
+        "additionalProperties": false
       },
       "RiderWallet": {
         "type": "object",

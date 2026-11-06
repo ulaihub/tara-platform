@@ -9,3 +9,4 @@ export type LiveOrder = Schemas['LiveOrder'];
 export type SafetyAlert = Schemas['SafetyAlert'];
 export type CourseAlert = Schemas['CourseAlert'];
 export type OrderStatus = Schemas['OrderStatus'];
+export type RiderTrail = Schemas['RiderTrail'];

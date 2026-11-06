@@ -4,14 +4,21 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { GeoJSONSource, Map as MapLibreMap, Marker } from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
 import {
+  type Collection,
   DOUALA,
+  type RiderProps,
   type Selection,
+  courseData,
+  glide,
   ordersData,
   ridersData,
-  selectedOrderData,
   taraStyle,
 } from '@/lib/map-data';
-import type { LiveMap } from '@/lib/schemas';
+import type { LiveMap, RiderTrail } from '@/lib/schemas';
+
+/** Durée du glissement d'un livreur vers sa nouvelle position, et rythme des images. */
+const GLIDE_MS = 1_400;
+const FRAME_MS = 60;
 
 /** Couleurs des états (les mêmes que les pastilles du panneau). */
 const COLORS = {
@@ -27,6 +34,22 @@ function addLayers(map: MapLibreMap): void {
   const empty = { type: 'FeatureCollection' as const, features: [] };
   map.addSource('bo-orders', { type: 'geojson', data: empty });
   map.addSource('bo-riders', { type: 'geojson', data: empty });
+  map.addSource('bo-traveled', { type: 'geojson', data: empty });
+  // Chemin déjà parcouru : sous l'itinéraire restant, plus discret.
+  map.addLayer(
+    {
+      id: 'bo-traveled-line',
+      type: 'line',
+      source: 'bo-traveled',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': '#8a4b1f',
+        'line-opacity': 0.55,
+        'line-width': ['interpolate', ['exponential', 1.5], ['zoom'], 12, 2.5, 18, 6],
+      },
+    },
+    'tara-route-case',
+  );
   map.addLayer({
     id: 'bo-orders-dot',
     type: 'circle',
@@ -107,11 +130,14 @@ function setData(map: MapLibreMap, source: string, data: object): void {
 export function MapView({
   data,
   selection,
+  trail,
   focus,
   onSelect,
 }: {
   data: LiveMap;
   selection: Selection;
+  /** Course du livreur choisi (chemin parcouru, itinéraire restant), quand elle est arrivée. */
+  trail: RiderTrail | null;
   /** Points à cadrer (choix dans le panneau) ; change de référence à chaque demande. */
   focus: { points: { latitude: number; longitude: number }[] } | null;
   onSelect: (selection: Selection) => void;
@@ -122,6 +148,9 @@ export function MapView({
   const select = useRef(onSelect);
   const [styleVersion, setStyleVersion] = useState(0);
   const [failed, setFailed] = useState(false);
+  /** Position affichée de chaque livreur, point de départ du prochain glissement. */
+  const shown = useRef(new Map<string, [number, number]>());
+  const frame = useRef<number | null>(null);
 
   useEffect(() => {
     select.current = onSelect;
@@ -166,6 +195,7 @@ export function MapView({
     return () => {
       disposed = true;
       scheme.removeEventListener('change', onScheme);
+      if (frame.current !== null) cancelAnimationFrame(frame.current);
       for (const marker of sosMarkers.values()) marker.remove();
       sosMarkers.clear();
       mapRef.current?.remove();
@@ -177,11 +207,8 @@ export function MapView({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || styleVersion === 0) return;
-    setData(map, 'bo-riders', ridersData(data, selection));
+    moveRiders(map, ridersData(data, selection));
     setData(map, 'bo-orders', ordersData(data, selection));
-    const { stops, route } = selectedOrderData(data, selection);
-    setData(map, 'tara-stop', stops);
-    setData(map, 'tara-route', route);
 
     const open = new Set(data.safetyAlerts.map((alert) => alert.id));
     for (const [id, marker] of markers.current) {
@@ -213,6 +240,53 @@ export function MapView({
       }
     });
   }, [data, selection, styleVersion]);
+
+  // Course choisie : vendeur, client, itinéraire sur les rues et chemin parcouru.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || styleVersion === 0) return;
+    const { stops, route, traveled } = courseData(data, selection, trail);
+    setData(map, 'tara-stop', stops);
+    setData(map, 'tara-route', route);
+    setData(map, 'bo-traveled', traveled);
+  }, [data, selection, trail, styleVersion]);
+
+  /**
+   * Les livreurs glissent de leur position affichée à la nouvelle (sauf au premier
+   * affichage, pour un grand saut, ou si l'ordinateur demande moins d'animations).
+   */
+  function moveRiders(map: MapLibreMap, target: Collection<RiderProps>): void {
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    const from = new Map(shown.current);
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const remember = (collection: Collection<RiderProps>) => {
+      shown.current = new Map(
+        collection.features.flatMap((feature) =>
+          feature.geometry.type === 'Point'
+            ? [[feature.properties.id, feature.geometry.coordinates] as [string, [number, number]]]
+            : [],
+        ),
+      );
+    };
+    if (still || from.size === 0) {
+      setData(map, 'bo-riders', target);
+      remember(target);
+      return;
+    }
+    const start = performance.now();
+    let drawn = 0;
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / GLIDE_MS);
+      if (t === 1 || now - drawn >= FRAME_MS) {
+        drawn = now;
+        const current = glide(from, target, t);
+        setData(map, 'bo-riders', current);
+        remember(current);
+      }
+      frame.current = t < 1 ? requestAnimationFrame(step) : null;
+    };
+    frame.current = requestAnimationFrame(step);
+  }
 
   useEffect(() => {
     const map = mapRef.current;

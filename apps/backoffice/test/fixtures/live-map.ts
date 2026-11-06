@@ -14,6 +14,7 @@ export function rider(overrides: Partial<LiveRider> = {}): LiveRider {
     state: 'FREE',
     signalLost: false,
     position: { latitude: 4.05, longitude: 9.7, heading: null, at: minutesAgo(0.2) },
+    roadPosition: null,
     orderIds: [],
     rating: 4.8,
     ...overrides,
