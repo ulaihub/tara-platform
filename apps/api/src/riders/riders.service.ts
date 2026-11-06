@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { Request } from 'express';
 import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
@@ -8,12 +8,15 @@ import { pageOf } from '../common/pagination.js';
 import { cameroonDate } from '../common/time.js';
 import type { KycDocument, RiderProfile } from '../generated/prisma/client.js';
 import type { KycDocumentType } from '../generated/prisma/enums.js';
+import { NotificationService } from '../notifications/notification.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { MediaService, type UploadedMedia } from '../storage/media.service.js';
 import {
   type AdminRiderDto,
   type AdminRiderListQuery,
   type ApplyRiderBody,
+  DOCUMENT_LABELS,
+  type EmergencyContactBody,
   type KycDocumentDto,
   REQUIRED_DOCUMENTS,
   type ReviewDocumentBody,
@@ -64,10 +67,13 @@ export function uncoveredDocuments(
 
 @Injectable()
 export class RidersService {
+  private readonly logger = new Logger(RidersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly media: MediaService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationService,
   ) {}
 
   private toProfileDto(rider: RiderWithDocuments): z.output<typeof RiderProfileDto> {
@@ -80,11 +86,54 @@ export class RidersService {
       cashLimit: rider.cashLimit,
       guarantorName: rider.guarantorName,
       guarantorPhone: rider.guarantorPhone,
+      emergencyContact:
+        rider.emergencyContactName && rider.emergencyContactPhone
+          ? { name: rider.emergencyContactName, phone: rider.emergencyContactPhone }
+          : null,
       approvedAt: rider.approvedAt?.toISOString() ?? null,
       suspendedReason: rider.suspendedReason,
       documents: [...latestByType(rider.documents).values()].map(toDocumentDto),
       missingDocuments: uncoveredDocuments(rider.documents, ['PENDING', 'APPROVED'], today),
     };
+  }
+
+  /** Le contact d'urgence doit pouvoir être joint à la place du livreur, pas le livreur. */
+  private checkEmergencyContact(actor: AuthUser, phone: string): void {
+    if (phone === actor.phone) throw AppError.unprocessable('EMERGENCY_CONTACT_IS_SELF');
+  }
+
+  /** Ajout, changement (contact donné) ou retrait (null) du contact d'urgence. */
+  async setEmergencyContact(
+    actor: AuthUser,
+    contact: z.output<typeof EmergencyContactBody> | null,
+    request: Request,
+  ): Promise<z.output<typeof RiderProfileDto>> {
+    if (contact) this.checkEmergencyContact(actor, contact.phone);
+    const before = await this.load({ userId: actor.id });
+    const rider = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.riderProfile.update({
+        where: { id: before.id },
+        data: {
+          emergencyContactName: contact?.name ?? null,
+          emergencyContactPhone: contact?.phone ?? null,
+        },
+        include: { documents: true },
+      });
+      await this.audit.record(
+        {
+          actor,
+          action: 'rider.emergency_contact_changed',
+          entityType: 'rider_profile',
+          entityId: before.id,
+          before: { emergencyContactName: before.emergencyContactName },
+          after: { emergencyContactName: updated.emergencyContactName },
+          request,
+        },
+        tx,
+      );
+      return updated;
+    });
+    return this.toProfileDto(rider);
   }
 
   private async load(where: { id: string } | { userId: string }): Promise<RiderWithDocuments> {
@@ -104,6 +153,7 @@ export class RidersService {
   ): Promise<z.output<typeof RiderProfileDto>> {
     const existing = await this.prisma.riderProfile.findUnique({ where: { userId: actor.id } });
     if (existing) throw AppError.conflict('RIDER_ALREADY_APPLIED');
+    if (body.emergencyContact) this.checkEmergencyContact(actor, body.emergencyContact.phone);
 
     const rider = await this.prisma.$transaction(async (tx) => {
       const created = await tx.riderProfile.create({
@@ -113,6 +163,8 @@ export class RidersService {
           plateNumber: body.plateNumber ?? null,
           guarantorName: body.guarantorName,
           guarantorPhone: body.guarantorPhone,
+          emergencyContactName: body.emergencyContact?.name ?? null,
+          emergencyContactPhone: body.emergencyContact?.phone ?? null,
         },
         include: { documents: true },
       });
@@ -230,7 +282,7 @@ export class RidersService {
     body: z.output<typeof ReviewDocumentBody>,
     request: Request,
   ): Promise<z.output<typeof KycDocumentDto>> {
-    return this.prisma.$transaction(async (tx) => {
+    const reviewed = await this.prisma.$transaction(async (tx) => {
       const before = await tx.kycDocument.findUnique({ where: { id: documentId } });
       if (!before) throw AppError.notFound('KYC_DOCUMENT_NOT_FOUND');
       const { count } = await tx.kycDocument.updateMany({
@@ -257,8 +309,35 @@ export class RidersService {
         },
         tx,
       );
-      return toDocumentDto(after);
+      return after;
     });
+    if (reviewed.status === 'REJECTED') await this.notifyRejected(reviewed);
+    return toDocumentDto(reviewed);
+  }
+
+  /**
+   * Pièce refusée : le livreur est prévenu avec le motif, pour la renvoyer depuis son
+   * profil. Un échec d'envoi n'annule pas la décision.
+   */
+  private async notifyRejected(doc: KycDocument): Promise<void> {
+    try {
+      const rider = await this.prisma.riderProfile.findUniqueOrThrow({
+        where: { id: doc.riderId },
+        select: { userId: true },
+      });
+      const label = DOCUMENT_LABELS[doc.type];
+      await this.notifications.toUser(rider.userId, {
+        template: 'RIDER_DOCUMENT_REJECTED',
+        params: {
+          documentFr: label.fr,
+          documentEn: label.en,
+          reason: (doc.rejectionReason ?? '').trim().replace(/[.\s]+$/, ''),
+        },
+        data: { type: 'kyc.document_rejected', documentType: doc.type },
+      });
+    } catch (error) {
+      this.logger.warn(`Pièce ${doc.id} refusée, livreur non prévenu : ${String(error)}`);
+    }
   }
 
   /** Décision sur le livreur : validation, refus, suspension ou réactivation (H3). */

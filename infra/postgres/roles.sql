@@ -60,4 +60,8 @@ BEGIN
       EXECUTE format('REVOKE UPDATE, DELETE, TRUNCATE ON public.%I FROM tara_app', t);
     END IF;
   END LOOP;
+  -- Trajet des courses : jamais modifié ; effacé seulement à la fin de la conservation.
+  IF to_regclass('public.course_track_points') IS NOT NULL THEN
+    EXECUTE 'REVOKE UPDATE, TRUNCATE ON public.course_track_points FROM tara_app';
+  END IF;
 END $$;

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Accueil hors ligne</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0A0A0F}
+a{color:#FFB15C}a:hover{color:#FFD2A1}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #FFB15C;outline-offset:3px}
+@keyframes morph{0%,100%{border-radius:42% 58% 70% 30%/45% 45% 55% 55%}33%{border-radius:70% 30% 46% 54%/30% 29% 71% 70%}66%{border-radius:100% 60% 60% 100%/100% 100% 60% 60%}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-32px) scale(1.12)}}
+@keyframes wave{to{transform:rotate(360deg)}}
+@keyframes ripple{0%{transform:scale(.92);opacity:.55}100%{transform:scale(1.45);opacity:0}}
+.blob{animation:morph 14s ease-in-out infinite,drift 20s ease-in-out infinite}
+.wave{animation:wave 6s linear infinite}
+.wave2{animation:wave 9s linear infinite reverse}
+.ripple{animation:ripple 3s ease-out infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #0A0A0F; color: #FFFFFF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <svg aria-hidden="true" width="390" height="844" viewBox="0 0 390 844" style="position: absolute; inset: 0; opacity: 0.55">
+    <rect width="390" height="844" fill="#0D0E13"></rect>
+    <path d="M-20 700 C 60 640, 150 680, 220 640 S 340 610, 410 650 L410 860 L-20 860 Z" fill="#0F1922"></path>
+    <g fill="none" stroke="#1A1C24" stroke-width="7" stroke-linecap="round">
+      <path d="M-20 90 L410 60"></path><path d="M-20 300 L410 330"></path><path d="M-20 520 L410 490"></path>
+      <path d="M40 -20 L70 860"></path><path d="M210 -20 L190 860"></path><path d="M350 -20 L370 860"></path><path d="M-20 420 L180 400"></path>
+    </g>
+    <g fill="none" stroke="#252833" stroke-width="14" stroke-linecap="round">
+      <path d="M-20 180 C 100 200, 240 150, 410 190"></path><path d="M120 -20 C 140 200, 100 420, 150 860"></path><path d="M410 380 C 300 400, 230 440, 150 600 S 60 700, -20 760"></path>
+    </g>
+  </svg>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(120% 70% at 50% 55%, rgba(10,10,15,0.2), rgba(10,10,15,0.92) 75%)"></div>
+  <div aria-hidden="true" class="blob" style="position: absolute; top: 330px; left: 60px; width: 270px; height: 270px; background: radial-gradient(circle at 40% 40%, #FFB000, #FF6A00 55%, #FF3D00); filter: blur(70px); opacity: 0.22"></div>
+
+  <div style="position: relative; height: 100%; box-sizing: border-box; padding: 60px 20px 24px; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <div aria-hidden="true" style="width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #2A2B33, #17181E); border: 1px solid rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15px">KY</div>
+      <div style="flex: 1; min-width: 0">
+        <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.66)">Bonsoir,</p>
+        <p style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700">Koffi Yao</p>
+      </div>
+      <button type="button" aria-label="Notifications" style="position: relative; width: 46px; height: 46px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.07); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1112 0c0 5 2 6.5 2 6.5H4S6 14 6 9zM10 19.5a2 2 0 004 0"></path></svg>
+        <span aria-hidden="true" style="position: absolute; top: 10px; right: 11px; width: 8px; height: 8px; border-radius: 50%; background: #FF6A00; box-shadow: 0 0 0 2px #15161C"></span>
+      </button>
+    </div>
+
+    <section aria-label="Gains du jour" style="margin-top: 20px; padding: 18px 18px 16px; border-radius: 26px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(26px) saturate(160%); -webkit-backdrop-filter: blur(26px) saturate(160%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12)">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <p style="margin: 0; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.72)">Gains du jour</p>
+        <a href="Gains.dc.html" style="font-size: 13px; font-weight: 600; text-decoration: none">Détails</a>
+      </div>
+      <p style="margin: 6px 0 0; font-family: 'Sora', sans-serif; font-size: 36px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">8 750 <span style="font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.72)">FCFA</span></p>
+      <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="padding: 10px; border-radius: 16px; background: rgba(255,255,255,0.05)">
+          <p style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700">6</p>
+          <p style="margin: 2px 0 0; font-size: 11px; color: rgba(255,255,255,0.66)">courses</p>
+        </div>
+        <div style="padding: 10px; border-radius: 16px; background: rgba(255,255,255,0.05)">
+          <p style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700">3 h 20</p>
+          <p style="margin: 2px 0 0; font-size: 11px; color: rgba(255,255,255,0.66)">en ligne</p>
+        </div>
+        <div style="padding: 10px; border-radius: 16px; background: rgba(255,138,0,0.10); border: 1px solid rgba(255,177,92,0.25)">
+          <p style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; color: #FFB15C">37 500</p>
+          <p style="margin: 2px 0 0; font-size: 11px; color: rgba(255,255,255,0.66)">espèces en main</p>
+        </div>
+      </div>
+    </section>
+
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px">
+      <div style="position: relative; width: 210px; height: 210px">
+        <span aria-hidden="true" class="ripple" style="position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(255,138,0,0.55)"></span>
+        <span aria-hidden="true" class="ripple" style="position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(255,138,0,0.55); animation-delay: -1.5s"></span>
+        <a href="AccueilEnLigne.dc.html" aria-label="Passer en ligne" style="position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 30px 60px rgba(0,0,0,0.5); color: #FFFFFF; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px">
+          <span aria-hidden="true" class="wave2" style="position: absolute; left: -95px; top: 128px; width: 400px; height: 400px; border-radius: 40%; background: rgba(255,61,0,0.45)"></span>
+          <span aria-hidden="true" class="wave" style="position: absolute; left: -95px; top: 138px; width: 400px; height: 400px; border-radius: 43%; background: linear-gradient(180deg, #FFB000, #FF6A00 40%, #FF3D00)"></span>
+          <svg aria-hidden="true" style="position: relative" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v8"></path><path d="M6.3 6.8a8 8 0 1011.4 0"></path></svg>
+          <span style="position: relative; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700">Passer en ligne</span>
+        </a>
+      </div>
+      <div style="text-align: center; display: flex; flex-direction: column; gap: 6px">
+        <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 700"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #8A8B93"></span>Vous êtes hors ligne</p>
+        <p style="margin: 0; max-width: 260px; font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.66)">Passez en ligne pour recevoir les propositions de course autour de vous.</p>
+      </div>
+    </div>
+
+    <nav aria-label="Navigation principale" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px; border-radius: 26px; background: rgba(22,22,28,0.6); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(28px) saturate(170%); -webkit-backdrop-filter: blur(28px) saturate(170%); box-shadow: 0 20px 40px rgba(0,0,0,0.45)">
+      <a href="AccueilHorsLigne.dc.html" aria-current="page" style="height: 52px; border-radius: 19px; background: rgba(255,138,0,0.16); color: #FFB15C; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"></path></svg>Accueil</a>
+      <a href="Gains.dc.html" style="height: 52px; border-radius: 19px; color: rgba(255,255,255,0.72); text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Activité</a>
+      <a href="#profil" style="height: 52px; border-radius: 19px; color: rgba(255,255,255,0.72); text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20c1.4-3.2 4.2-5 7.5-5s6.1 1.8 7.5 5"></path></svg>Profil</a>
+    </nav>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { motion: this.props.motion === false ? 'off' : 'on' };
+  }
+}
+</script>
+</body>
+</html>

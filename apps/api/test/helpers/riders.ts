@@ -3,6 +3,11 @@ import { Redis } from 'ioredis';
 import request from 'supertest';
 import { REQUIRED_DOCUMENTS } from '../../src/riders/riders.schemas.js';
 import { type SignedIn, signIn, type TestContext } from './app.js';
+import { PLATFORM_ACCOUNTS, riderPayable } from '../../src/finance/ledger.accounts.js';
+import { LedgerService } from '../../src/finance/ledger.service.js';
+
+/** Solde prépayé de départ d'un livreur de test (décision 36). */
+export const RIDER_START_BALANCE = 100_000;
 
 export interface TestRider extends SignedIn {
   riderId: string;
@@ -15,7 +20,7 @@ export interface TestRider extends SignedIn {
  */
 export async function activeRider(
   ctx: TestContext,
-  options: { cashLimit?: number; expiredDocuments?: boolean } = {},
+  options: { cashLimit?: number; expiredDocuments?: boolean; balance?: number } = {},
 ): Promise<TestRider> {
   const user = await signIn(ctx);
   await ctx.prisma.user.update({
@@ -28,7 +33,10 @@ export async function activeRider(
       userId: user.userId,
       status: 'ACTIVE',
       approvedAt: new Date(),
-      ...(options.cashLimit !== undefined ? { cashLimit: options.cashLimit } : {}),
+      // Livreur confirmé : plafond normal (un nouveau livreur commence à 25 000 FCFA).
+      cashLimit: options.cashLimit ?? 50_000,
+      guarantorName: 'Garant Test',
+      guarantorPhone: '+237699000111',
       documents: {
         create: REQUIRED_DOCUMENTS.map((group) => ({
           type: group[0] ?? 'SELFIE',
@@ -40,6 +48,22 @@ export async function activeRider(
       },
     },
   });
+  // Livreur confirmé : solde prépayé déjà rechargé (couvre les courses avec encaissement).
+  const balance = options.balance ?? RIDER_START_BALANCE;
+  if (balance > 0) {
+    const ledger = ctx.app.get(LedgerService);
+    await ctx.prisma.$transaction((tx) =>
+      ledger.post(tx, {
+        kind: 'PAYMENT_RECEIVED',
+        description: 'Recharge de départ (test)',
+        idempotencyKey: `test-start-balance:${rider.id}`,
+        postings: [
+          { account: PLATFORM_ACCOUNTS.officeCash, amount: balance },
+          { account: riderPayable(rider.id), amount: -balance },
+        ],
+      }),
+    );
+  }
   const pushToken = `push-${randomUUID()}-${randomUUID()}`;
   await request(ctx.http)
     .put(`/v1/me/devices/${user.installationId}/push-token`)

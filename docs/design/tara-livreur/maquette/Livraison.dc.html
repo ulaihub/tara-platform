@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Livraison</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0A0A0F}
+a{color:#FFB15C}a:hover{color:#FFD2A1}
+button,input{font-family:inherit}
+input::placeholder{color:rgba(255,255,255,.5)}
+:focus-visible{outline:2px solid #FFB15C;outline-offset:3px}
+@keyframes sheen{0%{transform:translateX(-140%) skewX(-20deg)}55%,100%{transform:translateX(420%) skewX(-20deg)}}
+@keyframes pulse{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.6);opacity:0}}
+@keyframes wave{to{transform:rotate(360deg)}}
+@keyframes caret{0%,100%{opacity:1}50%{opacity:0}}
+.sheen{animation:sheen 3.6s ease-in-out infinite}
+.pulse{animation:pulse 2.4s ease-out infinite}
+.wave{animation:wave 5s linear infinite}
+.caret{animation:caret 1s steps(1) infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #0A0A0F; color: #FFFFFF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <svg aria-hidden="true" width="390" height="300" viewBox="0 0 390 300" style="position: absolute; top: 0; left: 0">
+    <rect width="390" height="300" fill="#0D0E13"></rect>
+    <path d="M-20 250 C 80 210, 170 240, 240 205 S 350 190, 410 210 L410 320 L-20 320 Z" fill="#0F1922"></path>
+    <g fill="#121319"><rect x="70" y="120" width="70" height="50" rx="8"></rect><rect x="250" y="70" width="60" height="70" rx="8"></rect></g>
+    <g fill="none" stroke="#1A1C24" stroke-width="7" stroke-linecap="round"><path d="M-20 70 L410 50"></path><path d="M60 -20 L80 260"></path><path d="M330 -20 L340 230"></path></g>
+    <g fill="none" stroke="#252833" stroke-width="14" stroke-linecap="round"><path d="M-20 190 C 100 180, 260 150, 410 170"></path><path d="M200 -20 C 210 80, 190 140, 200 200"></path></g>
+  </svg>
+  <div aria-hidden="true" style="position: absolute; left: 180px; top: 150px; width: 40px; height: 40px">
+    <span class="pulse" style="position: absolute; inset: 0; border-radius: 50%; background: rgba(255,106,0,0.5)"></span>
+    <span class="pulse" style="position: absolute; inset: 0; border-radius: 50%; background: rgba(255,106,0,0.5); animation-delay: -1.2s"></span>
+    <span style="position: absolute; inset: 8px; border-radius: 50%; background: #FFFFFF; border: 5px solid #FF6A00; box-sizing: border-box"></span>
+  </div>
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 130px; background: linear-gradient(180deg, rgba(10,10,15,0.85), rgba(10,10,15,0))"></div>
+
+  <div style="position: absolute; top: 56px; left: 16px; right: 16px; display: flex; align-items: center; gap: 10px">
+    <a href="Enlevement.dc.html" aria-label="Retour" style="flex: none; width: 48px; height: 48px; border-radius: 16px; background: rgba(22,22,28,0.6); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+    <div style="flex: 1; height: 48px; padding: 0 14px; border-radius: 16px; background: rgba(22,22,28,0.6); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; justify-content: center">
+      <span style="font-size: 11px; color: rgba(255,255,255,0.66)">Course TR-48213</span>
+      <span style="font-size: 14px; font-weight: 700">Arrivé à destination</span>
+    </div>
+    <a href="Alerte.dc.html" aria-label="Alerte de sécurité" style="flex: none; width: 48px; height: 48px; border-radius: 16px; background: rgba(229,37,53,0.88); color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 800">SOS</a>
+  </div>
+
+  <section aria-label="Remise du colis" style="position: absolute; left: 0; right: 0; bottom: 0; top: 248px; box-sizing: border-box; padding: 12px 20px 30px; border-radius: 32px 32px 0 0; background: rgba(20,20,26,0.84); border-top: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(30px) saturate(170%); -webkit-backdrop-filter: blur(30px) saturate(170%); display: flex; flex-direction: column">
+    <span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.25)"></span>
+
+    <ol style="list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+      <li style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.72)"><span style="height: 4px; border-radius: 2px; background: rgba(255,177,92,0.6)"></span>Enlèvement ✓</li>
+      <li aria-current="step" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: #FFB15C"><span style="height: 4px; border-radius: 2px; background: linear-gradient(90deg, #FFB000, #FF3D00)"></span>Livraison</li>
+      <li style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.62)"><span style="height: 4px; border-radius: 2px; background: rgba(255,255,255,0.14)"></span>Encaissement</li>
+    </ol>
+
+    <div style="margin-top: 16px; display: flex; align-items: center; gap: 12px">
+      <div aria-hidden="true" style="flex: none; width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700">MT</div>
+      <div style="flex: 1; min-width: 0">
+        <p style="margin: 0; font-size: 16px; font-weight: 700">Mariam Touré</p>
+        <p style="margin: 2px 0 0; font-size: 13px; color: rgba(255,255,255,0.66)">Marcory, Zone 4 · portail bleu</p>
+      </div>
+      <a href="tel:+2250700000000" aria-label="Appeler Mariam Touré" style="flex: none; width: 48px; height: 48px; border-radius: 50%; background: rgba(74,222,155,0.16); border: 1px solid rgba(74,222,155,0.4); color: #4ADE9B; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>
+      </a>
+    </div>
+    <p style="margin: 12px 0 0; height: 38px; padding: 0 14px; border-radius: 14px; background: rgba(255,138,0,0.14); border: 1px solid rgba(255,177,92,0.35); display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600">À encaisser à la remise <strong style="font-family: 'Sora', sans-serif; font-size: 15px; color: #FFC283">12 500 F</strong></p>
+
+    <sc-if value="{{hasCode}}" hint-placeholder-val="{{ true }}">
+      <fieldset style="margin: 16px 0 0; padding: 0; border: 0">
+        <legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 700">Code du destinataire <span style="font-weight: 500; color: rgba(255,255,255,0.62)">· reçu par SMS</span></legend>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+          <div style="position: relative; height: 58px; border-radius: 16px; overflow: hidden; border: 1.5px solid #FF8A3D; background: rgba(255,106,0,0.10); box-shadow: 0 0 0 4px rgba(255,106,0,0.14)">
+            <div aria-hidden="true" class="wave" style="position: absolute; left: -30px; top: 36px; width: 140px; height: 140px; border-radius: 42%; background: linear-gradient(180deg, rgba(255,138,0,0.5), rgba(255,61,0,0.3))"></div>
+            <input aria-label="Chiffre 1" inputmode="numeric" maxlength="1" style="position: relative; height: 100%; width: 100%; box-sizing: border-box; text-align: center; border: 0; background: transparent; color: #FFFFFF; font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700">
+            <span aria-hidden="true" class="caret" style="position: absolute; left: 50%; top: 18px; width: 2px; height: 22px; margin-left: -1px; background: #FFFFFF; border-radius: 2px"></span>
+          </div>
+          <input aria-label="Chiffre 2" inputmode="numeric" maxlength="1" style="height: 58px; width: 100%; box-sizing: border-box; text-align: center; border-radius: 16px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #FFFFFF; font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700">
+          <input aria-label="Chiffre 3" inputmode="numeric" maxlength="1" style="height: 58px; width: 100%; box-sizing: border-box; text-align: center; border-radius: 16px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #FFFFFF; font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700">
+          <input aria-label="Chiffre 4" inputmode="numeric" maxlength="1" style="height: 58px; width: 100%; box-sizing: border-box; text-align: center; border-radius: 16px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #FFFFFF; font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700">
+        </div>
+      </fieldset>
+      <button type="button" onClick="{{toggleCode}}" style="margin-top: 8px; align-self: flex-start; height: 44px; padding: 0; border: 0; background: transparent; color: #FFB15C; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Le client n'a pas de code</button>
+    </sc-if>
+    <sc-if value="{{noCode}}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12)">
+        <p style="margin: 0; font-size: 14px; font-weight: 700">Livraison sans code</p>
+        <p style="margin: 0; font-size: 13px; line-height: 1.45; color: rgba(255,255,255,0.72)">La photo de remise devient obligatoire. Le client recevra un SMS pour confirmer.</p>
+        <label for="receveur" style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.72)">Nom de la personne qui reçoit</label>
+        <input id="receveur" placeholder="Ex. sa sœur, le gardien…" style="height: 46px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,177,92,0.55); background: rgba(10,10,15,0.5); color: #FFFFFF; font-size: 15px">
+      </div>
+      <button type="button" onClick="{{toggleCode}}" style="margin-top: 4px; align-self: flex-start; height: 44px; padding: 0; border: 0; background: transparent; color: #FFB15C; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Le client a un code</button>
+    </sc-if>
+
+    <div style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12)">
+      <div aria-hidden="true" style="position: relative; flex: none; width: 52px; height: 52px; border-radius: 14px; overflow: hidden; background: linear-gradient(140deg, #3A2A1E, #6B4523 60%, #2A1C14); display: flex; align-items: center; justify-content: center; color: rgba(255,220,180,0.8)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"></path><path d="M3 7.5L12 12l9-4.5M12 12v9"></path></svg>
+        <span style="position: absolute; right: 3px; bottom: 3px; width: 16px; height: 16px; border-radius: 50%; background: #4ADE9B; color: #0A0A0F; display: flex; align-items: center; justify-content: center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+      </div>
+      <div style="flex: 1; min-width: 0">
+        <p style="margin: 0; font-size: 14px; font-weight: 700">Photo de remise</p>
+        <p style="margin: 2px 0 0; font-size: 12px; color: rgba(255,255,255,0.62)">Prise à 18:52</p>
+      </div>
+      <button type="button" style="height: 44px; padding: 0 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.08); color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer">Reprendre</button>
+    </div>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px">
+      <a href="Encaissement.dc.html" style="position: relative; overflow: hidden; height: 58px; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); color: #140800; text-decoration: none; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 14px 30px rgba(255,90,0,0.38), inset 0 1px 0 rgba(255,255,255,0.45)">
+        <span aria-hidden="true" class="sheen" style="position: absolute; top: 0; left: 0; width: 70px; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.55), rgba(255,255,255,0))"></span>
+        <span style="position: relative">Confirmer la livraison</span>
+      </a>
+      <a href="Echec.dc.html" style="height: 44px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.8)">Livraison impossible&#160;?</a>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"sansCode":{"editor":"boolean","default":false,"section":"État"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { noCode: null };
+  }
+  renderVals() {
+    const noCode = this.state.noCode === null ? this.props.sansCode === true : this.state.noCode;
+    return {
+      motion: this.props.motion === false ? 'off' : 'on',
+      noCode: noCode,
+      hasCode: !noCode,
+      toggleCode: () => this.setState({ noCode: !noCode })
+    };
+  }
+}
+</script>
+</body>
+</html>

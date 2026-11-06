@@ -13,7 +13,14 @@ export const MobileMoneyPayer = z.object({
 export const PaymentDto = z
   .object({
     id: z.uuid(),
-    purpose: z.enum(['DELIVERY_FEE', 'COD', 'RIDER_CASH_DEPOSIT', 'SUBSCRIPTION', 'WALLET_TOPUP']),
+    purpose: z.enum([
+      'DELIVERY_FEE',
+      'COD',
+      'RIDER_CASH_DEPOSIT',
+      'SUBSCRIPTION',
+      'WALLET_TOPUP',
+      'RIDER_TOPUP',
+    ]),
     status: z.enum(['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED']),
     amount: z.int(),
     orderId: z.uuid().nullable(),
@@ -25,6 +32,8 @@ export const PaymentDto = z
 
 export const TopUpBody = MobileMoneyPayer.extend({ amount: Fcfa });
 export const DepositBody = MobileMoneyPayer.extend({ amount: Fcfa });
+/** Recharge du solde prépayé du livreur : 500 FCFA au moins (frais payés par Tara). */
+export const RiderTopUpBody = MobileMoneyPayer.extend({ amount: Fcfa.min(500).max(500_000) });
 export const PayoutBody = z.object({
   /** Par défaut, tout le disponible. */
   amount: Fcfa.optional(),
@@ -32,9 +41,28 @@ export const PayoutBody = z.object({
   operator: Operator,
 });
 
+/**
+ * Champs de l'app hors connexion (facultatifs) : un encaissement en espèces fait sans réseau
+ * part avec l'heure et la position du moment ; renvoyé, il est sans effet.
+ */
+const OfflineContext = {
+  clientEventId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{8,100}$/)
+    .optional(),
+  occurredAt: z.iso.datetime().optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+};
+
 export const CollectBody = z.discriminatedUnion('method', [
-  z.object({ method: z.literal('CASH') }),
-  z.object({ method: z.literal('MOBILE_MONEY'), phone: CameroonMobile, operator: Operator }),
+  z.object({ method: z.literal('CASH'), ...OfflineContext }),
+  z.object({
+    method: z.literal('MOBILE_MONEY'),
+    phone: CameroonMobile,
+    operator: Operator,
+    ...OfflineContext,
+  }),
 ]);
 
 export const CollectionDto = z
@@ -66,12 +94,18 @@ export const WalletDto = z
 export const RiderWalletDto = z
   .object({
     currency: z.literal('XAF'),
-    /** Gains dus au livreur. */
+    /** Solde prépayé du livreur : ses gains et ses recharges, moins l'argent encaissé. */
     earnings: z.int(),
+    /** Mis de côté pour ses courses avec encaissement en cours. */
+    reserved: z.int(),
     /** Espèces encaissées et pas encore déposées (dues à Tara). */
     cashHeld: z.int(),
     cashLimit: z.int(),
-    /** Retirable maintenant : gains moins espèces détenues. */
+    /** Heure limite de dépôt des espèces détenues (24 h après l'encaissement le plus ancien). */
+    cashDueBy: z.iso.datetime().nullable(),
+    /** Délai dépassé : plus de courses tant que les espèces ne sont pas déposées. */
+    cashOverdue: z.boolean(),
+    /** Disponible : solde moins l'argent mis de côté et les anciennes espèces dues. */
     available: z.int(),
     openPayout: OpenPayout,
   })

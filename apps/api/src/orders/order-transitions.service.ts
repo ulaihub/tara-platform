@@ -145,6 +145,8 @@ export class OrderTransitionsService {
       case 'DELIVERY_FAILED':
         data.attemptCount = { increment: 1 };
         data.failureDecision = null;
+        data.failedAt = now;
+        data.failureReason = options.failureReason ?? null;
         // Le livreur connaît le code d'enlèvement : un retour se valide avec un code neuf,
         // envoyé à l'expéditeur seul (sinon le livreur pourrait déclarer un retour fictif).
         returnCode = randomDigits(4);
@@ -157,6 +159,9 @@ export class OrderTransitionsService {
         break;
       case 'DELIVERED':
         data.deliveredAt = now;
+        break;
+      case 'RETURNED':
+        data.returnedAt = now;
         break;
       case 'CANCELLED':
         data.cancelledAt = now;

@@ -36,6 +36,8 @@ import {
   PublicLocationLinkDto,
   PublicLocationSubmitBody,
   ZoneBody,
+  MapZonesDto,
+  MapZonesQuery,
   ZoneDto,
   ZoneListQuery,
   ZonePatchBody,
@@ -50,7 +52,34 @@ export class AddressesController {
   constructor(
     private readonly addresses: AddressesService,
     private readonly prisma: PrismaService,
+    private readonly zoneShapes: ZonesRepository,
   ) {}
+
+  /** Contours des zones pour la carte : zone de service, zones interdites aux motos (B6). */
+  @Get('map/zones')
+  @ApiZodQuery(MapZonesQuery)
+  @ApiZodResponse(MapZonesDto)
+  async mapZones(
+    @ValidQuery(MapZonesQuery) query: z.output<typeof MapZonesQuery>,
+  ): Promise<z.output<typeof MapZonesDto>> {
+    const rows = await this.zoneShapes.mapFeatures(query.city);
+    const latest = rows.reduce((max, row) => Math.max(max, row.updatedAt.getTime()), 0);
+    return {
+      type: 'FeatureCollection',
+      version: `${rows.length}-${latest}`,
+      features: rows.map((row) => ({
+        type: 'Feature',
+        properties: {
+          id: row.id,
+          name: row.name,
+          kind: row.kind as 'SERVICE_AREA' | 'NO_MOTORBIKE',
+        },
+        geometry: JSON.parse(row.geometry) as z.output<
+          typeof MapZonesDto
+        >['features'][number]['geometry'],
+      })),
+    };
+  }
 
   /** Quartiers et zones actives, pour le sélecteur de quartier (B1). */
   @Get('zones')

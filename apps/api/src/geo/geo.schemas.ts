@@ -120,3 +120,30 @@ export const PublicLocationSubmitBody = z.object({
   contactName: z.string().trim().max(80).optional(),
   contactPhone: CameroonMobile.optional(),
 });
+
+export const MapZonesQuery = z.object({ city: z.string().min(1).max(60).optional() });
+
+/**
+ * Zones à dessiner sur la carte de l'app (GeoJSON) : zone de service et zones interdites
+ * aux motos. `version` change quand une zone change : l'app ne retélécharge qu'alors.
+ */
+export const MapZonesDto = z
+  .object({
+    type: z.literal('FeatureCollection'),
+    version: z.string(),
+    features: z.array(
+      z.object({
+        type: z.literal('Feature'),
+        properties: z.object({
+          id: z.uuid(),
+          name: z.string(),
+          kind: z.enum(['SERVICE_AREA', 'NO_MOTORBIKE']),
+        }),
+        geometry: z.object({
+          type: z.enum(['Polygon', 'MultiPolygon']),
+          coordinates: z.array(z.unknown()),
+        }),
+      }),
+    ),
+  })
+  .meta({ id: 'MapZones' });

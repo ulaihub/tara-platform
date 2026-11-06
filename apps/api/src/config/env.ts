@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CameroonMobile } from '../common/phone.js';
 
 /**
  * Variables d'environnement de l'API, validées au démarrage.
@@ -8,6 +9,9 @@ import { z } from 'zod';
 const base64Key32 = z.string().refine((value) => Buffer.from(value, 'base64').length === 32, {
   message: 'doit être une clé de 32 octets encodée en base64 (openssl rand -base64 32)',
 });
+
+/** Numéro d'urgence court (police, pompiers, SAMU) : 2 à 4 chiffres. */
+const EmergencyNumber = z.string().regex(/^\d{2,4}$/, 'numéro d’urgence de 2 à 4 chiffres');
 
 const booleanFlag = z
   .enum(['true', 'false', '1', '0'])
@@ -102,6 +106,28 @@ const envSchema = z
     WHATSAPP_VERIFY_TOKEN: z.string().min(16).optional(),
     /** Numéros de l'équipe prévenus par SMS en cas d'alerte de sécurité d'un livreur (SOS). */
     OPS_ALERT_PHONES: z.string().default(''),
+    /** Ligne de secours Tara (24 h/24), affichée sur l'écran d'alerte de l'app livreur. */
+    SAFETY_HOTLINE_PHONE: CameroonMobile.default('+237640114064'),
+    /** Numéros d'urgence affichés sur l'écran d'alerte : police, pompiers, SAMU (Cameroun). */
+    EMERGENCY_POLICE_NUMBER: EmergencyNumber.default('117'),
+    EMERGENCY_FIRE_NUMBER: EmergencyNumber.default('118'),
+    EMERGENCY_MEDICAL_NUMBER: EmergencyNumber.default('119'),
+    /**
+     * Échec de livraison (E6) : appels au destinataire exigés pour « absent », « injoignable »
+     * et « adresse introuvable », écart minimal entre le premier et le dernier, puis délai
+     * laissé à l'expéditeur pour choisir avant le retour automatique.
+     */
+    FAILURE_MIN_CALLS: z.coerce.number().int().min(1).max(5).default(2),
+    FAILURE_CALL_SPACING_MINUTES: z.coerce.number().min(0).max(60).default(5),
+    FAILURE_DECISION_TIMEOUT_MINUTES: z.coerce.number().min(0.05).max(240).default(15),
+    /**
+     * Espèces encore dues d'avant le solde prépayé (G5) : délai de dépôt, puis retard au-delà
+     * duquel le compte est suspendu (gains retenus).
+     */
+    CASH_DEPOSIT_DEADLINE_HOURS: z.coerce.number().min(1).max(240).default(24),
+    CASH_OVERDUE_SUSPEND_HOURS: z.coerce.number().min(1).max(720).default(72),
+    /** Ligne du support Tara, affichée dans l'app livreur ; sans valeur, le bouton est masqué. */
+    SUPPORT_PHONE: CameroonMobile.optional(),
 
     /** Attribution des courses (D1, D2). Valeurs réduites par le simulateur. */
     DISPATCH_OFFER_TIMEOUT_SECONDS: z.coerce.number().min(0.2).max(300).default(30),

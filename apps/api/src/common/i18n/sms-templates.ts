@@ -46,8 +46,24 @@ const TEMPLATES = {
     en: 'Tara OPS: order {reference} has been waiting for a rider for {minutes} min. Please assign.',
   },
   OPS_SAFETY_ALERT: {
-    fr: 'Tara OPS ALERTE : le livreur {rider} ({phone}) a declenche une alerte. Position : {map}',
-    en: 'Tara OPS ALERT: rider {rider} ({phone}) triggered an alert. Location: {map}',
+    fr: 'Tara OPS ALERTE : le livreur {rider} ({phone}), moto {plate}, a declenche une alerte. Quartier : {place}. Position : {map}',
+    en: 'Tara OPS ALERT: rider {rider} ({phone}), plate {plate}, triggered an alert. Area: {place}. Location: {map}',
+  },
+  OPS_CASH_OVERDUE: {
+    fr: 'Tara FINANCE : {rider} ({phone}) n a pas depose ses especes depuis {days} j. Compte suspendu, {offset} FCFA retenus sur ses gains, {amount} FCFA encore dus. Garant : {guarantor} ({guarantorPhone}).',
+    en: 'Tara FINANCE: {rider} ({phone}) has not paid back cash for {days} d. Account suspended, {offset} XAF taken from earnings, {amount} XAF still due. Guarantor: {guarantor} ({guarantorPhone}).',
+  },
+  OPS_SAFETY_ALERT_CANCELLED: {
+    fr: 'Tara OPS : le livreur {rider} ({phone}) a annule son alerte. Rappelez-le pour confirmer qu il va bien.',
+    en: 'Tara OPS: rider {rider} ({phone}) cancelled the alert. Call back to confirm they are safe.',
+  },
+  EMERGENCY_CONTACT_ALERT: {
+    fr: 'Tara : {rider} a declenche une alerte de securite pendant son travail. Position : {map}. Notre equipe le contacte.',
+    en: 'Tara: {rider} triggered a safety alert while working. Location: {map}. Our team is contacting them.',
+  },
+  EMERGENCY_CONTACT_ALERT_CANCELLED: {
+    fr: 'Tara : {rider} a annule son alerte de securite. Notre equipe verifie qu il va bien.',
+    en: 'Tara: {rider} cancelled their safety alert. Our team is checking that they are safe.',
   },
   PAYOUT_PHONE_CHANGED: {
     fr: 'Tara : le numero de reversement de {shop} vient d etre change. Reversements suspendus {hours} h. Si ce n est pas vous, contactez vite le support.',

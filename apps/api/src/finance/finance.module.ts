@@ -5,6 +5,8 @@ import {
   RiderFinanceController,
   WalletController,
 } from './finance.controller.js';
+import { CashDisciplineService } from './cash-discipline.service.js';
+import { RiderBalanceService } from './rider-balance.service.js';
 import { JournalExportService } from './journal-export.service.js';
 import { OrderFinanceService } from './order-finance.service.js';
 import { PayoutsService } from './payouts.service.js';
@@ -22,7 +24,16 @@ import { WalletsService } from './wallets.service.js';
     ReconciliationService,
     JournalExportService,
     StatementsService,
+    CashDisciplineService,
+    RiderBalanceService,
   ],
-  exports: [OrderFinanceService, PayoutsService, WalletsService, ReconciliationService],
+  exports: [
+    OrderFinanceService,
+    PayoutsService,
+    WalletsService,
+    ReconciliationService,
+    CashDisciplineService,
+    RiderBalanceService,
+  ],
 })
 export class FinanceModule {}

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Proposition de course (clair)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F2EC}
+a{color:#C2410C}a:hover{color:#9A3412}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #C2410C;outline-offset:3px}
+@keyframes morph{0%,100%{border-radius:42% 58% 70% 30%/45% 45% 55% 55%}33%{border-radius:70% 30% 46% 54%/30% 29% 71% 70%}66%{border-radius:100% 60% 60% 100%/100% 100% 60% 60%}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-32px) scale(1.12)}}
+@keyframes sheen{0%{transform:translateX(-140%) skewX(-20deg)}55%,100%{transform:translateX(420%) skewX(-20deg)}}
+@keyframes wave{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.blob{animation:morph 12s ease-in-out infinite,drift 16s ease-in-out infinite}
+.sheen{animation:sheen 3s ease-in-out infinite}
+.wave{animation:wave 5s linear infinite}
+.wave2{animation:wave 8s linear infinite reverse}
+.blink{animation:blink 1.2s ease-in-out infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F2EC; color: #16120E; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <div aria-hidden="true" class="blob" style="position: absolute; top: 40px; left: 20px; width: 350px; height: 350px; background: radial-gradient(circle at 40% 40%, #FFB000, #FF6A00 55%, #FF3D00); filter: blur(70px); opacity: 0.42"></div>
+  <div aria-hidden="true" class="blob" style="position: absolute; bottom: -140px; right: -120px; width: 300px; height: 300px; background: radial-gradient(circle, #FFD27A, #FF8A00); filter: blur(70px); opacity: 0.4; animation-delay: -5s"></div>
+
+  <div style="position: relative; height: 100%; box-sizing: border-box; padding: 60px 20px 32px; display: flex; flex-direction: column; align-items: center">
+    <p style="margin: 0; height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 6px 16px rgba(140,70,10,0.08); display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700">
+      <span aria-hidden="true" class="blink" style="width: 8px; height: 8px; border-radius: 50%; background: #FF6A00"></span>Nouvelle course · Moto</p>
+
+    <div role="timer" aria-label="Temps restant pour accepter : {{remaining}} secondes" style="position: relative; margin-top: 20px; width: 236px; height: 236px">
+      <svg aria-hidden="true" width="236" height="236" viewBox="0 0 236 236" style="position: absolute; inset: 0; transform: rotate(-90deg)">
+        <defs>
+          <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB000"></stop><stop offset="0.55" stop-color="#FF6A00"></stop><stop offset="1" stop-color="#FF3D00"></stop></linearGradient>
+        </defs>
+        <circle cx="118" cy="118" r="113" fill="none" stroke="rgba(22,18,14,0.08)" stroke-width="6"></circle>
+        <circle cx="118" cy="118" r="113" fill="none" stroke="url(#ring)" stroke-width="6" stroke-linecap="round" stroke-dasharray="710" stroke-dashoffset="{{dash}}" style="transition: stroke-dashoffset 1s linear"></circle>
+      </svg>
+      <div style="position: absolute; inset: 14px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.62); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: inset 0 1px 0 #FFFFFF, 0 24px 50px rgba(140,70,10,0.16)">
+        <div aria-hidden="true" style="position: absolute; left: -104px; width: 416px; height: 416px; top: {{waveTop2}}px; transition: top 1s linear">
+          <div class="wave2" style="width: 100%; height: 100%; border-radius: 40%; background: rgba(255,106,0,0.35)"></div>
+        </div>
+        <div aria-hidden="true" style="position: absolute; left: -104px; width: 416px; height: 416px; top: {{waveTop}}px; transition: top 1s linear">
+          <div class="wave" style="width: 100%; height: 100%; border-radius: 43%; background: linear-gradient(180deg, #FFB000 0%, #FF6A00 18%, #FF3D00 50%)"></div>
+        </div>
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center">
+          <span style="font-family: 'Sora', sans-serif; font-size: 72px; line-height: 1; font-weight: 800; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: #16120E; text-shadow: 0 2px 14px rgba(255,255,255,0.45)">{{remaining}}</span>
+          <span style="margin-top: 4px; font-size: 13px; font-weight: 700; color: #16120E">secondes</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 18px; text-align: center">
+      <p style="margin: 0; font-size: 13px; font-weight: 600; color: rgba(22,18,14,0.7)">Votre gain</p>
+      <p style="margin: 2px 0 0; font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">1 500 <span style="font-size: 18px; font-weight: 600; color: rgba(22,18,14,0.66)">FCFA</span></p>
+    </div>
+
+    <div style="margin-top: 16px; width: 100%; box-sizing: border-box; padding: 18px; border-radius: 26px; background: rgba(255,255,255,0.62); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(26px) saturate(180%); -webkit-backdrop-filter: blur(26px) saturate(180%); box-shadow: inset 0 1px 0 #FFFFFF, 0 16px 36px rgba(140,70,10,0.10)">
+      <div style="display: flex; gap: 14px">
+        <div aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; padding-top: 4px">
+          <span style="width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg, #FFB000, #FF3D00); box-shadow: 0 0 10px rgba(255,106,0,0.5)"></span>
+          <span style="flex: 1; width: 2px; margin: 4px 0; background: repeating-linear-gradient(180deg, rgba(22,18,14,0.3) 0 4px, transparent 4px 8px)"></span>
+          <span style="width: 10px; height: 10px; border-radius: 50%; border: 2px solid #16120E"></span>
+        </div>
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <div>
+            <p style="margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #C2410C">Enlèvement · 1,2 km</p>
+            <p style="margin: 3px 0 0; font-size: 16px; font-weight: 700">Boutique Awa Mode</p>
+            <p style="margin: 1px 0 0; font-size: 13px; color: rgba(22,18,14,0.68)">Cocody, Riviera 2</p>
+          </div>
+          <div>
+            <p style="margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(22,18,14,0.7)">Livraison · 6,8 km · ~22 min</p>
+            <p style="margin: 3px 0 0; font-size: 16px; font-weight: 700">Marcory, Zone 4</p>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px">
+        <span style="height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(22,18,14,0.06); display: flex; align-items: center; font-size: 12px; font-weight: 600">Colis moyen · 2 kg</span>
+        <span style="height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(255,138,0,0.14); border: 1px solid rgba(255,106,0,0.35); color: #9A3412; display: flex; align-items: center; font-size: 12px; font-weight: 700">À encaisser : 12 500 F</span>
+      </div>
+    </div>
+
+    <div style="margin-top: auto; width: 100%; display: grid; grid-template-columns: 1fr 2fr; gap: 10px">
+      <a href="AccueilEnLigneClair.dc.html" style="height: 60px; border-radius: 20px; background: rgba(255,255,255,0.75); border: 1px solid rgba(22,18,14,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 6px 16px rgba(140,70,10,0.08); color: #16120E; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700">Refuser</a>
+      <a href="EnlevementClair.dc.html" style="position: relative; overflow: hidden; height: 60px; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); color: #140800; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 800; box-shadow: 0 14px 30px rgba(255,90,0,0.35), inset 0 1px 0 rgba(255,255,255,0.5)">
+        <span aria-hidden="true" class="sheen" style="position: absolute; top: 0; left: 0; width: 70px; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.6), rgba(255,255,255,0))"></span>
+        <span style="position: relative">Accepter</span>
+        <svg aria-hidden="true" style="position: relative" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+      </a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { remaining: 24 };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      this.setState((s) => ({ remaining: s.remaining <= 0 ? 30 : s.remaining - 1 }));
+    }, 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  renderVals() {
+    const r = this.state.remaining;
+    const ratio = r / 30;
+    return {
+      motion: this.props.motion === false ? 'off' : 'on',
+      remaining: r,
+      dash: Math.round(710 * (1 - ratio)),
+      waveTop: Math.round(200 - ratio * 196),
+      waveTop2: Math.round(192 - ratio * 196)
+    };
+  }
+}
+</script>
+</body>
+</html>

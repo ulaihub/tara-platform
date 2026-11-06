@@ -22,7 +22,14 @@ export const PaymentMethodEnum = z
   .meta({ id: 'PaymentMethod' });
 export const FeePayerEnum = z.enum(['SENDER', 'RECIPIENT']).meta({ id: 'FeePayer' });
 export const FailureReasonEnum = z
-  .enum(['RECIPIENT_ABSENT', 'RECIPIENT_UNREACHABLE', 'REFUSED', 'ADDRESS_NOT_FOUND', 'OTHER'])
+  .enum([
+    'RECIPIENT_ABSENT',
+    'RECIPIENT_UNREACHABLE',
+    'REFUSED',
+    'ADDRESS_NOT_FOUND',
+    'PAYMENT_REFUSED',
+    'OTHER',
+  ])
   .meta({ id: 'FailureReason' });
 export const ActorRoleEnum = z
   .enum(['SENDER', 'RECIPIENT', 'RIDER', 'DISPATCHER', 'SUPPORT', 'SYSTEM'])

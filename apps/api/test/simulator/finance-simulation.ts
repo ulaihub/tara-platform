@@ -98,7 +98,9 @@ export async function runFinanceSimulation(
       shops.push(shop);
     }
     const riders: TestRider[] = [];
-    for (let i = 0; i < options.riders; i += 1) riders.push(await activeRider(ctx));
+    // Solde prépayé confortable : chaque livreur peut porter deux courses avec encaissement.
+    for (let i = 0; i < options.riders; i += 1)
+      riders.push(await activeRider(ctx, { balance: 1_000_000 }));
     log(`${shops.length} marchands, ${riders.length} livreurs ; ${options.orders} commandes`);
 
     /** Notification du prestataire : parfois perdue (rattrapée par l'interrogation), parfois répétée. */
@@ -310,10 +312,11 @@ export async function runFinanceSimulation(
       );
     }
 
-    // Reversements quotidiens des marchands : un envoi sur cinq perd sa réponse.
+    // Reversements quotidiens des marchands : le premier envoi, puis un sur cinq, perd sa
+    // réponse (au moins une coupure à chaque passage, quel que soit l'ordre des tirages).
     const original = provider.disburse.bind(provider);
     provider.disburse = (disbursement) => {
-      if (rng() < 0.2) {
+      if (stats.lostResponses === 0 || rng() < 0.2) {
         provider.loseResponseOnce.add(disbursement.reference);
         stats.lostResponses += 1;
       }

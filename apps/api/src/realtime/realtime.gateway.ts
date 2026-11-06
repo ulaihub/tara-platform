@@ -202,6 +202,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
           heading: parsed.data.heading,
           speed: parsed.data.speed,
           accuracy: parsed.data.accuracy,
+          mocked: parsed.data.mocked,
           at: parsed.data.recordedAt ? new Date(parsed.data.recordedAt) : new Date(),
         },
         data.riderId,

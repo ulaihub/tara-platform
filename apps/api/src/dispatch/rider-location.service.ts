@@ -3,9 +3,11 @@ import { AppError } from '../common/errors/app-error.js';
 import { cameroonDate } from '../common/time.js';
 import type { RiderProfile } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { CourseTrackService } from '../tracking/course-track.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { uncoveredDocuments } from '../riders/riders.service.js';
 import { ACTIVE_RIDER_STATUSES, DispatchService } from './dispatch.service.js';
+import { OnlineTimeService } from './online-time.service.js';
 import { PresenceService, type RiderPosition } from './presence.service.js';
 
 /** Position transmise au back-office au plus une fois par livreur sur cet intervalle. */
@@ -26,6 +28,8 @@ export class RiderLocationService {
     private readonly presence: PresenceService,
     private readonly dispatch: DispatchService,
     private readonly realtime: RealtimeService,
+    private readonly onlineTime: OnlineTimeService,
+    private readonly tracks: CourseTrackService,
   ) {}
 
   async riderOf(userId: string): Promise<RiderProfile & { documents: { id: string }[] }> {
@@ -46,6 +50,8 @@ export class RiderLocationService {
     if (!rider) return ['NOT_A_RIDER'];
     const reasons: string[] = [];
     if (rider.status !== 'ACTIVE') reasons.push(`STATUS_${rider.status}`);
+    // Espèces non déposées dans le délai (G5) : plus de courses jusqu'au dépôt.
+    if (rider.cashOverdueSince) reasons.push('CASH_OVERDUE');
     const missing = uncoveredDocuments(rider.documents, ['APPROVED'], cameroonDate(new Date()));
     reasons.push(...missing.map((type) => `DOCUMENT_${type}`));
     return reasons;
@@ -59,6 +65,7 @@ export class RiderLocationService {
     const rider = await this.riderOf(userId);
     if (!online) {
       await this.presence.goOffline(rider.id);
+      await this.onlineTime.stop(rider.id, new Date());
       await this.dispatch.declineAllFor(rider.id);
       await this.update(userId, position);
       return { online: false, blockers: [] };
@@ -69,6 +76,7 @@ export class RiderLocationService {
     }
     checkClock(position.at);
     await this.presence.goOnline(rider.id, position);
+    await this.onlineTime.start(rider.id, new Date());
     return { online: true, blockers: [] };
   }
 
@@ -83,6 +91,7 @@ export class RiderLocationService {
     const id = riderId ?? (await this.riderOf(userId)).id;
     const accepted = await this.presence.update(id, position);
     if (!accepted) return;
+    if (await this.presence.isOnline(id)) await this.onlineTime.touch(id, new Date());
     const payload = {
       latitude: position.latitude,
       longitude: position.longitude,
@@ -96,6 +105,14 @@ export class RiderLocationService {
     });
     for (const order of active) {
       this.realtime.toOrder(order.id, 'rider.position', { orderId: order.id, ...payload });
+    }
+    // Trajet de la course enregistré pendant la course seulement (sécurité, litiges).
+    if (active.length > 0) {
+      await this.tracks.record(
+        id,
+        active.map((order) => order.id),
+        position,
+      );
     }
     const now = Date.now();
     if ((this.lastOpsEmit.get(id) ?? 0) + OPS_POSITION_INTERVAL_MS <= now) {

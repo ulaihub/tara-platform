@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Retour du colis</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0A0A0F}
+a{color:#FFB15C}a:hover{color:#FFD2A1}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #FFB15C;outline-offset:3px}
+@keyframes sheen{0%{transform:translateX(-140%) skewX(-20deg)}55%,100%{transform:translateX(420%) skewX(-20deg)}}
+@keyframes dash{to{stroke-dashoffset:-40}}
+@keyframes pulse{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.6);opacity:0}}
+.sheen{animation:sheen 3.6s ease-in-out infinite}
+.dash{animation:dash 1.2s linear infinite}
+.pulse{animation:pulse 2.4s ease-out infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #0A0A0F; color: #FFFFFF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <svg aria-hidden="true" width="390" height="420" viewBox="0 0 390 420" style="position: absolute; top: 0; left: 0">
+    <defs>
+      <linearGradient id="routeBack" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset="1" stop-color="#FFB000"></stop></linearGradient>
+    </defs>
+    <rect width="390" height="420" fill="#0D0E13"></rect>
+    <path d="M-20 360 C 80 320, 170 350, 240 315 S 350 300, 410 320 L410 440 L-20 440 Z" fill="#0F1922"></path>
+    <g fill="#121319"><rect x="150" y="150" width="60" height="60" rx="8"></rect><rect x="246" y="220" width="80" height="50" rx="8"></rect><rect x="60" y="210" width="40" height="70" rx="8"></rect></g>
+    <g fill="none" stroke="#1A1C24" stroke-width="7" stroke-linecap="round">
+      <path d="M-20 110 L410 90"></path><path d="M-20 290 L410 300"></path><path d="M40 -20 L60 420"></path><path d="M220 -20 L210 420"></path><path d="M350 -20 L370 420"></path>
+    </g>
+    <g fill="none" stroke="#252833" stroke-width="14" stroke-linecap="round">
+      <path d="M-20 200 C 100 210, 240 180, 410 210"></path><path d="M120 -20 C 140 120, 100 260, 140 420"></path>
+    </g>
+    <path d="M300 300 L 296 205 C 230 196, 180 206, 124 202 C 120 170, 124 140, 120 100" fill="none" stroke="url(#routeBack)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.18"></path>
+    <path class="dash" d="M300 300 L 296 205 C 230 196, 180 206, 124 202 C 120 170, 124 140, 120 100" fill="none" stroke="url(#routeBack)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14 6"></path>
+    <circle cx="120" cy="92" r="16" fill="#FFB000" opacity="0.25"></circle>
+    <circle cx="120" cy="92" r="9" fill="#FFB000" stroke="#FFFFFF" stroke-width="3"></circle>
+  </svg>
+  <div aria-hidden="true" style="position: absolute; left: 284px; top: 284px; width: 32px; height: 32px">
+    <span class="pulse" style="position: absolute; inset: 0; border-radius: 50%; background: rgba(255,106,0,0.5)"></span>
+    <span style="position: absolute; inset: 6px; border-radius: 50%; background: linear-gradient(135deg, #FFB000, #FF3D00); border: 3px solid #FFFFFF"></span>
+  </div>
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 130px; background: linear-gradient(180deg, rgba(10,10,15,0.85), rgba(10,10,15,0))"></div>
+
+  <div style="position: absolute; top: 56px; left: 16px; right: 16px; display: flex; align-items: center; gap: 10px">
+    <a href="Echec.dc.html" aria-label="Retour" style="flex: none; width: 48px; height: 48px; border-radius: 16px; background: rgba(22,22,28,0.6); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+    <div style="flex: 1; height: 48px; padding: 0 14px; border-radius: 16px; background: rgba(22,22,28,0.6); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; justify-content: center">
+      <span style="font-size: 11px; color: rgba(255,255,255,0.66)">Course TR-48213</span>
+      <span style="font-size: 14px; font-weight: 700">Retour du colis · 24 min</span>
+    </div>
+    <a href="Alerte.dc.html" aria-label="Alerte de sécurité" style="flex: none; width: 48px; height: 48px; border-radius: 16px; background: rgba(229,37,53,0.88); color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 800">SOS</a>
+  </div>
+
+  <section aria-label="Retour au vendeur" style="position: absolute; left: 0; right: 0; bottom: 0; top: 372px; box-sizing: border-box; padding: 12px 20px 30px; border-radius: 32px 32px 0 0; background: rgba(20,20,26,0.84); border-top: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(30px) saturate(170%); -webkit-backdrop-filter: blur(30px) saturate(170%); display: flex; flex-direction: column">
+    <span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.25)"></span>
+
+    <p style="margin: 14px 0 0; align-self: flex-start; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(229,37,53,0.16); border: 1px solid rgba(255,122,133,0.4); color: #FF9AA2; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700">
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16.5v.5"></path></svg>Échec · Client absent</p>
+
+    <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px">
+      <div aria-hidden="true" style="flex: none; width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,176,0,0.3), rgba(255,61,0,0.3)); border: 1px solid rgba(255,177,92,0.4); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700">AM</div>
+      <div style="flex: 1; min-width: 0">
+        <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.66)">Rapporter le colis à</p>
+        <p style="margin: 1px 0 0; font-size: 16px; font-weight: 700">Boutique Awa Mode</p>
+        <p style="margin: 1px 0 0; font-size: 13px; color: rgba(255,255,255,0.66)">Cocody, Riviera 2 · 6,9 km</p>
+      </div>
+      <a href="tel:+2250700000000" aria-label="Appeler Boutique Awa Mode" style="flex: none; width: 48px; height: 48px; border-radius: 50%; background: rgba(74,222,155,0.16); border: 1px solid rgba(74,222,155,0.4); color: #4ADE9B; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>
+      </a>
+    </div>
+
+    <ol style="list-style: none; margin: 16px 0 0; padding: 14px 16px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 12px">
+      <li style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700"><span aria-hidden="true" style="width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #FFB000, #FF3D00); color: #140800; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800">1</span>Rejoindre le vendeur<span style="margin-left: auto; font-size: 12px; font-weight: 600; color: #FFB15C">En cours</span></li>
+      <li style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.72)"><span aria-hidden="true" style="width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.3); box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 12px">2</span>Saisir le code de retour du vendeur</li>
+      <li style="display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.72)"><span aria-hidden="true" style="width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.3); box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 12px">3</span>Photographier le colis rendu</li>
+    </ol>
+
+    <a href="AccueilEnLigne.dc.html" style="margin-top: auto; position: relative; overflow: hidden; height: 58px; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); color: #140800; text-decoration: none; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 14px 30px rgba(255,90,0,0.38), inset 0 1px 0 rgba(255,255,255,0.45)">
+      <span aria-hidden="true" class="sheen" style="position: absolute; top: 0; left: 0; width: 70px; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.55), rgba(255,255,255,0))"></span>
+      <span style="position: relative">Je suis chez le vendeur</span>
+    </a>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { motion: this.props.motion === false ? 'off' : 'on' };
+  }
+}
+</script>
+</body>
+</html>

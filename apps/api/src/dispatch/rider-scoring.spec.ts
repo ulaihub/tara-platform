@@ -12,25 +12,29 @@ const base: RiderSnapshot = {
   activeOrders: 0,
   hasPendingOffer: false,
   documentsValid: true,
-  cashHeld: 0,
-  cashLimit: 50_000,
+  cashOverdue: false,
+  availableBalance: 20_000,
   ratingSum: 0,
   ratingCount: 0,
 };
 
 describe('choix du livreur (D1, D4)', () => {
-  it('écarte un livreur aux pièces expirées, au plafond d’espèces ou déjà occupé', () => {
+  it('écarte un livreur aux pièces expirées, au solde insuffisant ou déjà occupé', () => {
     expect(ineligibilities(base, 0)).toEqual([]);
     expect(ineligibilities({ ...base, documentsValid: false }, 0)).toEqual(['DOCUMENTS']);
-    expect(ineligibilities({ ...base, cashHeld: 45_000 }, 6_000)).toEqual(['CASH_LIMIT']);
+    // Solde prépayé : il doit couvrir l'argent à encaisser ; une course déjà payée passe.
+    expect(ineligibilities(base, 20_000)).toEqual([]);
+    expect(ineligibilities(base, 20_001)).toEqual(['BALANCE_TOO_LOW']);
+    expect(ineligibilities({ ...base, availableBalance: 0 }, 0)).toEqual([]);
     expect(ineligibilities({ ...base, activeOrders: 2 }, 0)).toEqual(['TOO_MANY_ORDERS']);
     expect(ineligibilities({ ...base, hasPendingOffer: true }, 0)).toEqual(['PENDING_OFFER']);
+    // Espèces non déposées dans le délai (G5) : plus de courses jusqu'au dépôt.
+    expect(ineligibilities({ ...base, cashOverdue: true }, 0)).toEqual(['CASH_OVERDUE']);
   });
 
-  it('préfère le plus proche, puis corrige par les courses en cours, les espèces et la note', () => {
+  it('préfère le plus proche, puis corrige par les courses en cours et la note', () => {
     expect(score(base)).toBe(1_000);
     expect(score({ ...base, activeOrders: 1 })).toBe(3_000);
-    expect(score({ ...base, cashHeld: 25_000 })).toBe(1_500);
     // 4,8/5 sur 10 avis : 400 m de bonus.
     expect(score({ ...base, ratingSum: 48, ratingCount: 10 })).toBe(600);
     // Trop peu d'avis : la note ne compte pas.

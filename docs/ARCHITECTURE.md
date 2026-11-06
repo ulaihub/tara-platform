@@ -17,6 +17,7 @@ flowchart TB
     pg[(PostgreSQL 16 + PostGIS)]
     redis[(Redis 7)]
     osrm[OSRM · carte OSM du Cameroun]
+    tiles[Tuiles vectorielles<br/>OSM du Cameroun]
     s3[(Stockage objet<br/>photos, pièces KYC chiffrées)]
   end
   subgraph Prestataires
@@ -27,6 +28,7 @@ flowchart TB
   end
   client & rider & tracking & backoffice <--> api
   api <--> pg & redis & osrm & s3
+  rider & client & tracking --> tiles
   api <--> momo & sms & wa & fcm
 ```
 
@@ -54,16 +56,18 @@ tara-platform/
 
 ## Versions retenues
 
-| Outil                | Version  | Remarque                                                                                                                |
-| -------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Node.js              | 22 LTS   | `.nvmrc`                                                                                                                |
-| pnpm                 | 10.28    | Workspaces ; Turborepo 2.11 orchestre les tâches                                                                        |
-| TypeScript           | 6.0      | La 7.0 (compilateur natif) n'est pas encore prise en charge par tout l'outillage ; 6.0 est celle que NestJS 12 installe |
-| NestJS               | 12       | Modules ES, Vitest et oxlint par défaut                                                                                 |
-| Prisma               | 7.10     | Client généré dans `src/generated`, connexion via `@prisma/adapter-pg`, configuration dans `prisma.config.ts`           |
-| PostgreSQL / PostGIS | 16 / 3.4 | Image `postgis/postgis:16-3.4`                                                                                          |
-| Redis                | 7        | Positions des livreurs (GEO), files BullMQ, Socket.IO entre instances, limitation de débit                              |
-| OSRM                 | 6.0.0    | Image `ghcr.io/project-osrm/osrm-backend`                                                                               |
+| Outil                | Version              | Remarque                                                                                                                |
+| -------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Node.js              | 22 LTS               | `.nvmrc`                                                                                                                |
+| pnpm                 | 10.28                | Workspaces ; Turborepo 2.11 orchestre les tâches                                                                        |
+| TypeScript           | 6.0                  | La 7.0 (compilateur natif) n'est pas encore prise en charge par tout l'outillage ; 6.0 est celle que NestJS 12 installe |
+| NestJS               | 12                   | Modules ES, Vitest et oxlint par défaut                                                                                 |
+| Prisma               | 7.10                 | Client généré dans `src/generated`, connexion via `@prisma/adapter-pg`, configuration dans `prisma.config.ts`           |
+| PostgreSQL / PostGIS | 16 / 3.4             | Image `postgis/postgis:16-3.4`                                                                                          |
+| Redis                | 7                    | Positions des livreurs (GEO), files BullMQ, Socket.IO entre instances, limitation de débit                              |
+| OSRM                 | 6.0.0                | Image `ghcr.io/project-osrm/osrm-backend`                                                                               |
+| Flutter / Dart       | 3.47 / 3.13          | App livreur `apps/rider` ; version épinglée en CI (les captures de référence en dépendent)                              |
+| MapLibre             | Native (via Flutter) | Rendu des tuiles vectorielles, styles Tara sombre et clair, régions hors connexion                                      |
 
 ## Décisions de conception
 
@@ -160,6 +164,86 @@ tara-platform/
     valide avant l'envoi.
 26. **Rapprochement chaque nuit.** Grand livre, paiements, reversements, relevé du prestataire et
     contre-remboursements comparés pour la veille ; écarts listés et alerte à la finance.
+27. **Cartographie maîtrisée.** Comme les grands acteurs du transport, Tara a sa propre pile
+    cartographique, assemblée à partir de briques ouvertes plutôt que louée : extrait
+    OpenStreetMap du Cameroun (Geofabrik), tuiles vectorielles générées chaque mois (Planetiler,
+    fichier PMTiles servi par Martin derrière le CDN), rendu MapLibre avec nos styles sombre et
+    clair, OSRM pour les distances et les itinéraires. Ni clé ni facturation à l'usage ; les
+    zones de travail du livreur restent lisibles hors connexion. Seule la navigation pas à pas
+    part vers Google Maps ou Waze, par un simple lien.
+28. **App livreur : un socle visuel unique.** Couleurs des deux thèmes dans une
+    `ThemeExtension`, polices embarquées, un seul `Ticker` par écran pour le décor, mode effets
+    réduits (sans flou, formes figées) sur les téléphones de 3 Go de RAM ou moins, arrêt des
+    animations décoratives si le téléphone le demande. Chaque écran a ses captures de référence
+    (deux thèmes, 390 × 844 et 360 × 640, texte à 100 % et 130 %) vérifiées en CI.
+
+29. **App livreur : hors connexion d'abord.** Les actions de course (enlèvement, encaissement
+    en espèces, livraison, échec, retour) passent par une file persistante dans le stockage
+    chiffré du téléphone : ordre et heure réelle conservés, identifiant `clientEventId` qui
+    rend tout renvoi sans effet, photo envoyée une seule fois, et une action refusée ne bloque
+    que sa propre course. La file repart au retour du réseau, au retour dans l'app et toutes
+    les 30 s. Le temps réel accélère l'affichage ; l'API REST reste la référence.
+30. **Position du livreur.** En ligne, une position toutes les 10 s (le serveur le considère
+    hors ligne après 90 s sans nouvelles), par le temps réel ou à défaut en HTTP. Android
+    garde une notification permanente (service au premier plan de type « position ») : pas
+    d'autorisation de localisation « toujours ». Hors ligne, aucune position n'est envoyée.
+31. **Carte gardée malgré son poids.** Le moteur MapLibre ajoute 10,8 Mo à l'app installée
+    (APK arm64 : 18,6 → 30,2 Mo) mais seulement 3,7 Mo au téléchargement (≈ 13 Mo au total,
+    le Play Store compressant ce qu'il envoie). Choix validé : garder notre carte, et mesurer
+    le poids au téléchargement (25 Mo au plus) et une fois installée (32 Mo au plus). La CI
+    contrôle les deux sur les APK ARM (`tool/apk_report.py`). Google Maps aurait allégé l'app
+    de 11 Mo, mais au prix d'une clé tierce, sans carte hors connexion ni maîtrise des styles.
+32. **Trajet des courses enregistré.** Sécurité du livreur et des colis, preuves en cas de
+    litige, détection des fraudes : chaque position reçue pendant une course (de
+    l'acceptation à la fin, jamais en dehors) est gardée, un point toutes les ~10 s ; les
+    positions prises sans réseau arrivent en lot au retour du réseau. Les points ne sont
+    jamais modifiés (droit retiré au compte de l'API) et sont effacés après 90 jours, sauf
+    litige ou incident ouvert ; le résumé reste avec la commande. Consultation par l'équipe
+    seulement (support, dispatch, administrateur), chaque consultation tracée. Alertes au
+    support : action validée loin de l'adresse, long arrêt avec le colis, position simulée,
+    trajet coupé.
+33. **Alerte SOS en deux volets.** Équipe Tara : maintien de 3 s (contre les appuis par
+    erreur), l'alerte part avec la position, sa précision et le quartier ; les agents
+    d'astreinte (SMS avec nom, plaque, quartier et lien carte) et le contact d'urgence sont
+    prévenus, un agent rappelle, le livreur suit la prise en charge en direct. Sans data,
+    l'alerte reste sur le téléphone et repart sans doublon au retour du réseau ; un SMS
+    pré-rempli vers la ligne Tara part en un geste (pas d'envoi automatique : la permission
+    d'envoyer des SMS est très encadrée par Google Play). Police : le livreur appelle le 117 depuis
+    l'écran (pompiers 118 et SAMU 119 en cas d'accident ; Android ouvre le téléphone avec le
+    numéro tapé, sans data ni crédit). S'il ne peut pas appeler (injoignable, danger
+    confirmé), l'agent appelle la police avec la position en direct et la plaque ; l'heure,
+    l'agent et ce qui a été dit restent avec l'alerte, action tracée. Rien n'est envoyé à la
+    police automatiquement : pas de canal officiel, et les fausses alertes nuiraient à la
+    crédibilité de Tara. Numéros d'urgence réglables côté serveur.
+34. **Échec de livraison : preuve d'appel et décision bornée.** Client absent, injoignable
+    ou adresse introuvable : 2 appels au destinataire passés depuis l'app, à 5 min d'écart
+    au moins ; autre motif : 1 appel et une explication ; colis ou paiement refusé : aucun
+    (le client est sur place). L'app note l'heure de chaque appel et sa durée approchée
+    (temps passé hors de l'app ; le téléphone ne dit pas si l'appel a abouti, et lire le
+    journal d'appels demanderait une permission refusée par Google Play) ; le serveur
+    vérifie les règles. Après l'échec, l'expéditeur choisit nouvelle tentative ou retour ; le
+    support peut choisir à sa place (action tracée) ; sans décision après 15 min, retour
+    automatique : le livreur n'attend jamais plus longtemps avec le colis. Règles et délai
+    réglables côté serveur.
+35. **Espèces encaissées : dépôt sous 24 h (remplacé par la décision 36, gardé pour les espèces encore dues).** Le livreur dépose ses espèces sous 24 h
+    (Mobile Money ou bureau) ; l'échéance se calcule sur le grand livre, les dépôts soldant
+    d'abord les espèces les plus anciennes. Rappel à 18 h. En retard : plus de courses ni de
+    passage en ligne jusqu'au dépôt, plafond ramené à 25 000 FCFA. Après 72 h de retard :
+    compte suspendu, gains dus retenus sur la dette (écriture `CASH_COMPENSATED`), équipe
+    prévenue par SMS avec les coordonnées du garant exigé à l'inscription ; la suspension
+    est levée par la finance, une plainte reste la décision tracée d'un administrateur.
+    Plafond de départ 25 000 FCFA, 50 000 FCFA après 20 courses livrées sans retard.
+36. **Solde prépayé du livreur (comme les chauffeurs Yango).** Pour qu'un livreur ne puisse
+    jamais garder l'argent d'un marchand, sans garant ni recouvrement : son solde (gains et
+    recharges) couvre l'argent qu'il encaisse. À l'acceptation d'une course avec
+    encaissement, le montant est mis de côté sur son solde (refusée s'il ne le couvre pas,
+    comptes verrouillés contre deux acceptations simultanées) ; à l'encaissement en espèces,
+    il est pris sur le solde : le livreur garde les espèces, le marchand est crédité aussitôt.
+    Le solde ne devient jamais négatif. Recharge par Mobile Money (frais payés par Tara) ou au
+    bureau ; les gains des courses déjà payées l'alimentent. Garant facultatif, sa CNI n'est
+    plus exigée. Une course
+    dont le destinataire paiera peut-être par Mobile Money est aussi couverte (on ne le sait
+    qu'à la porte) : la réservation est libérée à la fin sans rien prendre.
 
 ## Cycle de vie d'une commande
 
@@ -243,9 +327,12 @@ pnpm dev                              # API sur http://localhost:3000/health
 
 ## Questions ouvertes
 
-| Sujet                                          | Options                                                                                                                     | Quand trancher  |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| Agrégateur Mobile Money                        | Adaptateur CamPay prêt (à valider sur son bac à sable) ; comparer les devis d'au moins 2 autres agrégateurs avant de signer | Avant le pilote |
-| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                                         | Avant le pilote |
-| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                                              | Avant phase 7   |
-| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel                           | Après le pilote |
+| Sujet                                          | Options                                                                                                                                                            | Quand trancher       |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| Agrégateur Mobile Money                        | Adaptateur CamPay prêt (à valider sur son bac à sable) ; comparer les devis d'au moins 2 autres agrégateurs avant de signer                                        | Avant le pilote      |
+| Montage de l'encaissement pour compte de tiers | Avis juridique sur la réglementation CEMAC des services de paiement                                                                                                | Avant le pilote      |
+| Hébergement et région                          | Avis juridique sur les transferts de données (loi n° 2024/017)                                                                                                     | Avant phase 7        |
+| Déclarations Google Play                       | Service au premier plan « position » et données de localisation à déclarer dans la Play Console (formulaire et courte vidéo)                                       | Avant la publication |
+| Notifications FCM                              | Jeton classique utilisé ; passer à l'identifiant d'installation (nouvelle API Firebase) quand l'envoi côté serveur aura été adapté et vérifié                      | Après le pilote      |
+| Information des livreurs sur le trajet         | Mention du trajet enregistré dans les conditions d'utilisation livreur et la déclaration du traitement à l'APDP (finalités, 90 jours, accès de l'équipe seulement) | Avant le pilote      |
+| Profil d'itinéraire moto                       | Profil « car » d'OSRM au départ ; profil moto sur mesure si les délais estimés s'écartent du réel                                                                  | Après le pilote      |

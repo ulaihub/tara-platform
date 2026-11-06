@@ -171,6 +171,11 @@ export const ERROR_MESSAGES = {
 
   // Commandes (C1 à C5)
   ORDER_NOT_FOUND: { fr: 'Commande introuvable.', en: 'Order not found.' },
+  COURSE_ALERT_NOT_FOUND: { fr: 'Alerte introuvable.', en: 'Alert not found.' },
+  ORDER_NOT_IN_PROGRESS: {
+    fr: 'Cette course n’est plus en cours.',
+    en: 'This job is no longer in progress.',
+  },
   ORDER_TRANSITION_INVALID: {
     fr: 'Passage de « {from} » à « {to} » impossible.',
     en: 'Cannot move from "{from}" to "{to}".',
@@ -262,11 +267,31 @@ export const ERROR_MESSAGES = {
     fr: 'Au-delà de {limit} FCFA à encaisser, la validation revient à un administrateur.',
     en: 'Above {limit} XAF to collect, validation requires an administrator.',
   },
+  RIDER_BALANCE_TOO_LOW: {
+    fr: 'Solde Tara insuffisant pour cette course : {required} FCFA à encaisser, {available} FCFA disponibles. Rechargez votre solde.',
+    en: 'Not enough Tara balance for this job: {required} XAF to collect, {available} XAF available. Top up your balance.',
+  },
+  FAILURE_CALL_REQUIRED: {
+    fr: 'Appelez le destinataire depuis l’app avant de déclarer l’échec.',
+    en: 'Call the recipient from the app before reporting the failure.',
+  },
+  FAILURE_CALLS_REQUIRED: {
+    fr: 'Appelez le destinataire au moins {required} fois depuis l’app, à {spacingMinutes} min d’écart, avant de déclarer l’échec.',
+    en: 'Call the recipient at least {required} times from the app, {spacingMinutes} min apart, before reporting the failure.',
+  },
   FAILURE_DECISION_NOT_EXPECTED: {
     fr: 'Aucune décision n’est attendue pour cette commande.',
     en: 'No decision is expected for this order.',
   },
   SAFETY_ALERT_NOT_FOUND: { fr: 'Alerte introuvable.', en: 'Alert not found.' },
+  SAFETY_ALERT_CLOSED: {
+    fr: 'Cette alerte est déjà close ou annulée.',
+    en: 'This alert is already closed or cancelled.',
+  },
+  EMERGENCY_CONTACT_IS_SELF: {
+    fr: 'Le contact d’urgence doit être un proche, pas votre propre numéro.',
+    en: 'The emergency contact must be someone close to you, not your own number.',
+  },
 
   // Argent (G)
   PAYMENT_ALREADY_PENDING: {

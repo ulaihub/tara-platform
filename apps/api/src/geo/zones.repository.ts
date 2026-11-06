@@ -57,6 +57,23 @@ export class ZonesRepository {
        ORDER BY ST_Area(area) ASC`;
   }
 
+  /**
+   * Contours des zones actives d'une ville, simplifiés à environ 5 m et arrondis à 6
+   * décimales : assez précis pour la carte, assez légers pour un réseau mobile.
+   */
+  async mapFeatures(
+    city: string | undefined,
+  ): Promise<{ id: string; name: string; kind: ZoneKind; geometry: string; updatedAt: Date }[]> {
+    return this.prisma.$queryRaw`
+      SELECT id, name, kind, updated_at AS "updatedAt",
+             ST_AsGeoJSON(ST_SimplifyPreserveTopology(area::geometry, 0.00005), 6) AS geometry
+        FROM zones
+       WHERE active
+         AND kind IN ('NO_MOTORBIKE', 'SERVICE_AREA')
+         AND (${city ?? null}::text IS NULL OR city = ${city ?? null})
+       ORDER BY kind, name`;
+  }
+
   /** Identifiants des adresses situées dans une zone interdite aux motos. */
   async restrictedAddressIds(addressIds: string[]): Promise<Set<string>> {
     if (addressIds.length === 0) return new Set();

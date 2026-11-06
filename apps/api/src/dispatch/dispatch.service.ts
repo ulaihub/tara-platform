@@ -9,8 +9,7 @@ import { addMinutes, cameroonDate } from '../common/time.js';
 import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js';
 import type { DispatchOffer, Order, Prisma } from '../generated/prisma/client.js';
 import type { DispatchOfferOutcome } from '../generated/prisma/enums.js';
-import { riderCashHeld } from '../finance/ledger.accounts.js';
-import { LedgerService } from '../finance/ledger.service.js';
+import { RiderBalanceService } from '../finance/rider-balance.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
 import { OrderTransitionsService } from '../orders/order-transitions.service.js';
 import { readyForDispatch } from '../orders/orders.service.js';
@@ -48,6 +47,7 @@ type OrderWithPlaces = Prisma.OrderGetPayload<{
   include: {
     pickupAddress: { include: { neighborhood: true } };
     dropoffAddress: { include: { neighborhood: true } };
+    merchant: { select: { shopName: true } };
   };
 }>;
 
@@ -95,7 +95,7 @@ export class DispatchService implements OnModuleInit {
     private readonly queue: QueueService,
     private readonly bus: OrderEventsBus,
     private readonly transitions: OrderTransitionsService,
-    private readonly ledger: LedgerService,
+    private readonly balances: RiderBalanceService,
     @Inject(ENV) private readonly env: Env,
   ) {
     this.radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
@@ -131,6 +131,7 @@ export class DispatchService implements OnModuleInit {
         where: { id: orderId },
         include: {
           pickupAddress: { include: { neighborhood: true } },
+          merchant: { select: { shopName: true } },
           dropoffAddress: { include: { neighborhood: true } },
         },
       });
@@ -272,7 +273,7 @@ export class DispatchService implements OnModuleInit {
         offers: { where: { outcome: 'PENDING' }, select: { id: true } },
       },
     });
-    const cash = await this.cashHeld(ids);
+    const available = await this.balances.availableFor(ids);
     const distance = new Map(nearby.map((rider) => [rider.riderId, rider.distanceMeters]));
     const today = cameroonDate(new Date());
     return riders.map((rider) => {
@@ -282,19 +283,13 @@ export class DispatchService implements OnModuleInit {
         activeOrders: rider.orders.length,
         hasPendingOffer: rider.offers.length > 0,
         documentsValid: uncoveredDocuments(rider.documents, ['APPROVED'], today).length === 0,
-        cashHeld: cash.get(rider.id) ?? 0,
-        cashLimit: rider.cashLimit,
+        availableBalance: available.get(rider.id) ?? 0,
+        cashOverdue: rider.cashOverdueSince !== null,
         ratingSum: rider.ratingSum,
         ratingCount: rider.ratingCount,
       };
       return { ...snapshot, userId: rider.userId, score: score(snapshot) };
     });
-  }
-
-  /** Espèces détenues par chaque livreur (D4, G5), lues dans le grand livre. */
-  private async cashHeld(riderIds: string[]): Promise<Map<string, number>> {
-    const balances = await this.ledger.balances(riderIds.map(riderCashHeld));
-    return new Map(riderIds.map((id) => [id, balances.get(riderCashHeld(id).code) ?? 0]));
   }
 
   private async schedule(
@@ -329,6 +324,7 @@ export class DispatchService implements OnModuleInit {
         order: {
           include: {
             pickupAddress: { include: { neighborhood: true } },
+            merchant: { select: { shopName: true } },
             dropoffAddress: { include: { neighborhood: true } },
           },
         },
@@ -672,6 +668,11 @@ async function lockOrder(tx: Prisma.TransactionClient, orderId: string): Promise
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`dispatch:${orderId}`}, 0))`;
 }
 
+/** Durée estimée d'une course en moto en ville : 20 km/h de moyenne, arrondie à la minute. */
+export function estimatedMinutes(distanceMeters: number): number {
+  return Math.max(5, Math.round(distanceMeters / ((20 * 1000) / 60)));
+}
+
 export function toOfferDto(
   order: OrderWithPlaces,
   offer: DispatchOffer,
@@ -690,7 +691,8 @@ export function toOfferDto(
     reference: order.reference,
     expiresAt: offer.expiresAt.toISOString(),
     approachMeters: offer.approachMeters,
-    pickup: place(order.pickupAddress),
+    // Nom de la boutique d'un commerçant ; jamais le nom d'un particulier avant acceptation.
+    pickup: { ...place(order.pickupAddress), shopName: order.merchant?.shopName ?? null },
     dropoff: {
       city: order.dropoffAddress.city,
       neighborhood: order.dropoffAddress.neighborhood?.name ?? null,
@@ -698,6 +700,7 @@ export function toOfferDto(
       longitude: approximate(order.dropoffAddress.longitude),
     },
     distanceMeters: order.distanceMeters,
+    estimatedMinutes: estimatedMinutes(order.distanceMeters),
     riderEarning: order.riderEarning,
     codAmount: order.codAmount,
     cashFee: order.feePaymentMethod === 'CASH' ? order.totalPrice : 0,

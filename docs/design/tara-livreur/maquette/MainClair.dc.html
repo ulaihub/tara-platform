@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Connexion (clair)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F2EC}
+a{color:#C2410C}a:hover{color:#9A3412}
+button,input{font-family:inherit}
+input::placeholder{color:rgba(22,18,14,.5)}
+:focus-visible{outline:2px solid #C2410C;outline-offset:3px}
+@keyframes morph{0%,100%{border-radius:42% 58% 70% 30%/45% 45% 55% 55%}33%{border-radius:70% 30% 46% 54%/30% 29% 71% 70%}66%{border-radius:100% 60% 60% 100%/100% 100% 60% 60%}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-32px) scale(1.12)}}
+@keyframes sheen{0%{transform:translateX(-140%) skewX(-20deg)}55%,100%{transform:translateX(420%) skewX(-20deg)}}
+.blob{animation:morph 14s ease-in-out infinite,drift 20s ease-in-out infinite}
+.sheen{animation:sheen 3.6s ease-in-out infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F2EC; color: #16120E; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <div aria-hidden="true" class="blob" style="position: absolute; top: -150px; right: -130px; width: 380px; height: 380px; background: radial-gradient(circle at 30% 30%, #FFB000 0%, #FF6A00 50%, #FF3D00 100%); filter: blur(40px); opacity: 0.55"></div>
+  <div aria-hidden="true" class="blob" style="position: absolute; top: 470px; left: -170px; width: 320px; height: 320px; background: radial-gradient(circle at 60% 40%, #FFB000, #FF6A00); filter: blur(56px); opacity: 0.4; animation-delay: -7s"></div>
+  <div aria-hidden="true" class="blob" style="position: absolute; bottom: -120px; right: -60px; width: 220px; height: 220px; background: radial-gradient(circle, #FFD27A, #FF8A00); filter: blur(60px); opacity: 0.35; animation-delay: -3s"></div>
+
+  <div style="position: relative; height: 100%; box-sizing: border-box; padding: 96px 24px 40px; display: flex; flex-direction: column">
+    <img src="/_blob/edf6974030d565312e9fc44bd0fc0270" alt="Tara — Livraison à la demande" style="width: 214px; height: auto; display: block; align-self: center">
+
+    <div style="margin-top: 64px; display: flex; flex-direction: column; gap: 10px">
+      <p style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C2410C">Espace livreur</p>
+      <h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em">Prêt à prendre la route&#160;?</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 1.5; color: rgba(22,18,14,0.7)">Connectez-vous avec votre numéro. Nous vous envoyons un code par SMS.</p>
+    </div>
+
+    <div style="margin-top: 28px; padding: 20px; border-radius: 28px; background: rgba(255,255,255,0.58); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); box-shadow: inset 0 1px 0 #FFFFFF, 0 20px 40px rgba(140,70,10,0.12); display: flex; flex-direction: column; gap: 12px">
+      <label for="phone" style="font-size: 13px; font-weight: 600; color: rgba(22,18,14,0.7)">Numéro de téléphone</label>
+      <div style="display: flex; gap: 10px; align-items: stretch">
+        <button type="button" aria-label="Indicatif pays : Côte d'Ivoire, +225" style="height: 56px; padding: 0 14px; border-radius: 18px; border: 1px solid rgba(22,18,14,0.10); background: rgba(255,255,255,0.75); color: #16120E; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer">+225
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07 00 00 00 00" style="flex: 1; min-width: 0; height: 56px; box-sizing: border-box; padding: 0 16px; border-radius: 18px; border: 1.5px solid #FF8A3D; background: #FFFFFF; color: #16120E; font-size: 18px; font-weight: 600; letter-spacing: 0.04em; box-shadow: 0 0 0 4px rgba(255,106,0,0.14)">
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 1.45; color: rgba(22,18,14,0.66)">Utilisez le numéro lié à votre compte Mobile Money : vos gains y seront versés.</p>
+    </div>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 16px">
+      <a href="CodeSMSClair.dc.html" style="position: relative; overflow: hidden; height: 58px; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); color: #140800; text-decoration: none; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 14px 30px rgba(255,90,0,0.32), inset 0 1px 0 rgba(255,255,255,0.5)">
+        <span aria-hidden="true" class="sheen" style="position: absolute; top: 0; left: 0; width: 70px; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.6), rgba(255,255,255,0))"></span>
+        <span style="position: relative">Recevoir le code</span>
+        <svg aria-hidden="true" style="position: relative" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+      <p style="margin: 0; text-align: center; font-size: 12px; line-height: 1.5; color: rgba(22,18,14,0.66)">En continuant, vous acceptez les <a href="#cgu">Conditions d'utilisation</a> et la <a href="#confidentialite">Politique de confidentialité</a>.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { motion: this.props.motion === false ? 'off' : 'on' };
+  }
+}
+</script>
+</body>
+</html>

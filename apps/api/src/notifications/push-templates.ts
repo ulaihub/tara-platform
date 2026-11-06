@@ -28,11 +28,11 @@ const TEMPLATES = {
   ORDER_DELIVERY_FAILED: {
     fr: {
       title: 'Livraison impossible',
-      body: '{reference} n’a pas pu être livré. Choisissez : nouvelle tentative ou retour.',
+      body: '{reference} n’a pas pu être livré. Choisissez vite : nouvelle tentative ou retour. Sans réponse, le colis vous est rapporté.',
     },
     en: {
       title: 'Delivery failed',
-      body: '{reference} could not be delivered. Choose: try again or return.',
+      body: '{reference} could not be delivered. Choose quickly: try again or return. Without an answer, the parcel is brought back to you.',
     },
   },
   ORDER_RETURNED: {
@@ -69,6 +69,51 @@ const TEMPLATES = {
     en: {
       title: 'Payout failed',
       body: 'Sending {amount} XAF failed: the amount stays on your Tara balance.',
+    },
+  },
+  RIDER_CASH_REMINDER: {
+    fr: {
+      title: 'Espèces à déposer',
+      body: 'Déposez vos {amount} FCFA avant {time} (Mobile Money ou bureau Tara).',
+    },
+    en: {
+      title: 'Cash to pay back',
+      body: 'Pay back your {amount} XAF before {time} (Mobile Money or Tara office).',
+    },
+  },
+  RIDER_CASH_OVERDUE: {
+    fr: {
+      title: 'Dépôt en retard',
+      body: 'Plus de courses tant que vos {amount} FCFA ne sont pas déposés.',
+    },
+    en: {
+      title: 'Cash overdue',
+      body: 'No more jobs until your {amount} XAF are paid back.',
+    },
+  },
+  RIDER_CASH_SUSPENDED: {
+    fr: {
+      title: 'Compte suspendu',
+      body: 'Espèces non déposées : compte suspendu, {amount} FCFA restent dus. Contactez Tara.',
+    },
+    en: {
+      title: 'Account suspended',
+      body: 'Cash not paid back: account suspended, {amount} XAF still due. Contact Tara.',
+    },
+  },
+  SENDER_FAILURE_DECISION: {
+    fr: { title: 'Suite de votre livraison', body: '{reference} : {decision}.' },
+    en: { title: 'Your delivery', body: '{reference}: {decision}.' },
+  },
+  // Le nom de la pièce est passé dans les deux langues ; le motif est celui de l'équipe.
+  RIDER_DOCUMENT_REJECTED: {
+    fr: {
+      title: 'Pièce refusée',
+      body: '{documentFr} — motif : {reason}. Renvoyez-la depuis votre profil.',
+    },
+    en: {
+      title: 'Document rejected',
+      body: '{documentEn} — reason: {reason}. Send it again from your profile.',
     },
   },
   RIDER_FAILURE_DECISION: {

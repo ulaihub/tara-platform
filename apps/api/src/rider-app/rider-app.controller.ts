@@ -3,6 +3,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Post,
@@ -14,6 +15,8 @@ import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
+import { ENV } from '../config/config.module.js';
+import type { Env } from '../config/env.js';
 import { CurrentUser, Roles } from '../auth/decorators.js';
 import { pageSchema } from '../common/pagination.js';
 import {
@@ -44,15 +47,19 @@ import {
   FailBody,
   FailureDecisionBody,
   PickupBody,
+  PoliceCalledBody,
   PositionActionBody,
   PositionBody,
   PresenceBody,
   PresenceDto,
   ReleaseBody,
+  RiderConfigDto,
   ResolveAlertBody,
   ReturnBody,
   RiderOrderDto,
   RiderOrdersQuery,
+  RiderRouteDto,
+  RouteQuery,
   SafetyAlertBody,
   SafetyAlertDto,
   SafetyAlertListQuery,
@@ -70,6 +77,7 @@ function position(body: z.output<typeof PositionBody>) {
     heading: body.heading,
     speed: body.speed,
     accuracy: body.accuracy,
+    mocked: body.mocked,
     at: body.recordedAt ? new Date(body.recordedAt) : new Date(),
   };
 }
@@ -85,7 +93,37 @@ export class RiderAppController {
     private readonly dispatch: DispatchService,
     private readonly orders: RiderOrdersService,
     private readonly alerts: SafetyAlertsService,
+    @Inject(ENV) private readonly env: Env,
   ) {}
+
+  /**
+   * Réglages de l'app : pays, devise, opérateurs, ligne de secours et du support.
+   * Lus au démarrage et gardés sur le téléphone pour l'usage hors connexion.
+   */
+  @Get('config')
+  @ApiZodResponse(RiderConfigDto)
+  config(): z.output<typeof RiderConfigDto> {
+    return {
+      country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
+      safetyHotline: this.env.SAFETY_HOTLINE_PHONE,
+      supportPhone: this.env.SUPPORT_PHONE ?? null,
+      failurePolicy: {
+        minCalls: this.env.FAILURE_MIN_CALLS,
+        callSpacingMinutes: this.env.FAILURE_CALL_SPACING_MINUTES,
+        decisionTimeoutMinutes: this.env.FAILURE_DECISION_TIMEOUT_MINUTES,
+      },
+      emergencyNumbers: {
+        police: this.env.EMERGENCY_POLICE_NUMBER,
+        fire: this.env.EMERGENCY_FIRE_NUMBER,
+        medical: this.env.EMERGENCY_MEDICAL_NUMBER,
+      },
+      mobileMoneyOperators: [
+        { code: 'MTN', name: 'MTN MoMo' },
+        { code: 'ORANGE', name: 'Orange Money' },
+      ],
+      offerTimeoutSeconds: this.env.DISPATCH_OFFER_TIMEOUT_SECONDS,
+    };
+  }
 
   /** Passage en ligne ou hors ligne (E1). En ligne : pièces valides exigées (D4). */
   @Put('presence')
@@ -166,6 +204,22 @@ export class RiderAppController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Out<typeof RiderOrderDto> {
     return this.orders.get(user.id, id);
+  }
+
+  /**
+   * Itinéraire de la position du livreur à la prochaine étape (E2) : tracé routier (OSRM)
+   * ou ligne droite estimée. L'app le redemande quand le livreur s'est déplacé.
+   */
+  @Get('orders/:id/route')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @ApiZodQuery(RouteQuery)
+  @ApiZodResponse(RiderRouteDto)
+  route(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidQuery(RouteQuery) query: z.output<typeof RouteQuery>,
+  ): Out<typeof RiderRouteDto> {
+    return this.orders.route(user.id, id, query);
   }
 
   /** Enlèvement : code de l'expéditeur et photo du colis (E3). */
@@ -276,6 +330,17 @@ export class RiderAppController {
     @ValidBody(SafetyAlertBody) body: z.output<typeof SafetyAlertBody>,
   ): Out<typeof SafetyAlertDto> {
     return this.alerts.raise(user, body);
+  }
+
+  /** Annulation de sa propre alerte : l'équipe est prévenue et rappelle le livreur (E8). */
+  @Post('alerts/:id/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodResponse(SafetyAlertDto)
+  cancelAlert(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Out<typeof SafetyAlertDto> {
+    return this.alerts.cancel(user, id);
   }
 }
 
@@ -393,6 +458,22 @@ export class AdminSupportController {
     await this.support.validateDelivery(user, id, body.note, request);
   }
 
+  /**
+   * Après un échec, le support choisit à la place de l'expéditeur (joint par téléphone, ou
+   * injoignable alors que le livreur attend). Action tracée (E6).
+   */
+  @Post('orders/:id/failure-decision')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiZodBody(FailureDecisionBody)
+  async failureDecisionForSender(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(FailureDecisionBody) body: z.output<typeof FailureDecisionBody>,
+    @Req() request: Request,
+  ): Promise<void> {
+    await this.support.failureDecisionForSender(user, id, body.decision, request);
+  }
+
   @Get('safety-alerts')
   @ApiZodQuery(SafetyAlertListQuery)
   @ApiZodResponse(z.array(SafetyAlertDto))
@@ -422,5 +503,22 @@ export class AdminSupportController {
     @ValidBody(ResolveAlertBody) body: z.output<typeof ResolveAlertBody>,
   ): Out<typeof SafetyAlertDto> {
     return this.alerts.resolve(id, user, body.resolution);
+  }
+
+  /**
+   * Police appelée par l'agent (livreur injoignable ou danger confirmé) : heure, agent et
+   * note gardés avec l'alerte, action tracée (E8).
+   */
+  @Post('safety-alerts/:id/police-called')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(PoliceCalledBody)
+  @ApiZodResponse(SafetyAlertDto)
+  policeCalled(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(PoliceCalledBody) body: z.output<typeof PoliceCalledBody>,
+    @Req() request: Request,
+  ): Out<typeof SafetyAlertDto> {
+    return this.alerts.policeCalled(id, user, body.note, request);
   }
 }

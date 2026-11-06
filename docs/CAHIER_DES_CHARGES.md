@@ -32,7 +32,7 @@ Concevoir, développer et mettre en production une plateforme de livraison urbai
 | Expéditeur particulier | App Tara | Commande, paie, suit, note le livreur |
 | Marchand ou entreprise | App Tara en mode marchand (portail web en V2) | Crée des commandes une à une ou en masse, suit ses encaissements, reçoit ses reversements et factures |
 | Destinataire | Page de suivi web, SMS, WhatsApp | Suit le colis, donne le code de livraison, paie en espèces ou Mobile Money |
-| Livreur | App Tara Livreur | Accepte, enlève, livre, encaisse, dépose les espèces, retire ses gains |
+| Livreur | App Tara Livreur | Accepte, enlève, livre, encaisse, recharge son solde prépayé, retire ses gains |
 | Dispatcheur | Back-office | Surveille la flotte en direct, réattribue, gère les incidents |
 | Agent de support | Back-office | Traite les réclamations et les litiges |
 | Responsable financier | Back-office | Rapproche les encaissements, valide les reversements, exporte la comptabilité |
@@ -63,7 +63,7 @@ Le MVP compte 51 exigences, réparties en 8 modules ; la V2 en ajoute 9. Chaque 
 | --- | --- | --- |
 | A1 | Inscription et connexion par numéro de téléphone (+237) et code SMS à usage unique ; aucun e-mail obligatoire | MVP |
 | A2 | Profil expéditeur avec adresses favorites ; passage en mode marchand (nom de boutique, catégorie, numéro Mobile Money de reversement, RCCM et NIU facultatifs) | MVP |
-| A3 | Inscription livreur dans l'app : CNI recto-verso, permis A, carte grise, selfie, garant ; validation au back-office ; statuts en attente, actif, suspendu | MVP |
+| A3 | Inscription livreur dans l'app : CNI recto-verso, permis A, carte grise, selfie, garant facultatif ; validation au back-office ; statuts en attente, actif, suspendu ; pièce refusée : livreur prévenu avec le motif, pièce renvoyée depuis son profil | MVP |
 | A4 | Choix de la langue : français ou anglais | MVP |
 | A5 | Rappel automatique avant expiration d'un document du livreur | MVP |
 | A6 | Compte marchand multi-utilisateurs (gérant, employés) | V2 |
@@ -98,10 +98,10 @@ Le MVP compte 51 exigences, réparties en 8 modules ; la V2 en ajoute 9. Chaque 
 
 | ID | Exigence | Lot |
 | --- | --- | --- |
-| D1 | Proposition automatique au livreur disponible le mieux placé (distance d'approche, note, courses en cours, espèces détenues) | MVP |
+| D1 | Proposition automatique au livreur disponible le mieux placé (distance d'approche, note, courses en cours) ; une course avec encaissement seulement à un livreur dont le solde prépayé la couvre | MVP |
 | D2 | 30 s pour accepter, puis proposition au suivant ; diffusion à plusieurs livreurs après 3 refus ; alerte au dispatch après 5 min sans livreur | MVP |
 | D3 | Attribution et réattribution manuelles par le dispatcheur | MVP |
-| D4 | Livreur exclu des propositions si plafond d'espèces atteint ou document expiré | MVP |
+| D4 | Livreur exclu des propositions si document expiré ; exclu des courses avec encaissement si son solde prépayé disponible ne couvre pas le montant | MVP |
 | D5 | Regroupement automatique de colis dans une même tournée | V2 |
 
 ### E. Exécution de la livraison (app livreur)
@@ -135,8 +135,8 @@ Le MVP compte 51 exigences, réparties en 8 modules ; la V2 en ajoute 9. Chaque 
 | G1 | Paiement de la livraison par MTN MoMo, Orange Money, solde Tara ou espèces ; option « le destinataire paie la livraison » | MVP |
 | G2 | Portefeuille marchand : encaissements, frais déduits, solde, historique ligne par ligne | MVP |
 | G3 | Reversement automatique quotidien à heure fixe (par défaut 18 h) vers le Mobile Money du marchand ; reversement à la demande pour les Pro | MVP |
-| G4 | Portefeuille livreur : gains, commissions dues sur courses payées en espèces, espèces détenues, retrait vers Mobile Money | MVP |
-| G5 | Plafond d'espèces par livreur ; dépôt par Mobile Money ou au bureau ; blocage des nouvelles courses au-delà | MVP |
+| G4 | Portefeuille livreur : solde prépayé (gains et recharges, moins l'argent encaissé en espèces), montant mis de côté pour les courses en cours, retrait du disponible vers Mobile Money | MVP |
+| G5 | Solde prépayé du livreur (décision 36) : recharge par Mobile Money (frais payés par Tara) ou au bureau ; l'argent à encaisser est mis de côté sur le solde à l'acceptation, puis pris sur le solde à l'encaissement (le livreur garde les espèces, le marchand est crédité aussitôt) ; le solde ne peut pas devenir négatif : aucune dette, aucun garant | MVP |
 | G6 | Rapprochement automatique quotidien : encaissements déclarés, dépôts et reversements, avec liste des écarts | MVP |
 | G7 | Relevé mensuel PDF par marchand | MVP |
 | G8 | Remboursements et avoirs | MVP |
@@ -166,7 +166,7 @@ L'application doit fonctionner sur un Android à 60 000 FCFA, en 3G instable, pe
 | Domaine | Exigence mesurable |
 | --- | --- |
 | Compatibilité | Android 8.0 et plus, 2 Go de RAM, écrans de 5 pouces ; iOS 14 et plus à partir du mois 8 |
-| Poids | App livreur et app expéditeur : moins de 25 Mo à l'installation ; page de suivi : moins de 200 Ko |
+| Poids | App livreur et app expéditeur : moins de 25 Mo à télécharger depuis le Play Store et au plus 32 Mo une fois installées (carte embarquée comprise) ; page de suivi : moins de 200 Ko |
 | Performance | Ouverture de l'app en moins de 3 s sur un téléphone d'entrée de gamme ; réponse de l'API en moins de 500 ms pour 95 % des appels |
 | Réseau | Fonctionne en 2G/3G ; requêtes compressées ; images réduites à moins de 150 Ko avant envoi ; reprise automatique des envois interrompus |
 | Hors ligne | L'app livreur conserve la course en cours et enregistre toutes ses actions sans réseau, puis synchronise sans perte ni doublon |
@@ -200,7 +200,7 @@ Chaque prestataire externe est branché derrière une interface : changer d'agr�
 | Base de données | PostgreSQL 16 + PostGIS | Transactions fiables pour l'argent, requêtes géographiques (zones, repères) |
 | Temps réel et tâches | Redis, Socket.IO, BullMQ | Positions des livreurs en mémoire, reconnexion automatique sur réseau instable, reversements et relances en tâche de fond |
 | Back-office et page de suivi | Next.js + Tailwind | Rapide à construire, même langage que l'API ; page de suivi rendue côté serveur pour rester légère |
-| Cartographie | Google Maps pour l'affichage, OSRM auto-hébergé sur OpenStreetMap pour les distances | Les calculs de distance, poste le plus coûteux chez Google, deviennent gratuits ; grille Google en vigueur à vérifier |
+| Cartographie | Pile cartographique propre à Tara, bâtie sur des briques ouvertes : données OpenStreetMap, tuiles vectorielles du Cameroun auto-hébergées et régénérées chaque mois, rendu MapLibre aux couleurs de Tara (thèmes sombre et clair), OSRM auto-hébergé pour les distances et les itinéraires | Aucune facturation à l'usage ni clé d'API tierce ; carte disponible hors connexion sur les zones du livreur ; styles maîtrisés ; corrections de terrain versées à OpenStreetMap (mention « © OpenStreetMap » obligatoire). La navigation pas à pas reste confiée à Google Maps ou Waze (E2) |
 | Paiements | Agrégateur Mobile Money camerounais, puis API MTN MoMo et Orange Money en direct | Une intégration couvre les deux opérateurs au démarrage ; le passage en direct réduit les frais avec le volume |
 | Notifications | Firebase (push), WhatsApp Cloud API, SMS via agrégateur local | WhatsApp est le canal naturel ; le SMS reste le secours pour les destinataires sans data |
 | Hébergement | Conteneurs Docker sur un cloud, région choisie après avis juridique | Portabilité : on peut changer d'hébergeur, ou rapatrier les données au Cameroun si la loi l'exige |

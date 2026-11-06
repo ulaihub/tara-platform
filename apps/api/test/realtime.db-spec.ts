@@ -142,3 +142,24 @@ describe('Temps réel (F1)', () => {
     ).toMatchObject({ ok: true });
   });
 });
+
+describe('Arrêt du temps réel', () => {
+  it('arrêtée juste après son démarrage, l’API ne laisse aucun abonnement Redis en vol', async () => {
+    const errors: string[] = [];
+    const onRejection = (error: unknown): void => {
+      errors.push(String(error));
+    };
+    process.on('unhandledRejection', onRejection);
+    try {
+      for (let i = 0; i < 3; i++) {
+        const quick = await createTestApp();
+        await request(quick.http).get('/v1/health');
+        await quick.app.close();
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    } finally {
+      process.off('unhandledRejection', onRejection);
+    }
+    expect(errors).toEqual([]);
+  });
+});

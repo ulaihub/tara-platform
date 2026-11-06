@@ -29,9 +29,11 @@ export const OfferDto = z
     expiresAt: z.iso.datetime(),
     /** Distance à vol d'oiseau jusqu'au point d'enlèvement. */
     approachMeters: z.int().nullable(),
-    pickup: Place,
+    pickup: Place.extend({ shopName: z.string().nullable() }),
     dropoff: Area,
     distanceMeters: z.int(),
+    /** Durée estimée du trajet enlèvement → livraison, en minutes. */
+    estimatedMinutes: z.int(),
     riderEarning: z.int(),
     /** Montant à encaisser auprès du destinataire. */
     codAmount: z.int(),
@@ -68,7 +70,7 @@ export const CandidateDto = z
     rating: z.number().nullable(),
     /** Vide si le livreur peut recevoir la course. */
     ineligibleBecause: z.array(
-      z.enum(['DOCUMENTS', 'CASH_LIMIT', 'TOO_MANY_ORDERS', 'PENDING_OFFER']),
+      z.enum(['DOCUMENTS', 'BALANCE_TOO_LOW', 'CASH_OVERDUE', 'TOO_MANY_ORDERS', 'PENDING_OFFER']),
     ),
     position: z
       .object({ latitude: Latitude, longitude: Longitude, at: z.iso.datetime() })

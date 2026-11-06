@@ -1,0 +1,857 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Tara Livreur",
+  "back": "Retour",
+  "close": "Fermer",
+  "notifications": "Notifications",
+  "recenterMap": "Recentrer la carte",
+  "safetyAlert": "Alerte de sécurité",
+  "callPerson": "Appeler {name}",
+  "@callPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "digitLabel": "Chiffre {index}",
+  "@digitLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "currencyFcfa": "FCFA",
+  "tabHome": "Accueil",
+  "tabActivity": "Activité",
+  "tabProfile": "Profil",
+  "online": "En ligne",
+  "offline": "Hors ligne",
+  "goOnlineLabel": "Vous êtes hors ligne. Passer en ligne",
+  "goOfflineLabel": "Vous êtes en ligne. Passer hors ligne",
+  "goOnline": "Passer en ligne",
+  "secondsRemaining": "Temps restant pour accepter : {seconds} secondes",
+  "@secondsRemaining": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "seconds": "secondes",
+  "sosHoldLabel": "Maintenir 3 secondes pour envoyer une alerte",
+  "sosHold": "Maintenir 3 s",
+  "sosHoldRemaining": "Encore {seconds} s…",
+  "@sosHoldRemaining": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "sosSent": "Envoyée",
+  "offlineBannerTitle": "Hors connexion",
+  "offlineBannerPending": "{count, plural, =0{Aucune action en attente} =1{1 action en attente} other{{count} actions en attente}} · enregistrées sur le téléphone",
+  "@offlineBannerPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "catalogTitle": "Catalogue des composants",
+  "stepPickup": "Enlèvement",
+  "stepCollect": "Encaissement",
+  "stepDelivery": "Livraison",
+  "cash": "Espèces",
+  "mobileMoney": "Mobile Money",
+  "periodDay": "Jour",
+  "periodWeek": "Semaine",
+  "periodMonth": "Mois",
+  "searchingJobs": "Recherche de courses…",
+  "searchingJobsHint": "Restez dans la zone, les propositions arrivent ici.",
+  "stepDone": "terminée",
+  "stepActive": "en cours",
+  "stepUpcoming": "à venir",
+  "riderSpace": "ESPACE LIVREUR",
+  "signInTitle": "Prêt à prendre la route ?",
+  "signInBody": "Connectez-vous avec votre numéro. Nous vous envoyons un code par SMS.",
+  "phoneLabel": "Numéro de téléphone",
+  "phoneHint": "6XX XX XX XX",
+  "countryCodeLabel": "Indicatif du pays {code}",
+  "@countryCodeLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneHelp": "Utilisez le numéro lié à votre compte Mobile Money : vos gains y seront versés.",
+  "phoneInvalid": "Numéro de mobile camerounais à 9 chiffres, commençant par 6.",
+  "getCode": "Recevoir le code",
+  "legalPrefix": "En continuant, vous acceptez les ",
+  "terms": "conditions d’utilisation",
+  "legalAnd": " et la ",
+  "privacy": "politique de confidentialité",
+  "codeTitle": "Entrez le code reçu",
+  "codeSentTo": "Envoyé par SMS au {phone}",
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "change": "Modifier",
+  "resendIn": "Renvoyer le code dans {time}",
+  "@resendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resendNow": "Vous n’avez rien reçu ?",
+  "resend": "Renvoyer",
+  "validate": "Valider",
+  "noSms": "Pas reçu de SMS ? Contacter le support",
+  "continueLabel": "Continuer",
+  "stepOf": "Étape {step} sur {total} · {name}",
+  "@stepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "stepProfile": "Profil",
+  "stepDocuments": "Pièces",
+  "becomeRider": "Devenez livreur Tara",
+  "becomeRiderBody": "Quelques infos pour créer votre profil. Tout est vérifié avant votre première course.",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "vehicle": "Véhicule",
+  "vehicleMotorbike": "Moto",
+  "vehicleCar": "Voiture",
+  "vehicleTricycle": "Tricycle",
+  "plateNumber": "Immatriculation",
+  "plateHint": "Ex. LT 123 AB",
+  "guarantor": "Garant (facultatif)",
+  "guarantorHelp": "Une personne de confiance qui se porte garante de vous. Vous pouvez laisser ce bloc vide.",
+  "guarantorName": "Nom du garant",
+  "guarantorPhone": "Téléphone du garant",
+  "emergencyContact": "Contact d’urgence (facultatif)",
+  "emergencyHelp": "Prévenu automatiquement si vous déclenchez une alerte.",
+  "emergencyName": "Nom du contact",
+  "emergencyPhone": "Téléphone du contact",
+  "requiredField": "Obligatoire",
+  "documentsTitle": "Vos pièces justificatives",
+  "documentsBody": "Prenez chaque pièce en photo, bien à plat et lisible.",
+  "docSent": "Envoyée",
+  "docToDo": "À envoyer",
+  "docUploading": "Envoi en cours… {percent} %",
+  "@docUploading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "docRejected": "Refusée",
+  "docApproved": "Validée",
+  "docExpired": "Expirée",
+  "takePhoto": "Prendre",
+  "sendAgain": "Renvoyer",
+  "docAlternative": "ou {name}",
+  "@docAlternative": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsNote": "Vos documents sont chiffrés et vérifiés par l’équipe Tara. Vous êtes prévenu par SMS à la validation.",
+  "sendFile": "Envoyer mon dossier",
+  "progressCount": "{done} / {total}",
+  "@progressCount": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingTitle": "Dossier en cours de vérification",
+  "pendingBody": "Nous vérifions vos pièces, en général sous 48 h. Vous recevrez un SMS dès que vous pourrez prendre des courses.",
+  "goodMorning": "Bonjour,",
+  "goodEvening": "Bonsoir,",
+  "todayEarnings": "Gains du jour",
+  "details": "Détails",
+  "jobsCount": "{count, plural, =0{Aucune course} =1{1 course} other{{count} courses}}",
+  "@jobsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onlineTime": "En ligne",
+  "youAreOffline": "Vous êtes hors ligne",
+  "offlineHint": "Passez en ligne pour recevoir les propositions de course autour de vous.",
+  "locationNeeded": "Activez la localisation pour passer en ligne.",
+  "blockersTitle": "Pièces à renouveler avant de passer en ligne",
+  "retry": "Réessayer",
+  "genericError": "Une erreur est survenue. Réessayez.",
+  "networkError": "Pas de connexion internet. Vérifiez le réseau et réessayez.",
+  "jobsWord": "{count, plural, =0{course} =1{course} other{courses}}",
+  "@jobsWord": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logout": "Se déconnecter",
+  "suspendedTitle": "Compte suspendu",
+  "suspendedBody": "Votre compte ne peut pas prendre de courses pour le moment. Contactez le support Tara pour en savoir plus.",
+  "goOffline": "Passer hors ligne",
+  "callSupport": "Appeler le support",
+  "noMotoZone": "Interdit aux motos",
+  "searchingTitle": "Recherche de courses…",
+  "today": "Aujourd’hui",
+  "newJob": "Nouvelle course",
+  "yourEarning": "Votre gain",
+  "pickupLabel": "ENLÈVEMENT · {distance}",
+  "dropoffLabel": "LIVRAISON · {distance} · ~{minutes} min",
+  "toCollect": "À encaisser : {amount}",
+  "decline": "Refuser",
+  "accept": "Accepter",
+  "packageSmall": "Petit colis",
+  "packageMedium": "Colis moyen",
+  "packageLarge": "Grand colis",
+  "fragile": "Fragile",
+  "express": "Express",
+  "offerTaken": "Course attribuée à un autre livreur",
+  "offerExpired": "Temps écoulé : la course est proposée à un autre livreur",
+  "vehicleShort": "Moto",
+  "@pickupLabel": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "@dropoffLabel": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@toCollect": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "toPickup": "Vers l’enlèvement",
+  "toPickupMinutes": "Vers l’enlèvement · {minutes} min",
+  "directions": "Itinéraire",
+  "openWith": "Ouvrir l’itinéraire avec",
+  "collectAtPickupTitle": "À encaisser à l’enlèvement",
+  "collectAtPickupBody": "En espèces, avant de prendre le colis.",
+  "noMotoAddress": "Adresse en zone interdite aux motos : garez-vous à l’extérieur et finissez à pied.",
+  "pickupCodeLabel": "Code d’enlèvement",
+  "pickupCodeHint": "donné par le vendeur",
+  "photoParcel": "Photographier le colis",
+  "photoParcelHint": "Étiquette Tara visible",
+  "photoParcelTaken": "Photo du colis · prise à {time}",
+  "retakePhoto": "Reprendre",
+  "parcelCollected": "Colis récupéré",
+  "actionSavedOffline": "Enregistré sur le téléphone : envoi automatique au retour du réseau.",
+  "noPositionYet": "Position en cours de recherche : patientez quelques secondes à l’extérieur.",
+  "orderCancelledNotice": "Course annulée par l’expéditeur.",
+  "orderReassignedNotice": "Course confiée à un autre livreur.",
+  "courseInProgress": "Course {reference} en cours",
+  "courseResume": "Reprendre",
+  "@toPickupMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@photoParcelTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@courseInProgress": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "courseRefRecorded": "Course {reference} · trajet enregistré",
+  "@courseRefRecorded": {
+    "description": "En-tête des écrans de course : le livreur sait que son trajet est enregistré pendant la course.",
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "toDropoff": "Vers le client",
+  "toDropoffMinutes": "Vers le client · {minutes} min",
+  "arrivedAtDestination": "Arrivé à destination",
+  "collectAtDeliveryTitle": "À encaisser à la remise",
+  "collectAtDeliveryBody": "Espèces ou Mobile Money, avant la remise.",
+  "farFromAddress": "Vous êtes à {distance} de l’adresse : une livraison confirmée d’ici sera signalée au support.",
+  "deliveryCodeLabel": "Code du destinataire",
+  "deliveryCodeHint": "reçu par SMS",
+  "noCodeLink": "Le client n’a pas de code",
+  "hasCodeLink": "Le client a un code",
+  "noCodeTitle": "Livraison sans code",
+  "noCodeBody": "La photo de remise est obligatoire. Le support appelle le client pour confirmer avant de clôturer la course.",
+  "receivedByLabel": "Nom de la personne qui reçoit",
+  "receivedByHint": "Ex. sa sœur, le gardien…",
+  "photoHandover": "Photographier la remise",
+  "photoHandoverHint": "Colis et lieu de remise visibles",
+  "photoHandoverTaken": "Photo de remise · prise à {time}",
+  "confirmDelivery": "Confirmer la livraison",
+  "deliveryQueuedTitle": "Livraison enregistrée",
+  "deliveryQueuedBody": "Pas de réseau : la livraison part automatiquement dès son retour.",
+  "awaitingSupportTitle": "Livraison déclarée",
+  "awaitingSupportBody": "Le support appelle le client pour confirmer la remise. Vous serez prévenu dès la validation.",
+  "orderDeliveredNotice": "Course livrée. Merci !",
+  "backHome": "Retour à l’accueil",
+  "@toDropoffMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@farFromAddress": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "@photoHandoverTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionTitle": "Encaissement",
+  "collectionSubtitle": "Course {reference} · {name}",
+  "toCollectFromCustomer": "À encaisser auprès du client",
+  "methodCash": "Espèces",
+  "methodMomo": "Mobile Money",
+  "amountReceived": "Montant reçu",
+  "exactAmount": "{amount} (exact)",
+  "changeToGive": "Monnaie à rendre",
+  "customerOperator": "Opérateur du client",
+  "customerMomoNumber": "Numéro Mobile Money du client",
+  "momoHint": "Le client valide le paiement sur son téléphone, puis la course se clôture.",
+  "momoWaiting": "En attente de la validation du client…",
+  "momoFailed": "Paiement non abouti (refusé, annulé ou expiré). Renvoyez la demande ou encaissez en espèces.",
+  "momoNoAnswer": "Toujours pas de réponse du client. Vous pouvez renvoyer la demande.",
+  "momoNeedsNetwork": "Mobile Money demande du réseau : encaissez en espèces ou réessayez.",
+  "confirmCollection": "Confirmer l’encaissement",
+  "sendPaymentRequest": "Envoyer la demande de paiement",
+  "resendPaymentRequest": "Renvoyer la demande",
+  "paymentRequestSent": "Demande envoyée au client",
+  "@collectionSubtitle": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@exactAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "sosBadge": "Sécurité",
+  "sosIdleTitle": "Besoin d’aide ?",
+  "sosIdleBody": "Maintenez le bouton 3 secondes. L’équipe Tara et votre contact d’urgence reçoivent votre position en direct.",
+  "sosSentTitle": "Alerte envoyée",
+  "sosSentBody": "Restez en lieu sûr si possible. Un agent Tara vous rappelle.",
+  "sosAcknowledgedBody": "Un agent Tara a pris en charge votre alerte et vous rappelle. Restez en lieu sûr si possible.",
+  "sosPoliceCalledBody": "L’équipe Tara a prévenu la police. Restez en lieu sûr si possible.",
+  "sosPendingTitle": "Pas d’internet",
+  "sosPendingBody": "L’alerte partira dès le retour du réseau. Envoyez-la aussi par SMS : il passe souvent sans internet.",
+  "sosFailedTitle": "Alerte non envoyée",
+  "sosFailedBody": "Appelez Tara ou la police, ou envoyez l’alerte par SMS.",
+  "sosClosedBody": "L’équipe Tara a clos votre alerte. Maintenez le bouton si vous avez encore besoin d’aide.",
+  "sosPendingHint": "En attente",
+  "sosSendingHint": "Envoi…",
+  "sosYourPosition": "Votre position",
+  "sosPositionCurrent": "Position actuelle · précision {meters} m",
+  "@sosPositionCurrent": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "sosPositionShared": "Partagée en direct avec Tara · précision {meters} m",
+  "@sosPositionShared": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "sosPositionSearching": "Recherche de la position…",
+  "sosPositionUnknown": "Position introuvable",
+  "sosPlate": "Moto {plate}",
+  "@sosPlate": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "sosCallTara": "Support Tara",
+  "sosCallPolice": "Police · {number}",
+  "@sosCallPolice": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "sosAccident": "Accident :",
+  "sosFire": "Pompiers {number}",
+  "@sosFire": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "sosMedical": "SAMU {number}",
+  "@sosMedical": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "sosSendSms": "Envoyer l’alerte par SMS",
+  "sosCancel": "Annuler l’alerte",
+  "sosCancelNeedsNetwork": "Annulation impossible sans réseau. Appelez Tara pour la confirmer.",
+  "sosSmsBody": "SOS Tara : j'ai besoin d'aide. Position : {map}",
+  "@sosSmsBody": {
+    "placeholders": {
+      "map": {
+        "type": "String"
+      }
+    }
+  },
+  "sosSmsNoPosition": "SOS Tara : j'ai besoin d'aide. Position inconnue.",
+  "sosSmsCourse": " Course {reference}.",
+  "@sosSmsCourse": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "sosPositionCurrentPlain": "Position actuelle",
+  "sosPositionSharedPlain": "Partagée en direct avec Tara",
+  "failureTitle": "Livraison impossible",
+  "failureReasonLabel": "Motif",
+  "reasonRecipientAbsent": "Client absent",
+  "reasonRecipientUnreachable": "Injoignable",
+  "reasonAddressNotFound": "Adresse introuvable",
+  "reasonRefused": "Colis refusé",
+  "reasonPaymentRefused": "Refus de payer",
+  "reasonOther": "Autre motif",
+  "failureNoteLabel": "Précisez le motif",
+  "failureNoteHint": "Ex. portail fermé, chien dangereux",
+  "callsTitle": "Appels au destinataire",
+  "callsCount": "{count, plural, =0{Aucun appel} =1{1 tentative} other{{count} tentatives}}",
+  "@callsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callMade": "Appel passé",
+  "callMeta": "{time} · {duration}",
+  "@callMeta": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "callsNotRequired": "Pas d’appel exigé pour ce motif.",
+  "callsDone": "Appels suffisants.",
+  "callsMissing": "{count, plural, =1{Encore 1 appel à passer.} other{Encore {count} appels à passer.}}",
+  "@callsMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callsMissingAt": "Encore 1 appel, à partir de {time}.",
+  "@callsMissingAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "callRecipient": "Appeler",
+  "callAgain": "Rappeler",
+  "photoPlace": "Photo du lieu · obligatoire",
+  "photoPlaceHint": "Porte, portail ou devanture visible",
+  "photoPlaceTaken": "Photo du lieu · prise à {time}",
+  "@photoPlaceTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureNotice": "L’expéditeur est prévenu tout de suite et choisit : nouvelle tentative ou retour. Sans réponse sous {minutes} min, vous lui rapportez le colis.",
+  "@failureNotice": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "validateFailure": "Valider l’échec",
+  "cantDeliver": "Livraison impossible ?",
+  "failureWaitingTitle": "Échec enregistré",
+  "failureWaitingBody": "L’expéditeur choisit : nouvelle tentative ou retour. Sans réponse, le retour sera décidé à {time}. Gardez le colis avec vous.",
+  "@failureWaitingBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureWaitingBodyQueued": "L’échec partira dès le retour du réseau. Gardez le colis avec vous.",
+  "retryTitle": "Nouvelle tentative",
+  "retryBody": "L’expéditeur demande une nouvelle tentative. Repartez vers le destinataire.",
+  "retryAction": "Repartir vers le destinataire",
+  "returnTitle": "Retour du colis",
+  "returnMinutes": "Retour du colis · {minutes} min",
+  "@returnMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "failureChip": "Échec · {reason}",
+  "@failureChip": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "returnTo": "Rapporter le colis à",
+  "returnStepJoin": "Rejoindre le vendeur",
+  "returnStepCode": "Saisir le code de retour du vendeur",
+  "returnStepPhoto": "Photographier le colis rendu",
+  "stepInProgress": "En cours",
+  "atSender": "Je suis chez le vendeur",
+  "returnCodeLabel": "Code de retour",
+  "returnCodeHint": "reçu par SMS par le vendeur",
+  "photoReturned": "Photographier le colis rendu",
+  "photoReturnedHint": "Colis entre les mains du vendeur",
+  "photoReturnedTaken": "Photo du retour · prise à {time}",
+  "@photoReturnedTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parcelReturned": "Colis rendu",
+  "returnQueuedTitle": "Retour enregistré",
+  "returnQueuedBody": "Il sera envoyé dès le retour du réseau.",
+  "orderReturnedNotice": "Colis rendu au vendeur : course terminée.",
+  "earningsToday": "Gains d’aujourd’hui",
+  "earningsWeek": "Gains de la semaine",
+  "earningsMonth": "Gains du mois",
+  "coursesCount": "{count, plural, =0{Aucune course} =1{1 course} other{{count} courses}}",
+  "@coursesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weekdaysShort": "Lun,Mar,Mer,Jeu,Ven,Sam,Dim",
+  "todayShort": "Auj.",
+  "weekShort": "S{number}",
+  "@weekShort": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hourShort": "{hour}h",
+  "@hourShort": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "chartSemantics": "{caption} : {values}",
+  "@chartSemantics": {
+    "placeholders": {
+      "caption": {
+        "type": "String"
+      },
+      "values": {
+        "type": "String"
+      }
+    }
+  },
+  "cashToDeposit": "Espèces à reverser à Tara",
+  "depositAction": "Reverser",
+  "lastCourses": "Dernières courses",
+  "seeAll": "Tout voir",
+  "seeLess": "Voir moins",
+  "statusDelivered": "Livrée",
+  "statusReturned": "Retour au vendeur",
+  "statusCancelled": "Annulée",
+  "cashCollectedAmount": "{amount} encaissés",
+  "@cashCollectedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "noCoursesYet": "Pas encore de course terminée.",
+  "activityError": "Impossible de charger l’activité.",
+  "depositTitle": "Reverser les espèces",
+  "depositBody": "Une demande de paiement de {amount} part sur votre téléphone. Validez-la avec votre code Mobile Money.",
+  "@depositBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "depositOffice": "Vous pouvez aussi déposer les espèces au bureau Tara.",
+  "depositNumber": "Votre numéro Mobile Money",
+  "depositSend": "Envoyer la demande",
+  "depositWaiting": "Validez la demande sur votre téléphone…",
+  "depositDone": "{amount} reversés à Tara.",
+  "@depositDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "depositFailed": "Paiement non abouti. Réessayez ou déposez au bureau Tara.",
+  "depositOperator": "Opérateur",
+  "cashDueAt": "À déposer avant {time}",
+  "@cashDueAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cashDueTomorrow": "À déposer avant demain {time}",
+  "@cashDueTomorrow": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cashOverdueNotice": "En retard : plus de courses jusqu’au dépôt.",
+  "blockerCashOverdue": "Espèces non déposées dans les 24 h : déposez-les (onglet Activité) pour recevoir des courses.",
+  "blockerSuspended": "Compte suspendu : contactez Tara.",
+  "blockerPending": "Compte en cours de validation.",
+  "pendingActionsTitle": "Actions en attente",
+  "autoSend": "Envoi automatique",
+  "queuedPickup": "Enlèvement",
+  "queuedDepart": "Départ vers le client",
+  "queuedCollect": "Encaissement espèces",
+  "queuedDeliver": "Livraison confirmée",
+  "queuedFail": "Échec de livraison",
+  "queuedRetry": "Nouvelle tentative",
+  "queuedReturn": "Retour au vendeur",
+  "detailCodePhoto": "code + photo",
+  "detailNoCodePhoto": "sans code + photo",
+  "detailPhotoSize": "photo {size} Mo",
+  "@detailPhotoSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "statusWaiting": "En attente",
+  "statusSending": "Envoi…",
+  "statusRefused": "Refusée",
+  "offlineNote": "Vous pouvez continuer la course : l’itinéraire et les codes restent disponibles hors connexion.",
+  "retryNow": "Réessayer maintenant",
+  "retrying": "Tentative d’envoi…",
+  "stillOffline": "Toujours hors connexion · Réessayer",
+  "continueCourse": "Continuer la course",
+  "allSent": "Tout est envoyé.",
+  "refusedBannerTitle": "Action refusée",
+  "refusedBannerDetail": "{count, plural, =1{1 action à vérifier} other{{count} actions à vérifier}}",
+  "@refusedBannerDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "refusedHelp": "Refusée par le serveur. Corrigez-la depuis la course, ou appelez le support avant de la retirer.",
+  "removeAction": "Retirer l’action",
+  "confirmRemoveAction": "Confirmer le retrait",
+  "offlineNoPending": "Vos actions sont gardées sur le téléphone",
+  "balanceAvailable": "Solde disponible",
+  "balanceReserved": "{amount} mis de côté pour vos courses en cours",
+  "@balanceReserved": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceExplain": "Couvre l’argent à encaisser sur vos courses",
+  "topUpAction": "Recharger",
+  "topUpTitle": "Recharger mon solde",
+  "topUpAmount": "Montant",
+  "topUpOther": "Autre montant (F)",
+  "topUpOtherHint": "Ex. 15000",
+  "topUpBody": "Une demande de paiement de {amount} part sur votre téléphone. Les frais Mobile Money sont pour Tara : votre solde reçoit {amount}.",
+  "@topUpBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpOffice": "Vous pouvez aussi recharger en espèces au bureau Tara.",
+  "topUpDone": "{amount} ajoutés à votre solde.",
+  "@topUpDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpFailed": "Paiement non abouti. Réessayez ou rechargez au bureau Tara.",
+  "topUpRange": "Montant entre {min} et {max}.",
+  "@topUpRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "takenFromBalance": "Pris sur votre solde (déjà mis de côté)",
+  "balanceShort": "Solde",
+  "myDocuments": "Mes pièces",
+  "myDocumentsBody": "Une pièce refusée ou expirée se renvoie ici ; l’équipe Tara la vérifie à nouveau.",
+  "docsToFix": "{count, plural, =1{1 pièce à renvoyer} other{{count} pièces à renvoyer}}",
+  "@docsToFix": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docsToFixHint": "Sans elle, vous ne pouvez plus recevoir de courses.",
+  "docsInReview": "{count, plural, =1{1 pièce en vérification} other{{count} pièces en vérification}}",
+  "@docsInReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docsAllApproved": "Toutes vos pièces sont validées",
+  "emergencyContactTitle": "Contact d’urgence",
+  "emergencyNone": "Aucun contact",
+  "add": "Ajouter",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "removeContact": "Retirer ce contact",
+  "displaySection": "Affichage",
+  "themeLabel": "Thème",
+  "optionAuto": "Auto",
+  "themeLight": "Clair",
+  "themeDark": "Sombre",
+  "languageLabel": "Langue",
+  "effectsLabel": "Animations",
+  "effectsFull": "Complètes",
+  "effectsReduced": "Réduites",
+  "effectsHint": "Réduites : moins d’effets, plus fluide sur un téléphone modeste.",
+  "effectsAutoReduced": "Réduites automatiquement sur ce téléphone.",
+  "helpSection": "Aide",
+  "supportTara": "Support Tara",
+  "logoutConfirm": "Vous ne recevrez plus de courses sur ce téléphone jusqu’à votre prochaine connexion.",
+  "logoutBlockedCourse": "Terminez votre course avant de vous déconnecter.",
+  "logoutBlockedPending": "Des actions attendent le réseau : elles seraient perdues. Reconnectez-vous d’abord.",
+  "appVersion": "Tara Livreur · version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "accountActive": "Compte actif",
+  "accountPending": "Dossier en vérification",
+  "accountSuspended": "Compte suspendu",
+  "accountRejected": "Dossier refusé",
+  "profileError": "Impossible de charger votre profil."
+}

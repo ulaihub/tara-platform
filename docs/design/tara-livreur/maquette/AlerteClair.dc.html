@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Alerte de sécurité (clair)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF1F0}
+a{color:#B3121F}a:hover{color:#8F0E19}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #B3121F;outline-offset:3px}
+@keyframes morph{0%,100%{border-radius:42% 58% 70% 30%/45% 45% 55% 55%}33%{border-radius:70% 30% 46% 54%/30% 29% 71% 70%}66%{border-radius:100% 60% 60% 100%/100% 100% 60% 60%}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-32px) scale(1.12)}}
+@keyframes wave{to{transform:rotate(360deg)}}
+@keyframes ripple{0%{transform:scale(.95);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.blob{animation:morph 10s ease-in-out infinite,drift 14s ease-in-out infinite}
+.wave{animation:wave 4s linear infinite}
+.wave2{animation:wave 7s linear infinite reverse}
+.ripple{animation:ripple 2.2s ease-out infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FBF1F0; color: #16120E; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <div aria-hidden="true" class="blob" style="position: absolute; top: 160px; left: 40px; width: 320px; height: 320px; background: radial-gradient(circle at 40% 40%, #FF7A85, #E52535); filter: blur(80px); opacity: 0.38"></div>
+  <div aria-hidden="true" class="blob" style="position: absolute; top: -140px; right: -140px; width: 280px; height: 280px; background: radial-gradient(circle, #FFB000, #FF6A00); filter: blur(70px); opacity: 0.3; animation-delay: -4s"></div>
+
+  <div style="position: relative; height: 100%; box-sizing: border-box; padding: 56px 20px 30px; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <p style="margin: 0; height: 34px; padding: 0 14px; border-radius: 17px; background: rgba(229,37,53,0.10); border: 1px solid rgba(200,30,44,0.3); display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #B3121F">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"></path></svg>Sécurité</p>
+      <a href="AccueilEnLigneClair.dc.html" aria-label="Fermer" style="width: 46px; height: 46px; border-radius: 16px; background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 6px 16px rgba(140,30,30,0.08); color: #16120E; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </a>
+    </div>
+
+    <sc-if value="{{idle}}" hint-placeholder-val="{{ true }}">
+      <h1 style="margin: 22px 0 6px; font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Besoin d'aide&#160;?</h1>
+      <p style="margin: 0; font-size: 14px; line-height: 1.5; color: rgba(22,18,14,0.74)">Maintenez le bouton 3 secondes. L'équipe Tara et votre contact d'urgence reçoivent votre position en direct.</p>
+    </sc-if>
+    <sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
+      <h1 style="margin: 22px 0 6px; font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Alerte envoyée</h1>
+      <p role="status" style="margin: 0; font-size: 14px; line-height: 1.5; color: rgba(22,18,14,0.74)">Restez en lieu sûr si possible. Un agent Tara vous rappelle.</p>
+    </sc-if>
+
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center">
+      <div style="position: relative; width: 236px; height: 236px">
+        <span aria-hidden="true" class="ripple" style="position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(229,37,53,0.55)"></span>
+        <span aria-hidden="true" class="ripple" style="position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(229,37,53,0.55); animation-delay: -1.1s"></span>
+        <button type="button" aria-label="{{btnLabel}}" onPointerDown="{{startHold}}" onPointerUp="{{stopHold}}" onPointerLeave="{{stopHold}}" onKeyDown="{{keyDown}}" onKeyUp="{{keyUp}}" style="position: absolute; inset: 0; border-radius: 50%; overflow: hidden; padding: 0; border: 3px solid rgba(255,255,255,0.9); background: linear-gradient(160deg, #FF5A66, #E52535 55%, #C81E2C); color: #FFFFFF; cursor: pointer; touch-action: none; box-shadow: 0 30px 60px rgba(200,30,44,0.35), inset 0 2px 0 rgba(255,255,255,0.35)">
+          <span aria-hidden="true" style="position: absolute; left: -92px; width: 416px; height: 416px; top: {{waveTop2}}px; transition: top 0.25s linear">
+            <span class="wave2" style="display: block; width: 100%; height: 100%; border-radius: 40%; background: rgba(120,8,18,0.45)"></span>
+          </span>
+          <span aria-hidden="true" style="position: absolute; left: -92px; width: 416px; height: 416px; top: {{waveTop}}px; transition: top 0.25s linear">
+            <span class="wave" style="display: block; width: 100%; height: 100%; border-radius: 43%; background: linear-gradient(180deg, #A50F1C, #8F0E19 40%, #6E0A13)"></span>
+          </span>
+          <span style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px">
+            <span style="font-family: 'Sora', sans-serif; font-size: 44px; font-weight: 800; letter-spacing: 0.04em">SOS</span>
+            <span style="font-size: 13px; font-weight: 700">{{hint}}</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 22px; background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 10px 24px rgba(140,30,30,0.08)">
+      <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 13px; background: rgba(229,37,53,0.10); color: #B3121F; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-12a7 7 0 0114 0c0 5.8-7 12-7 12z"></path><circle cx="12" cy="9" r="2.5"></circle></svg></span>
+      <div style="flex: 1; min-width: 0">
+        <p style="margin: 0; font-size: 14px; font-weight: 700">Cocody, boulevard Latrille</p>
+        <p style="margin: 1px 0 0; font-size: 12px; color: rgba(22,18,14,0.66)">{{posLine}}</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <a href="tel:+2250700000001" style="height: 54px; border-radius: 18px; background: #FFFFFF; border: 1px solid rgba(22,18,14,0.10); color: #16120E; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700; box-shadow: 0 6px 16px rgba(140,30,30,0.06)">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0116 0v2"></path><rect x="3" y="14" width="4" height="6" rx="1.5"></rect><rect x="17" y="14" width="4" height="6" rx="1.5"></rect></svg>Support Tara</a>
+      <a href="tel:[NUMÉRO_SECOURS]" style="height: 54px; border-radius: 18px; background: #E52535; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 800; box-shadow: 0 10px 24px rgba(229,37,53,0.3)">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>Secours</a>
+    </div>
+    <sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
+      <button type="button" onClick="{{cancel}}" style="margin-top: 6px; height: 44px; border: 0; background: transparent; color: #B3121F; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Annuler l'alerte</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { progress: 0, sent: false };
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  start() {
+    if (this.state.sent || this.timer) return;
+    this.timer = setInterval(() => {
+      const p = Math.min(100, this.state.progress + 100 / 12);
+      if (p >= 100) {
+        clearInterval(this.timer);
+        this.timer = null;
+        this.setState({ progress: 100, sent: true });
+      } else {
+        this.setState({ progress: p });
+      }
+    }, 250);
+  }
+  stop() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    if (!this.state.sent) this.setState({ progress: 0 });
+  }
+  renderVals() {
+    const p = this.state.progress;
+    const sent = this.state.sent;
+    const holding = p > 0 && !sent;
+    const secs = Math.max(1, Math.ceil(3 - (p / 100) * 3));
+    return {
+      motion: this.props.motion === false ? 'off' : 'on',
+      sent: sent,
+      idle: !sent,
+      waveTop: Math.round(232 - (p / 100) * 236),
+      waveTop2: Math.round(224 - (p / 100) * 236),
+      hint: sent ? 'Envoyée' : holding ? 'Encore ' + secs + ' s…' : 'Maintenir 3 s',
+      btnLabel: sent ? 'Alerte envoyée' : 'Maintenir 3 secondes pour envoyer une alerte',
+      posLine: sent ? 'Position partagée en direct · précision 8 m' : 'Votre position actuelle · précision 8 m',
+      startHold: () => this.start(),
+      stopHold: () => this.stop(),
+      keyDown: (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); this.start(); } },
+      keyUp: (e) => { if (e.key === 'Enter' || e.key === ' ') this.stop(); },
+      cancel: () => this.setState({ sent: false, progress: 0 })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -48,6 +48,7 @@ import {
   PayoutListQuery,
   RejectPayoutBody,
   RiderHistoryQuery,
+  RiderTopUpBody,
   RiderWalletDto,
   TopUpBody,
   WalletDto,
@@ -382,7 +383,31 @@ export class RiderFinanceController {
     return toPayoutDto(payout);
   }
 
-  /** Dépôt des espèces détenues par Mobile Money (G5). */
+  /**
+   * Recharge du solde prépayé par Mobile Money (G5) : demande au téléphone du livreur,
+   * confirmée par `payment.status`. Crédité du montant entier (frais payés par Tara).
+   */
+  @Post('topups')
+  @MONEY_HEADER
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @ApiZodBody(RiderTopUpBody)
+  @ApiZodResponse(PaymentDto, HttpStatus.CREATED)
+  async topUp(
+    @CurrentUser() user: AuthUser,
+    @ValidBody(RiderTopUpBody) body: z.output<typeof RiderTopUpBody>,
+    @Headers('idempotency-key') key: string | undefined,
+  ): Out<typeof PaymentDto> {
+    const payment = await this.wallets.topUpRider(
+      user.id,
+      body.amount,
+      body.phone,
+      body.operator,
+      requiredIdempotencyKey(key),
+    );
+    return toPaymentDto(payment);
+  }
+
+  /** Dépôt des espèces détenues par Mobile Money (G5, ancien fonctionnement). */
   @Post('cash-deposits')
   @MONEY_HEADER
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -588,7 +613,29 @@ export class AdminFinanceController {
     return toPayoutDto(await this.payouts.reject(id, user, body.reason, request));
   }
 
-  /** Espèces remises au bureau par un livreur (G5). */
+  /** Recharge du solde prépayé d'un livreur avec des espèces remises au bureau (G5). */
+  @Post('riders/:riderId/topups')
+  @MONEY_HEADER
+  @ApiZodBody(OfficeDepositBody)
+  @ApiZodResponse(z.object({ entryId: z.uuid(), balance: z.int() }), HttpStatus.CREATED)
+  topUpAtOffice(
+    @CurrentUser() user: AuthUser,
+    @Param('riderId', ParseUUIDPipe) riderId: string,
+    @ValidBody(OfficeDepositBody) body: z.output<typeof OfficeDepositBody>,
+    @Headers('idempotency-key') key: string | undefined,
+    @Req() request: Request,
+  ): Promise<{ entryId: string; balance: number }> {
+    return this.wallets.topUpRiderAtOffice(
+      user,
+      riderId,
+      body.amount,
+      body.note,
+      requiredIdempotencyKey(key),
+      request,
+    );
+  }
+
+  /** Espèces remises au bureau par un livreur (G5, ancien fonctionnement). */
   @Post('riders/:riderId/cash-deposits')
   @MONEY_HEADER
   @ApiZodBody(OfficeDepositBody)

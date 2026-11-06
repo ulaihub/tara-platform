@@ -36,9 +36,29 @@ export class RedisIoAdapter extends IoAdapter {
 
   override async close(server: Server): Promise<void> {
     await super.close(server);
+    // L'adaptateur s'abonne à ses canaux sans attendre la réponse : fermer une connexion
+    // encore en cours d'ouverture rejetterait ces abonnements, sans personne pour les
+    // rattraper (application arrêtée juste après son démarrage).
     await Promise.all(
-      this.connections.map((connection) => connection.quit().catch(() => undefined)),
+      this.connections.map(async (connection) => {
+        await whenSettled(connection);
+        await connection.quit().catch(() => undefined);
+      }),
     );
     this.connections.length = 0;
   }
+}
+
+/** Connexion prête, fermée ou en échec (5 s au plus) : plus aucune ouverture en cours. */
+function whenSettled(connection: Redis): Promise<void> {
+  if (connection.status === 'ready' || connection.status === 'end') return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = (): void => {
+      clearTimeout(timer);
+      connection.off('ready', done).off('end', done).off('error', done);
+      resolve();
+    };
+    const timer = setTimeout(done, 5_000);
+    connection.once('ready', done).once('end', done).once('error', done);
+  });
 }

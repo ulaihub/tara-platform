@@ -225,6 +225,8 @@ enum FailureReason {
   RECIPIENT_UNREACHABLE
   REFUSED
   ADDRESS_NOT_FOUND
+  /// Le destinataire refuse de payer le montant à encaisser.
+  PAYMENT_REFUSED
   OTHER
 
   @@map("failure_reason")
@@ -279,6 +281,8 @@ enum PaymentPurpose {
   RIDER_CASH_DEPOSIT
   SUBSCRIPTION
   WALLET_TOPUP
+  /// Recharge du solde prépayé du livreur (frais Mobile Money payés par Tara).
+  RIDER_TOPUP
 
   @@map("payment_purpose")
 }
@@ -438,36 +442,38 @@ model User {
   totpFailedAttempts Int       @default(0) @map("totp_failed_attempts")
   totpLockedUntil    DateTime? @map("totp_locked_until") @db.Timestamptz(3)
 
-  merchant             MerchantProfile?
-  rider                RiderProfile?          @relation("RiderUser")
-  devices              Device[]
-  refreshTokens        RefreshToken[]
-  consents             Consent[]
-  addresses            Address[]
-  locationLinks        LocationLink[]
-  orderBatches         OrderBatch[]
-  sentOrders           Order[]
-  orderEvents          OrderEvent[]
-  validatedProofs      DeliveryProof[]
-  ratingsGiven         Rating[]               @relation("RatingsGiven")
-  ratingsReceived      Rating[]               @relation("RatingsReceived")
-  payments             Payment[]
-  promoRedemptions     PromoRedemption[]
-  referralsMade        Referral[]             @relation("Referrer")
-  referredBy           Referral?              @relation("Referee")
-  ridersApproved       RiderProfile[]         @relation("RiderApprovedBy")
-  kycReviews           KycDocument[]
-  pricingGridsCreated  PricingGrid[]
-  journalEntriesPosted JournalEntry[]
-  notifications        Notification[]
-  ticketsOpened        Ticket[]               @relation("TicketOpenedBy")
-  ticketsAssigned      Ticket[]               @relation("TicketAssignee")
-  ticketMessages       TicketMessage[]
-  mediaFiles           MediaFile[]
-  safetyAlertsHandled  SafetyAlert[]
-  payoutsReceived      Payout[]               @relation("PayoutUser")
-  payoutsApproved      Payout[]               @relation("PayoutApprover")
-  reconciliationsRun   ReconciliationReport[]
+  merchant                 MerchantProfile?
+  rider                    RiderProfile?          @relation("RiderUser")
+  devices                  Device[]
+  refreshTokens            RefreshToken[]
+  consents                 Consent[]
+  addresses                Address[]
+  locationLinks            LocationLink[]
+  orderBatches             OrderBatch[]
+  sentOrders               Order[]
+  orderEvents              OrderEvent[]
+  validatedProofs          DeliveryProof[]
+  ratingsGiven             Rating[]               @relation("RatingsGiven")
+  ratingsReceived          Rating[]               @relation("RatingsReceived")
+  payments                 Payment[]
+  promoRedemptions         PromoRedemption[]
+  referralsMade            Referral[]             @relation("Referrer")
+  referredBy               Referral?              @relation("Referee")
+  ridersApproved           RiderProfile[]         @relation("RiderApprovedBy")
+  kycReviews               KycDocument[]
+  pricingGridsCreated      PricingGrid[]
+  journalEntriesPosted     JournalEntry[]
+  notifications            Notification[]
+  ticketsOpened            Ticket[]               @relation("TicketOpenedBy")
+  ticketsAssigned          Ticket[]               @relation("TicketAssignee")
+  ticketMessages           TicketMessage[]
+  mediaFiles               MediaFile[]
+  safetyAlertsHandled      SafetyAlert[]          @relation("SafetyAlertHandledBy")
+  safetyAlertsPoliceCalled SafetyAlert[]          @relation("SafetyAlertPoliceCalledBy")
+  payoutsReceived          Payout[]               @relation("PayoutUser")
+  payoutsApproved          Payout[]               @relation("PayoutApprover")
+  courseAlertsAcknowledged CourseAlert[]          @relation("CourseAlertAcknowledgedBy")
+  reconciliationsRun       ReconciliationReport[]
 
   @@map("users")
 }
@@ -549,22 +555,22 @@ model Consent {
 // -----------------------------------------------------------------------------
 
 model MerchantProfile {
-  id             String              @id @default(uuid(7)) @db.Uuid
-  userId         String              @unique @map("user_id") @db.Uuid
-  shopName       String              @map("shop_name")
-  category       String?
+  id                   String              @id @default(uuid(7)) @db.Uuid
+  userId               String              @unique @map("user_id") @db.Uuid
+  shopName             String              @map("shop_name")
+  category             String?
   /// Numéro Mobile Money de reversement (G3).
-  payoutPhone    String              @map("payout_phone")
-  payoutOperator MobileMoneyOperator @map("payout_operator")
-  payoutSchedule PayoutSchedule      @default(DAILY) @map("payout_schedule")
+  payoutPhone          String              @map("payout_phone")
+  payoutOperator       MobileMoneyOperator @map("payout_operator")
+  payoutSchedule       PayoutSchedule      @default(DAILY) @map("payout_schedule")
   /// Dernier changement du numéro de reversement : reversements gelés pendant PAYOUT_HOLD_HOURS.
-  payoutPhoneChangedAt DateTime?     @map("payout_phone_changed_at") @db.Timestamptz(3)
-  plan           MerchantPlan        @default(FREE)
-  planRenewsAt   DateTime?           @map("plan_renews_at") @db.Timestamptz(3)
-  rccm           String?
-  niu            String?
-  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  payoutPhoneChangedAt DateTime?           @map("payout_phone_changed_at") @db.Timestamptz(3)
+  plan                 MerchantPlan        @default(FREE)
+  planRenewsAt         DateTime?           @map("plan_renews_at") @db.Timestamptz(3)
+  rccm                 String?
+  niu                  String?
+  createdAt            DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user          User           @relation(fields: [userId], references: [id])
   orders        Order[]
@@ -575,27 +581,37 @@ model MerchantProfile {
 }
 
 model RiderProfile {
-  id              String      @id @default(uuid(7)) @db.Uuid
-  userId          String      @unique @map("user_id") @db.Uuid
-  status          RiderStatus @default(PENDING)
-  vehicleType     VehicleType @default(MOTORBIKE) @map("vehicle_type")
-  plateNumber     String?     @map("plate_number")
+  id                    String      @id @default(uuid(7)) @db.Uuid
+  userId                String      @unique @map("user_id") @db.Uuid
+  status                RiderStatus @default(PENDING)
+  vehicleType           VehicleType @default(MOTORBIKE) @map("vehicle_type")
+  plateNumber           String?     @map("plate_number")
   /// Plafond d'espèces détenues, en FCFA (G5, D4).
-  cashLimit       Int         @default(50000) @map("cash_limit")
+  cashLimit             Int         @default(25000) @map("cash_limit")
+  /// Espèces gardées au-delà du délai de dépôt (24 h) depuis cette heure : plus de courses
+  /// tant qu'elles ne sont pas déposées (G5).
+  cashOverdueSince      DateTime?   @map("cash_overdue_since") @db.Timestamptz(3)
+  /// Dernier retard de dépôt : le plafond d'espèces redescend et remonte après 20 courses.
+  lastCashLateAt        DateTime?   @map("last_cash_late_at") @db.Timestamptz(3)
+  /// Suspendu faute de dépôt (au-delà de 72 h de retard) : réactivation par la finance.
+  cashSuspendedAt       DateTime?   @map("cash_suspended_at") @db.Timestamptz(3)
   /// Caution exigée pour le kit, en FCFA.
-  depositRequired Int         @default(15000) @map("deposit_required")
-  ratingSum       Int         @default(0) @map("rating_sum")
-  ratingCount     Int         @default(0) @map("rating_count")
-  guarantorName   String?     @map("guarantor_name")
-  guarantorPhone  String?     @map("guarantor_phone")
-  approvedAt      DateTime?   @map("approved_at") @db.Timestamptz(3)
-  approvedById    String?     @map("approved_by_id") @db.Uuid
-  suspendedReason String?     @map("suspended_reason")
-  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  depositRequired       Int         @default(15000) @map("deposit_required")
+  ratingSum             Int         @default(0) @map("rating_sum")
+  ratingCount           Int         @default(0) @map("rating_count")
+  guarantorName         String?     @map("guarantor_name")
+  guarantorPhone        String?     @map("guarantor_phone")
+  /// Proche prévenu par SMS si le livreur déclenche une alerte de sécurité (facultatif).
+  emergencyContactName  String?     @map("emergency_contact_name")
+  emergencyContactPhone String?     @map("emergency_contact_phone")
+  approvedAt            DateTime?   @map("approved_at") @db.Timestamptz(3)
+  approvedById          String?     @map("approved_by_id") @db.Uuid
+  suspendedReason       String?     @map("suspended_reason")
+  createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user           User            @relation("RiderUser", fields: [userId], references: [id])
-  approvedBy     User?           @relation("RiderApprovedBy", fields: [approvedById], references: [id])
+  user           User                 @relation("RiderUser", fields: [userId], references: [id])
+  approvedBy     User?                @relation("RiderApprovedBy", fields: [approvedById], references: [id])
   documents      KycDocument[]
   orders         Order[]
   offers         DispatchOffer[]
@@ -603,6 +619,11 @@ model RiderProfile {
   payments       Payment[]
   payouts        Payout[]
   safetyAlerts   SafetyAlert[]
+  balanceHolds   RiderBalanceHold[]
+  onlineSessions RiderOnlineSession[]
+  trackPoints    CourseTrackPoint[]
+  courseTracks   CourseTrack[]
+  courseAlerts   CourseAlert[]
 
   @@index([status])
   @@map("rider_profiles")
@@ -890,8 +911,12 @@ model Order {
   /// Début de la recherche de livreur en cours (D2) ; l'alerte part après 5 min.
   searchingSince       DateTime?        @map("searching_since") @db.Timestamptz(3)
   dispatchAlertedAt    DateTime?        @map("dispatch_alerted_at") @db.Timestamptz(3)
-  /// Choix de l'expéditeur après un échec : nouvelle tentative ou retour (E6).
+  /// Choix de l'expéditeur après un échec : nouvelle tentative ou retour (E6). Sans réponse
+  /// dans le délai (FAILURE_DECISION_TIMEOUT_MINUTES), retour automatique.
   failureDecision      FailureDecision? @map("failure_decision")
+  /// Dernier échec de livraison : heure et motif (E6).
+  failedAt             DateTime?        @map("failed_at") @db.Timestamptz(3)
+  failureReason        FailureReason?   @map("failure_reason")
   /// Frais de livraison réglés (prépaiement, espèces ou Mobile Money).
   feePaidAt            DateTime?        @map("fee_paid_at") @db.Timestamptz(3)
   cancelReason         String?          @map("cancel_reason")
@@ -900,15 +925,17 @@ model Order {
   assignedAt           DateTime?        @map("assigned_at") @db.Timestamptz(3)
   pickedUpAt           DateTime?        @map("picked_up_at") @db.Timestamptz(3)
   deliveredAt          DateTime?        @map("delivered_at") @db.Timestamptz(3)
+  /// Colis rendu à l'expéditeur après un échec (E6).
+  returnedAt           DateTime?        @map("returned_at") @db.Timestamptz(3)
   cancelledAt          DateTime?        @map("cancelled_at") @db.Timestamptz(3)
 
-  sender          User             @relation(fields: [senderId], references: [id])
-  merchant        MerchantProfile? @relation(fields: [merchantId], references: [id])
-  batch           OrderBatch?      @relation(fields: [batchId], references: [id])
-  pickupAddress   Address          @relation("OrderPickup", fields: [pickupAddressId], references: [id])
-  dropoffAddress  Address          @relation("OrderDropoff", fields: [dropoffAddressId], references: [id])
-  pricingGrid     PricingGrid      @relation(fields: [pricingGridId], references: [id])
-  rider           RiderProfile?    @relation(fields: [riderId], references: [id])
+  sender          User               @relation(fields: [senderId], references: [id])
+  merchant        MerchantProfile?   @relation(fields: [merchantId], references: [id])
+  batch           OrderBatch?        @relation(fields: [batchId], references: [id])
+  pickupAddress   Address            @relation("OrderPickup", fields: [pickupAddressId], references: [id])
+  dropoffAddress  Address            @relation("OrderDropoff", fields: [dropoffAddressId], references: [id])
+  pricingGrid     PricingGrid        @relation(fields: [pricingGridId], references: [id])
+  rider           RiderProfile?      @relation(fields: [riderId], references: [id])
   events          OrderEvent[]
   proofs          DeliveryProof[]
   offers          DispatchOffer[]
@@ -920,6 +947,10 @@ model Order {
   notifications   Notification[]
   tickets         Ticket[]
   safetyAlerts    SafetyAlert[]
+  balanceHolds    RiderBalanceHold[]
+  trackPoints     CourseTrackPoint[]
+  tracks          CourseTrack[]
+  courseAlerts    CourseAlert[]
 
   @@index([status, scheduledFor])
   @@index([riderId, status])
@@ -965,6 +996,8 @@ model DeliveryProof {
   supportValidatorId String?   @map("support_validator_id") @db.Uuid
   /// Journal d'appels joint à un échec de livraison (E6).
   callLog            Json?     @map("call_log")
+  /// Livraison sans code : nom de la personne qui a reçu le colis (E4).
+  receivedBy         String?   @map("received_by")
   latitude           Float
   longitude          Float
   occurredAt         DateTime  @map("occurred_at") @db.Timestamptz(3)
@@ -1022,27 +1055,160 @@ model ReconciliationReport {
   @@map("reconciliation_reports")
 }
 
+/// Montant mis de côté sur le solde prépayé du livreur pour une course avec encaissement :
+/// pris à l'acceptation, libéré quand la course se termine ou lui est retirée (G5).
+model RiderBalanceHold {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  riderId    String    @map("rider_id") @db.Uuid
+  orderId    String    @map("order_id") @db.Uuid
+  amount     Int
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  releasedAt DateTime? @map("released_at") @db.Timestamptz(3)
+
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+  order Order        @relation(fields: [orderId], references: [id])
+
+  @@index([riderId, releasedAt])
+  @@index([orderId])
+  @@map("rider_balance_holds")
+}
+
 /// Alerte de sécurité déclenchée par un livreur (E8) : sa position part au dispatch.
 model SafetyAlert {
-  id             String    @id @default(uuid(7)) @db.Uuid
-  riderId        String    @map("rider_id") @db.Uuid
-  orderId        String?   @map("order_id") @db.Uuid
-  latitude       Float
-  longitude      Float
-  note           String?
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  acknowledgedAt DateTime? @map("acknowledged_at") @db.Timestamptz(3)
-  resolvedAt     DateTime? @map("resolved_at") @db.Timestamptz(3)
-  handledById    String?   @map("handled_by_id") @db.Uuid
-  resolution     String?
+  id               String    @id @default(uuid(7)) @db.Uuid
+  riderId          String    @map("rider_id") @db.Uuid
+  orderId          String?   @map("order_id") @db.Uuid
+  latitude         Float
+  longitude        Float
+  /// Précision de la position, en mètres.
+  accuracy         Float?
+  /// Quartier où se trouvait le livreur au moment de l'alerte.
+  neighborhood     String?
+  note             String?
+  /// Identifiant généré par l'app : une alerte renvoyée au retour du réseau n'est pas doublée.
+  clientEventId    String?   @map("client_event_id")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  acknowledgedAt   DateTime? @map("acknowledged_at") @db.Timestamptz(3)
+  resolvedAt       DateTime? @map("resolved_at") @db.Timestamptz(3)
+  /// Annulée par le livreur : l'alerte reste visible du dispatch, qui rappelle le livreur.
+  cancelledAt      DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  handledById      String?   @map("handled_by_id") @db.Uuid
+  resolution       String?
+  /// Police appelée par un agent Tara (livreur injoignable ou danger confirmé).
+  policeCalledAt   DateTime? @map("police_called_at") @db.Timestamptz(3)
+  policeCalledById String?   @map("police_called_by_id") @db.Uuid
+  policeNote       String?   @map("police_note")
 
-  rider     RiderProfile @relation(fields: [riderId], references: [id])
-  order     Order?       @relation(fields: [orderId], references: [id])
-  handledBy User?        @relation(fields: [handledById], references: [id])
+  rider          RiderProfile @relation(fields: [riderId], references: [id])
+  order          Order?       @relation(fields: [orderId], references: [id])
+  handledBy      User?        @relation("SafetyAlertHandledBy", fields: [handledById], references: [id])
+  policeCalledBy User?        @relation("SafetyAlertPoliceCalledBy", fields: [policeCalledById], references: [id])
 
+  @@unique([riderId, clientEventId])
   @@index([resolvedAt, createdAt])
   @@index([riderId, createdAt])
   @@map("safety_alerts")
+}
+
+/// Période passée en ligne par un livreur (temps en ligne, E9). Ouverte au passage en
+/// ligne, prolongée par les positions (au plus une écriture par minute), fermée au passage
+/// hors ligne ; sans position depuis le délai de présence, elle s'arrête à la dernière vue.
+model RiderOnlineSession {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  riderId    String    @map("rider_id") @db.Uuid
+  startedAt  DateTime  @map("started_at") @db.Timestamptz(3)
+  lastSeenAt DateTime  @map("last_seen_at") @db.Timestamptz(3)
+  endedAt    DateTime? @map("ended_at") @db.Timestamptz(3)
+
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+
+  @@index([riderId, startedAt])
+  @@map("rider_online_sessions")
+}
+
+/// Point du trajet d'une course : enregistré de l'acceptation à la fin de la course, jamais
+/// en dehors. Consultable par l'équipe seulement (consultations tracées), effacé après
+/// 90 jours sauf litige ou incident encore ouvert. Jamais modifié (droits de l'API).
+model CourseTrackPoint {
+  id         BigInt   @id @default(autoincrement())
+  orderId    String   @map("order_id") @db.Uuid
+  riderId    String   @map("rider_id") @db.Uuid
+  recordedAt DateTime @map("recorded_at") @db.Timestamptz(3)
+  latitude   Float
+  longitude  Float
+  accuracy   Float?
+  speed      Float?
+  /// Position simulée signalée par le téléphone (application de fausse position).
+  mocked     Boolean  @default(false)
+  /// Reçue en différé : gardée sur le téléphone faute de réseau.
+  late       Boolean  @default(false)
+  receivedAt DateTime @default(now()) @map("received_at") @db.Timestamptz(3)
+
+  order Order        @relation(fields: [orderId], references: [id])
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+
+  @@unique([orderId, riderId, recordedAt])
+  @@index([recordedAt])
+  @@map("course_track_points")
+}
+
+/// Résumé du trajet d'un livreur sur une course, calculé à la fin et gardé avec la commande.
+model CourseTrack {
+  orderId            String    @map("order_id") @db.Uuid
+  riderId            String    @map("rider_id") @db.Uuid
+  pointCount         Int       @map("point_count")
+  distanceMeters     Int       @map("distance_meters")
+  startedAt          DateTime? @map("started_at") @db.Timestamptz(3)
+  endedAt            DateTime? @map("ended_at") @db.Timestamptz(3)
+  longestGapSeconds  Int       @map("longest_gap_seconds")
+  longestStopSeconds Int       @map("longest_stop_seconds")
+  mockedPoints       Int       @map("mocked_points")
+  computedAt         DateTime  @map("computed_at") @db.Timestamptz(3)
+  /// Points détaillés effacés (fin de la conservation de 90 jours).
+  pointsPurgedAt     DateTime? @map("points_purged_at") @db.Timestamptz(3)
+
+  order Order        @relation(fields: [orderId], references: [id])
+  rider RiderProfile @relation(fields: [riderId], references: [id])
+
+  /// Une course réattribuée a un trajet par livreur.
+  @@id([orderId, riderId])
+  @@map("course_tracks")
+}
+
+enum CourseAlertKind {
+  /// Enlèvement, livraison ou retour validé loin de l'adresse.
+  ACTION_FAR
+  /// Arrêt prolongé avec le colis à bord, loin du vendeur et du client.
+  LONG_STOP
+  /// Position simulée par une application.
+  MOCK_LOCATION
+  /// Plus aucune position reçue pendant longtemps.
+  TRACK_GAP
+
+  @@map("course_alert_kind")
+}
+
+/// Alerte du support née du trajet d'une course (une par sujet et par course).
+model CourseAlert {
+  id               String          @id @default(uuid(7)) @db.Uuid
+  orderId          String          @map("order_id") @db.Uuid
+  riderId          String          @map("rider_id") @db.Uuid
+  kind             CourseAlertKind
+  /// Sujet unique dans la course (ex. « ACTION_FAR:DELIVERY ») : pas de doublon.
+  dedupeKey        String          @map("dedupe_key")
+  details          Json
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  acknowledgedAt   DateTime?       @map("acknowledged_at") @db.Timestamptz(3)
+  acknowledgedById String?         @map("acknowledged_by_id") @db.Uuid
+  note             String?
+
+  order          Order        @relation(fields: [orderId], references: [id])
+  rider          RiderProfile @relation(fields: [riderId], references: [id])
+  acknowledgedBy User?        @relation("CourseAlertAcknowledgedBy", fields: [acknowledgedById], references: [id])
+
+  @@unique([orderId, dedupeKey])
+  @@index([acknowledgedAt, createdAt])
+  @@map("course_alerts")
 }
 
 /// Notation réciproque expéditeur ↔ livreur (F4).

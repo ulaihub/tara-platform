@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tara Livreur · Historique et gains</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0A0A0F}
+a{color:#FFB15C}a:hover{color:#FFD2A1}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #FFB15C;outline-offset:3px}
+@keyframes morph{0%,100%{border-radius:42% 58% 70% 30%/45% 45% 55% 55%}33%{border-radius:70% 30% 46% 54%/30% 29% 71% 70%}66%{border-radius:100% 60% 60% 100%/100% 100% 60% 60%}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-32px) scale(1.12)}}
+@keyframes wave{to{transform:rotate(360deg)}}
+.blob{animation:morph 14s ease-in-out infinite,drift 20s ease-in-out infinite}
+.wave{animation:wave 4s linear infinite}
+[data-motion=off] *{animation:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div data-motion="{{motion}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #0A0A0F; color: #FFFFFF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <div aria-hidden="true" class="blob" style="position: absolute; top: 120px; right: -160px; width: 360px; height: 360px; background: radial-gradient(circle at 40% 40%, #FFB000, #FF6A00 55%, #FF3D00); filter: blur(70px); opacity: 0.26"></div>
+
+  <div style="position: relative; height: 100%; box-sizing: border-box; padding: 60px 20px 24px; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Activité</h1>
+      <div role="tablist" aria-label="Période" style="display: flex; gap: 4px; padding: 4px; border-radius: 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12)">
+        <sc-for list="{{periods}}" as="p" hint-placeholder-count="3">
+          <button type="button" role="tab" aria-selected="{{p.selected}}" onClick="{{p.pick}}" style="{{p.style}}">{{p.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <section aria-label="Gains de la période" style="margin-top: 16px; padding: 18px; border-radius: 26px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(26px) saturate(160%); -webkit-backdrop-filter: blur(26px) saturate(160%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12)">
+      <div style="display: flex; align-items: flex-end; justify-content: space-between">
+        <div>
+          <p style="margin: 0; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.72)">{{caption}}</p>
+          <p style="margin: 4px 0 0; font-family: 'Sora', sans-serif; font-size: 34px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">{{total}} <span style="font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.72)">FCFA</span></p>
+        </div>
+        <p style="margin: 0 0 6px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.8)">{{count}}</p>
+      </div>
+      <div role="img" aria-label="{{chartLabel}}" style="margin-top: 16px; height: 140px; display: flex; align-items: flex-end; gap: 8px">
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="7">
+          <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; color: #FFC283; height: 14px">{{b.top}}</span>
+            <div style="{{b.style}}">
+              <sc-if value="{{b.hi}}" hint-placeholder-val="{{ false }}">
+                <span class="wave" style="position: absolute; left: -30px; top: -52px; width: 100px; height: 64px; border-radius: 42%; background: rgba(255,214,140,0.55)"></span>
+              </sc-if>
+            </div>
+            <span style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.66)">{{b.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-radius: 22px; background: rgba(255,138,0,0.10); border: 1px solid rgba(255,177,92,0.35)">
+      <div style="flex: 1; min-width: 0">
+        <p style="margin: 0; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.76)">Espèces à reverser à Tara</p>
+        <p style="margin: 2px 0 0; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: #FFC283; font-variant-numeric: tabular-nums">37 500 F</p>
+      </div>
+      <button type="button" style="height: 46px; padding: 0 16px; border-radius: 15px; border: 0; background: linear-gradient(100deg, #FFB000, #FF6A00 60%, #FF3D00); color: #140800; font-size: 14px; font-weight: 800; cursor: pointer">Reverser</button>
+    </div>
+
+    <div style="margin-top: 18px; display: flex; align-items: baseline; justify-content: space-between">
+      <h2 style="margin: 0; font-size: 15px; font-weight: 700">Dernières courses</h2>
+      <a href="#historique" style="font-size: 13px; font-weight: 600; text-decoration: none">Tout voir</a>
+    </div>
+    <ul style="list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+      <li style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08)">
+        <span aria-hidden="true" style="flex: none; width: 38px; height: 38px; border-radius: 12px; background: rgba(74,222,155,0.14); color: #4ADE9B; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+        <div style="flex: 1; min-width: 0"><p style="margin: 0; font-size: 14px; font-weight: 700">Cocody → Marcory</p><p style="margin: 1px 0 0; font-size: 12px; color: rgba(255,255,255,0.66)">18:52 · Livrée · 12 500 F encaissés</p></div>
+        <span style="font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums">+1 500</span>
+      </li>
+      <li style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08)">
+        <span aria-hidden="true" style="flex: none; width: 38px; height: 38px; border-radius: 12px; background: rgba(74,222,155,0.14); color: #4ADE9B; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+        <div style="flex: 1; min-width: 0"><p style="margin: 0; font-size: 14px; font-weight: 700">Plateau → Treichville</p><p style="margin: 1px 0 0; font-size: 12px; color: rgba(255,255,255,0.66)">17:20 · Livrée · Mobile Money</p></div>
+        <span style="font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums">+1 250</span>
+      </li>
+      <li style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08)">
+        <span aria-hidden="true" style="flex: none; width: 38px; height: 38px; border-radius: 12px; background: rgba(255,138,0,0.16); color: #FFB15C; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"></path><path d="M4 9h10a6 6 0 010 12h-3"></path></svg></span>
+        <div style="flex: 1; min-width: 0"><p style="margin: 0; font-size: 14px; font-weight: 700">Yopougon → Adjamé</p><p style="margin: 1px 0 0; font-size: 12px; color: rgba(255,255,255,0.66)">15:05 · Retour au vendeur</p></div>
+        <span style="font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums">+750</span>
+      </li>
+    </ul>
+
+    <nav aria-label="Navigation principale" style="margin-top: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px; border-radius: 26px; background: rgba(22,22,28,0.6); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(28px) saturate(170%); -webkit-backdrop-filter: blur(28px) saturate(170%)">
+      <a href="AccueilEnLigne.dc.html" style="height: 52px; border-radius: 19px; color: rgba(255,255,255,0.72); text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"></path></svg>Accueil</a>
+      <a href="Gains.dc.html" aria-current="page" style="height: 52px; border-radius: 19px; background: rgba(255,138,0,0.16); color: #FFB15C; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Activité</a>
+      <a href="#profil" style="height: 52px; border-radius: 19px; color: rgba(255,255,255,0.72); text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20c1.4-3.2 4.2-5 7.5-5s6.1 1.8 7.5 5"></path></svg>Profil</a>
+    </nav>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true,"section":"Effets"},"periode":{"editor":"enum","options":["Jour","Semaine","Mois"],"default":"Semaine","section":"État"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { period: null };
+  }
+  renderVals() {
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const data = {
+      Jour: { caption: "Gains d'aujourd'hui", count: '6 courses', labels: ['8h', '10h', '12h', '14h', '16h', '18h'], values: [1500, 0, 2250, 1500, 1500, 2000] },
+      Semaine: { caption: 'Gains des 7 derniers jours', count: '32 courses', labels: ['Mer', 'Jeu', 'Ven', 'Sam', 'Dim', 'Lun', 'Auj.'], values: [7800, 11250, 10100, 6400, 3200, 6800, 8750] },
+      Mois: { caption: 'Gains des 4 dernières semaines', count: '131 courses', labels: ['S1', 'S2', 'S3', 'S4'], values: [48200, 61500, 57900, 54300] }
+    };
+    const period = this.state.period || this.props.periode || 'Semaine';
+    const d = data[period] || data.Semaine;
+    const max = Math.max.apply(null, d.values) || 1;
+    const last = d.values.length - 1;
+    const total = d.values.reduce((a, b) => a + b, 0);
+    const bars = d.values.map((v, i) => {
+      const h = Math.max(6, Math.round((v / max) * 104));
+      const hi = i === last;
+      const style = 'position: relative; overflow: hidden; width: 100%; max-width: 34px; height: ' + h + 'px; border-radius: 10px; ' +
+        (hi ? 'background: linear-gradient(180deg, #FFB000, #FF6A00 55%, #FF3D00); box-shadow: 0 8px 20px rgba(255,90,0,0.4)' : 'background: rgba(255,255,255,0.16)');
+      return { style: style, hi: hi, label: d.labels[i], top: hi ? fmt(v) : '' };
+    });
+    const tab = 'height: 34px; padding: 0 10px; border-radius: 12px; border: 0; font-size: 12px; cursor: pointer; ';
+    const periods = ['Jour', 'Semaine', 'Mois'].map((p) => ({
+      label: p,
+      selected: p === period ? 'true' : 'false',
+      style: tab + (p === period ? 'font-weight: 800; background: linear-gradient(100deg, #FFB000, #FF6A00 60%, #FF3D00); color: #140800' : 'font-weight: 600; background: transparent; color: rgba(255,255,255,0.78)'),
+      pick: () => this.setState({ period: p })
+    }));
+    return {
+      motion: this.props.motion === false ? 'off' : 'on',
+      periods: periods,
+      caption: d.caption,
+      count: d.count,
+      total: fmt(total),
+      bars: bars,
+      chartLabel: d.caption + ' : ' + d.labels.map((l, i) => l + ' ' + fmt(d.values[i]) + ' FCFA').join(', ')
+    };
+  }
+}
+</script>
+</body>
+</html>

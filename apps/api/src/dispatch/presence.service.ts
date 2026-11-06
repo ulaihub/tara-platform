@@ -18,6 +18,8 @@ export interface RiderPosition {
   heading?: number | undefined;
   speed?: number | undefined;
   accuracy?: number | undefined;
+  /** Position simulée signalée par le téléphone. */
+  mocked?: boolean | undefined;
 }
 
 export interface NearbyRider {

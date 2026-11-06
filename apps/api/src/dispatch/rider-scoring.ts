@@ -9,8 +9,6 @@
 export const MAX_ACTIVE_ORDERS = 2;
 /** Pénalité par course déjà en cours : le livreur arrivera plus tard. */
 export const ACTIVE_ORDER_PENALTY_METERS = 2_000;
-/** Pénalité maximale quand les espèces détenues approchent du plafond. */
-export const CASH_PENALTY_METERS = 1_000;
 /** Bonus ou malus par point de note au-dessus ou en dessous de 4/5. */
 export const RATING_WEIGHT_METERS = 500;
 /** En dessous de ce nombre d'avis, la note n'est pas prise en compte. */
@@ -24,19 +22,24 @@ export interface RiderSnapshot {
   hasPendingOffer: boolean;
   /** Pièces obligatoires validées et non expirées (D4). */
   documentsValid: boolean;
-  cashHeld: number;
-  cashLimit: number;
+  /** Solde prépayé disponible : doit couvrir l'argent à encaisser sur la course (G5). */
+  availableBalance: number;
+  /** Espèces non déposées dans le délai (ancien fonctionnement, G5). */
+  cashOverdue: boolean;
   ratingSum: number;
   ratingCount: number;
 }
 
-export type Ineligibility = 'DOCUMENTS' | 'CASH_LIMIT' | 'TOO_MANY_ORDERS' | 'PENDING_OFFER';
+export type Ineligibility =
+  'DOCUMENTS' | 'BALANCE_TOO_LOW' | 'CASH_OVERDUE' | 'TOO_MANY_ORDERS' | 'PENDING_OFFER';
 
 /** Raisons pour lesquelles le livreur ne peut pas recevoir cette course (vide si éligible). */
 export function ineligibilities(rider: RiderSnapshot, orderCash: number): Ineligibility[] {
   const reasons: Ineligibility[] = [];
   if (!rider.documentsValid) reasons.push('DOCUMENTS');
-  if (rider.cashHeld + orderCash > rider.cashLimit) reasons.push('CASH_LIMIT');
+  // Solde prépayé : l'argent encaissé est pris sur le solde, qui doit donc le couvrir.
+  if (orderCash > 0 && rider.availableBalance < orderCash) reasons.push('BALANCE_TOO_LOW');
+  if (rider.cashOverdue) reasons.push('CASH_OVERDUE');
   if (rider.activeOrders >= MAX_ACTIVE_ORDERS) reasons.push('TOO_MANY_ORDERS');
   if (rider.hasPendingOffer) reasons.push('PENDING_OFFER');
   return reasons;
@@ -44,9 +47,6 @@ export function ineligibilities(rider: RiderSnapshot, orderCash: number): Inelig
 
 export function score(rider: RiderSnapshot): number {
   let value = rider.distanceMeters + rider.activeOrders * ACTIVE_ORDER_PENALTY_METERS;
-  if (rider.cashLimit > 0) {
-    value += Math.min(1, rider.cashHeld / rider.cashLimit) * CASH_PENALTY_METERS;
-  }
   if (rider.ratingCount >= MIN_RATINGS) {
     value -= (rider.ratingSum / rider.ratingCount - 4) * RATING_WEIGHT_METERS;
   }

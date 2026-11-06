@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { type FakePushProvider, PUSH_PROVIDER } from '../src/notifications/push.provider.js';
+import { OrderSupportService } from '../src/rider-app/order-support.service.js';
 import {
   createTestApp,
   type SignedIn,
@@ -16,6 +17,7 @@ import {
   setupDouala,
   type TestMerchant,
 } from './helpers/orders.js';
+import { square } from './helpers/geo.js';
 import {
   activeRider,
   goOnline,
@@ -170,12 +172,31 @@ describe('Actions du livreur (E2 à E9)', () => {
       .set(rider.auth)
       .expect(200);
     const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } });
-    expect(earnings.body).toMatchObject({ delivered: 1, earnings: stored.riderEarning });
+    expect(earnings.body).toMatchObject({
+      delivered: 1,
+      earnings: stored.riderEarning,
+      bucket: 'two_hours',
+    });
+    // L'histogramme répartit exactement le total de la période.
+    expect(earnings.body.series).toHaveLength(8);
+    const series = earnings.body.series as { earnings: number; delivered: number }[];
+    expect(series.reduce((sum, bucket) => sum + bucket.earnings, 0)).toBe(stored.riderEarning);
+    expect(series.reduce((sum, bucket) => sum + bucket.delivered, 0)).toBe(1);
+    // En ligne depuis le début du test : du temps compté, et pas plus que la durée écoulée.
+    expect(earnings.body.onlineSeconds).toBeGreaterThanOrEqual(0);
+    expect(earnings.body.onlineSeconds).toBeLessThan(600);
+    const week = await request(ctx.http)
+      .get('/v1/rider/earnings?period=week')
+      .set(rider.auth)
+      .expect(200);
+    expect(week.body).toMatchObject({ bucket: 'day', earnings: stored.riderEarning });
+    expect(week.body.series).toHaveLength(7);
     const history = await request(ctx.http)
       .get('/v1/rider/orders?scope=history')
       .set(rider.auth)
       .expect(200);
     expect(history.body.items.map((item: { id: string }) => item.id)).toEqual([order.id]);
+    expect(history.body.items[0].completedAt).toBe(history.body.items[0].deliveredAt);
   });
 
   it('sans code, le support valide après appel ; au-delà du plafond, un administrateur (E4)', async () => {
@@ -196,7 +217,7 @@ describe('Actions du livreur (E2 à E9)', () => {
     const pending = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/deliver`)
       .set(rider.auth)
-      .send({ photoKey, ...HERE })
+      .send({ photoKey, receivedBy: 'Sa sœur, Brigitte', ...HERE })
       .expect(200);
     expect(pending.body).toMatchObject({ status: 'IN_DELIVERY', awaitingSupportValidation: true });
 
@@ -214,7 +235,11 @@ describe('Actions du livreur (E2 à E9)', () => {
     const proof = await ctx.prisma.deliveryProof.findFirstOrThrow({
       where: { orderId: order.id, kind: 'DELIVERY' },
     });
-    expect(proof).toMatchObject({ codeVerified: false, supportValidatorId: admin.userId });
+    expect(proof).toMatchObject({
+      codeVerified: false,
+      supportValidatorId: admin.userId,
+      receivedBy: 'Sa sœur, Brigitte',
+    });
     expect((await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } })).status).toBe(
       'DELIVERED',
     );
@@ -229,22 +254,71 @@ describe('Actions du livreur (E2 à E9)', () => {
     const { rider, order } = await assigned();
     await pickUp(rider, order);
     const photoKey = await proofPhoto(ctx, rider);
-    await request(ctx.http)
+    // Colis enlevé il y a 10 min : les appels comptent à partir de là.
+    await ctx.prisma.order.update({
+      where: { id: order.id },
+      data: { pickedUpAt: new Date(Date.now() - 10 * 60_000) },
+    });
+    // Client absent : deux appels au destinataire, à 5 min d'écart au moins.
+    const call = (minutesAgo: number) => ({
+      to: 'RECIPIENT',
+      at: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
+      durationSeconds: 30,
+    });
+    const none = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/fail`)
       .set(rider.auth)
       .send({ reason: 'RECIPIENT_ABSENT', photoKey, callLog: [], ...HERE })
+      .expect(422);
+    expect(none.body.error.code).toBe('FAILURE_CALLS_REQUIRED');
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'RECIPIENT_UNREACHABLE', photoKey, callLog: [call(3), call(0)], ...HERE })
+      .expect(422);
+    // Journal du téléphone : un appel d'avant l'enlèvement ou dans le futur ne compte pas.
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'RECIPIENT_ABSENT', photoKey, callLog: [call(30), call(0)], ...HERE })
+      .expect(422);
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'RECIPIENT_ABSENT', photoKey, callLog: [call(1), call(-10)], ...HERE })
+      .expect(422);
+    // Autre motif : un appel et une explication.
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'OTHER', photoKey, callLog: [call(0)], ...HERE })
       .expect(400);
+    // Refus sur place : pas d'appel exigé.
     const failed = await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/fail`)
       .set(rider.auth)
       .send({
-        reason: 'RECIPIENT_UNREACHABLE',
+        reason: 'PAYMENT_REFUSED',
         photoKey,
-        callLog: [{ to: 'RECIPIENT', at: new Date().toISOString(), durationSeconds: 0 }],
         ...HERE,
       })
       .expect(200);
-    expect(failed.body.status).toBe('DELIVERY_FAILED');
+    expect(failed.body).toMatchObject({
+      status: 'DELIVERY_FAILED',
+      failureReason: 'PAYMENT_REFUSED',
+    });
+    expect(Date.parse(failed.body.failureDecisionDueAt) - Date.parse(failed.body.failedAt)).toBe(
+      15 * 60_000,
+    );
+    const failure = await ctx.prisma.orderEvent.findFirstOrThrow({
+      where: { orderId: order.id, toStatus: 'DELIVERY_FAILED' },
+    });
+    expect(failure.failureReason).toBe('PAYMENT_REFUSED');
+    // Déclaré loin de l'adresse du destinataire : alerte au support.
+    const far = await ctx.prisma.courseAlert.findFirst({
+      where: { orderId: order.id, dedupeKey: 'ACTION_FAR:FAILURE' },
+    });
+    expect(far).not.toBeNull();
 
     await request(ctx.http)
       .post(`/v1/orders/${order.id}/failure-decision`)
@@ -283,6 +357,71 @@ describe('Actions du livreur (E2 à E9)', () => {
       .send({ senderCode: returnCode, ...HERE })
       .expect(200);
     expect(returned.body.status).toBe('RETURNED');
+    expect(returned.body.completedAt).not.toBeNull();
+  });
+
+  it('échec sans réponse de l’expéditeur : retour automatique ; le support peut choisir à sa place (E6)', async () => {
+    const call = (minutesAgo: number) => ({
+      to: 'RECIPIENT',
+      at: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
+      durationSeconds: 25,
+    });
+    const fail = async () => {
+      const { rider, order } = await assigned();
+      await pickUp(rider, order);
+      await ctx.prisma.order.update({
+        where: { id: order.id },
+        data: { pickedUpAt: new Date(Date.now() - 10 * 60_000) },
+      });
+      const photoKey = await proofPhoto(ctx, rider);
+      await request(ctx.http)
+        .post(`/v1/rider/orders/${order.id}/fail`)
+        .set(rider.auth)
+        .send({ reason: 'RECIPIENT_ABSENT', photoKey, callLog: [call(6), call(0)], ...HERE })
+        .expect(200);
+      return { rider, order };
+    };
+    const support$ = ctx.app.get(OrderSupportService);
+
+    const first = await fail();
+    // Avant le délai : rien ne change.
+    await support$.sweepFailures(new Date(Date.now() + 14 * 60_000));
+    const waiting = await ctx.prisma.order.findUniqueOrThrow({ where: { id: first.order.id } });
+    expect(waiting.failureDecision).toBeNull();
+    await support$.sweepFailures(new Date(Date.now() + 16 * 60_000));
+    const back = await request(ctx.http)
+      .get(`/v1/rider/orders/${first.order.id}`)
+      .set(first.rider.auth)
+      .expect(200);
+    expect(back.body).toMatchObject({ failureDecision: 'RETURN', failureDecisionDueAt: null });
+    expect(push.lastTo(first.rider.pushToken)).toMatchObject({
+      data: { type: 'order.failure-decision', decision: 'RETURN' },
+    });
+
+    // Le support choisit à la place de l'expéditeur ; le retour automatique ne le remplace pas.
+    const second = await fail();
+    await request(ctx.http)
+      .post(`/v1/admin/orders/${second.order.id}/failure-decision`)
+      .set(first.rider.auth)
+      .send({ decision: 'RETRY' })
+      .expect(403);
+    await request(ctx.http)
+      .post(`/v1/admin/orders/${second.order.id}/failure-decision`)
+      .set(support.auth)
+      .send({ decision: 'RETRY' })
+      .expect(204);
+    await support$.sweepFailures(new Date(Date.now() + 16 * 60_000));
+    const kept = await ctx.prisma.order.findUniqueOrThrow({ where: { id: second.order.id } });
+    expect(kept.failureDecision).toBe('RETRY');
+    const audit = await ctx.prisma.auditLog.findFirst({
+      where: { entityId: second.order.id, action: 'order.failure-decision' },
+    });
+    expect(audit).not.toBeNull();
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${second.order.id}/retry`)
+      .set(second.rider.auth)
+      .send(HERE)
+      .expect(200);
   });
 
   it('garde l’heure d’une action faite hors ligne et refuse une heure dans le futur (E7)', async () => {
@@ -311,6 +450,48 @@ describe('Actions du livreur (E2 à E9)', () => {
     expect(event.occurredAt.toISOString()).toBe(offlineAt.toISOString());
   });
 
+  it('trace l’itinéraire vers la prochaine étape, sans révéler la course aux autres (E2)', async () => {
+    const { rider, order } = await assigned();
+    const position = { latitude: HERE.latitude, longitude: HERE.longitude };
+    const toPickup = await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}/route`)
+      .query(position)
+      .set(rider.auth)
+      .expect(200);
+    const detail = await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}`)
+      .set(rider.auth)
+      .expect(200);
+    const pickup = detail.body.pickup as { latitude: number; longitude: number };
+    // Sans OSRM en test : ligne droite de la position du livreur au vendeur.
+    expect(toPickup.body).toMatchObject({ stop: 'PICKUP', source: 'estimate' });
+    expect(toPickup.body.path).toEqual([
+      [position.longitude, position.latitude],
+      [pickup.longitude, pickup.latitude],
+    ]);
+    expect(toPickup.body.meters).toBeGreaterThan(0);
+
+    await pickUp(rider, order);
+    const toDropoff = await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}/route`)
+      .query(position)
+      .set(rider.auth)
+      .expect(200);
+    expect(toDropoff.body.stop).toBe('DROPOFF');
+
+    const other = await activeRider(ctx);
+    await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}/route`)
+      .query(position)
+      .set(other.auth)
+      .expect(404);
+    await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}/route`)
+      .query({ latitude: 'abc', longitude: 9.7 })
+      .set(rider.auth)
+      .expect(400);
+  });
+
   it('cache les courses des autres livreurs et réserve les photos de preuve aux livreurs', async () => {
     const { order } = await assigned();
     const other = await activeRider(ctx);
@@ -332,6 +513,27 @@ describe('Actions du livreur (E2 à E9)', () => {
         contentType: 'image/jpeg',
       })
       .expect(403);
+  });
+
+  it('donne à l’app ses réglages : ligne de secours, opérateurs, délai des propositions', async () => {
+    const rider = await activeRider(ctx);
+    const res = await request(ctx.app.getHttpServer())
+      .get('/v1/rider/config')
+      .set(rider.auth)
+      .expect(200);
+    expect(res.body).toEqual({
+      country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
+      safetyHotline: '+237640114064',
+      supportPhone: null,
+      failurePolicy: { minCalls: 2, callSpacingMinutes: 5, decisionTimeoutMinutes: 15 },
+      emergencyNumbers: { police: '117', fire: '118', medical: '119' },
+      mobileMoneyOperators: [
+        { code: 'MTN', name: 'MTN MoMo' },
+        { code: 'ORANGE', name: 'Orange Money' },
+      ],
+      offerTimeoutSeconds: 30,
+    });
+    await request(ctx.app.getHttpServer()).get('/v1/rider/config').expect(401);
   });
 
   it('envoie l’alerte de sécurité au dispatch et aux numéros d’astreinte (E8)', async () => {
@@ -359,5 +561,164 @@ describe('Actions du livreur (E2 à E9)', () => {
       .set(support.auth)
       .expect(200);
     expect(after.body.map((alert: { id: string }) => alert.id)).not.toContain(res.body.id);
+  });
+
+  it('alerte : plaque et quartier pour l’équipe, renvoi sans doublon, police appelée par l’agent (E8)', async () => {
+    const rider = await activeRider(ctx);
+    await ctx.prisma.riderProfile.update({
+      where: { id: rider.riderId },
+      data: { plateNumber: 'LT 482 AB' },
+    });
+    const suffix = randomUUID().slice(0, 8);
+    await request(ctx.http)
+      .post('/v1/admin/zones')
+      .set(admin.auth)
+      .send({
+        name: `Akwa SOS ${suffix}`,
+        city: 'Douala',
+        kind: 'NEIGHBORHOOD',
+        geometry: square(HERE, 0.0002),
+      })
+      .expect(201);
+    const body = { ...HERE, accuracy: 8, clientEventId: `sos-${suffix}` };
+
+    const first = await request(ctx.http)
+      .post('/v1/rider/alerts')
+      .set(rider.auth)
+      .send(body)
+      .expect(201);
+    expect(first.body).toMatchObject({
+      riderPlate: 'LT 482 AB',
+      accuracy: 8,
+      policeCalledAt: null,
+    });
+    expect(first.body.neighborhood).toMatch(/^Akwa SOS /);
+    const sms = ctx.sms.lastTo(OPS_PHONE)?.text ?? '';
+    expect(sms).toContain('moto LT 482 AB');
+    expect(sms).toContain('Quartier : Akwa SOS');
+
+    // Renvoyée au retour du réseau : la même alerte, sans nouveau SMS à l'équipe.
+    const smsCount = ctx.sms.outbox.length;
+    const again = await request(ctx.http)
+      .post('/v1/rider/alerts')
+      .set(rider.auth)
+      .send(body)
+      .expect(201);
+    expect(again.body.id).toBe(first.body.id);
+    expect(ctx.sms.outbox.length).toBe(smsCount);
+    // Nouvel appui pendant que l'alerte est ouverte : la même, sans nouvelle salve de SMS.
+    const pressed = await request(ctx.http)
+      .post('/v1/rider/alerts')
+      .set(rider.auth)
+      .send({ ...body, clientEventId: `sos-bis-${suffix}` })
+      .expect(201);
+    expect(pressed.body.id).toBe(first.body.id);
+    expect(ctx.sms.outbox.length).toBe(smsCount);
+
+    // Livreur injoignable : l'agent appelle la police ; heure, agent et note gardés, action tracée.
+    await request(ctx.http)
+      .post(`/v1/admin/safety-alerts/${first.body.id}/police-called`)
+      .set(rider.auth)
+      .send({ note: 'Appel au 117' })
+      .expect(403);
+    const called = await request(ctx.http)
+      .post(`/v1/admin/safety-alerts/${first.body.id}/police-called`)
+      .set(support.auth)
+      .send({ note: 'Livreur injoignable, 117 prévenu avec position et plaque' })
+      .expect(200);
+    expect(called.body.policeCalledAt).not.toBeNull();
+    expect(called.body.acknowledgedAt).not.toBeNull();
+    const stored = await ctx.prisma.safetyAlert.findUniqueOrThrow({ where: { id: first.body.id } });
+    expect(stored.policeCalledById).toBe(support.userId);
+    const audit = await ctx.prisma.auditLog.findFirst({
+      where: { entityId: first.body.id, action: 'safety-alert.police-called' },
+    });
+    expect(audit).not.toBeNull();
+
+    await request(ctx.http)
+      .post(`/v1/admin/safety-alerts/${first.body.id}/resolve`)
+      .set(support.auth)
+      .send({ resolution: 'Police sur place, livreur en sécurité' })
+      .expect(200);
+    await request(ctx.http)
+      .post(`/v1/admin/safety-alerts/${first.body.id}/police-called`)
+      .set(support.auth)
+      .send({ note: 'Encore' })
+      .expect(409);
+  });
+
+  it('prévient le contact d’urgence ; une alerte annulée reste ouverte au dispatch (E8)', async () => {
+    const rider = await activeRider(ctx);
+    const contact = `+2376${String(Math.floor(Math.random() * 1e8)).padStart(8, '0')}`;
+    await request(ctx.http)
+      .put('/v1/riders/me/emergency-contact')
+      .set(rider.auth)
+      .send({ name: 'Mama', phone: rider.phone })
+      .expect(422);
+    const profile = await request(ctx.http)
+      .put('/v1/riders/me/emergency-contact')
+      .set(rider.auth)
+      .send({ name: 'Mama Ngo', phone: contact })
+      .expect(200);
+    expect(profile.body.emergencyContact).toEqual({ name: 'Mama Ngo', phone: contact });
+
+    const alert = await request(ctx.http)
+      .post('/v1/rider/alerts')
+      .set(rider.auth)
+      .send(HERE)
+      .expect(201);
+    expect(ctx.sms.lastTo(contact)?.text).toContain('maps.google.com');
+
+    // Un autre livreur ne peut pas annuler l'alerte.
+    const other = await activeRider(ctx);
+    await request(ctx.http)
+      .post(`/v1/rider/alerts/${alert.body.id}/cancel`)
+      .set(other.auth)
+      .expect(404);
+    const cancelled = await request(ctx.http)
+      .post(`/v1/rider/alerts/${alert.body.id}/cancel`)
+      .set(rider.auth)
+      .expect(200);
+    expect(cancelled.body.cancelledAt).not.toBeNull();
+    expect(ctx.sms.lastTo(OPS_PHONE)?.text).toContain('annule son alerte');
+    expect(ctx.sms.lastTo(contact)?.text).toContain('annule son alerte');
+    await request(ctx.http)
+      .post(`/v1/rider/alerts/${alert.body.id}/cancel`)
+      .set(rider.auth)
+      .expect(409);
+    // Toujours visible du dispatch, qui rappelle le livreur avant de clore.
+    const open = await request(ctx.http)
+      .get('/v1/admin/safety-alerts')
+      .set(support.auth)
+      .expect(200);
+    expect(open.body.find((item: { id: string }) => item.id === alert.body.id)).toMatchObject({
+      cancelledAt: cancelled.body.cancelledAt,
+      resolvedAt: null,
+    });
+
+    const removed = await request(ctx.http)
+      .delete('/v1/riders/me/emergency-contact')
+      .set(rider.auth)
+      .expect(200);
+    expect(removed.body.emergencyContact).toBeNull();
+  });
+
+  it('liste les pièces exigées, avec les alternatives et la date d’expiration demandée', async () => {
+    const rider = await activeRider(ctx);
+    const res = await request(ctx.http).get('/v1/riders/requirements').set(rider.auth).expect(200);
+    const vehicle = res.body.find((group: { types: { type: string }[] }) =>
+      group.types.some((item) => item.type === 'VEHICLE_REGISTRATION'),
+    );
+    expect(vehicle.types.map((item: { type: string }) => item.type)).toEqual([
+      'VEHICLE_REGISTRATION',
+      'VEHICLE_RENTAL_CONTRACT',
+    ]);
+    const licence = res.body.find(
+      (group: { types: { type: string }[] }) => group.types[0]?.type === 'DRIVING_LICENSE',
+    );
+    expect(licence.types[0]).toMatchObject({
+      asksExpiry: true,
+      label: { fr: 'Permis de conduire', en: 'Driving licence' },
+    });
   });
 });

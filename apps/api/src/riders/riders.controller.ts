@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Req,
   Res,
   UploadedFile,
@@ -15,7 +17,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
-import type { z } from 'zod';
+import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
 import { CurrentUser, Roles } from '../auth/decorators.js';
 import { AppError } from '../common/errors/app-error.js';
@@ -32,7 +34,12 @@ import {
   AdminRiderDto,
   AdminRiderListQuery,
   ApplyRiderBody,
+  DOCUMENT_LABELS,
+  DocumentRequirementDto,
+  EmergencyContactBody,
+  EXPIRING_DOCUMENTS,
   KycDocumentDto,
+  REQUIRED_DOCUMENTS,
   ReviewDocumentBody,
   RiderDecisionBody,
   RiderProfileDto,
@@ -58,11 +65,47 @@ export class RidersController {
     return this.riders.apply(user, body, request);
   }
 
+  /** Pièces à fournir, dans l'ordre d'affichage : l'app n'en code aucune en dur (A3). */
+  @Get('requirements')
+  @ApiZodResponse(z.array(DocumentRequirementDto))
+  requirements(): z.output<typeof DocumentRequirementDto>[] {
+    return REQUIRED_DOCUMENTS.map((group) => ({
+      types: group.map((type) => ({
+        type,
+        label: DOCUMENT_LABELS[type],
+        asksExpiry: EXPIRING_DOCUMENTS.includes(type),
+      })),
+    }));
+  }
+
   @Get('me')
   @Roles('RIDER')
   @ApiZodResponse(RiderProfileDto)
   me(@CurrentUser() user: AuthUser): Promise<z.output<typeof RiderProfileDto>> {
     return this.riders.myProfile(user.id);
+  }
+
+  /** Contact d'urgence, prévenu par SMS en cas d'alerte de sécurité (facultatif). */
+  @Put('me/emergency-contact')
+  @Roles('RIDER')
+  @ApiZodBody(EmergencyContactBody)
+  @ApiZodResponse(RiderProfileDto)
+  setEmergencyContact(
+    @CurrentUser() user: AuthUser,
+    @ValidBody(EmergencyContactBody) body: z.output<typeof EmergencyContactBody>,
+    @Req() request: Request,
+  ): Promise<z.output<typeof RiderProfileDto>> {
+    return this.riders.setEmergencyContact(user, body, request);
+  }
+
+  @Delete('me/emergency-contact')
+  @Roles('RIDER')
+  @ApiZodResponse(RiderProfileDto)
+  removeEmergencyContact(
+    @CurrentUser() user: AuthUser,
+    @Req() request: Request,
+  ): Promise<z.output<typeof RiderProfileDto>> {
+    return this.riders.setEmergencyContact(user, null, request);
   }
 
   /** Envoi d'une pièce : photo ou PDF de 5 Mo maximum, chiffré au stockage (A3). */

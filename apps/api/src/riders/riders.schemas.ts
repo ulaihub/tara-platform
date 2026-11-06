@@ -24,7 +24,8 @@ export const VehicleTypeEnum = z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']).meta({ i
 
 /**
  * Pièces exigées (A3). Chaque groupe doit être couvert par une pièce validée et non expirée ;
- * pour le véhicule, la carte grise OU le contrat de location suffit.
+ * pour le véhicule, la carte grise OU le contrat de location suffit. La CNI du garant reste
+ * acceptée (type GUARANTOR_ID) sans être exigée.
  */
 export const REQUIRED_DOCUMENTS: KycDocumentType[][] = [
   ['NATIONAL_ID_FRONT'],
@@ -34,7 +35,7 @@ export const REQUIRED_DOCUMENTS: KycDocumentType[][] = [
   ['INSURANCE'],
   ['SELFIE'],
   ['CRIMINAL_RECORD'],
-  ['GUARANTOR_ID'],
+  // Pas de CNI du garant : le garant est facultatif depuis le solde prépayé (décision 36).
 ];
 
 export const DOCUMENT_LABELS: Record<KycDocumentType, { fr: string; en: string }> = {
@@ -49,11 +50,40 @@ export const DOCUMENT_LABELS: Record<KycDocumentType, { fr: string; en: string }
   GUARANTOR_ID: { fr: 'CNI du garant', en: 'Guarantor ID' },
 };
 
+/** Pièces dont la date d'expiration est demandée à l'envoi (rappel avant échéance, A5). */
+export const EXPIRING_DOCUMENTS: KycDocumentType[] = [
+  'NATIONAL_ID_FRONT',
+  'DRIVING_LICENSE',
+  'INSURANCE',
+  'VEHICLE_RENTAL_CONTRACT',
+];
+
+/** Une pièce exigée : l'un des types listés suffit (carte grise OU contrat de location). */
+export const DocumentRequirementDto = z
+  .object({
+    types: z.array(
+      z.object({
+        type: KycDocumentTypeEnum,
+        label: z.object({ fr: z.string(), en: z.string() }),
+        asksExpiry: z.boolean(),
+      }),
+    ),
+  })
+  .meta({ id: 'DocumentRequirement' });
+
+/** Proche prévenu par SMS si le livreur déclenche une alerte de sécurité (facultatif). */
+export const EmergencyContactBody = z.object({
+  name: z.string().trim().min(2).max(80),
+  phone: CameroonMobile,
+});
+
 export const ApplyRiderBody = z.object({
   vehicleType: VehicleTypeEnum.default('MOTORBIKE'),
   plateNumber: z.string().trim().min(3).max(20).optional(),
-  guarantorName: z.string().trim().min(2).max(80),
-  guarantorPhone: CameroonMobile,
+  /** Garant facultatif : le solde prépayé (décision 36) couvre l'argent encaissé. */
+  guarantorName: z.string().trim().min(2).max(80).optional(),
+  guarantorPhone: CameroonMobile.optional(),
+  emergencyContact: EmergencyContactBody.optional(),
 });
 
 export const UploadDocumentBody = z.object({
@@ -83,6 +113,7 @@ export const RiderProfileDto = z
     cashLimit: z.int().meta({ description: 'Plafond d’espèces détenues, en FCFA' }),
     guarantorName: z.string().nullable(),
     guarantorPhone: z.string().nullable(),
+    emergencyContact: z.object({ name: z.string(), phone: z.string() }).nullable(),
     approvedAt: z.iso.datetime().nullable(),
     suspendedReason: z.string().nullable(),
     /** Dernière pièce envoyée pour chaque type. */

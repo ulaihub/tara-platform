@@ -15,6 +15,7 @@ import {
   riderCashHeld,
   riderPayable,
 } from './ledger.accounts.js';
+import { CashDisciplineService } from './cash-discipline.service.js';
 import { LedgerService } from './ledger.service.js';
 import { PayoutsService } from './payouts.service.js';
 
@@ -40,11 +41,13 @@ export class WalletsService implements OnModuleInit {
     private readonly payments: PaymentsService,
     private readonly payouts: PayoutsService,
     private readonly audit: AuditService,
+    private readonly cash: CashDisciplineService,
   ) {}
 
   onModuleInit(): void {
     this.payments.on('WALLET_TOPUP', (tx, payment) => this.onTopUp(tx, payment));
     this.payments.on('RIDER_CASH_DEPOSIT', (tx, payment) => this.onCashDeposit(tx, payment));
+    this.payments.on('RIDER_TOPUP', (tx, payment) => this.onRiderTopUp(tx, payment));
   }
 
   /** Solde utilisé par l'utilisateur pour payer : portefeuille marchand s'il en a un. */
@@ -89,8 +92,13 @@ export class WalletsService implements OnModuleInit {
     return {
       currency: 'XAF' as const,
       earnings: balances.get(riderPayable(rider.id).code) ?? 0,
+      reserved: await this.prisma.riderBalanceHold
+        .aggregate({ where: { riderId: rider.id, releasedAt: null }, _sum: { amount: true } })
+        .then((sum) => sum._sum.amount ?? 0),
       cashHeld: balances.get(riderCashHeld(rider.id).code) ?? 0,
       cashLimit: rider.cashLimit,
+      cashDueBy: (await this.cash.dueBy(rider.id)).dueBy?.toISOString() ?? null,
+      cashOverdue: rider.cashOverdueSince !== null,
       available: await this.payouts.available('RIDER', rider.id),
       openPayout: openPayout
         ? { id: openPayout.id, amount: openPayout.amount, status: openPayout.status }
@@ -164,7 +172,88 @@ export class WalletsService implements OnModuleInit {
     return merchant ? merchantPayable(merchant.id) : customerWallet(userId);
   }
 
-  // --- Espèces des livreurs (G5) ------------------------------------------------------------
+  // --- Solde prépayé des livreurs (G5, décision 36) ----------------------------------------
+
+  /**
+   * Recharge du solde prépayé depuis le téléphone du livreur. Il est crédité du montant
+   * entier : Tara paie les frais Mobile Money.
+   */
+  async topUpRider(
+    userId: string,
+    amount: number,
+    phone: string,
+    operator: 'MTN' | 'ORANGE',
+    key: string,
+  ): Promise<Payment> {
+    const rider = await this.prisma.riderProfile.findUnique({ where: { userId } });
+    if (!rider) throw AppError.forbidden();
+    return this.payments.request({
+      purpose: 'RIDER_TOPUP',
+      amount,
+      phone,
+      method: operator === 'ORANGE' ? 'MOMO_ORANGE' : 'MOMO_MTN',
+      payerId: userId,
+      riderId: rider.id,
+      idempotencyKey: `rider-topup:${rider.id}:${key}`,
+      description: 'Tara recharge du solde livreur',
+    });
+  }
+
+  private async onRiderTopUp(tx: Prisma.TransactionClient, payment: Payment): Promise<void> {
+    if (!payment.riderId) throw new Error(`Recharge sans livreur (${payment.id})`);
+    await this.ledger.post(tx, {
+      kind: 'PAYMENT_RECEIVED',
+      description: 'Recharge du solde livreur par Mobile Money',
+      idempotencyKey: `payment:${payment.id}`,
+      paymentId: payment.id,
+      postings: [
+        { account: PLATFORM_ACCOUNTS.mobileMoney, amount: payment.amount },
+        { account: riderPayable(payment.riderId), amount: -payment.amount },
+      ],
+    });
+  }
+
+  /** Recharge du solde avec des espèces remises au bureau, enregistrée par la finance (tracé). */
+  async topUpRiderAtOffice(
+    staff: AuthUser,
+    riderId: string,
+    amount: number,
+    note: string,
+    key: string,
+    request: Request,
+  ) {
+    const rider = await this.prisma.riderProfile.findUnique({ where: { id: riderId } });
+    if (!rider) throw AppError.notFound('RIDER_NOT_FOUND');
+    if (rider.userId === staff.id) throw AppError.forbidden('SELF_APPROVAL_FORBIDDEN');
+    const entry = await this.prisma.$transaction(async (tx) => {
+      const posted = await this.ledger.post(tx, {
+        kind: 'PAYMENT_RECEIVED',
+        description: `Recharge du solde livreur au bureau : ${note}`,
+        idempotencyKey: `office-topup:${riderId}:${key}`,
+        postedById: staff.id,
+        postings: [
+          { account: PLATFORM_ACCOUNTS.officeCash, amount },
+          { account: riderPayable(riderId), amount: -amount },
+        ],
+      });
+      if (!posted.created) return posted;
+      await this.audit.record(
+        {
+          actor: staff,
+          action: 'rider.balance_topped_up',
+          entityType: 'rider',
+          entityId: riderId,
+          after: { amount, note, entryId: posted.entryId },
+          request,
+        },
+        tx,
+      );
+      return posted;
+    });
+    return { entryId: entry.entryId, balance: await this.ledger.balance(riderPayable(riderId)) };
+  }
+
+  // --- Espèces des livreurs (G5, ancien fonctionnement) -----------------------------------
 
   /** Le livreur dépose ses espèces par Mobile Money depuis son téléphone. */
   async depositByMobileMoney(

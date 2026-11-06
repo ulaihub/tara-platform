@@ -5,12 +5,13 @@ import type { Env } from '../config/env.js';
 import { verifyCode } from '../common/crypto.js';
 import { AppError } from '../common/errors/app-error.js';
 import { pageOf } from '../common/pagination.js';
-import { CAMEROON_TIME_ZONE } from '../common/time.js';
+import { CAMEROON_TIME_ZONE, cameroonDate } from '../common/time.js';
 import { ACTIVE_RIDER_STATUSES } from '../dispatch/dispatch.service.js';
+import { OnlineTimeService } from '../dispatch/online-time.service.js';
 import { OrderFinanceService } from '../finance/order-finance.service.js';
 import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js';
 import type { Order, Prisma, RiderProfile } from '../generated/prisma/client.js';
-import type { OrderStatus, ProofKind } from '../generated/prisma/enums.js';
+import type { FailureReason, OrderStatus, ProofKind } from '../generated/prisma/enums.js';
 import { AddressesService } from '../geo/addresses.service.js';
 import { checkTransition } from '../orders/order-state-machine.js';
 import {
@@ -19,6 +20,8 @@ import {
 } from '../orders/order-transitions.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
+import { DistanceService, type GeoPoint } from '../routing/distance.service.js';
+import { CourseTrackService } from '../tracking/course-track.service.js';
 import { MediaService } from '../storage/media.service.js';
 import type {
   DeliverBody,
@@ -29,6 +32,7 @@ import type {
   ReturnBody,
   RiderOrderDto,
   RiderOrdersQuery,
+  RiderRouteDto,
 } from './rider-app.schemas.js';
 
 /** Codes à 4 chiffres : au-delà de ce nombre d'erreurs, le code est bloqué (E3, E4). */
@@ -42,6 +46,7 @@ const ORDER_INCLUDE = {
   dropoffAddress: { include: { neighborhood: true } },
   sender: { select: { fullName: true, phone: true, merchant: { select: { shopName: true } } } },
   merchant: { select: { shopName: true } },
+  codCollection: { select: { collectedAmount: true, method: true } },
 } as const satisfies Prisma.OrderInclude;
 
 type RiderOrder = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
@@ -53,6 +58,16 @@ type ActionContext = z.output<typeof PositionActionBody>;
  * sans effet de bord grâce à son identifiant (`clientEventId`) : l'app hors ligne peut
  * renvoyer sa file d'actions autant de fois que nécessaire.
  */
+/** Appels au destinataire exigés avant un échec, selon le motif (E6). */
+const CALLS_REQUIRED: Record<FailureReason, number | 'policy'> = {
+  RECIPIENT_ABSENT: 'policy',
+  RECIPIENT_UNREACHABLE: 'policy',
+  ADDRESS_NOT_FOUND: 'policy',
+  OTHER: 1,
+  REFUSED: 0,
+  PAYMENT_REFUSED: 0,
+};
+
 @Injectable()
 export class RiderOrdersService {
   constructor(
@@ -63,6 +78,9 @@ export class RiderOrdersService {
     private readonly media: MediaService,
     private readonly realtime: RealtimeService,
     private readonly finance: OrderFinanceService,
+    private readonly onlineTime: OnlineTimeService,
+    private readonly distance: DistanceService,
+    private readonly tracks: CourseTrackService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -116,6 +134,25 @@ export class RiderOrdersService {
     return dto as z.output<typeof RiderOrderDto>;
   }
 
+  /** Itinéraire de la position du livreur à la prochaine étape de sa course (E2). */
+  async route(
+    userId: string,
+    orderId: string,
+    from: GeoPoint,
+  ): Promise<z.output<typeof RiderRouteDto>> {
+    const { order } = await this.load(userId, orderId);
+    const target = navigationTarget(order);
+    if (!target) throw AppError.conflict('ORDER_NOT_IN_PROGRESS', { status: order.status });
+    const route = await this.distance.path(from, target);
+    return {
+      stop: target === order.pickupAddress ? 'PICKUP' : 'DROPOFF',
+      meters: route.meters,
+      seconds: route.seconds,
+      source: route.source,
+      path: route.path,
+    };
+  }
+
   private async toDtos(orders: RiderOrder[]): Promise<z.output<typeof RiderOrderDto>[]> {
     const unique = new Map(
       orders.flatMap((o) => [o.pickupAddress, o.dropoffAddress]).map((a) => [a.id, a] as const),
@@ -163,10 +200,26 @@ export class RiderOrdersService {
               }
             : null,
         failureDecision: order.failureDecision,
+        failureReason: order.failureReason,
+        failedAt: order.failedAt?.toISOString() ?? null,
+        failureDecisionDueAt:
+          order.status === 'DELIVERY_FAILED' && !order.failureDecision && order.failedAt
+            ? new Date(
+                order.failedAt.getTime() + this.env.FAILURE_DECISION_TIMEOUT_MINUTES * 60_000,
+              ).toISOString()
+            : null,
         awaitingSupportValidation: awaiting.has(order.id),
         assignedAt: order.assignedAt?.toISOString() ?? null,
         pickedUpAt: order.pickedUpAt?.toISOString() ?? null,
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
+        completedAt:
+          (order.deliveredAt ?? order.returnedAt ?? order.cancelledAt)?.toISOString() ?? null,
+        collected: order.codCollection
+          ? {
+              amount: order.codCollection.collectedAmount,
+              method: order.codCollection.method === 'CASH' ? 'CASH' : 'MOBILE_MONEY',
+            }
+          : null,
       };
     });
   }
@@ -205,6 +258,7 @@ export class RiderOrdersService {
       photoKey: body.photoKey,
       codeVerified: true,
     });
+    await this.tracks.checkAction(order, 'PICKUP', body, order.pickupAddress);
     return this.get(userId, orderId);
   }
 
@@ -251,6 +305,7 @@ export class RiderOrdersService {
           kind: 'DELIVERY',
           photoKey: body.photoKey,
           codeVerified: false,
+          receivedBy: body.receivedBy ?? null,
           latitude: body.latitude,
           longitude: body.longitude,
           occurredAt: this.occurredAt(body),
@@ -262,10 +317,12 @@ export class RiderOrdersService {
         reference: order.reference,
         riderId: rider.id,
         proofId: proof.id,
+        receivedBy: proof.receivedBy,
         collectAtDelivery:
           order.codAmount + (order.feePayer === 'RECIPIENT' ? order.totalPrice : 0),
         at: proof.occurredAt.toISOString(),
       });
+      await this.tracks.checkAction(order, 'DELIVERY', body, order.dropoffAddress);
       return this.get(userId, orderId);
     }
     assertTransition(order, 'DELIVERED');
@@ -275,6 +332,7 @@ export class RiderOrdersService {
       photoKey: body.photoKey,
       codeVerified: true,
     });
+    await this.tracks.checkAction(order, 'DELIVERY', body, order.dropoffAddress);
     return this.get(userId, orderId);
   }
 
@@ -287,6 +345,7 @@ export class RiderOrdersService {
     if (await this.replayed(orderId, body.clientEventId)) return this.get(userId, orderId);
     const { order } = await this.load(userId, orderId);
     await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
+    this.checkFailure(order, body);
     await this.act(
       userId,
       order,
@@ -300,7 +359,40 @@ export class RiderOrdersService {
       },
       { failureReason: body.reason, note: body.note },
     );
+    // Échec déclaré loin de l'adresse du destinataire : alerte au support (faux « absent »).
+    await this.tracks.checkAction(order, 'FAILURE', body, order.dropoffAddress);
     return this.get(userId, orderId);
+  }
+
+  /**
+   * Preuve d'appel exigée selon le motif (E6) : un faux « client absent » coûte une course
+   * au client ; un refus sur place n'a pas besoin d'appel.
+   */
+  private checkFailure(order: Order, body: z.output<typeof FailBody>): void {
+    if (body.reason === 'OTHER' && !body.note) {
+      throw AppError.badRequest('VALIDATION_FAILED', {}, [{ path: 'note', message: 'requis' }]);
+    }
+    const rule = CALLS_REQUIRED[body.reason];
+    const required = rule === 'policy' ? this.env.FAILURE_MIN_CALLS : rule;
+    if (required === 0) return;
+    // Le journal vient du téléphone : seuls comptent les appels de cette tentative (depuis
+    // l'enlèvement, ou depuis l'échec précédent) et pas dans le futur.
+    const from = (order.failedAt ?? order.pickedUpAt ?? order.assignedAt)?.getTime() ?? 0;
+    const until = Date.now() + 2 * 60_000;
+    const times = body.callLog
+      .filter((call) => call.to === 'RECIPIENT')
+      .map((call) => Date.parse(call.at))
+      .filter((at) => at >= from && at <= until)
+      .sort((a, b) => a - b);
+    const spacing = required > 1 ? this.env.FAILURE_CALL_SPACING_MINUTES * 60_000 : 0;
+    const spread = times.length > 0 ? (times.at(-1) ?? 0) - (times[0] ?? 0) : 0;
+    if (times.length < required || spread < spacing) {
+      if (required === 1) throw AppError.unprocessable('FAILURE_CALL_REQUIRED');
+      throw AppError.unprocessable('FAILURE_CALLS_REQUIRED', {
+        required,
+        spacingMinutes: this.env.FAILURE_CALL_SPACING_MINUTES,
+      });
+    }
   }
 
   /** Nouvelle tentative après un échec. */
@@ -331,6 +423,7 @@ export class RiderOrdersService {
       photoKey: body.photoKey ?? null,
       codeVerified: true,
     });
+    await this.tracks.checkAction(order, 'RETURN', body, order.pickupAddress);
     return this.get(userId, orderId);
   }
 
@@ -354,11 +447,10 @@ export class RiderOrdersService {
   ): Promise<z.output<typeof EarningsDto>> {
     const rider = await this.riderOf(userId);
     const from = periodStart(period, now);
-    const [delivered, failed, returned, cash] = await Promise.all([
-      this.prisma.order.aggregate({
+    const [delivered, failed, returned, cash, onlineSeconds] = await Promise.all([
+      this.prisma.order.findMany({
         where: { riderId: rider.id, status: 'DELIVERED', deliveredAt: { gte: from, lte: now } },
-        _count: true,
-        _sum: { riderEarning: true },
+        select: { deliveredAt: true, riderEarning: true },
       }),
       this.prisma.orderEvent.count({
         where: {
@@ -374,16 +466,37 @@ export class RiderOrdersService {
         where: { riderId: rider.id, method: 'CASH', collectedAt: { gte: from, lte: now } },
         _sum: { collectedAmount: true },
       }),
+      this.onlineTime.seconds(rider.id, from, now, now),
     ]);
+    const starts = bucketStarts(period, from);
+    const series = starts.map((start) => ({
+      start: start.toISOString(),
+      earnings: 0,
+      delivered: 0,
+    }));
+    for (const order of delivered) {
+      if (!order.deliveredAt) continue;
+      // Dernière tranche commencée avant la livraison (les heures hors 6 h-22 h vont aux bords).
+      let index = 0;
+      while (index + 1 < starts.length && (starts[index + 1] as Date) <= order.deliveredAt) index++;
+      const bucket = series[index];
+      if (bucket) {
+        bucket.earnings += order.riderEarning;
+        bucket.delivered += 1;
+      }
+    }
     return {
       period,
       from: from.toISOString(),
       to: now.toISOString(),
-      delivered: delivered._count,
+      delivered: delivered.length,
       failed,
       returned,
-      earnings: delivered._sum.riderEarning ?? 0,
+      earnings: delivered.reduce((sum, order) => sum + order.riderEarning, 0),
       cashCollected: cash._sum.collectedAmount ?? 0,
+      onlineSeconds,
+      bucket: period === 'day' ? 'two_hours' : period === 'week' ? 'day' : 'week',
+      series,
     };
   }
 
@@ -516,6 +629,29 @@ function navigationTarget(order: RiderOrder): { latitude: number; longitude: num
 }
 
 /** Début du jour, de la semaine (lundi) ou du mois, à l'heure du Cameroun. */
+/** Débuts des tranches de l'histogramme des gains (voir RiderEarnings.series). */
+export function bucketStarts(period: 'day' | 'week' | 'month', from: Date): Date[] {
+  const hour = 3_600_000;
+  const day = 24 * hour;
+  switch (period) {
+    case 'day':
+      // 6 h, 8 h… 20 h : la première tranche reçoit aussi la nuit, la dernière le soir.
+      return [0, 1, 2, 3, 4, 5, 6, 7].map((i) => new Date(from.getTime() + (6 + 2 * i) * hour));
+    case 'week':
+      return [0, 1, 2, 3, 4, 5, 6].map((i) => new Date(from.getTime() + i * day));
+    case 'month': {
+      const starts: Date[] = [];
+      // Semaines du mois : 1er, 8, 15, 22, 29 (si ce jour existe dans le mois).
+      const monthOf = (date: Date): string => cameroonDate(date).slice(0, 7);
+      for (const offset of [0, 7, 14, 21, 28]) {
+        const start = new Date(from.getTime() + offset * day);
+        if (monthOf(start) === monthOf(from)) starts.push(start);
+      }
+      return starts;
+    }
+  }
+}
+
 export function periodStart(period: 'day' | 'week' | 'month', now: Date): Date {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: CAMEROON_TIME_ZONE,
