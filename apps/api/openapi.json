@@ -8590,6 +8590,23 @@
               "vehicleType"
             ],
             "additionalProperties": false
+          },
+          "staff": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "mfaEnrolled": {
+                "type": "boolean"
+              },
+              "mfaVerified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "mfaEnrolled",
+              "mfaVerified"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -8601,7 +8618,8 @@
           "referralCode",
           "createdAt",
           "merchant",
-          "rider"
+          "rider",
+          "staff"
         ],
         "additionalProperties": false
       },

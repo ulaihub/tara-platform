@@ -2,13 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
-import type { AuthUser } from '../auth/auth.types.js';
+import { type AuthUser, isStaffRole } from '../auth/auth.types.js';
 import { randomReadableId } from '../common/crypto.js';
 import { AppError } from '../common/errors/app-error.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { NotificationService } from '../notifications/notification.service.js';
 import type { MerchantProfile } from '../generated/prisma/client.js';
+import type { UserRole } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
   ConsentBody,
@@ -42,7 +43,11 @@ export class UsersService {
     @Inject(ENV) private readonly env: Env,
   ) {}
 
-  async me(userId: string): Promise<z.output<typeof MeDto>> {
+  /** [effectiveRoles] : rôles de la session (ceux de l'équipe seulement si le second facteur est vérifié). */
+  async me(
+    userId: string,
+    effectiveRoles: readonly UserRole[] = [],
+  ): Promise<z.output<typeof MeDto>> {
     let user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: { merchant: true, rider: true },
@@ -67,6 +72,12 @@ export class UsersService {
       merchant: user.merchant ? toMerchantDto(user.merchant) : null,
       rider: user.rider
         ? { id: user.rider.id, status: user.rider.status, vehicleType: user.rider.vehicleType }
+        : null,
+      staff: user.roles.some(isStaffRole)
+        ? {
+            mfaEnrolled: user.totpEnabledAt !== null,
+            mfaVerified: effectiveRoles.some(isStaffRole),
+          }
         : null,
     };
   }

@@ -1,0 +1,89 @@
+@import 'tailwindcss';
+
+/*
+ * Couleurs des apps Tara (tara_colors) : fond chaud, cartes claires, accent orange, dégradé
+ * de la marque ; thème sombre selon l'ordinateur.
+ */
+:root {
+  color-scheme: light dark;
+  --bg: #f6f2ec;
+  --panel: #ffffff;
+  --panel-soft: #fbf8f4;
+  --line: rgba(22, 18, 14, 0.09);
+  --text: #16120e;
+  --muted: rgba(22, 18, 14, 0.68);
+  --faint: rgba(22, 18, 14, 0.46);
+  --track: rgba(22, 18, 14, 0.08);
+  --accent: #c24a00;
+  --accent-bg: rgba(255, 106, 0, 0.08);
+  --accent-line: rgba(255, 106, 0, 0.28);
+  --ok: #12805a;
+  --ok-bg: rgba(18, 128, 90, 0.1);
+  --danger: #c9302c;
+  --danger-bg: rgba(201, 48, 44, 0.08);
+  --warn: #a35a00;
+  --warn-bg: rgba(255, 176, 0, 0.14);
+  --on-brand: #140800;
+  --shadow: 0 12px 32px -18px rgba(90, 45, 0, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0f;
+    --panel: #15151c;
+    --panel-soft: #111117;
+    --line: rgba(255, 255, 255, 0.09);
+    --text: #ffffff;
+    --muted: rgba(255, 255, 255, 0.72);
+    --faint: rgba(255, 255, 255, 0.5);
+    --track: rgba(255, 255, 255, 0.1);
+    --accent: #ff9a4d;
+    --accent-bg: rgba(255, 106, 0, 0.12);
+    --accent-line: rgba(255, 106, 0, 0.35);
+    --ok: #3dd68c;
+    --ok-bg: rgba(61, 214, 140, 0.12);
+    --danger: #ff7a72;
+    --danger-bg: rgba(255, 107, 107, 0.12);
+    --warn: #ffc14d;
+    --warn-bg: rgba(255, 176, 0, 0.14);
+    --shadow: none;
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-jakarta), system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-soft: var(--panel-soft);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-track: var(--track);
+  --color-accent: var(--accent);
+  --color-accent-bg: var(--accent-bg);
+  --color-accent-line: var(--accent-line);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-on-brand: var(--on-brand);
+  --shadow-card: var(--shadow);
+}
+
+@utility bg-brand {
+  background-image: linear-gradient(100deg, #ffb000, #ff6a00 55%, #ff3d00);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+:focus-visible {
+  outline: 3px solid #ff8a3d;
+  outline-offset: 2px;
+}
