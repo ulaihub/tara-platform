@@ -10,6 +10,7 @@ import {
   RIDER_STATE_LABELS,
   STATUS_LABELS,
   alertsOf,
+  delayText,
   countsOf,
   place,
   type Point,
@@ -206,6 +207,7 @@ export function LiveMap({ initial }: { initial: LiveMapData }) {
             />
           ) : tab === 'commandes' ? (
             <OrderList
+              rules={data.rules}
               orders={data.orders}
               riders={data.riders}
               now={now}
@@ -449,12 +451,14 @@ const STATUS_TONE: Partial<Record<LiveOrder['status'], string>> = {
 };
 
 function OrderList({
+  rules,
   orders,
   riders,
   now,
   selection,
   onChoose,
 }: {
+  rules: LiveMapData['rules'];
   orders: LiveOrder[];
   riders: LiveRider[];
   now: number;
@@ -507,7 +511,7 @@ function OrderList({
                 </span>
                 {order.delay ? (
                   <span className="text-[12px] font-extrabold text-danger">
-                    +{duration(order.delay.minutes)}
+                    {delayText(order, rules)}
                   </span>
                 ) : null}
               </span>

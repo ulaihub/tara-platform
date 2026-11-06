@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { alertsOf, countsOf, nextStop } from '@/lib/live';
+import { alertsOf, countsOf, delayText, nextStop } from '@/lib/live';
 import { NOW, liveMap, minutesAgo, order, rider, sos } from './fixtures/live-map';
 
 describe('alertes de la carte en direct', () => {
@@ -123,5 +123,18 @@ describe('compteurs et arrêts', () => {
     expect(nextStop(order({ status: 'ASSIGNED' }))).toBe('pickup');
     expect(nextStop(order({ status: 'PICKED_UP' }))).toBe('dropoff');
     expect(nextStop(order({ status: 'DELIVERY_FAILED' }))).toBe('dropoff');
+  });
+});
+
+describe('retard en quelques mots', () => {
+  const rules = { searchingMinutes: 5, pickupMinutes: 25, deliveryMarginMinutes: 15 };
+  it('compte l’attente totale sans livreur, le dépassement sinon', () => {
+    expect(
+      delayText(order({ delay: { kind: 'NO_RIDER', dueAt: minutesAgo(5), minutes: 5 } }), rules),
+    ).toBe('depuis 10 min');
+    expect(
+      delayText(order({ delay: { kind: 'DELIVERY', dueAt: minutesAgo(9), minutes: 9 } }), rules),
+    ).toBe('+9 min');
+    expect(delayText(order(), rules)).toBeNull();
   });
 });

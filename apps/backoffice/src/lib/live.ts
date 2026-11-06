@@ -47,6 +47,15 @@ export function place(stop: LiveOrder['pickup']): string {
   return stop.neighborhood ? `${stop.neighborhood} · ${stop.landmark}` : stop.landmark;
 }
 
+/** Retard en quelques mots : « depuis 12 min » sans livreur, « +9 min » sinon. */
+export function delayText(order: LiveOrder, rules: LiveMap['rules']): string | null {
+  if (!order.delay) return null;
+  if (order.delay.kind === 'NO_RIDER') {
+    return `depuis ${duration(Math.round(rules.searchingMinutes) + order.delay.minutes)}`;
+  }
+  return `+${duration(order.delay.minutes)}`;
+}
+
 export type AlertLevel = 'critical' | 'high' | 'normal';
 
 export interface AlertItem {
@@ -116,12 +125,12 @@ export function alertsOf(map: LiveMap, now: number): AlertItem[] {
       ...(order.riderId ? { riderId: order.riderId } : {}),
     };
     if (order.delay?.kind === 'NO_RIDER') {
-      const waited = Math.round(map.rules.searchingMinutes) + order.delay.minutes;
+      const since = delayText(order, map.rules) ?? '';
       items.push({
         key: `late:${order.id}`,
         level: 'high',
         title: `${order.reference} sans livreur`,
-        detail: `Depuis ${duration(waited)} · ${place(order.pickup)}`,
+        detail: `${since.charAt(0).toUpperCase()}${since.slice(1)} · ${place(order.pickup)}`,
         at: order.delay.dueAt,
         ...base,
       });
