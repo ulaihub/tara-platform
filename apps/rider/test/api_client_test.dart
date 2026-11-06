@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/core/api/api_client.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
-import 'package:tara_rider/core/session/session_store.dart';
+import 'package:tara_core/api/api_client.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/session/session_store.dart';
 
 /// Faux serveur : répond selon la route, garde les requêtes reçues.
 class FakeServer implements HttpClientAdapter {

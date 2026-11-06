@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_offers">Nouvelles courses</string>
+    <string name="channel_orders">Courses en cours</string>
+    <string name="channel_money">Argent reçu</string>
+</resources>

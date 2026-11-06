@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_rider/features/course/collection_screen.dart';
 
 void main() {

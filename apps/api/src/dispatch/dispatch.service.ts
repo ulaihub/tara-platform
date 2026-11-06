@@ -13,6 +13,7 @@ import { RiderBalanceService } from '../finance/rider-balance.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
 import { OrderTransitionsService } from '../orders/order-transitions.service.js';
 import { readyForDispatch } from '../orders/orders.service.js';
+import { requiredVersions, termsAccepted } from '../legal/legal-versions.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { QueueService } from '../redis/queue.service.js';
@@ -271,6 +272,14 @@ export class DispatchService implements OnModuleInit {
         documents: true,
         orders: { where: { status: { in: [...ACTIVE_RIDER_STATUSES] } }, select: { id: true } },
         offers: { where: { outcome: 'PENDING' }, select: { id: true } },
+        user: {
+          select: {
+            consents: {
+              where: { granted: true, version: { in: requiredVersions('rider') } },
+              select: { version: true },
+            },
+          },
+        },
       },
     });
     const available = await this.balances.availableFor(ids);
@@ -283,6 +292,10 @@ export class DispatchService implements OnModuleInit {
         activeOrders: rider.orders.length,
         hasPendingOffer: rider.offers.length > 0,
         documentsValid: uncoveredDocuments(rider.documents, ['APPROVED'], today).length === 0,
+        termsAccepted: termsAccepted(
+          'rider',
+          rider.user.consents.map((consent) => consent.version),
+        ),
         availableBalance: available.get(rider.id) ?? 0,
         cashOverdue: rider.cashOverdueSince !== null,
         ratingSum: rider.ratingSum,
@@ -705,6 +718,7 @@ export function toOfferDto(
     codAmount: order.codAmount,
     cashFee: order.feePaymentMethod === 'CASH' ? order.totalPrice : 0,
     packageSize: order.packageSize,
+    packageContents: order.packageContents,
     isFragile: order.isFragile,
     isExpress: order.isExpress,
   };

@@ -1,23 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:tara_core/api/legal_api.dart';
+import 'package:tara_core/phone/phone_format.dart';
+import 'package:tara_ui/components/brand.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
-import '../../core/env.dart';
-import '../../design/components/brand.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/inputs.dart';
-import '../../design/components/layout.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/phone_format.dart';
+import '../common/scoped_page.dart';
+import '../legal/terms_screen.dart';
 
 /// 01 · Connexion par SMS.
 class SignInScreen extends ConsumerStatefulWidget {
@@ -91,6 +94,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final config = ref.watch(riderConfigProvider).value;
     final dialCode = config?.dialCode ?? '+237';
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 24,
@@ -164,14 +168,14 @@ class _Legal extends StatefulWidget {
   State<_Legal> createState() => _LegalState();
 }
 
+/// Liens vers les textes complets, lus dans l'app (ils sont acceptés à l'étape suivante
+/// pour un nouveau compte).
 class _LegalState extends State<_Legal> {
-  late final _terms = TapGestureRecognizer()..onTap = () => _open(Env.termsUrl);
-  late final _privacy = TapGestureRecognizer()..onTap = () => _open(Env.privacyUrl);
+  late final _terms = TapGestureRecognizer()..onTap = () => _open('livreurs');
+  late final _privacy = TapGestureRecognizer()..onTap = () => _open(LegalApi.privacyDocument);
 
-  static Future<void> _open(String url) async {
-    if (url.isEmpty) return;
-    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-  }
+  void _open(String document) =>
+      unawaited(Navigator.of(context).push(scopedPage<void>(context, (_) => LegalTextScreen(document: document))));
 
   @override
   void dispose() {

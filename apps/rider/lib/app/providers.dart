@@ -6,10 +6,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:tara_core/api/api_client.dart';
+import 'package:tara_core/api/auth_api.dart';
+import 'package:tara_core/api/legal_api.dart';
+import 'package:tara_core/network/network_status.dart';
+import 'package:tara_core/push/push_service.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_core/session/session_store.dart';
+import 'package:tara_ui/app_settings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../core/api/api_client.dart';
-import '../core/api/auth_api.dart';
 import '../core/api/models.dart';
 import '../core/api/rider_api.dart';
 import '../core/course/active_order.dart';
@@ -19,13 +25,8 @@ import '../core/course/track_buffer.dart';
 import '../core/env.dart';
 import '../core/location/location_tracker.dart';
 import '../core/location/online_controller.dart';
-import '../core/network/network_status.dart';
 import '../core/offline/action_queue.dart';
-import '../core/push/push_service.dart';
-import '../core/realtime/realtime_client.dart';
 import '../core/safety/safety_alert.dart';
-import '../core/session/session_store.dart';
-import 'app_settings.dart';
 
 /// Stockage chiffré du téléphone (remplacé par un stockage en mémoire dans les tests).
 final keyValueStoreProvider = Provider<KeyValueStore>((ref) => const SecureKeyValueStore());
@@ -73,6 +74,23 @@ final authApiProvider = Provider<AuthApi>(
 );
 
 final riderApiProvider = Provider<RiderApi>((ref) => RiderApi(ref.watch(apiClientProvider)));
+
+final legalApiProvider = Provider<LegalApi>(
+  (ref) => LegalApi(ref.watch(apiClientProvider), ref.watch(sessionStoreProvider), app: 'rider'),
+);
+
+/// Numéro du compte connecté (rappel « code envoyé au … » de la signature).
+final accountPhoneProvider = FutureProvider<String?>((ref) async {
+  ref.watch(authControllerProvider.select((auth) => auth.value));
+  return (await ref.read(riderApiProvider).me())['phone'] as String?;
+});
+
+/// Conditions à signer (nouvelle version) et versions acceptées ; relu après chaque signature
+/// et à chaque changement de session.
+final termsStatusProvider = FutureProvider<TermsStatus>((ref) {
+  ref.watch(authControllerProvider.select((auth) => auth.value));
+  return ref.read(legalApiProvider).status();
+});
 
 /// File des actions de course faites sans réseau.
 final actionQueueProvider = Provider<ActionQueue>((ref) {
@@ -143,15 +161,15 @@ class AuthController extends AsyncNotifier<AuthStatus> {
   Future<OtpChallenge> requestCode(String phone) =>
       ref.read(authApiProvider).requestOtp(phone, locale: ref.read(languageCodeProvider));
 
-  Future<AuthSession> verifyCode({required String challengeId, required String code, String? termsVersion}) async {
+  /// Nouveau compte : `TERMS_REQUIRED`, puis le même code avec [terms] (versions acceptées).
+  Future<AuthSession> verifyCode({
+    required String challengeId,
+    required String code,
+    Map<String, String>? terms,
+  }) async {
     final session = await ref
         .read(authApiProvider)
-        .verifyOtp(
-          challengeId: challengeId,
-          code: code,
-          locale: ref.read(languageCodeProvider),
-          termsVersion: termsVersion,
-        );
+        .verifyOtp(challengeId: challengeId, code: code, locale: ref.read(languageCodeProvider), terms: terms);
     state = const AsyncData(AuthStatus.signedIn);
     return session;
   }

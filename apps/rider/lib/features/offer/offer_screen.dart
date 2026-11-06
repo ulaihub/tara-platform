@@ -3,18 +3,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/status.dart';
+import 'package:tara_ui/components/swipe_button.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/components/status.dart';
-import '../../design/format.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 
@@ -40,6 +42,7 @@ class OfferScreen extends ConsumerStatefulWidget {
 
 class _OfferScreenState extends ConsumerState<OfferScreen> {
   Timer? _ticker;
+  int? _lastPulse;
   bool _busy = false;
   String? _error;
 
@@ -57,10 +60,19 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
   @override
   void initState() {
     super.initState();
-    HapticFeedback.heavyImpact();
+    // Sonnerie de la nouvelle course (balafon), répétée jusqu'à la réponse ou l'expiration.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) TaraFeedback.play(context, TaraSound.offer, loop: true);
+    });
     _ticker = Timer.periodic(const Duration(milliseconds: 500), (_) {
       if (!mounted) return;
       setState(() {});
+      // Les 5 dernières secondes se sentent dans la main : une impulsion par seconde.
+      final left = _remaining;
+      if (left > 0 && left <= 5 && left != _lastPulse && !_busy) {
+        _lastPulse = left;
+        unawaited(HapticFeedback.mediumImpact());
+      }
       if (_remaining == 0 && !_busy) {
         _ticker?.cancel();
         widget.onClosed(AppLocalizations.of(context).offerExpired);
@@ -71,15 +83,18 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
   @override
   void dispose() {
     _ticker?.cancel();
+    TaraFeedback.stop(TaraSound.offer);
     super.dispose();
   }
 
   Future<void> _accept() async {
+    if (_busy) return;
     setState(() => _busy = true);
     try {
       final order = await ref.read(riderApiProvider).acceptOffer(widget.offer.id);
       _ticker?.cancel();
-      unawaited(HapticFeedback.mediumImpact());
+      TaraFeedback.stop(TaraSound.offer);
+      if (mounted) TaraFeedback.play(context, TaraSound.accepted);
       widget.onAccepted(order);
     } catch (error) {
       if (!mounted) return;
@@ -93,6 +108,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
   Future<void> _decline() async {
     setState(() => _busy = true);
     _ticker?.cancel();
+    TaraFeedback.stop(TaraSound.offer);
     try {
       await ref.read(riderApiProvider).declineOffer(widget.offer.id);
     } catch (_) {
@@ -130,6 +146,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     final earningLabel = Text(l.yourEarning, style: TaraText.label.copyWith(color: c.textSecondary));
     final earning = AmountText(offer.riderEarning, style: TaraText.amountXL.copyWith(fontSize: 40));
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,
@@ -187,20 +204,24 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
           ),
           if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
         ],
+        // Accepter engage le livreur : on glisse la pastille plutôt que toucher, pour
+        // éviter l'acceptation par mégarde. Refuser reste à portée de pouce.
         footer: Row(
           children: [
-            Expanded(
-              child: GlassButton(label: l.decline, height: 58, radius: 20, onPressed: _busy ? null : _decline),
+            GlassIconButton(
+              icon: TaraIcons.close,
+              label: l.decline,
+              size: 58,
+              radius: 20,
+              onPressed: _busy ? null : _decline,
             ),
             const SizedBox(width: 10),
             Expanded(
-              flex: 2,
-              child: PrimaryButton(
+              child: SwipeButton(
                 label: l.accept,
-                icon: TaraIcons.check,
-                strong: true,
+                semanticLabel: l.slideToAccept,
                 loading: _busy,
-                onPressed: remaining == 0 ? null : _accept,
+                onConfirmed: remaining == 0 ? null : _accept,
               ),
             ),
           ],

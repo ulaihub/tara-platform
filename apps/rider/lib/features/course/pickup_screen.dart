@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/swipe_button.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
+import 'package:tara_ui/tara_icons.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../core/course/course_actions.dart';
 import '../../core/course/proof_photo.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/inputs.dart';
-import '../../design/components/progress.dart';
-import '../../design/tara_icons.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/step_labels.dart';
 import '../map/tara_map.dart';
+import 'address_help.dart';
 import 'course_scaffold.dart';
 
 /// 08 · Enlèvement : itinéraire jusqu'au vendeur, montant à encaisser sur place, code de
@@ -108,8 +111,10 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
         _error = result.message ?? l.genericError;
         _code.clear();
       });
+      TaraFeedback.play(context, TaraSound.error);
       return;
     }
+    TaraFeedback.play(context, TaraSound.pickedUp);
     widget.onPickedUp(result.outcome);
   }
 
@@ -128,14 +133,15 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
       title: (route, _) => route?.minutes == null ? l.toPickup : l.toPickupMinutes(route!.minutes!),
       onBack: widget.onBack,
       onSos: widget.onSos,
-      footer: PrimaryButton(
+      // Enlèvement définitif : on glisse plutôt que toucher, pour éviter l'erreur.
+      footer: SwipeButton(
         label: l.parcelCollected,
-        icon: TaraIcons.check,
+        icon: TaraIcons.package,
         loading: _busy,
-        onPressed: ready ? _submit : null,
+        onConfirmed: ready ? _submit : null,
       ),
       children: [
-        CourseStepper(labels: steps, activeIndex: 0),
+        CourseStepper(labels: steps, activeIndex: 0, stateLabels: stepStateLabels(l)),
         const SizedBox(height: 14),
         PartyRow(
           name: senderName,
@@ -144,6 +150,7 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           callLabel: l.callPerson(senderName),
           onCall: phone == null ? null : () => callPhone(phone),
         ),
+        AddressHelp(orderId: order.id, stop: 'pickup', address: order.pickup, name: senderName),
         if (order.collectAtPickup > 0) ...[
           const SizedBox(height: 12),
           CollectBox(amount: order.collectAtPickup, title: l.collectAtPickupTitle, body: l.collectAtPickupBody),

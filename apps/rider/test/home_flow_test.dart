@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/network/network_status.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/app/providers.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
 import 'package:tara_rider/core/course/call_journal.dart';
@@ -12,9 +14,7 @@ import 'package:tara_rider/core/course/course_actions.dart';
 import 'package:tara_rider/core/course/proof_photo.dart';
 import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';
-import 'package:tara_rider/core/network/network_status.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/activity/activity_screen.dart';
 import 'package:tara_rider/features/course/collection_screen.dart';
 import 'package:tara_rider/features/course/delivery_screen.dart';
@@ -26,6 +26,8 @@ import 'package:tara_rider/features/home/home_summary.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 import 'package:tara_rider/features/offline/pending_actions_screen.dart';
 import 'package:tara_rider/features/safety/sos_screen.dart';
+import 'package:tara_test/fake_legal_api.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/harness.dart';
@@ -88,6 +90,7 @@ Future<({ActiveOrderController active, ActionQueue queue})> pumpHome(
         safetyAlertProvider.overrideWithValue(safetyAlert()),
         networkStatusProvider.overrideWithValue(network ?? NetworkStatus.fixed(offline: false)),
         callJournalProvider.overrideWithValue(CallJournal(store: store, dial: (_) async {})),
+        legalApiProvider.overrideWithValue(FakeLegalApi(app: 'rider')),
       ],
       child: const HomeFlow(),
     ),
@@ -139,7 +142,7 @@ void main() {
     await tester.ensureVisible(find.text('Photographier la remise'));
     await tester.tap(find.text('Photographier la remise'));
     await settle(tester);
-    await tester.tap(find.text('Confirmer la livraison'));
+    await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
     await settle(tester);
     expect(find.byType(CollectionScreen), findsOneWidget);
     expect(find.text('À encaisser auprès du client'), findsOneWidget);

@@ -1,0 +1,23 @@
+name: tara_map
+description: "Carte Tara partagée par les apps : styles MapLibre sombre et clair (rues, quartiers, lieux utiles, zones interdites aux motos), adresses des tuiles, choix d'un point."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  maplibre_gl: ^0.28.0
+  tara_ui:
+    path: ../tara_ui
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  assets:
+    - assets/

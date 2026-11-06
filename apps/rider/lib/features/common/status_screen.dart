@@ -1,12 +1,12 @@
 import 'package:flutter/widgets.dart';
 
-import '../../design/components/brand.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_typography.dart';
+import 'package:tara_ui/components/brand.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 /// Écran d'état (non dessiné, proposé) : dossier en vérification, compte suspendu, erreur
 /// de chargement. Pictogramme, message, action principale et lien secondaire.
@@ -37,6 +37,7 @@ class StatusScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         content: [

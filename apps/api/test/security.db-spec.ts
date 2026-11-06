@@ -3,6 +3,7 @@ import { SignJWT } from 'jose';
 import request from 'supertest';
 import { totpCode, totpStep } from '../src/auth/totp.js';
 import {
+  CLIENT_TERMS,
   createTestApp,
   otpFrom,
   randomPhone,
@@ -41,7 +42,7 @@ describe('Sécurité', () => {
         challengeId: challenge.body.challengeId,
         code,
         device: { installationId: randomUUID(), platform: 'ANDROID' },
-        termsVersion: '2026-11',
+        terms: CLIENT_TERMS,
       });
       const tenth = await request(ctx.http)
         .post('/v1/auth/otp/verify')

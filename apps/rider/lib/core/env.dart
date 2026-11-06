@@ -2,22 +2,4 @@
 abstract final class Env {
   /// Adresse de l'API. Par défaut, l'API locale vue depuis l'émulateur Android.
   static const apiUrl = String.fromEnvironment('TARA_API_URL', defaultValue: 'http://10.0.2.2:3000');
-
-  /// Pages légales (conditions d'utilisation, confidentialité) ; vides : liens inactifs.
-  static const termsUrl = String.fromEnvironment('TARA_TERMS_URL');
-  static const privacyUrl = String.fromEnvironment('TARA_PRIVACY_URL');
-
-  /// Version des conditions acceptées à la création du compte (consentement enregistré).
-  static const termsVersion = '2026-11';
-
-  /// Tuiles vectorielles (TileJSON, schéma OpenMapTiles) et polices des libellés. Par défaut,
-  /// OpenFreeMap (même schéma) en attendant les tuiles Tara auto-hébergées.
-  static const tilesUrl = String.fromEnvironment(
-    'TARA_TILES_URL',
-    defaultValue: 'https://tiles.openfreemap.org/planet',
-  );
-  static const glyphsUrl = String.fromEnvironment(
-    'TARA_GLYPHS_URL',
-    defaultValue: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
-  );
 }

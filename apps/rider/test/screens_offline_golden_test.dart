@@ -1,12 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/network/network_status.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/app/providers.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
 import 'package:tara_rider/core/course/active_order.dart';
-import 'package:tara_rider/core/network/network_status.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 import 'package:tara_rider/features/offline/pending_actions_screen.dart';
 

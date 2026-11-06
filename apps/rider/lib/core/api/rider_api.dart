@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 
-import 'api_client.dart';
+import 'package:tara_core/api/api_client.dart';
+
 import 'models.dart';
 
 /// Routes de l'app livreur. Les actions d'une course (enlèvement, encaissement espèces,
@@ -149,6 +152,10 @@ class RiderApi {
   Future<Collection> collection(String orderId) async =>
       Collection.fromJson(await _api.get('/rider/orders/$orderId/collection') as Json);
 
+  /// Espèces reçues (frais de retour) : enregistrées tout de suite, prises sur le solde.
+  Future<Collection> collectCash(String orderId) async =>
+      Collection.fromJson(await _api.post('/rider/orders/$orderId/collect', body: {'method': 'CASH'}) as Json);
+
   /// Demande de paiement Mobile Money envoyée au téléphone du destinataire.
   Future<Collection> collectMobileMoney(String orderId, {required String phone, required String operator}) async =>
       Collection.fromJson(
@@ -157,6 +164,10 @@ class RiderApi {
           body: {'method': 'MOBILE_MONEY', 'phone': phone, 'operator': operator},
         ) as Json,
       );
+
+  /// Note de l'expéditeur après la course (F4), une fois, dans les 7 jours.
+  Future<void> rateSender(String orderId, int score) =>
+      _api.post('/rider/orders/$orderId/rating', body: {'score': score});
 
   /// Positions de la course prises sans réseau, envoyées en lot.
   Future<void> uploadTrack(String orderId, List<Json> points) =>
@@ -204,6 +215,11 @@ class RiderApi {
     ) as Json;
     return media['key']! as String;
   }
+
+  /// Photo de façade (`photo`) ou note vocale (`voice`) de l'adresse d'enlèvement
+  /// (`pickup`) ou de livraison (`dropoff`), pendant la course (B2).
+  Future<Uint8List> addressMedia(String orderId, String stop, String kind) =>
+      _api.getBytes('/rider/orders/$orderId/address-media/$stop/$kind');
 
   /// Jeton de notification de cet appareil (null pour ne plus rien recevoir).
   Future<void> registerPushToken(String installationId, String? token) =>

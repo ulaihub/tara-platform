@@ -15,6 +15,7 @@ import { OrderTransitionHooks } from '../events/order-transition.hooks.js';
 import { AddressesService } from '../geo/addresses.service.js';
 import { type FullQuote, PricingService } from '../pricing/pricing.service.js';
 import { PromoService } from '../pricing/promo.service.js';
+import { ratingDto } from './ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BEFORE_PICKUP } from './order-state-machine.js';
 import { OrderTransitionsService } from './order-transitions.service.js';
@@ -27,9 +28,9 @@ import {
   type DeliveryItem,
   MAX_COD_AMOUNT,
   type OrderDto,
+  ACTIVE_ORDER_STATUSES,
   type OrderListQuery,
   type OrderSummaryDto,
-  type PublicTrackingDto,
   type RecipientDto,
   type RecipientResponseBody,
 } from './orders.schemas.js';
@@ -42,7 +43,29 @@ const ORDER_INCLUDE = {
   pickupAddress: ADDRESS_INCLUDE,
   dropoffAddress: ADDRESS_INCLUDE,
   events: { orderBy: { recordedAt: 'asc' } },
+  rider: {
+    select: {
+      vehicleType: true,
+      plateNumber: true,
+      user: { select: { fullName: true, phone: true } },
+    },
+  },
+  ratings: { select: { raterId: true, score: true, comment: true, createdAt: true } },
 } as const satisfies Prisma.OrderInclude;
+
+/** Statuts où l'expéditeur peut joindre le livreur. */
+const RIDER_REACHABLE: readonly string[] = [
+  'ASSIGNED',
+  'PICKED_UP',
+  'IN_DELIVERY',
+  'DELIVERY_FAILED',
+];
+
+/** « Jean Mbarga » → « Jean M. » : assez pour reconnaître le livreur à la porte. */
+export function shortName(fullName: string | null): string {
+  const [first = '', last] = (fullName ?? '').trim().split(/\s+/);
+  return last ? `${first} ${last[0]?.toUpperCase()}.` : first || 'Livreur';
+}
 
 type OrderFull = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
 
@@ -120,6 +143,8 @@ export class OrdersService {
       isExpress: order.isExpress,
       scheduledFor: order.scheduledFor?.toISOString() ?? null,
       packageSize: order.packageSize,
+      packageContents: order.packageContents,
+      packageDescription: order.packageDescription,
       isFragile: order.isFragile,
       declaredValue: order.declaredValue,
       instructions: order.instructions,
@@ -142,10 +167,22 @@ export class OrdersService {
         feePayer: order.feePayer,
         feePaymentMethod: order.feePaymentMethod,
         codAmount: order.codAmount,
+        retryFee: order.retryFee,
+        returnFee: order.returnFee,
       },
       riderId: order.riderId,
+      rider: order.rider
+        ? {
+            name: shortName(order.rider.user.fullName),
+            phone: RIDER_REACHABLE.includes(order.status) ? order.rider.user.phone : null,
+            vehicleType: order.rider.vehicleType,
+            plateNumber: order.rider.plateNumber,
+          }
+        : null,
       attemptCount: order.attemptCount,
+      failure: this.failureOf(order),
       cancelReason: order.cancelReason,
+      rating: ratingDto(order.ratings.find((r) => r.raterId === order.senderId)),
       timeline: order.events.map((event: OrderEvent) => ({
         status: event.toStatus,
         at: event.occurredAt.toISOString(),
@@ -154,6 +191,24 @@ export class OrdersService {
         note: event.note,
       })),
       createdAt: order.createdAt.toISOString(),
+    };
+  }
+
+  /** Dernier échec de livraison, tant que la course n'est pas repartie (E6). */
+  private failureOf(order: OrderFull): z.output<typeof OrderDto>['failure'] {
+    if (order.status !== 'DELIVERY_FAILED' || !order.failedAt) return null;
+    const event = order.events.findLast((e: OrderEvent) => e.toStatus === 'DELIVERY_FAILED');
+    return {
+      reason: order.failureReason,
+      note: event?.note ?? null,
+      at: order.failedAt.toISOString(),
+      decision: order.failureDecision,
+      retryAllowed: order.attemptCount < 2,
+      decisionDueAt: order.failureDecision
+        ? null
+        : new Date(
+            order.failedAt.getTime() + this.env.FAILURE_DECISION_TIMEOUT_MINUTES * 60_000,
+          ).toISOString(),
     };
   }
 
@@ -195,11 +250,15 @@ export class OrdersService {
       where: {
         senderId: user.id,
         ...(query.status ? { status: query.status } : {}),
+        ...(query.scope === 'active' ? { status: { in: [...ACTIVE_ORDER_STATUSES] } } : {}),
+        ...(query.scope === 'history' ? { status: { notIn: [...ACTIVE_ORDER_STATUSES] } } : {}),
         ...(query.cursor ? { id: { lt: query.cursor } } : {}),
       },
       orderBy: { id: 'desc' },
       take: query.limit + 1,
-      include: { dropoffAddress: { select: { landmark: true } } },
+      include: {
+        dropoffAddress: { select: { landmark: true, neighborhood: { select: { name: true } } } },
+      },
     });
     const page = pageOf(rows, query.limit);
     return {
@@ -209,9 +268,11 @@ export class OrdersService {
         status: order.status,
         recipientName: order.recipientName,
         dropoffLandmark: order.dropoffAddress.landmark,
+        dropoffNeighborhood: order.dropoffAddress.neighborhood?.name ?? null,
         totalPrice: order.totalPrice,
         codAmount: order.codAmount,
         scheduledFor: order.scheduledFor?.toISOString() ?? null,
+        failureDecision: order.status === 'DELIVERY_FAILED' ? order.failureDecision : null,
         createdAt: order.createdAt.toISOString(),
       })),
       nextCursor: page.nextCursor,
@@ -271,6 +332,8 @@ export class OrdersService {
       recipientName: item.recipientName,
       recipientPhone: item.recipientPhone,
       packageSize: item.packageSize,
+      packageContents: item.packageContents,
+      packageDescription: item.packageDescription ?? null,
       isFragile: item.isFragile,
       declaredValue: item.declaredValue ?? null,
       instructions: item.instructions ?? null,
@@ -284,6 +347,8 @@ export class OrdersService {
       totalPrice: quote.price.totalPrice,
       riderEarning: quote.price.riderEarning,
       platformFee: quote.price.platformFee,
+      retryFee: quote.price.retryFee,
+      returnFee: quote.price.returnFee,
       feePayer: shared.feePayer,
       feePaymentMethod: shared.feePaymentMethod,
       codAmount: item.codAmount,
@@ -620,45 +685,13 @@ export class OrdersService {
 
   // --- Page de suivi publique (C5, F2) -----------------------------------------------------
 
-  private async byTrackingToken(token: string) {
-    const order = await this.prisma.order.findUnique({
-      where: { trackingToken: token },
-      include: {
-        dropoffAddress: { select: { landmark: true } },
-        merchant: { select: { shopName: true } },
-        sender: { select: { fullName: true } },
-        events: { orderBy: { recordedAt: 'asc' } },
-      },
-    });
-    if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
-    return order;
-  }
-
-  async publicTracking(token: string): Promise<z.output<typeof PublicTrackingDto>> {
-    const order = await this.byTrackingToken(token);
-    return {
-      reference: order.reference,
-      status: order.status,
-      senderName: order.merchant?.shopName ?? order.sender.fullName ?? null,
-      recipientName: order.recipientName,
-      dropoffLandmark: order.dropoffAddress.landmark,
-      scheduledFor: order.scheduledFor?.toISOString() ?? null,
-      recipientConfirmedAt: order.recipientConfirmedAt?.toISOString() ?? null,
-      recipientAvailable: order.recipientAvailable,
-      canRespond: BEFORE_PICKUP.includes(order.status) && !order.recipientConfirmedAt,
-      timeline: order.events.map((event) => ({
-        status: event.toStatus,
-        at: event.occurredAt.toISOString(),
-      })),
-    };
-  }
-
   /** Réponse du destinataire au message de confirmation (C5). */
   async recipientResponse(
     token: string,
     body: z.output<typeof RecipientResponseBody>,
-  ): Promise<z.output<typeof PublicTrackingDto>> {
-    const order = await this.byTrackingToken(token);
+  ): Promise<void> {
+    const order = await this.prisma.order.findUnique({ where: { trackingToken: token } });
+    if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
     const { count } = await this.prisma.order.updateMany({
       where: { id: order.id, recipientConfirmedAt: null, status: { in: BEFORE_PICKUP } },
       data: {
@@ -672,6 +705,5 @@ export class OrdersService {
         order.recipientConfirmedAt ? 'RECIPIENT_ALREADY_RESPONDED' : 'PICKUP_ALREADY_DONE',
       );
     }
-    return this.publicTracking(token);
   }
 }

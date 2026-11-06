@@ -5,9 +5,10 @@ import type { Env } from '../config/env.js';
 import { verifyCode } from '../common/crypto.js';
 import { AppError } from '../common/errors/app-error.js';
 import { pageOf } from '../common/pagination.js';
-import { CAMEROON_TIME_ZONE, cameroonDate } from '../common/time.js';
+import { cameroonDate, periodStart } from '../common/time.js';
 import { ACTIVE_RIDER_STATUSES } from '../dispatch/dispatch.service.js';
 import { OnlineTimeService } from '../dispatch/online-time.service.js';
+import { riderPayable } from '../finance/ledger.accounts.js';
 import { OrderFinanceService } from '../finance/order-finance.service.js';
 import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js';
 import type { Order, Prisma, RiderProfile } from '../generated/prisma/client.js';
@@ -18,6 +19,7 @@ import {
   OrderTransitionsService,
   type TransitionOptions,
 } from '../orders/order-transitions.service.js';
+import { ratingDto } from '../orders/ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { DistanceService, type GeoPoint } from '../routing/distance.service.js';
@@ -47,6 +49,7 @@ const ORDER_INCLUDE = {
   sender: { select: { fullName: true, phone: true, merchant: { select: { shopName: true } } } },
   merchant: { select: { shopName: true } },
   codCollection: { select: { collectedAmount: true, method: true } },
+  ratings: { select: { raterId: true, score: true, comment: true, createdAt: true } },
 } as const satisfies Prisma.OrderInclude;
 
 type RiderOrder = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
@@ -128,6 +131,26 @@ export class RiderOrdersService {
     return { items: await this.toDtos(page.items), nextCursor: page.nextCursor };
   }
 
+  /**
+   * Photo de façade ou note vocale d'une adresse de la course (B2) : pour son livreur, tant
+   * que la course est en cours. Ensuite, comme pour un autre livreur, introuvable.
+   */
+  async addressMedia(
+    userId: string,
+    orderId: string,
+    stop: 'pickup' | 'dropoff',
+    kind: 'photo' | 'voice',
+  ): Promise<{ buffer: Buffer; mimeType: string }> {
+    const { order } = await this.load(userId, orderId);
+    if (!(ACTIVE_RIDER_STATUSES as readonly OrderStatus[]).includes(order.status)) {
+      throw AppError.notFound('MEDIA_NOT_FOUND');
+    }
+    const address = stop === 'pickup' ? order.pickupAddress : order.dropoffAddress;
+    const key = kind === 'photo' ? address.photoKey : address.voiceNoteKey;
+    if (!key) throw AppError.notFound('MEDIA_NOT_FOUND');
+    return this.media.read(key);
+  }
+
   async get(userId: string, orderId: string): Promise<z.output<typeof RiderOrderDto>> {
     const { order } = await this.load(userId, orderId);
     const [dto] = await this.toDtos([order]);
@@ -172,6 +195,8 @@ export class RiderOrdersService {
         reference: order.reference,
         status: order.status,
         packageSize: order.packageSize,
+        packageContents: order.packageContents,
+        packageDescription: order.packageDescription,
         isFragile: order.isFragile,
         isExpress: order.isExpress,
         instructions: order.instructions,
@@ -214,6 +239,7 @@ export class RiderOrdersService {
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
         completedAt:
           (order.deliveredAt ?? order.returnedAt ?? order.cancelledAt)?.toISOString() ?? null,
+        rating: ratingDto(order.ratings.find((r) => r.raterId !== order.senderId)),
         collected: order.codCollection
           ? {
               amount: order.codCollection.collectedAmount,
@@ -417,6 +443,12 @@ export class RiderOrdersService {
     const { order } = await this.load(userId, orderId);
     assertTransition(order, 'RETURNED');
     if (body.photoKey) await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
+    // Pas de paiement, pas de colis (E6) : ce que le solde de l'expéditeur ne couvre pas est
+    // encaissé avant de rendre le colis (le code n'est pas vérifié, donc pas consommé, avant).
+    const collection = await this.finance.collectionState(order);
+    if (!collection.complete) {
+      throw AppError.conflict('RETURN_COLLECTION_REQUIRED', { amount: collection.due.total });
+    }
     await this.checkCode(order, 'pickup', body.senderCode);
     await this.act(userId, order, 'RETURNED', body, {
       kind: 'RETURN',
@@ -447,6 +479,16 @@ export class RiderOrdersService {
   ): Promise<z.output<typeof EarningsDto>> {
     const rider = await this.riderOf(userId);
     const from = periodStart(period, now);
+    // Gains réels : ce que le grand livre a crédité au livreur à la fin de ses courses
+    // (livrées ou rendues), part des frais d'échec comprise.
+    const credited = await this.prisma.$queryRaw<{ at: Date; amount: bigint }[]>`
+      SELECT e.posted_at AS at, (-p.amount)::bigint AS amount
+        FROM ledger_postings p
+        JOIN journal_entries e ON e.id = p.entry_id
+        JOIN ledger_accounts a ON a.id = p.account_id
+       WHERE a.code = ${riderPayable(rider.id).code}
+         AND e.kind = 'DELIVERY_COMPLETED'
+         AND e.posted_at >= ${from} AND e.posted_at <= ${now}`;
     const [delivered, failed, returned, cash, onlineSeconds] = await Promise.all([
       this.prisma.order.findMany({
         where: { riderId: rider.id, status: 'DELIVERED', deliveredAt: { gte: from, lte: now } },
@@ -474,16 +516,19 @@ export class RiderOrdersService {
       earnings: 0,
       delivered: 0,
     }));
-    for (const order of delivered) {
-      if (!order.deliveredAt) continue;
-      // Dernière tranche commencée avant la livraison (les heures hors 6 h-22 h vont aux bords).
+    // Dernière tranche commencée avant l'instant donné (les heures hors 6 h-22 h vont aux bords).
+    const bucketOf = (at: Date) => {
       let index = 0;
-      while (index + 1 < starts.length && (starts[index + 1] as Date) <= order.deliveredAt) index++;
-      const bucket = series[index];
-      if (bucket) {
-        bucket.earnings += order.riderEarning;
-        bucket.delivered += 1;
-      }
+      while (index + 1 < starts.length && (starts[index + 1] as Date) <= at) index++;
+      return series[index];
+    };
+    for (const order of delivered) {
+      const bucket = order.deliveredAt ? bucketOf(order.deliveredAt) : undefined;
+      if (bucket) bucket.delivered += 1;
+    }
+    for (const credit of credited) {
+      const bucket = bucketOf(credit.at);
+      if (bucket) bucket.earnings += Number(credit.amount);
     }
     return {
       period,
@@ -492,7 +537,7 @@ export class RiderOrdersService {
       delivered: delivered.length,
       failed,
       returned,
-      earnings: delivered.reduce((sum, order) => sum + order.riderEarning, 0),
+      earnings: credited.reduce((sum, credit) => sum + Number(credit.amount), 0),
       cashCollected: cash._sum.collectedAmount ?? 0,
       onlineSeconds,
       bucket: period === 'day' ? 'two_hours' : period === 'week' ? 'day' : 'week',
@@ -649,31 +694,5 @@ export function bucketStarts(period: 'day' | 'week' | 'month', from: Date): Date
       }
       return starts;
     }
-  }
-}
-
-export function periodStart(period: 'day' | 'week' | 'month', now: Date): Date {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: CAMEROON_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    weekday: 'short',
-  }).formatToParts(now);
-  const get = (type: string): string => parts.find((part) => part.type === type)?.value ?? '';
-  const year = Number(get('year'));
-  const month = Number(get('month'));
-  const day = Number(get('day'));
-  const weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(get('weekday'));
-  // Le Cameroun est à UTC+1 toute l'année (pas d'heure d'été).
-  const localMidnight = (y: number, m: number, d: number): Date =>
-    new Date(Date.UTC(y, m - 1, d) - 3_600_000);
-  switch (period) {
-    case 'day':
-      return localMidnight(year, month, day);
-    case 'week':
-      return localMidnight(year, month, day - weekday);
-    case 'month':
-      return localMidnight(year, month, 1);
   }
 }

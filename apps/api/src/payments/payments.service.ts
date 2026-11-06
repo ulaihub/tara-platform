@@ -38,6 +38,8 @@ export interface CollectionInput {
   idempotencyKey: string;
   description: string;
   orderId?: string | null;
+  /** Lot de livraisons payé en une fois (C4). */
+  batchId?: string | null;
   riderId?: string | null;
   payerId?: string | null;
   method?: 'MOMO_MTN' | 'MOMO_ORANGE';
@@ -124,6 +126,7 @@ export class PaymentsService {
           payerPhone: input.phone,
           payerId: input.payerId ?? null,
           orderId: input.orderId ?? null,
+          batchId: input.batchId ?? null,
           riderId: input.riderId ?? null,
           provider: this.provider.name,
           idempotencyKey: input.idempotencyKey,

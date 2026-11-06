@@ -243,12 +243,20 @@ describe('Tarification et commandes (C1 à C7)', () => {
         .post('/v1/orders')
         .set(m.auth)
         .set('Idempotency-Key', key)
-        .send(orderBody(m, { codAmount: 15_000 }))
+        .send(
+          orderBody(m, {
+            codAmount: 15_000,
+            packageContents: 'CLOTHING',
+            packageDescription: '2 paires de chaussures',
+          }),
+        )
         .expect(201);
       expect(res.body.pickupCode).toMatch(/^\d{4}$/);
       expect(res.body.order).toMatchObject({
         reference: expect.stringMatching(/^TR-[0-9A-Z]{6}$/),
         status: 'SEARCHING_RIDER',
+        packageContents: 'CLOTHING',
+        packageDescription: '2 paires de chaussures',
         recipient: { name: 'Client Bonamoussadi', phone: '+237655443322' },
         pricing: { codAmount: 15_000, feePaymentMethod: 'CASH', currency: 'XAF' },
       });
@@ -422,7 +430,13 @@ describe('Tarification et commandes (C1 à C7)', () => {
         .expect(201);
       const token = (order.body.order.trackingUrl as string).split('/t/')[1];
       const view = await request(ctx.http).get(`/v1/public/tracking/${token}`).expect(200);
-      expect(view.body).toMatchObject({ canRespond: true, recipientName: 'Client Bonamoussadi' });
+      expect(view.body).toMatchObject({
+        canRespond: true,
+        recipientName: 'Client Bonamoussadi',
+        rider: null,
+        eta: null,
+        failureDecision: null,
+      });
       expect(JSON.stringify(view.body)).not.toContain('+237');
 
       const answer = await request(ctx.http)
@@ -464,6 +478,20 @@ describe('Tarification et commandes (C1 à C7)', () => {
         id: order.body.order.id,
         dropoffLandmark: expect.any(String),
       });
+      // Quartier déduit du point, null hors des quartiers connus.
+      expect(list.body.items[0]).toHaveProperty('dropoffNeighborhood');
+      // Accueil de l'expéditeur : commandes en cours d'un côté, terminées de l'autre.
+      const active = await request(ctx.http).get('/v1/orders?scope=active').set(m.auth).expect(200);
+      expect(active.body.items.map((item: { id: string }) => item.id)).toContain(
+        order.body.order.id,
+      );
+      const history = await request(ctx.http)
+        .get('/v1/orders?scope=history')
+        .set(m.auth)
+        .expect(200);
+      expect(history.body.items.map((item: { id: string }) => item.id)).not.toContain(
+        order.body.order.id,
+      );
     });
 
     it('n’accepte qu’une annulation parmi deux simultanées', async () => {

@@ -2,9 +2,16 @@ pnpm-lock.yaml
 **/dist
 **/coverage
 **/src/generated
+**/*.generated.ts
 **/prisma/migrations
 infra/osrm/data
 docs/CAHIER_DES_CHARGES.md
 apps/api/openapi.json
 docs/design
 apps/rider
+# Paquets et apps Flutter : mis en forme par dart format.
+packages/tara_ui
+packages/tara_core
+packages/tara_test
+packages/tara_map
+apps/client

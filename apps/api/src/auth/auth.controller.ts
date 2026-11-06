@@ -47,8 +47,10 @@ export class AuthController {
   verify(
     @ValidBody(VerifyOtpBody) body: z.output<typeof VerifyOtpBody>,
     @Headers('accept-language') acceptLanguage: string | undefined,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string | undefined,
   ): Promise<z.output<typeof AuthSessionDto>> {
-    return this.otp.verify(body, body.locale ?? resolveLocale(acceptLanguage));
+    return this.otp.verify(body, body.locale ?? resolveLocale(acceptLanguage), { ip, userAgent });
   }
 
   /** Échange le jeton de rafraîchissement contre une nouvelle paire de jetons. */

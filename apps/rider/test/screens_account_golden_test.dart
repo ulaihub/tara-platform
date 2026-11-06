@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/app/providers.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 import 'package:tara_rider/features/account/account_screen.dart';
 import 'package:tara_rider/features/account/emergency_contact_screen.dart';
 import 'package:tara_rider/features/onboarding/documents_controller.dart';
 import 'package:tara_rider/features/onboarding/documents_screen.dart';
+import 'package:tara_test/fake_legal_api.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/fonts.dart';
@@ -92,11 +93,12 @@ class AccountHarness {
     appVersionProvider.overrideWith((ref) async => '1.0.0 (12)'),
     actionQueueProvider.overrideWithValue(queue),
     activeOrderProvider.overrideWithValue(active),
+    legalApiProvider.overrideWithValue(FakeLegalApi(app: 'rider')),
   ];
 
-  Widget screen({List<Override> extra = const [], ValueChanged<int>? onTab}) => ProviderScope(
+  Widget screen({List<Override> extra = const []}) => ProviderScope(
     overrides: [...overrides, ...extra],
-    child: AccountScreen(onTab: onTab ?? (_) {}, pickPhoto: ({required selfie}) async => null),
+    child: tabs(2, AccountScreen(pickPhoto: ({required selfie}) async => null)),
   );
 }
 

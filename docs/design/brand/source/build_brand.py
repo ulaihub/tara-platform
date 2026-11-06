@@ -93,5 +93,6 @@ for k, v in P.items():
     name = ''.join(w.capitalize() if i else w for i, w in enumerate(k.split('_')))
     dart.append(f"  static const {name} = '{v}';")
 dart.append('}')
-write(f'{RIDER}/lib/design/brand_paths.dart', '\n'.join(dart) + '\n')
+# Design partagé par les apps (paquet tara_ui), à côté de l'app livreur.
+write(os.path.join(RIDER, '..', '..', 'packages', 'tara_ui', 'lib', 'brand_paths.dart'), '\n'.join(dart) + '\n')
 print('ok')

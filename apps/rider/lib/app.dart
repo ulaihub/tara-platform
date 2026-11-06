@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:tara_ui/app_settings.dart';
+import 'package:tara_ui/tara_effects.dart';
+import 'package:tara_ui/tara_theme.dart';
 
-import 'app/app_settings.dart';
 import 'app/root.dart';
-import 'design/tara_effects.dart';
-import 'design/tara_theme.dart';
 import 'features/catalog/catalog_screen.dart';
 import 'l10n/app_localizations.dart';
 

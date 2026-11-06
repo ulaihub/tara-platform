@@ -1,4 +1,5 @@
 import { type AppLocale, interpolate } from '../common/i18n/locale.js';
+import type { PushChannel } from './push.provider.js';
 
 /** Titres et textes des notifications push, en français et en anglais. */
 const TEMPLATES = {
@@ -116,6 +117,27 @@ const TEMPLATES = {
       body: '{documentEn} — reason: {reason}. Send it again from your profile.',
     },
   },
+  // Le destinataire a placé son point depuis le lien de localisation (B3).
+  LOCATION_LINK_SUBMITTED: {
+    fr: {
+      title: 'Adresse reçue',
+      body: '{name} a placé son point : « {landmark} ». Vous pouvez valider la livraison.',
+    },
+    en: {
+      title: 'Address received',
+      body: '{name} placed their point: “{landmark}”. You can confirm the delivery.',
+    },
+  },
+  LOCATION_LINK_SUBMITTED_ANONYMOUS: {
+    fr: {
+      title: 'Adresse reçue',
+      body: 'Votre destinataire a placé son point : « {landmark} ». Vous pouvez valider la livraison.',
+    },
+    en: {
+      title: 'Address received',
+      body: 'Your recipient placed their point: “{landmark}”. You can confirm the delivery.',
+    },
+  },
   RIDER_FAILURE_DECISION: {
     fr: { title: 'Décision de l’expéditeur', body: '{reference} : {decision}.' },
     en: { title: 'Sender decision', body: '{reference}: {decision}.' },
@@ -123,6 +145,14 @@ const TEMPLATES = {
 } as const satisfies Record<string, Record<AppLocale, { title: string; body: string }>>;
 
 export type PushTemplate = keyof typeof TEMPLATES;
+
+/** Notifications d'argent : canal Android au son de pièce (créé par les apps). */
+const MONEY_TEMPLATES = new Set<PushTemplate>(['PAYOUT_SENT']);
+
+export function pushChannel(template: PushTemplate, urgent: boolean): PushChannel {
+  if (urgent) return 'offers';
+  return MONEY_TEMPLATES.has(template) ? 'money' : 'orders';
+}
 
 export function renderPush(
   template: PushTemplate,

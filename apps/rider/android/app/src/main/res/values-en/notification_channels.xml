@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_offers">New jobs</string>
+    <string name="channel_orders">Ongoing jobs</string>
+    <string name="channel_money">Money received</string>
+</resources>

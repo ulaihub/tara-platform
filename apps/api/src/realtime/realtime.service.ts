@@ -22,6 +22,7 @@ export type RealtimeEvent =
   | 'payment.status'
   | 'payout.status'
   | 'safety-alert.status'
+  | 'location-link.submitted'
   | 'session.expired';
 
 /**

@@ -9,10 +9,12 @@ import {
   Post,
   Put,
   Req,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
 import { ENV } from '../config/config.module.js';
@@ -33,10 +35,12 @@ import {
   OfferDto,
 } from '../dispatch/dispatch.schemas.js';
 import { DispatchService } from '../dispatch/dispatch.service.js';
+import { LegalService } from '../legal/legal.service.js';
 import { RiderLocationService } from '../dispatch/rider-location.service.js';
 import { AuditService } from '../audit/audit.service.js';
-import { OrderDto } from '../orders/orders.schemas.js';
+import { OrderDto, RateBody, RatingDto } from '../orders/orders.schemas.js';
 import { OrdersService } from '../orders/orders.service.js';
+import { RatingsService } from '../orders/ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppError } from '../common/errors/app-error.js';
 import { OrderSupportService } from './order-support.service.js';
@@ -93,6 +97,8 @@ export class RiderAppController {
     private readonly dispatch: DispatchService,
     private readonly orders: RiderOrdersService,
     private readonly alerts: SafetyAlertsService,
+    private readonly ratings: RatingsService,
+    private readonly legal: LegalService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -173,6 +179,7 @@ export class RiderAppController {
     @CurrentUser() user: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Out<typeof RiderOrderDto> {
+    await this.legal.assertAccepted(user.id, 'rider');
     const order = await this.dispatch.accept(id, user.id);
     return this.orders.get(user.id, order.id);
   }
@@ -204,6 +211,32 @@ export class RiderAppController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Out<typeof RiderOrderDto> {
     return this.orders.get(user.id, id);
+  }
+
+  /**
+   * Photo de façade (`photo`) ou note vocale (`voice`) de l'adresse d'enlèvement ou de
+   * livraison (B2), pendant la course. Fichier brut, gardé une heure par l'app.
+   */
+  @Get('orders/:id/address-media/:stop/:kind')
+  @ApiProduces('image/jpeg', 'image/png', 'image/webp', 'audio/mp4', 'audio/aac', 'audio/mpeg')
+  @ApiOkResponse({
+    description: 'Photo ou note vocale',
+    schema: { type: 'string', format: 'binary' },
+  })
+  async addressMedia(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('stop') stop: string,
+    @Param('kind') kind: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    if ((stop !== 'pickup' && stop !== 'dropoff') || (kind !== 'photo' && kind !== 'voice')) {
+      throw AppError.notFound('MEDIA_NOT_FOUND');
+    }
+    const media = await this.orders.addressMedia(user.id, id, stop, kind);
+    response.setHeader('Content-Type', media.mimeType);
+    response.setHeader('Cache-Control', 'private, max-age=3600');
+    return new StreamableFile(media.buffer);
   }
 
   /**
@@ -271,6 +304,19 @@ export class RiderAppController {
     @ValidBody(FailBody) body: z.output<typeof FailBody>,
   ): Out<typeof RiderOrderDto> {
     return this.orders.fail(user.id, id, body);
+  }
+
+  /** Note de l'expéditeur après la course (F4), une fois, dans les 7 jours. */
+  @Post('orders/:id/rating')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(RateBody)
+  @ApiZodResponse(RatingDto)
+  rateSender(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(RateBody) body: z.output<typeof RateBody>,
+  ): Out<typeof RatingDto> {
+    return this.ratings.rateSender(user, id, body);
   }
 
   @Post('orders/:id/retry')

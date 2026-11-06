@@ -9,6 +9,8 @@ import { AppError } from '../common/errors/app-error.js';
 import type { AppLocale } from '../common/i18n/locale.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { TERMINAL_STATUSES } from '../orders/order-state-machine.js';
+import { customerWallet, merchantPayable } from '../finance/ledger.accounts.js';
+import { LedgerService } from '../finance/ledger.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OBJECT_STORAGE, type ObjectStorage } from '../storage/object-storage.js';
 import { maskOrdersWhere } from './masking.js';
@@ -23,6 +25,7 @@ export class PrivacyService {
     private readonly otp: OtpService,
     private readonly tokens: TokenService,
     private readonly audit: AuditService,
+    private readonly ledger: LedgerService,
     @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
   ) {}
 
@@ -53,6 +56,15 @@ export class PrivacyService {
         consents: { orderBy: { createdAt: 'asc' } },
         addresses: true,
         locationLinks: true,
+        ratingsGiven: {
+          orderBy: { createdAt: 'asc' },
+          select: {
+            score: true,
+            comment: true,
+            createdAt: true,
+            order: { select: { reference: true } },
+          },
+        },
       },
     });
     const orders = await this.prisma.order.findMany({
@@ -150,6 +162,13 @@ export class PrivacyService {
         totalPrice: order.totalPrice,
         codAmount: order.codAmount,
       })),
+      // Notes données après ses courses (F4), avec le mot laissé à l'équipe.
+      ratingsGiven: user.ratingsGiven.map(({ score, comment, createdAt, order }) => ({
+        reference: order.reference,
+        score,
+        comment,
+        createdAt,
+      })),
       locationLinks: user.locationLinks.map(
         ({ recipientName, recipientPhone, createdAt, submittedAt }) => ({
           recipientName,
@@ -179,6 +198,14 @@ export class PrivacyService {
       where: { senderId: userId, status: { notIn: TERMINAL_STATUSES } },
     });
     if (active > 0) throw AppError.unprocessable('ACCOUNT_HAS_ACTIVE_ORDERS');
+    // Une dette envers Tara ne disparaît pas avec le compte (le numéro redevient libre).
+    const merchant = await this.prisma.merchantProfile.findUnique({ where: { userId } });
+    const balances = await this.ledger.balances([
+      customerWallet(userId),
+      ...(merchant ? [merchantPayable(merchant.id)] : []),
+    ]);
+    const debt = [...balances.values()].reduce((sum, balance) => sum + Math.max(0, -balance), 0);
+    if (debt > 0) throw AppError.unprocessable('ACCOUNT_HAS_DEBT', { debt });
   }
 
   /**
@@ -233,6 +260,11 @@ export class PrivacyService {
         data: { payoutPhone: '' },
       });
       await maskOrdersWhere(tx, Prisma.sql`sender_id = ${actor.id}::uuid`);
+      // Notes : les étoiles restent (score des livreurs), les mots libres disparaissent.
+      await tx.rating.updateMany({
+        where: { OR: [{ raterId: actor.id }, { rateeId: actor.id }] },
+        data: { comment: null },
+      });
       await tx.$executeRaw`
         UPDATE notifications SET recipient_phone = NULL
          WHERE order_id IN (SELECT id FROM orders WHERE sender_id = ${actor.id}::uuid)`;

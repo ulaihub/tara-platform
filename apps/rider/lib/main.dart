@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/session/session_store.dart';
+import 'package:tara_ui/app_settings.dart';
 
 import 'app.dart';
-import 'app/app_settings.dart';
 import 'app/providers.dart';
-import 'core/session/session_store.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {

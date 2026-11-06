@@ -3,29 +3,27 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/components/progress.dart';
-import '../../design/format.dart';
-import '../../design/motion/effects.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import 'deposit_screen.dart';
 
 /// 13 · Activité (E9) : gains du jour, de la semaine ou du mois avec leur histogramme,
 /// solde prépayé et sa recharge (G5), anciennes espèces à reverser, dernières courses.
 class ActivityScreen extends ConsumerStatefulWidget {
-  const ActivityScreen({super.key, required this.onTab, this.now});
-
-  /// Barre d'onglets : 0 accueil, 1 activité, 2 profil.
-  final ValueChanged<int> onTab;
+  const ActivityScreen({super.key, this.now});
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -76,182 +74,157 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
           child: TaraScreen(
             blobs: _blobs,
             safeBottom: false,
-            child: Column(
-              children: [
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      _reload();
-                      await Future.wait<Object?>([_earnings, _history, _wallet]).catchError((_) => <Object?>[]);
-                    },
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                      children: [
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final title = Semantics(
-                              header: true,
-                              child: Text(l.tabActivity, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-                            );
-                            final selector = LiquidSegmented<String>(
-                              compact: true,
-                              segments: [('day', l.periodDay), ('week', l.periodWeek), ('month', l.periodMonth)],
-                              selected: _period,
-                              onChanged: (period) {
-                                if (period == _period) return;
-                                setState(() {
-                                  _period = period;
-                                  _earnings = ref.read(riderApiProvider).earnings(period);
-                                });
-                              },
-                            );
-                            // Sélecteur à droite du titre (maquette) ; dessous si la place manque.
-                            final wide =
-                                constraints.maxWidth >= 340 && MediaQuery.textScalerOf(context).scale(10) <= 11;
-                            if (!wide) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [title, const SizedBox(height: 10), selector],
-                              );
-                            }
-                            return Row(
-                              children: [
-                                title,
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: ConstrainedBox(
-                                      constraints: const BoxConstraints(maxWidth: 230),
-                                      child: selector,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        FutureBuilder<Earnings>(
-                          future: _earnings,
-                          builder: (context, snapshot) => _EarningsCard(
-                            earnings: snapshot.data,
-                            failed: snapshot.hasError,
-                            onRetry: _reload,
-                            now: now,
+            // Le contenu défile jusqu'en bas de l'écran, sous la barre d'onglets en verre.
+            child: RefreshIndicator(
+              onRefresh: () async {
+                _reload();
+                await Future.wait<Object?>([_earnings, _history, _wallet]).catchError((_) => <Object?>[]);
+              },
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + TaraTabShell.bottomInset(context)),
+                children: [
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final title = Semantics(
+                        header: true,
+                        child: Text(l.tabActivity, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
+                      );
+                      final selector = LiquidSegmented<String>(
+                        compact: true,
+                        segments: [('day', l.periodDay), ('week', l.periodWeek), ('month', l.periodMonth)],
+                        selected: _period,
+                        onChanged: (period) {
+                          if (period == _period) return;
+                          setState(() {
+                            _period = period;
+                            _earnings = ref.read(riderApiProvider).earnings(period);
+                          });
+                        },
+                      );
+                      // Sélecteur à droite du titre (maquette) ; dessous si la place manque.
+                      final wide = constraints.maxWidth >= 340 && MediaQuery.textScalerOf(context).scale(10) <= 11;
+                      if (!wide) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [title, const SizedBox(height: 10), selector],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          title,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 230), child: selector),
+                            ),
                           ),
-                        ),
-                        FutureBuilder<RiderWallet>(
-                          future: _wallet,
-                          builder: (context, snapshot) {
-                            final wallet = snapshot.data;
-                            if (wallet == null) return const SizedBox.shrink();
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const SizedBox(height: 12),
-                                _BalanceBox(wallet: wallet, onTopUp: () => setState(() => _paying = _Payment.topUp)),
-                                if (wallet.cashHeld > 0) ...[
-                                  const SizedBox(height: 12),
-                                  _CashBox(
-                                    amount: wallet.cashHeld,
-                                    dueBy: wallet.cashDueBy,
-                                    overdue: wallet.cashOverdue,
-                                    now: now,
-                                    onDeposit: () => setState(() => _paying = _Payment.deposit),
-                                  ),
-                                ],
-                              ],
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        FutureBuilder<List<RiderOrder>>(
-                          future: _history,
-                          builder: (context, snapshot) {
-                            final orders = snapshot.data;
-                            final shown = orders == null
-                                ? const <RiderOrder>[]
-                                : (_all ? orders : orders.take(3).toList());
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                SectionHeader(
-                                  title: l.lastCourses,
-                                  action: orders != null && orders.length > 3
-                                      ? TaraLink(
-                                          label: _all ? l.seeLess : l.seeAll,
-                                          onPressed: () => setState(() => _all = !_all),
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(height: 8),
-                                if (snapshot.hasError)
-                                  _Failed(onRetry: _reload)
-                                else if (orders == null)
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 20),
-                                    child: Center(child: GooLoader(compact: true)),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  FutureBuilder<Earnings>(
+                    future: _earnings,
+                    builder: (context, snapshot) =>
+                        _EarningsCard(earnings: snapshot.data, failed: snapshot.hasError, onRetry: _reload, now: now),
+                  ),
+                  FutureBuilder<RiderWallet>(
+                    future: _wallet,
+                    builder: (context, snapshot) {
+                      final wallet = snapshot.data;
+                      if (wallet == null) return const SizedBox.shrink();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 12),
+                          _BalanceBox(wallet: wallet, onTopUp: () => setState(() => _paying = _Payment.topUp)),
+                          if (wallet.cashHeld > 0) ...[
+                            const SizedBox(height: 12),
+                            _CashBox(
+                              amount: wallet.cashHeld,
+                              dueBy: wallet.cashDueBy,
+                              overdue: wallet.cashOverdue,
+                              now: now,
+                              onDeposit: () => setState(() => _paying = _Payment.deposit),
+                            ),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  FutureBuilder<List<RiderOrder>>(
+                    future: _history,
+                    builder: (context, snapshot) {
+                      final orders = snapshot.data;
+                      final shown = orders == null ? const <RiderOrder>[] : (_all ? orders : orders.take(3).toList());
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SectionHeader(
+                            title: l.lastCourses,
+                            action: orders != null && orders.length > 3
+                                ? TaraLink(
+                                    label: _all ? l.seeLess : l.seeAll,
+                                    onPressed: () => setState(() => _all = !_all),
                                   )
-                                else if (orders.isEmpty)
-                                  Text(l.noCoursesYet, style: TaraText.label.copyWith(color: c.textSecondary))
-                                else
-                                  GlassCard(
-                                    radius: 22,
-                                    shadow: false,
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                    child: Column(
-                                      children: [
-                                        for (var i = 0; i < shown.length; i++) ...[
-                                          if (i > 0) Divider(height: 1, color: c.glassBorder),
-                                          _CourseRow(order: shown[i], now: now),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+                                : null,
+                          ),
+                          const SizedBox(height: 8),
+                          if (snapshot.hasError)
+                            _Failed(onRetry: _reload)
+                          else if (orders == null)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
+                              child: Center(child: GooLoader(compact: true)),
+                            )
+                          else if (orders.isEmpty)
+                            Text(l.noCoursesYet, style: TaraText.label.copyWith(color: c.textSecondary))
+                          else
+                            GlassCard(
+                              radius: 22,
+                              shadow: false,
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                              child: Column(
+                                children: [
+                                  for (var i = 0; i < shown.length; i++) ...[
+                                    if (i > 0) Divider(height: 1, color: c.glassBorder),
+                                    _CourseRow(order: shown[i], now: now),
+                                  ],
+                                ],
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
-                ),
-                SafeArea(
-                  top: false,
-                  child: FloatingTabBar(
-                    items: [
-                      TabItem(TaraIcons.home, l.tabHome),
-                      TabItem(TaraIcons.activity, l.tabActivity),
-                      TabItem(TaraIcons.user, l.tabProfile),
-                    ],
-                    current: 1,
-                    onSelected: widget.onTab,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
         if (_paying case final paying?)
           Positioned.fill(
-            child: FutureBuilder<RiderWallet>(
-              future: _wallet,
-              builder: (context, snapshot) {
-                void back() => setState(() => _paying = null);
-                void done() => setState(() {
-                  _paying = null;
-                  _load();
-                });
-                return switch (paying) {
-                  _Payment.topUp => DepositScreen.topUp(
-                    available: snapshot.data?.available ?? 0,
-                    onBack: back,
-                    onDone: done,
-                  ),
-                  _Payment.deposit => DepositScreen(amount: snapshot.data?.cashHeld ?? 0, onBack: back, onDone: done),
-                };
-              },
+            child: HideTabBar(
+              child: FutureBuilder<RiderWallet>(
+                future: _wallet,
+                builder: (context, snapshot) {
+                  void back() => setState(() => _paying = null);
+                  void done() => setState(() {
+                    _paying = null;
+                    _load();
+                  });
+                  return switch (paying) {
+                    _Payment.topUp => DepositScreen.topUp(
+                      available: snapshot.data?.available ?? 0,
+                      onBack: back,
+                      onDone: done,
+                    ),
+                    _Payment.deposit => DepositScreen(amount: snapshot.data?.cashHeld ?? 0, onBack: back, onDone: done),
+                  };
+                },
+              ),
             ),
           ),
       ],

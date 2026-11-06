@@ -1,6 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { createTestApp, otpFrom, randomPhone, signIn, type TestContext } from './helpers/app.js';
+import {
+  CLIENT_TERMS,
+  createTestApp,
+  otpFrom,
+  randomPhone,
+  signIn,
+  type TestContext,
+} from './helpers/app.js';
 
 describe('Authentification par code SMS (A1)', () => {
   let ctx: TestContext;
@@ -54,7 +61,7 @@ describe('Authentification par code SMS (A1)', () => {
 
     const accepted = await request(ctx.http)
       .post('/v1/auth/otp/verify')
-      .send({ ...body, termsVersion: '2026-11' })
+      .send({ ...body, terms: CLIENT_TERMS })
       .expect(200);
     expect(accepted.body).toMatchObject({ isNewUser: true, user: { phone, roles: ['CUSTOMER'] } });
 
@@ -76,7 +83,7 @@ describe('Authentification par code SMS (A1)', () => {
           challengeId: challenge.body.challengeId,
           code,
           device: { installationId: randomUUID(), platform: 'ANDROID' },
-          termsVersion: '2026-11',
+          terms: CLIENT_TERMS,
         });
     for (let i = 0; i < 4; i += 1) {
       expect((await attempt(wrong)).body.error.code).toBe('OTP_INVALID');

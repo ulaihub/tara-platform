@@ -135,6 +135,9 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     // montant pris sur son solde, gain crédité ; rien ne reste dû, rien n'est mis de côté.
     const expected = RIDER_START_BALANCE - o.totalPrice - 10_000 + o.riderEarning;
     expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(9_750);
+    // Accueil du marchand : encaissé aujourd'hui et livraisons du jour.
+    const shopWallet = await request(ctx.http).get('/v1/me/wallet').set(shop.auth).expect(200);
+    expect(shopWallet.body.merchant).toMatchObject({ todaySales: 10_000, todayDeliveries: 1 });
     expect(await ledger.balance(riderPayable(rider.riderId))).toBe(expected);
     expect(await ledger.balance(riderCashHeld(rider.riderId))).toBe(0);
     // Historique du livreur : montant encaissé et moyen.
@@ -231,6 +234,87 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     expect(broke.body.error.code).toBe('INSUFFICIENT_BALANCE');
   });
 
+  it('lot payé par Mobile Money en une fois : chaque commande réglée, le reste au solde', async () => {
+    const shop = await merchant(ctx);
+    const item = (n: number) => ({
+      dropoffAddressId: shop.dropoffId,
+      recipientName: `Client ${n}`,
+      recipientPhone: `+2376770000${n}${n}`,
+      packageSize: 'M',
+    });
+    const created = await request(ctx.http)
+      .post('/v1/orders/batch')
+      .set(shop.auth)
+      .send({
+        pickupAddressId: shop.pickupId,
+        feePaymentMethod: 'MOMO_MTN',
+        items: [1, 2, 3].map(item),
+      })
+      .expect(201);
+    const batchId = created.body.batchId as string;
+    const [a, b, c] = created.body.orders as {
+      id: string;
+      status: string;
+      pricing: { totalPrice: number };
+    }[];
+    expect([a, b, c].map((o) => o?.status)).toEqual(['CREATED', 'CREATED', 'CREATED']);
+    // Annulée avant la demande : elle n'en fait plus partie.
+    await request(ctx.http)
+      .post(`/v1/orders/${c?.id}/cancel`)
+      .set(shop.auth)
+      .send({ reason: 'Client absent' })
+      .expect(200);
+
+    const pay = await request(ctx.http)
+      .post(`/v1/orders/batches/${batchId}/pay`)
+      .set(shop.auth)
+      .send({ phone: shop.phone, operator: 'MTN' })
+      .expect(201);
+    expect(pay.body).toMatchObject({
+      status: 'PENDING',
+      batchId,
+      orderId: null,
+      amount: (a?.pricing.totalPrice ?? 0) + (b?.pricing.totalPrice ?? 0),
+    });
+    // Pas deux invites en même temps sur le téléphone.
+    const twice = await request(ctx.http)
+      .post(`/v1/orders/batches/${batchId}/pay`)
+      .set(shop.auth)
+      .send({ phone: shop.phone, operator: 'MTN' })
+      .expect(409);
+    expect(twice.body.error.code).toBe('PAYMENT_ALREADY_PENDING');
+    // Lot d'un autre : introuvable.
+    const stranger = await merchant(ctx);
+    await request(ctx.http)
+      .post(`/v1/orders/batches/${batchId}/pay`)
+      .set(stranger.auth)
+      .send({ phone: stranger.phone, operator: 'MTN' })
+      .expect(404);
+
+    // Annulée pendant que le client valide : son montant revient à son solde.
+    await request(ctx.http)
+      .post(`/v1/orders/${b?.id}/cancel`)
+      .set(shop.auth)
+      .send({ reason: 'Client absent' })
+      .expect(200);
+    const reference = await pendingReference(pay.body.id);
+    await settle(reference, 'SUCCEEDED');
+
+    const paidA = await order(a?.id ?? '');
+    expect(paidA).toMatchObject({ status: 'SEARCHING_RIDER', feePaidAt: expect.any(Date) });
+    expect((await order(b?.id ?? '')).status).toBe('CANCELLED');
+    expect(await ledger.balance(merchantPayable(paidA.merchantId ?? ''))).toBe(
+      b?.pricing.totalPrice,
+    );
+    expect(await ctx.prisma.journalEntry.count({ where: { paymentId: pay.body.id } })).toBe(2);
+    // Plus rien à payer dans ce lot.
+    await request(ctx.http)
+      .post(`/v1/orders/batches/${batchId}/pay`)
+      .set(shop.auth)
+      .send({ phone: shop.phone, operator: 'MTN' })
+      .expect(409);
+  });
+
   it('refuse un paiement d’un autre montant que celui demandé', async () => {
     const shop = await merchant(ctx);
     const placed = await placeOrder(ctx, shop, { feePaymentMethod: 'MOMO_ORANGE' });
@@ -306,9 +390,13 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     await go('DELIVERY_FAILED', { failureReason: 'REFUSED' });
     await go('RETURNED');
     const o = await order(placed.id);
-    expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(-o.totalPrice);
+    // La course et les frais de retour (E6), pris sur le portefeuille de la boutique ; le
+    // livreur touche sa part des deux.
+    expect(await ledger.balance(merchantPayable(o.merchantId ?? ''))).toBe(
+      -(o.totalPrice + o.returnFee),
+    );
     expect(await ledger.balance(riderPayable(rider.riderId))).toBe(
-      RIDER_START_BALANCE + o.riderEarning,
+      RIDER_START_BALANCE + o.riderEarning + Math.floor((o.returnFee * 8000) / 10_000),
     );
   });
 
@@ -584,6 +672,48 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       })
       .expect(422);
     expect(blocked.body.error.code).toBe('WALLET_IN_DEBT');
+    // La dette ne disparaît pas avec le compte : suppression refusée tant qu'elle reste.
+    const deletion = await request(ctx.http)
+      .post('/v1/me/deletion/code')
+      .set(customer.auth)
+      .expect(422);
+    expect(deletion.body.error).toMatchObject({ code: 'ACCOUNT_HAS_DEBT' });
+    expect(deletion.body.error.message).toContain('1000');
+  });
+
+  it('marchand : dette tolérée jusqu’au plafond (3 000 F), puis nouvelles commandes bloquées', async () => {
+    const shop = await merchant(ctx);
+    const profile = await ctx.prisma.merchantProfile.findUniqueOrThrow({
+      where: { userId: shop.userId },
+    });
+    const owe = (amount: number, tag: string) =>
+      ctx.prisma.$transaction((tx) =>
+        ledger.post(tx, {
+          kind: 'ADJUSTMENT',
+          description: 'Dette de test',
+          idempotencyKey: `test-debt:${profile.id}:${tag}`,
+          postings: [
+            { account: merchantPayable(profile.id), amount },
+            { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -amount },
+          ],
+        }),
+      );
+    await owe(2_999, 'a');
+    await placeOrder(ctx, shop);
+    await owe(1, 'b');
+    const blocked = await request(ctx.http)
+      .post('/v1/orders')
+      .set(shop.auth)
+      .send({
+        pickupAddressId: shop.pickupId,
+        dropoffAddressId: shop.dropoffId,
+        recipientName: 'Client',
+        recipientPhone: '+237677000333',
+        packageSize: 'S',
+        feePaymentMethod: 'CASH',
+      })
+      .expect(422);
+    expect(blocked.body.error).toMatchObject({ code: 'MERCHANT_DEBT_LIMIT' });
   });
 
   it('vire de la trésorerie du bureau vers l’agrégateur, une seule fois par clé', async () => {

@@ -63,7 +63,8 @@ export const MerchantBody = z.object({
 export const ConsentKindEnum = z.enum(['TERMS', 'PRIVACY', 'LOCATION', 'MARKETING']);
 
 export const ConsentBody = z.object({
-  kind: ConsentKindEnum,
+  /** Conditions et confidentialité s'acceptent par `POST /v1/me/terms` (signées par code SMS). */
+  kind: z.enum(['LOCATION', 'MARKETING']),
   version: z.string().min(1).max(32),
   granted: z.boolean(),
 });

@@ -4,10 +4,10 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/session/session_store.dart';
 
-import '../api/api_exception.dart';
 import '../api/models.dart';
-import '../session/session_store.dart';
 
 /// Action d'une course faite sur le téléphone, envoyée dès que le réseau le permet (E7).
 @immutable

@@ -1,11 +1,12 @@
 import 'package:flutter/widgets.dart';
 
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
+
 import '../../l10n/app_localizations.dart';
 
 /// Course en cours, réduite à l'accueil : la référence et « Reprendre ».

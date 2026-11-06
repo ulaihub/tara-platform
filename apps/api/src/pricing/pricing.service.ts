@@ -173,6 +173,8 @@ export class PricingService {
       discountTotal: quote.price.discountTotal,
       totalPrice: quote.price.totalPrice,
       promoCode: quote.promo?.code ?? null,
+      retryFee: quote.price.retryFee,
+      returnFee: quote.price.returnFee,
     };
   }
 

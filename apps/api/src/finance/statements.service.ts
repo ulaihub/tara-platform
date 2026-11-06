@@ -18,6 +18,7 @@ const KIND_LABELS: Partial<Record<JournalEntryKind, string>> = {
   COD_COLLECTED: 'Encaissements (net des frais)',
   ORDER_CHARGED: 'Frais de livraison payés par le solde',
   ORDER_RELEASED: 'Frais rendus (commandes annulées)',
+  FAILURE_FEE_CHARGED: 'Frais de nouvelle tentative et de retour',
   CREDIT_GRANTED: 'Avoirs',
   PAYMENT_RECEIVED: 'Recharges et paiements',
   PAYOUT_REQUESTED: 'Reversements',

@@ -18,9 +18,9 @@ L'app livreur utilise l'icône sombre.
 
 `source/paths.json` contient les tracés ; `source/build_brand.py` en produit les SVG, les
 icônes vectorielles Android (`res/drawable/ic_launcher_*.xml`, `splash_*.xml`) et
-`lib/design/brand_paths.dart` :
+`packages/tara_ui/lib/brand_paths.dart` (design partagé par les apps) :
 
 ```sh
 python3 docs/design/brand/source/build_brand.py docs/design/brand/source apps/rider /tmp/kit
-(cd apps/rider && dart format lib/design/brand_paths.dart)
+(cd packages/tara_ui && dart format lib/brand_paths.dart)
 ```

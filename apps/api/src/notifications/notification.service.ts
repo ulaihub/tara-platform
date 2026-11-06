@@ -11,7 +11,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../redis/queue.service.js';
 import { SMS_PROVIDER, type SmsProvider } from '../sms/sms.provider.js';
 import { PUSH_PROVIDER, type PushProvider, PushTokenInvalidError } from './push.provider.js';
-import { type PushTemplate, renderPush } from './push-templates.js';
+import { type PushTemplate, pushChannel, renderPush } from './push-templates.js';
 import { WHATSAPP_PROVIDER, type WhatsAppProvider } from './whatsapp.provider.js';
 
 /**
@@ -275,6 +275,7 @@ export class NotificationService implements OnModuleInit {
           body,
           data: { ...payload.data, notificationId: notification.id },
           urgent: payload.urgent ?? false,
+          channel: pushChannel(notification.template as PushTemplate, payload.urgent ?? false),
           ...(payload.ttlSeconds ? { ttlSeconds: payload.ttlSeconds } : {}),
         });
         references.push(sent.providerReference);

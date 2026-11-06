@@ -13,10 +13,12 @@ import { EventsModule } from './events/events.module.js';
 import { FinanceModule } from './finance/finance.module.js';
 import { GeoModule } from './geo/geo.module.js';
 import { HealthModule } from './health/health.module.js';
+import { LegalModule } from './legal/legal.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrivacyModule } from './privacy/privacy.module.js';
+import { PublicTrackingModule } from './public-tracking/public-tracking.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
@@ -52,11 +54,13 @@ import { UsersModule } from './users/users.module.js';
     StorageModule,
     AuthModule,
     HealthModule,
+    LegalModule,
     UsersModule,
     RidersModule,
     GeoModule,
     PricingModule,
     OrdersModule,
+    PublicTrackingModule,
     RiderAppModule,
     FinanceModule,
     PrivacyModule,

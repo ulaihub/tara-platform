@@ -2,27 +2,28 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/phone/phone_format.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/motion/liquid_wave.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
-import '../../core/api/api_exception.dart';
 import '../../core/api/models.dart';
 import '../../core/course/course_actions.dart';
-import '../../core/realtime/realtime_client.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/inputs.dart';
-import '../../design/components/layout.dart';
-import '../../design/components/progress.dart';
-import '../../design/format.dart';
-import '../../design/motion/effects.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/motion/liquid_wave.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/phone_format.dart';
 import 'course_scaffold.dart';
 
 /// Montants proposés (maquette 12) : le montant exact, puis les trois multiples de 5 000 FCFA
@@ -31,20 +32,6 @@ List<int> receivedAmounts(int due) {
   const step = 5000;
   final first = (due ~/ step + 1) * step;
   return [due, for (var i = 0; i < 3; i++) first + i * step];
-}
-
-/// Opérateur deviné d'après le numéro camerounais (le livreur peut le changer) : MTN pour
-/// 67, 650-654 et 680-684 ; Orange pour 69, 655-659 et 685-689.
-String? guessOperator(String nationalDigits) {
-  if (!isCameroonMobile(nationalDigits)) return null;
-  final second = nationalDigits[1];
-  final third = int.parse(nationalDigits[2]);
-  return switch (second) {
-    '7' => 'MTN',
-    '9' => 'ORANGE',
-    '5' || '8' => third <= 4 ? 'MTN' : 'ORANGE',
-    _ => null,
-  };
 }
 
 enum _Method { cash, mobileMoney }
@@ -154,8 +141,11 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
         _busy = false;
         _error = result.message ?? l.genericError;
       });
+      TaraFeedback.play(context, TaraSound.error);
       return;
     }
+    // Colis livré : la fanfare ; la pièce tinte quand le gain rejoint ceux du jour.
+    TaraFeedback.play(context, TaraSound.delivered);
     widget.onDone(result.outcome);
   }
 
@@ -264,8 +254,11 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
         _busy = false;
         _error = result.message ?? l.genericError;
       });
+      TaraFeedback.play(context, TaraSound.error);
       return;
     }
+    // Colis livré : la fanfare ; la pièce tinte quand le gain rejoint ceux du jour.
+    TaraFeedback.play(context, TaraSound.delivered);
     widget.onDone(result.outcome);
   }
 
@@ -281,6 +274,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
     final change = _received - _due;
 
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

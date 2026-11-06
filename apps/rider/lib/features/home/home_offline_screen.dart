@@ -1,38 +1,32 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/map_backdrop.dart';
+import 'package:tara_ui/components/status.dart';
+import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/location/online_controller.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/components/map_backdrop.dart';
-import '../../design/components/status.dart';
-import '../../design/format.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../legal/terms_screen.dart';
 import 'home_summary.dart';
 
 /// 05 · Accueil — hors ligne : gains du jour, bouton « Passer en ligne ». Pas de cloche de
 /// notifications au lancement (les messages arrivent par notification du téléphone).
 class HomeOfflineScreen extends ConsumerStatefulWidget {
-  const HomeOfflineScreen({
-    super.key,
-    required this.onWentOnline,
-    required this.onDetails,
-    required this.onTab,
-    this.now,
-  });
+  const HomeOfflineScreen({super.key, required this.onWentOnline, required this.onDetails, this.now});
 
   final VoidCallback onWentOnline;
   final VoidCallback onDetails;
-
-  /// Barre d'onglets : 0 accueil, 1 activité, 2 profil.
-  final ValueChanged<int> onTab;
 
   /// Heure affichée (bonjour / bonsoir), fixée dans les tests.
   final DateTime? now;
@@ -45,6 +39,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
   bool _switching = false;
   String? _error;
   List<String> _blockers = const [];
+  final _bottom = GlobalKey();
 
   static const _blobs = [BlobSpec(alignment: Alignment(0, -.05), size: 360, colors: BlobSpec.brand, blur: 80)];
 
@@ -63,6 +58,13 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
         widget.onWentOnline();
       } else {
         setState(() => _blockers = blockers);
+        // Les blocages s'affichent sous le bouton : l'écran défile pour les montrer en entier.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final bottom = _bottom.currentContext;
+          if (bottom != null && bottom.mounted) {
+            unawaited(Scrollable.ensureVisible(bottom, duration: const Duration(milliseconds: 300)));
+          }
+        });
       }
     } on LocationAccessException {
       if (mounted) setState(() => _error = l.locationNeeded);
@@ -73,6 +75,12 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
     }
   }
 
+  /// Nouvelles conditions : lues et signées, puis le livreur repasse en ligne.
+  Future<void> _openTerms() async {
+    await openTermsUpdate(context, ref);
+    if (mounted) setState(() => _blockers = _blockers.where((blocker) => blocker != 'TERMS').toList());
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -81,8 +89,11 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
     final hour = (widget.now ?? DateTime.now()).hour;
     final language = Localizations.localeOf(context).languageCode;
     final requirements = ref.watch(documentLabelsProvider).value ?? const {};
+    // Place de la barre d'onglets en verre : le contenu défile dessous.
+    final inset = TaraTabShell.bottomInset(context);
     return TaraScreen(
       blobs: _blobs,
+      safeBottom: false,
       background: Positioned.fill(
         child: Stack(
           fit: StackFit.expand,
@@ -97,7 +108,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -136,7 +147,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                         label: l.goOnline,
                         semanticLabel: l.goOnlineLabel,
                         // 210 px, réduit jusqu'à 140 sur petit écran ou avec le texte agrandi.
-                        size: (constraints.maxHeight - 150).clamp(140, 210).toDouble(),
+                        size: (constraints.maxHeight - inset - 150).clamp(140, 210).toDouble(),
                         onPressed: _switching ? null : _goOnline,
                       ),
                       const SizedBox(height: 22),
@@ -162,7 +173,26 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                         ),
                       ),
                       if (_error != null) ...[const SizedBox(height: 14), ErrorLine(_error!)],
-                      if (_blockers.isNotEmpty) ...[
+                      if (_blockers.contains('TERMS')) ...[
+                        const SizedBox(height: 14),
+                        TintBox(
+                          tone: TintTone.accent,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(l.blockerTerms, style: TaraText.text.copyWith(color: c.textPrimary)),
+                              const SizedBox(height: 10),
+                              GlassButton(
+                                label: l.readAndSign,
+                                height: 48,
+                                radius: 14,
+                                onPressed: () => unawaited(_openTerms()),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (_blockers.any((blocker) => blocker != 'TERMS')) ...[
                         const SizedBox(height: 14),
                         TintBox(
                           tone: TintTone.danger,
@@ -171,7 +201,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                             children: [
                               Text(l.blockersTitle, style: TaraText.text.copyWith(color: c.dangerTextStrong)),
                               const SizedBox(height: 6),
-                              for (final blocker in _blockers)
+                              for (final blocker in _blockers.where((blocker) => blocker != 'TERMS'))
                                 Text(
                                   '• ${switch (blocker) {
                                     'CASH_OVERDUE' => l.blockerCashOverdue,
@@ -185,20 +215,12 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      // Bas de l'écran, sous la barre d'onglets : amené à l'écran avec les blocages.
+                      SizedBox(key: _bottom, height: 16 + inset),
                     ],
                   ),
                 ),
               ),
-            ),
-            FloatingTabBar(
-              items: [
-                TabItem(TaraIcons.home, l.tabHome),
-                TabItem(TaraIcons.activity, l.tabActivity),
-                TabItem(TaraIcons.user, l.tabProfile),
-              ],
-              current: 0,
-              onSelected: widget.onTab,
             ),
           ],
         ),

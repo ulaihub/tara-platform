@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:tara_ui/app_settings.dart';
+import 'package:tara_ui/components/brand.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/status.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/motion/liquid_wave.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_effects.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
-import '../../app/app_settings.dart';
-import '../../design/components/brand.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/inputs.dart';
-import '../../design/components/layout.dart';
-import '../../design/components/progress.dart';
-import '../../design/components/status.dart';
-import '../../design/format.dart';
-import '../../design/motion/effects.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/motion/liquid_wave.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_effects.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
+import '../common/step_labels.dart';
 
 /// Catalogue des composants et des animations du socle visuel (passation §3 et §4).
 ///
@@ -276,7 +277,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
       children: [
         const LiquidProgressBar(value: .4, semanticLabel: 'Étape 2 sur 5'),
         const SizedBox(height: 22),
-        CourseStepper(labels: [l.stepPickup, l.stepCollect, l.stepDelivery], activeIndex: 1),
+        CourseStepper(
+          labels: [l.stepPickup, l.stepCollect, l.stepDelivery],
+          activeIndex: 1,
+          stateLabels: stepStateLabels(l),
+        ),
         const SizedBox(height: 22),
         LiquidSegmented<_Period>(
           segments: [(_Period.day, l.periodDay), (_Period.week, l.periodWeek), (_Period.month, l.periodMonth)],
@@ -497,7 +502,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 action: TaraLink(label: 'Détails', onPressed: () {}),
               ),
               const SizedBox(height: 12),
-              CourseStepper(labels: [l.stepPickup, l.stepCollect, l.stepDelivery], activeIndex: 2),
+              CourseStepper(
+                labels: [l.stepPickup, l.stepCollect, l.stepDelivery],
+                activeIndex: 2,
+                stateLabels: stepStateLabels(l),
+              ),
             ],
           ),
         ),

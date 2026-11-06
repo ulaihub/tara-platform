@@ -2,22 +2,29 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/legal_api.dart';
+import 'package:tara_core/phone/phone_format.dart';
+import 'package:tara_ui/app_settings.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/components/terms_flow.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
+import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_effects.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
-import '../../app/app_settings.dart';
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/components/progress.dart';
-import '../../design/motion/effects.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_effects.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
-import '../common/phone_format.dart';
+import '../common/scoped_page.dart';
+import '../legal/terms_screen.dart';
 import '../onboarding/documents_controller.dart';
 import '../onboarding/documents_screen.dart';
 import 'emergency_contact_screen.dart';
@@ -28,10 +35,7 @@ enum _Sub { documents, contact }
 /// identité et véhicule, pièces et leur état (une pièce refusée ou expirée se renvoie
 /// d'ici), contact d'urgence, affichage (thème, langue, effets), support, déconnexion.
 class AccountScreen extends ConsumerStatefulWidget {
-  const AccountScreen({super.key, required this.onTab, this.pickPhoto = pickWithCamera});
-
-  /// Barre d'onglets : 0 accueil, 1 activité, 2 profil.
-  final ValueChanged<int> onTab;
+  const AccountScreen({super.key, this.pickPhoto = pickWithCamera});
 
   /// Photo d'une pièce à renvoyer (remplacée dans les tests).
   final PickPhoto pickPhoto;
@@ -98,130 +102,121 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           child: TaraScreen(
             blobs: _blobs,
             safeBottom: false,
-            child: Column(
-              children: [
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async => _reload(),
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                      children: [
-                        Semantics(
-                          header: true,
-                          child: Text(l.tabProfile, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-                        ),
-                        const SizedBox(height: 16),
-                        FutureBuilder<Json>(
-                          future: _me,
-                          builder: (context, snapshot) => _IdentityCard(
-                            name: snapshot.data?['fullName'] as String?,
-                            phone: snapshot.data?['phone'] as String?,
-                            profile: profile,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        SectionHeader(
-                          title: l.myDocuments,
-                          action: documents.value == null
-                              ? null
-                              : TaraLink(label: l.seeAll, onPressed: () => setState(() => _sub = _Sub.documents)),
-                        ),
-                        const SizedBox(height: 8),
-                        if (documents.value case final data?)
-                          _DocumentsSummary(state: data, onOpen: () => setState(() => _sub = _Sub.documents))
-                        else if (documents.hasError)
-                          _Failed(onRetry: _reload)
-                        else
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(child: GooLoader(compact: true)),
-                          ),
-                        const SizedBox(height: 20),
-                        SectionHeader(title: l.emergencyContactTitle),
-                        const SizedBox(height: 8),
-                        _ContactCard(
-                          profile: profile,
-                          onEdit: profile == null ? null : () => setState(() => _sub = _Sub.contact),
-                        ),
-                        const SizedBox(height: 20),
-                        SectionHeader(title: l.displaySection),
-                        const SizedBox(height: 8),
-                        _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
-                        if (config?.supportPhone case final support?) ...[
-                          const SizedBox(height: 20),
-                          SectionHeader(title: l.helpSection),
-                          const SizedBox(height: 8),
-                          GlassCard(
-                            radius: 22,
-                            shadow: false,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                            child: ListRow(
-                              leading: const IconTile(icon: TaraIcons.headset),
-                              title: l.supportTara,
-                              subtitle: displayPhone(support),
-                              trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
-                              onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 24),
-                        ListenableBuilder(
-                          listenable: Listenable.merge([activeOrder, queue]),
-                          builder: (context, _) => _LogoutBlock(
-                            blocked: activeOrder.order != null
-                                ? l.logoutBlockedCourse
-                                : queue.pendingCount > 0
-                                ? l.logoutBlockedPending
-                                : null,
-                            confirming: _confirmLogout,
-                            busy: _loggingOut,
-                            onLogout: _logout,
-                            onCancel: () => setState(() => _confirmLogout = false),
-                          ),
-                        ),
-                        if (version != null) ...[
-                          const SizedBox(height: 18),
-                          Center(
-                            child: Text(l.appVersion(version), style: TaraText.small.copyWith(color: c.textTertiary)),
-                          ),
-                        ],
-                      ],
+            // Le contenu défile jusqu'en bas de l'écran, sous la barre d'onglets en verre.
+            child: RefreshIndicator(
+              onRefresh: () async => _reload(),
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + TaraTabShell.bottomInset(context)),
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(l.tabProfile, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
+                  ),
+                  const SizedBox(height: 16),
+                  FutureBuilder<Json>(
+                    future: _me,
+                    builder: (context, snapshot) => _IdentityCard(
+                      name: snapshot.data?['fullName'] as String?,
+                      phone: snapshot.data?['phone'] as String?,
+                      profile: profile,
                     ),
                   ),
-                ),
-                SafeArea(
-                  top: false,
-                  child: FloatingTabBar(
-                    items: [
-                      TabItem(TaraIcons.home, l.tabHome),
-                      TabItem(TaraIcons.activity, l.tabActivity),
-                      TabItem(TaraIcons.user, l.tabProfile),
-                    ],
-                    current: 2,
-                    onSelected: widget.onTab,
+                  const SizedBox(height: 20),
+                  SectionHeader(
+                    title: l.myDocuments,
+                    action: documents.value == null
+                        ? null
+                        : TaraLink(label: l.seeAll, onPressed: () => setState(() => _sub = _Sub.documents)),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  if (documents.value case final data?)
+                    _DocumentsSummary(state: data, onOpen: () => setState(() => _sub = _Sub.documents))
+                  else if (documents.hasError)
+                    _Failed(onRetry: _reload)
+                  else
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: GooLoader(compact: true)),
+                    ),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.emergencyContactTitle),
+                  const SizedBox(height: 8),
+                  _ContactCard(
+                    profile: profile,
+                    onEdit: profile == null ? null : () => setState(() => _sub = _Sub.contact),
+                  ),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.displaySection),
+                  const SizedBox(height: 8),
+                  _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.termsSection),
+                  const SizedBox(height: 8),
+                  const _TermsCard(),
+                  if (config?.supportPhone case final support?) ...[
+                    const SizedBox(height: 20),
+                    SectionHeader(title: l.helpSection),
+                    const SizedBox(height: 8),
+                    GlassCard(
+                      radius: 22,
+                      shadow: false,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                      child: ListRow(
+                        leading: const IconTile(icon: TaraIcons.headset),
+                        title: l.supportTara,
+                        subtitle: displayPhone(support),
+                        trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
+                        onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  ListenableBuilder(
+                    listenable: Listenable.merge([activeOrder, queue]),
+                    builder: (context, _) => _LogoutBlock(
+                      blocked: activeOrder.order != null
+                          ? l.logoutBlockedCourse
+                          : queue.pendingCount > 0
+                          ? l.logoutBlockedPending
+                          : null,
+                      confirming: _confirmLogout,
+                      busy: _loggingOut,
+                      onLogout: _logout,
+                      onCancel: () => setState(() => _confirmLogout = false),
+                    ),
+                  ),
+                  if (version != null) ...[
+                    const SizedBox(height: 18),
+                    Center(
+                      child: Text(l.appVersion(version), style: TaraText.small.copyWith(color: c.textTertiary)),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
         if (_sub == _Sub.documents)
           Positioned.fill(
-            child: DocumentsScreen(
-              fromProfile: true,
-              pickPhoto: widget.pickPhoto,
-              onDone: () => setState(() => _sub = null),
+            child: HideTabBar(
+              child: DocumentsScreen(
+                fromProfile: true,
+                pickPhoto: widget.pickPhoto,
+                onDone: () => setState(() => _sub = null),
+              ),
             ),
           ),
         if (_sub == _Sub.contact && profile != null)
           Positioned.fill(
-            child: EmergencyContactScreen(
-              profile: profile,
-              onBack: () => setState(() => _sub = null),
-              onSaved: (updated) {
-                ref.read(documentsControllerProvider.notifier).replaceProfile(updated);
-                setState(() => _sub = null);
-              },
+            child: HideTabBar(
+              child: EmergencyContactScreen(
+                profile: profile,
+                onBack: () => setState(() => _sub = null),
+                onSaved: (updated) {
+                  ref.read(documentsControllerProvider.notifier).replaceProfile(updated);
+                  setState(() => _sub = null);
+                },
+              ),
             ),
           ),
       ],
@@ -434,7 +429,7 @@ class _DisplayCard extends StatelessWidget {
       shadow: false,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
       child: ListenableBuilder(
-        listenable: effects,
+        listenable: Listenable.merge([effects, settings]),
         builder: (context, _) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -477,6 +472,32 @@ class _DisplayCard extends StatelessWidget {
               hint: effects.preference == EffectsPreference.automatic && effects.lowEndDevice
                   ? l.effectsAutoReduced
                   : l.effectsHint,
+            ),
+            const SizedBox(height: 16),
+            MergeSemantics(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _toggleSounds(context, settings),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.soundsLabel,
+                            style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(l.soundsHint, style: TaraText.small.copyWith(color: c.textTertiary)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GlassSwitch(value: settings.sounds, onChanged: (_) => _toggleSounds(context, settings)),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -568,6 +589,60 @@ class _Failed extends StatelessWidget {
             child: Text(l.profileError, style: TaraText.label.copyWith(color: c.textSecondary)),
           ),
           TaraLink(label: l.retry, onPressed: onRetry),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sons activés : un exemple se fait entendre aussitôt.
+void _toggleSounds(BuildContext context, AppSettings settings) {
+  settings.sounds = !settings.sounds;
+  if (settings.sounds) TaraFeedback.play(context, TaraSound.received);
+}
+
+/// Conditions et confidentialité : version acceptée et date (copie consultable), nouvelle
+/// version à signer.
+class _TermsCard extends ConsumerWidget {
+  const _TermsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final status = ref.watch(termsStatusProvider).value;
+    Widget row(String document, String title) {
+      final accepted = status?.accepted.where((item) => item.document == document).firstOrNull;
+      return ListRow(
+        leading: const IconTile(icon: TaraIcons.shieldCheck),
+        title: title,
+        subtitle: accepted == null
+            ? null
+            : l.termsAcceptedOn(accepted.version, formatLegalDay(context, accepted.acceptedAt)),
+        trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+        onTap: () => unawaited(
+          Navigator.of(context).push(
+            scopedPage<void>(context, (_) => LegalTextScreen(document: document, acceptedAt: accepted?.acceptedAt)),
+          ),
+        ),
+      );
+    }
+
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      child: Column(
+        children: [
+          if (status != null && !status.upToDate)
+            ListRow(
+              leading: const IconTile(icon: TaraIcons.alertCircle),
+              title: l.termsToSign,
+              trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.accentText),
+              onTap: () => unawaited(openTermsUpdate(context, ref)),
+            ),
+          row('livreurs', l.termsTitle),
+          row(LegalApi.privacyDocument, l.termsPrivacyTitle),
         ],
       ),
     );

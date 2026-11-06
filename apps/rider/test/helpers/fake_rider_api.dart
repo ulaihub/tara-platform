@@ -1,8 +1,11 @@
-import 'package:tara_rider/core/api/api_client.dart';
-import 'package:tara_rider/core/api/api_exception.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:tara_core/api/api_client.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/api/rider_api.dart';
-import 'package:tara_rider/core/session/session_store.dart';
 
 /// API livreur sans réseau pour les tests d'écrans : encaissement et portefeuille.
 class FakeRiderApi extends RiderApi {
@@ -15,6 +18,38 @@ class FakeRiderApi extends RiderApi {
     cashHeld: 0,
     cashLimit: 50000,
   );
+
+  /// Photos et notes d'adresse téléchargées : (course, étape, photo|voice).
+  final mediaFetched = <(String, String, String)>[];
+
+  @override
+  Future<Uint8List> addressMedia(String orderId, String stop, String kind) async {
+    mediaFetched.add((orderId, stop, kind));
+    return base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+    );
+  }
+
+  /// Notes données aux expéditeurs : (course, étoiles).
+  final ratings = <(String, int)>[];
+
+  @override
+  Future<void> rateSender(String orderId, int score) async => ratings.add((orderId, score));
+
+  /// Propositions acceptées ; erreur renvoyée à la prochaine acceptation.
+  final accepted = <String>[];
+  Object? acceptError;
+
+  @override
+  Future<Json> acceptOffer(String offerId) async {
+    accepted.add(offerId);
+    final error = acceptError;
+    if (error != null) {
+      acceptError = null;
+      throw error;
+    }
+    return {'id': offerId};
+  }
 
   /// États successifs renvoyés par GET /collection (le dernier est répété).
   List<Collection> collections = [const Collection(total: 12500, complete: false, paymentId: 'p1')];
@@ -100,6 +135,15 @@ class FakeRiderApi extends RiderApi {
   Future<Collection> collectMobileMoney(String orderId, {required String phone, required String operator}) async {
     requests.add((phone, operator));
     return const Collection(total: 12500, complete: false, paymentId: 'p1', paymentStatus: 'PENDING');
+  }
+
+  /// Espèces enregistrées (frais de retour).
+  final cashCollected = <String>[];
+
+  @override
+  Future<Collection> collectCash(String orderId) async {
+    cashCollected.add(orderId);
+    return const Collection(total: 0, complete: true);
   }
 
   @override

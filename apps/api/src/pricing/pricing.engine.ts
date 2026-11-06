@@ -10,6 +10,8 @@ import type { PackageSize, PromoKind, SurchargeCode } from '../generated/prisma/
  *   part livreur   = (base + suppléments) × part livreur, arrondie à l'inférieur
  *   remise         = code promo, financée par Tara (la part livreur n'est pas réduite)
  *   total          = base + suppléments − remise ; part Tara = total − part livreur
+ *   frais d'échec  = nouvelle tentative et retour (montant fixe ou part du prix de base),
+ *                    dus seulement si la livraison échoue, jamais dans le total
  */
 
 export interface GridRules {
@@ -42,6 +44,9 @@ export interface PriceBreakdown {
   totalPrice: number;
   riderEarning: number;
   platformFee: number;
+  /** Frais d'échec, figés avec le prix et annoncés avant de commander (E6). */
+  retryFee: number;
+  returnFee: number;
 }
 
 export const NIGHT_START_HOUR = 20;
@@ -107,6 +112,11 @@ export function computePrice(rules: GridRules, input: PriceInput): PriceBreakdow
   const riderEarning = Math.floor((subtotal * rules.riderShareBps) / 10_000);
   const discountTotal = input.promo ? discountFor(input.promo, subtotal) : 0;
   const totalPrice = subtotal - discountTotal;
+  const failureFee = (code: SurchargeCode) => {
+    const rule = rules.surcharges.find((s) => s.code === code && s.active);
+    if (!rule) return 0;
+    return rule.amount ?? Math.floor((basePrice * (rule.percentBps ?? 0)) / 10_000);
+  };
   return {
     basePrice,
     surcharges,
@@ -116,5 +126,7 @@ export function computePrice(rules: GridRules, input: PriceInput): PriceBreakdow
     totalPrice,
     riderEarning,
     platformFee: totalPrice - riderEarning,
+    retryFee: failureFee('FAILED_ATTEMPT'),
+    returnFee: failureFee('RETURN'),
   };
 }

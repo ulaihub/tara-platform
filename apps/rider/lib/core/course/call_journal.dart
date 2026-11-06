@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:tara_core/session/session_store.dart';
 
 import '../api/models.dart';
-import '../session/session_store.dart';
 
 /// Appel passé depuis l'app pendant une course.
 @immutable

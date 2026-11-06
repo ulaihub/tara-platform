@@ -173,7 +173,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get getCode => 'Recevoir le code';
 
   @override
-  String get legalPrefix => 'En continuant, vous acceptez les ';
+  String get legalPrefix => 'Nouveau compte : vous lirez et accepterez les ';
 
   @override
   String get terms => 'conditions d’utilisation';
@@ -1385,4 +1385,169 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profileError => 'Impossible de charger votre profil.';
+
+  @override
+  String get slideToAccept => 'Glisser pour accepter';
+
+  @override
+  String get soundsLabel => 'Sons';
+
+  @override
+  String get soundsHint =>
+      'Nouvelle course, colis livré, argent encaissé… Le mode silencieux du téléphone est respecté.';
+
+  @override
+  String milestoneTitle(int count) {
+    return '$count courses aujourd’hui !';
+  }
+
+  @override
+  String get milestoneBody => 'Bravo, continuez comme ça.';
+
+  @override
+  String rateSenderTitle(String name) {
+    return 'Notez $name';
+  }
+
+  @override
+  String get rateSenderBody => 'Expéditeur de votre dernière course';
+
+  @override
+  String get rateSenderThanks => 'Merci ! Votre note aide Tara à bien choisir ses clients.';
+
+  @override
+  String get senderFallback => 'l’expéditeur';
+
+  @override
+  String starsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count étoiles', one: '1 étoile');
+    return '$_temp0';
+  }
+
+  @override
+  String get returnFeesTitle => 'Frais de retour à encaisser';
+
+  @override
+  String returnFeesBody(String name, String amount) {
+    return '$name règle $amount avant de récupérer son colis : c’est ce que son solde Tara ne couvre pas.';
+  }
+
+  @override
+  String returnFeesCash(String amount) {
+    return 'Espèces reçues · $amount';
+  }
+
+  @override
+  String get returnFeesCashNote => 'Vous gardez les espèces : le montant est pris sur votre solde.';
+
+  @override
+  String get returnFeesMomo => 'Demander par Mobile Money';
+
+  @override
+  String get returnFeesSend => 'Envoyer la demande';
+
+  @override
+  String get returnFeesWaiting => 'Demande envoyée : l’expéditeur valide sur son téléphone.';
+
+  @override
+  String get returnFeesPaid => 'Frais de retour réglés : vous pouvez rendre le colis.';
+
+  @override
+  String get returnFeesChecking => 'Vérification des frais de retour…';
+
+  @override
+  String get returnFeesOffline => 'Connexion nécessaire pour vérifier les frais de retour.';
+
+  @override
+  String get termsTitle => 'Conditions des livreurs';
+
+  @override
+  String get termsUpdateTitle => 'Nos conditions ont changé';
+
+  @override
+  String get termsSignupIntro =>
+      'Avant de créer votre compte, lisez les conditions des livreurs et la politique de confidentialité jusqu’en bas. Elles expliquent votre statut, vos gains, l’encaissement et ce que nous faisons de vos données.';
+
+  @override
+  String get termsUpdateIntro =>
+      'Lisez la nouvelle version jusqu’en bas, puis signez-la avec le code reçu par SMS. Sans signature, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.';
+
+  @override
+  String get termsLater => 'Plus tard';
+
+  @override
+  String get termsEnd => 'Vous êtes arrivé au bout des textes.';
+
+  @override
+  String get termsScrollFirst => 'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.';
+
+  @override
+  String get termsCheckPrefix => 'J’ai lu et j’accepte les ';
+
+  @override
+  String termsCheckTerms(String version) {
+    return 'conditions des livreurs (version $version)';
+  }
+
+  @override
+  String get termsCheckAnd => ' et la ';
+
+  @override
+  String get termsCheckPrivacy => 'politique de confidentialité';
+
+  @override
+  String get termsCreateAccount => 'Accepter et créer mon compte';
+
+  @override
+  String get termsGetCode => 'Recevoir le code pour signer';
+
+  @override
+  String termsCodeSent(String phone) {
+    return 'Code envoyé au $phone. Il vaut signature de votre acceptation.';
+  }
+
+  @override
+  String get termsSign => 'Signer';
+
+  @override
+  String termsAcceptedOn(String version, String date) {
+    return 'Version $version acceptée le $date';
+  }
+
+  @override
+  String termsVersionLine(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get termsSection => 'Conditions et confidentialité';
+
+  @override
+  String get termsPrivacyTitle => 'Politique de confidentialité';
+
+  @override
+  String get termsToSign => 'Nouvelle version à lire et signer';
+
+  @override
+  String get blockerTerms => 'Nos conditions ont changé : lisez-les et signez-les pour recevoir des courses.';
+
+  @override
+  String get readAndSign => 'Lire et signer';
+
+  @override
+  String get addressPhoto => 'Voir la façade';
+
+  @override
+  String get addressVoice => 'Écouter la note';
+
+  @override
+  String get addressVoiceStop => 'Arrêter la note';
+
+  @override
+  String get addressMediaFailed => 'Fichier indisponible pour le moment : réessayez.';
+
+  @override
+  String addressPhotoTitle(String name) {
+    return 'Façade · $name';
+  }
 }

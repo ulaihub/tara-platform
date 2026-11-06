@@ -8,6 +8,7 @@ import { AppModule } from '../../src/app.module.js';
 import { configureApp } from '../../src/app.setup.js';
 import { TokenService } from '../../src/auth/token.service.js';
 import type { UserRole } from '../../src/generated/prisma/enums.js';
+import { LEGAL_TEXTS } from '../../src/legal/legal-texts.generated.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { type FakeSmsProvider, SMS_PROVIDER } from '../../src/sms/sms.provider.js';
 
@@ -75,6 +76,12 @@ export interface SignedIn {
   installationId?: string;
 }
 
+/** Textes acceptés à l'inscription depuis l'app expéditeur (versions en vigueur). */
+export const CLIENT_TERMS = {
+  expediteurs: LEGAL_TEXTS.expediteurs.version,
+  confidentialite: LEGAL_TEXTS.confidentialite.version,
+};
+
 /** Parcours complet de connexion par SMS, création du compte comprise. */
 export async function signIn(ctx: TestContext, phone = randomPhone()): Promise<SignedIn> {
   const challenge = await request(ctx.http).post('/v1/auth/otp').send({ phone }).expect(201);
@@ -85,7 +92,7 @@ export async function signIn(ctx: TestContext, phone = randomPhone()): Promise<S
       challengeId: challenge.body.challengeId,
       code: otpFrom(ctx.sms, phone),
       device: { installationId, platform: 'ANDROID' },
-      termsVersion: '2026-11',
+      terms: CLIENT_TERMS,
     })
     .expect(200);
   return {

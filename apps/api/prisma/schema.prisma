@@ -59,6 +59,8 @@ enum OtpPurpose {
   LOGIN
   PHONE_CHANGE
   ACCOUNT_DELETION
+  /// Acceptation d'une nouvelle version des conditions (signature par code SMS).
+  TERMS
 
   @@map("otp_purpose")
 }
@@ -193,6 +195,22 @@ enum PackageSize {
   XL
 
   @@map("package_size")
+}
+
+/// Nature du contenu d'un colis (C1) : tout type d'objet, précisé en clair à côté.
+enum PackageContents {
+  DOCUMENTS
+  CLOTHING
+  MEDICINE
+  LAUNDRY
+  HOUSEHOLD
+  ELECTRONICS
+  FOOD
+  BEAUTY
+  SECONDHAND
+  OTHER
+
+  @@map("package_contents")
 }
 
 enum OrderStatus {
@@ -346,6 +364,8 @@ enum JournalEntryKind {
   CASH_COMPENSATED
   /// Avoir accordé par l'équipe.
   CREDIT_GRANTED
+  /// Frais de nouvelle tentative ou de retour pris à l'expéditeur (E6).
+  FAILURE_FEE_CHARGED
   PAYMENT_RECEIVED
   DELIVERY_COMPLETED
   COD_COLLECTED
@@ -537,12 +557,16 @@ model Device {
 
 /// Consentements horodatés et versionnés (loi n° 2024/017).
 model Consent {
-  id        String      @id @default(uuid(7)) @db.Uuid
-  userId    String      @map("user_id") @db.Uuid
-  kind      ConsentKind
-  version   String
-  granted   Boolean
-  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  id             String      @id @default(uuid(7)) @db.Uuid
+  userId         String      @map("user_id") @db.Uuid
+  kind           ConsentKind
+  version        String
+  granted        Boolean
+  /// Preuve de l'acceptation des conditions (version, heure, adresse, appareil).
+  ip             String?
+  userAgent      String?     @map("user_agent")
+  installationId String?     @map("installation_id")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -849,33 +873,37 @@ model OrderBatch {
   idempotencyKey  String?  @unique @map("idempotency_key")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  sender        User    @relation(fields: [senderId], references: [id])
-  pickupAddress Address @relation(fields: [pickupAddressId], references: [id])
+  sender        User      @relation(fields: [senderId], references: [id])
+  pickupAddress Address   @relation(fields: [pickupAddressId], references: [id])
   orders        Order[]
+  payments      Payment[]
 
   @@map("order_batches")
 }
 
 model Order {
-  id               String      @id @default(uuid(7)) @db.Uuid
+  id                 String           @id @default(uuid(7)) @db.Uuid
   /// Référence lisible communiquée au client, ex. TR-7K3P9Q.
-  reference        String      @unique
+  reference          String           @unique
   /// Jeton du lien de suivi public (F2).
-  trackingToken    String      @unique @map("tracking_token")
-  senderId         String      @map("sender_id") @db.Uuid
-  merchantId       String?     @map("merchant_id") @db.Uuid
-  batchId          String?     @map("batch_id") @db.Uuid
-  pickupAddressId  String      @map("pickup_address_id") @db.Uuid
-  dropoffAddressId String      @map("dropoff_address_id") @db.Uuid
-  recipientName    String      @map("recipient_name")
-  recipientPhone   String      @map("recipient_phone")
-  packageSize      PackageSize @map("package_size")
-  isFragile        Boolean     @default(false) @map("is_fragile")
-  declaredValue    Int?        @map("declared_value")
-  instructions     String?
-  isExpress        Boolean     @default(false) @map("is_express")
-  scheduledFor     DateTime?   @map("scheduled_for") @db.Timestamptz(3)
-  status           OrderStatus @default(CREATED)
+  trackingToken      String           @unique @map("tracking_token")
+  senderId           String           @map("sender_id") @db.Uuid
+  merchantId         String?          @map("merchant_id") @db.Uuid
+  batchId            String?          @map("batch_id") @db.Uuid
+  pickupAddressId    String           @map("pickup_address_id") @db.Uuid
+  dropoffAddressId   String           @map("dropoff_address_id") @db.Uuid
+  recipientName      String           @map("recipient_name")
+  recipientPhone     String           @map("recipient_phone")
+  packageSize        PackageSize      @map("package_size")
+  /// Nature du contenu (null pour les commandes antérieures) et précision libre.
+  packageContents    PackageContents? @map("package_contents")
+  packageDescription String?          @map("package_description")
+  isFragile          Boolean          @default(false) @map("is_fragile")
+  declaredValue      Int?             @map("declared_value")
+  instructions       String?
+  isExpress          Boolean          @default(false) @map("is_express")
+  scheduledFor       DateTime?        @map("scheduled_for") @db.Timestamptz(3)
+  status             OrderStatus      @default(CREATED)
 
   // Prix figé à la création (C2) : total = base + suppléments − remises.
   pricingGridId    String        @map("pricing_grid_id") @db.Uuid
@@ -886,6 +914,10 @@ model Order {
   totalPrice       Int           @map("total_price")
   riderEarning     Int           @map("rider_earning")
   platformFee      Int           @map("platform_fee")
+  /// Frais d'échec figés à la commande (E6), annoncés avant de commander : nouvelle tentative
+  /// et retour à l'expéditeur, à sa charge, partagés comme la course.
+  retryFee         Int           @default(0) @map("retry_fee")
+  returnFee        Int           @default(0) @map("return_fee")
   feePayer         FeePayer      @default(SENDER) @map("fee_payer")
   feePaymentMethod PaymentMethod @map("fee_payment_method")
   /// Montant à encaisser auprès du destinataire, 0 si aucun (C1, E5).
@@ -1243,6 +1275,8 @@ model Payment {
   payerPhone        String?        @map("payer_phone")
   payerId           String?        @map("payer_id") @db.Uuid
   orderId           String?        @map("order_id") @db.Uuid
+  /// Lot de livraisons payé en une fois (C4) : réparti ensuite sur chaque commande.
+  batchId           String?        @map("batch_id") @db.Uuid
   riderId           String?        @map("rider_id") @db.Uuid
   /// Code du prestataire : "fake", "aggregator", "mtn_momo", "orange_money", "cash".
   provider          String
@@ -1260,12 +1294,14 @@ model Payment {
 
   payer          User?          @relation(fields: [payerId], references: [id])
   order          Order?         @relation(fields: [orderId], references: [id])
+  batch          OrderBatch?    @relation(fields: [batchId], references: [id])
   rider          RiderProfile?  @relation(fields: [riderId], references: [id])
   codCollection  CodCollection?
   journalEntries JournalEntry[]
 
   @@unique([provider, providerReference])
   @@index([status, createdAt])
+  @@index([batchId])
   @@map("payments")
 }
 

@@ -35,6 +35,22 @@ export const ActorRoleEnum = z
   .enum(['SENDER', 'RECIPIENT', 'RIDER', 'DISPATCHER', 'SUPPORT', 'SYSTEM'])
   .meta({ id: 'ActorRole' });
 
+/** Nature du contenu d'un colis (C1) : tout type d'objet, précisé en clair à côté. */
+export const PackageContentsEnum = z
+  .enum([
+    'DOCUMENTS',
+    'CLOTHING',
+    'MEDICINE',
+    'LAUNDRY',
+    'HOUSEHOLD',
+    'ELECTRONICS',
+    'FOOD',
+    'BEAUTY',
+    'SECONDHAND',
+    'OTHER',
+  ])
+  .meta({ id: 'PackageContents' });
+
 /** Plafond d'encaissement par commande, pour limiter le risque espèces (G5). */
 export const MAX_COD_AMOUNT = 500_000;
 
@@ -46,6 +62,10 @@ export const DeliveryItem = z.object({
   recipientName: z.string().trim().min(2).max(80),
   recipientPhone: CameroonMobile,
   packageSize: PackageSizeEnum,
+  /** Nature du contenu ; « Autre » si l'app ne la donne pas. */
+  packageContents: PackageContentsEnum.default('OTHER'),
+  /** Précision libre, ex. « 2 paires de chaussures ». */
+  packageDescription: z.string().trim().max(120).optional(),
   isFragile: z.boolean().default(false),
   declaredValue: Fcfa.optional(),
   /** Montant à encaisser auprès du destinataire, 0 si aucun (réservé aux marchands). */
@@ -82,6 +102,21 @@ export const OrderEventDto = z
   })
   .meta({ id: 'OrderEvent' });
 
+/** Note après la course (F4) : 1 à 5 étoiles, mot facultatif pour l'équipe. */
+export const RateBody = z.object({
+  score: z.int().min(1).max(5),
+  /** Mot laissé à l'équipe Tara ; jamais montré à la personne notée. */
+  comment: z.string().trim().max(300).optional(),
+});
+
+export const RatingDto = z
+  .object({
+    score: z.int(),
+    comment: z.string().nullable(),
+    at: z.iso.datetime(),
+  })
+  .meta({ id: 'Rating' });
+
 export const OrderDto = z
   .object({
     id: z.uuid(),
@@ -92,6 +127,8 @@ export const OrderDto = z
     isExpress: z.boolean(),
     scheduledFor: z.iso.datetime().nullable(),
     packageSize: PackageSizeEnum,
+    packageContents: PackageContentsEnum.nullable(),
+    packageDescription: z.string().nullable(),
     isFragile: z.boolean(),
     declaredValue: z.int().nullable(),
     instructions: z.string().nullable(),
@@ -114,10 +151,40 @@ export const OrderDto = z
       feePayer: FeePayerEnum,
       feePaymentMethod: PaymentMethodEnum,
       codAmount: z.int(),
+      /** Frais d'échec figés à la commande (E6), à la charge de l'expéditeur. */
+      retryFee: z.int(),
+      returnFee: z.int(),
     }),
     riderId: z.uuid().nullable(),
+    /**
+     * Livreur de la course, pour l'expéditeur (F1) : prénom et initiale, véhicule, plaque ;
+     * numéro seulement pendant la course (pour l'appeler).
+     */
+    rider: z
+      .object({
+        name: z.string(),
+        phone: z.string().nullable(),
+        vehicleType: z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']),
+        plateNumber: z.string().nullable(),
+      })
+      .nullable(),
     attemptCount: z.int(),
+    /** Après un échec (E6) : motif, choix de l'expéditeur et heure du retour automatique. */
+    failure: z
+      .object({
+        reason: FailureReasonEnum.nullable(),
+        note: z.string().nullable(),
+        at: z.iso.datetime(),
+        decision: z.enum(['RETRY', 'RETURN']).nullable(),
+        /** Sans choix d'ici là, le colis repart chez l'expéditeur (null une fois choisi). */
+        decisionDueAt: z.iso.datetime().nullable(),
+        /** Une seule nouvelle tentative : false après un deuxième échec. */
+        retryAllowed: z.boolean(),
+      })
+      .nullable(),
     cancelReason: z.string().nullable(),
+    /** Note donnée au livreur par l'expéditeur (F4), null tant qu'il n'a pas noté. */
+    rating: RatingDto.nullable(),
     timeline: z.array(OrderEventDto),
     createdAt: z.iso.datetime(),
   })
@@ -149,14 +216,32 @@ export const OrderSummaryDto = z
     status: OrderStatusEnum,
     recipientName: z.string(),
     dropoffLandmark: z.string(),
+    /** Quartier de livraison (null hors des quartiers connus). */
+    dropoffNeighborhood: z.string().nullable(),
     totalPrice: z.int(),
     codAmount: z.int(),
     scheduledFor: z.iso.datetime().nullable(),
+    /** Après un échec : choix fait (null tant que l'expéditeur doit décider). */
+    failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
     createdAt: z.iso.datetime(),
   })
   .meta({ id: 'OrderSummary' });
 
-export const OrderListQuery = PageQuery.extend({ status: OrderStatusEnum.optional() });
+/** Statuts d'une commande en cours (suivie sur l'accueil) ; les autres sont terminées. */
+export const ACTIVE_ORDER_STATUSES = [
+  'CREATED',
+  'SEARCHING_RIDER',
+  'ASSIGNED',
+  'PICKED_UP',
+  'IN_DELIVERY',
+  'DELIVERY_FAILED',
+] as const;
+
+export const OrderListQuery = PageQuery.extend({
+  status: OrderStatusEnum.optional(),
+  /** active : commandes en cours ; history : livrées, retournées ou annulées. */
+  scope: z.enum(['active', 'history']).optional(),
+});
 
 export const CancelOrderBody = z.object({ reason: z.string().trim().min(3).max(300) });
 
@@ -182,6 +267,7 @@ export const RecipientDto = z
 
 export const RecipientQuery = z.object({ q: z.string().trim().min(1).max(40).optional() });
 
+/** Page de suivi du destinataire (F2), sans compte : rien de plus que ce qu'il lui faut. */
 export const PublicTrackingDto = z
   .object({
     reference: z.string(),
@@ -189,12 +275,42 @@ export const PublicTrackingDto = z
     senderName: z.string().nullable(),
     recipientName: z.string(),
     dropoffLandmark: z.string(),
+    dropoffNeighborhood: z.string().nullable(),
     scheduledFor: z.iso.datetime().nullable(),
     recipientConfirmedAt: z.iso.datetime().nullable(),
     recipientAvailable: z.boolean().nullable(),
     /** Le destinataire peut encore confirmer sa disponibilité (avant l'enlèvement). */
     canRespond: z.boolean(),
     timeline: z.array(z.object({ status: OrderStatusEnum, at: z.iso.datetime() })),
+    /**
+     * Livreur : prénom et initiale, véhicule, plaque ; son numéro seulement quand il vient
+     * vers le destinataire (colis à bord, ou échec en attente).
+     */
+    rider: z
+      .object({
+        name: z.string(),
+        vehicleType: z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']),
+        plateNumber: z.string().nullable(),
+        phone: z.string().nullable(),
+      })
+      .nullable(),
+    /**
+     * Arrivée estimée (prudente) quand le livreur roule vers le destinataire, d'après sa
+     * dernière position (de moins de 5 min). `progress` : part du trajet faite, de 0 à 1.
+     */
+    eta: z
+      .object({
+        minutes: z.int(),
+        distanceMeters: z.int(),
+        progress: z.number().min(0).max(1),
+      })
+      .nullable(),
+    /** À payer à la porte : frais de livraison (si le destinataire les paie) et colis. */
+    due: z.object({ fee: z.int(), cod: z.int(), total: z.int() }),
+    /** Demande Mobile Money envoyée par le livreur, à valider sur le téléphone. */
+    paymentPending: z.object({ amount: z.int() }).nullable(),
+    /** Après un échec : nouvelle tentative ou retour à l'expéditeur, si c'est décidé. */
+    failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
   })
   .meta({ id: 'PublicTracking' });
 

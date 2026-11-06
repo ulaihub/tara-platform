@@ -4,6 +4,7 @@ import request from 'supertest';
 import { KycExpiryService } from '../src/riders/kyc-expiry.service.js';
 import { REQUIRED_DOCUMENTS } from '../src/riders/riders.schemas.js';
 import {
+  CLIENT_TERMS,
   createTestApp,
   randomPhone,
   signIn,
@@ -27,6 +28,18 @@ describe('Mon compte (A2, A4) et parrainage (C6)', () => {
   });
   afterAll(async () => {
     await ctx.app.close();
+  });
+
+  it('donne les réglages de l’app expéditeur sans connexion', async () => {
+    const res = await request(ctx.http).get('/v1/public/config').expect(200);
+    expect(res.body).toMatchObject({
+      country: { code: 'CM', dialCode: '+237', currency: 'XAF' },
+      mobileMoneyOperators: [
+        { code: 'MTN', name: 'MTN MoMo' },
+        { code: 'ORANGE', name: 'Orange Money' },
+      ],
+    });
+    expect(res.body).toHaveProperty('supportPhone');
   });
 
   it('renvoie le profil avec un code de parrainage', async () => {
@@ -102,7 +115,7 @@ describe('Mon compte (A2, A4) et parrainage (C6)', () => {
         challengeId: challenge.body.challengeId,
         code,
         device: { installationId: 'installation-parrainage', platform: 'ANDROID' },
-        termsVersion: '2026-11',
+        terms: CLIENT_TERMS,
         referralCode: me.body.referralCode.toLowerCase(),
       })
       .expect(200);

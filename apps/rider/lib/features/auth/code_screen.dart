@@ -2,23 +2,23 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/phone/phone_format.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
-import '../../core/env.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/inputs.dart';
-import '../../design/components/layout.dart';
-import '../../design/format.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/phone_format.dart';
 
 /// 02 · Code SMS : 6 chiffres, remplissage automatique proposé par le système, renvoi
 /// possible à la fin du minuteur fixé par le serveur.
@@ -29,12 +29,17 @@ class CodeScreen extends ConsumerStatefulWidget {
     required this.challenge,
     required this.onBack,
     required this.onSignedIn,
+    required this.onTermsRequired,
   });
 
   final String phone;
   final OtpChallenge challenge;
   final VoidCallback onBack;
   final void Function(AuthSession session) onSignedIn;
+
+  /// Nouveau compte : les conditions sont à lire et accepter, puis ce même code (juste)
+  /// les signe. Reçoit le défi et le code saisi.
+  final void Function(OtpChallenge challenge, String code) onTermsRequired;
 
   @override
   ConsumerState<CodeScreen> createState() => _CodeScreenState();
@@ -81,8 +86,16 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     try {
       final session = await ref
           .read(authControllerProvider.notifier)
-          .verifyCode(challengeId: _challenge.challengeId, code: _code.text, termsVersion: Env.termsVersion);
+          .verifyCode(challengeId: _challenge.challengeId, code: _code.text);
       if (mounted) widget.onSignedIn(session);
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      if (error.code == 'TERMS_REQUIRED') {
+        widget.onTermsRequired(_challenge, _code.text);
+        return;
+      }
+      setState(() => _error = errorMessage(context, error));
+      _code.clear();
     } catch (error) {
       if (mounted) {
         setState(() => _error = errorMessage(context, error));
@@ -118,6 +131,7 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     final support = ref.watch(riderConfigProvider).value?.supportPhone;
     final waiting = _remaining > Duration.zero;
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

@@ -1,8 +1,11 @@
-import { Injectable, type OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthUser } from '../auth/auth.types.js';
 import { AppError } from '../common/errors/app-error.js';
+import { ENV } from '../config/config.module.js';
+import type { Env } from '../config/env.js';
+import { periodStart } from '../common/time.js';
 import type { Payment, Prisma } from '../generated/prisma/client.js';
 import { PaymentsService } from '../payments/payments.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -42,6 +45,7 @@ export class WalletsService implements OnModuleInit {
     private readonly payouts: PayoutsService,
     private readonly audit: AuditService,
     private readonly cash: CashDisciplineService,
+    @Inject(ENV) private readonly env: Env,
   ) {}
 
   onModuleInit(): void {
@@ -56,8 +60,19 @@ export class WalletsService implements OnModuleInit {
     return merchant ? merchantPayable(merchant.id) : customerWallet(userId);
   }
 
-  async overview(userId: string) {
+  async overview(userId: string, now = new Date()) {
     const merchant = await this.prisma.merchantProfile.findUnique({ where: { userId } });
+    const today = merchant
+      ? await this.prisma.order.aggregate({
+          where: {
+            merchantId: merchant.id,
+            status: 'DELIVERED',
+            deliveredAt: { gte: periodStart('day', now), lte: now },
+          },
+          _sum: { codAmount: true },
+          _count: true,
+        })
+      : null;
     const customer = await this.ledger.balance(customerWallet(userId));
     const openPayout = await this.prisma.payout.findFirst({
       where: {
@@ -74,6 +89,9 @@ export class WalletsService implements OnModuleInit {
             payoutSchedule: merchant.payoutSchedule,
             plan: merchant.plan,
             payoutPhone: merchant.payoutPhone,
+            payoutHour: this.env.PAYOUT_DAILY_HOUR,
+            todaySales: today?._sum.codAmount ?? 0,
+            todayDeliveries: today?._count ?? 0,
           }
         : null,
       openPayout: openPayout

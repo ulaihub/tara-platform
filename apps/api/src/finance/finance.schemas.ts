@@ -24,6 +24,8 @@ export const PaymentDto = z
     status: z.enum(['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED']),
     amount: z.int(),
     orderId: z.uuid().nullable(),
+    /** Lot de livraisons payé en une fois (C4). */
+    batchId: z.uuid().nullable(),
     failureReason: z.string().nullable(),
     createdAt: z.iso.datetime(),
     confirmedAt: z.iso.datetime().nullable(),
@@ -68,6 +70,8 @@ export const CollectBody = z.discriminatedUnion('method', [
 export const CollectionDto = z
   .object({
     due: z.object({ fee: z.int(), cod: z.int(), total: z.int() }),
+    /** DELIVERY : auprès du destinataire ; RETURN : frais de retour, auprès de l'expéditeur. */
+    reason: z.enum(['DELIVERY', 'RETURN']),
     complete: z.boolean(),
     payment: z.object({ id: z.uuid(), status: z.string(), amount: z.int() }).nullable(),
   })
@@ -85,6 +89,11 @@ export const WalletDto = z
         payoutSchedule: z.enum(['DAILY', 'ON_DEMAND']),
         plan: z.enum(['FREE', 'PRO', 'BUSINESS']),
         payoutPhone: z.string(),
+        /** Heure du reversement quotidien (heure du Cameroun), 18 par défaut. */
+        payoutHour: z.int(),
+        /** Encaissé à la livraison aujourd'hui (heure du Cameroun) et livraisons du jour. */
+        todaySales: z.int(),
+        todayDeliveries: z.int(),
       })
       .nullable(),
     openPayout: OpenPayout,

@@ -2,17 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../core/course/active_order.dart';
 import '../../core/course/course_actions.dart';
-import '../../core/realtime/realtime_client.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/layout.dart';
-import '../../design/format.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../account/account_screen.dart';
 import '../activity/activity_screen.dart';
@@ -27,9 +29,11 @@ import '../offer/offer_screen.dart';
 import '../offline/pending_actions_screen.dart';
 import '../onboarding/documents_controller.dart';
 import '../safety/sos_screen.dart';
+import 'course_reward.dart';
 import 'home_offline_screen.dart';
 import 'home_online_screen.dart';
 import 'home_summary.dart';
+import 'rate_sender_card.dart';
 
 /// Accueil du livreur validé : hors ligne (05) ⇄ en ligne (06), propositions (07) reçues
 /// par le temps réel, les notifications ou au retour dans l'app, puis la course acceptée
@@ -63,6 +67,12 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Écran des actions en attente (15), ouvert depuis le bandeau.
   bool _pending = false;
+
+  /// Livraison qui vient d'aboutir : gain qui s'envole, palier du jour éventuel.
+  ({String id, int earning, int deliveredToday})? _reward;
+
+  /// Course à noter après la récompense (F4) : l'expéditeur, d'un geste.
+  ({String id, String name})? _rate;
 
   void _selectTab(int tab) => setState(() => _tab = tab);
 
@@ -148,6 +158,13 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   void _closeOffer(String? message) {
     setState(() => _offer = null);
     if (message != null) _showNotice(message);
+  }
+
+  /// Note facultative : sans réseau, elle est simplement perdue.
+  Future<void> _rateSender(String orderId, int stars) async {
+    try {
+      await ref.read(riderApiProvider).rateSender(orderId, stars);
+    } catch (_) {}
   }
 
   void _showNotice(String message) {
@@ -250,7 +267,14 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     }
     final collecting = _collecting?.orderId == order.id ? _collecting : null;
     void onDone(ActionOutcome outcome) {
-      setState(() => _collecting = null);
+      // Courses du jour avant celle-ci, relues ensuite avec les gains à jour.
+      final before = ref.read(homeSummaryProvider).value?.delivered ?? 0;
+      setState(() {
+        _collecting = null;
+        _reward = (id: order.id, earning: order.riderEarning, deliveredToday: before + 1);
+        _rate = (id: order.id, name: order.sender.name ?? l.senderFallback);
+      });
+      ref.invalidate(homeSummaryProvider);
       if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
     }
 
@@ -309,31 +333,38 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             Positioned.fill(
               child: showCourse
                   ? _course(order)
-                  : _tab == 1
-                  ? ActivityScreen(onTab: _selectTab)
-                  : _tab == 2
-                  ? AccountScreen(onTab: _selectTab)
-                  : online.online
-                  ? HomeOnlineScreen(
-                      onWentOffline: () => setState(() {}),
-                      onDetails: () => _selectTab(1),
-                      onSos: _openSos,
-                      onTab: _selectTab,
-                      courseBanner: order == null
-                          ? null
-                          : CourseBanner(
-                              reference: order.reference,
-                              stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.toDropoff,
-                              onResume: () => setState(() => _minimized = null),
-                            ),
-                    )
-                  : HomeOfflineScreen(
-                      onWentOnline: () {
-                        ref.invalidate(homeSummaryProvider);
-                        unawaited(_loadPendingOffers());
+                  // Onglets : contenu sous la barre en verre, transition vitrée entre onglets.
+                  : TaraTabShell(
+                      items: [
+                        TabItem(TaraIcons.home, l.tabHome),
+                        TabItem(TaraIcons.activity, l.tabActivity),
+                        TabItem(TaraIcons.user, l.tabProfile),
+                      ],
+                      current: _tab,
+                      onSelected: _selectTab,
+                      child: switch (_tab) {
+                        1 => const ActivityScreen(),
+                        2 => const AccountScreen(),
+                        _ when online.online => HomeOnlineScreen(
+                          onWentOffline: () => setState(() {}),
+                          onDetails: () => _selectTab(1),
+                          onSos: _openSos,
+                          courseBanner: order == null
+                              ? null
+                              : CourseBanner(
+                                  reference: order.reference,
+                                  stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.toDropoff,
+                                  onResume: () => setState(() => _minimized = null),
+                                ),
+                        ),
+                        _ => HomeOfflineScreen(
+                          onWentOnline: () {
+                            ref.invalidate(homeSummaryProvider);
+                            unawaited(_loadPendingOffers());
+                          },
+                          onDetails: () => _selectTab(1),
+                        ),
                       },
-                      onDetails: () => _selectTab(1),
-                      onTab: _selectTab,
                     ),
             ),
             // Bandeau sous les en-têtes (retour, SOS restent accessibles) : réseau coupé, ou
@@ -360,6 +391,27 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
               ),
             if (_notice != null)
               Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top + 64, child: _Notice(_notice!)),
+            if (_rate case final rate? when _reward == null)
+              Positioned(
+                left: 16,
+                right: 16,
+                top: MediaQuery.paddingOf(context).top + 76,
+                child: RateSenderCard(
+                  key: ValueKey('rate-${rate.id}'),
+                  name: rate.name,
+                  onRate: (stars) => unawaited(_rateSender(rate.id, stars)),
+                  onClose: () => setState(() => _rate = null),
+                ),
+              ),
+            if (_reward case final reward?)
+              Positioned.fill(
+                child: CourseReward(
+                  key: ValueKey('reward-${reward.id}'),
+                  earning: reward.earning,
+                  deliveredToday: reward.deliveredToday,
+                  onDone: () => setState(() => _reward = null),
+                ),
+              ),
             if (_pending)
               Positioned.fill(child: PendingActionsScreen(onContinue: () => setState(() => _pending = false))),
             if (offer != null)

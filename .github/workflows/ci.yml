@@ -136,6 +136,14 @@ jobs:
       - name: Dépendances
         run: flutter pub get --enforce-lockfile
 
+      # Design et cœur partagés avec l'app expéditeur : mis en forme et analysés comme l'app.
+      - name: Paquets partagés (design, cœur, carte, tests)
+        working-directory: packages
+        run: |
+          for package in tara_ui tara_core tara_map tara_test; do
+            (cd "$package" && flutter pub get && dart format --output=none --set-exit-if-changed lib && flutter analyze)
+          done
+
       - name: Traductions générées à jour
         run: |
           flutter gen-l10n
@@ -185,6 +193,89 @@ jobs:
         with:
           name: tara-livreur-symboles
           path: apps/rider/build/symbols/
+          retention-days: 90
+
+  client:
+    name: App expéditeur (Flutter)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/client
+    steps:
+      - uses: actions/checkout@v7
+
+      # Java 21 comme l'app livreur ; dépendances Gradle en cache.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: |
+            apps/client/android/*.gradle*
+            apps/client/android/app/*.gradle*
+            apps/client/android/gradle/wrapper/gradle-wrapper.properties
+            apps/client/pubspec.lock
+
+      # Version de Flutter épinglée : les captures de référence en dépendent.
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+
+      - name: Dépendances
+        run: flutter pub get --enforce-lockfile
+
+      - name: Traductions générées à jour
+        run: |
+          flutter gen-l10n
+          git diff --exit-code lib/l10n
+
+      - name: Formatage
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyse
+        run: flutter analyze
+
+      - name: Tests et captures de référence
+        run: flutter test
+
+      - name: Écarts de captures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-golden-failures
+          path: apps/client/test/**/failures/
+          retention-days: 7
+
+      # Code Dart obscurci ; les symboles gardés à part servent à lire les plantages.
+      # Signature par la clé d'envoi si les secrets du dépôt existent, sinon clé de test.
+      - name: APK par architecture
+        env:
+          TARA_CLIENT_KEYSTORE_BASE64: ${{ secrets.TARA_CLIENT_KEYSTORE_BASE64 }}
+          TARA_CLIENT_KEYSTORE_PASSWORD: ${{ secrets.TARA_CLIENT_KEYSTORE_PASSWORD }}
+          TARA_CLIENT_KEY_ALIAS: ${{ secrets.TARA_CLIENT_KEY_ALIAS }}
+          TARA_CLIENT_KEY_PASSWORD: ${{ secrets.TARA_CLIENT_KEY_PASSWORD }}
+        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
+
+      # Cahier des charges : moins de 25 Mo à télécharger depuis le Play Store et au plus
+      # 32 Mo une fois installée (carte comprise). Détail par bibliothèque, code et ressources.
+      - name: Poids des APK (téléchargement 25 Mo, installée 32 Mo)
+        run: >-
+          python3 ../rider/tool/apk_report.py --download-max-mo 25 --installed-max-mo 32
+          build/app/outputs/flutter-apk/app-*-release.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tara-apk
+          path: apps/client/build/app/outputs/flutter-apk/app-*-release.apk
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tara-symboles
+          path: apps/client/build/symbols/
           retention-days: 90
 
   map-preview:

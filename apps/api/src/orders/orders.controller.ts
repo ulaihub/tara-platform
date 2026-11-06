@@ -10,14 +10,13 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
-import { CurrentUser, Public, Roles } from '../auth/decorators.js';
-import { AppError } from '../common/errors/app-error.js';
+import { CurrentUser, Roles } from '../auth/decorators.js';
 import { idempotencyKey } from '../common/idempotency.js';
 import { pageSchema } from '../common/pagination.js';
+import { LegalService } from '../legal/legal.service.js';
 import {
   ApiZodBody,
   ApiZodQuery,
@@ -36,12 +35,13 @@ import {
   OrderListQuery,
   OrderSummaryDto,
   PickupCodeDto,
-  PublicTrackingDto,
+  RateBody,
+  RatingDto,
   RecipientDto,
   RecipientQuery,
-  RecipientResponseBody,
 } from './orders.schemas.js';
 import { OrdersService } from './orders.service.js';
+import { RatingsService } from './ratings.service.js';
 
 const IDEMPOTENCY_HEADER = ApiHeader({
   name: 'Idempotency-Key',
@@ -54,18 +54,26 @@ const IDEMPOTENCY_HEADER = ApiHeader({
 @ApiBearerAuth()
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly orders: OrdersService) {}
+  constructor(
+    private readonly orders: OrdersService,
+    private readonly ratings: RatingsService,
+    private readonly legal: LegalService,
+  ) {}
 
-  /** Nouvelle commande (C1) : le prix est recalculé côté serveur. */
+  /**
+   * Nouvelle commande (C1) : le prix est recalculé côté serveur. Les conditions des
+   * expéditeurs en vigueur doivent être acceptées (TERMS_ACCEPTANCE_REQUIRED sinon).
+   */
   @Post()
   @IDEMPOTENCY_HEADER
   @ApiZodBody(CreateOrderBody)
   @ApiZodResponse(CreatedOrderDto, HttpStatus.CREATED)
-  create(
+  async create(
     @CurrentUser() user: AuthUser,
     @ValidBody(CreateOrderBody) body: z.output<typeof CreateOrderBody>,
     @Headers('idempotency-key') key: string | undefined,
   ): Promise<z.output<typeof CreatedOrderDto>> {
+    await this.legal.assertAccepted(user.id, 'client');
     return this.orders.create(user, body, idempotencyKey(key));
   }
 
@@ -74,11 +82,12 @@ export class OrdersController {
   @IDEMPOTENCY_HEADER
   @ApiZodBody(CreateBatchBody)
   @ApiZodResponse(CreatedBatchDto, HttpStatus.CREATED)
-  createBatch(
+  async createBatch(
     @CurrentUser() user: AuthUser,
     @ValidBody(CreateBatchBody) body: z.output<typeof CreateBatchBody>,
     @Headers('idempotency-key') key: string | undefined,
   ): Promise<z.output<typeof CreatedBatchDto>> {
+    await this.legal.assertAccepted(user.id, 'client');
     return this.orders.createBatch(user, body, idempotencyKey(key));
   }
 
@@ -113,6 +122,19 @@ export class OrdersController {
     return this.orders.cancel(user, id, body.reason);
   }
 
+  /** Note du livreur après la course (F4), une fois, dans les 7 jours. */
+  @Post(':id/rating')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(RateBody)
+  @ApiZodResponse(RatingDto)
+  rate(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(RateBody) body: z.output<typeof RateBody>,
+  ): Promise<z.output<typeof RatingDto>> {
+    return this.ratings.rateRider(user, id, body);
+  }
+
   /** Nouveau code d'enlèvement si l'expéditeur a perdu le précédent. */
   @Post(':id/pickup-code')
   @HttpCode(HttpStatus.OK)
@@ -140,37 +162,6 @@ export class RecipientsController {
     @ValidQuery(RecipientQuery) query: z.output<typeof RecipientQuery>,
   ): Promise<z.output<typeof RecipientDto>[]> {
     return this.orders.recipients(user, query.q);
-  }
-}
-
-const TrackingToken = z.string().regex(/^[A-Za-z0-9_-]{16,64}$/);
-
-/** Page de suivi ouverte par le destinataire depuis le SMS, sans compte. */
-@ApiTags('Public')
-@Public()
-@Throttle({ default: { limit: 120, ttl: 60_000 } })
-@Controller('public/tracking')
-export class PublicTrackingController {
-  constructor(private readonly orders: OrdersService) {}
-
-  @Get(':token')
-  @ApiZodResponse(PublicTrackingDto)
-  view(@Param('token') token: string): Promise<z.output<typeof PublicTrackingDto>> {
-    if (!TrackingToken.safeParse(token).success) throw AppError.notFound('ORDER_NOT_FOUND');
-    return this.orders.publicTracking(token);
-  }
-
-  /** Le destinataire confirme son adresse et sa disponibilité (C5). */
-  @Post(':token/response')
-  @HttpCode(HttpStatus.OK)
-  @ApiZodBody(RecipientResponseBody)
-  @ApiZodResponse(PublicTrackingDto)
-  respond(
-    @Param('token') token: string,
-    @ValidBody(RecipientResponseBody) body: z.output<typeof RecipientResponseBody>,
-  ): Promise<z.output<typeof PublicTrackingDto>> {
-    if (!TrackingToken.safeParse(token).success) throw AppError.notFound('ORDER_NOT_FOUND');
-    return this.orders.recipientResponse(token, body);
   }
 }
 

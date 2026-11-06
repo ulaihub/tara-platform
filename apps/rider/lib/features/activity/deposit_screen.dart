@@ -3,26 +3,25 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/phone/phone_format.dart';
+import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
-import '../../core/api/api_exception.dart';
 import '../../core/api/models.dart';
 import '../../core/offline/action_queue.dart' show newEventId;
-import '../../core/realtime/realtime_client.dart';
-import '../../design/components/buttons.dart';
-import '../../design/components/glass.dart';
-import '../../design/components/inputs.dart';
-import '../../design/components/layout.dart';
-import '../../design/format.dart';
-import '../../design/motion/effects.dart';
-import '../../design/motion/liquid_background.dart';
-import '../../design/tara_colors.dart';
-import '../../design/tara_icons.dart';
-import '../../design/tara_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/phone_format.dart';
-import '../course/collection_screen.dart' show guessOperator;
 import '../course/course_scaffold.dart' show CourseFieldLabel;
 
 enum _DepositState { idle, sending, waiting, done, failed }
@@ -206,6 +205,7 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
     final amount = '${formatAmount(done ? _sent : _amount)} F';
 
     return TaraScreen(
+      safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fond de l'icône de l'app Tara (clair ; l'app livreur a l'icône sombre). -->
+    <color name="ic_launcher_background">#F6F2EC</color>
+    <!-- Écran de démarrage : suit le thème clair ou sombre du téléphone. -->
+    <color name="tara_splash_bg">#F6F2EC</color>
+    <color name="tara_ink">#16120E</color>
+</resources>

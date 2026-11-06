@@ -1,0 +1,1130 @@
+{
+  "@@locale": "fr",
+  "addLegalIds": "Ajouter RCCM et NIU (facultatif)",
+  "back": "Retour",
+  "categoryBeauty": "Beauté",
+  "categoryElectronics": "Électronique",
+  "categoryFashion": "Mode",
+  "categoryFood": "Alimentation",
+  "categoryHome": "Maison",
+  "categoryOther": "Autre",
+  "change": "Modifier",
+  "codeSentTo": "Envoyé par SMS au {phone}",
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "codeTitle": "Entrez le code reçu",
+  "continueLabel": "Continuer",
+  "countryCodeLabel": "Indicatif du pays {code}",
+  "@countryCodeLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "digitLabel": "Chiffre {index}",
+  "@digitLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "firstName": "Prénom",
+  "genericError": "Une erreur est survenue. Réessayez.",
+  "getCode": "Recevoir le code",
+  "haveReferral": "J’ai un code de parrainage",
+  "kindPerson": "Pour moi",
+  "kindPersonHelp": "Vous pourrez passer en mode boutique plus tard, depuis votre profil.",
+  "kindQuestion": "Vous envoyez des colis…",
+  "kindShop": "Pour ma boutique",
+  "kindShopHelp": "L’argent encaissé à la livraison vous est reversé par Mobile Money.",
+  "lastName": "Nom",
+  "legalAnd": " et la ",
+  "legalPrefix": "Nouveau compte : vous lirez et accepterez les ",
+  "logout": "Se déconnecter",
+  "networkError": "Pas de connexion internet. Vérifiez le réseau et réessayez.",
+  "niu": "NIU",
+  "niuHint": "Ex. M012345678901A",
+  "noSms": "Pas reçu de SMS ? Contacter le support",
+  "payoutHelp": "Numéro Mobile Money qui reçoit vos ventes encaissées.",
+  "payoutNumber": "Numéro Mobile Money",
+  "payoutTitle": "Reversements",
+  "phoneHelp": "Un SMS gratuit vous est envoyé. Aucun e-mail n’est demandé.",
+  "phoneHint": "6XX XX XX XX",
+  "phoneInvalid": "Numéro de mobile camerounais à 9 chiffres, commençant par 6.",
+  "phoneLabel": "Numéro de téléphone",
+  "privacy": "politique de confidentialité",
+  "rccm": "RCCM",
+  "rccmHint": "Ex. RC/DLA/2024/B/1234",
+  "referralHint": "Ex. TARA-7KQ2PM",
+  "referralLabel": "Code de parrainage",
+  "requiredField": "Obligatoire",
+  "resend": "Renvoyer",
+  "resendIn": "Renvoyer le code dans {time}",
+  "@resendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resendNow": "Vous n’avez rien reçu ?",
+  "retry": "Réessayer",
+  "senderSpace": "Envoyez vos colis",
+  "shopCategory": "Catégorie (facultatif)",
+  "shopName": "Nom de la boutique",
+  "shopNameHint": "Ex. Awa Fashion",
+  "signInBody": "Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code par SMS.",
+  "signInTitle": "Vos colis livrés à Douala",
+  "terms": "conditions d’utilisation",
+  "validate": "Valider",
+  "welcomeBody": "Votre nom figure dans les messages envoyés à vos destinataires.",
+  "welcomeTitle": "Bienvenue sur Tara",
+  "appTitle": "Tara",
+  "goodMorning": "Bonjour,",
+  "goodEvening": "Bonsoir,",
+  "tabHome": "Accueil",
+  "tabOrders": "Commandes",
+  "tabProfile": "Profil",
+  "sendTitle": "Envoyer un colis",
+  "sendBody": "Un livreur vient le chercher et le livre dans Douala, avec suivi en direct.",
+  "newDelivery": "Nouvelle livraison",
+  "askAddress": "Demander l’adresse au destinataire",
+  "shopBalance": "Ventes de la boutique",
+  "shopBalanceDaily": "À recevoir · versé chaque nuit sur votre Mobile Money",
+  "shopBalanceOnDemand": "À recevoir · versé quand vous le demandez",
+  "inProgress": "En cours",
+  "noOrdersInProgress": "Aucune livraison en cours. Vos colis apparaissent ici dès leur envoi.",
+  "statusScheduled": "Prévue {when}",
+  "@statusScheduled": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "statusSearching": "Recherche d’un livreur",
+  "statusRiderComing": "Livreur en route vers l’enlèvement",
+  "statusInDelivery": "En livraison",
+  "statusFailed": "Livraison impossible · à décider",
+  "todayAt": "aujourd’hui à {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tomorrowAt": "demain à {time}",
+  "@tomorrowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersError": "Impossible de charger vos livraisons.",
+  "finished": "Terminées",
+  "noOrdersFinished": "Aucune livraison terminée pour l’instant.",
+  "statusDelivered": "Livrée · {day}",
+  "@statusDelivered": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "statusReturned": "Retournée à l’expéditeur",
+  "statusCancelled": "Annulée",
+  "today": "aujourd’hui",
+  "yesterday": "hier",
+  "referralTitle": "Parrainage",
+  "referralBody": "Partagez votre code : vos amis l’entrent à leur inscription et profitent d’une réduction.",
+  "appVersion": "Tara · version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Annuler",
+  "displaySection": "Affichage",
+  "effectsAutoReduced": "Réduites automatiquement sur ce téléphone.",
+  "effectsFull": "Complètes",
+  "effectsHint": "Réduites : moins d’effets, plus fluide sur un téléphone modeste.",
+  "effectsLabel": "Animations",
+  "effectsReduced": "Réduites",
+  "helpSection": "Aide",
+  "languageLabel": "Langue",
+  "logoutConfirm": "Vous ne recevrez plus de notifications sur ce téléphone jusqu’à votre prochaine connexion.",
+  "optionAuto": "Auto",
+  "supportTara": "Support Tara",
+  "themeDark": "Sombre",
+  "themeLabel": "Thème",
+  "themeLight": "Clair",
+  "prohibitedTitle": "Objets interdits",
+  "prohibitedWeapons": "Armes, y compris armes blanches, et munitions",
+  "prohibitedIllegal": "Produits illicites : drogues, contrefaçons",
+  "prohibitedDangerous": "Matières dangereuses : gaz, carburant, produits inflammables, explosifs ou corrosifs",
+  "prohibitedAnimals": "Animaux vivants",
+  "prohibitedCash": "Liasses d’argent liquide",
+  "prohibitedPledge": "En envoyant le colis, vous confirmez qu’il n’en contient aucun.",
+  "close": "Fermer",
+  "stepOf": "Étape {current} sur {total} · {title}",
+  "@stepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "stepPickup": "Enlèvement",
+  "stepRecipient": "Destinataire",
+  "stepPackage": "Colis",
+  "stepWhen": "Quand",
+  "stepSummary": "Récapitulatif",
+  "pickupTitle": "Où récupérer le colis ?",
+  "pickupBody": "Le livreur passe le prendre à cette adresse.",
+  "noPickupYet": "Aucune adresse enregistrée. Placez votre boutique ou votre domicile sur la carte : vous la retrouverez la prochaine fois.",
+  "addressesError": "Impossible de charger vos adresses.",
+  "newAddress": "Nouvelle adresse",
+  "pickupRequired": "Choisissez ou ajoutez l’adresse d’enlèvement.",
+  "pickupAddressTitle": "Adresse d’enlèvement",
+  "locationUnavailable": "Position introuvable : déplacez la carte jusqu’au bon endroit.",
+  "myPosition": "Ma position",
+  "pinHint": "Déplacez la carte pour placer l’épingle sur l’entrée exacte.",
+  "neighborhoodLabel": "Quartier",
+  "neighborhoodAuto": "Déduit du point sur la carte",
+  "neighborhoodSearch": "Rechercher un quartier",
+  "landmarkLabel": "Repère",
+  "landmarkHint": "Ex. Portail bleu après la pharmacie du carrefour",
+  "landmarkRequired": "Décrivez un repère visible (3 caractères au moins).",
+  "addressLabel": "Libellé",
+  "labelShop": "Boutique",
+  "labelHome": "Maison",
+  "labelOffice": "Bureau",
+  "saveAddress": "Enregistrer l’adresse",
+  "recipientTitle": "Qui reçoit le colis ?",
+  "recipientBody": "Nous lui envoyons le suivi de la livraison par SMS.",
+  "recipientName": "Nom du destinataire",
+  "recipientNameHint": "Ex. Marie Ngo",
+  "recipientPhone": "Son numéro",
+  "recipientNameRequired": "Saisissez le nom du destinataire.",
+  "recentRecipients": "Récents",
+  "deliveriesCount": "{count, plural, =1{1 livraison} other{{count} livraisons}}",
+  "@deliveriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deliveryAddress": "Adresse de livraison",
+  "placeOnMap": "Placer sur la carte",
+  "placeOnMapBody": "Vous savez où livrer : placez l’épingle vous-même.",
+  "askRecipient": "Demander au destinataire",
+  "askRecipientBody": "Il reçoit un lien et place lui-même son point sur la carte.",
+  "viaWhatsapp": "WhatsApp",
+  "viaSms": "SMS",
+  "recipientFirst": "Saisissez d’abord le nom et le numéro du destinataire.",
+  "linkSentTitle": "Lien envoyé à {name}",
+  "@linkSentTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "linkWaiting": "En attente de son point : l’adresse s’affiche ici dès qu’il l’a placé. Vous pouvez continuer en attendant.",
+  "linkExpired": "Le lien a expiré sans réponse.",
+  "resendLink": "Renvoyer le lien",
+  "placeMyself": "Placer moi-même",
+  "changeAddress": "Changer d’adresse",
+  "addressVerified": "Adresse confirmée par une livraison",
+  "addressFromRecipient": "Placée par le destinataire",
+  "addressRequired": "Indiquez où livrer le colis.",
+  "whatsappUnavailable": "WhatsApp ne s’est pas ouvert. Essayez par SMS.",
+  "smsUnavailable": "Les SMS ne se sont pas ouverts sur ce téléphone.",
+  "locationLinkMessage": "Bonjour {name}, {sender} vous envoie un colis avec Tara. Indiquez où vous le livrer : {url}",
+  "@locationLinkMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "sender": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "packageTitle": "Qu’y a-t-il dans le colis ?",
+  "packageBody": "Le livreur sait ainsi comment le transporter.",
+  "contentsLabel": "Nature du contenu",
+  "contentsDocuments": "Documents",
+  "contentsClothing": "Vêtements, chaussures",
+  "contentsMedicine": "Médicaments",
+  "contentsLaundry": "Linge",
+  "contentsHousehold": "Cuisine, maison",
+  "contentsElectronics": "Électronique",
+  "contentsFood": "Alimentation",
+  "contentsBeauty": "Beauté",
+  "contentsSecondhand": "Brocante",
+  "contentsOther": "Autre",
+  "contentsRequired": "Choisissez la nature du contenu.",
+  "descriptionLabel": "Précisez (facultatif)",
+  "descriptionLabelRequired": "Précisez le contenu",
+  "descriptionRequired": "Décrivez ce que contient le colis.",
+  "descriptionHintDocuments": "Ex. Contrat signé, dossier",
+  "descriptionHintClothing": "Ex. 2 paires de chaussures",
+  "descriptionHintMedicine": "Ex. Ordonnance de la pharmacie",
+  "descriptionHintLaundry": "Ex. 1 sac de linge repassé",
+  "descriptionHintHousehold": "Ex. Marmite et 6 verres",
+  "descriptionHintElectronics": "Ex. Téléphone et chargeur",
+  "descriptionHintFood": "Ex. Gâteau d’anniversaire",
+  "descriptionHintBeauty": "Ex. Perruque, crèmes",
+  "descriptionHintSecondhand": "Ex. Lampe ancienne",
+  "descriptionHintOther": "Ex. Pièce de moto",
+  "sizeLabel": "Taille",
+  "sizeMax": "≤ {kg} kg",
+  "@sizeMax": {
+    "placeholders": {
+      "kg": {
+        "type": "int"
+      }
+    }
+  },
+  "sizeHelpS": "Jusqu’à 2 kg · tient dans une main : enveloppe, téléphone, médicaments.",
+  "sizeHelpM": "Jusqu’à 5 kg · boîte à chaussures, petit sac de vêtements.",
+  "sizeHelpL": "Jusqu’à 10 kg · carton moyen, sac de linge.",
+  "sizeHelpXL": "Jusqu’à 20 kg · gros carton, petit électroménager. Supplément colis XL.",
+  "fragileTitle": "Fragile",
+  "fragileBody": "Le livreur le transporte avec soin.",
+  "codLabel": "À encaisser auprès du destinataire",
+  "codHint": "0 si rien à encaisser",
+  "codHelp": "Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, reversées sur votre Mobile Money.",
+  "codTooHigh": "500 000 F au plus par livraison.",
+  "valueLabel": "Valeur du contenu (facultatif)",
+  "valueHint": "Ex. 25 000",
+  "valueHelp": "En FCFA. Indiquée au livreur, utile en cas de litige.",
+  "valueTooHigh": "10 000 000 F au plus.",
+  "instructionsLabel": "Instructions pour le livreur (facultatif)",
+  "instructionsHint": "Ex. Appeler en arrivant, sonner au portail vert",
+  "soundsLabel": "Sons",
+  "soundsHint": "Commande envoyée, adresse reçue, colis livré… Le mode silencieux du téléphone est respecté.",
+  "whenTitle": "Quand le livreur doit-il passer ?",
+  "whenBody": "Il récupère le colis, puis le livre aussitôt.",
+  "whenNow": "Maintenant",
+  "whenNowBody": "Un livreur part dès que possible.",
+  "whenLater": "Programmer",
+  "whenLaterBody": "Un jour et une heure, jusqu’à 7 jours à l’avance.",
+  "dayLabel": "Jour",
+  "timeLabel": "Heure de passage",
+  "dayToday": "Aujourd’hui",
+  "dayTomorrow": "Demain",
+  "dateAt": "{date} à {time}",
+  "@dateAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduledSummary": "Enlèvement prévu {when}.",
+  "@scheduledSummary": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "nightSurcharge": "Entre 20 h et 6 h, un supplément de nuit s’applique.",
+  "slotRequired": "Choisissez une heure de passage.",
+  "salesToday": "Encaissé aujourd’hui",
+  "salesDeliveries": "{count, plural, =0{Aucune livraison} =1{1 livraison} other{{count} livraisons}}",
+  "@salesDeliveries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "toReceiveDaily": "{amount} à recevoir cette nuit",
+  "@toReceiveDaily": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "toReceiveOnDemand": "{amount} à recevoir",
+  "@toReceiveOnDemand": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutSent": "{amount} envoyés sur votre Mobile Money",
+  "@payoutSent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryTitle": "Vérifiez et commandez",
+  "summaryBody": "Le prix est calculé pour ce trajet et cette heure.",
+  "whenNowShort": "Dès que possible",
+  "deliveryNumber": "Livraison {n}",
+  "@deliveryNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "waitingPoint": "En attente du point de {name}",
+  "@waitingPoint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeDelivery": "Retirer",
+  "addDelivery": "Ajouter une livraison",
+  "addDeliveryHint": "Jusqu’à 10 livraisons depuis le même enlèvement : un seul passage du livreur.",
+  "priceBase": "Course",
+  "surchargeExpress": "Express",
+  "surchargeHeavy": "Colis XL",
+  "surchargeNight": "Supplément de nuit",
+  "surchargeWeather": "Supplément météo",
+  "surchargeOther": "Supplément",
+  "discount": "Réduction",
+  "totalLabel": "Total",
+  "quoting": "Calcul du prix…",
+  "promoLabel": "Code promo",
+  "promoHint": "Ex. BIENVENUE",
+  "applyPromo": "Appliquer",
+  "promoApplied": "Code {code} appliqué",
+  "@promoApplied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "whoPays": "Qui paie la course ?",
+  "payerMe": "Moi",
+  "payerRecipient": "Le destinataire",
+  "recipientPaysBody": "Le destinataire paie la course à la livraison, en espèces ou par Mobile Money.",
+  "paymentLabel": "Moyen de paiement",
+  "payMtn": "MTN Mobile Money",
+  "payOrange": "Orange Money",
+  "payMomoBody": "Vous validez le paiement sur votre téléphone.",
+  "payWallet": "Solde Tara",
+  "payWalletShop": "Mes ventes",
+  "payWalletBody": "Disponible : {amount}",
+  "@payWalletBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "walletTooLow": "Disponible : {amount}, pas assez pour cette commande.",
+  "@walletTooLow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payCash": "Espèces à l’enlèvement",
+  "payCashBody": "Vous payez le livreur quand il récupère le colis.",
+  "payerPhoneLabel": "Numéro qui paie",
+  "orderFor": "Commander · {amount}",
+  "@orderFor": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderSlide": "Glisser pour commander",
+  "paymentRequired": "Choisissez comment payer.",
+  "linkPendingBlock": "Attendez que {name} place son point, ou placez-le vous-même.",
+  "@linkPendingBlock": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "payingTitle": "Validez le paiement sur votre téléphone",
+  "payingBody": "Une demande de {amount} arrive sur le {phone} : entrez votre code secret Mobile Money pour la valider.",
+  "@payingBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentFailed": "Le paiement n’a pas abouti.",
+  "retryPayment": "Renvoyer la demande",
+  "cancelOrder": "Annuler la commande",
+  "cancelReasonUnpaid": "Paiement Mobile Money non abouti",
+  "placedTitle": "Commande envoyée !",
+  "placedScheduledTitle": "Livraison programmée !",
+  "pickupCodeLabel": "Code d’enlèvement",
+  "pickupCodeHelp": "Donnez-le au livreur quand il récupère le colis. Notez-le : il ne sera plus affiché.",
+  "searchingRider": "Recherche d’un livreur…",
+  "riderFound": "Livreur trouvé ! Il vient chercher le colis.",
+  "scheduledPickup": "Le livreur passera {when}.",
+  "@scheduledPickup": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "backHome": "Retour à l’accueil",
+  "payWalletShopBody": "Pris sur vos ventes : il vous restera {amount} à recevoir.",
+  "@payWalletShopBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "trackAwaitingPayment": "En attente du paiement",
+  "trackAwaitingPaymentBody": "Validez le paiement Mobile Money pour lancer la recherche d’un livreur.",
+  "trackScheduled": "Livraison programmée",
+  "trackSearching": "Recherche d’un livreur…",
+  "trackSearchingBody": "Les livreurs proches de l’enlèvement reçoivent la course.",
+  "trackAssigned": "{rider} vient chercher le colis",
+  "@trackAssigned": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      }
+    }
+  },
+  "trackAssignedBody": "Donnez-lui le code d’enlèvement à son arrivée.",
+  "trackOnTheWay": "En route vers {recipient}",
+  "@trackOnTheWay": {
+    "placeholders": {
+      "recipient": {
+        "type": "String"
+      }
+    }
+  },
+  "trackOnTheWayBody": "Colis récupéré à {time}.",
+  "@trackOnTheWayBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "trackFailed": "Livraison impossible",
+  "trackFailedBody": "Le livreur n’a pas pu livrer. Choisissez la suite : nouvelle tentative ou retour.",
+  "trackDelivered": "Colis livré !",
+  "trackDeliveredBody": "Remis à {recipient} à {time}.",
+  "@trackDeliveredBody": {
+    "placeholders": {
+      "recipient": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "trackReturned": "Colis retourné",
+  "trackCancelled": "Livraison annulée",
+  "trackEta": "Environ {minutes} min",
+  "@trackEta": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "stepOrdered": "Commande",
+  "stepRiderFound": "Livreur",
+  "stepPickedUp": "Récupéré",
+  "stepDelivered": "Livré",
+  "vehicleMotorbike": "Moto",
+  "vehicleTricycle": "Tricycle",
+  "vehicleCar": "Voiture",
+  "callRider": "Appeler {name}",
+  "@callRider": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "forRecipient": "Pour {name}",
+  "@forRecipient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "newPickupCode": "Nouveau code d’enlèvement",
+  "pickupCodeShown": "Code d’enlèvement : {code}",
+  "@pickupCodeShown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelDelivery": "Annuler la livraison",
+  "cancelConfirm": "Touchez encore pour confirmer l’annulation.",
+  "cancelReasonSender": "Annulée par l’expéditeur",
+  "deliveredBy": "Livré par {rider}",
+  "@deliveredBy": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveredIn": "en {minutes} min",
+  "@deliveredIn": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "collectedAmount": "{amount} encaissés",
+  "@collectedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "shareRecap": "Partager",
+  "recapShareText": "Colis livré par Tara · {reference} · {recipient} · {time}",
+  "@recapShareText": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "trackOrderError": "Impossible de charger le suivi.",
+  "trackDelivery": "Suivre la livraison",
+  "statusRetrying": "Nouvelle tentative en cours",
+  "statusReturning": "Retour en cours",
+  "failureReasonRecipientAbsent": "Destinataire absent",
+  "failureReasonRecipientUnreachable": "Destinataire injoignable",
+  "failureReasonRefused": "Colis refusé par le destinataire",
+  "failureReasonAddressNotFound": "Adresse introuvable",
+  "failureReasonPaymentRefused": "Le destinataire a refusé de payer",
+  "failureReasonOther": "Autre motif",
+  "failureReported": "{reason} · signalé par {rider} à {time}",
+  "@failureReported": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "rider": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureDue": "Avant {time}",
+  "@failureDue": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureDueBody": "Sans réponse d’ici là, le colis vous est rapporté.",
+  "failureRetryTitle": "Nouvelle tentative",
+  "failureRetryBody": "{rider} repasse chez {recipient}. Appelez d’abord pour convenir du moment.",
+  "@failureRetryBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      }
+    }
+  },
+  "failureReturnTitle": "Retour du colis",
+  "failureReturnBody": "{rider} vous rapporte le colis : {place}.",
+  "@failureReturnBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "failureChoose": "Choisissez une option",
+  "failureConfirmRetry": "Confirmer la tentative",
+  "failureConfirmReturn": "Confirmer le retour",
+  "failureConfirmRetrySemantics": "Glisser pour demander une nouvelle tentative",
+  "failureConfirmReturnSemantics": "Glisser pour demander le retour du colis",
+  "callRecipient": "Appeler {name}",
+  "@callRecipient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trackRetrying": "Nouvelle tentative",
+  "trackRetryingBody": "{rider} repart livrer {recipient}.",
+  "@trackRetryingBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      }
+    }
+  },
+  "trackReturning": "Retour du colis",
+  "trackReturningBody": "{rider} vous rapporte le colis.",
+  "@trackReturningBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      }
+    }
+  },
+  "returnCodeHint": "Quand le livreur vous rend le colis, donnez-lui le code de retour reçu par SMS : c’est la preuve que vous l’avez récupéré.",
+  "newReturnCode": "Nouveau code de retour",
+  "returnCodeShown": "Code de retour : {code}",
+  "@returnCodeShown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "trackReturnedBody": "Le colis vous a été rendu à {time}.",
+  "@trackReturnedBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "stepFailed": "Échec",
+  "stepReturned": "Retourné",
+  "riderNoteQuoted": "« {note} »",
+  "@riderNoteQuoted": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "returnToPickup": "Retour au point d’enlèvement",
+  "failureBannerTitle": "Livraison impossible · {reference}",
+  "failureBannerBody": "Touchez pour choisir : nouvelle tentative ou retour.",
+  "@failureBannerTitle": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "rateTitle": "Comment s’est passée la livraison ?",
+  "rateBody": "Notez {rider} : les livreurs les mieux notés reçoivent plus de courses.",
+  "starsLabel": "{count, plural, =1{1 étoile} other{{count} étoiles}}",
+  "starWord1": "Très décevant",
+  "starWord2": "Décevant",
+  "starWord3": "Correct",
+  "starWord4": "Bien",
+  "starWord5": "Parfait !",
+  "rateCommentHint": "Un mot pour l’équipe Tara (facultatif)",
+  "rateSend": "Envoyer ma note",
+  "rateThanks": "Merci pour votre note !",
+  "rateThanksBody": "Votre avis reste entre vous et Tara.",
+  "@rateBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      }
+    }
+  },
+  "@starsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failureFeesNote": "En cas d’échec de livraison : nouvelle tentative {retry}, retour du colis {ret}, à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.",
+  "@failureFeesNote": {
+    "placeholders": {
+      "retry": {
+        "type": "String"
+      },
+      "ret": {
+        "type": "String"
+      }
+    }
+  },
+  "retryUsed": "Une seule nouvelle tentative est possible : le colis vous sera rapporté.",
+  "returnFeeHint": "Frais de retour : {amount}, pris sur votre solde Tara. S’il ne suffit pas, vous réglez le reste au livreur à la remise du colis (espèces ou Mobile Money).",
+  "@returnFeeHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpTitle": "Rechargez {amount} pour la nouvelle tentative",
+  "@topUpTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpBody": "Votre solde Tara ne couvre pas les frais. Payez par Mobile Money : la nouvelle tentative est confirmée dès le paiement validé.",
+  "topUpPay": "Payer {amount}",
+  "@topUpPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpPending": "Validez le paiement de {amount} sur votre téléphone avec votre code secret Mobile Money.",
+  "@topUpPending": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpFailed": "Le paiement n’a pas abouti. Réessayez, ou choisissez le retour du colis.",
+  "topUpCancel": "Choisir le retour à la place",
+  "termsTitle": "Conditions d’utilisation",
+  "termsUpdateTitle": "Nos conditions ont changé",
+  "termsSignupIntro": "Avant de créer votre compte, lisez les conditions et la politique de confidentialité jusqu’en bas. Elles expliquent les prix, les frais quand une livraison échoue et ce que nous faisons de vos données.",
+  "termsUpdateIntro": "Lisez la nouvelle version jusqu’en bas, puis signez-la avec le code reçu par SMS. Sans signature, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.",
+  "termsLater": "Plus tard",
+  "termsEnd": "Vous êtes arrivé au bout des textes.",
+  "termsScrollFirst": "Faites défiler les textes jusqu’en bas pour pouvoir les accepter.",
+  "termsCheckPrefix": "J’ai lu et j’accepte les ",
+  "termsCheckTerms": "conditions d’utilisation (version {version})",
+  "@termsCheckTerms": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "termsCheckAnd": " et la ",
+  "termsCheckPrivacy": "politique de confidentialité",
+  "termsCreateAccount": "Accepter et créer mon compte",
+  "termsGetCode": "Recevoir le code pour signer",
+  "termsCodeSent": "Code envoyé au {phone}. Il vaut signature de votre acceptation.",
+  "@termsCodeSent": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "termsSign": "Signer",
+  "termsAcceptedOn": "Version {version} acceptée le {date}",
+  "@termsAcceptedOn": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "termsVersionLine": "Version {version}",
+  "@termsVersionLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "termsSection": "Conditions et confidentialité",
+  "termsToSign": "Nouvelle version à lire et signer",
+  "termsSigned": "Conditions signées. Merci !",
+  "termsPrivacyTitle": "Politique de confidentialité",
+  "walletTitle": "Portefeuille",
+  "shopToReceive": "Ventes à recevoir",
+  "shopPayoutDaily": "Reversées chaque jour à {hour} h sur le {phone}.",
+  "@shopPayoutDaily": {
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "shopPayoutOnDemand": "Reversées à votre demande sur le {phone}.",
+  "@shopPayoutOnDemand": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "shopToday": "Aujourd’hui : {amount} encaissés · {count, plural, =0{aucune livraison} =1{1 livraison} other{{count} livraisons}}",
+  "@shopToday": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shopDebt": "Frais d’échec à régler : {amount}. Ils seront pris sur vos prochaines ventes ; au-delà de 3 000 F, vos nouvelles commandes attendent le règlement.",
+  "@shopDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutOpen": "Reversement en cours : {amount}",
+  "@payoutOpen": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutNow": "Recevoir {amount} maintenant",
+  "@payoutNow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payoutRequested": "Reversement demandé : l’argent arrive sur votre Mobile Money.",
+  "taraBalance": "Solde Tara",
+  "taraBalanceBody": "Sert à payer vos livraisons et, s’il y en a, les frais d’échec.",
+  "topUpAction": "Recharger",
+  "withdrawAction": "Retirer",
+  "topUpHowMuch": "Combien voulez-vous ajouter ?",
+  "topUpDone": "Solde rechargé de {amount}.",
+  "@topUpDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawBody": "Tout votre solde ({amount}) part sur votre numéro {phone}.",
+  "@withdrawBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawConfirm": "Retirer {amount}",
+  "@withdrawConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawDone": "Retrait demandé : l’argent arrive sur votre Mobile Money.",
+  "movements": "Mouvements",
+  "movementsShop": "Boutique",
+  "movementsBalance": "Solde Tara",
+  "movementsEmpty": "Aucun mouvement pour l’instant.",
+  "seeMore": "Voir plus",
+  "lineCodCollected": "Vente encaissée",
+  "lineOrderCharged": "Livraison payée",
+  "lineOrderReleased": "Frais rendus (annulation)",
+  "lineFailureFee": "Frais d’échec",
+  "lineCredit": "Avoir de Tara",
+  "lineTopUp": "Recharge",
+  "linePayout": "Reversement",
+  "lineWithdrawal": "Retrait",
+  "linePayoutFailed": "Reversement échoué, montant rendu",
+  "lineRefund": "Remboursement",
+  "payoutsTitle": "Reversements",
+  "payoutStatusDone": "Reçu",
+  "payoutStatusOpen": "En cours",
+  "payoutStatusFailed": "Échoué, montant rendu",
+  "statementsTitle": "Relevés mensuels",
+  "statementsBody": "Le relevé PDF de chaque mois : encaissements, frais, reversements, soldes.",
+  "statementCurrent": "{month} (en cours)",
+  "@statementCurrent": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "statementShare": "Relevé Tara de {month}",
+  "@statementShare": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "walletBalanceTile": "Solde Tara : {amount}",
+  "@walletBalanceTile": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "askTitle": "Demander l’adresse",
+  "askIntro": "Envoyez un lien à votre client : il place lui-même son point et écrit un repère. Vous êtes prévenu dès que c’est fait, et la livraison se crée avec son adresse.",
+  "askSendWhatsapp": "Envoyer par WhatsApp",
+  "askSendSms": "Par SMS",
+  "askSent": "Lien envoyé à {name}. Vous serez prévenu dès qu’il aura placé son point.",
+  "@askSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "askRequested": "Adresses demandées",
+  "askNone": "Aucune adresse demandée pour l’instant.",
+  "askPending": "En attente · lien valable jusqu’au {date}",
+  "@askPending": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "askReceived": "Point reçu · {landmark}",
+  "@askReceived": {
+    "placeholders": {
+      "landmark": {
+        "type": "String"
+      }
+    }
+  },
+  "askExpired": "Expiré sans réponse",
+  "askCreateOrder": "Créer la livraison",
+  "askResend": "Renvoyer",
+  "askArrived": "{name} a placé son point : vous pouvez créer la livraison.",
+  "@askArrived": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myAddresses": "Mes adresses",
+  "myAddressesEmpty": "Enregistrez votre boutique ou votre maison : elles vous seront proposées pour l’enlèvement.",
+  "addAddress": "Ajouter une adresse",
+  "newAddressTitle": "Nouvelle adresse",
+  "removeAddress": "Retirer {label}",
+  "@removeAddress": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "removeAddressConfirm": "Retirer « {label} » de vos adresses ? Les livraisons passées ne changent pas.",
+  "@removeAddressConfirm": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "removeYes": "Oui, retirer",
+  "mediaSection": "Pour aider le livreur (facultatif)",
+  "facadePhoto": "Photo de la façade",
+  "facadePhotoHint": "Le livreur reconnaît l’entrée au premier coup d’œil.",
+  "takePhoto": "Prendre la photo",
+  "retake": "Reprendre",
+  "removeMedia": "Retirer",
+  "voiceNote": "Note vocale",
+  "voiceNoteHint": "30 secondes pour expliquer le chemin, dans la langue de votre choix.",
+  "recordNote": "Enregistrer",
+  "recordingNote": "Enregistrement… {elapsed} / 0:30",
+  "@recordingNote": {
+    "placeholders": {
+      "elapsed": {
+        "type": "String"
+      }
+    }
+  },
+  "stopRecording": "Arrêter",
+  "listenNote": "Écouter ({length})",
+  "@listenNote": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      }
+    }
+  },
+  "stopListening": "Arrêter l’écoute",
+  "redoNote": "Refaire",
+  "micDenied": "Micro refusé : autorisez-le pour Tara dans les réglages du téléphone.",
+  "facadePhotoLabel": "Photo de la façade prise"
+}

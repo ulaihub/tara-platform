@@ -1,3 +1,14 @@
 # Paquets partagés
 
-Code partagé entre les applications. Le premier paquet, le client d'API généré depuis l'OpenAPI de `apps/api`, arrive en phase 1.
+Code partagé entre les applications :
+
+- `tara_ui` : design Tara (couleurs, typographie, composants, animations, icônes, polices,
+  transitions de page, sons de la marque et vibrations des moments clés — sons
+  synthétisés par `tool/make_sounds.py`, sans échantillon tiers) ;
+- `tara_core` : client de l'API, session, connexion par code SMS, temps réel, notifications,
+  réseau, numéros camerounais ;
+- `tara_map` : carte Tara (styles MapLibre sombre et clair, tuiles, choix d'un point) ;
+- `tara_test` (tests seulement) : variantes d'écran vérifiées, captures de référence, polices.
+
+L'app livreur (`apps/rider`) et l'app expéditeur (`apps/client`) en dépendent par chemin
+(`path: ../../packages/…`).

@@ -18,6 +18,8 @@ void main() {
 
   final models = <String, List<String>>{
     'OtpChallenge': OtpChallenge.fields,
+    'LegalDocument': LegalDocument.fields,
+    'TermsStatus': TermsStatus.fields,
     'SessionUser': SessionUser.fields,
     'AuthSession': AuthSession.fields,
     'RiderConfig': RiderConfig.fields,

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tara_rider/app/app_settings.dart';
+import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/app/providers.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';
-import 'package:tara_rider/core/session/session_store.dart';
-import 'package:tara_rider/design/tara_effects.dart';
 import 'package:tara_rider/features/account/account_screen.dart';
 import 'package:tara_rider/features/account/emergency_contact_screen.dart';
 import 'package:tara_rider/features/onboarding/documents_screen.dart';
+import 'package:tara_ui/app_settings.dart';
+import 'package:tara_ui/feedback/tara_feedback.dart';
+import 'package:tara_ui/tara_effects.dart';
 
 import 'helpers/harness.dart';
 import 'helpers/orders.dart';
@@ -51,6 +52,8 @@ void main() {
 
   Future<void> tapText(WidgetTester tester, String text) async {
     await tester.ensureVisible(find.text(text).last);
+    // Défilement terminé : sinon le toucher arrête la liste au lieu d'atteindre le bouton.
+    await settle(tester);
     await tester.tap(find.text(text).last);
     await settle(tester);
   }
@@ -65,9 +68,11 @@ void main() {
         ..themeMode = ThemeMode.dark
         ..locale = const Locale('en');
       first.effects.preference = EffectsPreference.reduced;
+      first.sounds = false;
       await Future<void>.delayed(Duration.zero);
 
       final next = await AppSettings.load(store);
+      expect(next.sounds, isFalse);
       expect(next.themeMode, ThemeMode.dark);
       expect(next.locale, const Locale('en'));
       expect(next.effects.preference, EffectsPreference.reduced);
@@ -78,6 +83,7 @@ void main() {
       final store = MemoryKeyValueStore()..values['settings.display'] = '{pas du json';
       final settings = await AppSettings.load(store);
       expect(settings.themeMode, ThemeMode.system);
+      expect(settings.sounds, isTrue);
       expect(settings.locale, isNull);
       expect(settings.languageCode(const Locale('en', 'CM')), 'en');
       expect(settings.languageCode(const Locale('de')), 'fr');
@@ -88,7 +94,8 @@ void main() {
     final harness = AccountHarness();
     await pumpVariant(tester, Variant.matrix.first, harness.screen());
     await settle(tester);
-    await show(tester, 'English');
+    // Réglages d'affichage au-dessus de la barre d'onglets : section suivante à l'écran.
+    await show(tester, 'Conditions et confidentialité');
 
     await tapText(tester, 'Clair');
     expect(settingsOf(tester).themeMode, ThemeMode.light);
@@ -99,6 +106,23 @@ void main() {
 
     await tapText(tester, 'Réduites');
     expect(settingsOf(tester).effects.preference, EffectsPreference.reduced);
+  });
+
+  testWidgets('sons : coupés puis remis, un exemple se fait entendre', (tester) async {
+    final harness = AccountHarness();
+    await pumpVariant(tester, Variant.matrix.first, harness.screen());
+    await settle(tester);
+    await show(tester, 'Sons');
+
+    await tapText(tester, 'Sons');
+    expect(settingsOf(tester).sounds, isFalse);
+    final context = tester.element(find.byType(AccountScreen));
+    TaraFeedback.play(context, TaraSound.delivered);
+    expect(sounds.played, isEmpty);
+
+    await tapText(tester, 'Sons');
+    expect(settingsOf(tester).sounds, isTrue);
+    expect(sounds.played, [TaraSound.received]);
   });
 
   testWidgets('pièce refusée : signalée avec son motif, renvoyée depuis le profil', (tester) async {

@@ -1,0 +1,54 @@
+name: tara_ui
+description: "Design Tara partagé par les apps : couleurs, typographie, composants, animations, icônes, polices."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  device_info_plus: ^13.3.0
+  # Réglages d'affichage gardés dans le stockage du téléphone (AppSettings).
+  tara_core:
+    path: ../tara_core
+  path_parsing: ^1.1.0
+  audioplayers: ^6.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  # Sons de la marque (tool/make_sounds.py) : « packages/tara_ui/assets/sounds/… ».
+  assets:
+    - assets/sounds/
+  # Polices embarquées (licence OFL) : les apps fonctionnent sans connexion. Déclarées ici,
+  # elles s'appellent « packages/tara_ui/Sora » et « packages/tara_ui/PlusJakartaSans ».
+  fonts:
+    - family: Sora
+      fonts:
+        - asset: fonts/Sora-400.ttf
+          weight: 400
+        - asset: fonts/Sora-500.ttf
+          weight: 500
+        - asset: fonts/Sora-600.ttf
+          weight: 600
+        - asset: fonts/Sora-700.ttf
+          weight: 700
+        - asset: fonts/Sora-800.ttf
+          weight: 800
+    - family: PlusJakartaSans
+      fonts:
+        - asset: fonts/PlusJakartaSans-400.ttf
+          weight: 400
+        - asset: fonts/PlusJakartaSans-500.ttf
+          weight: 500
+        - asset: fonts/PlusJakartaSans-600.ttf
+          weight: 600
+        - asset: fonts/PlusJakartaSans-700.ttf
+          weight: 700
+        - asset: fonts/PlusJakartaSans-800.ttf
+          weight: 800

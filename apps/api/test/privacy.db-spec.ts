@@ -58,7 +58,20 @@ describe('Données personnelles (loi n° 2024/017)', () => {
 
   it('exporte toutes les données du compte (droit d’accès)', async () => {
     const user = await customerWithOrder();
+    const other = await signIn(ctx);
+    await ctx.prisma.rating.create({
+      data: {
+        orderId: user.orderId,
+        raterId: user.userId,
+        rateeId: other.userId,
+        score: 5,
+        comment: 'Très soigneux',
+      },
+    });
     const res = await request(ctx.http).get('/v1/me/export').set(user.auth).expect(200);
+    expect(res.body.ratingsGiven).toEqual([
+      expect.objectContaining({ score: 5, comment: 'Très soigneux' }),
+    ]);
     expect(res.headers['content-disposition']).toMatch(/^attachment; filename="tara-donnees-/);
     expect(res.body.account.phone).toBe(user.phone);
     expect(res.body.orders[0]).toMatchObject({
@@ -104,6 +117,17 @@ describe('Données personnelles (loi n° 2024/017)', () => {
       .send({ reason: 'Plus besoin' })
       .expect(200);
 
+    const rider = await signIn(ctx);
+    await ctx.prisma.rating.create({
+      data: {
+        orderId: user.orderId,
+        raterId: user.userId,
+        rateeId: rider.userId,
+        score: 2,
+        comment: 'Il a appelé ma voisine Mme Ekambi',
+      },
+    });
+
     // Un code de connexion ne confirme pas une suppression.
     await ctx.prisma.otpChallenge.deleteMany({ where: { phone: user.phone } });
     const login = await request(ctx.http)
@@ -147,6 +171,10 @@ describe('Données personnelles (loi n° 2024/017)', () => {
     });
     const dropoff = await ctx.prisma.address.findUniqueOrThrow({ where: { id: user.dropoffId } });
     expect(dropoff).toMatchObject({ ownerId: null, contactName: null, contactPhone: null });
+    // Les étoiles restent (score du livreur), le mot libre disparaît.
+    expect(
+      await ctx.prisma.rating.findFirstOrThrow({ where: { raterId: user.userId } }),
+    ).toMatchObject({ score: 2, comment: null });
 
     // Le numéro est libre : la même personne peut se réinscrire.
     await ctx.prisma.otpChallenge.deleteMany({ where: { phone: user.phone } });
