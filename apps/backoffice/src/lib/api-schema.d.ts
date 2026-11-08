@@ -1956,6 +1956,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/orders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminOrderDesk_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/orders/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminOrderDesk_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/orders/{id}/notes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminOrderDesk_addNote'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/orders/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminOrderDesk_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1990,6 +2054,176 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    AdminOrder: {
+      /** Format: uuid */
+      id: string;
+      reference: string;
+      status: components['schemas']['OrderStatus'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+      /** Format: date-time */
+      scheduledFor: string | null;
+      isExpress: boolean;
+      delay: {
+        kind: components['schemas']['DelayKind'];
+        /** Format: date-time */
+        dueAt: string;
+        minutes: number;
+      } | null;
+      parcel: {
+        size: components['schemas']['PackageSize'];
+        contents: components['schemas']['PackageContents'] | null;
+        description: string | null;
+        fragile: boolean;
+        declaredValue: number | null;
+        instructions: string | null;
+      };
+      sender: {
+        /** Format: uuid */
+        id: string;
+        name: string | null;
+        phone: string;
+        shopName: string | null;
+      };
+      recipient: {
+        name: string;
+        phone: string;
+        /** Format: date-time */
+        confirmedAt: string | null;
+        available: boolean | null;
+        note: string | null;
+      };
+      pickup: {
+        label: string | null;
+        landmark: string;
+        neighborhood: string | null;
+        latitude: number;
+        longitude: number;
+        contactName: string | null;
+        contactPhone: string | null;
+        hasPhoto: boolean;
+        hasVoiceNote: boolean;
+      };
+      dropoff: {
+        label: string | null;
+        landmark: string;
+        neighborhood: string | null;
+        latitude: number;
+        longitude: number;
+        contactName: string | null;
+        contactPhone: string | null;
+        hasPhoto: boolean;
+        hasVoiceNote: boolean;
+      };
+      rider: {
+        /** Format: uuid */
+        id: string;
+        name: string | null;
+        phone: string;
+        vehicleType: components['schemas']['VehicleType'];
+        plateNumber: string | null;
+      } | null;
+      price: {
+        distanceMeters: number;
+        basePrice: number;
+        surchargesTotal: number;
+        discountTotal: number;
+        totalPrice: number;
+        riderEarning: number;
+        platformFee: number;
+        retryFee: number;
+        returnFee: number;
+        feePayer: components['schemas']['FeePayer'];
+        feePaymentMethod: components['schemas']['PaymentMethod'];
+        /** Format: date-time */
+        feePaidAt: string | null;
+      };
+      cod: {
+        amount: number;
+        collectedAmount: number | null;
+        method: components['schemas']['PaymentMethod'] | null;
+        /** Format: date-time */
+        collectedAt: string | null;
+      } | null;
+      attempts: number;
+      failure: {
+        reason: components['schemas']['FailureReason'] | null;
+        /** Format: date-time */
+        at: string | null;
+        /** @enum {string|null} */
+        decision: 'RETRY' | 'RETURN' | null;
+      } | null;
+      cancelReason: string | null;
+      timeline: {
+        /** Format: uuid */
+        id: string;
+        /** Format: date-time */
+        at: string;
+        from: components['schemas']['OrderStatus'] | null;
+        to: components['schemas']['OrderStatus'];
+        actorRole: string;
+        actorName: string | null;
+        note: string | null;
+        failureReason: components['schemas']['FailureReason'] | null;
+      }[];
+      proofs: {
+        /** Format: uuid */
+        id: string;
+        kind: string;
+        /** Format: date-time */
+        at: string;
+        codeVerified: boolean;
+        receivedBy: string | null;
+        hasPhoto: boolean;
+        validatedBySupport: boolean;
+      }[];
+      courseAlerts: components['schemas']['CourseAlert'][];
+      notes: components['schemas']['OrderNote'][];
+      can: {
+        cancel: boolean;
+        reassign: boolean;
+      };
+    };
+    AdminOrderPage: {
+      items: components['schemas']['AdminOrderRow'][];
+      /** Format: uuid */
+      nextCursor: string | null;
+      total: number;
+    };
+    AdminOrderRow: {
+      /** Format: uuid */
+      id: string;
+      reference: string;
+      status: components['schemas']['OrderStatus'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      scheduledFor: string | null;
+      isExpress: boolean;
+      senderName: string | null;
+      senderPhone: string;
+      recipientName: string;
+      rider: {
+        /** Format: uuid */
+        id: string;
+        name: string | null;
+        phone: string;
+      } | null;
+      pickupNeighborhood: string | null;
+      dropoffNeighborhood: string | null;
+      totalPrice: number;
+      codAmount: number;
+      delay: {
+        kind: components['schemas']['DelayKind'];
+        /** Format: date-time */
+        dueAt: string;
+        minutes: number;
+      } | null;
+    };
+    /** @enum {string} */
+    AdminOrderView: 'all' | 'active' | 'problems' | 'delivered' | 'cancelled';
     AdminRider: {
       /** Format: uuid */
       id: string;
@@ -2663,6 +2897,15 @@ export interface components {
       actorRole: components['schemas']['ActorRole'];
       failureReason: components['schemas']['FailureReason'] | null;
       note: string | null;
+    };
+    OrderNote: {
+      /** Format: uuid */
+      id: string;
+      body: string;
+      /** Format: date-time */
+      createdAt: string;
+      authorName: string | null;
+      authorPhone: string;
     };
     /** @enum {string} */
     OrderStatus:
@@ -6868,6 +7111,112 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['RiderTrail'];
+        };
+      };
+    };
+  };
+  AdminOrderDesk_list: {
+    parameters: {
+      query?: {
+        q?: string;
+        view?: components['schemas']['AdminOrderView'];
+        from?: string;
+        to?: string;
+        riderId?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminOrderPage'];
+        };
+      };
+    };
+  };
+  AdminOrderDesk_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminOrder'];
+        };
+      };
+    };
+  };
+  AdminOrderDesk_addNote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OrderNote'];
+        };
+      };
+    };
+  };
+  AdminOrderDesk_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminOrder'];
         };
       };
     };

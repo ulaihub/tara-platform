@@ -1,3 +1,4 @@
+import type { Env } from '../config/env.js';
 import type { OrderStatus } from '../generated/prisma/enums.js';
 
 /** Vitesse prudente d'une moto dans Douala (même valeur que l'app expéditeur). */
@@ -10,6 +11,15 @@ export interface LatenessRules {
   pickupMinutes: number;
   /** Marge ajoutée au trajet estimé entre l'enlèvement et la livraison. */
   deliveryMarginMinutes: number;
+}
+
+/** Règles de retard d'après la configuration (DISPATCH_ALERT_AFTER_SECONDS, LATE_*). */
+export function latenessRules(env: Env): LatenessRules {
+  return {
+    searchingSeconds: env.DISPATCH_ALERT_AFTER_SECONDS,
+    pickupMinutes: env.LATE_PICKUP_MINUTES,
+    deliveryMarginMinutes: env.LATE_DELIVERY_MARGIN_MINUTES,
+  };
 }
 
 export interface LatenessInput {

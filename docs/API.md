@@ -104,6 +104,23 @@ prochain arrêt (vendeur, client, ou rien si une décision est attendue après u
 distance et durée prudente (au moins 18 km/h de moyenne). Rien en dehors des courses : seul
 le trajet enregistré pendant la course est lu.
 
+**Commandes (H2)** :
+
+- `GET /admin/orders?q=&view=&from=&to=&riderId=&limit=&cursor=` (dispatch, support,
+  administrateurs) : recherche par référence, numéro ou nom du destinataire, expéditeur ou
+  boutique ; vues `all`, `active`, `problems` (échec en attente, recherche sans livreur
+  signalée, remise sans code, alerte de trajet non vue, retard), `delivered`, `cancelled`
+  (annulées ou retournées) ; jours de création à l'heure de Douala ; du plus récent au plus
+  ancien, avec le total.
+- `GET /admin/orders/{id}` : fiche complète (colis, personnes, arrêts, prix et parts,
+  encaissement, échec, historique des statuts avec l'auteur, preuves, alertes de trajet,
+  notes internes, actions possibles).
+- `POST /admin/orders/{id}/notes` : note interne (jamais montrée aux clients ni aux
+  livreurs).
+- `POST /admin/orders/{id}/cancel` (dispatch, administrateurs) : annulation avant
+  l'enlèvement, raison obligatoire, tracée et envoyée à l'expéditeur. La réattribution
+  passe par `GET /admin/orders/{id}/candidates` et `POST /admin/orders/{id}/assign`.
+
 ## Couverture des exigences de la phase 1
 
 | Exigence | Routes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |

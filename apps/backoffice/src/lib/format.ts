@@ -7,11 +7,24 @@ const clock = new Intl.DateTimeFormat('fr-FR', {
   timeZone: TIME_ZONE,
 });
 
+const dayClock = new Intl.DateTimeFormat('fr-FR', {
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: TIME_ZONE,
+});
+
 const amount = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 
 /** « 14:05 ». */
 export function time(iso: string | Date): string {
   return clock.format(typeof iso === 'string' ? new Date(iso) : iso);
+}
+
+/** « 6 nov., 14:05 ». */
+export function dateTime(iso: string | Date): string {
+  return dayClock.format(typeof iso === 'string' ? new Date(iso) : iso);
 }
 
 /** « 12 500 F » (espace insécable fine comme séparateur de milliers). */

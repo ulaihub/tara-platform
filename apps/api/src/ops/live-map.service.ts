@@ -9,7 +9,7 @@ import type { GeoPoint } from '../routing/distance.service.js';
 import { RoadService } from '../routing/road.service.js';
 import { SafetyAlertsService } from '../rider-app/safety-alerts.service.js';
 import { CourseTrackService } from '../tracking/course-track.service.js';
-import { type LatenessRules, lateness } from './lateness.js';
+import { type LatenessRules, lateness, latenessRules } from './lateness.js';
 import type { LiveMapDto, LiveOrderDto, LiveRiderDto } from './ops.schemas.js';
 
 /** Commandes en cours affichées sur la carte. */
@@ -88,11 +88,7 @@ export class LiveMapService {
   }
 
   private get rules(): LatenessRules {
-    return {
-      searchingSeconds: this.env.DISPATCH_ALERT_AFTER_SECONDS,
-      pickupMinutes: this.env.LATE_PICKUP_MINUTES,
-      deliveryMarginMinutes: this.env.LATE_DELIVERY_MARGIN_MINUTES,
-    };
+    return latenessRules(this.env);
   }
 
   async snapshot(now = new Date()): Promise<z.output<typeof LiveMapDto>> {

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { Icon, type IconName } from '@/components/icon';
 import { cx } from '@/components/ui';
@@ -146,7 +147,13 @@ function useNow(): number {
  * Carte en direct (H1) : la ville à gauche, ce qui demande l'attention à droite. Un SOS
  * arrive avec un son et passe en tête ; un clic sur un élément le montre sur la carte.
  */
-export function LiveMap({ initial }: { initial: LiveMapData }) {
+export function LiveMap({
+  initial,
+  focusOrder = null,
+}: {
+  initial: LiveMapData;
+  focusOrder?: string | null;
+}) {
   const { data, failing, receivedAt, refresh } = useLiveMap(initial);
   const now = useNow();
   const [tab, setTab] = useState<Tab>('alertes');
@@ -190,6 +197,15 @@ export function LiveMap({ initial }: { initial: LiveMapData }) {
     },
     [data],
   );
+
+  // Arrivée depuis une fiche commande : elle est choisie et montrée sur la carte.
+  const opened = useRef(false);
+  useEffect(() => {
+    if (opened.current || !focusOrder) return;
+    opened.current = true;
+    setTab('commandes');
+    choose({ type: 'order', id: focusOrder });
+  }, [focusOrder, choose]);
 
   return (
     <div className="-mx-10 -my-8 flex h-screen">
@@ -708,6 +724,7 @@ function Details({
   let lines: (string | null)[] = [];
   let phone: string | null = null;
   let link: { label: string; target: Selection } | null = null;
+  let sheet: string | null = null;
   if (selection.type === 'rider') {
     const rider = data.riders.find((item) => item.id === selection.id);
     if (!rider) return null;
@@ -742,6 +759,7 @@ function Details({
       order.delay ? `En retard de ${duration(order.delay.minutes)}` : null,
       remainingLine(trail, order.id),
     ];
+    sheet = `/commandes/${order.id}`;
     if (rider) {
       phone = rider.phone;
       link = {
@@ -792,6 +810,14 @@ function Details({
             <Icon name="phone" size={15} />
             Appeler {displayPhone(phone)}
           </a>
+        ) : null}
+        {sheet ? (
+          <Link
+            href={sheet}
+            className="inline-flex min-h-9 items-center rounded-xl border border-line px-3 text-[13px] font-bold hover:border-accent-line"
+          >
+            Ouvrir la fiche
+          </Link>
         ) : null}
         {link ? (
           <button

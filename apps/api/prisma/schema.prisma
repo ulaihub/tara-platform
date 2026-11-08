@@ -493,6 +493,7 @@ model User {
   payoutsReceived          Payout[]               @relation("PayoutUser")
   payoutsApproved          Payout[]               @relation("PayoutApprover")
   courseAlertsAcknowledged CourseAlert[]          @relation("CourseAlertAcknowledgedBy")
+  orderNotes               OrderNote[]            @relation("OrderNoteAuthor")
   reconciliationsRun       ReconciliationReport[]
 
   @@map("users")
@@ -972,6 +973,7 @@ model Order {
   proofs          DeliveryProof[]
   offers          DispatchOffer[]
   ratings         Rating[]
+  notes           OrderNote[]
   codCollection   CodCollection?
   payments        Payment[]
   promoRedemption PromoRedemption?
@@ -1218,6 +1220,22 @@ enum CourseAlertKind {
   TRACK_GAP
 
   @@map("course_alert_kind")
+}
+
+/// Note interne de l'équipe sur une commande (H2) : jamais montrée à l'expéditeur, au
+/// destinataire ni au livreur.
+model OrderNote {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order  Order @relation(fields: [orderId], references: [id])
+  author User  @relation("OrderNoteAuthor", fields: [authorId], references: [id])
+
+  @@index([orderId, createdAt])
+  @@map("order_notes")
 }
 
 /// Alerte du support née du trajet d'une course (une par sujet et par course).
