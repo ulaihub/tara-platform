@@ -172,7 +172,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 function OrderRow({ order }: { order: AdminOrderRow }) {
   return (
     <tr className="relative border-b border-line last:border-0 hover:bg-panel-soft">
-      <td className="px-4 py-3">
+      <td className="px-4 py-3 whitespace-nowrap">
         <Link
           href={`/commandes/${order.id}`}
           className="font-display font-bold after:absolute after:inset-0 after:content-['']"

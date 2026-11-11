@@ -348,6 +348,13 @@ export default async function OrderPage({
                           : null,
                   ],
                   ['Tentatives', order.attempts > 0 ? String(order.attempts) : null],
+                  // Colis non conforme refusé par le livreur : l'expéditeur paie le déplacement.
+                  [
+                    'Déplacement facturé',
+                    order.proofs.some((proof) => proof.kind === 'PICKUP_REFUSED')
+                      ? `${money(order.price.retryFee)} à l’expéditeur`
+                      : null,
+                  ],
                 ]}
               />
             </Section>
@@ -484,8 +491,9 @@ function Candidates({
   return (
     <ul className="mt-4 space-y-2">
       {shown.map((candidate) => {
-        const blocked = candidate.ineligibleBecause.some(
-          (reason) => reason === 'DOCUMENTS' || reason === 'TERMS',
+        // Ce que l'API refuserait de toute façon : pièces, conditions, véhicule, SOS ouvert.
+        const blocked = candidate.ineligibleBecause.some((reason) =>
+          ['DOCUMENTS', 'TERMS', 'VEHICLE', 'SAFETY_ALERT'].includes(reason),
         );
         const name = candidate.name ?? displayPhone(candidate.phone);
         return (
