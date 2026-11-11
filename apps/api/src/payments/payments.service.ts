@@ -147,6 +147,8 @@ export class PaymentsService {
         reference: payment.id,
         amount: payment.amount,
         phone: input.phone,
+        // Opérateur choisi par le payeur ; sinon le prestataire le déduit du numéro.
+        ...(input.method ? { operator: input.method === 'MOMO_ORANGE' ? 'ORANGE' : 'MTN' } : {}),
         description: input.description,
       });
       payment = await this.prisma.payment.update({

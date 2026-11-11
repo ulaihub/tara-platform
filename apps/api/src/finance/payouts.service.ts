@@ -205,6 +205,8 @@ export class PayoutsService implements OnModuleInit {
         reference: payout.id,
         amount: payout.amount,
         phone: payout.phone,
+        operator: payout.operator,
+        recipientName: await this.recipientName(payout),
         description: `Tara reversement ${payout.id.slice(0, 8)}`,
       });
       await this.prisma.payout.update({
@@ -222,6 +224,25 @@ export class PayoutsService implements OnModuleInit {
       }
       await this.settle(payout.id, 'FAILED', { failureReason: String(error).slice(0, 300) });
     }
+  }
+
+  /** Nom du bénéficiaire tel que l'opérateur le connaît le mieux : boutique, livreur, client. */
+  private async recipientName(payout: Payout): Promise<string> {
+    const found = await this.prisma.payout.findUniqueOrThrow({
+      where: { id: payout.id },
+      select: {
+        merchant: { select: { shopName: true, user: { select: { fullName: true } } } },
+        rider: { select: { user: { select: { fullName: true } } } },
+        user: { select: { fullName: true } },
+      },
+    });
+    return (
+      found.merchant?.user.fullName ??
+      found.merchant?.shopName ??
+      found.rider?.user.fullName ??
+      found.user?.fullName ??
+      'Bénéficiaire Tara'
+    );
   }
 
   /** Clôture un reversement en cours ; une seconde clôture est sans effet. */

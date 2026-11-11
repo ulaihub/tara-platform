@@ -238,6 +238,8 @@ Les événements servent à rafraîchir l'écran ; l'état qui fait foi reste ce
 
 Montants en FCFA entiers. Chaque mouvement est une écriture du grand livre ; les soldes affichés en sont tirés.
 
+**Agrégateur Mobile Money.** `PAYMENT_PROVIDER=sebpay` (MTN Money et Orange Money au Cameroun, en XAF) avec `SEBPAY_PUBLIC_KEY`, `SEBPAY_SECRET_KEY` (clés `_test_` sur le bac à sable `SEBPAY_BASE_URL`, `_live_` sur `https://newapi.sebpay.bj/api/v1`) et `PUBLIC_API_URL` : Sebpay rappelle `POST {PUBLIC_API_URL}/v1/webhooks/payments/sebpay`, signé (`X-SebPay-Signature`, HMAC-SHA256 du corps brut avec la clé secrète), puis la transaction est relue par l'API avant d'être crue. L'opérateur suit le choix du payeur, sinon les premiers chiffres du numéro. Les frais d'encaissement sont lus au tarif du compte (`GET /c/calculate-fee`), ceux des reversements dans la réponse de Sebpay. L'adresse IP du serveur doit être déclarée dans le tableau de bord Sebpay.
+
 **Paiement des frais d'une commande (G1).**
 
 | `feePaymentMethod` (payé par l'expéditeur) | Ce qui se passe                                                                                                                                                                                                                                                                                              |
@@ -276,7 +278,7 @@ Notifications de l'agrégateur : `GET` ou `POST /v1/webhooks/payments/{prestatai
 
 | Exigence | Réalisation                                                                                           |
 | -------- | ----------------------------------------------------------------------------------------------------- |
-| G1       | Espèces, Mobile Money (CamPay), solde Tara, destinataire payeur                                       |
+| G1       | Espèces, Mobile Money (Sebpay, CamPay en secours), solde Tara, destinataire payeur                    |
 | G2       | Portefeuille marchand ligne par ligne                                                                 |
 | G3       | Reversement quotidien à 18 h, à la demande pour Pro et Business, validation au-delà d'un seuil        |
 | G4       | Portefeuille livreur : gains, espèces détenues, retrait                                               |

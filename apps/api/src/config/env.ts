@@ -156,9 +156,24 @@ const envSchema = z
 
     /**
      * Agrégateur Mobile Money (G1, G3). « fake » simule les paiements (interdit en
-     * production) ; « campay » : MTN MoMo et Orange Money par CamPay.
+     * production) ; « campay » ou « sebpay » : MTN MoMo et Orange Money au Cameroun.
      */
-    PAYMENT_PROVIDER: z.enum(['fake', 'campay']).default('fake'),
+    PAYMENT_PROVIDER: z.enum(['fake', 'campay', 'sebpay']).default('fake'),
+    /** Bac à sable par défaut ; réel : https://newapi.sebpay.bj/api/v1 (clés pk_live_). */
+    SEBPAY_BASE_URL: z.url({ protocol: /^https$/ }).default('https://api.sandbox.sebpay.bj/api/v1'),
+    SEBPAY_PUBLIC_KEY: z
+      .string()
+      .regex(/^pk_(test|live)_/, 'clé publique pk_test_… ou pk_live_…')
+      .optional(),
+    SEBPAY_SECRET_KEY: z
+      .string()
+      .regex(/^sk_(test|live)_/, 'clé secrète sk_test_… ou sk_live_…')
+      .optional(),
+    /**
+     * Adresse publique de l'API (https), d'où Sebpay est rappelé :
+     * {PUBLIC_API_URL}/v1/webhooks/payments/sebpay.
+     */
+    PUBLIC_API_URL: z.url({ protocol: /^https$/ }).optional(),
     CAMPAY_BASE_URL: z.url({ protocol: /^https$/ }).default('https://demo.campay.net/api'),
     CAMPAY_USERNAME: z.string().min(1).optional(),
     CAMPAY_PASSWORD: z.string().min(1).optional(),
@@ -236,6 +251,29 @@ const envSchema = z
           });
       }
     }
+    if (env.PAYMENT_PROVIDER === 'sebpay') {
+      for (const key of ['SEBPAY_PUBLIC_KEY', 'SEBPAY_SECRET_KEY', 'PUBLIC_API_URL'] as const) {
+        if (!env[key])
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: 'requis avec PAYMENT_PROVIDER=sebpay',
+          });
+      }
+      // Clés et serveur du même environnement : sandbox avec _test_, réel avec _live_.
+      const sandbox = env.SEBPAY_BASE_URL.includes('sandbox');
+      for (const key of ['SEBPAY_PUBLIC_KEY', 'SEBPAY_SECRET_KEY'] as const) {
+        const value = env[key];
+        if (value && value.includes('_test_') !== sandbox)
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: sandbox
+              ? 'clé réelle (_live_) envoyée au bac à sable'
+              : 'clé de test (_test_) envoyée au serveur réel',
+          });
+      }
+    }
     const radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
     if (radii.some((r) => !Number.isInteger(r) || r <= 0)) {
       ctx.addIssue({
@@ -271,6 +309,13 @@ const envSchema = z
         code: 'custom',
         path: ['PAYMENT_PROVIDER'],
         message: 'le prestataire de paiement factice est interdit en production',
+      });
+    }
+    if (env.PAYMENT_PROVIDER === 'sebpay' && env.SEBPAY_BASE_URL.includes('sandbox')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SEBPAY_BASE_URL'],
+        message: 'le bac à sable Sebpay est interdit en production',
       });
     }
     if (env.STORAGE_DRIVER === 'local') {

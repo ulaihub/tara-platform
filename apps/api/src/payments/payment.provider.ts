@@ -5,6 +5,7 @@ export const PAYMENT_PROVIDER = Symbol('PAYMENT_PROVIDER');
 
 export type ProviderStatus = 'PENDING' | 'SUCCEEDED' | 'FAILED';
 export type OperationKind = 'COLLECT' | 'DISBURSE';
+export type MobileMoneyOperator = 'MTN' | 'ORANGE';
 
 export interface CollectRequest {
   /** Notre référence (identifiant du paiement), renvoyée par le prestataire. */
@@ -12,6 +13,8 @@ export interface CollectRequest {
   amount: number;
   /** Payeur, +2376XXXXXXXX : il reçoit une demande de validation sur son téléphone. */
   phone: string;
+  /** Opérateur choisi par le payeur ; sinon déduit du numéro par le prestataire. */
+  operator?: MobileMoneyOperator;
   description: string;
 }
 
@@ -20,6 +23,9 @@ export interface DisburseRequest {
   reference: string;
   amount: number;
   phone: string;
+  operator?: MobileMoneyOperator;
+  /** Nom du bénéficiaire (exigé par certains prestataires). */
+  recipientName?: string;
   description: string;
 }
 
@@ -89,8 +95,13 @@ export interface PaymentProvider {
    * quand la signature n'engage pas le contenu de la notification.
    */
   confirmEvent?(event: ProviderEvent): Promise<ProviderEvent>;
-  /** Relevé du prestataire sur une période (rapprochement). */
-  transactions(from: Date, to: Date): Promise<ProviderTransaction[]>;
+  /**
+   * Relevé du prestataire sur une période (rapprochement). Absent chez un prestataire qui
+   * n'en donne pas : chaque opération est alors relue une à une (`lookup`).
+   */
+  transactions?(from: Date, to: Date): Promise<ProviderTransaction[]>;
+  /** Relit une opération par notre référence ; null si le prestataire ne la connaît pas. */
+  lookup?(kind: OperationKind, reference: string): Promise<ProviderTransaction | null>;
 }
 
 // --- Prestataire factice --------------------------------------------------------------------
@@ -256,6 +267,17 @@ export class FakePaymentProvider implements PaymentProvider {
     return (await this.all())
       .filter((operation) => operation.at >= from && operation.at < to)
       .map(({ phone: _phone, failureReason: _reason, ...transaction }) => ({ ...transaction }));
+  }
+
+  async lookup(kind: OperationKind, reference: string): Promise<ProviderTransaction | null> {
+    const found = (await this.all()).find(
+      (operation) =>
+        operation.kind === kind &&
+        (operation.reference === reference || operation.providerReference === reference),
+    );
+    if (!found) return null;
+    const { phone: _phone, failureReason: _reason, ...transaction } = found;
+    return { ...transaction };
   }
 
   private view(operation: FakeOperation): ProviderOperation {

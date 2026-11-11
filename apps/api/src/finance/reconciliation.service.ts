@@ -267,6 +267,38 @@ export class ReconciliationService {
     return report;
   }
 
+  /**
+   * Relevé du prestataire autour de la journée. Sans relevé (Sebpay), chacune de nos
+   * opérations est relue une à une : les écarts de statut et de montant sont trouvés, mais
+   * pas une opération que le prestataire aurait faite sans nous (à vérifier sur son tableau
+   * de bord).
+   */
+  private async statement(
+    from: Date,
+    to: Date,
+    payments: { id: string; providerReference: string | null; provider: string }[],
+    payouts: { id: string; providerReference: string | null; provider: string }[],
+  ): Promise<ProviderTransaction[]> {
+    if (this.provider.transactions) {
+      return this.provider.transactions(
+        new Date(from.getTime() - 86_400_000),
+        new Date(to.getTime() + 86_400_000),
+      );
+    }
+    const lookup = this.provider.lookup?.bind(this.provider);
+    if (!lookup) throw new Error(`${this.provider.name} : ni relevé ni relecture d'opération`);
+    const found: ProviderTransaction[] = [];
+    const ours = [
+      ...payments.map((p) => ({ ...p, kind: 'COLLECT' as const })),
+      ...payouts.map((p) => ({ ...p, kind: 'DISBURSE' as const })),
+    ].filter((item) => item.provider === this.provider.name);
+    for (const item of ours) {
+      const transaction = await lookup(item.kind, item.id);
+      if (transaction) found.push(transaction);
+    }
+    return found;
+  }
+
   private async compareWithProvider(
     from: Date,
     to: Date,
@@ -276,10 +308,7 @@ export class ReconciliationService {
     const discrepancies: Discrepancy[] = [];
     let statement: ProviderTransaction[];
     try {
-      statement = await this.provider.transactions(
-        new Date(from.getTime() - 86_400_000),
-        new Date(to.getTime() + 86_400_000),
-      );
+      statement = await this.statement(from, to, payments, payouts);
     } catch (error) {
       this.logger.warn(`Relevé du prestataire indisponible : ${String(error)}`);
       return [
