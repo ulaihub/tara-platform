@@ -17,7 +17,7 @@ import { AddressesService } from '../geo/addresses.service.js';
 import { ZonesRepository } from '../geo/zones.repository.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { DistanceService, type RouteEstimate } from '../routing/distance.service.js';
-import { computePrice, type PriceBreakdown } from './pricing.engine.js';
+import { computePrice, type PriceBreakdown, vehicleForParcel } from './pricing.engine.js';
 import type {
   PointRef,
   PricingGridBody,
@@ -41,6 +41,7 @@ export interface QuoteInput {
   dropoff: z.output<typeof PointRef>;
   packageSize: PackageSize;
   isExpress: boolean;
+  loadingHelp?: boolean | undefined;
   scheduledFor?: string | undefined;
   promoCode?: string | undefined;
 }
@@ -146,7 +147,14 @@ export class PricingService {
       throw AppError.unprocessable('SAME_PICKUP_AND_DROPOFF');
     }
     const at = scheduledFor ?? now;
-    const grid = await this.activeGrid(pickup.city, 'MOTORBIKE', at);
+    const vehicle = vehicleForParcel(input.packageSize);
+    const grid = await this.activeGrid(pickup.city, vehicle, at).catch((error: unknown) => {
+      // Pas de grille tricycle active : l'offre gros objet n'est pas encore ouverte.
+      if (vehicle !== 'MOTORBIKE' && error instanceof AppError) {
+        throw AppError.unprocessable('BULKY_UNAVAILABLE', { city: pickup.city });
+      }
+      throw error;
+    });
     const route = await this.distance.route(pickup, dropoff);
     const promo = input.promoCode
       ? await this.promos.validate(input.promoCode, user.id, now, tx)
@@ -155,6 +163,7 @@ export class PricingService {
       distanceMeters: route.meters,
       packageSize: input.packageSize,
       isExpress: input.isExpress,
+      loadingHelp: input.packageSize === 'BULKY' && input.loadingHelp === true,
       at,
       promo,
     });
@@ -168,6 +177,7 @@ export class PricingService {
       distanceMeters: quote.route.meters,
       distanceSource: quote.route.source,
       estimatedMinutes: quote.route.seconds === null ? null : Math.ceil(quote.route.seconds / 60),
+      vehicleType: quote.grid.vehicleType,
       basePrice: quote.price.basePrice,
       surcharges: quote.price.surcharges,
       discountTotal: quote.price.discountTotal,

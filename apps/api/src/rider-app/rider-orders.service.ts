@@ -29,6 +29,7 @@ import type {
   DeliverBody,
   EarningsDto,
   FailBody,
+  RefuseParcelBody,
   PickupBody,
   PositionActionBody,
   ReturnBody,
@@ -198,6 +199,7 @@ export class RiderOrdersService {
         packageContents: order.packageContents,
         packageDescription: order.packageDescription,
         isFragile: order.isFragile,
+        loadingHelp: order.loadingHelp,
         isExpress: order.isExpress,
         instructions: order.instructions,
         pickup,
@@ -387,6 +389,57 @@ export class RiderOrdersService {
     );
     // Échec déclaré loin de l'adresse du destinataire : alerte au support (faux « absent »).
     await this.tracks.checkAction(order, 'FAILURE', body, order.dropoffAddress);
+    return this.get(userId, orderId);
+  }
+
+  /**
+   * Colis refusé à l'enlèvement : il ne correspond pas à la commande (trop gros pour une
+   * moto, trop lourd, autre chose que déclaré, objet interdit). Photo à l'appui, la
+   * commande est annulée, l'expéditeur prévenu et le déplacement facturé (gros objets).
+   */
+  async refuseParcel(
+    userId: string,
+    orderId: string,
+    body: z.output<typeof RefuseParcelBody>,
+  ): Promise<z.output<typeof RiderOrderDto>> {
+    if (await this.replayed(orderId, body.clientEventId)) return this.get(userId, orderId);
+    const { order, rider } = await this.load(userId, orderId);
+    if (order.status !== 'ASSIGNED') {
+      throw AppError.conflict('PARCEL_REFUSAL_NOT_ALLOWED', { status: order.status });
+    }
+    await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
+    const occurredAt = this.occurredAt(body);
+    const note = `Colis non conforme : ${PARCEL_REFUSAL_LABELS[body.reason]}${body.note ? ` · ${body.note}` : ''}`;
+    const change: OrderChange = await this.prisma.$transaction(async (tx) => {
+      await tx.deliveryProof.create({
+        data: {
+          orderId: order.id,
+          kind: 'PICKUP_REFUSED',
+          photoKey: body.photoKey,
+          codeVerified: false,
+          latitude: body.latitude,
+          longitude: body.longitude,
+          occurredAt,
+          clientEventId: null,
+        },
+      });
+      const result = await this.transitions.applyIn(
+        tx,
+        order,
+        'CANCELLED',
+        { id: userId, role: 'RIDER' },
+        {
+          note,
+          latitude: body.latitude,
+          longitude: body.longitude,
+          occurredAt,
+          clientEventId: body.clientEventId,
+        },
+      );
+      await this.finance.chargeRefusedParcel(tx, order, rider.id);
+      return result.change;
+    });
+    await this.bus.publish(change);
     return this.get(userId, orderId);
   }
 
@@ -650,6 +703,14 @@ export class RiderOrdersService {
     await this.bus.publish(change);
   }
 }
+
+/** Motifs de refus d'un colis à l'enlèvement, tels qu'écrits dans l'historique. */
+const PARCEL_REFUSAL_LABELS: Record<z.output<typeof RefuseParcelBody>['reason'], string> = {
+  TOO_BIG: 'trop grand pour le véhicule',
+  TOO_HEAVY: 'trop lourd',
+  NOT_AS_DECLARED: 'pas ce qui a été déclaré',
+  FORBIDDEN_ITEM: 'objet interdit',
+};
 
 /** Refuse tôt une action impossible : un code n'est vérifié (et compté) qu'à bon escient. */
 function assertTransition(order: Order, to: OrderStatus): void {

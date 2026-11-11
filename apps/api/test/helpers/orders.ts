@@ -22,6 +22,25 @@ export const DOUALA_GRID = {
   activate: true,
 };
 
+/** Grille des gros objets : tricycle, manutention à deux, déplacement payé si refus. */
+export const DOUALA_TRICYCLE_GRID = {
+  name: 'Douala tricycle',
+  city: 'Douala',
+  vehicleType: 'TRICYCLE',
+  perKmBeyondLastTier: 300,
+  tiers: [
+    { upToMeters: 5_000, price: 3000 },
+    { upToMeters: 10_000, price: 4500 },
+    { upToMeters: 15_000, price: 6000 },
+  ],
+  surcharges: [
+    { code: 'HANDLING', amount: 1500 },
+    { code: 'FAILED_ATTEMPT', amount: 1500 },
+    { code: 'RETURN', percentBps: 5000 },
+  ],
+  activate: true,
+};
+
 /** Zone de service de Douala et grille active. */
 export async function setupDouala(ctx: TestContext, admin: SignedIn): Promise<void> {
   await ensureDoualaServiceArea(ctx, admin);

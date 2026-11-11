@@ -67,6 +67,8 @@ export const DeliveryItem = z.object({
   /** Précision libre, ex. « 2 paires de chaussures ». */
   packageDescription: z.string().trim().max(120).optional(),
   isFragile: z.boolean().default(false),
+  /** Gros objet : aide au chargement par deux personnes (supplément manutention). */
+  loadingHelp: z.boolean().default(false),
   declaredValue: Fcfa.optional(),
   /** Montant à encaisser auprès du destinataire, 0 si aucun (réservé aux marchands). */
   codAmount: Fcfa.default(0),
@@ -130,6 +132,7 @@ export const OrderDto = z
     packageContents: PackageContentsEnum.nullable(),
     packageDescription: z.string().nullable(),
     isFragile: z.boolean(),
+    loadingHelp: z.boolean(),
     declaredValue: z.int().nullable(),
     instructions: z.string().nullable(),
     pickup: AddressDto,

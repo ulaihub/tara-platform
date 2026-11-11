@@ -17,6 +17,7 @@ import { requiredVersions, termsAccepted } from '../legal/legal-versions.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { QueueService } from '../redis/queue.service.js';
+import { vehicleCarries } from '../pricing/pricing.engine.js';
 import { uncoveredDocuments } from '../riders/riders.service.js';
 import type { CandidateDto, OfferDto } from './dispatch.schemas.js';
 import { PresenceService } from './presence.service.js';
@@ -231,7 +232,7 @@ export class DispatchService implements OnModuleInit {
     silent: Set<string>,
     size: number,
   ): Promise<Candidate[]> {
-    const orderCash = cashCarried(order);
+    const needs = { cash: cashCarried(order), packageSize: order.packageSize };
     const seen = new Set<string>();
     let eligible: Candidate[] = [];
     for (const radius of this.radii) {
@@ -249,7 +250,7 @@ export class DispatchService implements OnModuleInit {
       // « une offre en attente par livreur » tranche si un livreur est sollicité entre-temps.
       const snapshots = await this.snapshots(this.prisma, fresh);
       eligible = eligible.concat(
-        snapshots.filter((rider) => ineligibilities(rider, orderCash).length === 0),
+        snapshots.filter((rider) => ineligibilities(rider, needs).length === 0),
       );
       const preferred = eligible.filter((rider) => !silent.has(rider.riderId));
       if (preferred.length >= size) break;
@@ -272,6 +273,7 @@ export class DispatchService implements OnModuleInit {
         documents: true,
         orders: { where: { status: { in: [...ACTIVE_RIDER_STATUSES] } }, select: { id: true } },
         offers: { where: { outcome: 'PENDING' }, select: { id: true } },
+        safetyAlerts: { where: { resolvedAt: null }, select: { id: true }, take: 1 },
         user: {
           select: {
             consents: {
@@ -288,6 +290,8 @@ export class DispatchService implements OnModuleInit {
     return riders.map((rider) => {
       const snapshot: RiderSnapshot = {
         riderId: rider.id,
+        vehicleType: rider.vehicleType,
+        safetyAlertOpen: rider.safetyAlerts.length > 0,
         distanceMeters: distance.get(rider.id) ?? 0,
         activeOrders: rider.orders.length,
         hasPendingOffer: rider.offers.length > 0,
@@ -443,6 +447,20 @@ export class DispatchService implements OnModuleInit {
     if (missing.length > 0) {
       throw AppError.unprocessable('RIDER_NOT_ELIGIBLE', { reasons: missing.join(', ') });
     }
+    // Ni un gros objet sur une moto, ni une course à un livreur dont le SOS n'est pas clos.
+    const target = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { packageSize: true },
+    });
+    if (target && !vehicleCarries(rider.vehicleType, target.packageSize)) {
+      throw AppError.unprocessable('VEHICLE_NOT_SUITABLE');
+    }
+    const sos = await this.prisma.safetyAlert.count({ where: { riderId, resolvedAt: null } });
+    if (sos > 0) {
+      throw AppError.unprocessable('RIDER_NOT_ELIGIBLE', {
+        reasons: 'alerte de sécurité en cours',
+      });
+    }
     const actor = { id: actorId, role: 'DISPATCHER' as const };
     const { changes, withdrawn, previousRiderUserId } = await this.prisma.$transaction(
       async (tx) => {
@@ -516,13 +534,13 @@ export class DispatchService implements OnModuleInit {
     });
     const byId = new Map(riders.map((rider) => [rider.id, rider]));
     const positions = await this.presence.positions(snapshots.map((s) => s.riderId));
-    const orderCash = cashCarried(order);
+    const needs = { cash: cashCarried(order), packageSize: order.packageSize };
     return snapshots
       .sort((a, b) => a.score - b.score)
       .map((snapshot) => {
         const rider = byId.get(snapshot.riderId);
         const position = positions.get(snapshot.riderId);
-        const reasons: Ineligibility[] = ineligibilities(snapshot, orderCash);
+        const reasons: Ineligibility[] = ineligibilities(snapshot, needs);
         return {
           riderId: snapshot.riderId,
           name: rider?.user.fullName ?? null,
@@ -720,6 +738,7 @@ export function toOfferDto(
     packageSize: order.packageSize,
     packageContents: order.packageContents,
     isFragile: order.isFragile,
+    loadingHelp: order.loadingHelp,
     isExpress: order.isExpress,
   };
 }

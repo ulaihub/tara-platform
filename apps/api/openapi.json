@@ -2054,6 +2054,10 @@
                     "default": false,
                     "type": "boolean"
                   },
+                  "loadingHelp": {
+                    "default": false,
+                    "type": "boolean"
+                  },
                   "scheduledFor": {
                     "type": "string",
                     "format": "date-time"
@@ -2198,7 +2202,7 @@
                   },
                   "surcharges": {
                     "default": [],
-                    "maxItems": 6,
+                    "maxItems": 7,
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -2571,6 +2575,10 @@
                     "default": false,
                     "type": "boolean"
                   },
+                  "loadingHelp": {
+                    "default": false,
+                    "type": "boolean"
+                  },
                   "declaredValue": {
                     "type": "integer",
                     "minimum": 0,
@@ -2817,6 +2825,10 @@
                           "maxLength": 120
                         },
                         "isFragile": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "loadingHelp": {
                           "default": false,
                           "type": "boolean"
                         },
@@ -6042,6 +6054,89 @@
         ]
       }
     },
+    "/v1/rider/orders/{id}/refuse-parcel": {
+      "post": {
+        "operationId": "RiderApp_refuseParcel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "$ref": "#/components/schemas/ParcelRefusalReason"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "photoKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "reason",
+                  "photoKey",
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/rider/orders/{id}/rating": {
       "post": {
         "operationId": "RiderApp_rateSender",
@@ -7522,6 +7617,9 @@
               "fragile": {
                 "type": "boolean"
               },
+              "loadingHelp": {
+                "type": "boolean"
+              },
               "declaredValue": {
                 "nullable": true,
                 "type": "integer"
@@ -7536,6 +7634,7 @@
               "contents",
               "description",
               "fragile",
+              "loadingHelp",
               "declaredValue",
               "instructions"
             ],
@@ -8065,6 +8164,9 @@
           "isExpress": {
             "type": "boolean"
           },
+          "isBulky": {
+            "type": "boolean"
+          },
           "senderName": {
             "nullable": true,
             "type": "string"
@@ -8142,6 +8244,7 @@
           "createdAt",
           "scheduledFor",
           "isExpress",
+          "isBulky",
           "senderName",
           "senderPhone",
           "recipientName",
@@ -8798,7 +8901,9 @@
                 "BALANCE_TOO_LOW",
                 "CASH_OVERDUE",
                 "TOO_MANY_ORDERS",
-                "PENDING_OFFER"
+                "PENDING_OFFER",
+                "VEHICLE",
+                "SAFETY_ALERT"
               ]
             }
           },
@@ -8949,6 +9054,9 @@
           "isFragile": {
             "type": "boolean"
           },
+          "loadingHelp": {
+            "type": "boolean"
+          },
           "isExpress": {
             "type": "boolean"
           }
@@ -8969,6 +9077,7 @@
           "packageSize",
           "packageContents",
           "isFragile",
+          "loadingHelp",
           "isExpress"
         ],
         "additionalProperties": false
@@ -9157,6 +9266,7 @@
                   "LOCATION_LINK_EXPIRED",
                   "LOCATION_LINK_ALREADY_USED",
                   "PRICING_UNAVAILABLE",
+                  "BULKY_UNAVAILABLE",
                   "PRICING_GRID_NOT_FOUND",
                   "PROMO_INVALID",
                   "PROMO_EXPIRED",
@@ -9168,6 +9278,8 @@
                   "ORDER_NOT_IN_PROGRESS",
                   "ORDER_TRANSITION_INVALID",
                   "ORDER_CONFLICT",
+                  "PARCEL_REFUSAL_NOT_ALLOWED",
+                  "VEHICLE_NOT_SUITABLE",
                   "ORDER_NOT_CANCELLABLE",
                   "SAME_PICKUP_AND_DROPOFF",
                   "SCHEDULE_INVALID",
@@ -10134,6 +10246,9 @@
           "isFragile": {
             "type": "boolean"
           },
+          "loadingHelp": {
+            "type": "boolean"
+          },
           "declaredValue": {
             "nullable": true,
             "type": "integer"
@@ -10357,6 +10472,7 @@
           "packageContents",
           "packageDescription",
           "isFragile",
+          "loadingHelp",
           "declaredValue",
           "instructions",
           "pickup",
@@ -10559,9 +10675,19 @@
           "S",
           "M",
           "L",
-          "XL"
+          "XL",
+          "BULKY"
         ],
-        "description": "S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg"
+        "description": "S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg ; BULKY : gros objet (électroménager, meuble, plus de 20 kg), tricycle ou camionnette"
+      },
+      "ParcelRefusalReason": {
+        "type": "string",
+        "enum": [
+          "TOO_BIG",
+          "TOO_HEAVY",
+          "NOT_AS_DECLARED",
+          "FORBIDDEN_ITEM"
+        ]
       },
       "Payment": {
         "type": "object",
@@ -11160,6 +11286,9 @@
             "nullable": true,
             "type": "integer"
           },
+          "vehicleType": {
+            "$ref": "#/components/schemas/VehicleType"
+          },
           "basePrice": {
             "type": "integer"
           },
@@ -11205,6 +11334,7 @@
           "distanceMeters",
           "distanceSource",
           "estimatedMinutes",
+          "vehicleType",
           "basePrice",
           "surcharges",
           "discountTotal",
@@ -11551,6 +11681,9 @@
           "isFragile": {
             "type": "boolean"
           },
+          "loadingHelp": {
+            "type": "boolean"
+          },
           "isExpress": {
             "type": "boolean"
           },
@@ -11715,6 +11848,7 @@
           "packageContents",
           "packageDescription",
           "isFragile",
+          "loadingHelp",
           "isExpress",
           "instructions",
           "pickup",
@@ -12282,7 +12416,8 @@
           "NIGHT",
           "FAILED_ATTEMPT",
           "RETURN",
-          "WEATHER"
+          "WEATHER",
+          "HANDLING"
         ]
       },
       "TermsStatus": {

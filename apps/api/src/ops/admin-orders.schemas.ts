@@ -44,6 +44,8 @@ export const AdminOrderRowDto = z
     createdAt: z.iso.datetime(),
     scheduledFor: z.iso.datetime().nullable(),
     isExpress: z.boolean(),
+    /** Gros objet : course en tricycle ou voiture. */
+    isBulky: z.boolean(),
     /** Boutique du marchand ou nom de l'expéditeur. */
     senderName: z.string().nullable(),
     senderPhone: z.string(),
@@ -103,6 +105,8 @@ export const AdminOrderDto = z
       contents: PackageContentsEnum.nullable(),
       description: z.string().nullable(),
       fragile: z.boolean(),
+      /** Gros objet : deux personnes pour charger (supplément manutention). */
+      loadingHelp: z.boolean(),
       declaredValue: z.int().nullable(),
       instructions: z.string().nullable(),
     }),

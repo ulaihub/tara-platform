@@ -34,6 +34,10 @@ encaisse les paiements et suit chaque course.
   distance et, s'il y a lieu, des suppléments affichés : livraison express, colis très
   volumineux (XL), livraison de nuit (de 20 h à 6 h), fortes pluies. Un code promo réduit le
   prix affiché.
+- **Gros objets** (réfrigérateur, cuisinière, matelas, meuble…) : choisissez « Gros objet ».
+  La course se fait en tricycle ou en voiture, à un tarif propre affiché avant de commander.
+  Si vous demandez de l'aide pour charger (deux personnes), un supplément de manutention
+  s'ajoute, lui aussi affiché avant de commander.
 - Vous pouvez programmer une livraison jusqu'à plusieurs jours à l'avance.
 - Vous pouvez annuler gratuitement tant que le livreur n'a pas récupéré le colis : ce que vous
   avez payé revient sur votre solde Tara. Une fois le colis récupéré, la commande ne peut plus
@@ -54,6 +58,20 @@ qui lui paraît interdit ou mal emballé. Un colis interdit découvert en cours 
 au bureau de Tara et, si la loi l'exige, aux autorités.
 
 Emballez le colis pour qu'il supporte un trajet à moto. Signalez s'il est fragile.
+
+### Colis non conforme
+
+Déclarez le colis tel qu'il est : sa taille, son contenu, et « Gros objet » s'il ne tient pas
+sur une moto. Si, à l'enlèvement, le colis ne correspond pas à ce que vous avez déclaré (trop
+grand ou trop lourd pour le véhicule, autre chose que ce qui est annoncé, objet interdit), le
+livreur peut le refuser, photo à l'appui. Dans ce cas :
+
+- la commande est annulée et ce que vous aviez payé d'avance revient sur votre solde Tara ;
+- **le déplacement du livreur vous est facturé** : le même montant que les frais de nouvelle
+  tentative, affiché au récapitulatif avant que vous commandiez. Il est pris sur votre solde
+  Tara ; s'il ne suffit pas, vous réglez ce montant avant votre prochaine commande.
+
+Vous pouvez contester auprès du service client : la photo prise par le livreur est gardée.
 
 **[À VALIDER : responsabilité de Tara en cas de perte ou de dommage, par exemple dans la
 limite de la valeur déclarée et d'un plafond par colis ; procédure et délai de réclamation.]**

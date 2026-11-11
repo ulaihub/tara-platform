@@ -28,6 +28,13 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
   sans réponse, la course est proposée à un autre livreur.
 - Vous récupérez le colis avec le **code d'enlèvement** que vous donne l'expéditeur, et vous le
   photographiez.
+- **Gros objets** : ils sont proposés seulement aux tricycles et aux voitures. Si l'expéditeur
+  a demandé de l'aide pour charger, venez à deux.
+- **Colis non conforme** : si le colis est trop grand ou trop lourd pour votre véhicule, n'est
+  pas ce qui a été déclaré, ou vous paraît interdit, ne le prenez pas. Signalez-le dans
+  l'application avec une photo, **avant** de saisir le code d'enlèvement : la course est
+  annulée et votre déplacement vous est payé. Un refus sans raison valable est signalé à
+  l'équipe.
 - Vous remettez le colis contre le **code de livraison** que le destinataire a reçu par SMS, et
   vous photographiez la remise.
 - Votre prénom, l'initiale de votre nom, votre véhicule et sa plaque sont montrés à
@@ -41,7 +48,8 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
 ## 4. Votre argent
 
 - **Gain par course** : 80 % du prix de la course, plus 80 % des frais de nouvelle tentative et
-  de retour quand il y en a. Le pourcentage exact est celui affiché dans l'application.
+  de retour quand il y en a, et 80 % du déplacement facturé à l'expéditeur quand vous refusez
+  un colis non conforme. Le pourcentage exact est celui affiché dans l'application.
 - **Solde prépayé** : vous rechargez votre solde par Mobile Money (frais payés par Tara) ou au
   bureau. Quand vous encaissez de l'argent en espèces (frais de livraison, prix d'un article,
   frais de retour), **vous gardez les espèces** et le même montant est pris sur votre solde.

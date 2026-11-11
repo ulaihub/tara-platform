@@ -708,6 +708,49 @@ export class OrderFinanceService implements OnModuleInit {
     });
   }
 
+  /**
+   * Colis refusé à l'enlèvement (non conforme à la commande) : l'expéditeur paie le
+   * déplacement du livreur, au prix d'une nouvelle tentative, partagé comme une course
+   * entre le livreur et Tara. Le reste de ce qu'il avait payé lui est rendu par
+   * l'annulation. Pris sur son solde, même au-delà de la dette tolérée.
+   */
+  async chargeRefusedParcel(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    riderId: string,
+  ): Promise<void> {
+    const fee = order.retryFee;
+    if (fee <= 0) return;
+    const account = senderAccount(order);
+    await this.ledger.lock(tx, [account]);
+    await this.ledger.post(tx, {
+      kind: 'FAILURE_FEE_CHARGED',
+      description: `Déplacement pour un colis non conforme ${order.reference}`,
+      idempotencyKey: `order:${order.id}:refused-fee`,
+      orderId: order.id,
+      postings: [
+        { account, amount: fee },
+        { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -fee },
+      ],
+    });
+    const grid = await tx.pricingGrid.findUniqueOrThrow({
+      where: { id: order.pricingGridId },
+      select: { riderShareBps: true },
+    });
+    const riderPart = Math.floor((fee * grid.riderShareBps) / 10_000);
+    await this.ledger.post(tx, {
+      kind: 'DELIVERY_COMPLETED',
+      description: `Déplacement de ${order.reference} partagé`,
+      idempotencyKey: `order:${order.id}:refused-fee-share`,
+      orderId: order.id,
+      postings: [
+        { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: fee },
+        { account: riderPayable(riderId), amount: -riderPart },
+        { account: PLATFORM_ACCOUNTS.commission, amount: -(fee - riderPart) },
+      ],
+    });
+  }
+
   /** Ce que l'expéditeur doit payer à la remise du colis retourné (non couvert par son solde). */
   async returnShortfall(
     order: Order,

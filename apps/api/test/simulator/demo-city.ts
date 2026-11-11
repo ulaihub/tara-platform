@@ -17,7 +17,12 @@ import { parseArgs } from 'node:util';
 import request from 'supertest';
 import { createTestApp, type SignedIn, signIn, staffUser } from '../helpers/app.js';
 import { createAddress, square } from '../helpers/geo.js';
-import { DOUALA_GRID, placeOrder, type PlacedOrder } from '../helpers/orders.js';
+import {
+  DOUALA_GRID,
+  DOUALA_TRICYCLE_GRID,
+  placeOrder,
+  type PlacedOrder,
+} from '../helpers/orders.js';
 import { activeRider, proofPhoto, type TestRider } from '../helpers/riders.js';
 import { DistanceService } from '../../src/routing/distance.service.js';
 import { random } from './simulation.js';
@@ -244,13 +249,12 @@ try {
       })
       .expect(201);
   }
-  const hasGrid = await ctx.prisma.pricingGrid.count({ where: { active: true } });
-  if (hasGrid === 0) {
-    await request(ctx.http)
-      .post('/v1/admin/pricing-grids')
-      .set(admin.auth)
-      .send(DOUALA_GRID)
-      .expect(201);
+  // Grille moto (colis ordinaires) et grille tricycle (gros objets).
+  for (const grid of [DOUALA_GRID, DOUALA_TRICYCLE_GRID]) {
+    const vehicleType = 'vehicleType' in grid ? 'TRICYCLE' : 'MOTORBIKE';
+    const active = await ctx.prisma.pricingGrid.count({ where: { active: true, vehicleType } });
+    if (active > 0) continue;
+    await request(ctx.http).post('/v1/admin/pricing-grids').set(admin.auth).send(grid).expect(201);
   }
   // Quartiers (approximatifs) : les adresses portent un nom de quartier lisible.
   for (const place of QUARTIERS) {
@@ -314,6 +318,8 @@ try {
         plateNumber: `LT ${String(100 + Math.floor(rng() * 900))} ${String.fromCharCode(65 + Math.floor(rng() * 26))}${String.fromCharCode(65 + Math.floor(rng() * 26))}`,
         ratingSum: Math.round((4 + rng()) * 20),
         ratingCount: 20,
+        // Un livreur sur six roule en tricycle : lui seul prend les gros objets.
+        vehicleType: index % 6 === 5 ? 'TRICYCLE' : 'MOTORBIKE',
       },
     });
     const at = near(pick(QUARTIERS), 0.012);
@@ -417,14 +423,6 @@ try {
       .expect(200);
   }
 
-  // Premières commandes, prises par les livreurs proches.
-  for (let index = 0; index < 8; index += 1) {
-    const course = await order(pick(shops));
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    await acceptFor(course);
-  }
-
-  // Incidents mis en scène.
   const scene = async (label: string, run: () => Promise<void>) => {
     try {
       await run();
@@ -435,6 +433,50 @@ try {
       );
     }
   };
+
+  // Gros objets, tant que les tricycles sont libres.
+  await scene('gros objet en tricycle, chargement à deux', async () => {
+    const course = await order(shops[2] as Shop, {
+      packageSize: 'BULKY',
+      loadingHelp: true,
+      packageContents: 'HOUSEHOLD',
+      packageDescription: 'Réfrigérateur 2 portes',
+    });
+    if (!(await acceptFor(course))) throw new Error('aucun tricycle disponible');
+  });
+  await scene('colis non conforme refusé à l’enlèvement', async () => {
+    const course = await order(shops[0] as Shop, {
+      packageSize: 'BULKY',
+      packageContents: 'HOUSEHOLD',
+      packageDescription: 'Cuisinière 4 feux',
+    });
+    const bot = await acceptFor(course);
+    if (!bot) throw new Error('aucun tricycle disponible');
+    bot.at = near(course.pickup, 0.0004);
+    await send(bot);
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${course.order.id}/refuse-parcel`)
+      .set(bot.rider.auth)
+      .send({
+        reason: 'NOT_AS_DECLARED',
+        note: 'Armoire 3 portes, ne tient pas dans le tricycle',
+        photoKey: bot.photoKey,
+        clientEventId: randomUUID(),
+        ...bot.at,
+      })
+      .expect(200);
+    courses.delete(course.order.id);
+    bot.course = null;
+  });
+
+  // Premières commandes, prises par les livreurs proches.
+  for (let index = 0; index < 8; index += 1) {
+    const course = await order(pick(shops));
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await acceptFor(course);
+  }
+
+  // Incidents mis en scène.
   await scene('commande sans livreur depuis 9 min (Bonabéri)', async () => {
     const shop = shops[0] as Shop;
     const far = await createAddress(ctx, shop, near(quartier('Bonabéri'), 0.004), {
@@ -533,8 +575,12 @@ try {
   while (Date.now() < end) {
     ticks += 1;
     if (Date.now() >= nextOrder) {
-      const course = await order(pick(shops));
-      log(`Nouvelle commande ${course.order.reference}`);
+      const bulky = rng() < 0.125;
+      const course = await order(
+        pick(shops),
+        bulky ? { packageSize: 'BULKY', loadingHelp: rng() < 0.5 } : {},
+      );
+      log(`Nouvelle commande ${course.order.reference}${bulky ? ' (gros objet)' : ''}`);
       nextOrder = Date.now() + ORDER_EVERY_S * 1000 * (0.5 + rng());
     }
     for (const course of courses.values()) {

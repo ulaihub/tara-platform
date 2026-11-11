@@ -44,6 +44,8 @@ export const OfferDto = z
     /** Nature du contenu (C1) : le livreur sait ce qu'il transporte avant d'accepter. */
     packageContents: PackageContentsEnum.nullable(),
     isFragile: z.boolean(),
+    /** Gros objet : venir à deux, aide au chargement demandée. */
+    loadingHelp: z.boolean(),
     isExpress: z.boolean(),
   })
   .meta({ id: 'DispatchOffer' });
@@ -80,6 +82,8 @@ export const CandidateDto = z
         'CASH_OVERDUE',
         'TOO_MANY_ORDERS',
         'PENDING_OFFER',
+        'VEHICLE',
+        'SAFETY_ALERT',
       ]),
     ),
     position: z

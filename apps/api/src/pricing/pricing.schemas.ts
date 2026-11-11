@@ -3,11 +3,13 @@ import { Latitude, Longitude } from '../geo/geo.schemas.js';
 import { VehicleTypeEnum } from '../riders/riders.schemas.js';
 
 export const SurchargeCodeEnum = z
-  .enum(['EXPRESS', 'HEAVY_PARCEL', 'NIGHT', 'FAILED_ATTEMPT', 'RETURN', 'WEATHER'])
+  .enum(['EXPRESS', 'HEAVY_PARCEL', 'NIGHT', 'FAILED_ATTEMPT', 'RETURN', 'WEATHER', 'HANDLING'])
   .meta({ id: 'SurchargeCode' });
-export const PackageSizeEnum = z
-  .enum(['S', 'M', 'L', 'XL'])
-  .meta({ id: 'PackageSize', description: 'S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg' });
+export const PackageSizeEnum = z.enum(['S', 'M', 'L', 'XL', 'BULKY']).meta({
+  id: 'PackageSize',
+  description:
+    'S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg ; BULKY : gros objet (électroménager, meuble, plus de 20 kg), tricycle ou camionnette',
+});
 export const PromoKindEnum = z
   .enum(['FIXED_AMOUNT', 'PERCENT', 'FIXED_PRICE'])
   .meta({ id: 'PromoKind' });
@@ -34,7 +36,7 @@ export const PricingGridBody = z
           active: z.boolean().default(true),
         }),
       )
-      .max(6)
+      .max(7)
       .default([]),
     /** Active la grille immédiatement ; l'ancienne grille de la ville est archivée. */
     activate: z.boolean().default(false),
@@ -144,6 +146,8 @@ export const QuoteBody = z.object({
   dropoff: PointRef,
   packageSize: PackageSizeEnum,
   isExpress: z.boolean().default(false),
+  /** Gros objet : aide au chargement par deux personnes (supplément manutention). */
+  loadingHelp: z.boolean().default(false),
   scheduledFor: z.iso.datetime().optional(),
   promoCode: z.string().trim().max(32).optional(),
 });
@@ -155,6 +159,8 @@ export const QuoteDto = z
     distanceMeters: z.int(),
     distanceSource: z.enum(['osrm', 'estimate']),
     estimatedMinutes: z.int().nullable(),
+    /** Véhicule de la course : moto, ou tricycle pour un gros objet. */
+    vehicleType: VehicleTypeEnum,
     basePrice: z.int(),
     surcharges: z.array(z.object({ code: SurchargeCodeEnum, amount: z.int() })),
     discountTotal: z.int(),

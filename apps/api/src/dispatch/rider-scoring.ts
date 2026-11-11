@@ -16,6 +16,10 @@ export const MIN_RATINGS = 5;
 
 export interface RiderSnapshot {
   riderId: string;
+  /** Véhicule déclaré : un gros objet ne monte pas sur une moto. */
+  vehicleType: 'MOTORBIKE' | 'TRICYCLE' | 'CAR';
+  /** Alerte de sécurité pas encore close par l'équipe : pas de nouvelle course. */
+  safetyAlertOpen: boolean;
   /** Distance d'approche jusqu'au point d'enlèvement, en mètres. */
   distanceMeters: number;
   activeOrders: number;
@@ -33,11 +37,27 @@ export interface RiderSnapshot {
 }
 
 export type Ineligibility =
-  'DOCUMENTS' | 'TERMS' | 'BALANCE_TOO_LOW' | 'CASH_OVERDUE' | 'TOO_MANY_ORDERS' | 'PENDING_OFFER';
+  | 'DOCUMENTS'
+  | 'TERMS'
+  | 'BALANCE_TOO_LOW'
+  | 'CASH_OVERDUE'
+  | 'TOO_MANY_ORDERS'
+  | 'PENDING_OFFER'
+  | 'VEHICLE'
+  | 'SAFETY_ALERT';
+
+/** Ce que la course demande au livreur : argent à encaisser, véhicule pour le colis. */
+export interface CourseNeeds {
+  cash: number;
+  packageSize: 'S' | 'M' | 'L' | 'XL' | 'BULKY';
+}
 
 /** Raisons pour lesquelles le livreur ne peut pas recevoir cette course (vide si éligible). */
-export function ineligibilities(rider: RiderSnapshot, orderCash: number): Ineligibility[] {
+export function ineligibilities(rider: RiderSnapshot, needs: CourseNeeds): Ineligibility[] {
   const reasons: Ineligibility[] = [];
+  const orderCash = needs.cash;
+  if (rider.safetyAlertOpen) reasons.push('SAFETY_ALERT');
+  if (needs.packageSize === 'BULKY' && rider.vehicleType === 'MOTORBIKE') reasons.push('VEHICLE');
   if (!rider.documentsValid) reasons.push('DOCUMENTS');
   if (!rider.termsAccepted) reasons.push('TERMS');
   // Solde prépayé : l'argent encaissé est pris sur le solde, qui doit donc le couvrir.

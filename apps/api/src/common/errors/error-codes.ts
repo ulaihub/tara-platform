@@ -158,6 +158,10 @@ export const ERROR_MESSAGES = {
     fr: 'Aucun tarif n’est actif pour {city}.',
     en: 'No active pricing for {city}.',
   },
+  BULKY_UNAVAILABLE: {
+    fr: 'Les gros objets (électroménager, meubles) ne sont pas encore livrés à {city}.',
+    en: 'Bulky items (appliances, furniture) are not delivered in {city} yet.',
+  },
   PRICING_GRID_NOT_FOUND: { fr: 'Grille tarifaire introuvable.', en: 'Pricing grid not found.' },
   PROMO_INVALID: { fr: 'Code promo inconnu.', en: 'Unknown promo code.' },
   PROMO_EXPIRED: {
@@ -191,6 +195,14 @@ export const ERROR_MESSAGES = {
   ORDER_CONFLICT: {
     fr: 'La commande vient d’être modifiée. Rechargez et réessayez.',
     en: 'The order was just changed. Reload and try again.',
+  },
+  PARCEL_REFUSAL_NOT_ALLOWED: {
+    fr: 'Le colis ne peut être refusé qu’à l’enlèvement, avant de le prendre.',
+    en: 'A parcel can only be refused at pickup, before taking it.',
+  },
+  VEHICLE_NOT_SUITABLE: {
+    fr: 'Ce livreur roule à moto : un gros objet demande un tricycle ou une camionnette.',
+    en: 'This rider is on a motorbike: a bulky item needs a tricycle or a van.',
   },
   ORDER_NOT_CANCELLABLE: {
     fr: 'Cette commande ne peut plus être annulée.',

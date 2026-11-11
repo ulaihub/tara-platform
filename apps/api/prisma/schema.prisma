@@ -168,6 +168,8 @@ enum SurchargeCode {
   FAILED_ATTEMPT
   RETURN
   WEATHER
+  /// Aide au chargement (deux personnes) pour un gros objet.
+  HANDLING
 
   @@map("surcharge_code")
 }
@@ -193,6 +195,8 @@ enum PackageSize {
   M
   L
   XL
+  /// Gros objet (électroménager, meuble, plus de 20 kg) : tricycle ou camionnette seulement.
+  BULKY
 
   @@map("package_size")
 }
@@ -263,6 +267,8 @@ enum ProofKind {
   DELIVERY
   FAILED_ATTEMPT
   RETURN
+  /// Colis refusé à l'enlèvement : il ne correspond pas à ce qui a été déclaré.
+  PICKUP_REFUSED
 
   @@map("proof_kind")
 }
@@ -903,6 +909,8 @@ model Order {
   declaredValue      Int?             @map("declared_value")
   instructions       String?
   isExpress          Boolean          @default(false) @map("is_express")
+  /// Gros objet : l'expéditeur demande l'aide au chargement (supplément manutention).
+  loadingHelp        Boolean          @default(false) @map("loading_help")
   scheduledFor       DateTime?        @map("scheduled_for") @db.Timestamptz(3)
   status             OrderStatus      @default(CREATED)
 

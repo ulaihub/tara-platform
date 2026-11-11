@@ -22,7 +22,8 @@ export const ORDER_TRANSITIONS: Record<OrderStatus, Partial<Record<OrderStatus, 
   ASSIGNED: {
     PICKED_UP: ['RIDER', 'DISPATCHER'],
     SEARCHING_RIDER: ['RIDER', 'DISPATCHER', 'SYSTEM'],
-    CANCELLED: ['SENDER', 'DISPATCHER', 'SUPPORT'],
+    // RIDER : colis refusé à l'enlèvement, non conforme à la commande (photo à l'appui).
+    CANCELLED: ['SENDER', 'DISPATCHER', 'SUPPORT', 'RIDER'],
   },
   PICKED_UP: {
     IN_DELIVERY: ['RIDER', 'DISPATCHER', 'SYSTEM'],

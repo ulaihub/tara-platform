@@ -1,4 +1,11 @@
-import { basePriceFor, computePrice, discountFor, type GridRules } from './pricing.engine.js';
+import {
+  basePriceFor,
+  computePrice,
+  discountFor,
+  type GridRules,
+  vehicleCarries,
+  vehicleForParcel,
+} from './pricing.engine.js';
 
 /** Grille de Douala du business plan. */
 const DOUALA: GridRules = {
@@ -172,5 +179,57 @@ describe('remises', () => {
     ['FIXED_PRICE', 2000, 1500, 0],
   ] as const)('%s %i sur %i FCFA → %i FCFA de remise', (kind, value, subtotal, discount) => {
     expect(discountFor({ kind, value }, subtotal)).toBe(discount);
+  });
+});
+
+describe('gros objets (tricycle)', () => {
+  const TRICYCLE: GridRules = {
+    riderShareBps: 8000,
+    perKmBeyondLastTier: 300,
+    tiers: [
+      { upToMeters: 5_000, price: 3000 },
+      { upToMeters: 10_000, price: 4500 },
+      { upToMeters: 15_000, price: 6000 },
+    ],
+    surcharges: [
+      { code: 'HANDLING', amount: 1500, percentBps: null, active: true },
+      { code: 'FAILED_ATTEMPT', amount: 1500, percentBps: null, active: true },
+      { code: 'RETURN', amount: null, percentBps: 5000, active: true },
+    ],
+  };
+
+  it('ajoute la manutention seulement si l’aide au chargement est demandée', () => {
+    const base = {
+      distanceMeters: 7_000,
+      packageSize: 'BULKY' as const,
+      isExpress: false,
+      at: DAY,
+    };
+    expect(computePrice(TRICYCLE, base)).toMatchObject({
+      basePrice: 4500,
+      surchargesTotal: 0,
+      totalPrice: 4500,
+    });
+    expect(computePrice(TRICYCLE, { ...base, loadingHelp: true })).toMatchObject({
+      surcharges: [{ code: 'HANDLING', amount: 1500 }],
+      totalPrice: 6000,
+      riderEarning: 4800,
+      platformFee: 1200,
+      retryFee: 1500,
+      returnFee: 2250,
+    });
+    // Pas de manutention pour un colis ordinaire, même demandée par erreur.
+    expect(
+      computePrice(TRICYCLE, { ...base, packageSize: 'L', loadingHelp: true }).surchargesTotal,
+    ).toBe(0);
+  });
+
+  it('choisit le véhicule selon le colis et refuse un gros objet sur une moto', () => {
+    expect(vehicleForParcel('XL')).toBe('MOTORBIKE');
+    expect(vehicleForParcel('BULKY')).toBe('TRICYCLE');
+    expect(vehicleCarries('MOTORBIKE', 'BULKY')).toBe(false);
+    expect(vehicleCarries('TRICYCLE', 'BULKY')).toBe(true);
+    expect(vehicleCarries('CAR', 'BULKY')).toBe(true);
+    expect(vehicleCarries('MOTORBIKE', 'XL')).toBe(true);
   });
 });

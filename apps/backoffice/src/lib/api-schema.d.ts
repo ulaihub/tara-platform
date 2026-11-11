@@ -1604,6 +1604,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/rider/orders/{id}/refuse-parcel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['RiderApp_refuseParcel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/rider/orders/{id}/rating': {
     parameters: {
       query?: never;
@@ -2077,6 +2093,7 @@ export interface components {
         contents: components['schemas']['PackageContents'] | null;
         description: string | null;
         fragile: boolean;
+        loadingHelp: boolean;
         declaredValue: number | null;
         instructions: string | null;
       };
@@ -2202,6 +2219,7 @@ export interface components {
       /** Format: date-time */
       scheduledFor: string | null;
       isExpress: boolean;
+      isBulky: boolean;
       senderName: string | null;
       senderPhone: string;
       recipientName: string;
@@ -2398,6 +2416,8 @@ export interface components {
         | 'CASH_OVERDUE'
         | 'TOO_MANY_ORDERS'
         | 'PENDING_OFFER'
+        | 'VEHICLE'
+        | 'SAFETY_ALERT'
       )[];
       position: {
         latitude: number;
@@ -2436,6 +2456,7 @@ export interface components {
       packageSize: components['schemas']['PackageSize'];
       packageContents: components['schemas']['PackageContents'] | null;
       isFragile: boolean;
+      loadingHelp: boolean;
       isExpress: boolean;
     };
     DispatchState: {
@@ -2522,6 +2543,7 @@ export interface components {
           | 'LOCATION_LINK_EXPIRED'
           | 'LOCATION_LINK_ALREADY_USED'
           | 'PRICING_UNAVAILABLE'
+          | 'BULKY_UNAVAILABLE'
           | 'PRICING_GRID_NOT_FOUND'
           | 'PROMO_INVALID'
           | 'PROMO_EXPIRED'
@@ -2533,6 +2555,8 @@ export interface components {
           | 'ORDER_NOT_IN_PROGRESS'
           | 'ORDER_TRANSITION_INVALID'
           | 'ORDER_CONFLICT'
+          | 'PARCEL_REFUSAL_NOT_ALLOWED'
+          | 'VEHICLE_NOT_SUITABLE'
           | 'ORDER_NOT_CANCELLABLE'
           | 'SAME_PICKUP_AND_DROPOFF'
           | 'SCHEDULE_INVALID'
@@ -2837,6 +2861,7 @@ export interface components {
       packageContents: components['schemas']['PackageContents'] | null;
       packageDescription: string | null;
       isFragile: boolean;
+      loadingHelp: boolean;
       declaredValue: number | null;
       instructions: string | null;
       pickup: components['schemas']['Address'];
@@ -2955,10 +2980,12 @@ export interface components {
       | 'SECONDHAND'
       | 'OTHER';
     /**
-     * @description S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg
+     * @description S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg ; BULKY : gros objet (électroménager, meuble, plus de 20 kg), tricycle ou camionnette
      * @enum {string}
      */
-    PackageSize: 'S' | 'M' | 'L' | 'XL';
+    PackageSize: 'S' | 'M' | 'L' | 'XL' | 'BULKY';
+    /** @enum {string} */
+    ParcelRefusalReason: 'TOO_BIG' | 'TOO_HEAVY' | 'NOT_AS_DECLARED' | 'FORBIDDEN_ITEM';
     Payment: {
       /** Format: uuid */
       id: string;
@@ -3116,6 +3143,7 @@ export interface components {
       /** @enum {string} */
       distanceSource: 'osrm' | 'estimate';
       estimatedMinutes: number | null;
+      vehicleType: components['schemas']['VehicleType'];
       basePrice: number;
       surcharges: {
         code: components['schemas']['SurchargeCode'];
@@ -3214,6 +3242,7 @@ export interface components {
       packageContents: components['schemas']['PackageContents'] | null;
       packageDescription: string | null;
       isFragile: boolean;
+      loadingHelp: boolean;
       isExpress: boolean;
       instructions: string | null;
       pickup: components['schemas']['Address'];
@@ -3382,7 +3411,8 @@ export interface components {
       locale: 'FR' | 'EN';
     };
     /** @enum {string} */
-    SurchargeCode: 'EXPRESS' | 'HEAVY_PARCEL' | 'NIGHT' | 'FAILED_ATTEMPT' | 'RETURN' | 'WEATHER';
+    SurchargeCode:
+      'EXPRESS' | 'HEAVY_PARCEL' | 'NIGHT' | 'FAILED_ATTEMPT' | 'RETURN' | 'WEATHER' | 'HANDLING';
     TermsStatus: {
       required: {
         /** @enum {string} */
@@ -4633,6 +4663,8 @@ export interface operations {
           packageSize: components['schemas']['PackageSize'];
           /** @default false */
           isExpress?: boolean;
+          /** @default false */
+          loadingHelp?: boolean;
           /** Format: date-time */
           scheduledFor?: string;
           promoCode?: string;
@@ -4911,6 +4943,8 @@ export interface operations {
           packageDescription?: string;
           /** @default false */
           isFragile?: boolean;
+          /** @default false */
+          loadingHelp?: boolean;
           declaredValue?: number;
           /** @default 0 */
           codAmount?: number;
@@ -4977,6 +5011,8 @@ export interface operations {
             packageDescription?: string;
             /** @default false */
             isFragile?: boolean;
+            /** @default false */
+            loadingHelp?: boolean;
             declaredValue?: number;
             /** @default 0 */
             codAmount?: number;
@@ -6539,6 +6575,41 @@ export interface operations {
             at: string;
             durationSeconds: number;
           }[];
+          latitude: number;
+          longitude: number;
+          /** Format: date-time */
+          occurredAt?: string;
+          clientEventId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderOrder'];
+        };
+      };
+    };
+  };
+  RiderApp_refuseParcel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          reason: components['schemas']['ParcelRefusalReason'];
+          note?: string;
+          photoKey: string;
           latitude: number;
           longitude: number;
           /** Format: date-time */

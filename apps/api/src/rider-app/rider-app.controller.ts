@@ -49,6 +49,7 @@ import {
   EarningsDto,
   EarningsQuery,
   FailBody,
+  RefuseParcelBody,
   FailureDecisionBody,
   PickupBody,
   PoliceCalledBody,
@@ -304,6 +305,22 @@ export class RiderAppController {
     @ValidBody(FailBody) body: z.output<typeof FailBody>,
   ): Out<typeof RiderOrderDto> {
     return this.orders.fail(user.id, id, body);
+  }
+
+  /**
+   * Colis refusé à l'enlèvement : il ne correspond pas à la commande (gros objet annoncé
+   * comme petit colis, objet interdit…). Photo obligatoire ; commande annulée.
+   */
+  @Post('orders/:id/refuse-parcel')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(RefuseParcelBody)
+  @ApiZodResponse(RiderOrderDto)
+  refuseParcel(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(RefuseParcelBody) body: z.output<typeof RefuseParcelBody>,
+  ): Out<typeof RiderOrderDto> {
+    return this.orders.refuseParcel(user.id, id, body);
   }
 
   /** Note de l'expéditeur après la course (F4), une fois, dans les 7 jours. */

@@ -58,6 +58,7 @@ export const SIZE_LABELS: Record<AdminOrder['parcel']['size'], string> = {
   M: 'M · jusqu’à 5 kg',
   L: 'L · jusqu’à 10 kg',
   XL: 'XL · jusqu’à 20 kg',
+  BULKY: 'Gros objet · tricycle',
 };
 
 export const CONTENTS_LABELS: Record<NonNullable<AdminOrder['parcel']['contents']>, string> = {
@@ -78,6 +79,7 @@ export const PROOF_LABELS: Record<string, string> = {
   DELIVERY: 'Remise',
   FAILED_ATTEMPT: 'Tentative échouée',
   RETURN: 'Retour à l’expéditeur',
+  PICKUP_REFUSED: 'Colis refusé à l’enlèvement',
 };
 
 export const INELIGIBLE_LABELS: Record<DispatchCandidate['ineligibleBecause'][number], string> = {
@@ -87,6 +89,8 @@ export const INELIGIBLE_LABELS: Record<DispatchCandidate['ineligibleBecause'][nu
   CASH_OVERDUE: 'espèces non déposées',
   TOO_MANY_ORDERS: 'déjà trop de courses',
   PENDING_OFFER: 'proposition en attente',
+  VEHICLE: 'véhicule trop petit pour un gros objet',
+  SAFETY_ALERT: 'alerte SOS en cours',
 };
 
 /** Ce que cette personne de l'équipe peut faire sur une commande. */

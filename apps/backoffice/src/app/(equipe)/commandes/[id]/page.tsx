@@ -102,6 +102,11 @@ export default async function OrderPage({
             Express
           </span>
         ) : null}
+        {order.parcel.size === 'BULKY' ? (
+          <span className="rounded-full bg-warn-bg px-3 py-1 text-[13px] font-extrabold text-warn">
+            Gros objet{order.parcel.loadingHelp ? ' · à deux' : ''}
+          </span>
+        ) : null}
         {order.delay ? (
           <span className="rounded-full bg-danger-bg px-3 py-1 text-[13px] font-extrabold text-danger">
             En retard de {duration(order.delay.minutes)}
@@ -274,6 +279,7 @@ export default async function OrderPage({
                 ['Contenu', order.parcel.contents ? CONTENTS_LABELS[order.parcel.contents] : null],
                 ['Précision', order.parcel.description],
                 ['Fragile', order.parcel.fragile ? 'Oui' : null],
+                ['Chargement', order.parcel.loadingHelp ? 'À deux (manutention)' : null],
                 [
                   'Valeur déclarée',
                   order.parcel.declaredValue ? money(order.parcel.declaredValue) : null,
