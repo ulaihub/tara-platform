@@ -651,6 +651,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sizeHelpXL => 'Jusqu’à 20 kg · gros carton, petit électroménager. Supplément colis XL.';
 
   @override
+  String get sizeBulky => 'Gros objet';
+
+  @override
+  String get sizeBulkyBody => 'Frigo, cuisinière, matelas, meuble · livré en tricycle';
+
+  @override
+  String get sizeHelpBulky => 'Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.';
+
+  @override
+  String get loadingHelpTitle => 'Aide pour charger';
+
+  @override
+  String get loadingHelpBody => 'Le livreur vient à deux. Supplément de manutention affiché avant de commander.';
+
+  @override
+  String get loadingHelpShort => 'chargement à deux';
+
+  @override
   String get fragileTitle => 'Fragile';
 
   @override
@@ -802,10 +820,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get priceBase => 'Course';
 
   @override
+  String get priceBaseTricycle => 'Course en tricycle';
+
+  @override
   String get surchargeExpress => 'Express';
 
   @override
   String get surchargeHeavy => 'Colis XL';
+
+  @override
+  String get surchargeHandling => 'Manutention (chargement à deux)';
 
   @override
   String get surchargeNight => 'Supplément de nuit';
@@ -1007,6 +1031,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get trackCancelled => 'Livraison annulée';
+
+  @override
+  String get trackRefused => 'Colis refusé à l’enlèvement';
+
+  @override
+  String trackRefusedBody(String reason, String fee) {
+    return '$reason. La commande est annulée ; le déplacement du livreur ($fee) est à votre charge. Un désaccord ? Appelez le service client.';
+  }
 
   @override
   String trackEta(int minutes) {
@@ -1262,6 +1294,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String failureFeesNote(String retry, String ret) {
     return 'En cas d’échec de livraison : nouvelle tentative $retry, retour du colis $ret, à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.';
+  }
+
+  @override
+  String refusalFeeNote(String fee) {
+    return 'Colis différent de ce que vous déclarez (trop grand, trop lourd, interdit) : le livreur peut le refuser, et son déplacement ($fee) reste à votre charge.';
   }
 
   @override

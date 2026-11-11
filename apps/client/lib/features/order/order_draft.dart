@@ -29,8 +29,15 @@ class DeliveryDraft {
 
   String? contents;
   String description = '';
+
+  /// S, M, L, XL, ou BULKY (gros objet : tricycle ou voiture, jamais à moto).
   String size = 'S';
   bool fragile = false;
+
+  /// Gros objet : l'expéditeur demande deux personnes pour charger (supplément manutention).
+  bool loadingHelp = false;
+
+  bool get bulky => size == 'BULKY';
 
   /// Taille et fragilité choisies par l'expéditeur : la nature du contenu ne les suggère
   /// plus ensuite.
@@ -69,6 +76,7 @@ class DeliveryDraft {
     'packageContents': contents ?? 'OTHER',
     if (description.trim().isNotEmpty) 'packageDescription': description.trim(),
     'isFragile': fragile,
+    if (bulky) 'loadingHelp': loadingHelp,
     'declaredValue': ?declaredValue,
     'codAmount': codAmount,
     if (instructions.trim().isNotEmpty) 'instructions': instructions.trim(),

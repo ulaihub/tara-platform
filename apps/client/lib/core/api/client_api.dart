@@ -102,6 +102,7 @@ class ClientApi {
     required String pickupAddressId,
     required String dropoffAddressId,
     required String packageSize,
+    bool loadingHelp = false,
     DateTime? scheduledFor,
     String? promoCode,
   }) async => Quote.fromJson(
@@ -111,6 +112,7 @@ class ClientApi {
         'pickup': {'addressId': pickupAddressId},
         'dropoff': {'addressId': dropoffAddressId},
         'packageSize': packageSize,
+        if (loadingHelp) 'loadingHelp': true,
         'scheduledFor': ?scheduledFor?.toUtc().toIso8601String(),
         'promoCode': ?promoCode,
       },

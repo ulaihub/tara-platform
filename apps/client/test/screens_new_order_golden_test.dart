@@ -225,6 +225,37 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/05_colis/rempli_${brightness.name}.png'));
     });
 
+    goldenTest('05 colis gros objet puis récapitulatif ${brightness.name}', (tester) async {
+      final api = orderApi();
+      await pumpVariant(tester, variant, flow(api), surface: const Size(390, 1760));
+      await toPackage(tester);
+      await tester.tap(find.text('Cuisine, maison'));
+      await tester.enterText(find.byType(TextField).at(0), 'Réfrigérateur 2 portes');
+      await tester.tap(find.text('Gros objet'));
+      await settle(tester);
+      expect(
+        find.text('Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.'),
+        findsOne,
+      );
+      await tester.tap(find.text('Aide pour charger'));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      await expectLater(capture, matchesGoldenFile('goldens/05_colis/gros_objet_${brightness.name}.png'));
+
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      // Prix tricycle et manutention annoncés avant de commander, comme le déplacement
+      // facturé si le colis est refusé.
+      expect(api.quotes.last, containsPair('size', 'BULKY'));
+      expect(api.quotes.last, containsPair('loadingHelp', true));
+      expect(find.text('Manutention (chargement à deux)'), findsOneWidget);
+      expect(find.text('Commander · 4\u00a0500\u00a0F'), findsOneWidget);
+      expect(find.textContaining('son déplacement (1\u00a0500 F) reste à votre charge'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/gros_objet_${brightness.name}.png'));
+    });
+
     goldenTest('05 quand programmé ${brightness.name}', (tester) async {
       await pumpVariant(tester, variant, flow(orderApi()), surface: const Size(390, 1340));
       await toWhen(tester);
@@ -483,6 +514,34 @@ void main() {
     expect(find.text('500 000 F au plus par livraison.'), findsOneWidget);
   });
 
+  testWidgets('l’aide pour charger ne se propose que pour un gros objet et part avec la commande', (tester) async {
+    final api = orderApi();
+    await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1760));
+    await toPackage(tester);
+    await tester.tap(find.text('Cuisine, maison'));
+    await settle(tester);
+    expect(find.text('Aide pour charger'), findsNothing);
+    await tester.tap(find.text('Gros objet'));
+    await settle(tester);
+    await tester.tap(find.text('Aide pour charger'));
+    await settle(tester);
+    // Retour à une taille ordinaire : l'option disparaît et ne part pas.
+    await tester.tap(find.text('L'));
+    await settle(tester);
+    expect(find.text('Aide pour charger'), findsNothing);
+    await tester.tap(find.text('Gros objet'));
+    await settle(tester);
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tapVisible(tester, 'Espèces à l’enlèvement');
+    await slideToOrder(tester);
+    await settle(tester);
+    expect(api.created.single.body, containsPair('packageSize', 'BULKY'));
+    expect(api.created.single.body, containsPair('loadingHelp', true));
+  });
+
   testWidgets('un particulier n’a pas de montant à encaisser', (tester) async {
     await pumpVariant(tester, Variant.matrix.first, flow(orderApi(), me: person), surface: const Size(390, 1400));
     await toPackage(tester);
@@ -554,6 +613,7 @@ void main() {
         'size': 'S',
         'promo': null,
         'at': null,
+        'loadingHelp': false,
       });
       await slideToOrder(tester);
 

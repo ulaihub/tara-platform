@@ -108,8 +108,9 @@ export class OrderNotificationsListener implements OnModuleInit {
           template: 'ORDER_CANCELLED_RECIPIENT',
           params: { sender: senderName, reference: order.reference },
         });
-        // Le livreur déjà en route vers le point d'enlèvement est prévenu.
-        if (from === 'ASSIGNED' && full.rider) {
+        // Le livreur déjà en route vers le point d'enlèvement est prévenu, sauf si c'est lui
+        // qui a refusé le colis.
+        if (from === 'ASSIGNED' && full.rider && actor.id !== full.rider.userId) {
           await this.notifications.toUser(full.rider.userId, {
             template: 'RIDER_ORDER_CANCELLED',
             params: { reference: order.reference },
@@ -122,14 +123,18 @@ export class OrderNotificationsListener implements OnModuleInit {
         break;
     }
 
-    // L'expéditeur est prévenu, sauf de ses propres actions.
-    const template = SENDER_PUSH[to];
+    // L'expéditeur est prévenu, sauf de ses propres actions. Colis refusé par le livreur :
+    // il apprend pourquoi et ce que coûte le déplacement.
+    const refused = to === 'CANCELLED' && actor.role === 'RIDER';
+    const template = refused ? 'ORDER_PARCEL_REFUSED' : SENDER_PUSH[to];
     if (template && actor.id !== order.senderId) {
       await this.notifications.toUser(order.senderId, {
         template,
         params: {
           reference: order.reference,
           rider: full.rider?.user.fullName ?? 'Votre livreur',
+          reason: full.cancelReason ?? 'Colis non conforme',
+          fee: order.retryFee,
         },
         data: { type: 'order.status', orderId: order.id, status: to },
         orderId: order.id,

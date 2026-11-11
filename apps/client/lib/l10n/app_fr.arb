@@ -312,6 +312,12 @@
   "sizeHelpM": "Jusqu’à 5 kg · boîte à chaussures, petit sac de vêtements.",
   "sizeHelpL": "Jusqu’à 10 kg · carton moyen, sac de linge.",
   "sizeHelpXL": "Jusqu’à 20 kg · gros carton, petit électroménager. Supplément colis XL.",
+  "sizeBulky": "Gros objet",
+  "sizeBulkyBody": "Frigo, cuisinière, matelas, meuble · livré en tricycle",
+  "sizeHelpBulky": "Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.",
+  "loadingHelpTitle": "Aide pour charger",
+  "loadingHelpBody": "Le livreur vient à deux. Supplément de manutention affiché avant de commander.",
+  "loadingHelpShort": "chargement à deux",
   "fragileTitle": "Fragile",
   "fragileBody": "Le livreur le transporte avec soin.",
   "codLabel": "À encaisser auprès du destinataire",
@@ -413,8 +419,10 @@
   "addDelivery": "Ajouter une livraison",
   "addDeliveryHint": "Jusqu’à 10 livraisons depuis le même enlèvement : un seul passage du livreur.",
   "priceBase": "Course",
+  "priceBaseTricycle": "Course en tricycle",
   "surchargeExpress": "Express",
   "surchargeHeavy": "Colis XL",
+  "surchargeHandling": "Manutention (chargement à deux)",
   "surchargeNight": "Supplément de nuit",
   "surchargeWeather": "Supplément météo",
   "surchargeOther": "Supplément",
@@ -564,6 +572,18 @@
   },
   "trackReturned": "Colis retourné",
   "trackCancelled": "Livraison annulée",
+  "trackRefused": "Colis refusé à l’enlèvement",
+  "trackRefusedBody": "{reason}. La commande est annulée ; le déplacement du livreur ({fee}) est à votre charge. Un désaccord ? Appelez le service client.",
+  "@trackRefusedBody": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
   "trackEta": "Environ {minutes} min",
   "@trackEta": {
     "placeholders": {
@@ -808,6 +828,14 @@
         "type": "String"
       },
       "ret": {
+        "type": "String"
+      }
+    }
+  },
+  "refusalFeeNote": "Colis différent de ce que vous déclarez (trop grand, trop lourd, interdit) : le livreur peut le refuser, et son déplacement ({fee}) reste à votre charge.",
+  "@refusalFeeNote": {
+    "placeholders": {
+      "fee": {
         "type": "String"
       }
     }

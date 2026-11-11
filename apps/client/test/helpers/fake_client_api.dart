@@ -141,19 +141,29 @@ class FakeClientApi extends ClientApi {
     required String pickupAddressId,
     required String dropoffAddressId,
     required String packageSize,
+    bool loadingHelp = false,
     DateTime? scheduledFor,
     String? promoCode,
   }) async {
-    quotes.add({'dropoff': dropoffAddressId, 'size': packageSize, 'promo': promoCode, 'at': scheduledFor});
+    quotes.add({
+      'dropoff': dropoffAddressId,
+      'size': packageSize,
+      'promo': promoCode,
+      'at': scheduledFor,
+      'loadingHelp': loadingHelp,
+    });
     if (promoCode != null && promoCode != 'BIENVENUE') {
       throw const ApiException(code: 'PROMO_INVALID', message: 'Code promo inconnu.', status: 422);
     }
+    // Gros objet : grille tricycle, manutention si l'expéditeur demande de l'aide.
+    final bulky = packageSize == 'BULKY';
     final surcharges = [
       if (packageSize == 'XL') (code: 'HEAVY_PARCEL', amount: 500),
+      if (bulky && loadingHelp) (code: 'HANDLING', amount: 1500),
       if (scheduledFor != null && (scheduledFor.hour >= 20 || scheduledFor.hour < 6)) (code: 'NIGHT', amount: 300),
     ];
     final discount = promoCode == null ? 0 : 500;
-    const base = 1200;
+    final base = bulky ? 3000 : 1200;
     return Quote(
       distanceMeters: 4200,
       estimatedMinutes: 18,
@@ -162,7 +172,8 @@ class FakeClientApi extends ClientApi {
       discountTotal: discount,
       totalPrice: base + surcharges.fold<int>(0, (sum, s) => sum + s.amount) - discount,
       promoCode: promoCode,
-      retryFee: 500,
+      vehicleType: bulky ? 'TRICYCLE' : 'MOTORBIKE',
+      retryFee: bulky ? 1500 : 500,
       returnFee: base ~/ 2,
     );
   }

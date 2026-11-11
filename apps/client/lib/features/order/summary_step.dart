@@ -125,6 +125,7 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
         pickupAddressId: _draft.pickup!.id,
         dropoffAddressId: delivery.dropoff!.id,
         packageSize: delivery.size,
+        loadingHelp: delivery.bulky && delivery.loadingHelp,
         scheduledFor: _draft.later ? _draft.scheduledFor : null,
         promoCode: promoCode,
       );
@@ -265,6 +266,14 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
             l.failureFeesNote('${formatAmount(quote.retryFee)} F', '${formatAmount(quote.returnFee)} F'),
             style: TaraText.small.copyWith(color: c.textTertiary),
           ),
+          // Colis non conforme refusé à l'enlèvement : le déplacement se paie, annoncé ici.
+          if (quote.retryFee > 0) ...[
+            const SizedBox(height: 6),
+            Text(
+              l.refusalFeeNote('${formatAmount(quote.retryFee)} F'),
+              style: TaraText.small.copyWith(color: c.textTertiary),
+            ),
+          ],
         ],
         if (!_batch) ...[
           const SizedBox(height: 18),
@@ -399,7 +408,8 @@ class _DeliveryCard extends StatelessWidget {
     final first = d.recipientName.trim().split(RegExp(r'\s+')).first;
     final package = [
       contentsText(l, d.contents ?? 'OTHER'),
-      d.size,
+      d.bulky ? l.sizeBulky : d.size,
+      if (d.bulky && d.loadingHelp) l.loadingHelpShort,
       if (d.fragile) l.fragileTitle,
       if (d.codAmount > 0) '${l.codLabel} : ${formatAmount(d.codAmount)} F',
     ].join(' · ');
@@ -499,11 +509,12 @@ class _PriceCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (single != null) ...[
-            line(l.priceBase, amount(single.basePrice)),
+            line(single.vehicleType == 'TRICYCLE' ? l.priceBaseTricycle : l.priceBase, amount(single.basePrice)),
             for (final surcharge in single.surcharges)
               line(switch (surcharge.code) {
                 'EXPRESS' => l.surchargeExpress,
                 'HEAVY_PARCEL' => l.surchargeHeavy,
+                'HANDLING' => l.surchargeHandling,
                 'NIGHT' => l.surchargeNight,
                 'WEATHER' => l.surchargeWeather,
                 _ => l.surchargeOther,

@@ -646,6 +646,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sizeHelpXL => 'Up to 20 kg · large box, small appliance. XL parcel surcharge.';
 
   @override
+  String get sizeBulky => 'Bulky item';
+
+  @override
+  String get sizeBulkyBody => 'Fridge, cooker, mattress, furniture · delivered by tricycle';
+
+  @override
+  String get sizeHelpBulky => 'Too big or too heavy for a motorbike. Tricycle rate, shown before you order.';
+
+  @override
+  String get loadingHelpTitle => 'Help with loading';
+
+  @override
+  String get loadingHelpBody => 'The rider comes with a helper. Handling surcharge shown before you order.';
+
+  @override
+  String get loadingHelpShort => 'two-person loading';
+
+  @override
   String get fragileTitle => 'Fragile';
 
   @override
@@ -796,10 +814,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceBase => 'Delivery';
 
   @override
+  String get priceBaseTricycle => 'Delivery by tricycle';
+
+  @override
   String get surchargeExpress => 'Express';
 
   @override
   String get surchargeHeavy => 'XL parcel';
+
+  @override
+  String get surchargeHandling => 'Handling (two-person loading)';
 
   @override
   String get surchargeNight => 'Night surcharge';
@@ -1002,6 +1026,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackCancelled => 'Delivery cancelled';
+
+  @override
+  String get trackRefused => 'Parcel refused at pickup';
+
+  @override
+  String trackRefusedBody(String reason, String fee) {
+    return '$reason. The order is cancelled; the rider’s trip ($fee) is charged to you. Disagree? Call customer service.';
+  }
 
   @override
   String trackEta(int minutes) {
@@ -1257,6 +1289,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String failureFeesNote(String retry, String ret) {
     return 'If delivery fails: another attempt $retry, return of the parcel $ret, charged to you. A returned parcel is handed back against payment of what your Tara balance doesn’t cover.';
+  }
+
+  @override
+  String refusalFeeNote(String fee) {
+    return 'Parcel different from what you declare (too big, too heavy, forbidden): the rider may refuse it, and their trip ($fee) is charged to you.';
   }
 
   @override

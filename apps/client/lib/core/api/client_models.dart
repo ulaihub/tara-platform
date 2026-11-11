@@ -461,6 +461,7 @@ class Quote {
     required this.discountTotal,
     required this.totalPrice,
     required this.promoCode,
+    this.vehicleType = 'MOTORBIKE',
     this.retryFee = 0,
     this.returnFee = 0,
   });
@@ -475,6 +476,7 @@ class Quote {
     discountTotal: _field<num>(json, 'discountTotal').toInt(),
     totalPrice: _field<num>(json, 'totalPrice').toInt(),
     promoCode: _field(json, 'promoCode'),
+    vehicleType: json['vehicleType'] as String? ?? 'MOTORBIKE',
     retryFee: _field<num>(json, 'retryFee').toInt(),
     returnFee: _field<num>(json, 'returnFee').toInt(),
   );
@@ -486,6 +488,7 @@ class Quote {
     'discountTotal',
     'totalPrice',
     'promoCode',
+    'vehicleType',
     'retryFee',
     'returnFee',
   ];
@@ -497,6 +500,9 @@ class Quote {
   final int discountTotal;
   final int totalPrice;
   final String? promoCode;
+
+  /// MOTORBIKE, ou TRICYCLE pour un gros objet.
+  final String vehicleType;
 
   /// Seulement si la livraison échoue (E6) : nouvelle tentative, retour à l'expéditeur.
   final int retryFee;
@@ -612,6 +618,7 @@ class TrackedOrder {
     this.rating,
     this.retryFee = 0,
     this.returnFee = 0,
+    this.refusalReason,
   });
 
   factory TrackedOrder.fromJson(Json json) {
@@ -621,6 +628,11 @@ class TrackedOrder {
     final failure = json['failure'] as Json?;
     final rating = json['rating'] as Json?;
     final scheduled = json['scheduledFor'] as String?;
+    // Annulée par le livreur : colis non conforme refusé à l'enlèvement, motif à l'appui.
+    final refused = _field<List<Object?>>(
+      json,
+      'timeline',
+    ).cast<Json>().any((step) => step['status'] == 'CANCELLED' && step['actorRole'] == 'RIDER');
     return TrackedOrder(
       id: _field(json, 'id'),
       reference: _field(json, 'reference'),
@@ -645,6 +657,7 @@ class TrackedOrder {
       createdAt: DateTime.parse(_field(json, 'createdAt')),
       failure: failure == null ? null : OrderFailure.fromJson(failure),
       rating: rating == null ? null : OrderRating.fromJson(rating),
+      refusalReason: refused ? (json['cancelReason'] as String? ?? '') : null,
     );
   }
 
@@ -662,6 +675,7 @@ class TrackedOrder {
     'pricing',
     'rider',
     'failure',
+    'cancelReason',
     'rating',
     'timeline',
     'createdAt',
@@ -696,6 +710,10 @@ class TrackedOrder {
   final int retryFee;
   final int returnFee;
 
+  /// Colis refusé par le livreur à l'enlèvement (non conforme) : le motif, sinon null. Le
+  /// déplacement ([retryFee]) est alors à la charge de l'expéditeur.
+  final String? refusalReason;
+
   /// Heure du premier passage à [status] (null s'il n'a pas eu lieu).
   DateTime? reachedAt(String status) => timeline.where((step) => step.status == status).firstOrNull?.at;
 
@@ -724,6 +742,7 @@ class TrackedOrder {
     rating: rating ?? this.rating,
     retryFee: retryFee,
     returnFee: returnFee,
+    refusalReason: refusalReason,
   );
 }
 

@@ -560,6 +560,11 @@ class _Panel extends StatelessWidget {
       'DELIVERY_FAILED' => (l.trackFailed, l.trackFailedBody),
       'DELIVERED' => (l.trackDelivered, l.trackDeliveredBody(recipientFirst, formatClock(deliveredAt ?? now))),
       'RETURNED' => (l.trackReturned, l.trackReturnedBody(formatClock(o.reachedAt('RETURNED') ?? now))),
+      // Colis non conforme refusé à l'enlèvement : le motif et le déplacement facturé.
+      'CANCELLED' when o.refusalReason != null => (
+        l.trackRefused,
+        l.trackRefusedBody(o.refusalReason!, '${formatAmount(o.retryFee)} F'),
+      ),
       _ => (l.trackCancelled, ''),
     };
     final eta = _eta(o);

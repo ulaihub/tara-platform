@@ -27,6 +27,7 @@ TrackedOrder tracked(
   String? decision,
   int? rated,
   bool retryAllowed = true,
+  String? refusalReason,
 }) {
   DateTime at(int h, int m) => DateTime(2026, 11, 4, h, m);
   const ridden = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED', 'DELIVERED'];
@@ -89,6 +90,7 @@ TrackedOrder tracked(
         : null,
     retryFee: 500,
     returnFee: 750,
+    refusalReason: refusalReason,
     rating: rated == null ? null : OrderRating(score: rated, comment: null, at: at(10, 40)),
   );
 }
@@ -171,6 +173,22 @@ void main() {
       expect(find.text('Jean M. vient chercher le colis'), findsOneWidget);
       expect(find.text('Moto · LT 482 KQ'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_livreur/${brightness.name}.png'));
+    });
+
+    goldenTest('06 suivi colis refusé ${brightness.name}', (tester) async {
+      final api = FakeClientApi()
+        ..tracked[orderId] = tracked('CANCELLED', refusalReason: 'Colis non conforme : trop lourd · Armoire 3 portes');
+      await pumpVariant(tester, variant, screen(api, FakeRealtime()));
+      await settle(tester);
+      expect(find.text('Colis refusé à l’enlèvement'), findsOneWidget);
+      expect(
+        find.text(
+          'Colis non conforme : trop lourd · Armoire 3 portes. La commande est annulée ; le déplacement du '
+          'livreur (500 F) est à votre charge. Un désaccord ? Appelez le service client.',
+        ),
+        findsOneWidget,
+      );
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_refuse/${brightness.name}.png'));
     });
 
     goldenTest('06 suivi retour en cours ${brightness.name}', (tester) async {

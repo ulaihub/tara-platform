@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { customerWallet, merchantPayable, riderPayable } from '../src/finance/ledger.accounts.js';
 import { LedgerService } from '../src/finance/ledger.service.js';
+import { type FakePushProvider, PUSH_PROVIDER } from '../src/notifications/push.provider.js';
 import { type FakePaymentProvider, PAYMENT_PROVIDER } from '../src/payments/payment.provider.js';
 import {
   createTestApp,
@@ -224,6 +225,12 @@ describe('Gros objets et livreurs en alerte', () => {
   it('colis non conforme : course annulée, photo gardée, déplacement payé par l’expéditeur', async () => {
     const tricycle = await onlineRider(0.002, 'TRICYCLE');
     const sender = await merchant(ctx);
+    const senderToken = `push-${randomUUID()}-${randomUUID()}`;
+    await request(ctx.http)
+      .put(`/v1/me/devices/${sender.installationId}/push-token`)
+      .set(sender.auth)
+      .send({ pushToken: senderToken })
+      .expect(204);
     const order = await placeOrder(ctx, sender, { packageSize: 'BULKY' });
     const [offer] = await pendingOffers(order.id);
     expect(offer?.riderId).toBe(tricycle.riderId);
@@ -277,6 +284,14 @@ describe('Gros objets et livreurs en alerte', () => {
     // L'expéditeur doit le déplacement (1 500 F) ; le livreur en touche 80 %.
     expect(await ledger.balance(merchantPayable(merchantId ?? ''))).toBe(shopBefore - 1500);
     expect(await ledger.balance(riderPayable(tricycle.riderId))).toBe(RIDER_START_BALANCE + 1200);
+
+    // L'expéditeur apprend pourquoi et combien ; le livreur n'est pas prévenu de son propre refus.
+    const push = ctx.app.get<FakePushProvider>(PUSH_PROVIDER);
+    const told = push.lastTo(senderToken);
+    expect(told?.title).toBe('Colis refusé à l’enlèvement');
+    expect(told?.body).toContain('trop lourd');
+    expect(told?.body).toContain('1500 FCFA');
+    expect(push.lastTo(tricycle.pushToken)?.data).not.toMatchObject({ type: 'order.cancelled' });
 
     // L'équipe voit le motif dans la fiche.
     const sheet = await request(ctx.http)

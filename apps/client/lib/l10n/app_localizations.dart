@@ -1304,6 +1304,42 @@ abstract class AppLocalizations {
   /// **'Jusqu’à 20 kg · gros carton, petit électroménager. Supplément colis XL.'**
   String get sizeHelpXL;
 
+  /// No description provided for @sizeBulky.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gros objet'**
+  String get sizeBulky;
+
+  /// No description provided for @sizeBulkyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frigo, cuisinière, matelas, meuble · livré en tricycle'**
+  String get sizeBulkyBody;
+
+  /// No description provided for @sizeHelpBulky.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.'**
+  String get sizeHelpBulky;
+
+  /// No description provided for @loadingHelpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide pour charger'**
+  String get loadingHelpTitle;
+
+  /// No description provided for @loadingHelpBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur vient à deux. Supplément de manutention affiché avant de commander.'**
+  String get loadingHelpBody;
+
+  /// No description provided for @loadingHelpShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'chargement à deux'**
+  String get loadingHelpShort;
+
   /// No description provided for @fragileTitle.
   ///
   /// In fr, this message translates to:
@@ -1556,6 +1592,12 @@ abstract class AppLocalizations {
   /// **'Course'**
   String get priceBase;
 
+  /// No description provided for @priceBaseTricycle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course en tricycle'**
+  String get priceBaseTricycle;
+
   /// No description provided for @surchargeExpress.
   ///
   /// In fr, this message translates to:
@@ -1567,6 +1609,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Colis XL'**
   String get surchargeHeavy;
+
+  /// No description provided for @surchargeHandling.
+  ///
+  /// In fr, this message translates to:
+  /// **'Manutention (chargement à deux)'**
+  String get surchargeHandling;
 
   /// No description provided for @surchargeNight.
   ///
@@ -1921,6 +1969,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Livraison annulée'**
   String get trackCancelled;
+
+  /// No description provided for @trackRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis refusé à l’enlèvement'**
+  String get trackRefused;
+
+  /// No description provided for @trackRefusedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{reason}. La commande est annulée ; le déplacement du livreur ({fee}) est à votre charge. Un désaccord ? Appelez le service client.'**
+  String trackRefusedBody(String reason, String fee);
 
   /// No description provided for @trackEta.
   ///
@@ -2341,6 +2401,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'En cas d’échec de livraison : nouvelle tentative {retry}, retour du colis {ret}, à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.'**
   String failureFeesNote(String retry, String ret);
+
+  /// No description provided for @refusalFeeNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis différent de ce que vous déclarez (trop grand, trop lourd, interdit) : le livreur peut le refuser, et son déplacement ({fee}) reste à votre charge.'**
+  String refusalFeeNote(String fee);
 
   /// No description provided for @retryUsed.
   ///
