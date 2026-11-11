@@ -87,6 +87,37 @@ class CourseActions {
     return ActionResult(action == null ? ActionOutcome.sent : ActionOutcome.queued);
   }
 
+  /// Colis non conforme refusé à l'enlèvement (trop grand, trop lourd, pas ce qui a été
+  /// déclaré, objet interdit) : motif, photo du colis, note facultative. La course est annulée
+  /// et le déplacement payé au livreur par l'expéditeur.
+  Future<ActionResult> refuseParcel(
+    RiderOrder order, {
+    required String reason,
+    String? note,
+    required String photoPath,
+    required GeoPoint at,
+    String? retryActionId,
+  }) async {
+    final action = await _send(
+      order,
+      kind: refuseParcelKind,
+      body: {'reason': reason, 'note': ?note, 'latitude': at.latitude, 'longitude': at.longitude},
+      photoPath: photoPath,
+      retryActionId: retryActionId,
+    );
+    if (action != null && action.failed) return _refusal(action);
+    if (action == null) {
+      // Reçu : la course est annulée et quitte le téléphone.
+      await activeOrder.update(order.withStatus('CANCELLED'));
+      return const ActionResult(ActionOutcome.sent);
+    }
+    await activeOrder.update(order.withChanges({RiderOrder.refusalQueuedKey: true}));
+    return const ActionResult(ActionOutcome.queued);
+  }
+
+  /// Sorte de l'action « colis non conforme » dans la file (aussi le chemin de l'API).
+  static const refuseParcelKind = 'refuse-parcel';
+
   /// Livraison (E4) : code du destinataire, ou sans code le nom de la personne qui reçoit
   /// (le support appelle le client avant de valider) ; photo de remise dans les deux cas.
   Future<ActionResult> deliver(

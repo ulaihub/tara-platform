@@ -132,8 +132,9 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     // à encaisser et le colis visibles au-dessus des boutons.
     final tight = height / textScale < 560;
     final package = switch (offer.packageSize) {
-      'SMALL' => l.packageSmall,
-      'LARGE' => l.packageLarge,
+      'S' => l.packageSmall,
+      'L' || 'XL' => l.packageLarge,
+      'BULKY' => l.packageBulky,
       _ => l.packageMedium,
     };
     final ring = CountdownRing(
@@ -153,7 +154,11 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
         top: 12,
         content: [
           Center(
-            child: InfoPill(label: '${l.newJob} · ${l.vehicleShort}', dot: TaraBrand.orange, blinkDot: true),
+            child: InfoPill(
+              label: '${l.newJob} · ${offer.bulky ? l.packageBulky : l.vehicleShort}',
+              dot: TaraBrand.orange,
+              blinkDot: true,
+            ),
           ),
           SizedBox(height: compact ? 8 : 16),
           if (tight)
@@ -197,7 +202,9 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
                   icon: TaraIcons.cash,
                   tone: TintTone.accent,
                 ),
-              InfoPill(label: package, icon: TaraIcons.package),
+              InfoPill(label: package, icon: TaraIcons.package, tone: offer.bulky ? TintTone.accent : null),
+              // Aide au chargement payée par l'expéditeur : à savoir avant d'accepter.
+              if (offer.loadingHelp) InfoPill(label: l.comeWithHelper, icon: TaraIcons.user, tone: TintTone.accent),
               if (offer.isFragile) InfoPill(label: l.fragile, icon: TaraIcons.alertCircle),
               if (offer.isExpress) InfoPill(label: l.express, icon: TaraIcons.clock),
             ],

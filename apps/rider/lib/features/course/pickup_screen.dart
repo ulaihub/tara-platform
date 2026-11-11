@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
+import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
+import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
@@ -19,6 +23,7 @@ import 'course_scaffold.dart';
 
 /// 08 · Enlèvement : itinéraire jusqu'au vendeur, montant à encaisser sur place, code de
 /// l'expéditeur et photo du colis. « Colis récupéré » passe par la file hors connexion.
+/// « Colis non conforme ? » ouvre le refus du colis (trop grand, trop lourd, interdit…).
 class PickupScreen extends ConsumerStatefulWidget {
   const PickupScreen({
     super.key,
@@ -26,6 +31,7 @@ class PickupScreen extends ConsumerStatefulWidget {
     required this.onBack,
     required this.onSos,
     required this.onPickedUp,
+    required this.onRefuse,
     this.now,
   });
 
@@ -37,6 +43,9 @@ class PickupScreen extends ConsumerStatefulWidget {
 
   /// Colis récupéré : envoyé (sent) ou gardé sur le téléphone (queued).
   final void Function(ActionOutcome outcome) onPickedUp;
+
+  /// « Colis non conforme ? » : écran de refus du colis.
+  final VoidCallback onRefuse;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -133,12 +142,21 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
       title: (route, _) => route?.minutes == null ? l.toPickup : l.toPickupMinutes(route!.minutes!),
       onBack: widget.onBack,
       onSos: widget.onSos,
-      // Enlèvement définitif : on glisse plutôt que toucher, pour éviter l'erreur.
-      footer: SwipeButton(
-        label: l.parcelCollected,
-        icon: TaraIcons.package,
-        loading: _busy,
-        onConfirmed: ready ? _submit : null,
+      footer: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Enlèvement définitif : on glisse plutôt que toucher, pour éviter l'erreur.
+          SwipeButton(
+            label: l.parcelCollected,
+            icon: TaraIcons.package,
+            loading: _busy,
+            onConfirmed: ready ? _submit : null,
+          ),
+          Center(
+            child: TaraLink(label: l.parcelNotConforming, onPressed: _busy ? null : widget.onRefuse),
+          ),
+        ],
       ),
       children: [
         CourseStepper(labels: steps, activeIndex: 0, stateLabels: stepStateLabels(l)),
@@ -154,6 +172,24 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
         if (order.collectAtPickup > 0) ...[
           const SizedBox(height: 12),
           CollectBox(amount: order.collectAtPickup, title: l.collectAtPickupTitle, body: l.collectAtPickupBody),
+        ],
+        if (order.bulky) ...[
+          const SizedBox(height: 12),
+          TintBox(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TaraIcon(TaraIcons.package, size: 18, color: TaraColors.of(context).accentText),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    order.loadingHelp ? l.bulkyWithHelpNotice : l.bulkyNotice,
+                    style: TaraText.label.copyWith(color: TaraColors.of(context).textPrimary, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
         if (order.pickup.motorbikeRestricted) ...[const SizedBox(height: 12), CourseWarning(l.noMotoAddress)],
         const SizedBox(height: 14),

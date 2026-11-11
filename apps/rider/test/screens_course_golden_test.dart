@@ -17,6 +17,7 @@ import 'package:tara_rider/features/course/collection_screen.dart';
 import 'package:tara_rider/features/course/delivery_screen.dart';
 import 'package:tara_rider/features/course/failure_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
+import 'package:tara_rider/features/course/refuse_parcel_screen.dart';
 import 'package:tara_rider/features/course/return_screen.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -133,7 +134,15 @@ PickupScreen pickup(RiderOrder order) => PickupScreen(
   onBack: () {},
   onSos: () {},
   onPickedUp: (_) {},
+  onRefuse: () {},
   now: () => DateTime(2026, 11, 3, 14, 32),
+);
+
+RefuseParcelScreen refusal() => RefuseParcelScreen(
+  order: order(packageSize: 'BULKY'),
+  onBack: () {},
+  onDone: (_) {},
+  now: () => DateTime(2026, 11, 3, 14, 34),
 );
 
 void main() {
@@ -232,6 +241,15 @@ void main() {
       expect(find.text('Photo du colis · prise à 14:32'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/08_enlevement_pret/${variant.name}.png'));
     });
+    goldenTest('08 colis non conforme ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scope(refusal()));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      // Rien ne part sans motif ni photo.
+      expect(tester.widget<PrimaryButton>(find.byType(PrimaryButton)).onPressed, isNull);
+      await expectLater(capture, matchesGoldenFile('goldens/08_colis_non_conforme/${variant.name}.png'));
+    });
+
     goldenTest('10 échec ${variant.name}', (tester) async {
       final calls = await tester.runAsync(() => callsAt([DateTime(2026, 11, 3, 15, 2)]));
       await pumpVariant(tester, variant, scope(failure(), calls: calls));
@@ -292,6 +310,41 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Frais de retour à encaisser'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/11_retour_frais/${variant.name}.png'));
+    });
+  }
+
+  for (final brightness in Brightness.values) {
+    final variant = Variant(brightness, ScreenSize.regular, 1);
+
+    goldenTest('08 enlèvement gros objet ${brightness.name}', (tester) async {
+      await pumpVariant(
+        tester,
+        variant,
+        scope(pickup(order(packageSize: 'BULKY', loadingHelp: true, collectAtPickup: 0))),
+      );
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Gros objet, aide au chargement payée par l’expéditeur : venez à deux.'), findsOneWidget);
+      expect(find.text('Colis non conforme\u00a0?'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/08_enlevement_gros_objet/${brightness.name}.png'));
+    });
+
+    goldenTest('08 colis non conforme prêt ${brightness.name}', (tester) async {
+      await pumpVariant(tester, variant, scope(refusal()));
+      await settle(tester);
+      final context = tester.element(find.byType(RefuseParcelScreen));
+      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
+      await tester.tap(find.text('Trop grand pour mon véhicule'));
+      await tester.enterText(find.byType(EditableText).first, 'Armoire 3 portes au lieu d’un frigo');
+      await tester.ensureVisible(find.text('Photographier le colis'));
+      await tester.tap(find.text('Photographier le colis'));
+      await tester.pump();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Photo du colis · prise à 14:34'), findsOneWidget);
+      expect(tester.widget<PrimaryButton>(find.byType(PrimaryButton)).onPressed, isNotNull);
+      await expectLater(capture, matchesGoldenFile('goldens/08_colis_non_conforme/pret_${brightness.name}.png'));
     });
   }
 

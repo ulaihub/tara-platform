@@ -13,13 +13,16 @@ Json orderJson({
   String? failedAt,
   String? failureDecisionDueAt,
   bool dropoffMedia = false,
+  String packageSize = 'M',
+  bool loadingHelp = false,
 }) => {
   'id': id,
   'reference': 'TR-48213',
   'status': status,
-  'packageSize': 'MEDIUM',
+  'packageSize': packageSize,
   'isFragile': true,
   'isExpress': false,
+  'loadingHelp': loadingHelp,
   'instructions': instructions,
   'pickup': {
     'id': '00000000-0000-4000-8000-000000000010',
@@ -83,8 +86,12 @@ RiderOrder order({
   String? failureReason,
   String? failureDecisionDueAt,
   bool dropoffMedia = false,
+  String packageSize = 'M',
+  bool loadingHelp = false,
 }) => RiderOrder.fromJson(
   orderJson(
+    packageSize: packageSize,
+    loadingHelp: loadingHelp,
     dropoffMedia: dropoffMedia,
     status: status,
     collectAtPickup: collectAtPickup,

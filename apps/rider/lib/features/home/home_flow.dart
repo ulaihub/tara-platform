@@ -24,6 +24,7 @@ import '../course/course_banner.dart';
 import '../course/delivery_screen.dart';
 import '../course/failure_screen.dart';
 import '../course/pickup_screen.dart';
+import '../course/refuse_parcel_screen.dart';
 import '../course/return_screen.dart';
 import '../offer/offer_screen.dart';
 import '../offline/pending_actions_screen.dart';
@@ -57,6 +58,9 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   /// Écran d'échec (10) ouvert depuis la livraison : identifiant de la course.
   String? _failing;
+
+  /// Refus du colis (non conforme) ouvert depuis l'enlèvement : identifiant de la course.
+  String? _refusing;
 
   /// Écran d'alerte (14) ouvert par un bouton SOS, au-dessus de tout le reste.
   bool _sos = false;
@@ -189,16 +193,48 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     final actions = ref.read(courseActionsProvider);
     void minimize() => setState(() => _minimized = order.id);
     void sos() => _openSos();
+    // Colis refusé sans réseau : le refus part au retour du réseau, la course s'annule alors.
+    final refusalRejected = actions.refused(order.id, CourseActions.refuseParcelKind) != null;
+    if (order.refusalQueued && !refusalRejected) {
+      return StatusScreen(
+        title: l.refusalQueuedTitle,
+        body: l.refusalQueuedBody,
+        actionLabel: l.backHome,
+        onAction: minimize,
+      );
+    }
     // Une action refusée (code faux saisi hors réseau) ramène à son écran pour la corriger.
     if (order.status == 'ASSIGNED' || actions.refused(order.id, 'pickup') != null) {
-      return PickupScreen(
-        key: ValueKey('pickup-${order.id}'),
-        order: order,
-        onBack: minimize,
-        onSos: sos,
-        onPickedUp: (outcome) {
-          if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
-        },
+      void onRefused(ActionOutcome outcome) {
+        setState(() => _refusing = null);
+        _showNotice(outcome == ActionOutcome.queued ? l.actionSavedOffline : l.parcelRefusedNotice);
+      }
+
+      // Le refus du colis se pose sur l'enlèvement, qui garde code et photo au retour.
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: PickupScreen(
+              key: ValueKey('pickup-${order.id}'),
+              order: order,
+              onBack: minimize,
+              onSos: sos,
+              onPickedUp: (outcome) {
+                if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
+              },
+              onRefuse: () => setState(() => _refusing = order.id),
+            ),
+          ),
+          if (_refusing == order.id || refusalRejected)
+            Positioned.fill(
+              child: RefuseParcelScreen(
+                key: ValueKey('refuse-${order.id}'),
+                order: order,
+                onBack: () => setState(() => _refusing = null),
+                onDone: onRefused,
+              ),
+            ),
+        ],
       );
     }
     final refusedDelivery = actions.refused(order.id, 'deliver') != null;

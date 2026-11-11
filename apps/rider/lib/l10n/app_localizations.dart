@@ -878,6 +878,18 @@ abstract class AppLocalizations {
   /// **'Grand colis'**
   String get packageLarge;
 
+  /// No description provided for @packageBulky.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gros objet'**
+  String get packageBulky;
+
+  /// No description provided for @comeWithHelper.
+  ///
+  /// In fr, this message translates to:
+  /// **'Venir à deux'**
+  String get comeWithHelper;
+
   /// No description provided for @fragile.
   ///
   /// In fr, this message translates to:
@@ -991,6 +1003,120 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Colis récupéré'**
   String get parcelCollected;
+
+  /// No description provided for @parcelNotConforming.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis non conforme ?'**
+  String get parcelNotConforming;
+
+  /// No description provided for @bulkyNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gros objet : vérifiez qu’il tient dans votre véhicule avant de le charger.'**
+  String get bulkyNotice;
+
+  /// No description provided for @bulkyWithHelpNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gros objet, aide au chargement payée par l’expéditeur : venez à deux.'**
+  String get bulkyWithHelpNotice;
+
+  /// No description provided for @refusalTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis non conforme'**
+  String get refusalTitle;
+
+  /// No description provided for @refusalBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne prenez pas un colis trop grand, trop lourd, différent de ce qui a été déclaré ou interdit. Signalez-le ici avant de saisir le code.'**
+  String get refusalBody;
+
+  /// No description provided for @refusalReasonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi ?'**
+  String get refusalReasonLabel;
+
+  /// No description provided for @refusalTooBig.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop grand pour mon véhicule'**
+  String get refusalTooBig;
+
+  /// No description provided for @refusalTooHeavy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop lourd'**
+  String get refusalTooHeavy;
+
+  /// No description provided for @refusalNotAsDeclared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas ce qui a été déclaré'**
+  String get refusalNotAsDeclared;
+
+  /// No description provided for @refusalForbidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objet interdit'**
+  String get refusalForbidden;
+
+  /// No description provided for @refusalNoteLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisez (facultatif)'**
+  String get refusalNoteLabel;
+
+  /// No description provided for @refusalNoteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. armoire 3 portes au lieu d’un carton'**
+  String get refusalNoteHint;
+
+  /// No description provided for @refusalPhotoHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis entier visible : c’est la preuve'**
+  String get refusalPhotoHint;
+
+  /// No description provided for @refusalNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'La course sera annulée et votre déplacement vous sera payé. L’expéditeur voit le motif et la photo. Un refus sans raison valable est signalé à l’équipe.'**
+  String get refusalNotice;
+
+  /// No description provided for @refusalConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser le colis'**
+  String get refusalConfirm;
+
+  /// No description provided for @parcelRefusedNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis refusé. Votre déplacement vous est payé.'**
+  String get parcelRefusedNotice;
+
+  /// No description provided for @refusalQueuedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refus enregistré'**
+  String get refusalQueuedTitle;
+
+  /// No description provided for @refusalQueuedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il sera envoyé dès le retour du réseau. Vous pouvez repartir.'**
+  String get refusalQueuedBody;
+
+  /// No description provided for @queuedRefuseParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis non conforme refusé'**
+  String get queuedRefuseParcel;
 
   /// No description provided for @actionSavedOffline.
   ///

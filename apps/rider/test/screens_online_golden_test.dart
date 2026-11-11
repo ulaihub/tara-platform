@@ -30,9 +30,30 @@ final offer = Offer(
   riderEarning: 1500,
   codAmount: 12500,
   cashFee: 0,
-  packageSize: 'MEDIUM',
+  packageSize: 'M',
   isFragile: true,
   isExpress: false,
+);
+
+/// Gros objet avec aide au chargement payée par l'expéditeur.
+final bulkyOffer = Offer(
+  id: '00000000-0000-4000-8000-000000000003',
+  orderId: '00000000-0000-4000-8000-000000000004',
+  expiresAt: expiresAt,
+  approachMeters: 2100,
+  pickupName: 'Électro Kotto',
+  pickupNeighborhood: 'Kotto',
+  dropoffNeighborhood: 'Bonamoussadi',
+  dropoffCity: 'Douala',
+  distanceMeters: 5400,
+  estimatedMinutes: 19,
+  riderEarning: 4800,
+  codAmount: 0,
+  cashFee: 0,
+  packageSize: 'BULKY',
+  isFragile: false,
+  isExpress: false,
+  loadingHelp: true,
 );
 
 Widget scope(Widget child) => ProviderScope(
@@ -80,6 +101,29 @@ void main() {
         expect(tester.getRect(find.textContaining(detail)).bottom, lessThan(buttonsTop), reason: detail);
       }
       await expectLater(capture, matchesGoldenFile('goldens/07_proposition/${variant.name}.png'));
+    });
+  }
+
+  for (final brightness in Brightness.values) {
+    goldenTest('07 proposition gros objet ${brightness.name}', (tester) async {
+      await pumpVariant(
+        tester,
+        Variant(brightness, ScreenSize.regular, 1),
+        scope(
+          OfferScreen(
+            offer: bulkyOffer,
+            onAccepted: (_) {},
+            onClosed: (_) {},
+            now: () => expiresAt.subtract(const Duration(seconds: 18)),
+          ),
+        ),
+      );
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      // Avant d'accepter : c'est un gros objet, et il faut venir à deux.
+      expect(find.text('Nouvelle course · Gros objet'), findsOneWidget);
+      expect(find.text('Venir à deux'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/07_proposition_gros_objet/${brightness.name}.png'));
     });
   }
 }

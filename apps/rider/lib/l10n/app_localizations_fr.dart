@@ -456,6 +456,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get packageLarge => 'Grand colis';
 
   @override
+  String get packageBulky => 'Gros objet';
+
+  @override
+  String get comeWithHelper => 'Venir à deux';
+
+  @override
   String get fragile => 'Fragile';
 
   @override
@@ -515,6 +521,65 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get parcelCollected => 'Colis récupéré';
+
+  @override
+  String get parcelNotConforming => 'Colis non conforme ?';
+
+  @override
+  String get bulkyNotice => 'Gros objet : vérifiez qu’il tient dans votre véhicule avant de le charger.';
+
+  @override
+  String get bulkyWithHelpNotice => 'Gros objet, aide au chargement payée par l’expéditeur : venez à deux.';
+
+  @override
+  String get refusalTitle => 'Colis non conforme';
+
+  @override
+  String get refusalBody =>
+      'Ne prenez pas un colis trop grand, trop lourd, différent de ce qui a été déclaré ou interdit. Signalez-le ici avant de saisir le code.';
+
+  @override
+  String get refusalReasonLabel => 'Pourquoi ?';
+
+  @override
+  String get refusalTooBig => 'Trop grand pour mon véhicule';
+
+  @override
+  String get refusalTooHeavy => 'Trop lourd';
+
+  @override
+  String get refusalNotAsDeclared => 'Pas ce qui a été déclaré';
+
+  @override
+  String get refusalForbidden => 'Objet interdit';
+
+  @override
+  String get refusalNoteLabel => 'Précisez (facultatif)';
+
+  @override
+  String get refusalNoteHint => 'Ex. armoire 3 portes au lieu d’un carton';
+
+  @override
+  String get refusalPhotoHint => 'Colis entier visible : c’est la preuve';
+
+  @override
+  String get refusalNotice =>
+      'La course sera annulée et votre déplacement vous sera payé. L’expéditeur voit le motif et la photo. Un refus sans raison valable est signalé à l’équipe.';
+
+  @override
+  String get refusalConfirm => 'Refuser le colis';
+
+  @override
+  String get parcelRefusedNotice => 'Colis refusé. Votre déplacement vous est payé.';
+
+  @override
+  String get refusalQueuedTitle => 'Refus enregistré';
+
+  @override
+  String get refusalQueuedBody => 'Il sera envoyé dès le retour du réseau. Vous pouvez repartir.';
+
+  @override
+  String get queuedRefuseParcel => 'Colis non conforme refusé';
 
   @override
   String get actionSavedOffline => 'Enregistré sur le téléphone : envoi automatique au retour du réseau.';

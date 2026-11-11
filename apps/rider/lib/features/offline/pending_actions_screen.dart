@@ -226,6 +226,7 @@ class _ActionRow extends StatelessWidget {
     final c = TaraColors.of(context);
     final (title, icon) = switch (action.kind) {
       'pickup' => (l.queuedPickup, TaraIcons.package),
+      'refuse-parcel' => (l.queuedRefuseParcel, TaraIcons.close),
       'depart' => (l.queuedDepart, TaraIcons.navigation),
       'collect' => (l.queuedCollect, TaraIcons.cash),
       'deliver' => (l.queuedDeliver, TaraIcons.check),
@@ -305,7 +306,7 @@ class _ActionRow extends StatelessWidget {
       case 'collect':
         final amount = order?.collectAtDelivery;
         return amount == null || amount == 0 ? null : '${formatAmount(amount)} F';
-      case 'fail':
+      case 'fail' || 'refuse-parcel':
         if (photo == null) return null;
         try {
           final mo = File(photo).lengthSync() / (1024 * 1024);

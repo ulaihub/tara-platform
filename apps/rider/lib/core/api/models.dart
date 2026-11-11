@@ -358,6 +358,7 @@ class Offer {
     required this.packageSize,
     required this.isFragile,
     required this.isExpress,
+    this.loadingHelp = false,
   });
 
   factory Offer.fromJson(Json json) {
@@ -380,6 +381,7 @@ class Offer {
       packageSize: _field(json, 'packageSize'),
       isFragile: _field(json, 'isFragile'),
       isExpress: _field(json, 'isExpress'),
+      loadingHelp: json['loadingHelp'] == true,
     );
   }
   static const fields = [
@@ -397,6 +399,7 @@ class Offer {
     'packageSize',
     'isFragile',
     'isExpress',
+    'loadingHelp',
   ];
 
   final String id;
@@ -417,6 +420,12 @@ class Offer {
   final String packageSize;
   final bool isFragile;
   final bool isExpress;
+
+  /// Gros objet : l'expéditeur a payé l'aide au chargement, le livreur vient à deux.
+  final bool loadingHelp;
+
+  /// Gros objet (BULKY) : réservé aux tricycles et aux voitures.
+  bool get bulky => packageSize == 'BULKY';
 
   /// Espèces que le livreur aura à encaisser (montant du colis et frais réglés en espèces).
   int get cashToCollect => codAmount + cashFee;
@@ -518,6 +527,7 @@ class RiderOrder {
     required this.collectAtPickup,
     required this.collectAtDelivery,
     required this.awaitingSupportValidation,
+    this.loadingHelp = false,
     this.instructions,
     this.googleMapsUrl,
     this.wazeUrl,
@@ -540,6 +550,7 @@ class RiderOrder {
       packageSize: _field(json, 'packageSize'),
       isFragile: _field(json, 'isFragile'),
       isExpress: _field(json, 'isExpress'),
+      loadingHelp: json['loadingHelp'] == true,
       instructions: json['instructions'] as String?,
       pickup: OrderAddress.fromJson(_field(json, 'pickup')),
       dropoff: OrderAddress.fromJson(_field(json, 'dropoff')),
@@ -568,6 +579,7 @@ class RiderOrder {
     'packageSize',
     'isFragile',
     'isExpress',
+    'loadingHelp',
     'instructions',
     'pickup',
     'dropoff',
@@ -596,6 +608,9 @@ class RiderOrder {
   final String packageSize;
   final bool isFragile;
   final bool isExpress;
+
+  /// Gros objet : l'expéditeur a payé l'aide au chargement, le livreur vient à deux.
+  final bool loadingHelp;
   final String? instructions;
   final OrderAddress pickup;
   final OrderAddress dropoff;
@@ -647,6 +662,13 @@ class RiderOrder {
   /// Retour enregistré sur le téléphone, pas encore reçu par le serveur (sans réseau).
   bool get returnQueued => raw[returnQueuedKey] == true;
   static const returnQueuedKey = '_returnQueued';
+
+  /// Refus du colis (non conforme) enregistré sur le téléphone, pas encore reçu par le serveur.
+  bool get refusalQueued => raw[refusalQueuedKey] == true;
+  static const refusalQueuedKey = '_refusalQueued';
+
+  /// Gros objet (BULKY) : réservé aux tricycles et aux voitures.
+  bool get bulky => packageSize == 'BULKY';
 }
 
 /// Itinéraire vers la prochaine étape de la course, à dessiner sur la carte.

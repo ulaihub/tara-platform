@@ -40,7 +40,7 @@ class QueuedAction {
   final String id;
   final String orderId;
 
-  /// pickup, depart, collect, deliver, fail, retry, return.
+  /// pickup, refuse-parcel, depart, collect, deliver, fail, retry, return.
   final String kind;
   final String path;
   final Json body;

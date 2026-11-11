@@ -314,6 +314,48 @@ void main() {
       expect(active.order?.failureDecision, isNull);
     });
 
+    test('colis non conforme refusé : motif et photo envoyés, la course est annulée', () async {
+      final result = await actions.refuseParcel(
+        order(),
+        reason: 'TOO_BIG',
+        note: 'Armoire 3 portes',
+        photoPath: 'colis.jpg',
+        at: here,
+      );
+      expect(result.outcome, ActionOutcome.sent);
+      expect(uploads, ['colis.jpg']);
+      expect(sent.single.$1, '/rider/orders/00000000-0000-4000-8000-000000000002/refuse-parcel');
+      expect(sent.single.$2, containsPair('reason', 'TOO_BIG'));
+      expect(sent.single.$2, containsPair('note', 'Armoire 3 portes'));
+      expect(sent.single.$2, containsPair('photoKey', 'proofs/colis.jpg'));
+      expect(sent.single.$2['clientEventId'], isA<String>());
+      expect(active.order, isNull);
+      expect(active.takeEnded(), OrderEnded.cancelled);
+    });
+
+    test('colis refusé sans réseau : gardé sur le téléphone, la course l’indique', () async {
+      server = (path, body) async => throw offline;
+      final result = await actions.refuseParcel(order(), reason: 'TOO_HEAVY', photoPath: 'colis.jpg', at: here);
+      expect(result.outcome, ActionOutcome.queued);
+      expect(active.order?.refusalQueued, isTrue);
+      expect(queue.items.single.kind, 'refuse-parcel');
+      expect(queue.items.single.body.containsKey('note'), isFalse);
+    });
+
+    test('refus du colis rejeté par le serveur (déjà enlevé) : message, rien ne change', () async {
+      server = (path, body) async => throw const ApiException(
+        code: 'PARCEL_REFUSAL_NOT_ALLOWED',
+        message: 'Le colis ne peut être refusé qu’à l’enlèvement, avant de le prendre.',
+        status: 409,
+      );
+      final result = await actions.refuseParcel(order(), reason: 'TOO_BIG', photoPath: 'colis.jpg', at: here);
+      expect(result.outcome, ActionOutcome.refused);
+      expect(result.message, contains('avant de le prendre'));
+      expect(active.order, isNotNull);
+      expect(active.order?.refusalQueued, isFalse);
+      expect(actions.refused(order().id, CourseActions.refuseParcelKind), isNotNull);
+    });
+
     test('retour avec le code du vendeur : la course est terminée', () async {
       await active.update(order(status: 'DELIVERY_FAILED', failureDecision: 'RETURN', failureReason: 'REFUSED'));
       final result = await actions.returnToSender(active.order!, code: '5521', photoPath: 'rendu.jpg', at: here);

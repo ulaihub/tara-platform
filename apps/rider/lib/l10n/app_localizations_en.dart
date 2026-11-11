@@ -454,6 +454,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get packageLarge => 'Large parcel';
 
   @override
+  String get packageBulky => 'Bulky item';
+
+  @override
+  String get comeWithHelper => 'Come with a helper';
+
+  @override
   String get fragile => 'Fragile';
 
   @override
@@ -513,6 +519,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get parcelCollected => 'Parcel collected';
+
+  @override
+  String get parcelNotConforming => 'Parcel not as declared?';
+
+  @override
+  String get bulkyNotice => 'Bulky item: check that it fits your vehicle before loading it.';
+
+  @override
+  String get bulkyWithHelpNotice => 'Bulky item, loading help paid by the sender: come with a helper.';
+
+  @override
+  String get refusalTitle => 'Parcel not as declared';
+
+  @override
+  String get refusalBody =>
+      'Do not take a parcel that is too big, too heavy, different from what was declared, or forbidden. Report it here before entering the code.';
+
+  @override
+  String get refusalReasonLabel => 'Why?';
+
+  @override
+  String get refusalTooBig => 'Too big for my vehicle';
+
+  @override
+  String get refusalTooHeavy => 'Too heavy';
+
+  @override
+  String get refusalNotAsDeclared => 'Not what was declared';
+
+  @override
+  String get refusalForbidden => 'Forbidden item';
+
+  @override
+  String get refusalNoteLabel => 'Details (optional)';
+
+  @override
+  String get refusalNoteHint => 'E.g. 3-door wardrobe instead of a box';
+
+  @override
+  String get refusalPhotoHint => 'Whole parcel visible: it is the proof';
+
+  @override
+  String get refusalNotice =>
+      'The job will be cancelled and your trip will be paid. The sender sees the reason and the photo. A refusal without a valid reason is reported to the team.';
+
+  @override
+  String get refusalConfirm => 'Refuse the parcel';
+
+  @override
+  String get parcelRefusedNotice => 'Parcel refused. Your trip is paid.';
+
+  @override
+  String get refusalQueuedTitle => 'Refusal saved';
+
+  @override
+  String get refusalQueuedBody => 'It will be sent as soon as the network is back. You can leave.';
+
+  @override
+  String get queuedRefuseParcel => 'Non-conforming parcel refused';
 
   @override
   String get actionSavedOffline => 'Saved on the phone: sent automatically when the network is back.';
