@@ -153,12 +153,7 @@ class SupportApi implements SupportBackend {
   }) async => SupportTicket.fromJson(
     await _api.post(
       '/support/tickets',
-      body: {
-        'category': category.code,
-        'subject': subject,
-        'message': message,
-        'orderId': ?orderId,
-      },
+      body: {'category': category.code, 'subject': subject, 'message': message, 'orderId': ?orderId},
     ) as Json,
   );
 
