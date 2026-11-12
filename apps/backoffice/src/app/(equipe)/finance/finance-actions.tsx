@@ -36,57 +36,61 @@ export function PayoutDecision({ payoutId, amount }: { payoutId: string; amount:
   const [rejectState, reject, rejecting] = useActionState(rejectPayout, IDLE);
   if (mode === 'approve') {
     return (
-      <form action={approve} className="flex flex-wrap items-center justify-end gap-2">
+      <form action={approve} className="flex flex-col items-end">
         <input type="hidden" name="payoutId" value={payoutId} />
-        <span className="text-[13px] font-bold">Envoyer {amount} ?</span>
-        <button
-          type="submit"
-          disabled={approving}
-          className="min-h-9 rounded-xl bg-ok px-3 text-[13px] font-extrabold text-white disabled:opacity-60"
-        >
-          {approving ? 'Envoi…' : 'Confirmer'}
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('idle')}
-          className="min-h-9 rounded-xl px-2 text-[13px] font-bold text-muted hover:text-text"
-        >
-          Retour
-        </button>
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <span className="text-[13px] font-bold">Envoyer {amount} ?</span>
+          <button
+            type="submit"
+            disabled={approving}
+            className="min-h-9 rounded-xl bg-ok px-3 text-[13px] font-extrabold text-white disabled:opacity-60"
+          >
+            {approving ? 'Envoi…' : 'Confirmer'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('idle')}
+            className="min-h-9 rounded-xl px-2 text-[13px] font-bold text-muted hover:text-text"
+          >
+            Retour
+          </button>
+        </div>
         <Feedback state={approveState} />
       </form>
     );
   }
   if (mode === 'reject') {
     return (
-      <form action={reject} className="flex flex-wrap items-center justify-end gap-2">
+      <form action={reject} className="flex flex-col items-end">
         <input type="hidden" name="payoutId" value={payoutId} />
-        <label className="min-w-[200px] flex-1">
-          <span className="sr-only">Motif du refus</span>
-          <input
-            name="reason"
-            required
-            minLength={3}
-            maxLength={300}
-            autoFocus
-            placeholder="Motif du refus"
-            className={cx(INPUT, 'py-2')}
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={rejecting}
-          className="min-h-9 rounded-xl bg-danger px-3 text-[13px] font-extrabold text-white disabled:opacity-60"
-        >
-          {rejecting ? 'Envoi…' : 'Refuser'}
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('idle')}
-          className="min-h-9 rounded-xl px-2 text-[13px] font-bold text-muted hover:text-text"
-        >
-          Retour
-        </button>
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <label className="w-[200px]">
+            <span className="sr-only">Motif du refus</span>
+            <input
+              name="reason"
+              required
+              minLength={3}
+              maxLength={300}
+              autoFocus
+              placeholder="Motif du refus"
+              className="block h-9 w-full rounded-xl border border-line bg-panel px-3 text-[13px] focus:border-accent-line focus:outline-none"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={rejecting}
+            className="min-h-9 rounded-xl bg-danger px-3 text-[13px] font-extrabold text-white disabled:opacity-60"
+          >
+            {rejecting ? 'Envoi…' : 'Refuser'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('idle')}
+            className="min-h-9 rounded-xl px-2 text-[13px] font-bold text-muted hover:text-text"
+          >
+            Retour
+          </button>
+        </div>
         <Feedback state={rejectState} />
       </form>
     );
