@@ -4908,6 +4908,19 @@
                 "CANCELLED"
               ]
             }
+          },
+          {
+            "name": "view",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "ALL",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/AdminPayoutView"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -4916,25 +4929,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Payout"
-                      }
-                    },
-                    "nextCursor": {
-                      "nullable": true,
-                      "type": "string",
-                      "format": "uuid"
-                    }
-                  },
-                  "required": [
-                    "items",
-                    "nextCursor"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/AdminPayoutPage"
                 }
               }
             }
@@ -9092,6 +9087,176 @@
           "problems",
           "delivered",
           "cancelled"
+        ]
+      },
+      "AdminPayout": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "beneficiary": {
+            "type": "string",
+            "enum": [
+              "MERCHANT",
+              "RIDER",
+              "CUSTOMER"
+            ]
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "withdrawalFee": {
+            "type": "integer"
+          },
+          "received": {
+            "type": "integer"
+          },
+          "fee": {
+            "type": "integer"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "AWAITING_APPROVAL",
+              "PROCESSING",
+              "SUCCEEDED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "failureReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "owner": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "shopName": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "phone",
+              "shopName"
+            ],
+            "additionalProperties": false
+          },
+          "approvedBy": {
+            "nullable": true,
+            "type": "string"
+          },
+          "approvedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "beneficiary",
+          "amount",
+          "withdrawalFee",
+          "received",
+          "fee",
+          "phone",
+          "status",
+          "failureReason",
+          "requestedAt",
+          "completedAt",
+          "owner",
+          "approvedBy",
+          "approvedAt"
+        ],
+        "additionalProperties": false
+      },
+      "AdminPayoutPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminPayout"
+            }
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "TO_APPROVE": {
+                "type": "integer"
+              },
+              "IN_PROGRESS": {
+                "type": "integer"
+              },
+              "FAILED": {
+                "type": "integer"
+              },
+              "SENT": {
+                "type": "integer"
+              },
+              "ALL": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "TO_APPROVE",
+              "IN_PROGRESS",
+              "FAILED",
+              "SENT",
+              "ALL"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "AdminPayoutView": {
+        "type": "string",
+        "enum": [
+          "TO_APPROVE",
+          "IN_PROGRESS",
+          "FAILED",
+          "SENT",
+          "ALL"
         ]
       },
       "AdminRider": {

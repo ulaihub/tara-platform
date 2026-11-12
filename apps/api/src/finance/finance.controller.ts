@@ -32,7 +32,7 @@ import {
   ValidBody,
   ValidQuery,
 } from '../common/validation/zod.js';
-import type { Payment, Payout } from '../generated/prisma/client.js';
+import type { Payment, Payout, Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   CollectBody,
@@ -47,6 +47,10 @@ import {
   TreasuryTransferBody,
   PaymentDto,
   PayoutBody,
+  AdminPayoutDto,
+  AdminPayoutListQuery,
+  AdminPayoutPageDto,
+  AdminPayoutViewEnum,
   PayoutDto,
   PayoutListQuery,
   RejectPayoutBody,
@@ -159,6 +163,64 @@ export function toPayoutDto(payout: Payout): z.output<typeof PayoutDto> {
     failureReason: payout.failureReason,
     requestedAt: payout.requestedAt.toISOString(),
     completedAt: payout.completedAt?.toISOString() ?? null,
+  };
+}
+
+const PAYOUT_PEOPLE = {
+  merchant: {
+    select: { id: true, shopName: true, user: { select: { fullName: true, phone: true } } },
+  },
+  rider: { select: { id: true, user: { select: { fullName: true, phone: true } } } },
+  user: { select: { id: true, fullName: true, phone: true } },
+  approvedBy: { select: { fullName: true, phone: true } },
+} as const satisfies Prisma.PayoutInclude;
+
+/** Reversements d'une vue de la finance. */
+function payoutView(view: z.output<typeof AdminPayoutViewEnum>): Prisma.PayoutWhereInput {
+  switch (view) {
+    case 'TO_APPROVE':
+      return { status: 'AWAITING_APPROVAL' };
+    case 'IN_PROGRESS':
+      return { status: { in: ['PENDING', 'PROCESSING'] } };
+    case 'FAILED':
+      return { status: 'FAILED' };
+    case 'SENT':
+      return { status: 'SUCCEEDED' };
+    case 'ALL':
+      return {};
+  }
+}
+
+function toAdminPayoutDto(
+  payout: Prisma.PayoutGetPayload<{ include: typeof PAYOUT_PEOPLE }>,
+): z.output<typeof AdminPayoutDto> {
+  const owner = payout.merchant
+    ? {
+        id: payout.merchant.id,
+        name: payout.merchant.user.fullName,
+        phone: payout.merchant.user.phone,
+        shopName: payout.merchant.shopName,
+      }
+    : payout.rider
+      ? {
+          id: payout.rider.id,
+          name: payout.rider.user.fullName,
+          phone: payout.rider.user.phone,
+          shopName: null,
+        }
+      : payout.user
+        ? {
+            id: payout.user.id,
+            name: payout.user.fullName,
+            phone: payout.user.phone,
+            shopName: null,
+          }
+        : null;
+  return {
+    ...toPayoutDto(payout),
+    owner,
+    approvedBy: payout.approvedBy ? (payout.approvedBy.fullName ?? payout.approvedBy.phone) : null,
+    approvedAt: payout.approvedAt?.toISOString() ?? null,
   };
 }
 
@@ -631,22 +693,28 @@ export class AdminFinanceController {
     };
   }
 
+  /** Reversements par vue (à valider d'abord), avec le bénéficiaire et le nombre par vue. */
   @Get('payouts')
-  @ApiZodQuery(PayoutListQuery)
-  @ApiZodResponse(pageSchema(PayoutDto))
+  @ApiZodQuery(AdminPayoutListQuery)
+  @ApiZodResponse(AdminPayoutPageDto)
   async list(
-    @ValidQuery(PayoutListQuery) query: z.output<typeof PayoutListQuery>,
-  ): Promise<{ items: z.output<typeof PayoutDto>[]; nextCursor: string | null }> {
+    @ValidQuery(AdminPayoutListQuery) query: z.output<typeof AdminPayoutListQuery>,
+  ): Out<typeof AdminPayoutPageDto> {
     const rows = await this.prisma.payout.findMany({
       where: {
-        ...(query.status ? { status: query.status } : {}),
+        ...(query.status ? { status: query.status } : payoutView(query.view)),
         ...(query.cursor ? { id: { lt: query.cursor } } : {}),
       },
       orderBy: { id: 'desc' },
       take: query.limit + 1,
+      include: PAYOUT_PEOPLE,
     });
     const page = pageOf(rows, query.limit);
-    return { items: page.items.map(toPayoutDto), nextCursor: page.nextCursor };
+    const counts = {} as Record<z.output<typeof AdminPayoutViewEnum>, number>;
+    for (const view of AdminPayoutViewEnum.options) {
+      counts[view] = await this.prisma.payout.count({ where: payoutView(view) });
+    }
+    return { items: page.items.map(toAdminPayoutDto), nextCursor: page.nextCursor, counts };
   }
 
   @Post('payouts/:id/approve')

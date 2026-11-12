@@ -2452,6 +2452,48 @@ export interface components {
     };
     /** @enum {string} */
     AdminOrderView: 'all' | 'active' | 'problems' | 'delivered' | 'cancelled';
+    AdminPayout: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      beneficiary: 'MERCHANT' | 'RIDER' | 'CUSTOMER';
+      amount: number;
+      withdrawalFee: number;
+      received: number;
+      fee: number;
+      phone: string;
+      /** @enum {string} */
+      status: 'PENDING' | 'AWAITING_APPROVAL' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED';
+      failureReason: string | null;
+      /** Format: date-time */
+      requestedAt: string;
+      /** Format: date-time */
+      completedAt: string | null;
+      owner: {
+        /** Format: uuid */
+        id: string;
+        name: string | null;
+        phone: string;
+        shopName: string | null;
+      } | null;
+      approvedBy: string | null;
+      /** Format: date-time */
+      approvedAt: string | null;
+    };
+    AdminPayoutPage: {
+      items: components['schemas']['AdminPayout'][];
+      /** Format: uuid */
+      nextCursor: string | null;
+      counts: {
+        TO_APPROVE: number;
+        IN_PROGRESS: number;
+        FAILED: number;
+        SENT: number;
+        ALL: number;
+      };
+    };
+    /** @enum {string} */
+    AdminPayoutView: 'TO_APPROVE' | 'IN_PROGRESS' | 'FAILED' | 'SENT' | 'ALL';
     AdminRider: {
       /** Format: uuid */
       id: string;
@@ -6590,6 +6632,7 @@ export interface operations {
         cursor?: string;
         status?:
           'PENDING' | 'AWAITING_APPROVAL' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED';
+        view?: components['schemas']['AdminPayoutView'];
       };
       header?: never;
       path?: never;
@@ -6603,11 +6646,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': {
-            items: components['schemas']['Payout'][];
-            /** Format: uuid */
-            nextCursor: string | null;
-          };
+          'application/json': components['schemas']['AdminPayoutPage'];
         };
       };
     };

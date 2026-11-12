@@ -205,6 +205,44 @@ export const PayoutListQuery = PageQuery.extend({
     .optional(),
 });
 
+/** Vues des reversements au back-office (H5) : à valider, en cours, échoués, versés. */
+export const AdminPayoutViewEnum = z
+  .enum(['TO_APPROVE', 'IN_PROGRESS', 'FAILED', 'SENT', 'ALL'])
+  .meta({ id: 'AdminPayoutView' });
+
+export const AdminPayoutListQuery = PayoutListQuery.extend({
+  view: AdminPayoutViewEnum.default('ALL'),
+});
+
+/** Reversement vu par la finance : qui le reçoit, et qui l'a validé. */
+export const AdminPayoutDto = PayoutDto.extend({
+  /** Boutique, livreur ou client remboursé ; lien vers sa fiche par son identifiant. */
+  owner: z
+    .object({
+      id: z.uuid(),
+      name: z.string().nullable(),
+      phone: z.string(),
+      shopName: z.string().nullable(),
+    })
+    .nullable(),
+  approvedBy: z.string().nullable(),
+  approvedAt: z.iso.datetime().nullable(),
+}).meta({ id: 'AdminPayout' });
+
+export const AdminPayoutPageDto = z
+  .object({
+    items: z.array(AdminPayoutDto),
+    nextCursor: z.uuid().nullable(),
+    counts: z.object({
+      TO_APPROVE: z.int(),
+      IN_PROGRESS: z.int(),
+      FAILED: z.int(),
+      SENT: z.int(),
+      ALL: z.int(),
+    }),
+  })
+  .meta({ id: 'AdminPayoutPage' });
+
 export const RejectPayoutBody = z.object({ reason: z.string().trim().min(3).max(300) });
 export const OfficeDepositBody = z.object({
   amount: Fcfa,
