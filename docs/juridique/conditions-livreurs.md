@@ -60,6 +60,7 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
 
   Le montant de chaque prime est affiché dans la proposition, avant que vous acceptiez, et
   reste acquis pour cette course.
+
 - **Solde prépayé** : vous rechargez votre solde par Mobile Money (frais payés par Tara) ou au
   bureau. Quand vous encaissez de l'argent en espèces (frais de livraison, prix d'un article,
   frais de retour), **vous gardez les espèces** et le même montant est pris sur votre solde.
