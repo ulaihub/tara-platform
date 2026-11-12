@@ -2139,6 +2139,352 @@
         ]
       }
     },
+    "/v1/admin/pricing-grids/simulate": {
+      "post": {
+        "operationId": "AdminPricing_simulate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "riderShareBps": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "perKmBeyondLastTier": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000
+                  },
+                  "tiers": {
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "upToMeters": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200000
+                        },
+                        "price": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000000
+                        }
+                      },
+                      "required": [
+                        "upToMeters",
+                        "price"
+                      ]
+                    }
+                  },
+                  "distancesMeters": {
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000
+                    }
+                  }
+                },
+                "required": [
+                  "riderShareBps",
+                  "perKmBeyondLastTier",
+                  "tiers",
+                  "distancesMeters"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceSimulation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
+    "/v1/admin/pricing-settings/{city}": {
+      "get": {
+        "operationId": "AdminPricing_pricingSettings",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingSettings"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      },
+      "put": {
+        "operationId": "AdminPricing_updatePricingSettings",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "volumeDiscounts": {
+                    "maxItems": 5,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "fromDeliveries": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100000
+                        },
+                        "percentBps": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 5000
+                        }
+                      },
+                      "required": [
+                        "fromDeliveries",
+                        "percentBps"
+                      ]
+                    }
+                  },
+                  "approachBonusAmount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5000
+                  },
+                  "approachBonusFromMeters": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20000
+                  }
+                },
+                "required": [
+                  "volumeDiscounts",
+                  "approachBonusAmount",
+                  "approachBonusFromMeters"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingSettings"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
+    "/v1/admin/rider-boosts": {
+      "get": {
+        "operationId": "AdminPricing_boosts",
+        "parameters": [
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RiderBoost"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      },
+      "post": {
+        "operationId": "AdminPricing_createBoost",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "default": "Douala",
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 60
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "minimum": 50,
+                    "maximum": 5000
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 120
+                  },
+                  "startsAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endsAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "reason",
+                  "endsAt"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderBoost"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
+    "/v1/admin/rider-boosts/{id}/cancel": {
+      "post": {
+        "operationId": "AdminPricing_cancelBoost",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderBoost"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · tarifs"
+        ]
+      }
+    },
     "/v1/admin/pricing-grids": {
       "get": {
         "operationId": "AdminPricing_list",
@@ -2207,7 +2553,7 @@
                     ]
                   },
                   "riderShareBps": {
-                    "default": 8000,
+                    "default": 7000,
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 10000
@@ -10547,6 +10893,12 @@
           "riderEarning": {
             "type": "integer"
           },
+          "approachBonus": {
+            "type": "integer"
+          },
+          "boostBonus": {
+            "type": "integer"
+          },
           "codAmount": {
             "type": "integer"
           },
@@ -10585,6 +10937,8 @@
           "distanceMeters",
           "estimatedMinutes",
           "riderEarning",
+          "approachBonus",
+          "boostBonus",
           "codAmount",
           "cashFee",
           "packageSize",
@@ -10787,6 +11141,7 @@
                   "PARCEL_ANALYSIS_LIMIT",
                   "BULKY_UNAVAILABLE",
                   "PRICING_GRID_NOT_FOUND",
+                  "RIDER_BOOST_NOT_FOUND",
                   "PROMO_INVALID",
                   "PROMO_EXPIRED",
                   "PROMO_EXHAUSTED",
@@ -12641,6 +12996,42 @@
           }
         ]
       },
+      "PriceSimulation": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "distanceMeters": {
+                  "type": "integer"
+                },
+                "price": {
+                  "type": "integer"
+                },
+                "riderEarning": {
+                  "type": "integer"
+                },
+                "platformShare": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "distanceMeters",
+                "price",
+                "riderEarning",
+                "platformShare"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "rows"
+        ],
+        "additionalProperties": false
+      },
       "PricingGrid": {
         "type": "object",
         "properties": {
@@ -12741,6 +13132,56 @@
           "tiers",
           "surcharges",
           "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "PricingSettings": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "volumeDiscounts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fromDeliveries": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "percentBps": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5000
+                }
+              },
+              "required": [
+                "fromDeliveries",
+                "percentBps"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "approachBonusAmount": {
+            "type": "integer"
+          },
+          "approachBonusFromMeters": {
+            "type": "integer"
+          },
+          "updatedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "city",
+          "volumeDiscounts",
+          "approachBonusAmount",
+          "approachBonusFromMeters",
+          "updatedAt"
         ],
         "additionalProperties": false
       },
@@ -13095,6 +13536,17 @@
           "discountTotal": {
             "type": "integer"
           },
+          "discountSource": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "PROMO",
+              "VOLUME"
+            ]
+          },
+          "proDiscountBps": {
+            "type": "integer"
+          },
           "totalPrice": {
             "type": "integer"
           },
@@ -13119,6 +13571,8 @@
           "basePrice",
           "surcharges",
           "discountTotal",
+          "discountSource",
+          "proDiscountBps",
           "totalPrice",
           "promoCode",
           "retryFee",
@@ -13239,6 +13693,73 @@
           "updatedAt"
         ],
         "additionalProperties": false
+      },
+      "RiderBoost": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "city": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RiderBoostStatus"
+          },
+          "createdBy": {
+            "nullable": true,
+            "type": "string"
+          },
+          "orders": {
+            "type": "integer"
+          },
+          "paid": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "city",
+          "amount",
+          "reason",
+          "startsAt",
+          "endsAt",
+          "cancelledAt",
+          "status",
+          "createdBy",
+          "orders",
+          "paid"
+        ],
+        "additionalProperties": false
+      },
+      "RiderBoostStatus": {
+        "type": "string",
+        "enum": [
+          "SCHEDULED",
+          "ACTIVE",
+          "ENDED",
+          "CANCELLED"
+        ]
       },
       "RiderConfig": {
         "type": "object",

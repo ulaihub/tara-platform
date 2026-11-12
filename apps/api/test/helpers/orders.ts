@@ -3,10 +3,14 @@ import request from 'supertest';
 import { type SignedIn, signIn, type TestContext } from './app.js';
 import { createAddress, ensureDoualaServiceArea, PLACES } from './geo.js';
 
+/** Part du livreur validée (70 %), aussi la valeur par défaut d'une grille. */
+export const RIDER_SHARE_BPS = 7000;
+
 /** Grille du business plan (C2). */
 export const DOUALA_GRID = {
   name: 'Douala moto',
   city: 'Douala',
+  riderShareBps: RIDER_SHARE_BPS,
   perKmBeyondLastTier: 150,
   tiers: [
     { upToMeters: 5_000, price: 1000 },

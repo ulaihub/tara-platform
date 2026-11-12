@@ -17,7 +17,9 @@ import { requiredVersions, termsAccepted } from '../legal/legal-versions.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { QueueService } from '../redis/queue.service.js';
-import { vehicleCarries } from '../pricing/pricing.engine.js';
+import { approachBonusFor, vehicleCarries } from '../pricing/pricing.engine.js';
+import { PricingSettingsService } from '../pricing/pricing-settings.service.js';
+import { haversineMeters } from '../routing/distance.service.js';
 import { uncoveredDocuments } from '../riders/riders.service.js';
 import type { CandidateDto, OfferDto } from './dispatch.schemas.js';
 import { PresenceService } from './presence.service.js';
@@ -98,6 +100,7 @@ export class DispatchService implements OnModuleInit {
     private readonly bus: OrderEventsBus,
     private readonly transitions: OrderTransitionsService,
     private readonly balances: RiderBalanceService,
+    private readonly pricingSettings: PricingSettingsService,
     @Inject(ENV) private readonly env: Env,
   ) {
     this.radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
@@ -179,6 +182,10 @@ export class DispatchService implements OnModuleInit {
       if (candidates.length === 0) return { kind: 'none', closed, order } as const;
 
       const expiresAt = new Date(now.getTime() + this.env.DISPATCH_OFFER_TIMEOUT_SECONDS * 1000);
+      // Primes annoncées avant d'accepter (H4) : approche selon la distance, renfort en cours.
+      const city = await this.cityOf(tx, order.pickupAddressId);
+      const settings = await this.pricingSettings.get(city, tx);
+      const boostBonus = await this.pricingSettings.activeBoostAmount(city, now, tx);
       // Un livreur qui vient de recevoir une autre offre est ignoré (une offre à la fois).
       const offers = await tx.dispatchOffer.createManyAndReturn({
         data: candidates.map((candidate) => ({
@@ -186,6 +193,8 @@ export class DispatchService implements OnModuleInit {
           riderId: candidate.riderId,
           round,
           approachMeters: candidate.distanceMeters,
+          approachBonus: approachBonusFor(settings, candidate.distanceMeters),
+          boostBonus,
           offeredAt: now,
           expiresAt,
         })),
@@ -381,7 +390,12 @@ export class DispatchService implements OnModuleInit {
         order,
         'ASSIGNED',
         { id: userId, role: 'RIDER' },
-        { riderId: rider.id, note: 'Proposition acceptée' },
+        {
+          riderId: rider.id,
+          note: 'Proposition acceptée',
+          // Les primes annoncées dans la proposition sont celles payées.
+          bonuses: { approachBonus: offer.approachBonus, boostBonus: offer.boostBonus },
+        },
       );
       return { change, withdrawn };
     });
@@ -487,6 +501,7 @@ export class DispatchService implements OnModuleInit {
         const assigned = await this.transitions.applyIn(tx, order, 'ASSIGNED', actor, {
           riderId,
           note,
+          bonuses: await this.manualBonuses(tx, order.pickupAddressId, riderId),
         });
         changes.push(assigned.change);
         return { changes, withdrawn, previousRiderUserId };
@@ -511,6 +526,29 @@ export class DispatchService implements OnModuleInit {
       });
     }
     return { order: last.order, previousRiderUserId };
+  }
+
+  private async cityOf(tx: Prisma.TransactionClient, addressId: string): Promise<string> {
+    const address = await tx.address.findUniqueOrThrow({
+      where: { id: addressId },
+      select: { city: true },
+    });
+    return address.city;
+  }
+
+  /** Attribution par le dispatch : mêmes primes qu'une proposition, depuis la position connue. */
+  private async manualBonuses(
+    tx: Prisma.TransactionClient,
+    pickupAddressId: string,
+    riderId: string,
+  ): Promise<{ approachBonus: number; boostBonus: number }> {
+    const pickup = await tx.address.findUniqueOrThrow({
+      where: { id: pickupAddressId },
+      select: { city: true, latitude: true, longitude: true },
+    });
+    const position = await this.presence.position(riderId);
+    const approachMeters = position ? Math.round(haversineMeters(position, pickup)) : null;
+    return this.pricingSettings.offerBonuses(pickup.city, approachMeters, new Date(), tx);
   }
 
   /** Livreurs proches du point d'enlèvement, éligibles ou non, pour le dispatcheur (D3). */
@@ -732,7 +770,10 @@ export function toOfferDto(
     },
     distanceMeters: order.distanceMeters,
     estimatedMinutes: estimatedMinutes(order.distanceMeters),
-    riderEarning: order.riderEarning,
+    // Gain annoncé : la part du livreur plus les primes payées par Tara (H4).
+    riderEarning: order.riderEarning + offer.approachBonus + offer.boostBonus,
+    approachBonus: offer.approachBonus,
+    boostBonus: offer.boostBonus,
     codAmount: order.codAmount,
     cashFee: order.feePaymentMethod === 'CASH' ? order.totalPrice : 0,
     packageSize: order.packageSize,

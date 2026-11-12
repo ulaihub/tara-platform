@@ -26,6 +26,8 @@ export interface TransitionOptions {
   occurredAt?: Date | undefined;
   /** Identifiant généré par l'app : rejouer la même action ne fait rien de plus (E7). */
   clientEventId?: string | undefined;
+  /** Attribution : primes payées par Tara au livreur, figées avec la course (H4). */
+  bonuses?: { approachBonus: number; boostBonus: number } | undefined;
 }
 
 export interface TransitionResult {
@@ -127,11 +129,16 @@ export class OrderTransitionsService {
         data.riderId = options.riderId ?? null;
         data.assignedAt = now;
         data.searchingSince = null;
+        data.approachBonus = options.bonuses?.approachBonus ?? 0;
+        data.boostBonus = options.bonuses?.boostBonus ?? 0;
         break;
       case 'SEARCHING_RIDER':
         if (order.status === 'ASSIGNED') {
           data.riderId = null;
           data.assignedAt = null;
+          // Les primes suivent le livreur : le suivant aura les siennes.
+          data.approachBonus = 0;
+          data.boostBonus = 0;
         }
         // Nouvelle recherche : le délai d'alerte au dispatch repart de zéro (D2).
         data.searchingSince = now;

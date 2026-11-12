@@ -25,6 +25,7 @@ import type {
   QuoteBody,
   QuoteDto,
 } from './pricing.schemas.js';
+import { PricingSettingsService } from './pricing-settings.service.js';
 import { PromoService } from './promo.service.js';
 
 type GridWithRules = PricingGrid & { tiers: PricingTier[]; surcharges: PricingSurcharge[] };
@@ -89,6 +90,7 @@ export class PricingService {
     private readonly zones: ZonesRepository,
     private readonly distance: DistanceService,
     private readonly promos: PromoService,
+    private readonly settings: PricingSettingsService,
     private readonly audit: AuditService,
   ) {}
 
@@ -159,6 +161,14 @@ export class PricingService {
     const promo = input.promoCode
       ? await this.promos.validate(input.promoCode, user.id, now, tx)
       : null;
+    // Tarif pro (H4) : une boutique paie moins selon ses livraisons réussies du mois.
+    const merchant = await (tx ?? this.prisma).merchantProfile.findUnique({
+      where: { userId: user.id },
+      select: { id: true },
+    });
+    const volumeDiscountBps = merchant
+      ? await this.settings.volumeDiscountBps(merchant.id, pickup.city, now, tx)
+      : 0;
     const price = computePrice(grid, {
       distanceMeters: route.meters,
       packageSize: input.packageSize,
@@ -166,8 +176,11 @@ export class PricingService {
       loadingHelp: input.packageSize === 'BULKY' && input.loadingHelp === true,
       at,
       promo,
+      volumeDiscountBps,
     });
-    return { grid, pickup, dropoff, route, promo, price, scheduledFor };
+    // Le tarif pro l'emporte : le code promo n'est pas consommé.
+    const usedPromo = price.discountSource === 'PROMO' ? promo : null;
+    return { grid, pickup, dropoff, route, promo: usedPromo, price, scheduledFor };
   }
 
   toQuoteDto(quote: FullQuote): z.output<typeof QuoteDto> {
@@ -181,6 +194,8 @@ export class PricingService {
       basePrice: quote.price.basePrice,
       surcharges: quote.price.surcharges,
       discountTotal: quote.price.discountTotal,
+      discountSource: quote.price.discountSource,
+      proDiscountBps: quote.price.proDiscountBps,
       totalPrice: quote.price.totalPrice,
       promoCode: quote.promo?.code ?? null,
       retryFee: quote.price.retryFee,

@@ -231,7 +231,8 @@ export class RiderOrdersService {
           name: inProgress ? order.recipientName : null,
           phone: inProgress ? order.recipientPhone : null,
         },
-        riderEarning: order.riderEarning,
+        // Part du livreur plus les primes payées par Tara, figées à l'acceptation (H4).
+        riderEarning: order.riderEarning + order.approachBonus + order.boostBonus,
         collectAtPickup:
           order.feePayer === 'SENDER' && order.feePaymentMethod === 'CASH' ? order.totalPrice : 0,
         collectAtDelivery:

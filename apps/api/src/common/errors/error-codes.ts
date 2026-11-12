@@ -185,6 +185,7 @@ export const ERROR_MESSAGES = {
     en: 'Bulky items (appliances, furniture) are not delivered in {city} yet.',
   },
   PRICING_GRID_NOT_FOUND: { fr: 'Grille tarifaire introuvable.', en: 'Pricing grid not found.' },
+  RIDER_BOOST_NOT_FOUND: { fr: 'Prime de renfort introuvable.', en: 'Rider boost not found.' },
   PROMO_INVALID: { fr: 'Code promo inconnu.', en: 'Unknown promo code.' },
   PROMO_EXPIRED: {
     fr: 'Ce code promo n’est plus valable.',

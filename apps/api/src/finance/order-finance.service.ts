@@ -653,6 +653,14 @@ export class OrderFinanceService implements OnModuleInit {
     } else {
       postings.push({ account: PLATFORM_ACCOUNTS.promotions, amount: -order.platformFee });
     }
+    // Primes d'approche et de renfort (H4) : payées par Tara, en plus de la part du livreur.
+    const bonus = order.approachBonus + order.boostBonus;
+    if (bonus > 0) {
+      postings.push(
+        { account: riderPayable(order.riderId), amount: -bonus },
+        { account: PLATFORM_ACCOUNTS.riderBonuses, amount: bonus },
+      );
+    }
     await this.ledger.post(tx, {
       kind: 'DELIVERY_COMPLETED',
       description: `Course ${order.reference} ${returned ? 'retournée' : 'livrée'}`,
@@ -664,7 +672,7 @@ export class OrderFinanceService implements OnModuleInit {
 
     // Le livreur garde sa part sur les espèces encaissées pour cette course (G4).
     const cash = await this.orderSum(tx, order.id, riderCashHeld(order.riderId).code);
-    const kept = Math.min(order.riderEarning, Math.max(0, cash));
+    const kept = Math.min(order.riderEarning + bonus, Math.max(0, cash));
     if (kept > 0) {
       await this.ledger.post(tx, {
         kind: 'CASH_COMPENSATED',

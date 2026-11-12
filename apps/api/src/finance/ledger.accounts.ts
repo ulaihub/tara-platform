@@ -39,6 +39,8 @@ export const PLATFORM_ACCOUNTS = {
   providerFees: platform('expense:provider_fees', 'Frais Mobile Money', 'EXPENSE'),
   promotions: platform('expense:promotions', 'Remises financées par Tara', 'EXPENSE'),
   goodwill: platform('expense:goodwill', 'Avoirs commerciaux', 'EXPENSE'),
+  /** Primes d'approche et de renfort versées aux livreurs (H4), en plus de leur part. */
+  riderBonuses: platform('expense:rider_bonuses', 'Primes des livreurs', 'EXPENSE'),
   /** Paiement reçu sans emploi (doublon, commande déjà réglée) : à rembourser ou affecter. */
   unallocated: platform('unallocated', 'Encaissements à affecter', 'LIABILITY'),
 } as const;

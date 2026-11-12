@@ -198,6 +198,18 @@ Le code d'enlèvement (4 chiffres) n'est renvoyé qu'une fois, à la création ;
 
 Moteur : `PARCEL_VISION_PROVIDER=claude` (vision de Claude, `ANTHROPIC_API_KEY`, modèle `PARCEL_VISION_MODEL`, `claude-opus-5-5` par défaut, effort bas, sortie structurée), `fake` en développement, `none` pour couper l'analyse. Seule la photo est envoyée, jamais le nom ni le numéro.
 
+## Modèle de prix : tarif pro et primes des livreurs (H4)
+
+Tout se règle au back-office, sans nouvelle version des apps : le devis est toujours calculé par le serveur et affiché avant la commande.
+
+- **Grille de lancement de Douala** (moto) : 1 000 F jusqu'à 5 km, +100 F par km commencé jusqu'à 10 km (paliers d'un km), puis +50 F par km (`perKmBeyondLastTier`). Part du livreur : 70 % (`riderShareBps: 7000`, valeur par défaut d'une grille).
+- **Tarif pro** : une boutique (mode marchand) a une remise selon ses livraisons réussies du mois en cours, heure du Cameroun (par défaut −10 % dès 100, −15 % dès 300). Arrondie à 50 F, prise sur la part de Tara (la part du livreur ne change pas). Jamais cumulée avec un code promo : le plus avantageux est retenu, et un code moins avantageux n'est pas consommé. Le devis renvoie `discountSource` (`PROMO`, `VOLUME` ou `null`) et `proDiscountBps` ; la commande garde `proDiscountBps`.
+- **Prime d'approche** : quand le vendeur est au-delà d'une distance (3 km par défaut) du livreur au moment de la proposition, Tara ajoute un montant (200 F par défaut).
+- **Prime de renfort** : montant ajouté à chaque course proposée pendant une période (pluie, heures de pointe), au lieu d'augmenter le prix du client. Plusieurs primes qui se chevauchent ne se cumulent pas : la plus forte s'applique.
+- Les primes sont annoncées dans la proposition (`approachBonus`, `boostBonus` ; `riderEarning` est le gain total), figées sur la commande quand le livreur accepte (ou quand le dispatch l'attribue, depuis sa dernière position), remises à zéro s'il rend la course, et payées à la livraison sur le compte `platform:expense:rider_bonuses`.
+
+Routes (`ADMIN`, double authentification) : `GET` et `PUT /admin/pricing-settings/{ville}` (paliers du tarif pro, montant et seuil de la prime d'approche ; `updatedAt: null` tant que les valeurs validées s'appliquent), `POST /admin/pricing-grids/simulate` (prix, part du livreur et part de Tara d'une grille en projet pour quelques distances). Primes de renfort (`ADMIN` ou `DISPATCHER`) : `GET` et `POST /admin/rider-boosts`, `POST /admin/rider-boosts/{id}/cancel` (les courses déjà acceptées gardent leur prime).
+
 ## Gros objets (frigo, cuisinière, matelas…)
 
 - Taille `BULKY` (« Gros objet ») : la course se fait en tricycle ou en voiture, jamais à moto. Le prix vient de la grille **tricycle** de la ville (`vehicleType: TRICYCLE` dans `POST /admin/pricing-grids`), distincte de la grille moto ; le devis renvoie `vehicleType`.

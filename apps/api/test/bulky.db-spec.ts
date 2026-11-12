@@ -281,9 +281,9 @@ describe('Gros objets et livreurs en alerte', () => {
       expect.objectContaining({ kind: 'PICKUP_REFUSED', photoKey, codeVerified: false }),
     ]);
 
-    // L'expéditeur doit le déplacement (1 500 F) ; le livreur en touche 80 %.
+    // L'expéditeur doit le déplacement (1 500 F) ; le livreur en touche 70 %.
     expect(await ledger.balance(merchantPayable(merchantId ?? ''))).toBe(shopBefore - 1500);
-    expect(await ledger.balance(riderPayable(tricycle.riderId))).toBe(RIDER_START_BALANCE + 1200);
+    expect(await ledger.balance(riderPayable(tricycle.riderId))).toBe(RIDER_START_BALANCE + 1050);
 
     // L'expéditeur apprend pourquoi et combien ; le livreur n'est pas prévenu de son propre refus.
     const push = ctx.app.get<FakePushProvider>(PUSH_PROVIDER);
@@ -346,7 +346,7 @@ describe('Gros objets et livreurs en alerte', () => {
 
     // 4 500 F rendus, 1 500 F de déplacement gardés : il reste 4 500 F.
     expect(await ledger.balance(customerWallet(sender.userId))).toBe(4500);
-    expect(await ledger.balance(riderPayable(tricycle.riderId))).toBe(RIDER_START_BALANCE + 1200);
+    expect(await ledger.balance(riderPayable(tricycle.riderId))).toBe(RIDER_START_BALANCE + 1050);
   });
 
   it('refuse le refus de colis une fois le colis enlevé', async () => {

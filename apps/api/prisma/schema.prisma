@@ -937,6 +937,11 @@ model Order {
   totalPrice       Int           @map("total_price")
   riderEarning     Int           @map("rider_earning")
   platformFee      Int           @map("platform_fee")
+  /// Tarif pro appliqué à la commande, en points de base ; 0 sinon (H4).
+  proDiscountBps   Int           @default(0) @map("pro_discount_bps")
+  /// Primes payées par Tara au livreur, figées quand il accepte la course (H4).
+  approachBonus    Int           @default(0) @map("approach_bonus")
+  boostBonus       Int           @default(0) @map("boost_bonus")
   /// Frais d'échec figés à la commande (E6), annoncés avant de commander : nouvelle tentative
   /// et retour à l'expéditeur, à sa charge, partagés comme la course.
   retryFee         Int           @default(0) @map("retry_fee")
@@ -1074,6 +1079,9 @@ model DispatchOffer {
   riderId        String               @map("rider_id") @db.Uuid
   round          Int
   approachMeters Int?                 @map("approach_meters")
+  /// Primes annoncées dans la proposition, reprises sur la commande si elle est acceptée.
+  approachBonus  Int                  @default(0) @map("approach_bonus")
+  boostBonus     Int                  @default(0) @map("boost_bonus")
   offeredAt      DateTime             @default(now()) @map("offered_at") @db.Timestamptz(3)
   expiresAt      DateTime             @map("expires_at") @db.Timestamptz(3)
   respondedAt    DateTime?            @map("responded_at") @db.Timestamptz(3)
@@ -1624,4 +1632,36 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([actorId, createdAt])
   @@map("audit_logs")
+}
+
+/// Réglages commerciaux d'une ville (H4) : tarif pro des boutiques, prime d'approche.
+/// Sans ligne pour la ville, les valeurs validées s'appliquent (pricing-settings.service).
+model PricingSettings {
+  city                    String   @id
+  /// Tarif pro : [{ fromDeliveries, percentBps }] selon les livraisons réussies du mois.
+  volumeDiscounts         Json     @map("volume_discounts")
+  /// Prime d'approche : versée par Tara quand le vendeur est au-delà de cette distance.
+  approachBonusAmount     Int      @map("approach_bonus_amount")
+  approachBonusFromMeters Int      @map("approach_bonus_from_meters")
+  updatedById             String?  @map("updated_by_id") @db.Uuid
+  updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("pricing_settings")
+}
+
+/// Prime de renfort (H4) : ajoutée au gain des courses proposées pendant la période, au lieu
+/// d'augmenter le prix pour le client (heures de pointe, forte pluie).
+model RiderBoost {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  city        String
+  amount      Int
+  reason      String
+  startsAt    DateTime  @map("starts_at") @db.Timestamptz(3)
+  endsAt      DateTime  @map("ends_at") @db.Timestamptz(3)
+  createdById String    @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(3)
+
+  @@index([city, endsAt])
+  @@map("rider_boosts")
 }

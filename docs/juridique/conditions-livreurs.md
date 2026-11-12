@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11 · Projet à faire valider par un juriste avant publication. Les points marqués
+Version 2026-11.1 · Projet à faire valider par un juriste avant publication. Les points marqués
 **[À VALIDER]** demandent son avis.
 
 Ces conditions s'appliquent à toute personne qui livre avec l'application Tara Livreur. Elles
@@ -47,9 +47,19 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
 
 ## 4. Votre argent
 
-- **Gain par course** : 80 % du prix de la course, plus 80 % des frais de nouvelle tentative et
-  de retour quand il y en a, et 80 % du déplacement facturé à l'expéditeur quand vous refusez
-  un colis non conforme. Le pourcentage exact est celui affiché dans l'application.
+- **Gain par course** : 70 % du prix de la course, plus 70 % des frais de nouvelle tentative et
+  de retour quand il y en a, et 70 % du déplacement facturé à l'expéditeur quand vous refusez
+  un colis non conforme. Le pourcentage exact est celui affiché dans l'application. Une remise
+  accordée à l'expéditeur (code promo, tarif pro) ne réduit jamais votre gain : Tara la prend
+  sur sa part.
+- **Primes payées par Tara**, en plus de votre gain :
+  - **prime d'approche** quand le vendeur est loin de vous au moment de la proposition (par
+    exemple 200 FCFA au-delà de 3 km) ;
+  - **primes de renfort** annoncées dans l'application quand Tara a besoin de plus de livreurs
+    (heures de pointe, forte pluie), pour les courses acceptées pendant la période annoncée.
+
+  Le montant de chaque prime est affiché dans la proposition, avant que vous acceptiez, et
+  reste acquis pour cette course.
 - **Solde prépayé** : vous rechargez votre solde par Mobile Money (frais payés par Tara) ou au
   bureau. Quand vous encaissez de l'argent en espèces (frais de livraison, prix d'un article,
   frais de retour), **vous gardez les espèces** et le même montant est pris sur votre solde.

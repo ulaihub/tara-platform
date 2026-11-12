@@ -628,6 +628,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/pricing-grids/simulate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminPricing_simulate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/pricing-settings/{city}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminPricing_pricingSettings'];
+    put: operations['AdminPricing_updatePricingSettings'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/rider-boosts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminPricing_boosts'];
+    put?: never;
+    post: operations['AdminPricing_createBoost'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/rider-boosts/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminPricing_cancelBoost'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/admin/pricing-grids': {
     parameters: {
       query?: never;
@@ -2836,6 +2900,8 @@ export interface components {
       distanceMeters: number;
       estimatedMinutes: number;
       riderEarning: number;
+      approachBonus: number;
+      boostBonus: number;
       codAmount: number;
       cashFee: number;
       packageSize: components['schemas']['PackageSize'];
@@ -2936,6 +3002,7 @@ export interface components {
           | 'PARCEL_ANALYSIS_LIMIT'
           | 'BULKY_UNAVAILABLE'
           | 'PRICING_GRID_NOT_FOUND'
+          | 'RIDER_BOOST_NOT_FOUND'
           | 'PROMO_INVALID'
           | 'PROMO_EXPIRED'
           | 'PROMO_EXHAUSTED'
@@ -3491,6 +3558,14 @@ export interface components {
           latitude: number;
           longitude: number;
         };
+    PriceSimulation: {
+      rows: {
+        distanceMeters: number;
+        price: number;
+        riderEarning: number;
+        platformShare: number;
+      }[];
+    };
     PricingGrid: {
       /** Format: uuid */
       id: string;
@@ -3516,6 +3591,17 @@ export interface components {
       }[];
       /** Format: date-time */
       createdAt: string;
+    };
+    PricingSettings: {
+      city: string;
+      volumeDiscounts: {
+        fromDeliveries: number;
+        percentBps: number;
+      }[];
+      approachBonusAmount: number;
+      approachBonusFromMeters: number;
+      /** Format: date-time */
+      updatedAt: string | null;
     };
     /** @enum {string} */
     ProhibitedCategory: 'WEAPON' | 'DRUGS' | 'DANGEROUS_GOODS' | 'LIVE_ANIMAL' | 'CASH';
@@ -3604,6 +3690,9 @@ export interface components {
         amount: number;
       }[];
       discountTotal: number;
+      /** @enum {string|null} */
+      discountSource: 'PROMO' | 'VOLUME' | null;
+      proDiscountBps: number;
       totalPrice: number;
       promoCode: string | null;
       retryFee: number;
@@ -3641,6 +3730,25 @@ export interface components {
       /** Format: date-time */
       updatedAt: string;
     };
+    RiderBoost: {
+      /** Format: uuid */
+      id: string;
+      city: string;
+      amount: number;
+      reason: string;
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      /** Format: date-time */
+      cancelledAt: string | null;
+      status: components['schemas']['RiderBoostStatus'];
+      createdBy: string | null;
+      orders: number;
+      paid: number;
+    };
+    /** @enum {string} */
+    RiderBoostStatus: 'SCHEDULED' | 'ACTIVE' | 'ENDED' | 'CANCELLED';
     RiderConfig: {
       country: {
         code: string;
@@ -5268,6 +5376,170 @@ export interface operations {
       };
     };
   };
+  AdminPricing_simulate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          riderShareBps: number;
+          perKmBeyondLastTier: number;
+          tiers: {
+            upToMeters: number;
+            price: number;
+          }[];
+          distancesMeters: number[];
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PriceSimulation'];
+        };
+      };
+    };
+  };
+  AdminPricing_pricingSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        city: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PricingSettings'];
+        };
+      };
+    };
+  };
+  AdminPricing_updatePricingSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        city: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          volumeDiscounts: {
+            fromDeliveries: number;
+            percentBps: number;
+          }[];
+          approachBonusAmount: number;
+          approachBonusFromMeters: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PricingSettings'];
+        };
+      };
+    };
+  };
+  AdminPricing_boosts: {
+    parameters: {
+      query?: {
+        city?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderBoost'][];
+        };
+      };
+    };
+  };
+  AdminPricing_createBoost: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default Douala */
+          city?: string;
+          amount: number;
+          reason: string;
+          /** Format: date-time */
+          startsAt?: string;
+          /** Format: date-time */
+          endsAt: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderBoost'];
+        };
+      };
+    };
+  };
+  AdminPricing_cancelBoost: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderBoost'];
+        };
+      };
+    };
+  };
   AdminPricing_list: {
     parameters: {
       query?: {
@@ -5304,7 +5576,7 @@ export interface operations {
           city: string;
           /** @default MOTORBIKE */
           vehicleType?: components['schemas']['VehicleType'];
-          /** @default 8000 */
+          /** @default 7000 */
           riderShareBps?: number;
           perKmBeyondLastTier: number;
           tiers: {

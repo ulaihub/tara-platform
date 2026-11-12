@@ -36,10 +36,11 @@ const GROUPS: { title: string; hint: string; codes: string[] }[] = [
   },
   {
     title: 'Ce que Tara dépense',
-    hint: 'Depuis le début : frais de l’agrégateur, remises, avoirs commerciaux.',
+    hint: 'Depuis le début : frais de l’agrégateur, remises, primes des livreurs, avoirs.',
     codes: [
       'platform:expense:provider_fees',
       'platform:expense:promotions',
+      'platform:expense:rider_bonuses',
       'platform:expense:goodwill',
     ],
   },

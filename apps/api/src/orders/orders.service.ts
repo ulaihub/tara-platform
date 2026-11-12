@@ -372,6 +372,7 @@ export class OrdersService {
       basePrice: quote.price.basePrice,
       surchargesTotal: quote.price.surchargesTotal,
       discountTotal: quote.price.discountTotal,
+      proDiscountBps: quote.price.proDiscountBps,
       totalPrice: quote.price.totalPrice,
       riderEarning: quote.price.riderEarning,
       platformFee: quote.price.platformFee,

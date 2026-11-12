@@ -1,10 +1,12 @@
 import {
+  approachBonusFor,
   basePriceFor,
   computePrice,
   discountFor,
   type GridRules,
   vehicleCarries,
   vehicleForParcel,
+  volumeDiscountFor,
 } from './pricing.engine.js';
 
 /** Grille de Douala du business plan. */
@@ -60,6 +62,8 @@ describe('prix complet', () => {
       surchargesTotal: 0,
       subtotal: 1500,
       discountTotal: 0,
+      discountSource: null,
+      proDiscountBps: 0,
       totalPrice: 1500,
       riderEarning: 1200,
       platformFee: 300,
@@ -231,5 +235,68 @@ describe('gros objets (tricycle)', () => {
     expect(vehicleCarries('TRICYCLE', 'BULKY')).toBe(true);
     expect(vehicleCarries('CAR', 'BULKY')).toBe(true);
     expect(vehicleCarries('MOTORBIKE', 'XL')).toBe(true);
+  });
+});
+
+describe('tarif pro et primes des livreurs (H4)', () => {
+  const at = DAY;
+  it('prend le tarif pro sur la part de Tara, arrondi à 50 F', () => {
+    const price = computePrice(DOUALA, {
+      distanceMeters: 7_000,
+      packageSize: 'M',
+      isExpress: false,
+      at,
+      volumeDiscountBps: 1000,
+    });
+    // 10 % de 1 500 = 150 F ; le livreur garde sa part entière.
+    expect(price).toMatchObject({
+      discountTotal: 150,
+      discountSource: 'VOLUME',
+      proDiscountBps: 1000,
+      totalPrice: 1350,
+      riderEarning: 1200,
+      platformFee: 150,
+    });
+    // 15 % de 1 450 = 217,5 F, arrondi à 200 F : le total se paie avec des pièces de 50 F.
+    const rounded = computePrice(
+      { ...DOUALA, tiers: [{ upToMeters: 5_000, price: 1450 }] },
+      { distanceMeters: 1_000, packageSize: 'S', isExpress: false, at, volumeDiscountBps: 1500 },
+    );
+    expect(rounded).toMatchObject({ discountTotal: 200, totalPrice: 1250 });
+  });
+
+  it('retient le plus avantageux du code promo et du tarif pro, jamais les deux', () => {
+    const input = { distanceMeters: 7_000, packageSize: 'M' as const, isExpress: false, at };
+    expect(
+      computePrice(DOUALA, {
+        ...input,
+        volumeDiscountBps: 1000,
+        promo: { kind: 'FIXED_AMOUNT', value: 500 },
+      }),
+    ).toMatchObject({ discountTotal: 500, discountSource: 'PROMO', proDiscountBps: 0 });
+    expect(
+      computePrice(DOUALA, {
+        ...input,
+        volumeDiscountBps: 1500,
+        promo: { kind: 'FIXED_AMOUNT', value: 100 },
+      }),
+    ).toMatchObject({ discountTotal: 250, discountSource: 'VOLUME', proDiscountBps: 1500 });
+  });
+
+  it('choisit le palier atteint par les livraisons du mois', () => {
+    const tiers = [
+      { fromDeliveries: 100, percentBps: 1000 },
+      { fromDeliveries: 300, percentBps: 1500 },
+    ];
+    expect(volumeDiscountFor(tiers, 99)).toBe(0);
+    expect(volumeDiscountFor(tiers, 100)).toBe(1000);
+    expect(volumeDiscountFor(tiers, 450)).toBe(1500);
+  });
+
+  it('verse la prime d’approche au-delà du seuil seulement', () => {
+    const settings = { approachBonusAmount: 200, approachBonusFromMeters: 3000 };
+    expect(approachBonusFor(settings, 2_900)).toBe(0);
+    expect(approachBonusFor(settings, 3_400)).toBe(200);
+    expect(approachBonusFor(settings, null)).toBe(0);
   });
 });

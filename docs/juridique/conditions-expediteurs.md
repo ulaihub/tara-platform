@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11 · Projet à faire valider par un juriste avant publication. Les points marqués
+Version 2026-11.1 · Projet à faire valider par un juriste avant publication. Les points marqués
 **[À VALIDER]** demandent son avis.
 
 Ces conditions s'appliquent à toute personne qui envoie un colis avec l'application Tara, qu'elle
@@ -34,6 +34,10 @@ encaisse les paiements et suit chaque course.
   distance et, s'il y a lieu, des suppléments affichés : livraison express, colis très
   volumineux (XL), livraison de nuit (de 20 h à 6 h), fortes pluies. Un code promo réduit le
   prix affiché.
+- **Tarif pro des boutiques** : en mode marchand, une remise s'applique automatiquement selon
+  le nombre de vos livraisons réussies du mois en cours (par exemple 10 % à partir de 100,
+  15 % à partir de 300). Elle est affichée avant que vous commandiez et ne se cumule pas avec
+  un code promo : le prix le plus avantageux des deux est retenu.
 - **Paiement par Mobile Money** (MTN MoMo, Orange Money) : des frais Mobile Money s'ajoutent
   au montant, affichés avant que vous validiez. En espèces, vous ne payez rien de plus. Ces
   frais couvrent ceux de l'opérateur ; ils ne sont pas rendus si la commande est annulée.
