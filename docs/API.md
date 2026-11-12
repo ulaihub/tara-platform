@@ -210,6 +210,8 @@ Tout se règle au back-office, sans nouvelle version des apps : le devis est tou
 
 Routes (`ADMIN`, double authentification) : `GET` et `PUT /admin/pricing-settings/{ville}` (paliers du tarif pro, montant et seuil de la prime d'approche ; `updatedAt: null` tant que les valeurs validées s'appliquent), `POST /admin/pricing-grids/simulate` (prix, part du livreur et part de Tara d'une grille en projet pour quelques distances). Primes de renfort (`ADMIN` ou `DISPATCHER`) : `GET` et `POST /admin/rider-boosts`, `POST /admin/rider-boosts/{id}/cancel` (les courses déjà acceptées gardent leur prime).
 
+Boutiques (`ADMIN`, `FINANCE`) : `GET /admin/merchants?q&page` (les plus actives du mois d'abord : livraisons réussies du mois, tarif pro atteint, solde, dernière commande ; `onProRate` compte les boutiques au tarif pro), `GET /admin/merchants/{id}` (30 derniers jours, prochain palier du tarif pro, dernières commandes et reversements). Zones : `GET /admin/zones` liste aussi les zones coupées.
+
 ## Gros objets (frigo, cuisinière, matelas…)
 
 - Taille `BULKY` (« Gros objet ») : la course se fait en tricycle ou en voiture, jamais à moto. Le prix vient de la grille **tricycle** de la ville (`vehicleType: TRICYCLE` dans `POST /admin/pricing-grids`), distincte de la grille moto ; le devis renvoie `vehicleType`.

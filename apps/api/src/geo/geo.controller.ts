@@ -211,6 +211,23 @@ export class AdminZonesController {
     private readonly audit: AuditService,
   ) {}
 
+  /** Toutes les zones, actives ou coupées, pour l'écran Zones du back-office (H4). */
+  @Get()
+  @ApiZodQuery(ZoneListQuery)
+  @ApiZodResponse(z.array(ZoneDto))
+  list(
+    @ValidQuery(ZoneListQuery) query: z.output<typeof ZoneListQuery>,
+  ): Promise<z.output<typeof ZoneDto>[]> {
+    return this.prisma.zone.findMany({
+      where: {
+        ...(query.city ? { city: query.city } : {}),
+        ...(query.kind ? { kind: query.kind } : {}),
+      },
+      select: { id: true, name: true, city: true, kind: true, active: true },
+      orderBy: [{ kind: 'asc' }, { name: 'asc' }],
+    });
+  }
+
   /** Importe un polygone GeoJSON (coordonnées [longitude, latitude]). */
   @Post()
   @ApiZodBody(ZoneBody)

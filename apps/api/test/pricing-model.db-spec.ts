@@ -241,4 +241,41 @@ describe('Modèle de prix (H4) : tarif pro et primes des livreurs', () => {
       { distanceMeters: 28_400, price: 2450, riderEarning: 1715, platformShare: 735 },
     ]);
   });
+
+  it('liste les boutiques les plus actives du mois avec leur tarif pro et leur solde', async () => {
+    const busy = await merchant(ctx);
+    const placed = await placeOrder(ctx, busy);
+    await ctx.prisma.order.update({
+      where: { id: placed.id },
+      data: { status: 'DELIVERED', deliveredAt: new Date() },
+    });
+    const profile = await ctx.prisma.merchantProfile.findUniqueOrThrow({
+      where: { userId: busy.userId },
+    });
+    const page = await request(ctx.http)
+      .get(`/v1/admin/merchants?q=${encodeURIComponent(profile.shopName)}`)
+      .set(admin.auth)
+      .expect(200);
+    expect(page.body.items[0]).toMatchObject({
+      id: profile.id,
+      deliveriesThisMonth: 1,
+      balance: expect.any(Number),
+      lastOrderAt: expect.any(String),
+    });
+    const sheet = await request(ctx.http)
+      .get(`/v1/admin/merchants/${profile.id}`)
+      .set(admin.auth)
+      .expect(200);
+    expect(sheet.body).toMatchObject({
+      last30Days: { delivered: 1 },
+      recentOrders: [{ reference: placed.reference }],
+      // Réglage du test précédent (un seul palier, dès 1 livraison) : atteint, pas de suivant.
+      proDiscountBps: 1000,
+      nextTier: null,
+    });
+    await request(ctx.http).get('/v1/admin/merchants').set(ops.auth).expect(403);
+    // Toutes les zones, y compris coupées, pour l'écran Zones.
+    const zones = await request(ctx.http).get('/v1/admin/zones').set(admin.auth).expect(200);
+    expect(zones.body.some((zone: { kind: string }) => zone.kind === 'SERVICE_AREA')).toBe(true);
+  });
 });

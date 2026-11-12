@@ -1941,6 +1941,56 @@
       }
     },
     "/v1/admin/zones": {
+      "get": {
+        "operationId": "AdminZones_list",
+        "parameters": [
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ZoneKind"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Zone"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · zones"
+        ]
+      },
       "post": {
         "operationId": "AdminZones_create",
         "parameters": [],
@@ -8569,6 +8619,88 @@
           "Back-office · service client"
         ]
       }
+    },
+    "/v1/admin/merchants": {
+      "get": {
+        "operationId": "AdminMerchants_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMerchantPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · marchands"
+        ]
+      }
+    },
+    "/v1/admin/merchants/{id}": {
+      "get": {
+        "operationId": "AdminMerchants_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMerchant"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · marchands"
+        ]
+      }
     }
   },
   "info": {
@@ -8701,6 +8833,297 @@
           "verifiedAt",
           "motorbikeRestricted",
           "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "AdminMerchant": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "ownerName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PRO",
+              "BUSINESS"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveriesThisMonth": {
+            "type": "integer"
+          },
+          "proDiscountBps": {
+            "type": "integer"
+          },
+          "balance": {
+            "type": "integer"
+          },
+          "lastOrderAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "payoutPhone": {
+            "type": "string"
+          },
+          "payoutOperator": {
+            "type": "string"
+          },
+          "payoutSchedule": {
+            "type": "string"
+          },
+          "freePayoutFrom": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "rccm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "niu": {
+            "nullable": true,
+            "type": "string"
+          },
+          "last30Days": {
+            "type": "object",
+            "properties": {
+              "delivered": {
+                "type": "integer"
+              },
+              "failed": {
+                "type": "integer"
+              },
+              "returned": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "delivered",
+              "failed",
+              "returned"
+            ],
+            "additionalProperties": false
+          },
+          "nextTier": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "fromDeliveries": {
+                "type": "integer"
+              },
+              "percentBps": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "fromDeliveries",
+              "percentBps"
+            ],
+            "additionalProperties": false
+          },
+          "recentOrders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "reference": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/components/schemas/OrderStatus"
+                },
+                "totalPrice": {
+                  "type": "integer"
+                },
+                "proDiscountBps": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "reference",
+                "status",
+                "totalPrice",
+                "proDiscountBps",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "recentPayouts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "amount": {
+                  "type": "integer"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "requestedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "amount",
+                "status",
+                "requestedAt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "shopName",
+          "ownerName",
+          "phone",
+          "category",
+          "plan",
+          "createdAt",
+          "deliveriesThisMonth",
+          "proDiscountBps",
+          "balance",
+          "lastOrderAt",
+          "payoutPhone",
+          "payoutOperator",
+          "payoutSchedule",
+          "freePayoutFrom",
+          "rccm",
+          "niu",
+          "last30Days",
+          "nextTier",
+          "recentOrders",
+          "recentPayouts"
+        ],
+        "additionalProperties": false
+      },
+      "AdminMerchantPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminMerchantRow"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pages": {
+            "type": "integer"
+          },
+          "onProRate": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pages",
+          "onProRate"
+        ],
+        "additionalProperties": false
+      },
+      "AdminMerchantRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "ownerName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PRO",
+              "BUSINESS"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveriesThisMonth": {
+            "type": "integer"
+          },
+          "proDiscountBps": {
+            "type": "integer"
+          },
+          "balance": {
+            "type": "integer"
+          },
+          "lastOrderAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "shopName",
+          "ownerName",
+          "phone",
+          "category",
+          "plan",
+          "createdAt",
+          "deliveriesThisMonth",
+          "proDiscountBps",
+          "balance",
+          "lastOrderAt"
         ],
         "additionalProperties": false
       },
@@ -11141,6 +11564,7 @@
                   "PARCEL_ANALYSIS_LIMIT",
                   "BULKY_UNAVAILABLE",
                   "PRICING_GRID_NOT_FOUND",
+                  "MERCHANT_NOT_FOUND",
                   "RIDER_BOOST_NOT_FOUND",
                   "PROMO_INVALID",
                   "PROMO_EXPIRED",

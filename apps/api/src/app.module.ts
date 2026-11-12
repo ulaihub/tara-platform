@@ -17,6 +17,7 @@ import { LegalModule } from './legal/legal.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { OpsModule } from './ops/ops.module.js';
 import { OrdersModule } from './orders/orders.module.js';
+import { MerchantsModule } from './merchants/merchants.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrivacyModule } from './privacy/privacy.module.js';
 import { PublicTrackingModule } from './public-tracking/public-tracking.module.js';
@@ -70,6 +71,7 @@ import { UsersModule } from './users/users.module.js';
     PrivacyModule,
     OpsModule,
     SupportModule,
+    MerchantsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },

@@ -587,7 +587,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    get: operations['AdminZones_list'];
     put?: never;
     post: operations['AdminZones_create'];
     delete?: never;
@@ -2308,6 +2308,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/merchants': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminMerchants_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/merchants/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminMerchants_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2341,6 +2373,80 @@ export interface components {
       motorbikeRestricted: boolean;
       /** Format: date-time */
       createdAt: string;
+    };
+    AdminMerchant: {
+      /** Format: uuid */
+      id: string;
+      shopName: string;
+      ownerName: string | null;
+      phone: string;
+      category: string | null;
+      /** @enum {string} */
+      plan: 'FREE' | 'PRO' | 'BUSINESS';
+      /** Format: date-time */
+      createdAt: string;
+      deliveriesThisMonth: number;
+      proDiscountBps: number;
+      balance: number;
+      /** Format: date-time */
+      lastOrderAt: string | null;
+      payoutPhone: string;
+      payoutOperator: string;
+      payoutSchedule: string;
+      freePayoutFrom: number | null;
+      rccm: string | null;
+      niu: string | null;
+      last30Days: {
+        delivered: number;
+        failed: number;
+        returned: number;
+      };
+      nextTier: {
+        fromDeliveries: number;
+        percentBps: number;
+      } | null;
+      recentOrders: {
+        /** Format: uuid */
+        id: string;
+        reference: string;
+        status: components['schemas']['OrderStatus'];
+        totalPrice: number;
+        proDiscountBps: number;
+        /** Format: date-time */
+        createdAt: string;
+      }[];
+      recentPayouts: {
+        /** Format: uuid */
+        id: string;
+        amount: number;
+        status: string;
+        /** Format: date-time */
+        requestedAt: string;
+      }[];
+    };
+    AdminMerchantPage: {
+      items: components['schemas']['AdminMerchantRow'][];
+      total: number;
+      page: number;
+      pages: number;
+      onProRate: number;
+    };
+    AdminMerchantRow: {
+      /** Format: uuid */
+      id: string;
+      shopName: string;
+      ownerName: string | null;
+      phone: string;
+      category: string | null;
+      /** @enum {string} */
+      plan: 'FREE' | 'PRO' | 'BUSINESS';
+      /** Format: date-time */
+      createdAt: string;
+      deliveriesThisMonth: number;
+      proDiscountBps: number;
+      balance: number;
+      /** Format: date-time */
+      lastOrderAt: string | null;
     };
     AdminOrder: {
       /** Format: uuid */
@@ -3002,6 +3108,7 @@ export interface components {
           | 'PARCEL_ANALYSIS_LIMIT'
           | 'BULKY_UNAVAILABLE'
           | 'PRICING_GRID_NOT_FOUND'
+          | 'MERCHANT_NOT_FOUND'
           | 'RIDER_BOOST_NOT_FOUND'
           | 'PROMO_INVALID'
           | 'PROMO_EXPIRED'
@@ -5276,6 +5383,29 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['PublicLocationLink'];
+        };
+      };
+    };
+  };
+  AdminZones_list: {
+    parameters: {
+      query?: {
+        city?: string;
+        kind?: components['schemas']['ZoneKind'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Zone'][];
         };
       };
     };
@@ -8551,6 +8681,51 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  AdminMerchants_list: {
+    parameters: {
+      query?: {
+        q?: string;
+        page?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminMerchantPage'];
+        };
+      };
+    };
+  };
+  AdminMerchants_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminMerchant'];
+        };
       };
     };
   };
