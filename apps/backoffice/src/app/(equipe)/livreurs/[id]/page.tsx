@@ -65,6 +65,16 @@ export default async function RiderPage({ params }: { params: Promise<{ id: stri
     : null;
   const name = rider.user.fullName ?? displayPhone(rider.user.phone);
   const lines = documentLines(rider.documents);
+  // Pièces validées qui expirent dans les 30 jours (le livreur a été prévenu, A5).
+  const expiring = new Set(
+    rider.documents
+      .filter((doc) =>
+        rider.expiringSoon.some(
+          (soon) => soon.type === doc.type && soon.expiresOn === doc.expiresOn,
+        ),
+      )
+      .map((doc) => doc.id),
+  );
 
   return (
     <div className="mx-auto max-w-[1280px]">
@@ -154,7 +164,16 @@ export default async function RiderPage({ params }: { params: Promise<{ id: stri
                     {doc ? (
                       <p className="mt-1 text-[13px] text-muted">
                         Envoyée le {dateTime(doc.createdAt)}
-                        {doc.expiresOn ? ` · expire le ${calendarDate(doc.expiresOn)}` : ''}
+                        {doc.expiresOn && expiring.has(doc.id) ? (
+                          <strong className="text-warn">
+                            {' '}
+                            · expire bientôt, le {calendarDate(doc.expiresOn)}
+                          </strong>
+                        ) : doc.expiresOn ? (
+                          ` · expire le ${calendarDate(doc.expiresOn)}`
+                        ) : (
+                          ''
+                        )}
                         {doc.reviewedAt && doc.status !== 'PENDING'
                           ? ` · examinée le ${dateTime(doc.reviewedAt)}`
                           : ''}
@@ -276,12 +295,14 @@ export default async function RiderPage({ params }: { params: Promise<{ id: stri
             />
           </Section>
 
-          {payout ? (
+          {payout && (rider.status === 'ACTIVE' || rider.status === 'SUSPENDED') ? (
             <Section title="Retraits">
               <p className="text-[14px]">
                 Gratuit à partir de <strong>{money(payout.freeFrom)}</strong>
-                {payout.custom === null ? ' (seuil général)' : ''}. En dessous,{' '}
-                {(payout.feeBps / 100).toLocaleString('fr-FR')} % de frais.
+                {payout.custom === null ? ' (seuil général)' : ''}.
+                {payout.feeBps > 0
+                  ? ` En dessous, ${(payout.feeBps / 100).toLocaleString('fr-FR')} % de frais Mobile Money retenus.`
+                  : ' Aucun frais de retrait réglé pour l’instant.'}
               </p>
               <p className="mt-1 text-[13px] text-muted">
                 Retraits moyens : {money(payout.averageMonthlyPayouts)} par mois (90 derniers

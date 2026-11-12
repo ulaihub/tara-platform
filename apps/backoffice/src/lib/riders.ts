@@ -185,7 +185,7 @@ export const HISTORY_LABELS: Record<HistoryAction, string> = {
 };
 
 export const HISTORY_TONE: Record<HistoryAction, string> = {
-  APPLIED: 'bg-track',
+  APPLIED: 'bg-faint',
   DOCUMENT_APPROVED: 'bg-ok',
   DOCUMENT_REJECTED: 'bg-danger',
   INTERVIEW_PASSED: 'bg-ok',
