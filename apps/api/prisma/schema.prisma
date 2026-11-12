@@ -488,6 +488,7 @@ model User {
   referralsMade            Referral[]             @relation("Referrer")
   referredBy               Referral?              @relation("Referee")
   ridersApproved           RiderProfile[]         @relation("RiderApprovedBy")
+  ridersInterviewed        RiderProfile[]         @relation("RiderInterviewedBy")
   kycReviews               KycDocument[]
   pricingGridsCreated      PricingGrid[]
   journalEntriesPosted     JournalEntry[]
@@ -645,12 +646,18 @@ model RiderProfile {
   emergencyContactPhone String?     @map("emergency_contact_phone")
   approvedAt            DateTime?   @map("approved_at") @db.Timestamptz(3)
   approvedById          String?     @map("approved_by_id") @db.Uuid
+  /// Entretien au bureau (H3) : exigé réussi avant la validation du livreur.
+  interviewAt           DateTime?   @map("interview_at") @db.Timestamptz(3)
+  interviewById         String?     @map("interview_by_id") @db.Uuid
+  interviewPassed       Boolean?    @map("interview_passed")
+  interviewNote         String?     @map("interview_note")
   suspendedReason       String?     @map("suspended_reason")
   createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt             DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user           User                 @relation("RiderUser", fields: [userId], references: [id])
   approvedBy     User?                @relation("RiderApprovedBy", fields: [approvedById], references: [id])
+  interviewBy    User?                @relation("RiderInterviewedBy", fields: [interviewById], references: [id])
   documents      KycDocument[]
   orders         Order[]
   offers         DispatchOffer[]

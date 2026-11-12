@@ -388,6 +388,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/riders/{riderId}/reliability': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminRiders_riderReliability'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/riders/{riderId}/interview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminRiders_interview'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/admin/riders/{riderId}': {
     parameters: {
       query?: never;
@@ -2320,7 +2352,42 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
       documentHistory: components['schemas']['KycDocument'][];
+      interview: {
+        /** Format: date-time */
+        at: string;
+        passed: boolean;
+        note: string;
+        by: string | null;
+      } | null;
+      pendingDocuments: number;
+      expiringSoon: {
+        type: components['schemas']['KycDocumentType'];
+        /** Format: date */
+        expiresOn: string;
+      }[];
+      rating: {
+        average: number | null;
+        count: number;
+      };
+      deliveredLast30Days: number;
+      /** Format: date-time */
+      cashSuspendedAt: string | null;
     };
+    AdminRiderPage: {
+      items: components['schemas']['AdminRider'][];
+      /** Format: uuid */
+      nextCursor: string | null;
+      counts: {
+        TO_REVIEW: number;
+        PENDING: number;
+        ACTIVE: number;
+        SUSPENDED: number;
+        REJECTED: number;
+        ALL: number;
+      };
+    };
+    /** @enum {string} */
+    AdminRiderView: 'TO_REVIEW' | 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'ALL';
     AppConfig: {
       country: {
         code: string;
@@ -2583,6 +2650,7 @@ export interface components {
           | 'RIDER_ALREADY_APPLIED'
           | 'RIDER_NOT_FOUND'
           | 'RIDER_DOCUMENTS_INCOMPLETE'
+          | 'RIDER_INTERVIEW_REQUIRED'
           | 'RIDER_DECISION_INVALID'
           | 'KYC_DOCUMENT_NOT_FOUND'
           | 'KYC_DOCUMENT_ALREADY_REVIEWED'
@@ -3319,6 +3387,20 @@ export interface components {
         delivered: number;
       }[];
     };
+    /** @enum {string} */
+    RiderHistoryAction:
+      | 'APPLIED'
+      | 'DOCUMENT_APPROVED'
+      | 'DOCUMENT_REJECTED'
+      | 'INTERVIEW_PASSED'
+      | 'INTERVIEW_FAILED'
+      | 'APPROVED'
+      | 'REJECTED'
+      | 'SUSPENDED'
+      | 'REACTIVATED'
+      | 'CASH_OVERDUE'
+      | 'CASH_SUSPENDED'
+      | 'FREE_PAYOUT_SET';
     RiderOrder: {
       /** Format: uuid */
       id: string;
@@ -3398,6 +3480,56 @@ export interface components {
       suspendedReason: string | null;
       documents: components['schemas']['KycDocument'][];
       missingDocuments: components['schemas']['KycDocumentType'][];
+    };
+    RiderReliability: {
+      last30Days: {
+        offers: {
+          accepted: number;
+          declined: number;
+          expired: number;
+        };
+        deliveries: {
+          delivered: number;
+          onTime: number;
+          failed: number;
+          parcelsRefused: number;
+        };
+        rating: {
+          average: number | null;
+          count: number;
+        };
+        onlineMinutes: number;
+        courseAlerts: number;
+        sosAlerts: number;
+      };
+      allTime: {
+        offers: {
+          accepted: number;
+          declined: number;
+          expired: number;
+        };
+        deliveries: {
+          delivered: number;
+          onTime: number;
+          failed: number;
+          parcelsRefused: number;
+        };
+        rating: {
+          average: number | null;
+          count: number;
+        };
+        onlineMinutes: number;
+        courseAlerts: number;
+        sosAlerts: number;
+      };
+      history: {
+        /** Format: date-time */
+        at: string;
+        action: components['schemas']['RiderHistoryAction'];
+        by: string | null;
+        note: string | null;
+        documentType: components['schemas']['KycDocumentType'] | null;
+      }[];
     };
     RiderRoute: {
       /** @enum {string} */
@@ -4276,6 +4408,8 @@ export interface operations {
         limit?: number;
         cursor?: string;
         status?: components['schemas']['RiderStatus'];
+        view?: components['schemas']['AdminRiderView'];
+        q?: string;
       };
       header?: never;
       path?: never;
@@ -4289,11 +4423,58 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': {
-            items: components['schemas']['AdminRider'][];
-            /** Format: uuid */
-            nextCursor: string | null;
-          };
+          'application/json': components['schemas']['AdminRiderPage'];
+        };
+      };
+    };
+  };
+  AdminRiders_riderReliability: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        riderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderReliability'];
+        };
+      };
+    };
+  };
+  AdminRiders_interview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        riderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          passed: boolean;
+          note: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminRider'];
         };
       };
     };

@@ -1171,6 +1171,29 @@
                 }
               ]
             }
+          },
+          {
+            "name": "view",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "ALL",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/AdminRiderView"
+                }
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 60
+            }
           }
         ],
         "responses": {
@@ -1179,25 +1202,101 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/AdminRider"
-                      }
-                    },
-                    "nextCursor": {
-                      "nullable": true,
-                      "type": "string",
-                      "format": "uuid"
-                    }
+                  "$ref": "#/components/schemas/AdminRiderPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · livreurs"
+        ]
+      }
+    },
+    "/v1/admin/riders/{riderId}/reliability": {
+      "get": {
+        "operationId": "AdminRiders_riderReliability",
+        "parameters": [
+          {
+            "name": "riderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderReliability"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · livreurs"
+        ]
+      }
+    },
+    "/v1/admin/riders/{riderId}/interview": {
+      "post": {
+        "operationId": "AdminRiders_interview",
+        "parameters": [
+          {
+            "name": "riderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "passed": {
+                    "type": "boolean"
                   },
-                  "required": [
-                    "items",
-                    "nextCursor"
-                  ],
-                  "additionalProperties": false
+                  "note": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "passed",
+                  "note"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRider"
                 }
               }
             }
@@ -8584,6 +8683,81 @@
             "items": {
               "$ref": "#/components/schemas/KycDocument"
             }
+          },
+          "interview": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "passed": {
+                "type": "boolean"
+              },
+              "note": {
+                "type": "string"
+              },
+              "by": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "passed",
+              "note",
+              "by"
+            ],
+            "additionalProperties": false
+          },
+          "pendingDocuments": {
+            "type": "integer"
+          },
+          "expiringSoon": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/KycDocumentType"
+                },
+                "expiresOn": {
+                  "type": "string",
+                  "format": "date"
+                }
+              },
+              "required": [
+                "type",
+                "expiresOn"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rating": {
+            "type": "object",
+            "properties": {
+              "average": {
+                "nullable": true,
+                "type": "number"
+              },
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "average",
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "deliveredLast30Days": {
+            "type": "integer"
+          },
+          "cashSuspendedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
@@ -8601,9 +8775,80 @@
           "missingDocuments",
           "user",
           "createdAt",
-          "documentHistory"
+          "documentHistory",
+          "interview",
+          "pendingDocuments",
+          "expiringSoon",
+          "rating",
+          "deliveredLast30Days",
+          "cashSuspendedAt"
         ],
         "additionalProperties": false
+      },
+      "AdminRiderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminRider"
+            }
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "TO_REVIEW": {
+                "type": "integer"
+              },
+              "PENDING": {
+                "type": "integer"
+              },
+              "ACTIVE": {
+                "type": "integer"
+              },
+              "SUSPENDED": {
+                "type": "integer"
+              },
+              "REJECTED": {
+                "type": "integer"
+              },
+              "ALL": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "TO_REVIEW",
+              "PENDING",
+              "ACTIVE",
+              "SUSPENDED",
+              "REJECTED",
+              "ALL"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "AdminRiderView": {
+        "type": "string",
+        "enum": [
+          "TO_REVIEW",
+          "PENDING",
+          "ACTIVE",
+          "SUSPENDED",
+          "REJECTED",
+          "ALL"
+        ]
       },
       "AppConfig": {
         "type": "object",
@@ -9484,6 +9729,7 @@
                   "RIDER_ALREADY_APPLIED",
                   "RIDER_NOT_FOUND",
                   "RIDER_DOCUMENTS_INCOMPLETE",
+                  "RIDER_INTERVIEW_REQUIRED",
                   "RIDER_DECISION_INVALID",
                   "KYC_DOCUMENT_NOT_FOUND",
                   "KYC_DOCUMENT_ALREADY_REVIEWED",
@@ -12018,6 +12264,23 @@
         ],
         "additionalProperties": false
       },
+      "RiderHistoryAction": {
+        "type": "string",
+        "enum": [
+          "APPLIED",
+          "DOCUMENT_APPROVED",
+          "DOCUMENT_REJECTED",
+          "INTERVIEW_PASSED",
+          "INTERVIEW_FAILED",
+          "APPROVED",
+          "REJECTED",
+          "SUSPENDED",
+          "REACTIVATED",
+          "CASH_OVERDUE",
+          "CASH_SUSPENDED",
+          "FREE_PAYOUT_SET"
+        ]
+      },
       "RiderOrder": {
         "type": "object",
         "properties": {
@@ -12350,6 +12613,224 @@
           "suspendedReason",
           "documents",
           "missingDocuments"
+        ],
+        "additionalProperties": false
+      },
+      "RiderReliability": {
+        "type": "object",
+        "properties": {
+          "last30Days": {
+            "type": "object",
+            "properties": {
+              "offers": {
+                "type": "object",
+                "properties": {
+                  "accepted": {
+                    "type": "integer"
+                  },
+                  "declined": {
+                    "type": "integer"
+                  },
+                  "expired": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "accepted",
+                  "declined",
+                  "expired"
+                ],
+                "additionalProperties": false
+              },
+              "deliveries": {
+                "type": "object",
+                "properties": {
+                  "delivered": {
+                    "type": "integer"
+                  },
+                  "onTime": {
+                    "type": "integer"
+                  },
+                  "failed": {
+                    "type": "integer"
+                  },
+                  "parcelsRefused": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "delivered",
+                  "onTime",
+                  "failed",
+                  "parcelsRefused"
+                ],
+                "additionalProperties": false
+              },
+              "rating": {
+                "type": "object",
+                "properties": {
+                  "average": {
+                    "nullable": true,
+                    "type": "number"
+                  },
+                  "count": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "average",
+                  "count"
+                ],
+                "additionalProperties": false
+              },
+              "onlineMinutes": {
+                "type": "integer"
+              },
+              "courseAlerts": {
+                "type": "integer"
+              },
+              "sosAlerts": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "offers",
+              "deliveries",
+              "rating",
+              "onlineMinutes",
+              "courseAlerts",
+              "sosAlerts"
+            ],
+            "additionalProperties": false
+          },
+          "allTime": {
+            "type": "object",
+            "properties": {
+              "offers": {
+                "type": "object",
+                "properties": {
+                  "accepted": {
+                    "type": "integer"
+                  },
+                  "declined": {
+                    "type": "integer"
+                  },
+                  "expired": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "accepted",
+                  "declined",
+                  "expired"
+                ],
+                "additionalProperties": false
+              },
+              "deliveries": {
+                "type": "object",
+                "properties": {
+                  "delivered": {
+                    "type": "integer"
+                  },
+                  "onTime": {
+                    "type": "integer"
+                  },
+                  "failed": {
+                    "type": "integer"
+                  },
+                  "parcelsRefused": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "delivered",
+                  "onTime",
+                  "failed",
+                  "parcelsRefused"
+                ],
+                "additionalProperties": false
+              },
+              "rating": {
+                "type": "object",
+                "properties": {
+                  "average": {
+                    "nullable": true,
+                    "type": "number"
+                  },
+                  "count": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "average",
+                  "count"
+                ],
+                "additionalProperties": false
+              },
+              "onlineMinutes": {
+                "type": "integer"
+              },
+              "courseAlerts": {
+                "type": "integer"
+              },
+              "sosAlerts": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "offers",
+              "deliveries",
+              "rating",
+              "onlineMinutes",
+              "courseAlerts",
+              "sosAlerts"
+            ],
+            "additionalProperties": false
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "$ref": "#/components/schemas/RiderHistoryAction"
+                },
+                "by": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "note": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "documentType": {
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/KycDocumentType"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "at",
+                "action",
+                "by",
+                "note",
+                "documentType"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "last30Days",
+          "allTime",
+          "history"
         ],
         "additionalProperties": false
       },

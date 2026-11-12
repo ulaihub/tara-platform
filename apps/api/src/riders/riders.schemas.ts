@@ -128,9 +128,115 @@ export const AdminRiderDto = RiderProfileDto.extend({
   createdAt: z.iso.datetime(),
   /** Historique complet des pièces, de la plus récente à la plus ancienne. */
   documentHistory: z.array(KycDocumentDto),
+  /** Entretien au bureau, exigé réussi avant la validation. */
+  interview: z
+    .object({
+      at: z.iso.datetime(),
+      passed: z.boolean(),
+      note: z.string(),
+      by: z.string().nullable(),
+    })
+    .nullable(),
+  /** Pièces envoyées qui attendent l'examen de l'équipe. */
+  pendingDocuments: z.int(),
+  /** Pièces validées qui expirent dans les 30 jours (le livreur est déjà prévenu, A5). */
+  expiringSoon: z.array(z.object({ type: KycDocumentTypeEnum, expiresOn: z.iso.date() })),
+  /** Note moyenne donnée par les expéditeurs (1 à 5), depuis l'inscription. */
+  rating: z.object({ average: z.number().nullable(), count: z.int() }),
+  /** Courses livrées dans les 30 derniers jours. */
+  deliveredLast30Days: z.int(),
+  /** Suspendu faute d'avoir déposé ses anciennes espèces (réactivation par la finance). */
+  cashSuspendedAt: z.iso.datetime().nullable(),
 }).meta({ id: 'AdminRider' });
 
-export const AdminRiderListQuery = PageQuery.extend({ status: RiderStatusEnum.optional() });
+/** Vues de la liste : à examiner (candidature ou pièce en attente), puis par statut. */
+export const AdminRiderViewEnum = z
+  .enum(['TO_REVIEW', 'PENDING', 'ACTIVE', 'SUSPENDED', 'REJECTED', 'ALL'])
+  .meta({ id: 'AdminRiderView' });
+
+export const AdminRiderListQuery = PageQuery.extend({
+  /** Ancien filtre, gardé : prime sur `view`. */
+  status: RiderStatusEnum.optional(),
+  view: AdminRiderViewEnum.default('ALL'),
+  /** Nom, numéro de téléphone ou plaque (2 caractères au moins). */
+  q: z.string().trim().min(2).max(60).optional(),
+});
+
+export const AdminRiderPageDto = z
+  .object({
+    items: z.array(AdminRiderDto),
+    nextCursor: z.uuid().nullable(),
+    /** Nombre de livreurs dans chaque vue (sans la recherche). */
+    counts: z.object({
+      TO_REVIEW: z.int(),
+      PENDING: z.int(),
+      ACTIVE: z.int(),
+      SUSPENDED: z.int(),
+      REJECTED: z.int(),
+      ALL: z.int(),
+    }),
+  })
+  .meta({ id: 'AdminRiderPage' });
+
+/** Entretien au bureau : résultat et compte rendu (motif si échec). */
+export const RiderInterviewBody = z.object({
+  passed: z.boolean(),
+  note: z.string().trim().min(3).max(500),
+});
+
+/** Activité d'un livreur sur une période : de quoi juger sa fiabilité (H3). */
+const ReliabilityWindowDto = z.object({
+  /** Propositions de course : acceptées, refusées, laissées sans réponse. */
+  offers: z.object({ accepted: z.int(), declined: z.int(), expired: z.int() }),
+  /** Livrées (dont à l'heure), échecs déclarés, colis refusés à l'enlèvement. */
+  deliveries: z.object({
+    delivered: z.int(),
+    onTime: z.int(),
+    failed: z.int(),
+    parcelsRefused: z.int(),
+  }),
+  rating: z.object({ average: z.number().nullable(), count: z.int() }),
+  onlineMinutes: z.int(),
+  /** Alertes de course : action loin de l'adresse, long arrêt, position simulée, coupure. */
+  courseAlerts: z.int(),
+  /** Alertes de sécurité déclenchées (hors alertes annulées). */
+  sosAlerts: z.int(),
+});
+
+export const RiderHistoryActionEnum = z
+  .enum([
+    'APPLIED',
+    'DOCUMENT_APPROVED',
+    'DOCUMENT_REJECTED',
+    'INTERVIEW_PASSED',
+    'INTERVIEW_FAILED',
+    'APPROVED',
+    'REJECTED',
+    'SUSPENDED',
+    'REACTIVATED',
+    'CASH_OVERDUE',
+    'CASH_SUSPENDED',
+    'FREE_PAYOUT_SET',
+  ])
+  .meta({ id: 'RiderHistoryAction' });
+
+export const RiderReliabilityDto = z
+  .object({
+    last30Days: ReliabilityWindowDto,
+    allTime: ReliabilityWindowDto,
+    /** Décisions et événements du compte, du plus récent au plus ancien (50 au plus). */
+    history: z.array(
+      z.object({
+        at: z.iso.datetime(),
+        action: RiderHistoryActionEnum,
+        /** Membre de l'équipe ; null pour une action automatique. */
+        by: z.string().nullable(),
+        note: z.string().nullable(),
+        documentType: KycDocumentTypeEnum.nullable(),
+      }),
+    ),
+  })
+  .meta({ id: 'RiderReliability' });
 
 export const ReviewDocumentBody = z
   .object({

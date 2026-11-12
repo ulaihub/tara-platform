@@ -46,7 +46,7 @@ export const SECTIONS: readonly Section[] = [
     requirement: 'H3',
     description: 'Validation des pièces et entretien, suspension, historique de fiabilité.',
     roles: ['ADMIN', 'DISPATCHER'],
-    ready: false,
+    ready: true,
   },
   {
     href: '/support',
