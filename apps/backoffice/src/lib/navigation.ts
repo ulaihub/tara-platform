@@ -64,7 +64,7 @@ export const SECTIONS: readonly Section[] = [
     requirement: 'H5',
     description: 'Rapprochement du jour, reversements à valider, export comptable.',
     roles: ['ADMIN', 'FINANCE'],
-    ready: false,
+    ready: true,
   },
   {
     href: '/marchands',

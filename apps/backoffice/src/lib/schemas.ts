@@ -24,3 +24,7 @@ export type AdminTicket = Schemas['AdminTicket'];
 export type AdminTicketRow = Schemas['AdminTicketRow'];
 export type AdminTicketPage = Schemas['AdminTicketPage'];
 export type OrderEvidence = Schemas['OrderEvidence'];
+export type FinanceOverview = Schemas['FinanceOverview'];
+export type AdminPayout = Schemas['AdminPayout'];
+export type AdminPayoutPage = Schemas['AdminPayoutPage'];
+export type Reconciliation = Schemas['Reconciliation'];
