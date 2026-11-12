@@ -1,15 +1,9 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
+import { useActionState, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { cx } from '@/components/ui';
-import {
-  type ActionState,
-  decideRider,
-  recordInterview,
-  reviewDocument,
-  setFreePayout,
-} from '../actions';
+import { type ActionState, decideRider, reviewDocument, setFreePayout } from '../actions';
 
 const IDLE: ActionState = { error: null, done: false };
 
@@ -116,87 +110,6 @@ export function DocumentReview({
         className="min-h-10 rounded-xl border border-danger/40 px-3 text-[13px] font-extrabold text-danger hover:bg-danger-bg"
       >
         Refuser
-      </button>
-      <Feedback state={state} />
-    </form>
-  );
-}
-
-/** Compte rendu de l'entretien au bureau ; le champ se vide une fois enregistré. */
-export function InterviewForm({ riderId, again }: { riderId: string; again: boolean }) {
-  const [open, setOpen] = useState(!again);
-  const [state, action, pending] = useActionState(recordInterview, IDLE);
-  const form = useRef<HTMLFormElement>(null);
-  useEffect(() => {
-    if (state.done) {
-      form.current?.reset();
-      setOpen(false);
-    }
-  }, [state]);
-  if (!open) {
-    return (
-      <>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="mt-3 min-h-10 w-full rounded-xl border border-line px-3 text-[13px] font-bold hover:border-accent-line"
-        >
-          Enregistrer un nouvel entretien
-        </button>
-        <Feedback state={state} done="Entretien enregistré." />
-      </>
-    );
-  }
-  return (
-    <form ref={form} action={action} className="mt-3 space-y-3">
-      <input type="hidden" name="riderId" value={riderId} />
-      <fieldset className="flex gap-2">
-        <legend className="mb-1 text-[13px] font-bold">Résultat</legend>
-        {[
-          { value: 'passed', label: 'Réussi', tone: 'peer-checked:bg-ok peer-checked:text-white' },
-          {
-            value: 'failed',
-            label: 'Échoué',
-            tone: 'peer-checked:bg-danger peer-checked:text-white',
-          },
-        ].map((option) => (
-          <label key={option.value} className="flex-1">
-            <input
-              type="radio"
-              name="result"
-              value={option.value}
-              required
-              className="peer sr-only"
-            />
-            <span
-              className={cx(
-                'flex min-h-10 cursor-pointer items-center justify-center rounded-xl border border-line text-[13px] font-extrabold peer-focus-visible:ring-2',
-                option.tone,
-              )}
-            >
-              {option.label}
-            </span>
-          </label>
-        ))}
-      </fieldset>
-      <label className="block">
-        <span className="text-[13px] font-bold">Compte rendu</span>
-        <textarea
-          name="note"
-          required
-          minLength={3}
-          maxLength={500}
-          rows={3}
-          placeholder="Ex. : connaît bien Douala, moto en bon état, comprend les règles d’encaissement."
-          className={cx(INPUT, 'mt-1')}
-        />
-      </label>
-      <button
-        type="submit"
-        disabled={pending}
-        className="min-h-10 w-full rounded-xl bg-text px-4 text-[13px] font-extrabold text-bg disabled:opacity-60"
-      >
-        {pending ? 'Enregistrement…' : 'Enregistrer l’entretien'}
       </button>
       <Feedback state={state} />
     </form>

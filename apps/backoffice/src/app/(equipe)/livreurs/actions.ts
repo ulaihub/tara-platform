@@ -64,28 +64,6 @@ export async function reviewDocument(_: ActionState, form: FormData): Promise<Ac
   return done(riderId);
 }
 
-/** Entretien au bureau : résultat et compte rendu. */
-export async function recordInterview(_: ActionState, form: FormData): Promise<ActionState> {
-  await requireStaff(RIDER_ROLES);
-  const riderId = field(form, 'riderId');
-  const result = field(form, 'result');
-  const note = field(form, 'note');
-  if (!UUID.test(riderId)) return { error: 'Livreur inconnu.', done: false };
-  if (result !== 'passed' && result !== 'failed') {
-    return { error: 'Choisissez le résultat de l’entretien.', done: false };
-  }
-  if (note.length < 3) return { error: 'Écrivez un court compte rendu.', done: false };
-  try {
-    await staffApi(`/admin/riders/${riderId}/interview`, {
-      method: 'POST',
-      body: { passed: result === 'passed', note },
-    });
-  } catch (error) {
-    return failure(error);
-  }
-  return done(riderId);
-}
-
 /** Validation, refus, suspension ou réactivation ; motif exigé pour refuser ou suspendre. */
 export async function decideRider(_: ActionState, form: FormData): Promise<ActionState> {
   await requireStaff(RIDER_ROLES);

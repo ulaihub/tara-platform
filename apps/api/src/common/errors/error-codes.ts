@@ -115,10 +115,6 @@ export const ERROR_MESSAGES = {
     fr: 'Pièces manquantes ou non validées : {missing}.',
     en: 'Missing or unapproved documents: {missing}.',
   },
-  RIDER_INTERVIEW_REQUIRED: {
-    fr: 'L’entretien au bureau doit être réussi avant de valider le livreur.',
-    en: 'The office interview must be passed before approving the rider.',
-  },
   RIDER_DECISION_INVALID: {
     fr: 'Cette décision n’est pas possible pour un livreur au statut {status}.',
     en: 'This decision is not possible for a rider with status {status}.',

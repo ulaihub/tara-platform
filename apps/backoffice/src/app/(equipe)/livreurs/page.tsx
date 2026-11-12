@@ -12,7 +12,6 @@ import {
   RIDER_VIEWS,
   VEHICLE_LABELS,
   documentSummary,
-  interviewSummary,
   ratingText,
   riderView,
 } from '@/lib/riders';
@@ -34,7 +33,7 @@ function hrefWith(current: Search, changes: Partial<Search>): string {
 
 /**
  * Livreurs (H3) : candidatures et pièces à examiner d'abord, puis par statut ; recherche
- * par nom, numéro ou plaque. Un clic ouvre la fiche (pièces, entretien, fiabilité).
+ * par nom, numéro ou plaque. Un clic ouvre la fiche (pièces, décision, fiabilité).
  */
 export default async function RidersPage({ searchParams }: { searchParams: Promise<Search> }) {
   await requireStaff(RIDER_ROLES);
@@ -137,7 +136,6 @@ export default async function RidersPage({ searchParams }: { searchParams: Promi
                 <th className="px-4 py-3">Véhicule</th>
                 <th className="px-4 py-3">Statut</th>
                 <th className="px-4 py-3">Pièces</th>
-                <th className="px-4 py-3">Entretien</th>
                 <th className="px-4 py-3">30 derniers jours</th>
                 <th className="px-4 py-3">Inscrit</th>
               </tr>
@@ -179,7 +177,6 @@ export default async function RidersPage({ searchParams }: { searchParams: Promi
 
 function RiderRow({ rider }: { rider: AdminRider }) {
   const documents = documentSummary(rider);
-  const interview = interviewSummary(rider);
   const rating = ratingText(rider.rating.average);
   return (
     <tr className="relative border-b border-line last:border-0 hover:bg-panel-soft">
@@ -209,7 +206,6 @@ function RiderRow({ rider }: { rider: AdminRider }) {
         </span>
       </td>
       <td className={cx('px-4 py-3 font-bold', documents.tone)}>{documents.text}</td>
-      <td className={cx('px-4 py-3 font-bold', interview.tone)}>{interview.text}</td>
       <td className="px-4 py-3 whitespace-nowrap">
         {rider.status === 'ACTIVE' || rider.deliveredLast30Days > 0 ? (
           <>

@@ -128,15 +128,6 @@ export const AdminRiderDto = RiderProfileDto.extend({
   createdAt: z.iso.datetime(),
   /** Historique complet des pièces, de la plus récente à la plus ancienne. */
   documentHistory: z.array(KycDocumentDto),
-  /** Entretien au bureau, exigé réussi avant la validation. */
-  interview: z
-    .object({
-      at: z.iso.datetime(),
-      passed: z.boolean(),
-      note: z.string(),
-      by: z.string().nullable(),
-    })
-    .nullable(),
   /** Pièces envoyées qui attendent l'examen de l'équipe. */
   pendingDocuments: z.int(),
   /** Pièces validées qui expirent dans les 30 jours (le livreur est déjà prévenu, A5). */
@@ -178,12 +169,6 @@ export const AdminRiderPageDto = z
   })
   .meta({ id: 'AdminRiderPage' });
 
-/** Entretien au bureau : résultat et compte rendu (motif si échec). */
-export const RiderInterviewBody = z.object({
-  passed: z.boolean(),
-  note: z.string().trim().min(3).max(500),
-});
-
 /** Activité d'un livreur sur une période : de quoi juger sa fiabilité (H3). */
 const ReliabilityWindowDto = z.object({
   /** Propositions de course : acceptées, refusées, laissées sans réponse. */
@@ -208,8 +193,6 @@ export const RiderHistoryActionEnum = z
     'APPLIED',
     'DOCUMENT_APPROVED',
     'DOCUMENT_REJECTED',
-    'INTERVIEW_PASSED',
-    'INTERVIEW_FAILED',
     'APPROVED',
     'REJECTED',
     'SUSPENDED',

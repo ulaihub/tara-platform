@@ -137,13 +137,10 @@ export function approvalBlockers(rider: AdminRider): string[] {
   if (approved < lines.length) {
     blockers.push(`Pièces validées : ${approved} sur ${lines.length}`);
   }
-  if (!rider.interview) blockers.push('Entretien au bureau à faire');
-  else if (!rider.interview.passed)
-    blockers.push('Entretien échoué : un nouvel entretien est exigé');
   return blockers;
 }
 
-/** Réactivation : les pièces doivent être valides (l'entretien a déjà été passé). */
+/** Réactivation : les pièces doivent être valides. */
 export function reactivationBlockers(rider: AdminRider): string[] {
   const lines = documentLines(rider.documents).filter((line) => line.required);
   const approved = lines.filter((line) => line.document?.status === 'APPROVED').length;
@@ -173,8 +170,6 @@ export const HISTORY_LABELS: Record<HistoryAction, string> = {
   APPLIED: 'Candidature envoyée',
   DOCUMENT_APPROVED: 'Pièce validée',
   DOCUMENT_REJECTED: 'Pièce refusée',
-  INTERVIEW_PASSED: 'Entretien réussi',
-  INTERVIEW_FAILED: 'Entretien échoué',
   APPROVED: 'Livreur validé',
   REJECTED: 'Candidature refusée',
   SUSPENDED: 'Livreur suspendu',
@@ -188,8 +183,6 @@ export const HISTORY_TONE: Record<HistoryAction, string> = {
   APPLIED: 'bg-faint',
   DOCUMENT_APPROVED: 'bg-ok',
   DOCUMENT_REJECTED: 'bg-danger',
-  INTERVIEW_PASSED: 'bg-ok',
-  INTERVIEW_FAILED: 'bg-danger',
   APPROVED: 'bg-ok',
   REJECTED: 'bg-danger',
   SUSPENDED: 'bg-danger',
@@ -239,14 +232,6 @@ export function documentSummary(rider: AdminRider): { text: string; tone: string
     };
   }
   return { text: 'Complètes', tone: 'text-ok' };
-}
-
-/** « Réussi », « Échoué » ou « À faire ». */
-export function interviewSummary(rider: AdminRider): { text: string; tone: string } {
-  if (!rider.interview) return { text: 'À faire', tone: 'text-muted' };
-  return rider.interview.passed
-    ? { text: 'Réussi', tone: 'text-ok' }
-    : { text: 'Échoué', tone: 'text-danger' };
 }
 
 /** « 4,6 » ; null sans note. */

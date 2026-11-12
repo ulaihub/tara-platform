@@ -109,14 +109,14 @@ le trajet enregistré pendant la course est lu.
 - `GET /admin/riders?view=&q=&limit=&cursor=` : vues `TO_REVIEW` (candidature en attente ou
   pièce envoyée à examiner), `PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`, `ALL` ; recherche
   par nom, numéro (saisie en chiffres) ou plaque (avec ou sans espaces) ; `counts` donne le
-  nombre de livreurs par vue. Chaque livreur porte ses pièces, l'entretien, la note moyenne,
+  nombre de livreurs par vue. Chaque livreur porte ses pièces, la note moyenne,
   les courses livrées en 30 jours et les pièces qui expirent dans les 30 jours.
-- `POST /admin/riders/{id}/interview` (`passed`, `note`) : entretien au bureau, tracé ;
-  **la validation (`decision: APPROVE`) exige un entretien réussi** (`RIDER_INTERVIEW_REQUIRED`).
+- Un candidat est validé (`decision: APPROVE`) dès que toutes ses pièces exigées sont
+  validées ; aucun entretien n'est demandé.
 - `GET /admin/riders/{id}/reliability` : sur 30 jours et depuis l'inscription, propositions
   acceptées, refusées ou sans réponse, courses livrées et à l'heure, échecs déclarés, colis
   refusés à l'enlèvement, notes, temps en ligne, alertes de course et SOS ; historique des
-  décisions lu dans le journal d'audit (pièces examinées, entretiens, validation, refus,
+  décisions lu dans le journal d'audit (pièces examinées, validation, refus,
   suspension, réactivation, suspension faute de dépôt, seuil de retrait gratuit).
 - Le back-office ouvre une pièce (`GET /admin/kyc-documents/{id}/file`, consultation tracée)
   dans un onglet isolé : images seulement affichées, PDF téléchargés.

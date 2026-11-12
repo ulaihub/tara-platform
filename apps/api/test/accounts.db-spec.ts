@@ -279,19 +279,6 @@ describe('Livreurs et pièces (A3, A5, H3)', () => {
       .send({ decision: 'APPROVED' })
       .expect(409);
 
-    // Pièces complètes, mais pas encore d'entretien au bureau : validation refusée.
-    const noInterview = await request(ctx.http)
-      .post(`/v1/admin/riders/${rider.riderId}/decision`)
-      .set(ops.auth)
-      .send({ decision: 'APPROVE' })
-      .expect(422);
-    expect(noInterview.body.error.code).toBe('RIDER_INTERVIEW_REQUIRED');
-    await request(ctx.http)
-      .post(`/v1/admin/riders/${rider.riderId}/interview`)
-      .set(ops.auth)
-      .send({ passed: true, note: 'Connaît bien Douala, moto en bon état.' })
-      .expect(200);
-
     const approved = await request(ctx.http)
       .post(`/v1/admin/riders/${rider.riderId}/decision`)
       .set(ops.auth)

@@ -23,7 +23,6 @@ import {
   REQUIRED_DOCUMENTS,
   type ReviewDocumentBody,
   type RiderDecisionBody,
-  type RiderInterviewBody,
   type RiderProfileDto,
   type UploadDocumentBody,
 } from './riders.schemas.js';
@@ -33,12 +32,10 @@ type RiderWithDocuments = RiderProfile & { documents: KycDocument[] };
 const ADMIN_INCLUDE = {
   documents: true,
   user: { select: { id: true, phone: true, fullName: true } },
-  interviewBy: { select: { phone: true, fullName: true } },
 } as const;
 
 type AdminRider = RiderWithDocuments & {
   user: { id: string; phone: string; fullName: string | null };
-  interviewBy: { phone: string; fullName: string | null } | null;
 };
 
 const DAY = 86_400_000;
@@ -348,17 +345,6 @@ export class RidersService {
       documentHistory: [...rider.documents]
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
         .map(toDocumentDto),
-      interview:
-        rider.interviewPassed !== null && rider.interviewAt && rider.interviewNote !== null
-          ? {
-              at: rider.interviewAt.toISOString(),
-              passed: rider.interviewPassed,
-              note: rider.interviewNote,
-              by: rider.interviewBy
-                ? (rider.interviewBy.fullName ?? rider.interviewBy.phone)
-                : null,
-            }
-          : null,
       pendingDocuments: latest.filter((doc) => doc.status === 'PENDING').length,
       expiringSoon: latest
         .filter((doc) => doc.status === 'APPROVED' && doc.expiresOn)
@@ -375,47 +361,6 @@ export class RidersService {
       deliveredLast30Days,
       cashSuspendedAt: rider.cashSuspendedAt?.toISOString() ?? null,
     };
-  }
-
-  /**
-   * Entretien au bureau (H3) : résultat et compte rendu, tracés. Un nouvel entretien
-   * remplace le précédent (l'ancien reste au journal d'audit).
-   */
-  async recordInterview(
-    actor: AuthUser,
-    riderId: string,
-    body: z.output<typeof RiderInterviewBody>,
-    request: Request,
-  ): Promise<z.output<typeof AdminRiderDto>> {
-    const rider = await this.prisma.riderProfile.findUnique({ where: { id: riderId } });
-    if (!rider) throw AppError.notFound('RIDER_NOT_FOUND');
-    if (rider.status === 'REJECTED') {
-      throw AppError.conflict('RIDER_DECISION_INVALID', { status: rider.status });
-    }
-    await this.prisma.$transaction(async (tx) => {
-      await tx.riderProfile.update({
-        where: { id: riderId },
-        data: {
-          interviewAt: new Date(),
-          interviewById: actor.id,
-          interviewPassed: body.passed,
-          interviewNote: body.note,
-        },
-      });
-      await this.audit.record(
-        {
-          actor,
-          action: 'rider.interview',
-          entityType: 'rider_profile',
-          entityId: riderId,
-          before: { passed: rider.interviewPassed, note: rider.interviewNote },
-          after: { passed: body.passed, note: body.note },
-          request,
-        },
-        tx,
-      );
-    });
-    return this.get(riderId);
   }
 
   /** Contenu déchiffré d'une pièce. Chaque consultation est tracée. */
@@ -526,9 +471,6 @@ export class RidersService {
           { missing },
         );
       }
-    }
-    if (body.decision === 'APPROVE' && rider.interviewPassed !== true) {
-      throw AppError.unprocessable('RIDER_INTERVIEW_REQUIRED');
     }
 
     const now = new Date();

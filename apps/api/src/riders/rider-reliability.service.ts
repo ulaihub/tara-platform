@@ -22,7 +22,6 @@ const HISTORY_ACTIONS: Record<string, HistoryAction | ((after: Json) => HistoryA
   'rider.reject': 'REJECTED',
   'rider.suspend': 'SUSPENDED',
   'rider.reactivate': 'REACTIVATED',
-  'rider.interview': (after) => (after.passed === true ? 'INTERVIEW_PASSED' : 'INTERVIEW_FAILED'),
   'rider.cash_overdue': 'CASH_OVERDUE',
   'rider.cash_suspended': 'CASH_SUSPENDED',
   'finance.free_payout_set': 'FREE_PAYOUT_SET',
@@ -41,9 +40,6 @@ function noteOf(action: HistoryAction, after: Json): string | null {
     case 'REJECTED':
     case 'SUSPENDED':
       return text(after.reason);
-    case 'INTERVIEW_PASSED':
-    case 'INTERVIEW_FAILED':
-      return text(after.note);
     case 'DOCUMENT_REJECTED':
       return text(after.rejectionReason);
     case 'FREE_PAYOUT_SET':

@@ -44,7 +44,7 @@ export const SECTIONS: readonly Section[] = [
     label: 'Livreurs',
     icon: 'moto',
     requirement: 'H3',
-    description: 'Validation des pièces et entretien, suspension, historique de fiabilité.',
+    description: 'Validation des pièces, suspension, historique de fiabilité.',
     roles: ['ADMIN', 'DISPATCHER'],
     ready: true,
   },

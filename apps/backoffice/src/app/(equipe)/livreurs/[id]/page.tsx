@@ -28,7 +28,7 @@ import {
   reactivationBlockers,
 } from '@/lib/riders';
 import type { AdminRider, FreePayout, RiderReliability } from '@/lib/schemas';
-import { DecisionButton, DocumentReview, FreePayoutForm, InterviewForm } from './rider-actions';
+import { DecisionButton, DocumentReview, FreePayoutForm } from './rider-actions';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -52,7 +52,7 @@ async function load(id: string): Promise<AdminRider> {
 
 /**
  * Fiche d'un livreur (H3) : pièces à examiner (ouvertes dans un onglet, validées ou
- * refusées avec motif), entretien au bureau, décision (valider, refuser, suspendre,
+ * refusées avec motif), décision (valider, refuser, suspendre,
  * réactiver), fiabilité sur 30 jours et depuis l'inscription, historique des décisions.
  */
 export default async function RiderPage({ params }: { params: Promise<{ id: string }> }) {
@@ -252,33 +252,6 @@ export default async function RiderPage({ params }: { params: Promise<{ id: stri
         <div className="space-y-5">
           <Decision rider={rider} />
 
-          <Section title="Entretien au bureau">
-            {rider.interview ? (
-              <div>
-                <p
-                  className={cx(
-                    'text-[15px] font-extrabold',
-                    rider.interview.passed ? 'text-ok' : 'text-danger',
-                  )}
-                >
-                  {rider.interview.passed ? 'Réussi' : 'Échoué'}
-                </p>
-                <p className="text-[13px] text-muted">
-                  {dateTime(rider.interview.at)}
-                  {rider.interview.by ? ` · ${rider.interview.by}` : ''}
-                </p>
-                <p className="mt-2 text-[14px]">{rider.interview.note}</p>
-              </div>
-            ) : (
-              <p className="text-[14px] text-muted">
-                Pas encore d’entretien. Il doit être réussi avant la validation.
-              </p>
-            )}
-            {rider.status === 'REJECTED' ? null : (
-              <InterviewForm riderId={rider.id} again={rider.interview !== null} />
-            )}
-          </Section>
-
           <Section title="Contacts">
             <Facts
               rows={[
@@ -330,12 +303,7 @@ function Decision({ rider }: { rider: AdminRider }) {
     const blockers = approvalBlockers(rider);
     return (
       <Section title="Décision">
-        <Checklist
-          items={[
-            ['Toutes les pièces validées', !blockers.some((b) => b.startsWith('Pièces'))],
-            ['Entretien réussi', rider.interview?.passed === true],
-          ]}
-        />
+        <Checklist items={[['Toutes les pièces validées', blockers.length === 0]]} />
         {blockers.length > 0 ? (
           <p className="mt-3 text-[13px] font-bold text-warn">{blockers.join(' · ')}</p>
         ) : null}

@@ -64,14 +64,6 @@ async function review(staff: SignedIn, id: string, rejectionReason?: string) {
     .expect(200);
 }
 
-async function interview(staff: SignedIn, riderId: string, passed: boolean, note: string) {
-  await request(http)
-    .post(`/v1/admin/riders/${riderId}/interview`)
-    .set(staff.auth)
-    .send({ passed, note })
-    .expect(200);
-}
-
 async function decide(staff: SignedIn, riderId: string, decision: string, reason?: string) {
   await request(http)
     .post(`/v1/admin/riders/${riderId}/decision`)
@@ -111,14 +103,14 @@ try {
     data: { fullName: 'Mireille Ndongo' },
   });
 
-  // 1. Candidat complet : toutes ses pièces attendent l'examen, pas encore d'entretien.
+  // 1. Candidat complet : toutes ses pièces attendent l'examen.
   if (!(await existing('Ibrahim Nfor'))) {
     const ibrahim = await candidate('Ibrahim Nfor', 'LT 482 KB');
     for (const type of firstTypes) await upload(ibrahim, type, expiryOf(type));
   }
   log('Candidat à examiner : Ibrahim Nfor');
 
-  // 2. Candidate presque prête : pièces validées, selfie flou refusé puis renvoyé, entretien réussi.
+  // 2. Candidate presque prête : pièces validées, selfie flou refusé puis renvoyé.
   if (!(await existing('Sandrine Mvogo'))) {
     const sandrine = await candidate('Sandrine Mvogo', 'LT 913 SM');
     for (const type of firstTypes.filter((type) => type !== 'SELFIE')) {
@@ -130,27 +122,15 @@ try {
       'Photo floue, visage caché par le casque',
     );
     await upload(sandrine, 'SELFIE');
-    await interview(
-      dispatch,
-      sandrine.riderId,
-      true,
-      'Connaît bien Akwa et Bonapriso, moto en bon état, a compris les règles d’encaissement.',
-    );
   }
   log('Candidate presque prête : Sandrine Mvogo');
 
-  // 3. Candidat incomplet, entretien échoué.
+  // 3. Candidat incomplet : trois pièces validées, les autres pas encore envoyées.
   if (!(await existing('Jean-Pierre Kamga'))) {
     const jp = await candidate('Jean-Pierre Kamga', 'LT 207 JK');
     for (const type of ['NATIONAL_ID_FRONT', 'NATIONAL_ID_BACK', 'DRIVING_LICENSE'] as const) {
       await review(dispatch, await upload(jp, type, expiryOf(type)));
     }
-    await interview(
-      dispatch,
-      jp.riderId,
-      false,
-      'Ne connaît pas encore les quartiers ; à revoir dans un mois.',
-    );
   }
   log('Candidat incomplet : Jean-Pierre Kamga');
 
@@ -162,12 +142,6 @@ try {
       const id = await upload(session, type, expiryOf(type, type === 'INSURANCE' ? 12 : 400));
       await review(dispatch, id);
     }
-    await interview(
-      dispatch,
-      session.riderId,
-      true,
-      'Ancienne livreuse de repas, très à l’aise au guidon et polie au téléphone.',
-    );
     await decide(dispatch, session.riderId, 'APPROVE');
     aminatou = { riderId: session.riderId, userId: session.userId };
   }
@@ -184,7 +158,6 @@ try {
     const herve = await candidate('Hervé Tchoupo', 'LT 318 HT');
     for (const type of firstTypes)
       await review(dispatch, await upload(herve, type, expiryOf(type)));
-    await interview(dispatch, herve.riderId, true, 'Bon entretien.');
     await decide(dispatch, herve.riderId, 'APPROVE');
     await decide(
       dispatch,

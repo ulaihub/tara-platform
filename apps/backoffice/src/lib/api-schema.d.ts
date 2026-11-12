@@ -404,22 +404,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/v1/admin/riders/{riderId}/interview': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['AdminRiders_interview'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/v1/admin/riders/{riderId}': {
     parameters: {
       query?: never;
@@ -2352,13 +2336,6 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
       documentHistory: components['schemas']['KycDocument'][];
-      interview: {
-        /** Format: date-time */
-        at: string;
-        passed: boolean;
-        note: string;
-        by: string | null;
-      } | null;
       pendingDocuments: number;
       expiringSoon: {
         type: components['schemas']['KycDocumentType'];
@@ -2650,7 +2627,6 @@ export interface components {
           | 'RIDER_ALREADY_APPLIED'
           | 'RIDER_NOT_FOUND'
           | 'RIDER_DOCUMENTS_INCOMPLETE'
-          | 'RIDER_INTERVIEW_REQUIRED'
           | 'RIDER_DECISION_INVALID'
           | 'KYC_DOCUMENT_NOT_FOUND'
           | 'KYC_DOCUMENT_ALREADY_REVIEWED'
@@ -3392,8 +3368,6 @@ export interface components {
       | 'APPLIED'
       | 'DOCUMENT_APPROVED'
       | 'DOCUMENT_REJECTED'
-      | 'INTERVIEW_PASSED'
-      | 'INTERVIEW_FAILED'
       | 'APPROVED'
       | 'REJECTED'
       | 'SUSPENDED'
@@ -4446,35 +4420,6 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['RiderReliability'];
-        };
-      };
-    };
-  };
-  AdminRiders_interview: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        riderId: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': {
-          passed: boolean;
-          note: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Succès */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['AdminRider'];
         };
       };
     };

@@ -1253,65 +1253,6 @@
         ]
       }
     },
-    "/v1/admin/riders/{riderId}/interview": {
-      "post": {
-        "operationId": "AdminRiders_interview",
-        "parameters": [
-          {
-            "name": "riderId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "passed": {
-                    "type": "boolean"
-                  },
-                  "note": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 500
-                  }
-                },
-                "required": [
-                  "passed",
-                  "note"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminRider"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Back-office · livreurs"
-        ]
-      }
-    },
     "/v1/admin/riders/{riderId}": {
       "get": {
         "operationId": "AdminRiders_get",
@@ -8684,33 +8625,6 @@
               "$ref": "#/components/schemas/KycDocument"
             }
           },
-          "interview": {
-            "nullable": true,
-            "type": "object",
-            "properties": {
-              "at": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "passed": {
-                "type": "boolean"
-              },
-              "note": {
-                "type": "string"
-              },
-              "by": {
-                "nullable": true,
-                "type": "string"
-              }
-            },
-            "required": [
-              "at",
-              "passed",
-              "note",
-              "by"
-            ],
-            "additionalProperties": false
-          },
           "pendingDocuments": {
             "type": "integer"
           },
@@ -8776,7 +8690,6 @@
           "user",
           "createdAt",
           "documentHistory",
-          "interview",
           "pendingDocuments",
           "expiringSoon",
           "rating",
@@ -9729,7 +9642,6 @@
                   "RIDER_ALREADY_APPLIED",
                   "RIDER_NOT_FOUND",
                   "RIDER_DOCUMENTS_INCOMPLETE",
-                  "RIDER_INTERVIEW_REQUIRED",
                   "RIDER_DECISION_INVALID",
                   "KYC_DOCUMENT_NOT_FOUND",
                   "KYC_DOCUMENT_ALREADY_REVIEWED",
@@ -12270,8 +12182,6 @@
           "APPLIED",
           "DOCUMENT_APPROVED",
           "DOCUMENT_REJECTED",
-          "INTERVIEW_PASSED",
-          "INTERVIEW_FAILED",
           "APPROVED",
           "REJECTED",
           "SUSPENDED",

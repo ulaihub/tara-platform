@@ -42,7 +42,6 @@ import {
   REQUIRED_DOCUMENTS,
   ReviewDocumentBody,
   RiderDecisionBody,
-  RiderInterviewBody,
   RiderProfileDto,
   RiderReliabilityDto,
   UploadDocumentBody,
@@ -167,20 +166,6 @@ export class AdminRidersController {
     @Param('riderId', ParseUUIDPipe) riderId: string,
   ): Promise<z.output<typeof RiderReliabilityDto>> {
     return this.reliability.reliability(riderId);
-  }
-
-  /** Entretien au bureau : réussi, il permet la validation ; tracé au journal d'audit. */
-  @Post('riders/:riderId/interview')
-  @HttpCode(HttpStatus.OK)
-  @ApiZodBody(RiderInterviewBody)
-  @ApiZodResponse(AdminRiderDto)
-  interview(
-    @CurrentUser() user: AuthUser,
-    @Param('riderId', ParseUUIDPipe) riderId: string,
-    @ValidBody(RiderInterviewBody) body: z.output<typeof RiderInterviewBody>,
-    @Req() request: Request,
-  ): Promise<z.output<typeof AdminRiderDto>> {
-    return this.riders.recordInterview(user, riderId, body, request);
   }
 
   @Get('riders/:riderId')

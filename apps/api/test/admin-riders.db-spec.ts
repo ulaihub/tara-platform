@@ -21,8 +21,8 @@ const MINUTE = 60_000;
 const DAY = 86_400_000;
 
 /**
- * Écran Livreurs du back-office (H3) : vues et recherche, entretien exigé avant la
- * validation, fiabilité sur 30 jours et depuis l'inscription, historique des décisions.
+ * Écran Livreurs du back-office (H3) : vues et recherche, validation sur pièces, fiabilité
+ * sur 30 jours et depuis l'inscription, historique des décisions.
  */
 describe('Back-office · livreurs (H3)', () => {
   let ctx: TestContext;
@@ -95,7 +95,6 @@ describe('Back-office · livreurs (H3)', () => {
     expect(row).toMatchObject({
       status: 'PENDING',
       pendingDocuments: REQUIRED_DOCUMENTS.length,
-      interview: null,
       rating: { average: null, count: 0 },
       deliveredLast30Days: 0,
     });
@@ -111,56 +110,6 @@ describe('Back-office · livreurs (H3)', () => {
       expect(found.body.items.map((r: { id: string }) => r.id)).toEqual([pending.riderId]);
     }
     await request(ctx.http).get('/v1/admin/riders?view=WRONG').set(ops.auth).expect(400);
-  });
-
-  it('ne valide qu’après un entretien réussi, tracé avec son auteur', async () => {
-    const rider = await candidate('Paul Ekane', 'LT 555 PE');
-    await approveAllDocuments(rider.riderId);
-    const decide = () =>
-      request(ctx.http)
-        .post(`/v1/admin/riders/${rider.riderId}/decision`)
-        .set(ops.auth)
-        .send({ decision: 'APPROVE' });
-
-    expect((await decide().expect(422)).body.error.code).toBe('RIDER_INTERVIEW_REQUIRED');
-    const failed = await request(ctx.http)
-      .post(`/v1/admin/riders/${rider.riderId}/interview`)
-      .set(ops.auth)
-      .send({ passed: false, note: 'Ne connaît pas les quartiers, à revoir dans un mois.' })
-      .expect(200);
-    expect(failed.body.interview).toMatchObject({ passed: false, by: 'Awa Dispatch' });
-    expect((await decide().expect(422)).body.error.code).toBe('RIDER_INTERVIEW_REQUIRED');
-
-    await request(ctx.http)
-      .post(`/v1/admin/riders/${rider.riderId}/interview`)
-      .set(ops.auth)
-      .send({ passed: true, note: 'Ok' })
-      .expect(400);
-    await request(ctx.http)
-      .post(`/v1/admin/riders/${rider.riderId}/interview`)
-      .set(ops.auth)
-      .send({ passed: true, note: 'Deuxième entretien : itinéraires maîtrisés.' })
-      .expect(200);
-    const approved = await decide().expect(200);
-    expect(approved.body).toMatchObject({
-      status: 'ACTIVE',
-      interview: { passed: true, note: 'Deuxième entretien : itinéraires maîtrisés.' },
-    });
-
-    const logs = await ctx.prisma.auditLog.findMany({
-      where: { entityId: rider.riderId, action: 'rider.interview' },
-      orderBy: { createdAt: 'asc' },
-    });
-    expect(logs.map((log) => (log.after as { passed: boolean }).passed)).toEqual([false, true]);
-    expect(logs[0]?.actorId).toBe(ops.userId);
-
-    // Le support ne valide pas les livreurs.
-    const support = await staffUser(ctx, ['SUPPORT']);
-    await request(ctx.http)
-      .post(`/v1/admin/riders/${rider.riderId}/interview`)
-      .set(support.auth)
-      .send({ passed: true, note: 'Tentative du support' })
-      .expect(403);
   });
 
   it('calcule la fiabilité sur 30 jours et depuis l’inscription', async () => {
@@ -314,7 +263,7 @@ describe('Back-office · livreurs (H3)', () => {
     expect(row.body.deliveredLast30Days).toBe(2);
   });
 
-  it('retrace les décisions : pièces, entretien, validation, suspension avec motif', async () => {
+  it('retrace les décisions : pièces, validation, suspension avec motif', async () => {
     const rider = await candidate('Sandrine Mvogo', 'LT 777 SM');
     await approveAllDocuments(rider.riderId);
     const selfie = await request(ctx.http)
@@ -336,11 +285,6 @@ describe('Back-office · livreurs (H3)', () => {
       .attach('file', PNG, { filename: 'selfie.png', contentType: 'image/png' })
       .expect(201);
     await approveAllDocuments(rider.riderId);
-    await request(ctx.http)
-      .post(`/v1/admin/riders/${rider.riderId}/interview`)
-      .set(ops.auth)
-      .send({ passed: true, note: 'Très motivée.' })
-      .expect(200);
     await request(ctx.http)
       .post(`/v1/admin/riders/${rider.riderId}/decision`)
       .set(ops.auth)
@@ -367,7 +311,7 @@ describe('Back-office · livreurs (H3)', () => {
       note: string | null;
       documentType: string | null;
     }[];
-    expect(history.slice(0, 5)).toEqual([
+    expect(history.slice(0, 4)).toEqual([
       {
         at: expect.any(String),
         action: 'SUSPENDED',
@@ -380,13 +324,6 @@ describe('Back-office · livreurs (H3)', () => {
         action: 'APPROVED',
         by: 'Awa Dispatch',
         note: null,
-        documentType: null,
-      },
-      {
-        at: expect.any(String),
-        action: 'INTERVIEW_PASSED',
-        by: 'Awa Dispatch',
-        note: 'Très motivée.',
         documentType: null,
       },
       {

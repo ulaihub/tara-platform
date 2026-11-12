@@ -50,7 +50,6 @@ function rider(overrides: Partial<AdminRider> = {}): AdminRider {
     user: { id: 'u1', phone: '+237690000001', fullName: 'Ibrahim Nfor' },
     createdAt: '2026-11-01T08:00:00Z',
     documentHistory: ALL_APPROVED,
-    interview: null,
     pendingDocuments: 0,
     expiringSoon: [],
     rating: { average: null, count: 0 },
@@ -84,21 +83,11 @@ describe('livreurs au back-office', () => {
     expect(lines[7]).toMatchObject({ label: 'CNI du garant', required: false });
   });
 
-  it('dit ce qui manque avant la validation : pièces puis entretien', () => {
-    expect(approvalBlockers(rider())).toEqual(['Entretien au bureau à faire']);
-    expect(
-      approvalBlockers(
-        rider({
-          documents: ALL_APPROVED.slice(1),
-          interview: { at: '2026-11-02T08:00:00Z', passed: false, note: 'À revoir', by: 'Awa' },
-        }),
-      ),
-    ).toEqual(['Pièces validées : 6 sur 7', 'Entretien échoué : un nouvel entretien est exigé']);
-    expect(
-      approvalBlockers(
-        rider({ interview: { at: '2026-11-02T08:00:00Z', passed: true, note: 'Bien', by: 'Awa' } }),
-      ),
-    ).toEqual([]);
+  it('ne valide qu’avec toutes les pièces exigées validées', () => {
+    expect(approvalBlockers(rider())).toEqual([]);
+    expect(approvalBlockers(rider({ documents: ALL_APPROVED.slice(1) }))).toEqual([
+      'Pièces validées : 6 sur 7',
+    ]);
   });
 
   it('résume les pièces : à examiner d’abord, puis manquantes, puis échéance proche', () => {
