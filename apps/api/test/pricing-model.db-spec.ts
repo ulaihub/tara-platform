@@ -277,5 +277,37 @@ describe('Modèle de prix (H4) : tarif pro et primes des livreurs', () => {
     // Toutes les zones, y compris coupées, pour l'écran Zones.
     const zones = await request(ctx.http).get('/v1/admin/zones').set(admin.auth).expect(200);
     expect(zones.body.some((zone: { kind: string }) => zone.kind === 'SERVICE_AREA')).toBe(true);
+    // Contours de toutes les zones pour la carte du back-office, puis une zone dessinée.
+    const map = await request(ctx.http).get('/v1/admin/zones/map').set(admin.auth).expect(200);
+    expect(map.body.features[0]).toMatchObject({
+      properties: { kind: expect.any(String), active: expect.any(Boolean) },
+      geometry: { type: expect.stringMatching(/Polygon/) },
+    });
+    const drawn = await request(ctx.http)
+      .post('/v1/admin/zones')
+      .set(admin.auth)
+      .send({
+        name: `Marché Central ${Date.now()}`,
+        city: 'Douala',
+        kind: 'NO_MOTORBIKE',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [9.701, 4.046],
+              [9.705, 4.046],
+              [9.705, 4.049],
+              [9.701, 4.049],
+              [9.701, 4.046],
+            ],
+          ],
+        },
+      })
+      .expect(201);
+    await request(ctx.http)
+      .patch(`/v1/admin/zones/${drawn.body.id as string}`)
+      .set(admin.auth)
+      .send({ active: false })
+      .expect(200);
   });
 });

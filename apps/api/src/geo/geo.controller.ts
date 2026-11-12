@@ -41,6 +41,7 @@ import {
   ZoneDto,
   ZoneListQuery,
   ZonePatchBody,
+  AdminZonesMapDto,
 } from './geo.schemas.js';
 import { LocationLinksService } from './location-links.service.js';
 import { ZonesRepository } from './zones.repository.js';
@@ -226,6 +227,26 @@ export class AdminZonesController {
       select: { id: true, name: true, city: true, kind: true, active: true },
       orderBy: [{ kind: 'asc' }, { name: 'asc' }],
     });
+  }
+
+  /** Contours de toutes les zones, pour la carte où l'équipe dessine les nouvelles (H4). */
+  @Get('map')
+  @ApiZodQuery(MapZonesQuery)
+  @ApiZodResponse(AdminZonesMapDto)
+  async map(
+    @ValidQuery(MapZonesQuery) query: z.output<typeof MapZonesQuery>,
+  ): Promise<z.output<typeof AdminZonesMapDto>> {
+    const rows = await this.zones.adminFeatures(query.city);
+    return {
+      type: 'FeatureCollection',
+      features: rows.map((row) => ({
+        type: 'Feature',
+        properties: { id: row.id, name: row.name, kind: row.kind, active: row.active },
+        geometry: JSON.parse(row.geometry) as z.output<
+          typeof AdminZonesMapDto
+        >['features'][number]['geometry'],
+      })),
+    };
   }
 
   /** Importe un polygone GeoJSON (coordonnées [longitude, latitude]). */

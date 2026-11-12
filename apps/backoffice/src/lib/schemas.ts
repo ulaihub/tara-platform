@@ -41,3 +41,4 @@ export type Metrics = Schemas['Metrics'];
 export type TeamMember = Schemas['TeamMember'];
 export type AuditEntry = Schemas['AuditEntry'];
 export type AuditPage = Schemas['AuditPage'];
+export type AdminZonesMap = Schemas['AdminZonesMap'];

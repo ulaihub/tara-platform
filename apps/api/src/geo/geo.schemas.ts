@@ -147,3 +147,25 @@ export const MapZonesDto = z
     ),
   })
   .meta({ id: 'MapZones' });
+
+/** Contours de toutes les zones, actives ou coupées, pour la carte du back-office (H4). */
+export const AdminZonesMapDto = z
+  .object({
+    type: z.literal('FeatureCollection'),
+    features: z.array(
+      z.object({
+        type: z.literal('Feature'),
+        properties: z.object({
+          id: z.uuid(),
+          name: z.string(),
+          kind: ZoneKindEnum,
+          active: z.boolean(),
+        }),
+        geometry: z.object({
+          type: z.enum(['Polygon', 'MultiPolygon']),
+          coordinates: z.array(z.unknown()),
+        }),
+      }),
+    ),
+  })
+  .meta({ id: 'AdminZonesMap' });

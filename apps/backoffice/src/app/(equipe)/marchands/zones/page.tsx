@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { requireStaff, staffApi } from '@/lib/dal';
 import { PRICING_ROLES, ZONE_KIND_LABELS } from '@/lib/merchants';
-import type { Zone } from '@/lib/schemas';
+import type { AdminZonesMap, Zone } from '@/lib/schemas';
 import { ZoneToggle } from '../row-actions';
 import { MerchantsHeader } from '../tabs';
+import { ZoneMap } from './zone-map';
 
 export const metadata: Metadata = { title: 'Zones' };
 
@@ -17,7 +18,10 @@ const HINTS: Record<Zone['kind'], string> = {
 /** Zones (B6, H4) : zone desservie, zones interdites aux motos, quartiers ; coupées ou actives. */
 export default async function ZonesPage() {
   await requireStaff(PRICING_ROLES);
-  const zones = await staffApi<Zone[]>('/admin/zones', { query: { city: 'Douala' } });
+  const [zones, map] = await Promise.all([
+    staffApi<Zone[]>('/admin/zones', { query: { city: 'Douala' } }),
+    staffApi<AdminZonesMap>('/admin/zones/map', { query: { city: 'Douala' } }),
+  ]);
 
   return (
     <div className="mx-auto max-w-[1280px]">
@@ -25,6 +29,10 @@ export default async function ZonesPage() {
         current="/marchands/zones"
         aside="Couper une zone l’enlève tout de suite des apps ; la rétablir la remet."
       />
+      <section className="mb-5 rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <h2 className="mb-3 font-display text-[17px] font-bold">Carte des zones</h2>
+        <ZoneMap zones={map} />
+      </section>
       <div className="space-y-5">
         {ORDER.map((kind) => {
           const items = zones.filter((zone) => zone.kind === kind);

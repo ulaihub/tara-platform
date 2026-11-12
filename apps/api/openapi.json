@@ -2068,6 +2068,43 @@
         ]
       }
     },
+    "/v1/admin/zones/map": {
+      "get": {
+        "operationId": "AdminZones_map",
+        "parameters": [
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminZonesMap"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · zones"
+        ]
+      }
+    },
     "/v1/admin/zones/{id}": {
       "patch": {
         "operationId": "AdminZones_patch",
@@ -10940,6 +10977,88 @@
           "RESOLVED",
           "ALL"
         ]
+      },
+      "AdminZonesMap": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FeatureCollection"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Feature"
+                  ]
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "$ref": "#/components/schemas/ZoneKind"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "kind",
+                    "active"
+                  ],
+                  "additionalProperties": false
+                },
+                "geometry": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "Polygon",
+                        "MultiPolygon"
+                      ]
+                    },
+                    "coordinates": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "coordinates"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "type",
+                "properties",
+                "geometry"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "type",
+          "features"
+        ],
+        "additionalProperties": false
       },
       "AppConfig": {
         "type": "object",

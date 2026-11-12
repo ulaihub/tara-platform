@@ -596,6 +596,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/zones/map': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminZones_map'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/admin/zones/{id}': {
     parameters: {
       query?: never;
@@ -2903,6 +2919,26 @@ export interface components {
     };
     /** @enum {string} */
     AdminTicketView: 'TO_HANDLE' | 'MINE' | 'URGENT' | 'RESOLVED' | 'ALL';
+    AdminZonesMap: {
+      /** @enum {string} */
+      type: 'FeatureCollection';
+      features: {
+        /** @enum {string} */
+        type: 'Feature';
+        properties: {
+          /** Format: uuid */
+          id: string;
+          name: string;
+          kind: components['schemas']['ZoneKind'];
+          active: boolean;
+        };
+        geometry: {
+          /** @enum {string} */
+          type: 'Polygon' | 'MultiPolygon';
+          coordinates: unknown[];
+        };
+      }[];
+    };
     AppConfig: {
       country: {
         code: string;
@@ -5633,6 +5669,28 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Zone'];
+        };
+      };
+    };
+  };
+  AdminZones_map: {
+    parameters: {
+      query?: {
+        city?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminZonesMap'];
         };
       };
     };

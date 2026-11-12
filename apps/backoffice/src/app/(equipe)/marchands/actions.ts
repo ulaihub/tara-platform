@@ -284,3 +284,54 @@ export async function toggleZone(_: ActionState, form: FormData): Promise<Action
   revalidatePath('/marchands/zones');
   return { error: null, done: true };
 }
+
+const ZONE_KINDS = ['SERVICE_AREA', 'NO_MOTORBIKE', 'NEIGHBORHOOD'];
+
+/** Zone dessinée sur la carte : polygone fermé, vérifié par le serveur avant d'être gardé. */
+export async function createZone(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireStaff(PRICING_ROLES);
+  const name = field(form, 'name');
+  const kind = field(form, 'kind');
+  let points: unknown;
+  try {
+    points = JSON.parse(field(form, 'points') || '[]');
+  } catch {
+    points = [];
+  }
+  const ring = Array.isArray(points)
+    ? points.filter(
+        (point): point is [number, number] =>
+          Array.isArray(point) &&
+          point.length === 2 &&
+          point.every((value) => typeof value === 'number' && Number.isFinite(value)) &&
+          Math.abs(point[0]) <= 180 &&
+          Math.abs(point[1]) <= 90,
+      )
+    : [];
+  if (name.length < 2) return { error: 'Donnez un nom à la zone.', done: false };
+  if (!ZONE_KINDS.includes(kind)) return { error: 'Choisissez le type de zone.', done: false };
+  if (ring.length < 3 || ring.length > 200) {
+    return { error: 'Placez au moins 3 points sur la carte.', done: false };
+  }
+  try {
+    await staffApi('/admin/zones', {
+      method: 'POST',
+      body: {
+        name,
+        city: 'Douala',
+        kind,
+        geometry: { type: 'Polygon', coordinates: [[...ring, ring[0]]] },
+      },
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'ZONE_GEOMETRY_INVALID') {
+      return {
+        error: 'Le contour se croise : replacez les points dans l’ordre, en faisant le tour.',
+        done: false,
+      };
+    }
+    return failure(error);
+  }
+  revalidatePath('/marchands/zones');
+  return { error: null, done: true };
+}
