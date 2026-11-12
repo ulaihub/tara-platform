@@ -8701,6 +8701,42 @@
           "Back-office · marchands"
         ]
       }
+    },
+    "/v1/admin/metrics": {
+      "get": {
+        "operationId": "Metrics_get",
+        "parameters": [
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 30,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metrics"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · indicateurs"
+        ]
+      }
     }
   },
   "info": {
@@ -12498,6 +12534,321 @@
           "plan",
           "rccm",
           "niu"
+        ],
+        "additionalProperties": false
+      },
+      "Metrics": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "days": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "days"
+            ],
+            "additionalProperties": false
+          },
+          "daily": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "day": {
+                  "type": "string"
+                },
+                "delivered": {
+                  "type": "integer"
+                },
+                "failed": {
+                  "type": "integer"
+                },
+                "returned": {
+                  "type": "integer"
+                },
+                "cancelled": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "day",
+                "delivered",
+                "failed",
+                "returned",
+                "cancelled"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "deliveries": {
+            "type": "object",
+            "properties": {
+              "created": {
+                "type": "integer"
+              },
+              "delivered": {
+                "type": "integer"
+              },
+              "returned": {
+                "type": "integer"
+              },
+              "cancelled": {
+                "type": "integer"
+              },
+              "successRate": {
+                "nullable": true,
+                "type": "number"
+              },
+              "firstAttemptRate": {
+                "nullable": true,
+                "type": "number"
+              },
+              "previousDelivered": {
+                "type": "integer"
+              },
+              "previousSuccessRate": {
+                "nullable": true,
+                "type": "number"
+              }
+            },
+            "required": [
+              "created",
+              "delivered",
+              "returned",
+              "cancelled",
+              "successRate",
+              "firstAttemptRate",
+              "previousDelivered",
+              "previousSuccessRate"
+            ],
+            "additionalProperties": false
+          },
+          "delays": {
+            "type": "object",
+            "properties": {
+              "assign": {
+                "type": "object",
+                "properties": {
+                  "median": {
+                    "nullable": true,
+                    "type": "number"
+                  },
+                  "p90": {
+                    "nullable": true,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "median",
+                  "p90"
+                ],
+                "additionalProperties": false
+              },
+              "delivery": {
+                "type": "object",
+                "properties": {
+                  "median": {
+                    "nullable": true,
+                    "type": "number"
+                  },
+                  "p90": {
+                    "nullable": true,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "median",
+                  "p90"
+                ],
+                "additionalProperties": false
+              },
+              "total": {
+                "type": "object",
+                "properties": {
+                  "median": {
+                    "nullable": true,
+                    "type": "number"
+                  },
+                  "p90": {
+                    "nullable": true,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "median",
+                  "p90"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "assign",
+              "delivery",
+              "total"
+            ],
+            "additionalProperties": false
+          },
+          "payouts": {
+            "type": "object",
+            "properties": {
+              "merchantPayouts": {
+                "type": "integer"
+              },
+              "sameDay": {
+                "type": "integer"
+              },
+              "sameDayRate": {
+                "nullable": true,
+                "type": "number"
+              }
+            },
+            "required": [
+              "merchantPayouts",
+              "sameDay",
+              "sameDayRate"
+            ],
+            "additionalProperties": false
+          },
+          "riders": {
+            "type": "object",
+            "properties": {
+              "active": {
+                "type": "integer"
+              },
+              "perRiderDay": {
+                "nullable": true,
+                "type": "number"
+              },
+              "top": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "riderId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "delivered": {
+                      "type": "integer"
+                    },
+                    "rating": {
+                      "nullable": true,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "riderId",
+                    "name",
+                    "delivered",
+                    "rating"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "active",
+              "perRiderDay",
+              "top"
+            ],
+            "additionalProperties": false
+          },
+          "merchants": {
+            "type": "object",
+            "properties": {
+              "active": {
+                "type": "integer"
+              },
+              "previousActive": {
+                "type": "integer"
+              },
+              "retained": {
+                "type": "integer"
+              },
+              "retentionRate": {
+                "nullable": true,
+                "type": "number"
+              },
+              "new": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "active",
+              "previousActive",
+              "retained",
+              "retentionRate",
+              "new"
+            ],
+            "additionalProperties": false
+          },
+          "reconciliation": {
+            "type": "object",
+            "properties": {
+              "daysChecked": {
+                "type": "integer"
+              },
+              "daysWithIssues": {
+                "type": "integer"
+              },
+              "issues": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "daysChecked",
+              "daysWithIssues",
+              "issues"
+            ],
+            "additionalProperties": false
+          },
+          "ratings": {
+            "type": "object",
+            "properties": {
+              "average": {
+                "nullable": true,
+                "type": "number"
+              },
+              "count": {
+                "type": "integer"
+              },
+              "lowRated": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "average",
+              "count",
+              "lowRated"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "period",
+          "daily",
+          "deliveries",
+          "delays",
+          "payouts",
+          "riders",
+          "merchants",
+          "reconciliation",
+          "ratings"
         ],
         "additionalProperties": false
       },

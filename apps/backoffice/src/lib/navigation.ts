@@ -82,7 +82,7 @@ export const SECTIONS: readonly Section[] = [
     requirement: 'H7',
     description: 'Livraisons par jour, réussite, délais, reversements, notes des livreurs.',
     roles: ALL,
-    ready: false,
+    ready: true,
   },
   {
     href: '/equipe',

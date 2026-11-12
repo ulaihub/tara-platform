@@ -2340,6 +2340,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/metrics': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Metrics_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3408,6 +3424,77 @@ export interface components {
       plan: 'FREE' | 'PRO' | 'BUSINESS';
       rccm: string | null;
       niu: string | null;
+    };
+    Metrics: {
+      period: {
+        from: string;
+        to: string;
+        days: number;
+      };
+      daily: {
+        day: string;
+        delivered: number;
+        failed: number;
+        returned: number;
+        cancelled: number;
+      }[];
+      deliveries: {
+        created: number;
+        delivered: number;
+        returned: number;
+        cancelled: number;
+        successRate: number | null;
+        firstAttemptRate: number | null;
+        previousDelivered: number;
+        previousSuccessRate: number | null;
+      };
+      delays: {
+        assign: {
+          median: number | null;
+          p90: number | null;
+        };
+        delivery: {
+          median: number | null;
+          p90: number | null;
+        };
+        total: {
+          median: number | null;
+          p90: number | null;
+        };
+      };
+      payouts: {
+        merchantPayouts: number;
+        sameDay: number;
+        sameDayRate: number | null;
+      };
+      riders: {
+        active: number;
+        perRiderDay: number | null;
+        top: {
+          /** Format: uuid */
+          riderId: string;
+          name: string | null;
+          delivered: number;
+          rating: number | null;
+        }[];
+      };
+      merchants: {
+        active: number;
+        previousActive: number;
+        retained: number;
+        retentionRate: number | null;
+        new: number;
+      };
+      reconciliation: {
+        daysChecked: number;
+        daysWithIssues: number;
+        issues: number;
+      };
+      ratings: {
+        average: number | null;
+        count: number;
+        lowRated: number;
+      };
     };
     MfaSetup: {
       /** @description À saisir dans l’application si le QR code ne peut pas être lu */
@@ -8725,6 +8812,28 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['AdminMerchant'];
+        };
+      };
+    };
+  };
+  Metrics_get: {
+    parameters: {
+      query?: {
+        days?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Metrics'];
         };
       };
     };
