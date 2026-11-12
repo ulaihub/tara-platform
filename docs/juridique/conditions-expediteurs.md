@@ -34,6 +34,9 @@ encaisse les paiements et suit chaque course.
   distance et, s'il y a lieu, des suppléments affichés : livraison express, colis très
   volumineux (XL), livraison de nuit (de 20 h à 6 h), fortes pluies. Un code promo réduit le
   prix affiché.
+- **Paiement par Mobile Money** (MTN MoMo, Orange Money) : des frais Mobile Money s'ajoutent
+  au montant, affichés avant que vous validiez. En espèces, vous ne payez rien de plus. Ces
+  frais couvrent ceux de l'opérateur ; ils ne sont pas rendus si la commande est annulée.
 - **Gros objets** (réfrigérateur, cuisinière, matelas, meuble…) : choisissez « Gros objet ».
   La course se fait en tricycle ou en voiture, à un tarif propre affiché avant de commander.
   Si vous demandez de l'aide pour charger (deux personnes), un supplément de manutention
@@ -108,6 +111,9 @@ Vous choisissez, avant de commander :
   des frais de 2 % (250 FCFA au moins).
 - Votre portefeuille vous est reversé chaque jour (par défaut à 18 h) sur votre numéro Mobile
   Money, à partir de 500 FCFA disponibles.
+- **Frais de retrait** : un reversement est gratuit à partir d'un montant fixé pour votre
+  boutique selon vos transactions avec Tara (affiché dans l'application). En dessous, les frais
+  Mobile Money de l'envoi (2,5 % aujourd'hui) sont retenus sur le montant reçu.
 - Votre relevé mensuel est disponible dans l'application.
 
 **[À VALIDER : encaisser pour le compte de boutiques puis leur reverser peut relever de la

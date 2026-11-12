@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:tara_core/money/mobile_money_fees.dart';
 
 import '../../core/api/client_models.dart';
 
@@ -122,6 +123,15 @@ class OrderDraft extends ChangeNotifier {
   /// Toutes les livraisons ont leur adresse et leur prix.
   bool get allQuoted => deliveries.every((d) => d.dropoff != null && d.quote != null);
   int get total => deliveries.fold(0, (sum, d) => sum + (d.quote?.totalPrice ?? 0));
+
+  /// Taux des frais Mobile Money (réglages de l'app), en points de base.
+  int mobileMoneyFeeBps = 0;
+
+  /// Payé par Mobile Money par l'expéditeur : frais en plus de la course ; sinon rien.
+  int get mobileMoneyFeeAmount => momo ? mobileMoneyFee(total, mobileMoneyFeeBps) : 0;
+
+  /// Ce que l'expéditeur paie maintenant : courses et frais Mobile Money éventuels.
+  int get amountToPay => total + mobileMoneyFeeAmount;
 
   /// Moyen de paiement choisi et utilisable (Mobile Money : numéro valide).
   bool get hasPayment =>

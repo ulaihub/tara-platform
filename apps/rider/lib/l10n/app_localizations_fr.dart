@@ -1615,4 +1615,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String addressPhotoTitle(String name) {
     return 'Façade · $name';
   }
+
+  @override
+  String get toCollectByMomo => 'À demander par Mobile Money';
+
+  @override
+  String momoFeeIncluded(String amount, String fee) {
+    return '$amount de course et de colis, plus $fee de frais Mobile Money payés par le client.';
+  }
+
+  @override
+  String withdrawalRule(String amount, String rate) {
+    return 'Retrait gratuit dès $amount ; en dessous, $rate de frais Mobile Money retenus.';
+  }
 }

@@ -856,6 +856,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceBase => 'Delivery';
 
   @override
+  String get mobileMoneyFeeLine => 'Mobile Money fee';
+
+  @override
   String get priceBaseTricycle => 'Delivery by tricycle';
 
   @override
@@ -1473,6 +1476,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String shopWithdrawalRule(String amount, String rate) {
+    return 'Free payout from $amount; below that, a $rate Mobile Money fee is deducted.';
+  }
+
+  @override
   String shopDebt(String amount) {
     return 'Failure fees due: $amount. They will be taken from your next sales; above 3,000 F, new orders wait until they are paid.';
   }
@@ -1504,6 +1512,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get topUpHowMuch => 'How much do you want to add?';
+
+  @override
+  String topUpFeeNote(String fee) {
+    return '+ $fee Mobile Money fee (operator fee).';
+  }
 
   @override
   String topUpDone(String amount) {

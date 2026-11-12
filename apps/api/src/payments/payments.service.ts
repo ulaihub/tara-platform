@@ -11,6 +11,7 @@ import { Prisma, type Payment } from '../generated/prisma/client.js';
 import type { PaymentPurpose } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
+import { mobileMoneySurcharge, SURCHARGED_PURPOSES } from './mobile-money-fees.js';
 import {
   PAYMENT_PROVIDER,
   type PaymentProvider,
@@ -116,6 +117,10 @@ export class PaymentsService {
       },
     });
     if (unanswered >= MAX_UNANSWERED_PROMPTS) throw AppError.tooMany('RATE_LIMITED');
+    // Le client paie les frais Mobile Money en plus : le montant reste celui dû à Tara.
+    const surcharge = SURCHARGED_PURPOSES.has(input.purpose)
+      ? mobileMoneySurcharge(input.amount, this.env.MOBILE_MONEY_FEE_BPS)
+      : 0;
     let payment: Payment;
     try {
       payment = await this.prisma.payment.create({
@@ -123,6 +128,7 @@ export class PaymentsService {
           purpose: input.purpose,
           method: input.method ?? 'MOMO_MTN',
           amount: input.amount,
+          surcharge,
           payerPhone: input.phone,
           payerId: input.payerId ?? null,
           orderId: input.orderId ?? null,
@@ -145,7 +151,7 @@ export class PaymentsService {
     try {
       const operation = await this.provider.collect({
         reference: payment.id,
-        amount: payment.amount,
+        amount: payment.amount + payment.surcharge,
         phone: input.phone,
         // Opérateur choisi par le payeur ; sinon le prestataire le déduit du numéro.
         ...(input.method ? { operator: input.method === 'MOMO_ORANGE' ? 'ORANGE' : 'MTN' } : {}),
@@ -211,25 +217,22 @@ export class PaymentsService {
       return true;
     }
 
-    if (
-      details.amount !== undefined &&
-      details.amount !== null &&
-      details.amount !== payment.amount
-    ) {
+    const requested = payment.amount + payment.surcharge;
+    if (details.amount !== undefined && details.amount !== null && details.amount !== requested) {
       // Montant différent de celui demandé : jamais accepté, signalé au rapprochement.
       this.logger.error(
-        `Paiement ${paymentId} : ${details.amount} FCFA reçus pour ${payment.amount} demandés`,
+        `Paiement ${paymentId} : ${details.amount} FCFA reçus pour ${requested} demandés`,
       );
       this.realtime.toOps('ops.finance-alert', {
         type: 'PAYMENT_AMOUNT_MISMATCH',
         paymentId,
-        expected: payment.amount,
+        expected: requested,
         received: details.amount,
       });
       return false;
     }
 
-    const fee = Math.max(0, Math.min(payment.amount, details.fee ?? 0));
+    const fee = Math.max(0, Math.min(requested, details.fee ?? 0));
     const confirmed = await this.prisma.$transaction(async (tx) => {
       const { count } = await tx.payment.updateMany({
         where: { id: paymentId, status: { in: ['PENDING', 'FAILED', 'CANCELLED'] } },
@@ -245,6 +248,19 @@ export class PaymentsService {
       const handler = this.succeeded.get(updated.purpose);
       if (!handler) throw new Error(`Aucun traitement pour les paiements ${updated.purpose}`);
       const changes = (await handler(tx, updated)) ?? [];
+      if (updated.surcharge > 0) {
+        await this.ledger.post(tx, {
+          kind: 'PAYMENT_RECEIVED',
+          description: `Frais Mobile Money payés avec le paiement ${updated.id}`,
+          idempotencyKey: `payment:${updated.id}:surcharge`,
+          paymentId: updated.id,
+          orderId: updated.orderId,
+          postings: [
+            { account: PLATFORM_ACCOUNTS.mobileMoney, amount: updated.surcharge },
+            { account: PLATFORM_ACCOUNTS.mobileMoneyFeesCharged, amount: -updated.surcharge },
+          ],
+        });
+      }
       if (fee > 0) {
         await this.ledger.post(tx, {
           kind: 'ADJUSTMENT',

@@ -597,6 +597,9 @@ model MerchantProfile {
   payoutPhone          String              @map("payout_phone")
   payoutOperator       MobileMoneyOperator @map("payout_operator")
   payoutSchedule       PayoutSchedule      @default(DAILY) @map("payout_schedule")
+  /// Retrait gratuit à partir de ce montant (fixé par l'équipe d'après la moyenne des
+  /// transactions de la boutique) ; null : seuil général FREE_PAYOUT_FROM.
+  freePayoutFrom       Int?                @map("free_payout_from")
   /// Dernier changement du numéro de reversement : reversements gelés pendant PAYOUT_HOLD_HOURS.
   payoutPhoneChangedAt DateTime?           @map("payout_phone_changed_at") @db.Timestamptz(3)
   plan                 MerchantPlan        @default(FREE)
@@ -622,6 +625,8 @@ model RiderProfile {
   plateNumber           String?     @map("plate_number")
   /// Plafond d'espèces détenues, en FCFA (G5, D4).
   cashLimit             Int         @default(25000) @map("cash_limit")
+  /// Retrait gratuit à partir de ce montant (fixé par l'équipe) ; null : seuil général.
+  freePayoutFrom        Int?        @map("free_payout_from")
   /// Espèces gardées au-delà du délai de dépôt (24 h) depuis cette heure : plus de courses
   /// tant qu'elles ne sont pas déposées (G5).
   cashOverdueSince      DateTime?   @map("cash_overdue_since") @db.Timestamptz(3)
@@ -1340,6 +1345,9 @@ model Payment {
   confirmedAt       DateTime?      @map("confirmed_at") @db.Timestamptz(3)
   /// Frais retenus par le prestataire Mobile Money, s'il les communique.
   fee               Int            @default(0)
+  /// Frais Mobile Money payés par le payeur, en plus du montant : le prestataire encaisse
+  /// amount + surcharge (0 pour les espèces et les recharges des livreurs).
+  surcharge         Int            @default(0)
   /// Dernière interrogation du prestataire (paiement en attente).
   lastCheckedAt     DateTime?      @map("last_checked_at") @db.Timestamptz(3)
 
@@ -1386,6 +1394,9 @@ model Payout {
   riderId           String?             @map("rider_id") @db.Uuid
   amount            Int
   fee               Int                 @default(0)
+  /// Frais de retrait retenus sur le montant : le bénéficiaire reçoit amount − charge
+  /// (0 au-delà de son seuil de retrait gratuit).
+  charge            Int                 @default(0)
   phone             String
   operator          MobileMoneyOperator
   provider          String

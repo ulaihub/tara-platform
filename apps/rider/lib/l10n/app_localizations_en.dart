@@ -1607,4 +1607,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String addressPhotoTitle(String name) {
     return 'Entrance · $name';
   }
+
+  @override
+  String get toCollectByMomo => 'To request by Mobile Money';
+
+  @override
+  String momoFeeIncluded(String amount, String fee) {
+    return '$amount for the delivery and parcel, plus $fee Mobile Money fee paid by the customer.';
+  }
+
+  @override
+  String withdrawalRule(String amount, String rate) {
+    return 'Free withdrawal from $amount; below that, a $rate Mobile Money fee is deducted.';
+  }
 }

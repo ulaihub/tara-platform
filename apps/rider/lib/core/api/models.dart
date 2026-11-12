@@ -93,6 +93,7 @@ class RiderConfig {
     required this.offerTimeoutSeconds,
     this.emergencyNumbers = EmergencyNumbers.cameroon,
     this.failurePolicy = const FailurePolicy(),
+    this.mobileMoneyFeeBps = 0,
   });
   factory RiderConfig.fromJson(Json json) {
     final country = _field<Json>(json, 'country');
@@ -108,6 +109,8 @@ class RiderConfig {
       offerTimeoutSeconds: _field<num>(json, 'offerTimeoutSeconds').toInt(),
       emergencyNumbers: EmergencyNumbers.fromJson(json['emergencyNumbers'] as Json?),
       failurePolicy: FailurePolicy.fromJson(json['failurePolicy'] as Json?),
+      // Réglages gardés par une version plus ancienne : pas de frais connus.
+      mobileMoneyFeeBps: (json['mobileMoneyFeeBps'] as num?)?.toInt() ?? 0,
     );
   }
   static const fields = [
@@ -118,6 +121,7 @@ class RiderConfig {
     'offerTimeoutSeconds',
     'emergencyNumbers',
     'failurePolicy',
+    'mobileMoneyFeeBps',
   ];
 
   final String dialCode;
@@ -128,6 +132,9 @@ class RiderConfig {
   final int offerTimeoutSeconds;
   final EmergencyNumbers emergencyNumbers;
   final FailurePolicy failurePolicy;
+
+  /// Frais Mobile Money payés par le client en plus du montant, en points de base.
+  final int mobileMoneyFeeBps;
 }
 
 @immutable
@@ -746,6 +753,8 @@ class RiderWallet {
     this.reserved = 0,
     this.cashDueBy,
     this.cashOverdue = false,
+    this.withdrawalFreeFrom = 0,
+    this.withdrawalFeeBps = 0,
   });
 
   factory RiderWallet.fromJson(Json json) => RiderWallet(
@@ -756,9 +765,20 @@ class RiderWallet {
     cashLimit: _field<num>(json, 'cashLimit').toInt(),
     cashDueBy: _date(json['cashDueBy']),
     cashOverdue: json['cashOverdue'] == true,
+    withdrawalFreeFrom: _field<num>(_field<Json>(json, 'withdrawal'), 'freeFrom').toInt(),
+    withdrawalFeeBps: _field<num>(_field<Json>(json, 'withdrawal'), 'feeBps').toInt(),
   );
 
-  static const fields = ['earnings', 'reserved', 'cashHeld', 'cashLimit', 'available', 'cashDueBy', 'cashOverdue'];
+  static const fields = [
+    'earnings',
+    'reserved',
+    'cashHeld',
+    'cashLimit',
+    'available',
+    'cashDueBy',
+    'cashOverdue',
+    'withdrawal',
+  ];
 
   /// Solde prépayé (G5) : gains et recharges, moins l'argent encaissé en espèces.
   final int earnings;
@@ -779,6 +799,10 @@ class RiderWallet {
 
   /// Délai dépassé : plus de courses jusqu'au dépôt.
   final bool cashOverdue;
+
+  /// Retrait gratuit à partir de ce montant ; en dessous, frais Mobile Money retenus.
+  final int withdrawalFreeFrom;
+  final int withdrawalFeeBps;
 }
 
 /// Paiement Mobile Money demandé au téléphone du payeur (recharge du solde, dépôt d'espèces, G5).

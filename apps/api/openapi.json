@@ -4654,6 +4654,111 @@
         ]
       }
     },
+    "/v1/admin/finance/{kind}/{ownerId}/free-payout": {
+      "get": {
+        "operationId": "AdminFinance_freePayout",
+        "parameters": [
+          {
+            "name": "kind",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FreePayout"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · finance"
+        ]
+      },
+      "put": {
+        "operationId": "AdminFinance_setFreePayout",
+        "parameters": [
+          {
+            "name": "kind",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "freeFrom": {
+                    "nullable": true,
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000
+                  }
+                },
+                "required": [
+                  "freeFrom"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FreePayout"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · finance"
+        ]
+      }
+    },
     "/v1/admin/finance/merchants/{merchantId}/statements/{month}": {
       "get": {
         "operationId": "AdminFinance_merchantStatement",
@@ -8547,12 +8652,16 @@
               ],
               "additionalProperties": false
             }
+          },
+          "mobileMoneyFeeBps": {
+            "type": "integer"
           }
         },
         "required": [
           "country",
           "supportPhone",
-          "mobileMoneyOperators"
+          "mobileMoneyOperators",
+          "mobileMoneyFeeBps"
         ],
         "additionalProperties": false
       },
@@ -8612,6 +8721,9 @@
             ],
             "additionalProperties": false
           },
+          "mobileMoneyFee": {
+            "type": "integer"
+          },
           "reason": {
             "type": "string",
             "enum": [
@@ -8635,18 +8747,23 @@
               },
               "amount": {
                 "type": "integer"
+              },
+              "total": {
+                "type": "integer"
               }
             },
             "required": [
               "id",
               "status",
-              "amount"
+              "amount",
+              "total"
             ],
             "additionalProperties": false
           }
         },
         "required": [
           "due",
+          "mobileMoneyFee",
           "reason",
           "complete",
           "payment"
@@ -9536,6 +9653,35 @@
           "accounts",
           "payoutsAwaitingApproval",
           "paymentsPending"
+        ],
+        "additionalProperties": false
+      },
+      "FreePayout": {
+        "type": "object",
+        "properties": {
+          "freeFrom": {
+            "type": "integer"
+          },
+          "custom": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "default": {
+            "type": "integer"
+          },
+          "averageMonthlyPayouts": {
+            "type": "integer"
+          },
+          "feeBps": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "freeFrom",
+          "custom",
+          "default",
+          "averageMonthlyPayouts",
+          "feeBps"
         ],
         "additionalProperties": false
       },
@@ -10907,6 +11053,12 @@
           "amount": {
             "type": "integer"
           },
+          "mobileMoneyFee": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
           "orderId": {
             "nullable": true,
             "type": "string",
@@ -10936,6 +11088,8 @@
           "purpose",
           "status",
           "amount",
+          "mobileMoneyFee",
+          "total",
           "orderId",
           "batchId",
           "failureReason",
@@ -10969,6 +11123,12 @@
             ]
           },
           "amount": {
+            "type": "integer"
+          },
+          "withdrawalFee": {
+            "type": "integer"
+          },
+          "received": {
             "type": "integer"
           },
           "fee": {
@@ -11006,6 +11166,8 @@
           "id",
           "beneficiary",
           "amount",
+          "withdrawalFee",
+          "received",
           "fee",
           "phone",
           "status",
@@ -11402,6 +11564,9 @@
             ],
             "additionalProperties": false
           },
+          "mobileMoneyFee": {
+            "type": "integer"
+          },
           "paymentPending": {
             "nullable": true,
             "type": "object",
@@ -11439,6 +11604,7 @@
           "rider",
           "eta",
           "due",
+          "mobileMoneyFee",
           "paymentPending",
           "failureDecision"
         ],
@@ -11750,6 +11916,9 @@
           },
           "offerTimeoutSeconds": {
             "type": "number"
+          },
+          "mobileMoneyFeeBps": {
+            "type": "integer"
           }
         },
         "required": [
@@ -11759,7 +11928,8 @@
           "failurePolicy",
           "emergencyNumbers",
           "mobileMoneyOperators",
-          "offerTimeoutSeconds"
+          "offerTimeoutSeconds",
+          "mobileMoneyFeeBps"
         ],
         "additionalProperties": false
       },
@@ -12417,6 +12587,22 @@
           "available": {
             "type": "integer"
           },
+          "withdrawal": {
+            "type": "object",
+            "properties": {
+              "freeFrom": {
+                "type": "integer"
+              },
+              "feeBps": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "freeFrom",
+              "feeBps"
+            ],
+            "additionalProperties": false
+          },
           "openPayout": {
             "nullable": true,
             "type": "object",
@@ -12449,6 +12635,7 @@
           "cashDueBy",
           "cashOverdue",
           "available",
+          "withdrawal",
           "openPayout"
         ],
         "additionalProperties": false
@@ -12776,6 +12963,22 @@
               },
               "todayDeliveries": {
                 "type": "integer"
+              },
+              "withdrawal": {
+                "type": "object",
+                "properties": {
+                  "freeFrom": {
+                    "type": "integer"
+                  },
+                  "feeBps": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "freeFrom",
+                  "feeBps"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -12785,7 +12988,8 @@
               "payoutPhone",
               "payoutHour",
               "todaySales",
-              "todayDeliveries"
+              "todayDeliveries",
+              "withdrawal"
             ],
             "additionalProperties": false
           },

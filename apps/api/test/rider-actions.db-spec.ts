@@ -755,6 +755,7 @@ describe('Actions du livreur (E2 à E9)', () => {
         { code: 'ORANGE', name: 'Orange Money' },
       ],
       offerTimeoutSeconds: 30,
+      mobileMoneyFeeBps: 0,
     });
     await request(ctx.app.getHttpServer()).get('/v1/rider/config').expect(401);
   });

@@ -129,6 +129,7 @@ export class RiderAppController {
         { code: 'ORANGE', name: 'Orange Money' },
       ],
       offerTimeoutSeconds: this.env.DISPATCH_OFFER_TIMEOUT_SECONDS,
+      mobileMoneyFeeBps: this.env.MOBILE_MONEY_FEE_BPS,
     };
   }
 

@@ -514,5 +514,8 @@
   "addressVoice": "Play the note",
   "addressVoiceStop": "Stop the note",
   "addressMediaFailed": "File unavailable right now: try again.",
-  "addressPhotoTitle": "Entrance · {name}"
+  "addressPhotoTitle": "Entrance · {name}",
+  "toCollectByMomo": "To request by Mobile Money",
+  "momoFeeIncluded": "{amount} for the delivery and parcel, plus {fee} Mobile Money fee paid by the customer.",
+  "withdrawalRule": "Free withdrawal from {amount}; below that, a {rate} Mobile Money fee is deducted."
 }

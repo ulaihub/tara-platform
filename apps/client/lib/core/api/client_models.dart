@@ -24,6 +24,7 @@ class AppConfig {
     required this.currency,
     required this.supportPhone,
     required this.operators,
+    this.mobileMoneyFeeBps = 0,
   });
 
   factory AppConfig.fromJson(Json json) {
@@ -36,15 +37,20 @@ class AppConfig {
         for (final item in _field<List<Object?>>(json, 'mobileMoneyOperators'))
           MobileMoneyOperator(_field(item! as Json, 'code'), _field(item as Json, 'name')),
       ],
+      // Réglages gardés d'une version antérieure : sans taux, pas de frais affichés.
+      mobileMoneyFeeBps: (json['mobileMoneyFeeBps'] as num?)?.toInt() ?? 0,
     );
   }
 
-  static const fields = ['country', 'supportPhone', 'mobileMoneyOperators'];
+  static const fields = ['country', 'supportPhone', 'mobileMoneyOperators', 'mobileMoneyFeeBps'];
 
   final String dialCode;
   final String currency;
   final String? supportPhone;
   final List<MobileMoneyOperator> operators;
+
+  /// Frais Mobile Money payés par le client, en points de base (600 = 6 %).
+  final int mobileMoneyFeeBps;
 }
 
 /// Boutique du marchand (A2) : reversements vers son numéro Mobile Money.
@@ -187,6 +193,8 @@ class Wallet {
     this.plan,
     this.payoutPhone,
     this.payoutHour = 18,
+    this.withdrawalFreeFrom = 0,
+    this.withdrawalFeeBps = 0,
     this.openPayout,
   });
 
@@ -202,6 +210,8 @@ class Wallet {
       plan: merchant == null ? null : _field<String>(merchant, 'plan'),
       payoutPhone: merchant == null ? null : _field<String>(merchant, 'payoutPhone'),
       payoutHour: merchant == null ? 18 : _field<num>(merchant, 'payoutHour').toInt(),
+      withdrawalFreeFrom: merchant == null ? 0 : _field<num>(_field<Json>(merchant, 'withdrawal'), 'freeFrom').toInt(),
+      withdrawalFeeBps: merchant == null ? 0 : _field<num>(_field<Json>(merchant, 'withdrawal'), 'feeBps').toInt(),
       openPayout: open == null
           ? null
           : (amount: _field<num>(open, 'amount').toInt(), status: _field<String>(open, 'status')),
@@ -219,6 +229,7 @@ class Wallet {
     'payoutHour',
     'todaySales',
     'todayDeliveries',
+    'withdrawal',
   ];
 
   final int customerBalance;
@@ -238,6 +249,10 @@ class Wallet {
 
   /// Numéro Mobile Money des reversements de la boutique.
   final String? payoutPhone;
+
+  /// Reversement gratuit à partir de ce montant ; en dessous, ce taux (points de base) est retenu.
+  final int withdrawalFreeFrom;
+  final int withdrawalFeeBps;
 
   /// Heure du reversement quotidien (heure du Cameroun).
   final int payoutHour;
@@ -604,21 +619,32 @@ class Placement {
 /// Paiement Mobile Money (G1) : en attente de validation sur le téléphone, réussi ou refusé.
 @immutable
 class Payment {
-  const Payment({required this.id, required this.status, required this.amount, required this.failureReason});
+  const Payment({
+    required this.id,
+    required this.status,
+    required this.amount,
+    required this.failureReason,
+    this.mobileMoneyFee = 0,
+  });
   factory Payment.fromJson(Json json) => Payment(
     id: _field(json, 'id'),
     status: _field(json, 'status'),
     amount: _field<num>(json, 'amount').toInt(),
     failureReason: _field(json, 'failureReason'),
+    mobileMoneyFee: _field<num>(json, 'mobileMoneyFee').toInt(),
   );
-  static const fields = ['id', 'status', 'amount', 'failureReason'];
+  static const fields = ['id', 'status', 'amount', 'failureReason', 'mobileMoneyFee', 'total'];
 
   final String id;
 
   /// PENDING, SUCCEEDED, FAILED ou CANCELLED.
   final String status;
+
+  /// Montant dû à Tara ; le téléphone reçoit une demande de amount + mobileMoneyFee.
   final int amount;
   final String? failureReason;
+  final int mobileMoneyFee;
+  int get total => amount + mobileMoneyFee;
 }
 
 /// Livreur d'une course, vu par l'expéditeur (F1) : numéro seulement pendant la course.

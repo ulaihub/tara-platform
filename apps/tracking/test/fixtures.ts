@@ -63,6 +63,7 @@ export function tracking(status: OrderStatus, patch: Partial<PublicTracking> = {
       : null,
     eta: status === 'IN_DELIVERY' ? { minutes: 8, distanceMeters: 2350, progress: 0.62 } : null,
     due: { fee: 1500, cod: 12500, total: 14000 },
+    mobileMoneyFee: 0,
     paymentPending: null,
     failureDecision: null,
     ...patch,

@@ -11,6 +11,7 @@ import 'package:tara_core/session/session_store.dart';
 import 'helpers/fake_client_api.dart';
 import 'helpers/harness.dart';
 import 'screens_home_golden_test.dart' show homeNow, person, shopOwner;
+import 'screens_new_order_golden_test.dart' show storeWithMobileMoneyFee;
 
 WalletLine line(String id, String kind, int amount, {String? reference, int minutes = 0}) => WalletLine(
   id: id,
@@ -53,14 +54,15 @@ FakeClientApi walletApi({String plan = 'PRO', int shopBalance = 128500}) => Fake
     ),
   ];
 
-Widget wallet(FakeClientApi api, {Me me = shopOwner, List<(Uint8List, String)>? shared}) => ProviderScope(
-  overrides: [
-    keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
-    clientApiProvider.overrideWithValue(api),
-    shareFileProvider.overrideWithValue((bytes, name, mime, text) async => shared?.add((bytes, name))),
-  ],
-  child: WalletScreen(me: me, onBack: () {}, now: () => homeNow),
-);
+Widget wallet(FakeClientApi api, {Me me = shopOwner, List<(Uint8List, String)>? shared, MemoryKeyValueStore? store}) =>
+    ProviderScope(
+      overrides: [
+        keyValueStoreProvider.overrideWithValue(store ?? MemoryKeyValueStore()),
+        clientApiProvider.overrideWithValue(api),
+        shareFileProvider.overrideWithValue((bytes, name, mime, text) async => shared?.add((bytes, name))),
+      ],
+      child: WalletScreen(me: me, onBack: () {}, now: () => homeNow),
+    );
 
 void main() {
   setUpAll(loadAppFonts);
@@ -113,6 +115,41 @@ void main() {
     await settle(tester);
     expect(find.text('Solde rechargé de 1\u00a0200 F.'), findsOneWidget);
     expect(sounds.played, isNotEmpty);
+  });
+
+  testWidgets('recharge par Mobile Money : frais annoncés et ajoutés au montant', (tester) async {
+    final api = walletApi()..paymentStatuses = ['PENDING'];
+    await pumpVariant(tester, Variant.matrix.first, wallet(api, me: person, store: storeWithMobileMoneyFee()));
+    await settle(tester);
+    await tester.tap(find.text('Recharger'));
+    await settle(tester);
+    // 5 000 F crédités, 320 F de frais Mobile Money (6 %) en plus.
+    expect(find.text('+ 320\u00a0F de frais Mobile Money (frais de l’opérateur).'), findsOneWidget);
+    await tester.tap(find.text('Payer 5\u00a0320\u00a0F'));
+    await tester.pump(const Duration(seconds: 1));
+    await settle(tester);
+    expect(api.topUps, [(5000, '699112233', 'MTN')]);
+  });
+
+  testWidgets('boutique : retrait gratuit à partir du seuil, frais en dessous', (tester) async {
+    final api = walletApi();
+    api.wallet0 = const Wallet(
+      customerBalance: 3500,
+      merchantBalance: 128500,
+      payoutSchedule: 'DAILY',
+      todaySales: 37500,
+      todayDeliveries: 3,
+      plan: 'PRO',
+      payoutPhone: '+237677123456',
+      withdrawalFreeFrom: 50000,
+      withdrawalFeeBps: 250,
+    );
+    await pumpVariant(tester, Variant.matrix.first, wallet(api));
+    await settle(tester);
+    expect(
+      find.text('Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, 2,5\u00a0% de frais Mobile Money retenus.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('reversement immédiat avec l’offre Pro', (tester) async {

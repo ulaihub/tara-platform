@@ -1664,6 +1664,12 @@ abstract class AppLocalizations {
   /// **'Course'**
   String get priceBase;
 
+  /// No description provided for @mobileMoneyFeeLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais Mobile Money'**
+  String get mobileMoneyFeeLine;
+
   /// No description provided for @priceBaseTricycle.
   ///
   /// In fr, this message translates to:
@@ -2684,6 +2690,12 @@ abstract class AppLocalizations {
   /// **'Aujourd’hui : {amount} encaissés · {count, plural, =0{aucune livraison} =1{1 livraison} other{{count} livraisons}}'**
   String shopToday(String amount, int count);
 
+  /// No description provided for @shopWithdrawalRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversement gratuit dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.'**
+  String shopWithdrawalRule(String amount, String rate);
+
   /// No description provided for @shopDebt.
   ///
   /// In fr, this message translates to:
@@ -2737,6 +2749,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Combien voulez-vous ajouter ?'**
   String get topUpHowMuch;
+
+  /// No description provided for @topUpFeeNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'+ {fee} de frais Mobile Money (frais de l’opérateur).'**
+  String topUpFeeNote(String fee);
 
   /// No description provided for @topUpDone.
   ///

@@ -53,6 +53,7 @@ const fr: Strings = {
   parcel: 'Colis',
   delivery: 'Livraison',
   payHow: 'En espèces ou par Mobile Money (MTN, Orange) auprès du livreur.',
+  mobileMoneyFee: (fee: string) => `Par Mobile Money, ${fee} de frais de l’opérateur s’ajoutent.`,
   paymentPending: (amount: string) =>
     `Une demande de ${amount} est arrivée sur votre téléphone : validez-la avec votre code secret Mobile Money.`,
   nothingToPay: 'Rien à payer : la livraison est réglée.',
@@ -168,6 +169,7 @@ const en: Strings = {
   parcel: 'Parcel',
   delivery: 'Delivery',
   payHow: 'In cash or by Mobile Money (MTN, Orange) to the rider.',
+  mobileMoneyFee: (fee: string) => `By Mobile Money, an operator fee of ${fee} is added.`,
   paymentPending: (amount: string) =>
     `A payment request of ${amount} reached your phone: approve it with your Mobile Money PIN.`,
   nothingToPay: 'Nothing to pay: the delivery is settled.',
@@ -278,6 +280,7 @@ export interface Strings {
   parcel: Text;
   delivery: Text;
   payHow: Text;
+  mobileMoneyFee: Template;
   paymentPending: Template;
   nothingToPay: Text;
   codeHint: Text;

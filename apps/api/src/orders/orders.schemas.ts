@@ -312,7 +312,9 @@ export const PublicTrackingDto = z
       .nullable(),
     /** À payer à la porte : frais de livraison (si le destinataire les paie) et colis. */
     due: z.object({ fee: z.int(), cod: z.int(), total: z.int() }),
-    /** Demande Mobile Money envoyée par le livreur, à valider sur le téléphone. */
+    /** Frais Mobile Money ajoutés si le destinataire paie par Mobile Money (en espèces : rien). */
+    mobileMoneyFee: z.int(),
+    /** Demande Mobile Money envoyée par le livreur, à valider sur le téléphone (frais compris). */
     paymentPending: z.object({ amount: z.int() }).nullable(),
     /** Après un échec : nouvelle tentative ou retour à l'expéditeur, si c'est décidé. */
     failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),

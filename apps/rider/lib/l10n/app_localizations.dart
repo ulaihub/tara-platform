@@ -2869,6 +2869,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Façade · {name}'**
   String addressPhotoTitle(String name);
+
+  /// No description provided for @toCollectByMomo.
+  ///
+  /// In fr, this message translates to:
+  /// **'À demander par Mobile Money'**
+  String get toCollectByMomo;
+
+  /// No description provided for @momoFeeIncluded.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} de course et de colis, plus {fee} de frais Mobile Money payés par le client.'**
+  String momoFeeIncluded(String amount, String fee);
+
+  /// No description provided for @withdrawalRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait gratuit dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.'**
+  String withdrawalRule(String amount, String rate);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -92,6 +92,10 @@ export class WalletsService implements OnModuleInit {
             payoutHour: this.env.PAYOUT_DAILY_HOUR,
             todaySales: today?._sum.codAmount ?? 0,
             todayDeliveries: today?._count ?? 0,
+            withdrawal: {
+              freeFrom: merchant.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM,
+              feeBps: this.env.PAYOUT_FEE_BPS,
+            },
           }
         : null,
       openPayout: openPayout
@@ -118,6 +122,10 @@ export class WalletsService implements OnModuleInit {
       cashDueBy: (await this.cash.dueBy(rider.id)).dueBy?.toISOString() ?? null,
       cashOverdue: rider.cashOverdueSince !== null,
       available: await this.payouts.available('RIDER', rider.id),
+      withdrawal: {
+        freeFrom: rider.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM,
+        feeBps: this.env.PAYOUT_FEE_BPS,
+      },
       openPayout: openPayout
         ? { id: openPayout.id, amount: openPayout.amount, status: openPayout.status }
         : null,

@@ -862,6 +862,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get priceBase => 'Course';
 
   @override
+  String get mobileMoneyFeeLine => 'Frais Mobile Money';
+
+  @override
   String get priceBaseTricycle => 'Course en tricycle';
 
   @override
@@ -1478,6 +1481,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String shopWithdrawalRule(String amount, String rate) {
+    return 'Reversement gratuit dès $amount ; en dessous, $rate de frais Mobile Money retenus.';
+  }
+
+  @override
   String shopDebt(String amount) {
     return 'Frais d’échec à régler : $amount. Ils seront pris sur vos prochaines ventes ; au-delà de 3 000 F, vos nouvelles commandes attendent le règlement.';
   }
@@ -1509,6 +1517,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get topUpHowMuch => 'Combien voulez-vous ajouter ?';
+
+  @override
+  String topUpFeeNote(String fee) {
+    return '+ $fee de frais Mobile Money (frais de l’opérateur).';
+  }
 
   @override
   String topUpDone(String amount) {

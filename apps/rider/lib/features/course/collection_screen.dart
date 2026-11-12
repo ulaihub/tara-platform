@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/money/mobile_money_fees.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -272,6 +273,8 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
     final operators = ref.watch(riderConfigProvider).value?.operators ?? const <MobileMoneyOperator>[];
     final waiting = _momo == _MomoState.sending || _momo == _MomoState.waiting || _momo == _MomoState.noAnswer;
     final change = _received - _due;
+    // Par Mobile Money, le client paie aussi les frais de l'opérateur (même calcul que le serveur).
+    final momoFee = mobileMoneyFee(_due, ref.watch(riderConfigProvider).value?.mobileMoneyFeeBps ?? 0);
 
     return TaraScreen(
       safeBottom: false,
@@ -306,7 +309,10 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          _AmountCard(amount: _due, label: l.toCollectFromCustomer),
+          _AmountCard(
+            amount: cash ? _due : _due + momoFee,
+            label: cash || momoFee == 0 ? l.toCollectFromCustomer : l.toCollectByMomo,
+          ),
           const SizedBox(height: 16),
           LiquidSegmented<_Method>(
             segments: [(_Method.cash, l.methodCash), (_Method.mobileMoney, l.methodMomo)],
@@ -348,6 +354,13 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
               ],
             ),
           ] else ...[
+            if (momoFee > 0) ...[
+              Text(
+                l.momoFeeIncluded('${formatAmount(_due)}\u00a0F', '${formatAmount(momoFee)}\u00a0F'),
+                style: TaraText.small.copyWith(color: c.textSecondary),
+              ),
+              const SizedBox(height: 14),
+            ],
             CourseFieldLabel(l.customerOperator),
             const SizedBox(height: 8),
             ChoiceChips<String>(

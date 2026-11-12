@@ -1252,6 +1252,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/finance/{kind}/{ownerId}/free-payout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminFinance_freePayout'];
+    put: operations['AdminFinance_setFreePayout'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/admin/finance/merchants/{merchantId}/statements/{month}': {
     parameters: {
       query?: never;
@@ -2316,6 +2332,7 @@ export interface components {
         code: string;
         name: string;
       }[];
+      mobileMoneyFeeBps: number;
     };
     AuthSession: {
       accessToken: string;
@@ -2332,6 +2349,7 @@ export interface components {
         cod: number;
         total: number;
       };
+      mobileMoneyFee: number;
       /** @enum {string} */
       reason: 'DELIVERY' | 'RETURN';
       complete: boolean;
@@ -2340,6 +2358,7 @@ export interface components {
         id: string;
         status: string;
         amount: number;
+        total: number;
       } | null;
     };
     Consent: {
@@ -2673,6 +2692,13 @@ export interface components {
       }[];
       payoutsAwaitingApproval: number;
       paymentsPending: number;
+    };
+    FreePayout: {
+      freeFrom: number;
+      custom: number | null;
+      default: number;
+      averageMonthlyPayouts: number;
+      feeBps: number;
     };
     KycDocument: {
       /** Format: uuid */
@@ -3052,6 +3078,8 @@ export interface components {
       /** @enum {string} */
       status: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED';
       amount: number;
+      mobileMoneyFee: number;
+      total: number;
       /** Format: uuid */
       orderId: string | null;
       /** Format: uuid */
@@ -3070,6 +3098,8 @@ export interface components {
       /** @enum {string} */
       beneficiary: 'MERCHANT' | 'RIDER' | 'CUSTOMER';
       amount: number;
+      withdrawalFee: number;
+      received: number;
       fee: number;
       phone: string;
       /** @enum {string} */
@@ -3180,6 +3210,7 @@ export interface components {
         cod: number;
         total: number;
       };
+      mobileMoneyFee: number;
       paymentPending: {
         amount: number;
       } | null;
@@ -3264,6 +3295,7 @@ export interface components {
         name: string;
       }[];
       offerTimeoutSeconds: number;
+      mobileMoneyFeeBps: number;
     };
     RiderEarnings: {
       /** @enum {string} */
@@ -3417,6 +3449,10 @@ export interface components {
       cashDueBy: string | null;
       cashOverdue: boolean;
       available: number;
+      withdrawal: {
+        freeFrom: number;
+        feeBps: number;
+      };
       openPayout: {
         /** Format: uuid */
         id: string;
@@ -3506,6 +3542,10 @@ export interface components {
         payoutHour: number;
         todaySales: number;
         todayDeliveries: number;
+        withdrawal: {
+          freeFrom: number;
+          feeBps: number;
+        };
       } | null;
       openPayout: {
         /** Format: uuid */
@@ -5997,6 +6037,58 @@ export interface operations {
         };
         content: {
           'text/csv': string;
+        };
+      };
+    };
+  };
+  AdminFinance_freePayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        kind: string;
+        ownerId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FreePayout'];
+        };
+      };
+    };
+  };
+  AdminFinance_setFreePayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        kind: string;
+        ownerId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          freeFrom: number | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FreePayout'];
         };
       };
     };

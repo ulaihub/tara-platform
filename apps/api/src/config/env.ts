@@ -192,6 +192,15 @@ const envSchema = z
     PAYMENT_REQUEST_TIMEOUT_MINUTES: z.coerce.number().int().min(1).max(60).default(10),
     /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */
     PAYOUT_MIN_AMOUNT: z.coerce.number().int().min(1).default(500),
+    /**
+     * Frais Mobile Money du prestataire à l'encaissement, en points de base (600 = 6 % pour un
+     * compte Sebpay particulier) : ajoutés au montant payé par le client.
+     */
+    MOBILE_MONEY_FEE_BPS: z.coerce.number().int().min(0).max(2000).default(0),
+    /** Frais du prestataire sur un reversement (250 = 2,5 %) : retenus sur le montant envoyé. */
+    PAYOUT_FEE_BPS: z.coerce.number().int().min(0).max(2000).default(0),
+    /** Seuil général de retrait gratuit (boutiques et livreurs sans seuil propre). */
+    FREE_PAYOUT_FROM: z.coerce.number().int().min(0).default(50_000),
     PAYOUT_APPROVAL_THRESHOLD: z.coerce.number().int().min(1).default(200_000),
     /** Heure du reversement quotidien des marchands, heure du Cameroun (G3). */
     PAYOUT_DAILY_HOUR: z.coerce.number().int().min(0).max(23).default(18),

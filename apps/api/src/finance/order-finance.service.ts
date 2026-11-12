@@ -21,6 +21,7 @@ import {
   riderCashHeld,
   riderPayable,
 } from './ledger.accounts.js';
+import { mobileMoneySurcharge } from '../payments/mobile-money-fees.js';
 import { LedgerService, type PostingInput } from './ledger.service.js';
 import { RiderBalanceService } from './rider-balance.service.js';
 
@@ -34,10 +35,18 @@ export interface CollectionDue {
 
 export interface CollectionState {
   due: CollectionDue;
+  /** Frais Mobile Money payés en plus si le client règle par Mobile Money. */
+  mobileMoneyFee: number;
   reason: 'DELIVERY' | 'RETURN';
   /** Tout ce qui devait être encaissé l'a été. */
   complete: boolean;
-  payment: { id: string; status: string; amount: number } | null;
+  /** Demande Mobile Money en attente ; `total` : montant demandé au téléphone, frais compris. */
+  payment: { id: string; status: string; amount: number; total: number } | null;
+}
+
+function pendingPayment(payment: Payment): NonNullable<CollectionState['payment']> {
+  const { id, status, amount, surcharge } = payment;
+  return { id, status, amount, total: amount + surcharge };
 }
 
 /** Colis qui repart chez l'expéditeur (retour décidé, pas encore rendu). */
@@ -366,9 +375,10 @@ export class OrderFinanceService implements OnModuleInit {
       });
       return {
         due: { fee: total, cod: 0, total },
+        mobileMoneyFee: mobileMoneySurcharge(total, this.env.MOBILE_MONEY_FEE_BPS),
         reason: 'RETURN',
         complete: total === 0,
-        payment: topUp ? { id: topUp.id, status: topUp.status, amount: topUp.amount } : null,
+        payment: topUp ? pendingPayment(topUp) : null,
       };
     }
     // Une requête après l'autre : `db` peut être une transaction (une seule connexion).
@@ -381,9 +391,10 @@ export class OrderFinanceService implements OnModuleInit {
     const cod = order.codAmount > 0 && !collection ? order.codAmount : 0;
     return {
       due: { fee, cod, total: fee + cod },
+      mobileMoneyFee: mobileMoneySurcharge(fee + cod, this.env.MOBILE_MONEY_FEE_BPS),
       reason: 'DELIVERY',
       complete: fee + cod === 0,
-      payment: payment ? { id: payment.id, status: payment.status, amount: payment.amount } : null,
+      payment: payment ? pendingPayment(payment) : null,
     };
   }
 

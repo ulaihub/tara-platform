@@ -526,7 +526,9 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
                   footer: _step == _summary
                       // La commande engage l'expéditeur : elle part d'un geste, pas d'un toucher.
                       ? SwipeButton(
-                          label: _draft.allQuoted ? l.orderFor('${formatAmount(_draft.total)}\u00a0F') : l.quoting,
+                          label: _draft.allQuoted
+                              ? l.orderFor('${formatAmount(_draft.amountToPay)}\u00a0F')
+                              : l.quoting,
                           semanticLabel: l.orderSlide,
                           icon: TaraIcons.arrowRight,
                           loading: _placing,

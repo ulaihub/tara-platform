@@ -997,5 +997,28 @@
         "type": "String"
       }
     }
+  },
+  "toCollectByMomo": "À demander par Mobile Money",
+  "momoFeeIncluded": "{amount} de course et de colis, plus {fee} de frais Mobile Money payés par le client.",
+  "@momoFeeIncluded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawalRule": "Retrait gratuit dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.",
+  "@withdrawalRule": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
   }
 }

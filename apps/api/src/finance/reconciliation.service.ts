@@ -130,12 +130,12 @@ export class ReconciliationService {
           reference: payment.id,
           detail: 'Paiement réussi sans écriture',
         });
-      } else if (recorded !== payment.amount - payment.fee) {
+      } else if (recorded !== payment.amount + payment.surcharge - payment.fee) {
         discrepancies.push({
           type: 'PAYMENT_AMOUNT_MISMATCH',
           reference: payment.id,
           detail: 'Écritures différentes du montant encaissé',
-          expected: payment.amount - payment.fee,
+          expected: payment.amount + payment.surcharge - payment.fee,
           actual: recorded,
         });
       }
@@ -170,12 +170,12 @@ export class ReconciliationService {
           reference: payout.id,
           detail: 'Reversement envoyé sans écriture',
         });
-      } else if (recorded !== -(payout.amount + payout.fee)) {
+      } else if (recorded !== -(payout.amount - payout.charge + payout.fee)) {
         discrepancies.push({
           type: 'PAYOUT_AMOUNT_MISMATCH',
           reference: payout.id,
           detail: 'Écritures différentes du montant envoyé',
-          expected: -(payout.amount + payout.fee),
+          expected: -(payout.amount - payout.charge + payout.fee),
           actual: recorded,
         });
       }
@@ -195,7 +195,16 @@ export class ReconciliationService {
     }
 
     // 4. Relevé du prestataire, opération par opération (fenêtre élargie pour les opérations à cheval sur minuit).
-    discrepancies.push(...(await this.compareWithProvider(from, to, payments, payouts)));
+    // Montants tels que le prestataire les a traités : frais du client compris à l'encaissement,
+    // frais de retrait retenus au reversement.
+    discrepancies.push(
+      ...(await this.compareWithProvider(
+        from,
+        to,
+        payments.map((payment) => ({ ...payment, amount: payment.amount + payment.surcharge })),
+        payouts.map((payout) => ({ ...payout, amount: payout.amount - payout.charge })),
+      )),
+    );
 
     // 5. Contre-remboursements déclarés : crédités au marchand.
     const collections = await this.prisma.codCollection.findMany({

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_core/session/session_store.dart';
@@ -21,11 +23,17 @@ void main() {
   late ActiveOrderController active;
   ActionOutcome? done;
 
-  Future<void> pumpCollection(WidgetTester tester) async {
+  Future<void> pumpCollection(WidgetTester tester, {int mobileMoneyFeeBps = 0}) async {
     sent = [];
     done = null;
     api = FakeRiderApi();
     final store = MemoryKeyValueStore();
+    if (mobileMoneyFeeBps > 0) {
+      store.values['tara.rider-config'] = jsonEncode({
+        ...RiderConfigController.fallback,
+        'mobileMoneyFeeBps': mobileMoneyFeeBps,
+      });
+    }
     final queue = ActionQueue(
       store: store,
       send: (path, body) async {
@@ -106,6 +114,23 @@ void main() {
     await wait(tester, const Duration(seconds: 7));
     expect(sent, ['deliver']);
     expect(done, ActionOutcome.sent);
+  });
+
+  testWidgets('Mobile Money : frais de l’opérateur ajoutés, payés par le client', (tester) async {
+    await pumpCollection(tester, mobileMoneyFeeBps: 600);
+    expect(find.text('À encaisser auprès du client'), findsOneWidget);
+    await tapText(tester, 'Mobile Money');
+    // 12 500 F à encaisser, 798 F de frais (6 %) demandés en plus au client.
+    expect(find.text('À demander par Mobile Money'), findsOneWidget);
+    expect(
+      find.text('12\u00A0500\u00A0F de course et de colis, plus 798\u00A0F de frais Mobile Money payés par le client.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('13\u00A0298'), findsOneWidget);
+    // En espèces : le montant de la course, sans frais.
+    await tapText(tester, 'Espèces');
+    expect(find.text('À encaisser auprès du client'), findsOneWidget);
+    expect(find.textContaining('13\u00A0298'), findsNothing);
   });
 
   testWidgets('Mobile Money refusé : message, renvoi possible', (tester) async {

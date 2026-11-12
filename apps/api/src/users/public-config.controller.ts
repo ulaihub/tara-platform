@@ -13,6 +13,11 @@ export const AppConfigDto = z
     /** Ligne du support (« Pas reçu de SMS ? », aide), null si non configurée. */
     supportPhone: z.string().nullable(),
     mobileMoneyOperators: z.array(z.object({ code: z.string(), name: z.string() })),
+    /**
+     * Frais Mobile Money payés par le client, en points de base du montant encaissé : l'app
+     * affiche frais = arrondi supérieur de montant × taux / (10 000 − taux).
+     */
+    mobileMoneyFeeBps: z.int(),
   })
   .meta({ id: 'AppConfig' });
 
@@ -37,6 +42,7 @@ export class PublicConfigController {
         { code: 'MTN', name: 'MTN MoMo' },
         { code: 'ORANGE', name: 'Orange Money' },
       ],
+      mobileMoneyFeeBps: this.env.MOBILE_MONEY_FEE_BPS,
     };
   }
 }

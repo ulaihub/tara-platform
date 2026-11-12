@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -57,8 +58,18 @@ FakeClientApi orderApi() => FakeClientApi()
 /// Photo du colis prise dans les tests (petite image du dossier fixtures).
 final parcelPhoto = File('test/fixtures/colis.jpg').absolute.path;
 
-List<Override> overrides(FakeClientApi api, {Future<bool> Function(Uri uri)? launcher, FakeRealtime? realtime}) => [
-  keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
+/// Réglages de l'app gardés sur le téléphone, frais Mobile Money à 6 % (compte Sebpay particulier).
+MemoryKeyValueStore storeWithMobileMoneyFee() =>
+    MemoryKeyValueStore()
+      ..values['tara.app-config'] = jsonEncode({...AppConfigController.fallback, 'mobileMoneyFeeBps': 600});
+
+List<Override> overrides(
+  FakeClientApi api, {
+  Future<bool> Function(Uri uri)? launcher,
+  FakeRealtime? realtime,
+  MemoryKeyValueStore? store,
+}) => [
+  keyValueStoreProvider.overrideWithValue(store ?? MemoryKeyValueStore()),
   takeParcelPhotoProvider.overrideWithValue(() async => parcelPhoto),
   clientApiProvider.overrideWithValue(api),
   realMapProvider.overrideWithValue(false),
@@ -73,8 +84,9 @@ Widget flow(
   VoidCallback? onClose,
   Future<bool> Function(Uri uri)? launcher,
   FakeRealtime? realtime,
+  MemoryKeyValueStore? store,
 }) => ProviderScope(
-  overrides: overrides(api, launcher: launcher, realtime: realtime),
+  overrides: overrides(api, launcher: launcher, realtime: realtime, store: store),
   child: NewOrderFlow(me: me, onClose: onClose ?? () {}, now: () => homeNow),
 );
 
@@ -291,6 +303,29 @@ void main() {
       expect(find.text('Réfrigérateur 2 portes'), findsOneWidget);
       expect(find.textContaining('La photo semble montrer : matière dangereuse'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_colis/photo_${brightness.name}.png'));
+    });
+
+    goldenTest('05 récapitulatif Mobile Money ${brightness.name}', (tester) async {
+      await pumpVariant(
+        tester,
+        variant,
+        flow(orderApi(), store: storeWithMobileMoneyFee()),
+        surface: const Size(390, 1500),
+      );
+      await toSummary(tester);
+      await tapVisible(tester, 'MTN Mobile Money');
+      await settle(tester);
+      // 1 200 F de course, 77 F de frais Mobile Money (6 %), payés en plus.
+      expect(find.text('Frais Mobile Money'), findsOneWidget);
+      expect(find.text('+77\u00a0F'), findsOneWidget);
+      expect(find.text('Commander · 1\u00a0277\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/mobile_money_${brightness.name}.png'));
+
+      // En espèces : rien de plus.
+      await tapVisible(tester, 'Espèces à l’enlèvement');
+      await settle(tester);
+      expect(find.text('Frais Mobile Money'), findsNothing);
+      expect(find.text('Commander · 1\u00a0200\u00a0F'), findsOneWidget);
     });
 
     goldenTest('05 quand programmé ${brightness.name}', (tester) async {

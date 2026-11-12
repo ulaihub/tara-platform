@@ -201,6 +201,8 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
     final c = TaraColors.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
     final draft = _draft;
+    // Taux des frais Mobile Money : la ligne s'affiche dès que Mobile Money est choisi.
+    draft.mobileMoneyFeeBps = ref.watch(appConfigProvider).value?.mobileMoneyFeeBps ?? 0;
     final pickup = draft.pickup!;
     final shop = widget.me.merchant != null;
     final wallet = ref.watch(walletProvider).value;
@@ -523,6 +525,9 @@ class _PriceCard extends StatelessWidget {
           ] else if (deliveries.length > 1)
             for (final (i, d) in deliveries.indexed)
               line('${i + 1}. ${d.recipientName.trim()}', d.quote == null ? '…' : amount(d.quote!.totalPrice)),
+          // Frais de l'opérateur, payés en plus seulement par Mobile Money.
+          if (draft.allQuoted && draft.mobileMoneyFeeAmount > 0)
+            line(l.mobileMoneyFeeLine, '+${amount(draft.mobileMoneyFeeAmount)}'),
           if (single != null || deliveries.length > 1) Divider(height: 18, color: c.glassBorder),
           Row(
             children: [
@@ -534,7 +539,7 @@ class _PriceCard extends StatelessWidget {
               ),
               if (draft.allQuoted)
                 Text(
-                  amount(draft.total),
+                  amount(draft.amountToPay),
                   style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontFeatures: TaraText.tabular),
                 )
               else

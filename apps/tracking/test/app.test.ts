@@ -121,6 +121,21 @@ describe('page de suivi du destinataire (F2)', () => {
     );
   });
 
+  it('paiement par Mobile Money : frais de l’opérateur annoncés, compris dans la demande', async () => {
+    const { app } = setup(
+      new FakeApi(
+        tracking('IN_DELIVERY', { mobileMoneyFee: 894, paymentPending: { amount: 14894 } }),
+      ),
+    );
+    const { html } = await page(app);
+    expect(text(html)).toContain(
+      `Par Mobile Money, 894${NBSP}F de frais de l’opérateur s’ajoutent.`,
+    );
+    expect(text(html)).toContain(
+      `Une demande de 14${NBSP}894${NBSP}F est arrivée sur votre téléphone`,
+    );
+  });
+
   it('frais déjà réglés et pas de colis à payer : rien à payer', async () => {
     const { app } = setup(
       new FakeApi(tracking('IN_DELIVERY', { due: { fee: 0, cod: 0, total: 0 } })),

@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   Req,
   Res,
@@ -39,6 +40,8 @@ import {
   CreditBody,
   DepositBody,
   FinanceOverviewDto,
+  FreePayoutBody,
+  FreePayoutDto,
   MobileMoneyPayer,
   OfficeDepositBody,
   TreasuryTransferBody,
@@ -129,6 +132,8 @@ const MONEY_HEADER = IdempotencyHeader(
 
 export function toPaymentDto(payment: Payment): z.output<typeof PaymentDto> {
   return {
+    mobileMoneyFee: payment.surcharge,
+    total: payment.amount + payment.surcharge,
     id: payment.id,
     purpose: payment.purpose,
     status: payment.status,
@@ -143,6 +148,8 @@ export function toPaymentDto(payment: Payment): z.output<typeof PaymentDto> {
 
 export function toPayoutDto(payout: Payout): z.output<typeof PayoutDto> {
   return {
+    withdrawalFee: payout.charge,
+    received: payout.amount - payout.charge,
     id: payout.id,
     beneficiary: payout.beneficiary,
     amount: payout.amount,
@@ -555,6 +562,44 @@ export class AdminFinanceController {
     return csv;
   }
 
+  /**
+   * Retrait gratuit d'une boutique ou d'un livreur : au-dessus de son seuil, aucun frais de
+   * retrait ; en dessous, les frais Mobile Money sont retenus sur le montant envoyé.
+   */
+  @Get(':kind/:ownerId/free-payout')
+  @ApiZodResponse(FreePayoutDto)
+  freePayout(
+    @Param('kind') kind: string,
+    @Param('ownerId', ParseUUIDPipe) ownerId: string,
+  ): Out<typeof FreePayoutDto> {
+    return this.payouts.freePayoutSettings(beneficiaryOf(kind), ownerId);
+  }
+
+  @Put(':kind/:ownerId/free-payout')
+  @ApiZodBody(FreePayoutBody)
+  @ApiZodResponse(FreePayoutDto)
+  async setFreePayout(
+    @CurrentUser() user: AuthUser,
+    @Param('kind') kind: string,
+    @Param('ownerId', ParseUUIDPipe) ownerId: string,
+    @ValidBody(FreePayoutBody) body: z.output<typeof FreePayoutBody>,
+    @Req() request: Request,
+  ): Out<typeof FreePayoutDto> {
+    const beneficiary = beneficiaryOf(kind);
+    const before = await this.payouts.freePayoutSettings(beneficiary, ownerId);
+    await this.payouts.setFreePayoutFrom(beneficiary, ownerId, body.freeFrom);
+    await this.audit.record({
+      actor: user,
+      action: 'finance.free_payout_set',
+      entityType: beneficiary === 'MERCHANT' ? 'merchant' : 'rider',
+      entityId: ownerId,
+      before: { freePayoutFrom: before.custom },
+      after: { freePayoutFrom: body.freeFrom },
+      request,
+    });
+    return this.payouts.freePayoutSettings(beneficiary, ownerId);
+  }
+
   /** Relevé mensuel PDF d'un marchand, pour le support et la finance. */
   @Get('merchants/:merchantId/statements/:month')
   @ApiProduces('application/pdf')
@@ -714,4 +759,11 @@ export class AdminFinanceController {
       request,
     );
   }
+}
+
+/** « merchants » ou « riders » dans l'adresse. */
+function beneficiaryOf(kind: string): 'MERCHANT' | 'RIDER' {
+  if (kind === 'merchants') return 'MERCHANT';
+  if (kind === 'riders') return 'RIDER';
+  throw AppError.notFound();
 }

@@ -279,5 +279,7 @@ export const RiderConfigDto = z
     emergencyNumbers: z.object({ police: z.string(), fire: z.string(), medical: z.string() }),
     mobileMoneyOperators: z.array(z.object({ code: z.string(), name: z.string() })),
     offerTimeoutSeconds: z.number(),
+    /** Frais Mobile Money payés par le client en plus du montant encaissé, en points de base. */
+    mobileMoneyFeeBps: z.int(),
   })
   .meta({ id: 'RiderConfig' });

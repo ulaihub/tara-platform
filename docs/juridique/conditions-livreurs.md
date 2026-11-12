@@ -55,7 +55,10 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
   frais de retour), **vous gardez les espèces** et le même montant est pris sur votre solde.
   L'argent à encaisser pour une course est mis de côté sur votre solde dès que vous
   l'acceptez : votre solde ne peut jamais devenir négatif, et vous ne devez jamais rien à Tara.
-- Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money.
+- Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money. Le
+  retrait est gratuit à partir d'un montant fixé pour vous selon votre activité (affiché dans
+  l'application) ; en dessous, les frais Mobile Money de l'envoi (2,5 % aujourd'hui) sont
+  retenus sur le montant reçu.
 
 ## 5. Encaisser correctement
 

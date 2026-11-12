@@ -452,6 +452,7 @@
   "addDelivery": "Ajouter une livraison",
   "addDeliveryHint": "Jusqu’à 10 livraisons depuis le même enlèvement : un seul passage du livreur.",
   "priceBase": "Course",
+  "mobileMoneyFeeLine": "Frais Mobile Money",
   "priceBaseTricycle": "Course en tricycle",
   "surchargeExpress": "Express",
   "surchargeHeavy": "Colis XL",
@@ -993,6 +994,17 @@
       }
     }
   },
+  "shopWithdrawalRule": "Reversement gratuit dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.",
+  "@shopWithdrawalRule": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
   "shopDebt": "Frais d’échec à régler : {amount}. Ils seront pris sur vos prochaines ventes ; au-delà de 3 000 F, vos nouvelles commandes attendent le règlement.",
   "@shopDebt": {
     "placeholders": {
@@ -1023,6 +1035,14 @@
   "topUpAction": "Recharger",
   "withdrawAction": "Retirer",
   "topUpHowMuch": "Combien voulez-vous ajouter ?",
+  "topUpFeeNote": "+ {fee} de frais Mobile Money (frais de l’opérateur).",
+  "@topUpFeeNote": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
   "topUpDone": "Solde rechargé de {amount}.",
   "@topUpDone": {
     "placeholders": {
