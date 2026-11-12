@@ -185,6 +185,19 @@ export const ERROR_MESSAGES = {
     en: 'Bulky items (appliances, furniture) are not delivered in {city} yet.',
   },
   PRICING_GRID_NOT_FOUND: { fr: 'Grille tarifaire introuvable.', en: 'Pricing grid not found.' },
+  TEAM_MEMBER_NOT_FOUND: { fr: 'Membre de l’équipe introuvable.', en: 'Team member not found.' },
+  TEAM_MEMBER_UNAVAILABLE: {
+    fr: 'Ce numéro appartient à un compte supprimé.',
+    en: 'This number belongs to a deleted account.',
+  },
+  TEAM_LAST_ADMIN: {
+    fr: 'Il doit rester au moins un administrateur.',
+    en: 'At least one administrator must remain.',
+  },
+  TEAM_SELF_DEMOTION: {
+    fr: 'Vous ne pouvez pas retirer vos propres droits d’administrateur.',
+    en: 'You cannot remove your own administrator rights.',
+  },
   MERCHANT_NOT_FOUND: { fr: 'Boutique introuvable.', en: 'Shop not found.' },
   RIDER_BOOST_NOT_FOUND: { fr: 'Prime de renfort introuvable.', en: 'Rider boost not found.' },
   PROMO_INVALID: { fr: 'Code promo inconnu.', en: 'Unknown promo code.' },

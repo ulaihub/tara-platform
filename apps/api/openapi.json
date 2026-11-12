@@ -8737,6 +8737,255 @@
           "Back-office · indicateurs"
         ]
       }
+    },
+    "/v1/admin/team": {
+      "get": {
+        "operationId": "Team_members",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamMember"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · équipe et audit"
+        ]
+      },
+      "post": {
+        "operationId": "Team_add",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "fullName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "roles": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/StaffRole"
+                    }
+                  }
+                },
+                "required": [
+                  "phone",
+                  "fullName",
+                  "roles"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamMember"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · équipe et audit"
+        ]
+      }
+    },
+    "/v1/admin/team/{userId}/roles": {
+      "put": {
+        "operationId": "Team_setRoles",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roles": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/StaffRole"
+                    }
+                  }
+                },
+                "required": [
+                  "roles"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamMember"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · équipe et audit"
+        ]
+      }
+    },
+    "/v1/admin/team/{userId}": {
+      "delete": {
+        "operationId": "Team_remove",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · équipe et audit"
+        ]
+      }
+    },
+    "/v1/admin/audit-log": {
+      "get": {
+        "operationId": "Team_auditLog",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          {
+            "name": "actorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · équipe et audit"
+        ]
+      }
     }
   },
   "info": {
@@ -10752,6 +11001,109 @@
         ],
         "additionalProperties": false
       },
+      "AuditEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "phone": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "phone"
+            ],
+            "additionalProperties": false
+          },
+          "actorRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "action": {
+            "type": "string"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "before": {
+            "nullable": true
+          },
+          "after": {
+            "nullable": true
+          },
+          "ip": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "actor",
+          "actorRoles",
+          "action",
+          "entityType",
+          "entityId",
+          "before",
+          "after",
+          "ip"
+        ],
+        "additionalProperties": false
+      },
+      "AuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEntry"
+            }
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "entityTypes"
+        ],
+        "additionalProperties": false
+      },
       "AuthSession": {
         "type": "object",
         "properties": {
@@ -11600,6 +11952,10 @@
                   "PARCEL_ANALYSIS_LIMIT",
                   "BULKY_UNAVAILABLE",
                   "PRICING_GRID_NOT_FOUND",
+                  "TEAM_MEMBER_NOT_FOUND",
+                  "TEAM_MEMBER_UNAVAILABLE",
+                  "TEAM_LAST_ADMIN",
+                  "TEAM_SELF_DEMOTION",
                   "MERCHANT_NOT_FOUND",
                   "RIDER_BOOST_NOT_FOUND",
                   "PROMO_INVALID",
@@ -15748,6 +16104,15 @@
         ],
         "additionalProperties": false
       },
+      "StaffRole": {
+        "type": "string",
+        "enum": [
+          "ADMIN",
+          "DISPATCHER",
+          "SUPPORT",
+          "FINANCE"
+        ]
+      },
       "SurchargeCode": {
         "type": "string",
         "enum": [
@@ -15759,6 +16124,50 @@
           "WEATHER",
           "HANDLING"
         ]
+      },
+      "TeamMember": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StaffRole"
+            }
+          },
+          "mfaEnabled": {
+            "type": "boolean"
+          },
+          "lastActiveAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "phone",
+          "roles",
+          "mfaEnabled",
+          "lastActiveAt",
+          "createdAt"
+        ],
+        "additionalProperties": false
       },
       "TermsStatus": {
         "type": "object",

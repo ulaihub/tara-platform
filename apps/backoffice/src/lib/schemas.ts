@@ -38,3 +38,6 @@ export type AdminMerchant = Schemas['AdminMerchant'];
 export type AdminMerchantRow = Schemas['AdminMerchantRow'];
 export type AdminMerchantPage = Schemas['AdminMerchantPage'];
 export type Metrics = Schemas['Metrics'];
+export type TeamMember = Schemas['TeamMember'];
+export type AuditEntry = Schemas['AuditEntry'];
+export type AuditPage = Schemas['AuditPage'];

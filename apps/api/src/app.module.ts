@@ -19,6 +19,7 @@ import { OpsModule } from './ops/ops.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
 import { MetricsModule } from './metrics/metrics.module.js';
+import { TeamModule } from './team/team.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrivacyModule } from './privacy/privacy.module.js';
 import { PublicTrackingModule } from './public-tracking/public-tracking.module.js';
@@ -74,6 +75,7 @@ import { UsersModule } from './users/users.module.js';
     SupportModule,
     MerchantsModule,
     MetricsModule,
+    TeamModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },

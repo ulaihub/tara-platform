@@ -216,6 +216,16 @@ Boutiques (`ADMIN`, `FINANCE`) : `GET /admin/merchants?q&page` (les plus actives
 
 `GET /admin/metrics?days=7|30|90` (toute l'équipe ; 30 par défaut), heure du Cameroun, comparés à la période précédente de même durée : livraisons réussies par jour (avec échecs, retours, annulations), taux de réussite (livrées / livrées + retournées) et réussite au premier passage, délais médians et « 9 sur 10 » (trouver un livreur, trajet, total ; hors courses programmées, horodatages incohérents écartés), reversements aux boutiques faits le jour même, livreurs actifs et courses par livreur et par jour, cinq livreurs les plus actifs, fidélité des boutiques (actives la période d'avant et encore actives), journées du contrôle des comptes avec écarts, note moyenne reçue par les livreurs et livreurs sous 4/5.
 
+## Équipe et audit (H8)
+
+Routes `ADMIN` (double authentification) :
+
+- `GET /admin/team` : membres de l'équipe, rôles, double authentification configurée ou non, dernière connexion.
+- `POST /admin/team` `{ phone, fullName, roles }` : donne l'accès à un numéro (compte créé s'il n'existe pas, sinon rôles ajoutés). La personne se connecte ensuite au back-office avec son numéro et configure sa double authentification.
+- `PUT /admin/team/{userId}/roles` : remplace les rôles d'équipe ; les sessions du membre sont fermées pour que les nouveaux droits s'appliquent tout de suite.
+- `DELETE /admin/team/{userId}` : retire l'accès (rôles d'équipe, sessions, double authentification). Il reste toujours un administrateur (`422 TEAM_LAST_ADMIN`) et personne ne retire ses propres droits d'administrateur (`422 TEAM_SELF_DEMOTION`).
+- `GET /admin/audit-log?entityType&entityId&actorId&cursor&limit` : journal des actions sensibles, les plus récentes d'abord, avec l'auteur, l'avant et l'après ; `entityTypes` liste les types d'objets présents pour le filtre. Le journal ne peut être ni modifié ni effacé (règle de la base de données).
+
 ## Gros objets (frigo, cuisinière, matelas…)
 
 - Taille `BULKY` (« Gros objet ») : la course se fait en tricycle ou en voiture, jamais à moto. Le prix vient de la grille **tricycle** de la ville (`vehicleType: TRICYCLE` dans `POST /admin/pricing-grids`), distincte de la grille moto ; le devis renvoie `vehicleType`.

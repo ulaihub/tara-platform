@@ -2356,6 +2356,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/team': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Team_members'];
+    put?: never;
+    post: operations['Team_add'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/team/{userId}/roles': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['Team_setRoles'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/team/{userId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['Team_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/audit-log': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Team_auditLog'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2852,6 +2916,31 @@ export interface components {
       }[];
       mobileMoneyFeeBps: number;
     };
+    AuditEntry: {
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      at: string;
+      actor: {
+        /** Format: uuid */
+        id: string;
+        name: string | null;
+        phone: string | null;
+      } | null;
+      actorRoles: string[];
+      action: string;
+      entityType: string;
+      entityId: string;
+      before: unknown;
+      after: unknown;
+      ip: string | null;
+    };
+    AuditPage: {
+      items: components['schemas']['AuditEntry'][];
+      /** Format: uuid */
+      nextCursor: string | null;
+      entityTypes: string[];
+    };
     AuthSession: {
       accessToken: string;
       refreshToken: string;
@@ -3124,6 +3213,10 @@ export interface components {
           | 'PARCEL_ANALYSIS_LIMIT'
           | 'BULKY_UNAVAILABLE'
           | 'PRICING_GRID_NOT_FOUND'
+          | 'TEAM_MEMBER_NOT_FOUND'
+          | 'TEAM_MEMBER_UNAVAILABLE'
+          | 'TEAM_LAST_ADMIN'
+          | 'TEAM_SELF_DEMOTION'
           | 'MERCHANT_NOT_FOUND'
           | 'RIDER_BOOST_NOT_FOUND'
           | 'PROMO_INVALID'
@@ -4236,8 +4329,22 @@ export interface components {
       locale: 'FR' | 'EN';
     };
     /** @enum {string} */
+    StaffRole: 'ADMIN' | 'DISPATCHER' | 'SUPPORT' | 'FINANCE';
+    /** @enum {string} */
     SurchargeCode:
       'EXPRESS' | 'HEAVY_PARCEL' | 'NIGHT' | 'FAILED_ATTEMPT' | 'RETURN' | 'WEATHER' | 'HANDLING';
+    TeamMember: {
+      /** Format: uuid */
+      id: string;
+      fullName: string | null;
+      phone: string;
+      roles: components['schemas']['StaffRole'][];
+      mfaEnabled: boolean;
+      /** Format: date-time */
+      lastActiveAt: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
     TermsStatus: {
       required: {
         /** @enum {string} */
@@ -8834,6 +8941,131 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Metrics'];
+        };
+      };
+    };
+  };
+  Team_members: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TeamMember'][];
+        };
+      };
+    };
+  };
+  Team_add: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @description Mobile camerounais ; toutes les écritures courantes sont acceptées
+           * @example +237690000000
+           */
+          phone: string;
+          fullName: string;
+          roles: components['schemas']['StaffRole'][];
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TeamMember'];
+        };
+      };
+    };
+  };
+  Team_setRoles: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          roles: components['schemas']['StaffRole'][];
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TeamMember'];
+        };
+      };
+    };
+  };
+  Team_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  Team_auditLog: {
+    parameters: {
+      query?: {
+        entityType?: string;
+        actorId?: string;
+        entityId?: string;
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuditPage'];
         };
       };
     };

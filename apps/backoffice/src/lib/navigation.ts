@@ -91,7 +91,7 @@ export const SECTIONS: readonly Section[] = [
     requirement: 'H8',
     description: 'Membres de l’équipe et leurs rôles, journal des actions sensibles.',
     roles: ['ADMIN'],
-    ready: false,
+    ready: true,
   },
 ];
 
