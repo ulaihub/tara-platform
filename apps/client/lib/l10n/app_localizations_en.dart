@@ -551,6 +551,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get packageBody => 'So the rider knows how to carry it.';
 
   @override
+  String get parcelPhotoTitle => 'Take a photo of the parcel';
+
+  @override
+  String get parcelPhotoBody => 'Optional · we suggest the size and contents, you check.';
+
+  @override
+  String get parcelPhotoAnalyzing => 'Analysing the photo…';
+
+  @override
+  String get parcelPhotoAnalyzingBody => 'A few seconds.';
+
+  @override
+  String get parcelPhotoApplied => 'Suggestion applied';
+
+  @override
+  String parcelPhotoAppliedBody(String summary) {
+    return '$summary. Check below.';
+  }
+
+  @override
+  String get parcelPhotoNotParcel => 'No parcel recognised';
+
+  @override
+  String get parcelPhotoNotParcelBody => 'Retake the photo with only the parcel in frame.';
+
+  @override
+  String get parcelPhotoAttached => 'Photo attached';
+
+  @override
+  String get parcelPhotoAttachedBody => 'The rider will see it. Choose the size and contents below.';
+
+  @override
+  String parcelPhotoProhibited(String items) {
+    return 'The photo seems to show: $items. These items are forbidden. If this is a mistake, you can continue: the Tara team and the rider will be informed.';
+  }
+
+  @override
+  String sizeShort(String size) {
+    return 'Size $size';
+  }
+
+  @override
   String get contentsLabel => 'Contents';
 
   @override

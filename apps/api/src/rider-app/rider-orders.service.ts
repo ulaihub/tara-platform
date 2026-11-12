@@ -152,6 +152,21 @@ export class RiderOrdersService {
     return this.media.read(key);
   }
 
+  /** Photo du colis jointe par l'expéditeur, pour le livreur de la course en cours. */
+  async parcelPhoto(
+    userId: string,
+    orderId: string,
+  ): Promise<{ buffer: Buffer; mimeType: string }> {
+    const { order } = await this.load(userId, orderId);
+    if (
+      !order.parcelPhotoKey ||
+      !(ACTIVE_RIDER_STATUSES as readonly OrderStatus[]).includes(order.status)
+    ) {
+      throw AppError.notFound('MEDIA_NOT_FOUND');
+    }
+    return this.media.read(order.parcelPhotoKey);
+  }
+
   async get(userId: string, orderId: string): Promise<z.output<typeof RiderOrderDto>> {
     const { order } = await this.load(userId, orderId);
     const [dto] = await this.toDtos([order]);
@@ -200,6 +215,8 @@ export class RiderOrdersService {
         packageDescription: order.packageDescription,
         isFragile: order.isFragile,
         loadingHelp: order.loadingHelp,
+        hasParcelPhoto: order.parcelPhotoKey !== null,
+        parcelWarning: order.parcelAiWarning,
         isExpress: order.isExpress,
         instructions: order.instructions,
         pickup,

@@ -274,6 +274,39 @@
   },
   "packageTitle": "Qu’y a-t-il dans le colis ?",
   "packageBody": "Le livreur sait ainsi comment le transporter.",
+  "parcelPhotoTitle": "Photographier le colis",
+  "parcelPhotoBody": "Facultatif · nous proposons la taille et la nature, vous vérifiez.",
+  "parcelPhotoAnalyzing": "Analyse de la photo…",
+  "parcelPhotoAnalyzingBody": "Quelques secondes.",
+  "parcelPhotoApplied": "Proposition appliquée",
+  "parcelPhotoAppliedBody": "{summary}. Vérifiez ci-dessous.",
+  "@parcelPhotoAppliedBody": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "parcelPhotoNotParcel": "Pas de colis reconnu",
+  "parcelPhotoNotParcelBody": "Reprenez la photo en cadrant le colis seul.",
+  "parcelPhotoAttached": "Photo jointe",
+  "parcelPhotoAttachedBody": "Le livreur la verra. Choisissez la taille et la nature ci-dessous.",
+  "parcelPhotoProhibited": "La photo semble montrer : {items}. Ces objets sont interdits. Si c’est une erreur, vous pouvez continuer : l’équipe Tara et le livreur en seront informés.",
+  "@parcelPhotoProhibited": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "sizeShort": "Taille {size}",
+  "@sizeShort": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "contentsLabel": "Nature du contenu",
   "contentsDocuments": "Documents",
   "contentsClothing": "Vêtements, chaussures",

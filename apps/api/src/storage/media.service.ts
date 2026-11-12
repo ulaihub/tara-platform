@@ -20,6 +20,7 @@ interface MediaRule {
 export const MEDIA_RULES: Record<MediaKind, MediaRule> = {
   ADDRESS_PHOTO: { maxBytes: 1_000_000, mimeTypes: IMAGE_TYPES, encrypted: false },
   PROOF_PHOTO: { maxBytes: 1_000_000, mimeTypes: IMAGE_TYPES, encrypted: false },
+  PARCEL_PHOTO: { maxBytes: 1_000_000, mimeTypes: IMAGE_TYPES, encrypted: false },
   VOICE_NOTE: {
     maxBytes: 1_000_000,
     mimeTypes: [

@@ -246,6 +246,8 @@ export class AdminOrdersService {
         description: order.packageDescription,
         fragile: order.isFragile,
         loadingHelp: order.loadingHelp,
+        hasPhoto: order.parcelPhotoKey !== null,
+        aiWarning: order.parcelAiWarning,
         declaredValue: order.declaredValue,
         instructions: order.instructions,
       },

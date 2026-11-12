@@ -158,6 +158,14 @@ export const ERROR_MESSAGES = {
     fr: 'Aucun tarif n’est actif pour {city}.',
     en: 'No active pricing for {city}.',
   },
+  PARCEL_ANALYSIS_UNAVAILABLE: {
+    fr: 'L’analyse de la photo est momentanément indisponible. Choisissez la taille et la nature vous-même.',
+    en: 'Photo analysis is temporarily unavailable. Choose the size and contents yourself.',
+  },
+  PARCEL_ANALYSIS_LIMIT: {
+    fr: 'Trop de photos analysées en une heure. Choisissez la taille et la nature vous-même.',
+    en: 'Too many photos analysed within an hour. Choose the size and contents yourself.',
+  },
   BULKY_UNAVAILABLE: {
     fr: 'Les gros objets (électroménager, meubles) ne sont pas encore livrés à {city}.',
     en: 'Bulky items (appliances, furniture) are not delivered in {city} yet.',

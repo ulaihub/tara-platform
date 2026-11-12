@@ -63,7 +63,8 @@
                     "enum": [
                       "ADDRESS_PHOTO",
                       "VOICE_NOTE",
-                      "PROOF_PHOTO"
+                      "PROOF_PHOTO",
+                      "PARCEL_PHOTO"
                     ]
                   }
                 }
@@ -2584,6 +2585,11 @@
                     "minimum": 0,
                     "maximum": 10000000
                   },
+                  "parcelPhotoKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
                   "codAmount": {
                     "default": 0,
                     "type": "integer",
@@ -2836,6 +2842,11 @@
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 10000000
+                        },
+                        "parcelPhotoKey": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
                         },
                         "codAmount": {
                           "default": 0,
@@ -3177,6 +3188,52 @@
         ],
         "tags": [
           "Back-office · commandes"
+        ]
+      }
+    },
+    "/v1/orders/parcel-analysis": {
+      "post": {
+        "operationId": "ParcelAnalysis_analyze",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "photoKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "photoKey"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParcelAnalysis"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
         ]
       }
     },
@@ -5652,6 +5709,54 @@
         ]
       }
     },
+    "/v1/rider/orders/{id}/parcel-photo": {
+      "get": {
+        "operationId": "RiderApp_parcelPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo du colis",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/rider/orders/{id}/route": {
       "get": {
         "operationId": "RiderApp_route",
@@ -7620,6 +7725,13 @@
               "loadingHelp": {
                 "type": "boolean"
               },
+              "hasPhoto": {
+                "type": "boolean"
+              },
+              "aiWarning": {
+                "nullable": true,
+                "type": "string"
+              },
               "declaredValue": {
                 "nullable": true,
                 "type": "integer"
@@ -7635,6 +7747,8 @@
               "description",
               "fragile",
               "loadingHelp",
+              "hasPhoto",
+              "aiWarning",
               "declaredValue",
               "instructions"
             ],
@@ -9266,6 +9380,8 @@
                   "LOCATION_LINK_EXPIRED",
                   "LOCATION_LINK_ALREADY_USED",
                   "PRICING_UNAVAILABLE",
+                  "PARCEL_ANALYSIS_UNAVAILABLE",
+                  "PARCEL_ANALYSIS_LIMIT",
                   "BULKY_UNAVAILABLE",
                   "PRICING_GRID_NOT_FOUND",
                   "PROMO_INVALID",
@@ -10098,7 +10214,8 @@
               "ADDRESS_PHOTO",
               "VOICE_NOTE",
               "KYC_DOCUMENT",
-              "PROOF_PHOTO"
+              "PROOF_PHOTO",
+              "PARCEL_PHOTO"
             ]
           },
           "mimeType": {
@@ -10680,6 +10797,77 @@
         ],
         "description": "S ≤ 2 kg, M ≤ 5 kg, L ≤ 10 kg, XL ≤ 20 kg ; BULKY : gros objet (électroménager, meuble, plus de 20 kg), tricycle ou camionnette"
       },
+      "ParcelAnalysis": {
+        "type": "object",
+        "properties": {
+          "photoKey": {
+            "type": "string"
+          },
+          "isParcel": {
+            "type": "boolean"
+          },
+          "suggestion": {
+            "type": "object",
+            "properties": {
+              "size": {
+                "$ref": "#/components/schemas/PackageSize"
+              },
+              "contents": {
+                "$ref": "#/components/schemas/PackageContents"
+              },
+              "description": {
+                "nullable": true,
+                "type": "string"
+              },
+              "fragile": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "size",
+              "contents",
+              "description",
+              "fragile"
+            ],
+            "additionalProperties": false
+          },
+          "prohibited": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "$ref": "#/components/schemas/ProhibitedCategory"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "label"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          }
+        },
+        "required": [
+          "photoKey",
+          "isParcel",
+          "suggestion",
+          "prohibited",
+          "confidence"
+        ],
+        "additionalProperties": false
+      },
       "ParcelRefusalReason": {
         "type": "string",
         "enum": [
@@ -10976,6 +11164,16 @@
           "createdAt"
         ],
         "additionalProperties": false
+      },
+      "ProhibitedCategory": {
+        "type": "string",
+        "enum": [
+          "WEAPON",
+          "DRUGS",
+          "DANGEROUS_GOODS",
+          "LIVE_ANIMAL",
+          "CASH"
+        ]
       },
       "PromoCode": {
         "type": "object",
@@ -11684,6 +11882,13 @@
           "loadingHelp": {
             "type": "boolean"
           },
+          "hasParcelPhoto": {
+            "type": "boolean"
+          },
+          "parcelWarning": {
+            "nullable": true,
+            "type": "string"
+          },
           "isExpress": {
             "type": "boolean"
           },
@@ -11849,6 +12054,8 @@
           "packageDescription",
           "isFragile",
           "loadingHelp",
+          "hasParcelPhoto",
+          "parcelWarning",
           "isExpress",
           "instructions",
           "pickup",

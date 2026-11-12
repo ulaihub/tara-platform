@@ -556,6 +556,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String get packageBody => 'Le livreur sait ainsi comment le transporter.';
 
   @override
+  String get parcelPhotoTitle => 'Photographier le colis';
+
+  @override
+  String get parcelPhotoBody => 'Facultatif · nous proposons la taille et la nature, vous vérifiez.';
+
+  @override
+  String get parcelPhotoAnalyzing => 'Analyse de la photo…';
+
+  @override
+  String get parcelPhotoAnalyzingBody => 'Quelques secondes.';
+
+  @override
+  String get parcelPhotoApplied => 'Proposition appliquée';
+
+  @override
+  String parcelPhotoAppliedBody(String summary) {
+    return '$summary. Vérifiez ci-dessous.';
+  }
+
+  @override
+  String get parcelPhotoNotParcel => 'Pas de colis reconnu';
+
+  @override
+  String get parcelPhotoNotParcelBody => 'Reprenez la photo en cadrant le colis seul.';
+
+  @override
+  String get parcelPhotoAttached => 'Photo jointe';
+
+  @override
+  String get parcelPhotoAttachedBody => 'Le livreur la verra. Choisissez la taille et la nature ci-dessous.';
+
+  @override
+  String parcelPhotoProhibited(String items) {
+    return 'La photo semble montrer : $items. Ces objets sont interdits. Si c’est une erreur, vous pouvez continuer : l’équipe Tara et le livreur en seront informés.';
+  }
+
+  @override
+  String sizeShort(String size) {
+    return 'Taille $size';
+  }
+
+  @override
   String get contentsLabel => 'Nature du contenu';
 
   @override

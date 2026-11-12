@@ -450,6 +450,53 @@ class LocationLink {
   final Address? address;
 }
 
+/// Proposition tirée de la photo du colis : à confirmer ou corriger par l'expéditeur.
+@immutable
+class ParcelAnalysis {
+  const ParcelAnalysis({
+    required this.photoKey,
+    required this.isParcel,
+    required this.size,
+    required this.contents,
+    required this.description,
+    required this.fragile,
+    required this.prohibited,
+    required this.confidence,
+  });
+
+  factory ParcelAnalysis.fromJson(Json json) {
+    final suggestion = _field<Json>(json, 'suggestion');
+    return ParcelAnalysis(
+      photoKey: _field(json, 'photoKey'),
+      isParcel: _field(json, 'isParcel'),
+      size: _field(suggestion, 'size'),
+      contents: _field(suggestion, 'contents'),
+      description: suggestion['description'] as String?,
+      fragile: _field(suggestion, 'fragile'),
+      prohibited: [
+        for (final item in _field<List<Object?>>(json, 'prohibited')) _field<String>(item! as Json, 'label'),
+      ],
+      confidence: _field(json, 'confidence'),
+    );
+  }
+  static const fields = ['photoKey', 'isParcel', 'suggestion', 'prohibited', 'confidence'];
+
+  final String photoKey;
+
+  /// Faux : la photo ne montre pas de colis, elle est à reprendre.
+  final bool isParcel;
+  final String size;
+  final String contents;
+  final String? description;
+  final bool fragile;
+
+  /// Objets interdits que la photo semble montrer (libellés).
+  final List<String> prohibited;
+
+  /// low, medium ou high.
+  final String confidence;
+}
+
 /// Prix d'une livraison avant validation (C2).
 @immutable
 class Quote {

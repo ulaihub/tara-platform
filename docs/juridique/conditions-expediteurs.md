@@ -59,6 +59,14 @@ au bureau de Tara et, si la loi l'exige, aux autorités.
 
 Emballez le colis pour qu'il supporte un trajet à moto. Signalez s'il est fragile.
 
+### Photo du colis
+
+Vous pouvez photographier le colis en commandant. La photo est analysée automatiquement pour
+vous proposer sa taille et sa nature : vous gardez toujours le dernier mot. Si la photo semble
+montrer un objet interdit, l'application vous prévient ; si vous commandez quand même,
+l'équipe Tara et le livreur en sont informés. La photo est jointe à la commande et montrée au
+livreur. Photographiez le colis seul, sans personne dans le cadre.
+
 ### Colis non conforme
 
 Déclarez le colis tel qu'il est : sa taille, son contenu, et « Gros objet » s'il ne tient pas

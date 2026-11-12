@@ -70,6 +70,8 @@ export const DeliveryItem = z.object({
   /** Gros objet : aide au chargement par deux personnes (supplément manutention). */
   loadingHelp: z.boolean().default(false),
   declaredValue: Fcfa.optional(),
+  /** Photo du colis (POST /media, kind=PARCEL_PHOTO), analysée par POST /orders/parcel-analysis. */
+  parcelPhotoKey: z.string().min(1).max(200).optional(),
   /** Montant à encaisser auprès du destinataire, 0 si aucun (réservé aux marchands). */
   codAmount: Fcfa.default(0),
   instructions: z.string().trim().max(300).optional(),

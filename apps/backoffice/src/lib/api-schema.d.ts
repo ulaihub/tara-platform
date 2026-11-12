@@ -820,6 +820,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/orders/parcel-analysis': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ParcelAnalysis_analyze'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/public/tracking/{token}': {
     parameters: {
       query?: never;
@@ -1524,6 +1540,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/rider/orders/{id}/parcel-photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['RiderApp_parcelPhoto'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/rider/orders/{id}/route': {
     parameters: {
       query?: never;
@@ -2094,6 +2126,8 @@ export interface components {
         description: string | null;
         fragile: boolean;
         loadingHelp: boolean;
+        hasPhoto: boolean;
+        aiWarning: string | null;
         declaredValue: number | null;
         instructions: string | null;
       };
@@ -2543,6 +2577,8 @@ export interface components {
           | 'LOCATION_LINK_EXPIRED'
           | 'LOCATION_LINK_ALREADY_USED'
           | 'PRICING_UNAVAILABLE'
+          | 'PARCEL_ANALYSIS_UNAVAILABLE'
+          | 'PARCEL_ANALYSIS_LIMIT'
           | 'BULKY_UNAVAILABLE'
           | 'PRICING_GRID_NOT_FOUND'
           | 'PROMO_INVALID'
@@ -2819,7 +2855,7 @@ export interface components {
       /** @description Clé à transmettre dans photoKey ou voiceNoteKey */
       key: string;
       /** @enum {string} */
-      kind: 'ADDRESS_PHOTO' | 'VOICE_NOTE' | 'KYC_DOCUMENT' | 'PROOF_PHOTO';
+      kind: 'ADDRESS_PHOTO' | 'VOICE_NOTE' | 'KYC_DOCUMENT' | 'PROOF_PHOTO' | 'PARCEL_PHOTO';
       mimeType: string;
       sizeBytes: number;
     };
@@ -2984,6 +3020,22 @@ export interface components {
      * @enum {string}
      */
     PackageSize: 'S' | 'M' | 'L' | 'XL' | 'BULKY';
+    ParcelAnalysis: {
+      photoKey: string;
+      isParcel: boolean;
+      suggestion: {
+        size: components['schemas']['PackageSize'];
+        contents: components['schemas']['PackageContents'];
+        description: string | null;
+        fragile: boolean;
+      };
+      prohibited: {
+        code: components['schemas']['ProhibitedCategory'];
+        label: string;
+      }[];
+      /** @enum {string} */
+      confidence: 'low' | 'medium' | 'high';
+    };
     /** @enum {string} */
     ParcelRefusalReason: 'TOO_BIG' | 'TOO_HEAVY' | 'NOT_AS_DECLARED' | 'FORBIDDEN_ITEM';
     Payment: {
@@ -3066,6 +3118,8 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    /** @enum {string} */
+    ProhibitedCategory: 'WEAPON' | 'DRUGS' | 'DANGEROUS_GOODS' | 'LIVE_ANIMAL' | 'CASH';
     PromoCode: {
       /** Format: uuid */
       id: string;
@@ -3243,6 +3297,8 @@ export interface components {
       packageDescription: string | null;
       isFragile: boolean;
       loadingHelp: boolean;
+      hasParcelPhoto: boolean;
+      parcelWarning: string | null;
       isExpress: boolean;
       instructions: string | null;
       pickup: components['schemas']['Address'];
@@ -3524,7 +3580,7 @@ export interface operations {
           /** Format: binary */
           file: string;
           /** @enum {string} */
-          kind: 'ADDRESS_PHOTO' | 'VOICE_NOTE' | 'PROOF_PHOTO';
+          kind: 'ADDRESS_PHOTO' | 'VOICE_NOTE' | 'PROOF_PHOTO' | 'PARCEL_PHOTO';
         };
       };
     };
@@ -4946,6 +5002,7 @@ export interface operations {
           /** @default false */
           loadingHelp?: boolean;
           declaredValue?: number;
+          parcelPhotoKey?: string;
           /** @default 0 */
           codAmount?: number;
           instructions?: string;
@@ -5014,6 +5071,7 @@ export interface operations {
             /** @default false */
             loadingHelp?: boolean;
             declaredValue?: number;
+            parcelPhotoKey?: string;
             /** @default 0 */
             codAmount?: number;
             instructions?: string;
@@ -5184,6 +5242,32 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Order'];
+        };
+      };
+    };
+  };
+  ParcelAnalysis_analyze: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          photoKey: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ParcelAnalysis'];
         };
       };
     };
@@ -6422,6 +6506,30 @@ export interface operations {
           'audio/mp4': string;
           'audio/aac': string;
           'audio/mpeg': string;
+        };
+      };
+    };
+  };
+  RiderApp_parcelPhoto: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Photo du colis */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'image/jpeg': string;
+          'image/png': string;
+          'image/webp': string;
         };
       };
     };

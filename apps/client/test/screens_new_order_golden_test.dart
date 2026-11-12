@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -5,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_client/app/providers.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/core/location.dart';
+import 'package:tara_client/core/media/address_media.dart';
 import 'package:tara_client/features/home/home_flow.dart';
 import 'package:tara_client/features/order/address_editor.dart';
 import 'package:tara_client/features/order/new_order_flow.dart';
@@ -51,8 +54,12 @@ FakeClientApi orderApi() => FakeClientApi()
     ),
   ];
 
+/// Photo du colis prise dans les tests (petite image du dossier fixtures).
+final parcelPhoto = File('test/fixtures/colis.jpg').absolute.path;
+
 List<Override> overrides(FakeClientApi api, {Future<bool> Function(Uri uri)? launcher, FakeRealtime? realtime}) => [
   keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
+  takeParcelPhotoProvider.overrideWithValue(() async => parcelPhoto),
   clientApiProvider.overrideWithValue(api),
   realMapProvider.overrideWithValue(false),
   currentPositionProvider.overrideWithValue(() async => MapPoint.douala),
@@ -83,6 +90,9 @@ Future<void> toPackage(WidgetTester tester) async {
 /// Étape 4 : colis « Documents ».
 Future<void> toWhen(WidgetTester tester) async {
   await toPackage(tester);
+  // Petit écran, grand texte : la carte photo pousse les natures sous le pli.
+  await tester.ensureVisible(find.text('Documents'));
+  await settle(tester);
   await tester.tap(find.text('Documents'));
   await tester.tap(find.text('Continuer'));
   await settle(tester);
@@ -254,6 +264,33 @@ void main() {
       expect(find.text('Commander · 4\u00a0500\u00a0F'), findsOneWidget);
       expect(find.textContaining('son déplacement (1\u00a0500 F) reste à votre charge'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/gros_objet_${brightness.name}.png'));
+    });
+
+    goldenTest('05 colis photo analysée ${brightness.name}', (tester) async {
+      final api = orderApi()
+        ..parcelAnalysis = const ParcelAnalysis(
+          photoKey: 'parcel_photo-1',
+          isParcel: true,
+          size: 'BULKY',
+          contents: 'HOUSEHOLD',
+          description: 'Réfrigérateur 2 portes',
+          fragile: true,
+          prohibited: ['matière dangereuse (gaz, carburant…)'],
+          confidence: 'high',
+        );
+      await pumpVariant(tester, variant, flow(api), surface: const Size(390, 1900));
+      await toPackage(tester);
+      final context = tester.element(find.text('Photographier le colis'));
+      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(parcelPhoto)), width: 168), context));
+      await tester.tap(find.text('Prendre la photo'));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await settle(tester);
+      expect(api.uploads.last, (parcelPhoto, 'PARCEL_PHOTO'));
+      expect(api.analyzed, ['address/parcel_photo-1']);
+      expect(find.text('Proposition appliquée'), findsOneWidget);
+      expect(find.text('Réfrigérateur 2 portes'), findsOneWidget);
+      expect(find.textContaining('La photo semble montrer : matière dangereuse'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_colis/photo_${brightness.name}.png'));
     });
 
     goldenTest('05 quand programmé ${brightness.name}', (tester) async {
@@ -540,6 +577,31 @@ void main() {
     await settle(tester);
     expect(api.created.single.body, containsPair('packageSize', 'BULKY'));
     expect(api.created.single.body, containsPair('loadingHelp', true));
+  });
+
+  testWidgets('photo du colis : jointe à la commande ; analyse indisponible, on choisit soi-même', (tester) async {
+    final api = orderApi()
+      ..parcelAnalysisError = const ApiException(
+        code: 'PARCEL_ANALYSIS_UNAVAILABLE',
+        message: 'L’analyse de la photo est momentanément indisponible. Choisissez la taille et la nature vous-même.',
+        status: 503,
+      );
+    await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1800));
+    await toPackage(tester);
+    await tester.tap(find.text('Prendre la photo'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await settle(tester);
+    expect(find.text('Photo jointe'), findsOneWidget);
+    expect(find.textContaining('momentanément indisponible'), findsOneWidget);
+    await tester.tap(find.text('Documents'));
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tapVisible(tester, 'Espèces à l’enlèvement');
+    await slideToOrder(tester);
+    await settle(tester);
+    expect(api.created.single.body, containsPair('parcelPhotoKey', 'address/parcel_photo-1'));
   });
 
   testWidgets('un particulier n’a pas de montant à encaisser', (tester) async {

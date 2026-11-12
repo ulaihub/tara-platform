@@ -1118,6 +1118,78 @@ abstract class AppLocalizations {
   /// **'Le livreur sait ainsi comment le transporter.'**
   String get packageBody;
 
+  /// No description provided for @parcelPhotoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier le colis'**
+  String get parcelPhotoTitle;
+
+  /// No description provided for @parcelPhotoBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif · nous proposons la taille et la nature, vous vérifiez.'**
+  String get parcelPhotoBody;
+
+  /// No description provided for @parcelPhotoAnalyzing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse de la photo…'**
+  String get parcelPhotoAnalyzing;
+
+  /// No description provided for @parcelPhotoAnalyzingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelques secondes.'**
+  String get parcelPhotoAnalyzingBody;
+
+  /// No description provided for @parcelPhotoApplied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposition appliquée'**
+  String get parcelPhotoApplied;
+
+  /// No description provided for @parcelPhotoAppliedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{summary}. Vérifiez ci-dessous.'**
+  String parcelPhotoAppliedBody(String summary);
+
+  /// No description provided for @parcelPhotoNotParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de colis reconnu'**
+  String get parcelPhotoNotParcel;
+
+  /// No description provided for @parcelPhotoNotParcelBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprenez la photo en cadrant le colis seul.'**
+  String get parcelPhotoNotParcelBody;
+
+  /// No description provided for @parcelPhotoAttached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo jointe'**
+  String get parcelPhotoAttached;
+
+  /// No description provided for @parcelPhotoAttachedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur la verra. Choisissez la taille et la nature ci-dessous.'**
+  String get parcelPhotoAttachedBody;
+
+  /// No description provided for @parcelPhotoProhibited.
+  ///
+  /// In fr, this message translates to:
+  /// **'La photo semble montrer : {items}. Ces objets sont interdits. Si c’est une erreur, vous pouvez continuer : l’équipe Tara et le livreur en seront informés.'**
+  String parcelPhotoProhibited(String items);
+
+  /// No description provided for @sizeShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille {size}'**
+  String sizeShort(String size);
+
   /// No description provided for @contentsLabel.
   ///
   /// In fr, this message translates to:

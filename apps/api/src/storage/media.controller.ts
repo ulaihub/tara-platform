@@ -8,12 +8,14 @@ import { AppError } from '../common/errors/app-error.js';
 import { ApiZodResponse, ZodValidationPipe } from '../common/validation/zod.js';
 import { MediaService } from './media.service.js';
 
-const UploadMediaBody = z.object({ kind: z.enum(['ADDRESS_PHOTO', 'VOICE_NOTE', 'PROOF_PHOTO']) });
+const UploadMediaBody = z.object({
+  kind: z.enum(['ADDRESS_PHOTO', 'VOICE_NOTE', 'PROOF_PHOTO', 'PARCEL_PHOTO']),
+});
 
 export const MediaDto = z
   .object({
     key: z.string().meta({ description: 'Clé à transmettre dans photoKey ou voiceNoteKey' }),
-    kind: z.enum(['ADDRESS_PHOTO', 'VOICE_NOTE', 'KYC_DOCUMENT', 'PROOF_PHOTO']),
+    kind: z.enum(['ADDRESS_PHOTO', 'VOICE_NOTE', 'KYC_DOCUMENT', 'PROOF_PHOTO', 'PARCEL_PHOTO']),
     mimeType: z.string(),
     sizeBytes: z.int(),
   })
@@ -38,7 +40,10 @@ export class MediaController {
       required: ['file', 'kind'],
       properties: {
         file: { type: 'string', format: 'binary' },
-        kind: { type: 'string', enum: ['ADDRESS_PHOTO', 'VOICE_NOTE', 'PROOF_PHOTO'] },
+        kind: {
+          type: 'string',
+          enum: ['ADDRESS_PHOTO', 'VOICE_NOTE', 'PROOF_PHOTO', 'PARCEL_PHOTO'],
+        },
       },
     },
   })

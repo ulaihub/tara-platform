@@ -178,6 +178,16 @@ const envSchema = z
     CAMPAY_USERNAME: z.string().min(1).optional(),
     CAMPAY_PASSWORD: z.string().min(1).optional(),
     CAMPAY_WEBHOOK_KEY: z.string().min(16).optional(),
+    /**
+     * Analyse de la photo du colis (taille, nature, objets interdits proposés) : « claude »
+     * (ANTHROPIC_API_KEY), « fake » (développement, interdit en production) ou « none »
+     * (l'expéditeur choisit seul).
+     */
+    PARCEL_VISION_PROVIDER: z.enum(['none', 'fake', 'claude']).default('fake'),
+    ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    PARCEL_VISION_MODEL: z.string().min(1).default('claude-opus-5-5'),
+    /** Analyses de photo par compte et par heure (coût du modèle). */
+    PARCEL_ANALYSIS_PER_HOUR: z.coerce.number().int().min(1).max(500).default(20),
     /** Une demande de paiement sans réponse est abandonnée après ce délai. */
     PAYMENT_REQUEST_TIMEOUT_MINUTES: z.coerce.number().int().min(1).max(60).default(10),
     /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */
@@ -251,6 +261,13 @@ const envSchema = z
           });
       }
     }
+    if (env.PARCEL_VISION_PROVIDER === 'claude' && !env.ANTHROPIC_API_KEY) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['ANTHROPIC_API_KEY'],
+        message: 'requis avec PARCEL_VISION_PROVIDER=claude',
+      });
+    }
     if (env.PAYMENT_PROVIDER === 'sebpay') {
       for (const key of ['SEBPAY_PUBLIC_KEY', 'SEBPAY_SECRET_KEY', 'PUBLIC_API_URL'] as const) {
         if (!env[key])
@@ -309,6 +326,13 @@ const envSchema = z
         code: 'custom',
         path: ['PAYMENT_PROVIDER'],
         message: 'le prestataire de paiement factice est interdit en production',
+      });
+    }
+    if (env.PARCEL_VISION_PROVIDER === 'fake') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['PARCEL_VISION_PROVIDER'],
+        message: 'l’analyse factice des photos de colis est interdite en production',
       });
     }
     if (env.PAYMENT_PROVIDER === 'sebpay' && env.SEBPAY_BASE_URL.includes('sandbox')) {

@@ -160,6 +160,10 @@ export const RiderOrderDto = z
     isFragile: z.boolean(),
     /** Gros objet : venir à deux, aide au chargement demandée. */
     loadingHelp: z.boolean(),
+    /** Photo du colis jointe par l'expéditeur (GET /rider/orders/{id}/parcel-photo). */
+    hasParcelPhoto: z.boolean(),
+    /** Objets interdits que l'analyse de cette photo a cru voir : à vérifier à l'enlèvement. */
+    parcelWarning: z.string().nullable(),
     isExpress: z.boolean(),
     instructions: z.string().nullable(),
     pickup: AddressDto,

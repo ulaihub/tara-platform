@@ -7,9 +7,11 @@ import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
+import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import 'order_draft.dart';
+import 'parcel_photo_card.dart';
 import 'prohibited_items.dart';
 
 /// Libellé d'une nature de contenu (C1) dans la langue de l'app.
@@ -95,6 +97,25 @@ class _PackageStepState extends State<PackageStep> {
     super.dispose();
   }
 
+  /// Proposition tirée de la photo : elle remplit le formulaire, l'expéditeur vérifie. Une
+  /// précision déjà écrite par l'expéditeur est gardée.
+  void _applyAnalysis(ParcelAnalysis analysis) {
+    widget.draft.update((d) {
+      d.parcelAnalysis = analysis;
+      if (!analysis.isParcel) return;
+      d
+        ..contents = analysis.contents
+        ..size = analysis.size
+        ..sizeChosen = true
+        ..fragile = analysis.fragile
+        ..fragileChosen = true;
+    });
+    final description = analysis.description;
+    if (analysis.isParcel && description != null && _description.text.trim().isEmpty) {
+      _description.text = description;
+    }
+  }
+
   /// Nature choisie : documents → petit colis ; vaisselle, électronique → fragile.
   void _chooseContents(String code) => widget.draft.update((d) {
     d.contents = code;
@@ -126,6 +147,17 @@ class _PackageStepState extends State<PackageStep> {
         ),
         const SizedBox(height: 8),
         Text(l.packageBody, style: TaraText.body.copyWith(color: c.textSecondary)),
+        const SizedBox(height: 18),
+        ParcelPhotoCard(
+          delivery: d,
+          onAnalyzed: _applyAnalysis,
+          onPhoto: (path, key) => widget.draft.update(
+            (d) => d
+              ..parcelPhotoPath = path
+              ..parcelPhotoKey = key
+              ..parcelAnalysis = null,
+          ),
+        ),
         const SizedBox(height: 18),
         label(l.contentsLabel),
         ChoiceChips<String>(

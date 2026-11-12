@@ -41,6 +41,9 @@ Future<String?> takeFacadePhoto() async {
 
 final takeFacadePhotoProvider = Provider<TakeFacadePhoto>((ref) => takeFacadePhoto);
 
+/// Photo du colis à la commande : même prise de vue que la façade (appareil arrière, réduite).
+final takeParcelPhotoProvider = Provider<TakeFacadePhoto>((ref) => takeFacadePhoto);
+
 /// Note vocale (B2) : AAC mono, léger (environ 4 Ko par seconde), 30 s au plus.
 abstract class VoiceRecorder {
   /// Demande le micro puis commence ; false si l'accès est refusé.

@@ -273,6 +273,15 @@ export default async function OrderPage({
           </Section>
 
           <Section title="Colis">
+            {order.parcel.aiWarning ? (
+              <p
+                role="alert"
+                className="mb-3 rounded-2xl bg-danger-bg px-3 py-2 text-[13px] font-bold text-danger"
+              >
+                L’analyse de la photo signale un objet interdit possible : {order.parcel.aiWarning}.
+                L’expéditeur a maintenu la commande.
+              </p>
+            ) : null}
             <Facts
               rows={[
                 ['Taille', SIZE_LABELS[order.parcel.size]],
@@ -280,6 +289,7 @@ export default async function OrderPage({
                 ['Précision', order.parcel.description],
                 ['Fragile', order.parcel.fragile ? 'Oui' : null],
                 ['Chargement', order.parcel.loadingHelp ? 'À deux (manutention)' : null],
+                ['Photo', order.parcel.hasPhoto ? 'Jointe par l’expéditeur' : null],
                 [
                   'Valeur déclarée',
                   order.parcel.declaredValue ? money(order.parcel.declaredValue) : null,

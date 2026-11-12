@@ -151,6 +151,14 @@ le trajet enregistré pendant la course est lu.
 
 Le code d'enlèvement (4 chiffres) n'est renvoyé qu'une fois, à la création ; s'il est perdu, `POST /orders/{id}/pickup-code` en génère un nouveau. Le code de livraison est créé à l'enlèvement et envoyé au destinataire (WhatsApp, ou SMS en repli). Après 5 codes faux saisis par le livreur, le code est bloqué : nouveau code d'enlèvement par l'expéditeur, validation de la livraison par le support.
 
+## Photo du colis analysée
+
+1. L'app envoie la photo : `POST /v1/media` avec `kind=PARCEL_PHOTO` (image, 1 Mo au plus).
+2. `POST /v1/orders/parcel-analysis` `{ photoKey }` renvoie une proposition à faire confirmer : `suggestion` (taille `S`…`XL` ou `BULKY`, nature, précision en quelques mots, fragile), `prohibited` (objets interdits que la photo semble montrer, avec leur libellé), `isParcel` (faux : photo à reprendre) et `confidence`. Une photo n'est analysée qu'une fois (la même réponse ensuite). `503 PARCEL_ANALYSIS_UNAVAILABLE` ou `429 PARCEL_ANALYSIS_LIMIT` (`PARCEL_ANALYSIS_PER_HOUR` par compte) : l'expéditeur choisit lui-même.
+3. La commande porte `parcelPhotoKey`. Si l'analyse a signalé un objet interdit, l'avertissement suit la commande : `parcelWarning` pour le livreur (avec `hasParcelPhoto` et `GET /v1/rider/orders/{id}/parcel-photo` tant que la course est en cours) et `parcel.aiWarning` au back-office.
+
+Moteur : `PARCEL_VISION_PROVIDER=claude` (vision de Claude, `ANTHROPIC_API_KEY`, modèle `PARCEL_VISION_MODEL`, `claude-opus-5-5` par défaut, effort bas, sortie structurée), `fake` en développement, `none` pour couper l'analyse. Seule la photo est envoyée, jamais le nom ni le numéro.
+
 ## Gros objets (frigo, cuisinière, matelas…)
 
 - Taille `BULKY` (« Gros objet ») : la course se fait en tricycle ou en voiture, jamais à moto. Le prix vient de la grille **tricycle** de la ville (`vehicleType: TRICYCLE` dans `POST /admin/pricing-grids`), distincte de la grille moto ; le devis renvoie `vehicleType`.

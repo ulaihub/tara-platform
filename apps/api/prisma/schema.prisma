@@ -428,6 +428,8 @@ enum MediaKind {
   VOICE_NOTE
   KYC_DOCUMENT
   PROOF_PHOTO
+  /// Photo du colis prise par l'expéditeur à la commande (analysée automatiquement).
+  PARCEL_PHOTO
 
   @@map("media_kind")
 }
@@ -500,6 +502,7 @@ model User {
   payoutsApproved          Payout[]               @relation("PayoutApprover")
   courseAlertsAcknowledged CourseAlert[]          @relation("CourseAlertAcknowledgedBy")
   orderNotes               OrderNote[]            @relation("OrderNoteAuthor")
+  parcelAnalyses           ParcelAnalysis[]
   reconciliationsRun       ReconciliationReport[]
 
   @@map("users")
@@ -911,6 +914,11 @@ model Order {
   isExpress          Boolean          @default(false) @map("is_express")
   /// Gros objet : l'expéditeur demande l'aide au chargement (supplément manutention).
   loadingHelp        Boolean          @default(false) @map("loading_help")
+  /// Photo du colis jointe par l'expéditeur (clé de stockage, type PARCEL_PHOTO).
+  parcelPhotoKey     String?          @map("parcel_photo_key")
+  /// Objets interdits que l'analyse de la photo a cru voir, maintenus par l'expéditeur :
+  /// signalés à l'équipe et au livreur, jamais bloquants à eux seuls.
+  parcelAiWarning    String?          @map("parcel_ai_warning")
   scheduledFor       DateTime?        @map("scheduled_for") @db.Timestamptz(3)
   status             OrderStatus      @default(CREATED)
 
@@ -1228,6 +1236,23 @@ enum CourseAlertKind {
   TRACK_GAP
 
   @@map("course_alert_kind")
+}
+
+/// Analyse automatique d'une photo de colis : taille, nature et objets interdits proposés à
+/// l'expéditeur, qui confirme ou corrige. Une analyse par photo (aucun second appel payant).
+model ParcelAnalysis {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  ownerId   String   @map("owner_id") @db.Uuid
+  photoKey  String   @unique @map("photo_key")
+  /// Moteur utilisé : « claude:<modèle> » ou « fake ».
+  engine    String
+  result    Json
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  owner User @relation(fields: [ownerId], references: [id])
+
+  @@index([ownerId, createdAt])
+  @@map("parcel_analyses")
 }
 
 /// Note interne de l'équipe sur une commande (H2) : jamais montrée à l'expéditeur, au

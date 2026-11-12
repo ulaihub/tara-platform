@@ -240,6 +240,21 @@ export class RiderAppController {
     return new StreamableFile(media.buffer);
   }
 
+  /** Photo du colis prise par l'expéditeur, tant que la course est en cours. */
+  @Get('orders/:id/parcel-photo')
+  @ApiProduces('image/jpeg', 'image/png', 'image/webp')
+  @ApiOkResponse({ description: 'Photo du colis', schema: { type: 'string', format: 'binary' } })
+  async parcelPhoto(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    const media = await this.orders.parcelPhoto(user.id, id);
+    response.setHeader('Content-Type', media.mimeType);
+    response.setHeader('Cache-Control', 'private, max-age=3600');
+    return new StreamableFile(media.buffer);
+  }
+
   /**
    * Itinéraire de la position du livreur à la prochaine étape (E2) : tracé routier (OSRM)
    * ou ligne droite estimée. L'app le redemande quand le livreur s'est déplacé.

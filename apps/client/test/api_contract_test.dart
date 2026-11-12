@@ -30,6 +30,7 @@ void main() {
     'Recipient': Recipient.fields,
     'LocationLink': LocationLink.fields,
     'Quote': Quote.fields,
+    'ParcelAnalysis': ParcelAnalysis.fields,
     'Order': PlacedOrder.fields,
     'CreatedOrder': Placement.singleFields,
     'CreatedBatch': Placement.batchFields,

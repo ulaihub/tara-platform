@@ -105,6 +105,30 @@ class FakeClientApi extends ClientApi {
     return 'address/${kind.toLowerCase()}-${uploads.length}';
   }
 
+  /// Réponse de l'analyse de la photo du colis (par défaut : carton moyen).
+  ParcelAnalysis? parcelAnalysis;
+
+  /// Refus renvoyé par l'analyse (indisponible, trop de photos).
+  ApiException? parcelAnalysisError;
+  final analyzed = <String>[];
+
+  @override
+  Future<ParcelAnalysis> analyzeParcel(String photoKey) async {
+    analyzed.add(photoKey);
+    if (parcelAnalysisError case final error?) throw error;
+    return parcelAnalysis ??
+        ParcelAnalysis(
+          photoKey: photoKey,
+          isParcel: true,
+          size: 'M',
+          contents: 'OTHER',
+          description: 'Carton fermé',
+          fragile: false,
+          prohibited: const [],
+          confidence: 'medium',
+        );
+  }
+
   /// Adresses retirées du carnet.
   final deletedAddresses = <String>[];
 

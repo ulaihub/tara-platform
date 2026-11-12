@@ -107,6 +107,10 @@ export const AdminOrderDto = z
       fragile: z.boolean(),
       /** Gros objet : deux personnes pour charger (supplément manutention). */
       loadingHelp: z.boolean(),
+      /** Photo du colis jointe par l'expéditeur. */
+      hasPhoto: z.boolean(),
+      /** Objets interdits que l'analyse de la photo a cru voir (l'expéditeur a maintenu). */
+      aiWarning: z.string().nullable(),
       declaredValue: z.int().nullable(),
       instructions: z.string().nullable(),
     }),

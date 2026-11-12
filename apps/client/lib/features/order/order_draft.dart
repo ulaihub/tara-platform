@@ -47,6 +47,12 @@ class DeliveryDraft {
   int codAmount = 0;
   String instructions = '';
 
+  /// Photo du colis : fichier sur le téléphone, clé une fois envoyée, et ce que l'analyse en
+  /// a tiré (null tant qu'elle n'a pas répondu).
+  String? parcelPhotoPath;
+  String? parcelPhotoKey;
+  ParcelAnalysis? parcelAnalysis;
+
   /// Prix calculé au récapitulatif (null tant qu'il ne l'est pas).
   Quote? quote;
   String? quoteError;
@@ -77,6 +83,7 @@ class DeliveryDraft {
     if (description.trim().isNotEmpty) 'packageDescription': description.trim(),
     'isFragile': fragile,
     if (bulky) 'loadingHelp': loadingHelp,
+    'parcelPhotoKey': ?parcelPhotoKey,
     'declaredValue': ?declaredValue,
     'codAmount': codAmount,
     if (instructions.trim().isNotEmpty) 'instructions': instructions.trim(),
