@@ -1020,5 +1020,49 @@
         "type": "String"
       }
     }
-  }
+  },
+  "supportTitle": "Aide et service client",
+  "supportIntro": "Un souci avec une course, vos gains ou l’app ? Écrivez-nous : l’équipe Tara vous répond ici et vous êtes prévenu de sa réponse.",
+  "supportNewRequest": "Nouvelle demande",
+  "supportEmpty": "Aucune demande pour l’instant.",
+  "supportCallUs": "Urgent ? Appelez le {phone}",
+  "@supportCallUs": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "supportCategoryPayment": "Gains, solde ou retrait",
+  "supportCategoryLostParcel": "Colis perdu",
+  "supportCategoryDamagedParcel": "Colis abîmé",
+  "supportCategoryAppBug": "Problème dans l’app",
+  "supportCategoryOther": "Autre",
+  "supportStatusOpen": "Envoyée",
+  "supportStatusInProgress": "En cours",
+  "supportStatusResolved": "Résolue",
+  "supportStatusClosed": "Close",
+  "supportNewTitle": "Nouvelle demande",
+  "supportReasonLabel": "Motif",
+  "supportSubjectLabel": "En quelques mots",
+  "supportSubjectHint": "Ex. : retrait non reçu",
+  "supportMessageLabel": "Expliquez-nous",
+  "supportMessageHint": "Ce qui s’est passé, la course concernée si besoin.",
+  "supportOrderLine": "Course {reference}",
+  "@supportOrderLine": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "supportSend": "Envoyer la demande",
+  "supportReplyHint": "Votre réponse…",
+  "supportReplySend": "Envoyer",
+  "supportClosedNote": "Cette demande est close. Ouvrez une nouvelle demande si besoin.",
+  "supportFromTara": "Service client Tara",
+  "supportNewAnswer": "Réponse",
+  "supportWaitingNote": "L’équipe Tara vous répond ici ; vous serez prévenu.",
+  "supportMenuRow": "Écrire au service client",
+  "supportMenuRowSubtitle": "Vos demandes et les réponses de Tara"
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/api/support_api.dart';
 import 'package:tara_rider/core/api/models.dart';
 
 /// Chaque champ lu par l'app existe dans le contrat de l'API (apps/api/openapi.json) :
@@ -19,6 +20,7 @@ void main() {
   final models = <String, List<String>>{
     'OtpChallenge': OtpChallenge.fields,
     'LegalDocument': LegalDocument.fields,
+    'Ticket': SupportTicket.fields,
     'TermsStatus': TermsStatus.fields,
     'SessionUser': SessionUser.fields,
     'AuthSession': AuthSession.fields,

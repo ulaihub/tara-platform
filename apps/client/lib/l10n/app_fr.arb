@@ -1207,5 +1207,52 @@
   "stopListening": "Arrêter l’écoute",
   "redoNote": "Refaire",
   "micDenied": "Micro refusé : autorisez-le pour Tara dans les réglages du téléphone.",
-  "facadePhotoLabel": "Photo de la façade prise"
+  "facadePhotoLabel": "Photo de la façade prise",
+  "supportTitle": "Aide et service client",
+  "supportIntro": "Une question, un souci avec une livraison ? Écrivez-nous : l’équipe Tara vous répond ici et vous êtes prévenu de sa réponse.",
+  "supportNewRequest": "Nouvelle demande",
+  "supportEmpty": "Aucune demande pour l’instant. Pour un souci avec une livraison, vous pouvez aussi la signaler depuis son suivi.",
+  "supportCallUs": "Urgent ? Appelez le {phone}",
+  "@supportCallUs": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "supportCategoryLostParcel": "Colis perdu ou non reçu",
+  "supportCategoryDamagedParcel": "Colis abîmé",
+  "supportCategoryLateDelivery": "Retard",
+  "supportCategoryPayment": "Paiement",
+  "supportCategoryRiderBehavior": "Comportement du livreur",
+  "supportCategoryAppBug": "Problème dans l’app",
+  "supportCategoryOther": "Autre",
+  "supportStatusOpen": "Envoyée",
+  "supportStatusInProgress": "En cours",
+  "supportStatusResolved": "Résolue",
+  "supportStatusClosed": "Close",
+  "supportNewTitle": "Nouvelle demande",
+  "supportReasonLabel": "Motif",
+  "supportSubjectLabel": "En quelques mots",
+  "supportSubjectHint": "Ex. : colis non reçu par ma cliente",
+  "supportMessageLabel": "Expliquez-nous",
+  "supportMessageHint": "Ce qui s’est passé et ce que vous attendez de Tara.",
+  "supportOrderLine": "Commande {reference}",
+  "@supportOrderLine": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "supportSend": "Envoyer la demande",
+  "supportReplyHint": "Votre réponse…",
+  "supportReplySend": "Envoyer",
+  "supportClosedNote": "Cette demande est close. Ouvrez une nouvelle demande si besoin.",
+  "supportFromTara": "Service client Tara",
+  "supportNewAnswer": "Réponse",
+  "supportWaitingNote": "L’équipe Tara vous répond ici ; vous serez prévenu.",
+  "supportMenuRow": "Écrire au service client",
+  "supportMenuRowSubtitle": "Vos demandes et les réponses de Tara",
+  "reportProblem": "Signaler un problème"
 }

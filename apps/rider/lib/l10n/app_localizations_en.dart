@@ -1620,4 +1620,99 @@ class AppLocalizationsEn extends AppLocalizations {
   String withdrawalRule(String amount, String rate) {
     return 'Free withdrawal from $amount; below that, a $rate Mobile Money fee is deducted.';
   }
+
+  @override
+  String get supportTitle => 'Help and customer service';
+
+  @override
+  String get supportIntro =>
+      'A problem with a job, your earnings or the app? Write to us: the Tara team answers here and you are notified of its reply.';
+
+  @override
+  String get supportNewRequest => 'New request';
+
+  @override
+  String get supportEmpty => 'No requests yet.';
+
+  @override
+  String supportCallUs(String phone) {
+    return 'Urgent? Call $phone';
+  }
+
+  @override
+  String get supportCategoryPayment => 'Earnings, balance or withdrawal';
+
+  @override
+  String get supportCategoryLostParcel => 'Lost parcel';
+
+  @override
+  String get supportCategoryDamagedParcel => 'Damaged parcel';
+
+  @override
+  String get supportCategoryAppBug => 'Problem in the app';
+
+  @override
+  String get supportCategoryOther => 'Other';
+
+  @override
+  String get supportStatusOpen => 'Sent';
+
+  @override
+  String get supportStatusInProgress => 'In progress';
+
+  @override
+  String get supportStatusResolved => 'Resolved';
+
+  @override
+  String get supportStatusClosed => 'Closed';
+
+  @override
+  String get supportNewTitle => 'New request';
+
+  @override
+  String get supportReasonLabel => 'Reason';
+
+  @override
+  String get supportSubjectLabel => 'In a few words';
+
+  @override
+  String get supportSubjectHint => 'E.g. withdrawal not received';
+
+  @override
+  String get supportMessageLabel => 'Tell us more';
+
+  @override
+  String get supportMessageHint => 'What happened, and the job concerned if any.';
+
+  @override
+  String supportOrderLine(String reference) {
+    return 'Job $reference';
+  }
+
+  @override
+  String get supportSend => 'Send the request';
+
+  @override
+  String get supportReplyHint => 'Your reply…';
+
+  @override
+  String get supportReplySend => 'Send';
+
+  @override
+  String get supportClosedNote => 'This request is closed. Open a new request if needed.';
+
+  @override
+  String get supportFromTara => 'Tara customer service';
+
+  @override
+  String get supportNewAnswer => 'Reply';
+
+  @override
+  String get supportWaitingNote => 'The Tara team answers here; you will be notified.';
+
+  @override
+  String get supportMenuRow => 'Write to customer service';
+
+  @override
+  String get supportMenuRowSubtitle => 'Your requests and Tara’s replies';
 }

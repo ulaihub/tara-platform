@@ -1738,4 +1738,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facadePhotoLabel => 'Photo of the entrance taken';
+
+  @override
+  String get supportTitle => 'Help and customer service';
+
+  @override
+  String get supportIntro =>
+      'A question or a problem with a delivery? Write to us: the Tara team answers here and you are notified of its reply.';
+
+  @override
+  String get supportNewRequest => 'New request';
+
+  @override
+  String get supportEmpty =>
+      'No requests yet. For a problem with a delivery, you can also report it from its tracking screen.';
+
+  @override
+  String supportCallUs(String phone) {
+    return 'Urgent? Call $phone';
+  }
+
+  @override
+  String get supportCategoryLostParcel => 'Parcel lost or not received';
+
+  @override
+  String get supportCategoryDamagedParcel => 'Damaged parcel';
+
+  @override
+  String get supportCategoryLateDelivery => 'Late delivery';
+
+  @override
+  String get supportCategoryPayment => 'Payment';
+
+  @override
+  String get supportCategoryRiderBehavior => 'Rider behaviour';
+
+  @override
+  String get supportCategoryAppBug => 'Problem in the app';
+
+  @override
+  String get supportCategoryOther => 'Other';
+
+  @override
+  String get supportStatusOpen => 'Sent';
+
+  @override
+  String get supportStatusInProgress => 'In progress';
+
+  @override
+  String get supportStatusResolved => 'Resolved';
+
+  @override
+  String get supportStatusClosed => 'Closed';
+
+  @override
+  String get supportNewTitle => 'New request';
+
+  @override
+  String get supportReasonLabel => 'Reason';
+
+  @override
+  String get supportSubjectLabel => 'In a few words';
+
+  @override
+  String get supportSubjectHint => 'E.g. parcel not received by my customer';
+
+  @override
+  String get supportMessageLabel => 'Tell us more';
+
+  @override
+  String get supportMessageHint => 'What happened and what you expect from Tara.';
+
+  @override
+  String supportOrderLine(String reference) {
+    return 'Order $reference';
+  }
+
+  @override
+  String get supportSend => 'Send the request';
+
+  @override
+  String get supportReplyHint => 'Your reply…';
+
+  @override
+  String get supportReplySend => 'Send';
+
+  @override
+  String get supportClosedNote => 'This request is closed. Open a new request if needed.';
+
+  @override
+  String get supportFromTara => 'Tara customer service';
+
+  @override
+  String get supportNewAnswer => 'Reply';
+
+  @override
+  String get supportWaitingNote => 'The Tara team answers here; you will be notified.';
+
+  @override
+  String get supportMenuRow => 'Write to customer service';
+
+  @override
+  String get supportMenuRowSubtitle => 'Your requests and Tara’s replies';
+
+  @override
+  String get reportProblem => 'Report a problem';
 }

@@ -3139,6 +3139,204 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Photo de la façade prise'**
   String get facadePhotoLabel;
+
+  /// No description provided for @supportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide et service client'**
+  String get supportTitle;
+
+  /// No description provided for @supportIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une question, un souci avec une livraison ? Écrivez-nous : l’équipe Tara vous répond ici et vous êtes prévenu de sa réponse.'**
+  String get supportIntro;
+
+  /// No description provided for @supportNewRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande'**
+  String get supportNewRequest;
+
+  /// No description provided for @supportEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande pour l’instant. Pour un souci avec une livraison, vous pouvez aussi la signaler depuis son suivi.'**
+  String get supportEmpty;
+
+  /// No description provided for @supportCallUs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Urgent ? Appelez le {phone}'**
+  String supportCallUs(String phone);
+
+  /// No description provided for @supportCategoryLostParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis perdu ou non reçu'**
+  String get supportCategoryLostParcel;
+
+  /// No description provided for @supportCategoryDamagedParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis abîmé'**
+  String get supportCategoryDamagedParcel;
+
+  /// No description provided for @supportCategoryLateDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retard'**
+  String get supportCategoryLateDelivery;
+
+  /// No description provided for @supportCategoryPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement'**
+  String get supportCategoryPayment;
+
+  /// No description provided for @supportCategoryRiderBehavior.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comportement du livreur'**
+  String get supportCategoryRiderBehavior;
+
+  /// No description provided for @supportCategoryAppBug.
+  ///
+  /// In fr, this message translates to:
+  /// **'Problème dans l’app'**
+  String get supportCategoryAppBug;
+
+  /// No description provided for @supportCategoryOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get supportCategoryOther;
+
+  /// No description provided for @supportStatusOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyée'**
+  String get supportStatusOpen;
+
+  /// No description provided for @supportStatusInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get supportStatusInProgress;
+
+  /// No description provided for @supportStatusResolved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résolue'**
+  String get supportStatusResolved;
+
+  /// No description provided for @supportStatusClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Close'**
+  String get supportStatusClosed;
+
+  /// No description provided for @supportNewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande'**
+  String get supportNewTitle;
+
+  /// No description provided for @supportReasonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get supportReasonLabel;
+
+  /// No description provided for @supportSubjectLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'En quelques mots'**
+  String get supportSubjectLabel;
+
+  /// No description provided for @supportSubjectHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. : colis non reçu par ma cliente'**
+  String get supportSubjectHint;
+
+  /// No description provided for @supportMessageLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expliquez-nous'**
+  String get supportMessageLabel;
+
+  /// No description provided for @supportMessageHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui s’est passé et ce que vous attendez de Tara.'**
+  String get supportMessageHint;
+
+  /// No description provided for @supportOrderLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande {reference}'**
+  String supportOrderLine(String reference);
+
+  /// No description provided for @supportSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get supportSend;
+
+  /// No description provided for @supportReplyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre réponse…'**
+  String get supportReplyHint;
+
+  /// No description provided for @supportReplySend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get supportReplySend;
+
+  /// No description provided for @supportClosedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette demande est close. Ouvrez une nouvelle demande si besoin.'**
+  String get supportClosedNote;
+
+  /// No description provided for @supportFromTara.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service client Tara'**
+  String get supportFromTara;
+
+  /// No description provided for @supportNewAnswer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse'**
+  String get supportNewAnswer;
+
+  /// No description provided for @supportWaitingNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’équipe Tara vous répond ici ; vous serez prévenu.'**
+  String get supportWaitingNote;
+
+  /// No description provided for @supportMenuRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire au service client'**
+  String get supportMenuRow;
+
+  /// No description provided for @supportMenuRowSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos demandes et les réponses de Tara'**
+  String get supportMenuRowSubtitle;
+
+  /// No description provided for @reportProblem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler un problème'**
+  String get reportProblem;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

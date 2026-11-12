@@ -26,6 +26,9 @@ class TaraTextField extends StatefulWidget {
     this.leading,
     this.height = 56,
     this.textCapitalization = TextCapitalization.none,
+    this.minLines = 1,
+    this.maxLines = 1,
+    this.maxLength,
   });
 
   final String? label;
@@ -41,6 +44,11 @@ class TaraTextField extends StatefulWidget {
   final Widget? leading;
   final double height;
   final TextCapitalization textCapitalization;
+
+  /// Plusieurs lignes (message, compte rendu) : le champ grandit jusqu'à [maxLines].
+  final int minLines;
+  final int maxLines;
+  final int? maxLength;
 
   @override
   State<TaraTextField> createState() => _TaraTextFieldState();
@@ -90,6 +98,9 @@ class _TaraTextFieldState extends State<TaraTextField> {
               onChanged: widget.onChanged,
               onSubmitted: widget.onSubmitted,
               textCapitalization: widget.textCapitalization,
+              minLines: widget.minLines,
+              maxLines: widget.maxLines,
+              maxLength: widget.maxLength,
               cursorColor: TaraBrand.orange,
               style: TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 16),
               decoration: InputDecoration(
@@ -98,6 +109,8 @@ class _TaraTextFieldState extends State<TaraTextField> {
                 hintText: widget.hint,
                 hintStyle: TaraText.body.copyWith(color: c.placeholder, fontSize: 16),
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                // Le compteur de caractères n'est pas affiché : la limite suffit.
+                counterText: '',
               ),
             ),
           ),

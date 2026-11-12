@@ -1744,4 +1744,109 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facadePhotoLabel => 'Photo de la façade prise';
+
+  @override
+  String get supportTitle => 'Aide et service client';
+
+  @override
+  String get supportIntro =>
+      'Une question, un souci avec une livraison ? Écrivez-nous : l’équipe Tara vous répond ici et vous êtes prévenu de sa réponse.';
+
+  @override
+  String get supportNewRequest => 'Nouvelle demande';
+
+  @override
+  String get supportEmpty =>
+      'Aucune demande pour l’instant. Pour un souci avec une livraison, vous pouvez aussi la signaler depuis son suivi.';
+
+  @override
+  String supportCallUs(String phone) {
+    return 'Urgent ? Appelez le $phone';
+  }
+
+  @override
+  String get supportCategoryLostParcel => 'Colis perdu ou non reçu';
+
+  @override
+  String get supportCategoryDamagedParcel => 'Colis abîmé';
+
+  @override
+  String get supportCategoryLateDelivery => 'Retard';
+
+  @override
+  String get supportCategoryPayment => 'Paiement';
+
+  @override
+  String get supportCategoryRiderBehavior => 'Comportement du livreur';
+
+  @override
+  String get supportCategoryAppBug => 'Problème dans l’app';
+
+  @override
+  String get supportCategoryOther => 'Autre';
+
+  @override
+  String get supportStatusOpen => 'Envoyée';
+
+  @override
+  String get supportStatusInProgress => 'En cours';
+
+  @override
+  String get supportStatusResolved => 'Résolue';
+
+  @override
+  String get supportStatusClosed => 'Close';
+
+  @override
+  String get supportNewTitle => 'Nouvelle demande';
+
+  @override
+  String get supportReasonLabel => 'Motif';
+
+  @override
+  String get supportSubjectLabel => 'En quelques mots';
+
+  @override
+  String get supportSubjectHint => 'Ex. : colis non reçu par ma cliente';
+
+  @override
+  String get supportMessageLabel => 'Expliquez-nous';
+
+  @override
+  String get supportMessageHint => 'Ce qui s’est passé et ce que vous attendez de Tara.';
+
+  @override
+  String supportOrderLine(String reference) {
+    return 'Commande $reference';
+  }
+
+  @override
+  String get supportSend => 'Envoyer la demande';
+
+  @override
+  String get supportReplyHint => 'Votre réponse…';
+
+  @override
+  String get supportReplySend => 'Envoyer';
+
+  @override
+  String get supportClosedNote => 'Cette demande est close. Ouvrez une nouvelle demande si besoin.';
+
+  @override
+  String get supportFromTara => 'Service client Tara';
+
+  @override
+  String get supportNewAnswer => 'Réponse';
+
+  @override
+  String get supportWaitingNote => 'L’équipe Tara vous répond ici ; vous serez prévenu.';
+
+  @override
+  String get supportMenuRow => 'Écrire au service client';
+
+  @override
+  String get supportMenuRowSubtitle => 'Vos demandes et les réponses de Tara';
+
+  @override
+  String get reportProblem => 'Signaler un problème';
 }

@@ -27,6 +27,7 @@ import '../common/scoped_page.dart';
 import '../legal/terms_screen.dart';
 import '../onboarding/documents_controller.dart';
 import '../onboarding/documents_screen.dart';
+import '../support/support.dart';
 import 'emergency_contact_screen.dart';
 
 enum _Sub { documents, contact }
@@ -153,23 +154,33 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   SectionHeader(title: l.termsSection),
                   const SizedBox(height: 8),
                   const _TermsCard(),
-                  if (config?.supportPhone case final support?) ...[
-                    const SizedBox(height: 20),
-                    SectionHeader(title: l.helpSection),
-                    const SizedBox(height: 8),
-                    GlassCard(
-                      radius: 22,
-                      shadow: false,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                      child: ListRow(
-                        leading: const IconTile(icon: TaraIcons.headset),
-                        title: l.supportTara,
-                        subtitle: displayPhone(support),
-                        trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
-                        onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
-                      ),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.helpSection),
+                  const SizedBox(height: 8),
+                  GlassCard(
+                    radius: 22,
+                    shadow: false,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    child: Column(
+                      children: [
+                        ListRow(
+                          leading: const IconTile(icon: TaraIcons.message),
+                          title: l.supportMenuRow,
+                          subtitle: l.supportMenuRowSubtitle,
+                          trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+                          onTap: () => unawaited(openSupport(context, ref)),
+                        ),
+                        if (config?.supportPhone case final support?)
+                          ListRow(
+                            leading: const IconTile(icon: TaraIcons.headset),
+                            title: l.supportTara,
+                            subtitle: displayPhone(support),
+                            trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
+                            onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
+                          ),
+                      ],
                     ),
-                  ],
+                  ),
                   const SizedBox(height: 24),
                   ListenableBuilder(
                     listenable: Listenable.merge([activeOrder, queue]),

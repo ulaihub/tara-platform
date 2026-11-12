@@ -30,6 +30,7 @@ import '../home/home_screen.dart' show walletProvider;
 import '../legal/terms_screen.dart';
 import '../order/address_editor.dart';
 import '../order/pickup_step.dart' show pickupAddressesProvider;
+import '../support/support.dart';
 import '../wallet/wallet_screen.dart';
 
 /// Onglet Profil de l'expéditeur (non dessiné : style Tara) : identité et boutique, code de
@@ -147,23 +148,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SectionHeader(title: l.termsSection),
           const SizedBox(height: 8),
           _TermsCard(phone: me.phone),
-          if (support != null) ...[
-            const SizedBox(height: 20),
-            SectionHeader(title: l.helpSection),
-            const SizedBox(height: 8),
-            GlassCard(
-              radius: 22,
-              shadow: false,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              child: ListRow(
-                leading: const IconTile(icon: TaraIcons.headset),
-                title: l.supportTara,
-                subtitle: displayPhone(support),
-                trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
-                onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
-              ),
+          const SizedBox(height: 20),
+          SectionHeader(title: l.helpSection),
+          const SizedBox(height: 8),
+          GlassCard(
+            radius: 22,
+            shadow: false,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Column(
+              children: [
+                ListRow(
+                  leading: const IconTile(icon: TaraIcons.message),
+                  title: l.supportMenuRow,
+                  subtitle: l.supportMenuRowSubtitle,
+                  trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+                  onTap: () => unawaited(openSupport(context, ref)),
+                ),
+                if (support != null)
+                  ListRow(
+                    leading: const IconTile(icon: TaraIcons.headset),
+                    title: l.supportTara,
+                    subtitle: displayPhone(support),
+                    trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
+                    onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
+                  ),
+              ],
             ),
-          ],
+          ),
           const SizedBox(height: 24),
           _LogoutBlock(
             confirming: _confirmLogout,

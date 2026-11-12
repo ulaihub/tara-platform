@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_client/core/api/client_models.dart';
+import 'package:tara_core/api/support_api.dart';
 
 /// Chaque champ lu par l'app existe dans le contrat de l'API (apps/api/openapi.json) :
 /// un renommage côté serveur casse ce test avant de casser l'app chez les expéditeurs.
@@ -37,6 +38,7 @@ void main() {
     'Payment': Payment.fields,
     'Rating': OrderRating.fields,
     'LegalDocument': LegalDocument.fields,
+    'Ticket': SupportTicket.fields,
     'WalletLine': WalletLine.fields,
     'Payout': Payout.fields,
     'TermsStatus': TermsStatus.fields,
