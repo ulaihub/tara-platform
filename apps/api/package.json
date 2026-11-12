@@ -26,6 +26,7 @@
     "db:seed": "prisma db seed",
     "legal": "tsx src/legal/generate.ts",
     "demo:city": "node test/simulator/launch.mjs test/simulator/demo-city.ts",
+    "demo:finance": "node test/simulator/launch.mjs test/simulator/demo-finance.ts",
     "demo:riders": "node test/simulator/launch.mjs test/simulator/demo-riders.ts",
     "demo:support": "node test/simulator/launch.mjs test/simulator/demo-support.ts"
   },

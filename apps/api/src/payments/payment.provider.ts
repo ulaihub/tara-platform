@@ -130,6 +130,8 @@ export class FakePaymentProvider implements PaymentProvider {
   readonly operations = new Map<string, FakeOperation>();
   /** Payeurs qui refusent ou n'ont pas assez d'argent. */
   readonly decliningPhones = new Set<string>();
+  /** Numéros que l'opérateur refuse comme destinataires (numéro inconnu, compte bloqué). */
+  readonly refusingPhones = new Set<string>();
   /** Références d'envoi pour lesquelles la réponse se perd, une fois, après exécution. */
   readonly loseResponseOnce = new Set<string>();
   /** Frais retenus, en points de base. */
@@ -198,6 +200,10 @@ export class FakePaymentProvider implements PaymentProvider {
   async disburse(request: DisburseRequest): Promise<ProviderOperation> {
     const operation = this.record('DISBURSE', request.reference, request.amount, request.phone);
     operation.status = 'SUCCEEDED';
+    if (this.refusingPhones.has(request.phone)) {
+      operation.status = 'FAILED';
+      operation.failureReason = 'Numéro Mobile Money inconnu de l’opérateur';
+    }
     await this.persist(operation);
     if (this.loseResponseOnce.delete(request.reference)) {
       throw new ProviderUnavailableError('Délai dépassé (réponse perdue)');

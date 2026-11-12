@@ -13,27 +13,35 @@ import { FinanceHeader } from './tabs';
 
 export const metadata: Metadata = { title: 'Finance' };
 
-/** Comptes de la plateforme, regroupés pour être lus d'un coup d'œil. */
+/** Comptes de la plateforme (codes `platform:…` de l'API), regroupés pour être lus d'un coup d'œil. */
 const GROUPS: { title: string; hint: string; codes: string[] }[] = [
   {
     title: 'Argent détenu par Tara',
     hint: 'Ce qui est sur le compte de l’agrégateur et en espèces au bureau.',
-    codes: ['mobile_money', 'office_cash'],
+    codes: ['platform:mobile_money', 'platform:office_cash'],
   },
   {
     title: 'Argent dû par Tara',
     hint: 'Livraisons payées d’avance, reversements en route, paiements à affecter.',
-    codes: ['orders_prepaid', 'payouts_in_transit', 'unallocated'],
+    codes: ['platform:orders_prepaid', 'platform:payouts_in_transit', 'platform:unallocated'],
   },
   {
     title: 'Ce que Tara gagne',
     hint: 'Depuis le début : commission, frais d’encaissement, frais Mobile Money facturés.',
-    codes: ['revenue:commission', 'revenue:cod_fees', 'revenue:mobile_money_fees'],
+    codes: [
+      'platform:revenue:commission',
+      'platform:revenue:cod_fees',
+      'platform:revenue:mobile_money_fees',
+    ],
   },
   {
     title: 'Ce que Tara dépense',
     hint: 'Depuis le début : frais de l’agrégateur, remises, avoirs commerciaux.',
-    codes: ['expense:provider_fees', 'expense:promotions', 'expense:goodwill'],
+    codes: [
+      'platform:expense:provider_fees',
+      'platform:expense:promotions',
+      'platform:expense:goodwill',
+    ],
   },
 ];
 
