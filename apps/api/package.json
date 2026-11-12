@@ -26,7 +26,8 @@
     "db:seed": "prisma db seed",
     "legal": "tsx src/legal/generate.ts",
     "demo:city": "node test/simulator/launch.mjs test/simulator/demo-city.ts",
-    "demo:riders": "node test/simulator/launch.mjs test/simulator/demo-riders.ts"
+    "demo:riders": "node test/simulator/launch.mjs test/simulator/demo-riders.ts",
+    "demo:support": "node test/simulator/launch.mjs test/simulator/demo-support.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",

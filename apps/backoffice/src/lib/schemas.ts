@@ -20,3 +20,7 @@ export type AdminRiderPage = Schemas['AdminRiderPage'];
 export type KycDocument = Schemas['KycDocument'];
 export type RiderReliability = Schemas['RiderReliability'];
 export type FreePayout = Schemas['FreePayout'];
+export type AdminTicket = Schemas['AdminTicket'];
+export type AdminTicketRow = Schemas['AdminTicketRow'];
+export type AdminTicketPage = Schemas['AdminTicketPage'];
+export type OrderEvidence = Schemas['OrderEvidence'];

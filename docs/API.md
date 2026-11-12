@@ -121,6 +121,27 @@ le trajet enregistré pendant la course est lu.
 - Le back-office ouvre une pièce (`GET /admin/kyc-documents/{id}/file`, consultation tracée)
   dans un onglet isolé : images seulement affichées, PDF téléchargés.
 
+**Service client (H6)** :
+
+- Apps (tout utilisateur connecté) : `POST /support/tickets` (`category`, `subject`,
+  `message`, `orderId` d'une commande qu'il envoie, reçoit ou livre), `GET /support/tickets`,
+  `GET /support/tickets/{id}`, `POST /support/tickets/{id}/messages`. Cinq demandes en cours
+  au plus (`TICKET_LIMIT_REACHED`) ; colis perdu et paiement en priorité haute ; une demande
+  résolue est rouverte par une réponse du client, une demande close ne l'est plus
+  (`TICKET_CLOSED`). Les notes internes ne sont jamais renvoyées.
+- Back-office (support et administrateurs) : `GET /admin/support/tickets?view=&q=` (vues
+  `TO_HANDLE`, `MINE`, `URGENT`, `RESOLVED`, `ALL` ; recherche par `SUP-…`, commande,
+  téléphone ou sujet ; urgentes puis plus anciennes d'abord ; `counts` par vue),
+  `POST /admin/support/tickets` (après un appel : `phone` et/ou `orderReference`, même pour une
+  personne sans compte ; la demande est confiée à qui l'ouvre), `GET /admin/support/tickets/{id}`,
+  `POST /admin/support/tickets/{id}/messages` (`internal` : note interne ; sinon le client est
+  prévenu par notification, à défaut par SMS `SUPPORT_REPLY`), `PATCH /admin/support/tickets/{id}`
+  (`status`, `priority`, `assigneeId`, tracé).
+- Litiges (support, dispatch, administrateurs) : `GET /admin/support/orders/{id}/evidence`
+  (preuves : heure, position, code vérifié, photo, appels du livreur avant un échec ; notes ;
+  photo du colis ; points du trajet), `GET /admin/support/proofs/{id}/photo` et
+  `GET /admin/support/orders/{id}/parcel-photo` (consultations tracées).
+
 **Commandes (H2)** :
 
 - `GET /admin/orders?q=&view=&from=&to=&riderId=&limit=&cursor=` (dispatch, support,

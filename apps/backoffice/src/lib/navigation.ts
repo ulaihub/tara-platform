@@ -55,7 +55,7 @@ export const SECTIONS: readonly Section[] = [
     requirement: 'H6',
     description: 'Tickets liés aux commandes, litiges avec preuves, alertes SOS.',
     roles: ['ADMIN', 'SUPPORT'],
-    ready: false,
+    ready: true,
   },
   {
     href: '/finance',
