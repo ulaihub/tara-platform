@@ -7660,6 +7660,574 @@
           "Back-office · commandes"
         ]
       }
+    },
+    "/v1/support/tickets": {
+      "post": {
+        "operationId": "Support_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "$ref": "#/components/schemas/TicketCategory"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 120
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 2000
+                  },
+                  "orderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "category",
+                  "subject",
+                  "message"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticket"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Service client"
+        ]
+      },
+      "get": {
+        "operationId": "Support_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Ticket"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Service client"
+        ]
+      }
+    },
+    "/v1/support/tickets/{id}": {
+      "get": {
+        "operationId": "Support_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticket"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Service client"
+        ]
+      }
+    },
+    "/v1/support/tickets/{id}/messages": {
+      "post": {
+        "operationId": "Support_reply",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "body"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticket"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Service client"
+        ]
+      }
+    },
+    "/v1/admin/support/tickets": {
+      "get": {
+        "operationId": "AdminSupport_list",
+        "parameters": [
+          {
+            "name": "view",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "TO_HANDLE",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/AdminTicketView"
+                }
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 30,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTicketPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · service client"
+        ]
+      },
+      "post": {
+        "operationId": "AdminSupport_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
+                    "example": "+237690000000",
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "orderReference": {
+                    "type": "string",
+                    "pattern": "^(TR-)?[A-Z0-9]{4,10}$"
+                  },
+                  "category": {
+                    "$ref": "#/components/schemas/TicketCategory"
+                  },
+                  "priority": {
+                    "default": "NORMAL",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/TicketPriority"
+                      }
+                    ]
+                  },
+                  "subject": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 120
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "category",
+                  "subject",
+                  "message"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTicket"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · service client"
+        ]
+      }
+    },
+    "/v1/admin/support/tickets/{id}": {
+      "get": {
+        "operationId": "AdminSupport_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTicket"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · service client"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminSupport_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/TicketStatus"
+                      }
+                    ]
+                  },
+                  "priority": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/TicketPriority"
+                      }
+                    ]
+                  },
+                  "assigneeId": {
+                    "nullable": true,
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTicket"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · service client"
+        ]
+      }
+    },
+    "/v1/admin/support/tickets/{id}/messages": {
+      "post": {
+        "operationId": "AdminSupport_message",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 2000
+                  },
+                  "internal": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "body"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTicket"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · service client"
+        ]
+      }
+    },
+    "/v1/admin/support/orders/{orderId}/evidence": {
+      "get": {
+        "operationId": "AdminSupport_evidence",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderEvidence"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · service client"
+        ]
+      }
+    },
+    "/v1/admin/support/proofs/{proofId}/photo": {
+      "get": {
+        "operationId": "AdminSupport_proofPhoto",
+        "parameters": [
+          {
+            "name": "proofId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · service client"
+        ]
+      }
+    },
+    "/v1/admin/support/orders/{orderId}/parcel-photo": {
+      "get": {
+        "operationId": "AdminSupport_parcelPhoto",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · service client"
+        ]
+      }
     }
   },
   "info": {
@@ -8763,6 +9331,393 @@
           "ALL"
         ]
       },
+      "AdminTicket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TicketCategory"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/TicketPriority"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TicketStatus"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "requester": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "nullable": true,
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "CUSTOMER",
+                  "MERCHANT",
+                  "RIDER",
+                  "STAFF",
+                  "NO_ACCOUNT"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "phone",
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "assignee": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "order": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "reference": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "reference"
+            ],
+            "additionalProperties": false
+          },
+          "fromApp": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastMessageAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "awaitingReply": {
+            "type": "boolean"
+          },
+          "resolvedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "internal": {
+                  "type": "boolean"
+                },
+                "fromTara": {
+                  "type": "boolean"
+                },
+                "authorName": {
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "body",
+                "at",
+                "internal",
+                "fromTara",
+                "authorName"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "otherTickets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "reference": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/components/schemas/TicketStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "reference",
+                "subject",
+                "status",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "category",
+          "priority",
+          "status",
+          "subject",
+          "requester",
+          "assignee",
+          "order",
+          "fromApp",
+          "createdAt",
+          "lastMessageAt",
+          "awaitingReply",
+          "resolvedAt",
+          "messages",
+          "otherTickets"
+        ],
+        "additionalProperties": false
+      },
+      "AdminTicketPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminTicketRow"
+            }
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "TO_HANDLE": {
+                "type": "integer"
+              },
+              "MINE": {
+                "type": "integer"
+              },
+              "URGENT": {
+                "type": "integer"
+              },
+              "RESOLVED": {
+                "type": "integer"
+              },
+              "ALL": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "TO_HANDLE",
+              "MINE",
+              "URGENT",
+              "RESOLVED",
+              "ALL"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "AdminTicketRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TicketCategory"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/TicketPriority"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TicketStatus"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "requester": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "nullable": true,
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "CUSTOMER",
+                  "MERCHANT",
+                  "RIDER",
+                  "STAFF",
+                  "NO_ACCOUNT"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "phone",
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "assignee": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "order": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "reference": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "reference"
+            ],
+            "additionalProperties": false
+          },
+          "fromApp": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastMessageAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "awaitingReply": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "category",
+          "priority",
+          "status",
+          "subject",
+          "requester",
+          "assignee",
+          "order",
+          "fromApp",
+          "createdAt",
+          "lastMessageAt",
+          "awaitingReply"
+        ],
+        "additionalProperties": false
+      },
+      "AdminTicketView": {
+        "type": "string",
+        "enum": [
+          "TO_HANDLE",
+          "MINE",
+          "URGENT",
+          "RESOLVED",
+          "ALL"
+        ]
+      },
       "AppConfig": {
         "type": "object",
         "properties": {
@@ -9640,6 +10595,10 @@
                   "ACCOUNT_SUSPENDED",
                   "REFRESH_TOKEN_INVALID",
                   "RIDER_ALREADY_APPLIED",
+                  "TICKET_NOT_FOUND",
+                  "TICKET_LIMIT_REACHED",
+                  "TICKET_CLOSED",
+                  "TICKET_ASSIGNEE_INVALID",
                   "RIDER_NOT_FOUND",
                   "RIDER_DOCUMENTS_INCOMPLETE",
                   "RIDER_DECISION_INVALID",
@@ -10943,6 +11902,137 @@
           "actorRole",
           "failureReason",
           "note"
+        ],
+        "additionalProperties": false
+      },
+      "OrderEvidence": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proofs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "latitude": {
+                  "type": "number"
+                },
+                "longitude": {
+                  "type": "number"
+                },
+                "codeVerified": {
+                  "type": "boolean"
+                },
+                "receivedBy": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "hasPhoto": {
+                  "type": "boolean"
+                },
+                "calls": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "to": {
+                        "type": "string",
+                        "enum": [
+                          "RECIPIENT",
+                          "SENDER"
+                        ]
+                      },
+                      "at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "durationSeconds": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "to",
+                      "at",
+                      "durationSeconds"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "at",
+                "latitude",
+                "longitude",
+                "codeVerified",
+                "receivedBy",
+                "hasPhoto",
+                "calls"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "hasParcelPhoto": {
+            "type": "boolean"
+          },
+          "ratings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "by": {
+                  "type": "string",
+                  "enum": [
+                    "SENDER",
+                    "RIDER"
+                  ]
+                },
+                "score": {
+                  "type": "integer"
+                },
+                "comment": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "by",
+                "score",
+                "comment",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "trackPoints": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "orderId",
+          "proofs",
+          "hasParcelPhoto",
+          "ratings",
+          "trackPoints"
         ],
         "additionalProperties": false
       },
@@ -13263,6 +14353,124 @@
           "accepted"
         ],
         "additionalProperties": false
+      },
+      "Ticket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TicketCategory"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TicketStatus"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "order": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "reference": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "reference"
+            ],
+            "additionalProperties": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "fromTara": {
+                  "type": "boolean"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "fromTara",
+                "body",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "category",
+          "status",
+          "subject",
+          "order",
+          "createdAt",
+          "updatedAt",
+          "messages"
+        ],
+        "additionalProperties": false
+      },
+      "TicketCategory": {
+        "type": "string",
+        "enum": [
+          "LOST_PARCEL",
+          "DAMAGED_PARCEL",
+          "LATE_DELIVERY",
+          "PAYMENT",
+          "RIDER_BEHAVIOR",
+          "APP_BUG",
+          "OTHER"
+        ]
+      },
+      "TicketPriority": {
+        "type": "string",
+        "enum": [
+          "LOW",
+          "NORMAL",
+          "HIGH",
+          "URGENT"
+        ]
+      },
+      "TicketStatus": {
+        "type": "string",
+        "enum": [
+          "OPEN",
+          "IN_PROGRESS",
+          "RESOLVED",
+          "CLOSED"
+        ]
       },
       "TrackBatchResult": {
         "type": "object",

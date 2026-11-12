@@ -26,6 +26,7 @@ import { RealtimeModule } from './realtime/realtime.module.js';
 import { RedisModule } from './redis/redis.module.js';
 import { RedisThrottlerStorage } from './redis/redis-throttler.storage.js';
 import { RiderAppModule } from './rider-app/rider-app.module.js';
+import { SupportModule } from './support/support.module.js';
 import { RidersModule } from './riders/riders.module.js';
 import { SmsModule } from './sms/sms.module.js';
 import { ParcelAnalysisModule } from './parcel-analysis/parcel-analysis.module.js';
@@ -68,6 +69,7 @@ import { UsersModule } from './users/users.module.js';
     FinanceModule,
     PrivacyModule,
     OpsModule,
+    SupportModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },

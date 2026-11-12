@@ -5,6 +5,11 @@ import { interpolate, type AppLocale } from './locale.js';
  * remplis, autant que possible) et sans accents superflus pour limiter le coût d'envoi.
  */
 const TEMPLATES = {
+  // Réponse du service client quand la personne n'a pas l'app (ou pas de compte) (H6).
+  SUPPORT_REPLY: {
+    fr: 'Tara service client ({reference}) : {message}',
+    en: 'Tara customer service ({reference}): {message}',
+  },
   OTP: {
     fr: 'Tara : votre code de connexion est {code}. Il expire dans {minutes} min. Ne le partagez avec personne.',
     en: 'Tara: your sign-in code is {code}. It expires in {minutes} min. Do not share it with anyone.',

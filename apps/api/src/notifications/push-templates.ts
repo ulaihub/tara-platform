@@ -148,6 +148,11 @@ const TEMPLATES = {
       body: 'Your recipient placed their point: “{landmark}”. You can confirm the delivery.',
     },
   },
+  // Réponse du service client à une demande (H6).
+  SUPPORT_REPLY: {
+    fr: { title: 'Service client Tara', body: 'Demande {reference} : {excerpt}' },
+    en: { title: 'Tara customer service', body: 'Request {reference}: {excerpt}' },
+  },
   RIDER_FAILURE_DECISION: {
     fr: { title: 'Décision de l’expéditeur', body: '{reference} : {decision}.' },
     en: { title: 'Sender decision', body: '{reference}: {decision}.' },

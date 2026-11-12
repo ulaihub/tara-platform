@@ -494,6 +494,7 @@ model User {
   notifications            Notification[]
   ticketsOpened            Ticket[]               @relation("TicketOpenedBy")
   ticketsAssigned          Ticket[]               @relation("TicketAssignee")
+  ticketsRequested         Ticket[]               @relation("TicketRequester")
   ticketMessages           TicketMessage[]
   mediaFiles               MediaFile[]
   safetyAlertsHandled      SafetyAlert[]          @relation("SafetyAlertHandledBy")
@@ -1535,26 +1536,38 @@ model Notification {
   @@map("notifications")
 }
 
+/// Demande au service client (H6) : réclamation, litige, question. Ouverte depuis une app
+/// par l'utilisateur, ou par l'équipe à la suite d'un appel (la personne n'a pas forcément
+/// de compte : un destinataire, par exemple).
 model Ticket {
-  id         String         @id @default(uuid(7)) @db.Uuid
-  orderId    String?        @map("order_id") @db.Uuid
-  openedById String         @map("opened_by_id") @db.Uuid
-  assigneeId String?        @map("assignee_id") @db.Uuid
-  category   TicketCategory
-  priority   TicketPriority @default(NORMAL)
-  status     TicketStatus   @default(OPEN)
-  subject    String
-  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt  DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
-  resolvedAt DateTime?      @map("resolved_at") @db.Timestamptz(3)
+  id           String         @id @default(uuid(7)) @db.Uuid
+  /// Numéro lisible, donné au client au téléphone : SUP-1024.
+  number       Int            @unique @default(autoincrement())
+  orderId      String?        @map("order_id") @db.Uuid
+  openedById   String         @map("opened_by_id") @db.Uuid
+  /// Personne concernée quand elle a un compte (l'auteur, ou l'appelant retrouvé).
+  requesterId  String?        @map("requester_id") @db.Uuid
+  /// Numéro à rappeler (E.164).
+  contactPhone String         @map("contact_phone")
+  assigneeId   String?        @map("assignee_id") @db.Uuid
+  category     TicketCategory
+  priority     TicketPriority @default(NORMAL)
+  status       TicketStatus   @default(OPEN)
+  subject      String
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  resolvedAt   DateTime?      @map("resolved_at") @db.Timestamptz(3)
 
-  order    Order?          @relation(fields: [orderId], references: [id])
-  openedBy User            @relation("TicketOpenedBy", fields: [openedById], references: [id])
-  assignee User?           @relation("TicketAssignee", fields: [assigneeId], references: [id])
-  messages TicketMessage[]
+  order     Order?          @relation(fields: [orderId], references: [id])
+  openedBy  User            @relation("TicketOpenedBy", fields: [openedById], references: [id])
+  requester User?           @relation("TicketRequester", fields: [requesterId], references: [id])
+  assignee  User?           @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  messages  TicketMessage[]
 
   @@index([status, priority])
   @@index([orderId])
+  @@index([requesterId, createdAt])
+  @@index([assigneeId, status])
   @@map("tickets")
 }
 

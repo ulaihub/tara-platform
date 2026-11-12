@@ -253,6 +253,7 @@ describe('Trajet des courses (sécurité, litiges, fraude)', () => {
       data: {
         orderId: disputed.order.id,
         openedById: support.userId,
+        contactPhone: support.phone,
         category: 'LOST_PARCEL',
         subject: 'Colis non reçu selon le client',
       },

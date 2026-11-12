@@ -110,6 +110,20 @@ export const ERROR_MESSAGES = {
     fr: 'Une candidature livreur existe déjà pour ce compte.',
     en: 'A rider application already exists for this account.',
   },
+  // Service client (H6)
+  TICKET_NOT_FOUND: { fr: 'Demande introuvable.', en: 'Request not found.' },
+  TICKET_LIMIT_REACHED: {
+    fr: 'Vous avez déjà 5 demandes en cours. Attendez une réponse avant d’en ouvrir une autre.',
+    en: 'You already have 5 open requests. Wait for an answer before opening another one.',
+  },
+  TICKET_CLOSED: {
+    fr: 'Cette demande est close. Ouvrez une nouvelle demande si besoin.',
+    en: 'This request is closed. Open a new request if needed.',
+  },
+  TICKET_ASSIGNEE_INVALID: {
+    fr: 'La demande ne peut être confiée qu’à un membre de l’équipe Tara.',
+    en: 'The request can only be assigned to a Tara team member.',
+  },
   RIDER_NOT_FOUND: { fr: 'Livreur introuvable.', en: 'Rider not found.' },
   RIDER_DOCUMENTS_INCOMPLETE: {
     fr: 'Pièces manquantes ou non validées : {missing}.',

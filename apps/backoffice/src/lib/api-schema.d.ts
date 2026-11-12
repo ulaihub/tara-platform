@@ -2100,6 +2100,150 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/support/tickets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Support_list'];
+    put?: never;
+    post: operations['Support_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/support/tickets/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Support_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/support/tickets/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Support_reply'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/support/tickets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminSupport_list'];
+    put?: never;
+    post: operations['AdminSupport_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/support/tickets/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminSupport_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['AdminSupport_update'];
+    trace?: never;
+  };
+  '/v1/admin/support/tickets/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminSupport_message'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/support/orders/{orderId}/evidence': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminSupport_evidence'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/support/proofs/{proofId}/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminSupport_proofPhoto'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/support/orders/{orderId}/parcel-photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminSupport_parcelPhoto'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2365,6 +2509,107 @@ export interface components {
     };
     /** @enum {string} */
     AdminRiderView: 'TO_REVIEW' | 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'ALL';
+    AdminTicket: {
+      /** Format: uuid */
+      id: string;
+      reference: string;
+      category: components['schemas']['TicketCategory'];
+      priority: components['schemas']['TicketPriority'];
+      status: components['schemas']['TicketStatus'];
+      subject: string;
+      requester: {
+        /** Format: uuid */
+        id: string | null;
+        name: string | null;
+        phone: string;
+        /** @enum {string} */
+        kind: 'CUSTOMER' | 'MERCHANT' | 'RIDER' | 'STAFF' | 'NO_ACCOUNT';
+      };
+      assignee: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      } | null;
+      order: {
+        /** Format: uuid */
+        id: string;
+        reference: string;
+      } | null;
+      fromApp: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      lastMessageAt: string;
+      awaitingReply: boolean;
+      /** Format: date-time */
+      resolvedAt: string | null;
+      messages: {
+        /** Format: uuid */
+        id: string;
+        body: string;
+        /** Format: date-time */
+        at: string;
+        internal: boolean;
+        fromTara: boolean;
+        authorName: string | null;
+      }[];
+      otherTickets: {
+        /** Format: uuid */
+        id: string;
+        reference: string;
+        subject: string;
+        status: components['schemas']['TicketStatus'];
+        /** Format: date-time */
+        createdAt: string;
+      }[];
+    };
+    AdminTicketPage: {
+      items: components['schemas']['AdminTicketRow'][];
+      /** Format: uuid */
+      nextCursor: string | null;
+      counts: {
+        TO_HANDLE: number;
+        MINE: number;
+        URGENT: number;
+        RESOLVED: number;
+        ALL: number;
+      };
+    };
+    AdminTicketRow: {
+      /** Format: uuid */
+      id: string;
+      reference: string;
+      category: components['schemas']['TicketCategory'];
+      priority: components['schemas']['TicketPriority'];
+      status: components['schemas']['TicketStatus'];
+      subject: string;
+      requester: {
+        /** Format: uuid */
+        id: string | null;
+        name: string | null;
+        phone: string;
+        /** @enum {string} */
+        kind: 'CUSTOMER' | 'MERCHANT' | 'RIDER' | 'STAFF' | 'NO_ACCOUNT';
+      };
+      assignee: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      } | null;
+      order: {
+        /** Format: uuid */
+        id: string;
+        reference: string;
+      } | null;
+      fromApp: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      lastMessageAt: string;
+      awaitingReply: boolean;
+    };
+    /** @enum {string} */
+    AdminTicketView: 'TO_HANDLE' | 'MINE' | 'URGENT' | 'RESOLVED' | 'ALL';
     AppConfig: {
       country: {
         code: string;
@@ -2625,6 +2870,10 @@ export interface components {
           | 'ACCOUNT_SUSPENDED'
           | 'REFRESH_TOKEN_INVALID'
           | 'RIDER_ALREADY_APPLIED'
+          | 'TICKET_NOT_FOUND'
+          | 'TICKET_LIMIT_REACHED'
+          | 'TICKET_CLOSED'
+          | 'TICKET_ASSIGNEE_INVALID'
           | 'RIDER_NOT_FOUND'
           | 'RIDER_DOCUMENTS_INCOMPLETE'
           | 'RIDER_DECISION_INVALID'
@@ -3028,6 +3277,39 @@ export interface components {
       actorRole: components['schemas']['ActorRole'];
       failureReason: components['schemas']['FailureReason'] | null;
       note: string | null;
+    };
+    OrderEvidence: {
+      /** Format: uuid */
+      orderId: string;
+      proofs: {
+        /** Format: uuid */
+        id: string;
+        kind: string;
+        /** Format: date-time */
+        at: string;
+        latitude: number;
+        longitude: number;
+        codeVerified: boolean;
+        receivedBy: string | null;
+        hasPhoto: boolean;
+        calls: {
+          /** @enum {string} */
+          to: 'RECIPIENT' | 'SENDER';
+          /** Format: date-time */
+          at: string;
+          durationSeconds: number;
+        }[];
+      }[];
+      hasParcelPhoto: boolean;
+      ratings: {
+        /** @enum {string} */
+        by: 'SENDER' | 'RIDER';
+        score: number;
+        comment: string | null;
+        /** Format: date-time */
+        at: string;
+      }[];
+      trackPoints: number;
     };
     OrderNote: {
       /** Format: uuid */
@@ -3624,6 +3906,44 @@ export interface components {
         acceptedAt: string;
       }[];
     };
+    Ticket: {
+      /** Format: uuid */
+      id: string;
+      reference: string;
+      category: components['schemas']['TicketCategory'];
+      status: components['schemas']['TicketStatus'];
+      subject: string;
+      order: {
+        /** Format: uuid */
+        id: string;
+        reference: string;
+      } | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+      messages: {
+        /** Format: uuid */
+        id: string;
+        fromTara: boolean;
+        body: string;
+        /** Format: date-time */
+        at: string;
+      }[];
+    };
+    /** @enum {string} */
+    TicketCategory:
+      | 'LOST_PARCEL'
+      | 'DAMAGED_PARCEL'
+      | 'LATE_DELIVERY'
+      | 'PAYMENT'
+      | 'RIDER_BEHAVIOR'
+      | 'APP_BUG'
+      | 'OTHER';
+    /** @enum {string} */
+    TicketPriority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+    /** @enum {string} */
+    TicketStatus: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
     TrackBatchResult: {
       accepted: number;
       ignored: number;
@@ -7615,6 +7935,310 @@ export interface operations {
         content: {
           'application/json': components['schemas']['AdminOrder'];
         };
+      };
+    };
+  };
+  Support_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Ticket'][];
+        };
+      };
+    };
+  };
+  Support_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          category: components['schemas']['TicketCategory'];
+          subject: string;
+          message: string;
+          /** Format: uuid */
+          orderId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Ticket'];
+        };
+      };
+    };
+  };
+  Support_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Ticket'];
+        };
+      };
+    };
+  };
+  Support_reply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Ticket'];
+        };
+      };
+    };
+  };
+  AdminSupport_list: {
+    parameters: {
+      query?: {
+        view?: components['schemas']['AdminTicketView'];
+        q?: string;
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminTicketPage'];
+        };
+      };
+    };
+  };
+  AdminSupport_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @description Mobile camerounais ; toutes les écritures courantes sont acceptées
+           * @example +237690000000
+           */
+          phone?: string;
+          orderReference?: string;
+          category: components['schemas']['TicketCategory'];
+          /** @default NORMAL */
+          priority?: components['schemas']['TicketPriority'];
+          subject: string;
+          message: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminTicket'];
+        };
+      };
+    };
+  };
+  AdminSupport_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminTicket'];
+        };
+      };
+    };
+  };
+  AdminSupport_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          status?: components['schemas']['TicketStatus'];
+          priority?: components['schemas']['TicketPriority'];
+          /** Format: uuid */
+          assigneeId?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminTicket'];
+        };
+      };
+    };
+  };
+  AdminSupport_message: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+          /** @default false */
+          internal?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminTicket'];
+        };
+      };
+    };
+  };
+  AdminSupport_evidence: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OrderEvidence'];
+        };
+      };
+    };
+  };
+  AdminSupport_proofPhoto: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        proofId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminSupport_parcelPhoto: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
