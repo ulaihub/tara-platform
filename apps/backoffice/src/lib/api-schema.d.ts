@@ -2543,6 +2543,7 @@ export interface components {
       awaitingReply: boolean;
       /** Format: date-time */
       resolvedAt: string | null;
+      requesterHasApp: boolean;
       messages: {
         /** Format: uuid */
         id: string;

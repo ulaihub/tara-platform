@@ -82,7 +82,7 @@ void main() {
       expect(find.text('Service client Tara'), findsOneWidget);
       await tester.enterText(find.byType(TextField).last, 'Merci, j’attends.');
       await settle(tester);
-      await tester.tap(iconButton('Envoyer'));
+      await tester.tap(find.byKey(supportSendKey));
       await settle(tester);
       expect(support.replies.single, ('ticket-1001', 'Merci, j’attends.'));
       await expectLater(

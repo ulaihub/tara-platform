@@ -248,6 +248,11 @@ export class SupportService {
     });
     if (!ticket) throw AppError.notFound('TICKET_NOT_FOUND');
     const latest = await this.latestMessages([id]);
+    const devices = ticket.requesterId
+      ? await this.prisma.device.count({
+          where: { userId: ticket.requesterId, pushToken: { not: null } },
+        })
+      : 0;
     const others = await this.prisma.ticket.findMany({
       where: {
         id: { not: id },
@@ -262,6 +267,7 @@ export class SupportService {
     return {
       ...this.toRow(ticket, latest.get(id)),
       resolvedAt: ticket.resolvedAt?.toISOString() ?? null,
+      requesterHasApp: devices > 0,
       messages: ticket.messages.map((message) => {
         const fromTara = isStaff(message.author.roles);
         return {

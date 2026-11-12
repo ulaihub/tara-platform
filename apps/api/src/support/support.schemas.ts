@@ -123,6 +123,11 @@ export const AdminTicketPageDto = z
 
 export const AdminTicketDto = AdminTicketRowDto.extend({
   resolvedAt: z.iso.datetime().nullable(),
+  /**
+   * La personne a l'app Tara (un téléphone qui reçoit les notifications). Sinon la réponse
+   * part par SMS, et l'équipe l'appelle pour la lui donner.
+   */
+  requesterHasApp: z.boolean(),
   /** Tous les échanges, notes internes comprises, du plus ancien au plus récent. */
   messages: z.array(
     z.object({

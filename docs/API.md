@@ -135,7 +135,8 @@ le trajet enregistré pendant la course est lu.
   `POST /admin/support/tickets` (après un appel : `phone` et/ou `orderReference`, même pour une
   personne sans compte ; la demande est confiée à qui l'ouvre), `GET /admin/support/tickets/{id}`,
   `POST /admin/support/tickets/{id}/messages` (`internal` : note interne ; sinon le client est
-  prévenu par notification, à défaut par SMS `SUPPORT_REPLY`), `PATCH /admin/support/tickets/{id}`
+  prévenu par notification, à défaut par SMS `SUPPORT_REPLY` ; sans l'app, `requesterHasApp`
+  est faux et le back-office demande à l'équipe d'appeler la personne), `PATCH /admin/support/tickets/{id}`
   (`status`, `priority`, `assigneeId`, tracé).
 - Litiges (support, dispatch, administrateurs) : `GET /admin/support/orders/{id}/evidence`
   (preuves : heure, position, code vérifié, photo, appels du livreur avant un échec ; notes ;

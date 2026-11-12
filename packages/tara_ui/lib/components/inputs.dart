@@ -24,6 +24,7 @@ class TaraTextField extends StatefulWidget {
     this.onSubmitted,
     this.autofocus = false,
     this.leading,
+    this.trailing,
     this.height = 56,
     this.textCapitalization = TextCapitalization.none,
     this.minLines = 1,
@@ -42,6 +43,10 @@ class TaraTextField extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final bool autofocus;
   final Widget? leading;
+
+  /// Action dans le champ, à droite (envoi d'un message) : centrée, puis en bas du champ
+  /// quand le texte s'étend sur plusieurs lignes.
+  final Widget? trailing;
   final double height;
   final TextCapitalization textCapitalization;
 
@@ -76,7 +81,7 @@ class _TaraTextFieldState extends State<TaraTextField> {
     final field = AnimatedContainer(
       duration: const Duration(milliseconds: 160),
       constraints: BoxConstraints(minHeight: widget.height),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.only(left: 16, right: widget.trailing == null ? 16 : 8),
       decoration: BoxDecoration(
         color: c.inputBg,
         borderRadius: BorderRadius.circular(18),
@@ -84,6 +89,7 @@ class _TaraTextFieldState extends State<TaraTextField> {
         boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 4)] : null,
       ),
       child: Row(
+        crossAxisAlignment: widget.maxLines > 1 ? CrossAxisAlignment.end : CrossAxisAlignment.center,
         children: [
           if (widget.leading != null) ...[widget.leading!, const SizedBox(width: 10)],
           Expanded(
@@ -101,6 +107,8 @@ class _TaraTextFieldState extends State<TaraTextField> {
               minLines: widget.minLines,
               maxLines: widget.maxLines,
               maxLength: widget.maxLength,
+              // La limite suffit : pas de compteur de caractères sous le champ.
+              buildCounter: (_, {required currentLength, required isFocused, required maxLength}) => null,
               cursorColor: TaraBrand.orange,
               style: TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 16),
               decoration: InputDecoration(
@@ -109,11 +117,17 @@ class _TaraTextFieldState extends State<TaraTextField> {
                 hintText: widget.hint,
                 hintStyle: TaraText.body.copyWith(color: c.placeholder, fontSize: 16),
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                // Le compteur de caractères n'est pas affiché : la limite suffit.
-                counterText: '',
               ),
             ),
           ),
+          if (widget.trailing != null) ...[
+            const SizedBox(width: 8),
+            // En bas d'un texte sur plusieurs lignes : même marge qu'en haut d'une ligne seule.
+            Padding(
+              padding: EdgeInsets.only(bottom: widget.maxLines > 1 ? 8 : 0),
+              child: widget.trailing,
+            ),
+          ],
         ],
       ),
     );

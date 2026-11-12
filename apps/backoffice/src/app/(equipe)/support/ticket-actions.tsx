@@ -87,7 +87,7 @@ export function ReplyForm({ ticketId, canReply }: { ticketId: string; canReply: 
         <p className="flex-1 text-[12px] text-muted">
           {internal
             ? 'Le client ne voit pas cette note.'
-            : 'Le client la reçoit : notification dans l’app, sinon SMS.'}
+            : 'Le client la reçoit dans l’app, ou par SMS s’il ne l’a pas.'}
         </p>
         <button
           type="submit"

@@ -126,13 +126,25 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
               ))}
             </ol>
             <div className="mt-4">
-              <ReplyForm ticketId={ticket.id} canReply={ticket.status !== 'CLOSED'} />
-              {!ticket.requester.id ? (
-                <p className="mt-2 text-[12px] text-muted">
-                  Personne sans compte : la réponse part par SMS au{' '}
-                  {displayPhone(ticket.requester.phone)}.
-                </p>
+              {!ticket.requesterHasApp && ticket.status !== 'CLOSED' ? (
+                <div className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl bg-warn-bg px-4 py-3">
+                  <Icon name="phone" size={18} className="text-warn" />
+                  <p className="min-w-[220px] flex-1 text-[13px] font-bold text-warn">
+                    {ticket.requester.id
+                      ? 'Cette personne n’a pas l’app Tara'
+                      : 'Personne sans compte Tara'}{' '}
+                    : appelez-la pour lui donner la réponse. Elle la reçoit aussi par SMS.
+                  </p>
+                  <a
+                    href={`tel:${ticket.requester.phone}`}
+                    className="inline-flex min-h-9 items-center gap-1.5 rounded-xl bg-panel px-3 text-[13px] font-extrabold text-accent"
+                  >
+                    <Icon name="phone" size={14} />
+                    {displayPhone(ticket.requester.phone)}
+                  </a>
+                </div>
               ) : null}
+              <ReplyForm ticketId={ticket.id} canReply={ticket.status !== 'CLOSED'} />
             </div>
           </Section>
 

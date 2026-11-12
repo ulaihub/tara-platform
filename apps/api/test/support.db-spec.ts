@@ -111,6 +111,7 @@ describe('Service client (H6)', () => {
       .send({ body: 'Bonjour, le second paiement vous est remboursé sur votre solde Tara.' })
       .expect(200);
     expect(answered.body).toMatchObject({
+      requesterHasApp: false,
       status: 'IN_PROGRESS',
       assignee: { id: agent.userId, name: 'Nadège Support' },
       awaitingReply: false,

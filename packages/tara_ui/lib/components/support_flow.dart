@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tara_core/api/support_api.dart';
 
+import '../motion/effects.dart';
 import '../motion/liquid_background.dart';
 import '../tara_colors.dart';
 import '../tara_icons.dart';
@@ -519,28 +521,75 @@ class _SupportThreadScreenState extends State<SupportThreadScreen> {
           ],
         ],
         footer: ticket.status.acceptsReplies
-            ? Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: TaraTextField(
-                      hint: s.replyHint,
-                      controller: _reply,
-                      maxLines: 4,
-                      maxLength: 2000,
-                      keyboardType: TextInputType.multiline,
-                      textCapitalization: TextCapitalization.sentences,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  GlassIconButton(
-                    icon: TaraIcons.send,
-                    label: s.replySend,
-                    onPressed: _sending || _reply.text.trim().length < _messageMin ? null : () => unawaited(_send()),
-                  ),
-                ],
+            ? TaraTextField(
+                hint: s.replyHint,
+                controller: _reply,
+                maxLines: 4,
+                maxLength: 2000,
+                keyboardType: TextInputType.multiline,
+                textCapitalization: TextCapitalization.sentences,
+                trailing: _SendButton(
+                  label: s.replySend,
+                  busy: _sending,
+                  onPressed: _sending || _reply.text.trim().length < _messageMin ? null : () => unawaited(_send()),
+                ),
               )
             : const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+/// Clé du bouton d'envoi d'une réponse (tests des apps).
+const supportSendKey = ValueKey('support-send');
+
+/// Envoi d'une réponse, dans le champ à droite : bouton de la marque, atténué tant que
+/// le message est vide.
+class _SendButton extends StatelessWidget {
+  const _SendButton({required this.label, required this.busy, required this.onPressed});
+
+  final String label;
+  final bool busy;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final enabled = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        key: supportSendKey,
+        onTap: enabled
+            ? () {
+                HapticFeedback.selectionClick();
+                onPressed!();
+              }
+            : null,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 160),
+          opacity: enabled || busy ? 1 : .45,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: TaraBrand.gradient,
+              borderRadius: BorderRadius.circular(13),
+              boxShadow: enabled ? c.brandShadow : null,
+            ),
+            child: Center(
+              child: busy
+                  ? const Spin(
+                      period: Duration(milliseconds: 900),
+                      child: TaraIcon(TaraIcons.refresh, size: 18, strokeWidth: 2.2, color: TaraBrand.onBrand),
+                    )
+                  : const TaraIcon(TaraIcons.send, size: 19, strokeWidth: 2.2, color: TaraBrand.onBrand),
+            ),
+          ),
+        ),
       ),
     );
   }

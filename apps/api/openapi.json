@@ -9442,6 +9442,9 @@
             "type": "string",
             "format": "date-time"
           },
+          "requesterHasApp": {
+            "type": "boolean"
+          },
           "messages": {
             "type": "array",
             "items": {
@@ -9529,6 +9532,7 @@
           "lastMessageAt",
           "awaitingReply",
           "resolvedAt",
+          "requesterHasApp",
           "messages",
           "otherTickets"
         ],
