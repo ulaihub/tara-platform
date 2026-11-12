@@ -160,6 +160,9 @@ class FakeClientApi extends ClientApi {
   /// États successifs du paiement relu (le dernier est répété).
   List<String> paymentStatuses = ['PENDING'];
 
+  /// Tarif pro de la boutique (points de base), comme le calcule le serveur.
+  int proDiscountBps = 0;
+
   @override
   Future<Quote> quote({
     required String pickupAddressId,
@@ -186,16 +189,23 @@ class FakeClientApi extends ClientApi {
       if (bulky && loadingHelp) (code: 'HANDLING', amount: 1500),
       if (scheduledFor != null && (scheduledFor.hour >= 20 || scheduledFor.hour < 6)) (code: 'NIGHT', amount: 300),
     ];
-    final discount = promoCode == null ? 0 : 500;
     final base = bulky ? 3000 : 1200;
+    final subtotal = base + surcharges.fold<int>(0, (sum, s) => sum + s.amount);
+    // Le plus avantageux du code promo et du tarif pro (arrondi à 50 F), jamais les deux.
+    final promoDiscount = promoCode == null ? 0 : 500;
+    final proDiscount = (subtotal * proDiscountBps / 10000 / 50).round() * 50;
+    final pro = proDiscount > promoDiscount;
+    final discount = pro ? proDiscount : promoDiscount;
     return Quote(
       distanceMeters: 4200,
       estimatedMinutes: 18,
       basePrice: base,
       surcharges: surcharges,
       discountTotal: discount,
-      totalPrice: base + surcharges.fold<int>(0, (sum, s) => sum + s.amount) - discount,
-      promoCode: promoCode,
+      totalPrice: subtotal - discount,
+      promoCode: pro ? null : promoCode,
+      discountSource: pro ? 'VOLUME' : (promoDiscount > 0 ? 'PROMO' : null),
+      proDiscountBps: pro ? proDiscountBps : 0,
       vehicleType: bulky ? 'TRICYCLE' : 'MOTORBIKE',
       retryFee: bulky ? 1500 : 500,
       returnFee: base ~/ 2,

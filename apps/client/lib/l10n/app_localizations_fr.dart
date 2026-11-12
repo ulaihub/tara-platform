@@ -889,6 +889,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get discount => 'Réduction';
 
   @override
+  String proDiscountLine(String percent) {
+    return 'Tarif pro ($percent)';
+  }
+
+  @override
+  String promoBeatenByPro(String percent) {
+    return 'Votre tarif pro (−$percent) est plus avantageux : ce code n’est pas utilisé.';
+  }
+
+  @override
   String get totalLabel => 'Total';
 
   @override

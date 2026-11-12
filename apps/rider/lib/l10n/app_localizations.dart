@@ -830,6 +830,24 @@ abstract class AppLocalizations {
   /// **'Votre gain'**
   String get yourEarning;
 
+  /// Sous le gain d’une proposition : primes payées par Tara, comprises dans le gain.
+  ///
+  /// In fr, this message translates to:
+  /// **'dont {details}'**
+  String bonusIncluded(String details);
+
+  /// No description provided for @approachBonus.
+  ///
+  /// In fr, this message translates to:
+  /// **'prime d’approche {amount}'**
+  String approachBonus(String amount);
+
+  /// No description provided for @boostBonus.
+  ///
+  /// In fr, this message translates to:
+  /// **'prime de renfort {amount}'**
+  String boostBonus(String amount);
+
   /// No description provided for @pickupLabel.
   ///
   /// In fr, this message translates to:

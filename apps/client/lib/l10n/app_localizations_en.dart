@@ -883,6 +883,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discount => 'Discount';
 
   @override
+  String proDiscountLine(String percent) {
+    return 'Pro rate ($percent)';
+  }
+
+  @override
+  String promoBeatenByPro(String percent) {
+    return 'Your pro rate (−$percent) is better: this code isn\'t used.';
+  }
+
+  @override
   String get totalLabel => 'Total';
 
   @override

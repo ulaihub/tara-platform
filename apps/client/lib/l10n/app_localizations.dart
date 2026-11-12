@@ -1718,6 +1718,18 @@ abstract class AppLocalizations {
   /// **'Réduction'**
   String get discount;
 
+  /// Ligne du récapitulatif : remise du tarif pro des boutiques.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tarif pro ({percent})'**
+  String proDiscountLine(String percent);
+
+  /// No description provided for @promoBeatenByPro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre tarif pro (−{percent}) est plus avantageux : ce code n’est pas utilisé.'**
+  String promoBeatenByPro(String percent);
+
   /// No description provided for @totalLabel.
   ///
   /// In fr, this message translates to:

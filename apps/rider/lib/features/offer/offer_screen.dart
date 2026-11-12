@@ -146,6 +146,19 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     );
     final earningLabel = Text(l.yourEarning, style: TaraText.label.copyWith(color: c.textSecondary));
     final earning = AmountText(offer.riderEarning, style: TaraText.amountXL.copyWith(fontSize: 40));
+    // Primes payées par Tara, comprises dans le gain : annoncées pour décider en connaissance.
+    final bonuses = [
+      if (offer.approachBonus > 0) l.approachBonus('${formatAmount(offer.approachBonus)}\u00a0F'),
+      if (offer.boostBonus > 0) l.boostBonus('${formatAmount(offer.boostBonus)}\u00a0F'),
+    ];
+    final bonusLine = bonuses.isEmpty
+        ? null
+        : Text(
+            l.bonusIncluded(bonuses.join(' · ')),
+            key: const ValueKey('offer-bonus'),
+            textAlign: tight ? TextAlign.start : TextAlign.center,
+            style: TaraText.label.copyWith(color: c.success, fontWeight: FontWeight.w700),
+          );
     return TaraScreen(
       safeBottom: false,
       blobs: _blobs,
@@ -172,6 +185,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
                     children: [
                       earningLabel,
                       FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: earning),
+                      ?bonusLine,
                     ],
                   ),
                 ),
@@ -182,6 +196,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
             const SizedBox(height: 16),
             Center(child: earningLabel),
             Center(child: earning),
+            if (bonusLine != null) Center(child: bonusLine),
           ],
           SizedBox(height: tight ? 12 : 16),
           GlassCard(

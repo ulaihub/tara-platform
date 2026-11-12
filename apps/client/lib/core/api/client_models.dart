@@ -523,6 +523,8 @@ class Quote {
     required this.discountTotal,
     required this.totalPrice,
     required this.promoCode,
+    this.discountSource,
+    this.proDiscountBps = 0,
     this.vehicleType = 'MOTORBIKE',
     this.retryFee = 0,
     this.returnFee = 0,
@@ -538,6 +540,8 @@ class Quote {
     discountTotal: _field<num>(json, 'discountTotal').toInt(),
     totalPrice: _field<num>(json, 'totalPrice').toInt(),
     promoCode: _field(json, 'promoCode'),
+    discountSource: json['discountSource'] as String?,
+    proDiscountBps: (json['proDiscountBps'] as num?)?.toInt() ?? 0,
     vehicleType: json['vehicleType'] as String? ?? 'MOTORBIKE',
     retryFee: _field<num>(json, 'retryFee').toInt(),
     returnFee: _field<num>(json, 'returnFee').toInt(),
@@ -550,6 +554,8 @@ class Quote {
     'discountTotal',
     'totalPrice',
     'promoCode',
+    'discountSource',
+    'proDiscountBps',
     'vehicleType',
     'retryFee',
     'returnFee',
@@ -562,6 +568,12 @@ class Quote {
   final int discountTotal;
   final int totalPrice;
   final String? promoCode;
+
+  /// D'où vient la remise : PROMO (code promo), VOLUME (tarif pro de la boutique) ou rien.
+  final String? discountSource;
+
+  /// Tarif pro appliqué, en points de base (1000 = 10 %).
+  final int proDiscountBps;
 
   /// MOTORBIKE, ou TRICYCLE pour un gros objet.
   final String vehicleType;

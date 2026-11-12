@@ -426,6 +426,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get yourEarning => 'Votre gain';
 
   @override
+  String bonusIncluded(String details) {
+    return 'dont $details';
+  }
+
+  @override
+  String approachBonus(String amount) {
+    return 'prime d’approche $amount';
+  }
+
+  @override
+  String boostBonus(String amount) {
+    return 'prime de renfort $amount';
+  }
+
+  @override
   String pickupLabel(String distance) {
     return 'ENLÈVEMENT · $distance';
   }

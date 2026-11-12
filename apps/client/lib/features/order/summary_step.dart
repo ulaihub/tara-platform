@@ -162,10 +162,19 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
       _promoError = null;
     });
     try {
-      delivery.quote = await _quote(delivery, promoCode: code);
-      _draft
-        ..promoCode = code
-        ..touch();
+      final quote = await _quote(delivery, promoCode: code);
+      delivery.quote = quote;
+      if (quote.discountSource == 'VOLUME') {
+        // Le tarif pro de la boutique est plus avantageux : le code n'est pas utilisé.
+        _draft.touch();
+        if (mounted) {
+          setState(() => _promoError = AppLocalizations.of(context).promoBeatenByPro(percent(quote.proDiscountBps)));
+        }
+      } else {
+        _draft
+          ..promoCode = code
+          ..touch();
+      }
     } catch (error) {
       if (mounted) setState(() => _promoError = errorMessage(context, error));
     } finally {
@@ -521,7 +530,12 @@ class _PriceCard extends StatelessWidget {
                 'WEATHER' => l.surchargeWeather,
                 _ => l.surchargeOther,
               }, '+${amount(surcharge.amount)}'),
-            if (single.discountTotal > 0) line(l.discount, '−${amount(single.discountTotal)}', color: c.success),
+            if (single.discountTotal > 0)
+              line(
+                single.discountSource == 'VOLUME' ? l.proDiscountLine(percent(single.proDiscountBps)) : l.discount,
+                '−${amount(single.discountTotal)}',
+                color: c.success,
+              ),
           ] else if (deliveries.length > 1)
             for (final (i, d) in deliveries.indexed)
               line('${i + 1}. ${d.recipientName.trim()}', d.quote == null ? '…' : amount(d.quote!.totalPrice)),
@@ -550,4 +564,11 @@ class _PriceCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Pourcentage lisible depuis des points de base : 1000 → « 10 % », 1250 → « 12,5 % ».
+String percent(int bps) {
+  final whole = bps % 100 == 0;
+  final value = whole ? '${bps ~/ 100}' : (bps / 100).toStringAsFixed(1).replaceAll('.', ',');
+  return '$value %';
 }

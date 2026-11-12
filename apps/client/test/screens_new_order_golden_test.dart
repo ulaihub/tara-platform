@@ -830,6 +830,31 @@ void main() {
       expect(api.created.single.body['promoCode'], 'BIENVENUE');
     });
 
+    testWidgets('tarif pro : remise affichée avant de commander ; un code moins avantageux n’est pas utilisé', (
+      tester,
+    ) async {
+      final api = orderApi()..proDiscountBps = 1000;
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toSummary(tester);
+      // 10 % de 1 200 F = 120 F, arrondis à 100 F pour la monnaie.
+      expect(find.text('Tarif pro (10\u00a0%)'), findsOneWidget);
+      expect(find.text('−100\u00a0F'), findsOneWidget);
+      expect(find.text('Commander · 1\u00a0100\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/tarif_pro.png'));
+
+      // Tarif pro de 50 % : plus avantageux que le code de 500 F, qui n'est pas consommé.
+      api.proDiscountBps = 5000;
+      await tester.enterText(find.widgetWithText(TextField, 'Ex. BIENVENUE'), 'bienvenue');
+      await tapVisible(tester, 'Appliquer');
+      expect(
+        find.text('Votre tarif pro (−50\u00a0%) est plus avantageux : ce code n’est pas utilisé.'),
+        findsOneWidget,
+      );
+      expect(find.text('Code BIENVENUE appliqué'), findsNothing);
+      await slideToOrder(tester);
+      expect(api.created.single.body['promoCode'], isNull);
+    });
+
     testWidgets('plusieurs livraisons : un lot, un seul code, un seul paiement Mobile Money', (tester) async {
       final api = orderApi();
       await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1700));

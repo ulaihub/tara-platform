@@ -230,6 +230,19 @@
   "today": "Aujourd’hui",
   "newJob": "Nouvelle course",
   "yourEarning": "Votre gain",
+  "bonusIncluded": "dont {details}",
+  "@bonusIncluded": {
+    "description": "Sous le gain d’une proposition : primes payées par Tara, comprises dans le gain.",
+    "placeholders": { "details": { "type": "String" } }
+  },
+  "approachBonus": "prime d’approche {amount}",
+  "@approachBonus": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "boostBonus": "prime de renfort {amount}",
+  "@boostBonus": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "pickupLabel": "ENLÈVEMENT · {distance}",
   "dropoffLabel": "LIVRAISON · {distance} · ~{minutes} min",
   "toCollect": "À encaisser : {amount}",

@@ -366,6 +366,8 @@ class Offer {
     required this.isFragile,
     required this.isExpress,
     this.loadingHelp = false,
+    this.approachBonus = 0,
+    this.boostBonus = 0,
   });
 
   factory Offer.fromJson(Json json) {
@@ -389,6 +391,8 @@ class Offer {
       isFragile: _field(json, 'isFragile'),
       isExpress: _field(json, 'isExpress'),
       loadingHelp: json['loadingHelp'] == true,
+      approachBonus: (json['approachBonus'] as num?)?.toInt() ?? 0,
+      boostBonus: (json['boostBonus'] as num?)?.toInt() ?? 0,
     );
   }
   static const fields = [
@@ -396,6 +400,8 @@ class Offer {
     'orderId',
     'expiresAt',
     'approachMeters',
+    'approachBonus',
+    'boostBonus',
     'pickup',
     'dropoff',
     'distanceMeters',
@@ -421,7 +427,13 @@ class Offer {
   final String dropoffCity;
   final int distanceMeters;
   final int estimatedMinutes;
+
+  /// Gain total : part du livreur plus les primes payées par Tara.
   final int riderEarning;
+
+  /// Dont prime d'approche (vendeur éloigné) et prime de renfort (pluie, heures de pointe).
+  final int approachBonus;
+  final int boostBonus;
   final int codAmount;
   final int cashFee;
   final String packageSize;

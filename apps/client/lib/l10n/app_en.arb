@@ -346,6 +346,8 @@
   "surchargeWeather": "Weather surcharge",
   "surchargeOther": "Surcharge",
   "discount": "Discount",
+  "proDiscountLine": "Pro rate ({percent})",
+  "promoBeatenByPro": "Your pro rate (−{percent}) is better: this code isn't used.",
   "totalLabel": "Total",
   "quoting": "Working out the price…",
   "promoLabel": "Promo code",

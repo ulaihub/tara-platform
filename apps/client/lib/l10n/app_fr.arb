@@ -461,6 +461,15 @@
   "surchargeWeather": "Supplément météo",
   "surchargeOther": "Supplément",
   "discount": "Réduction",
+  "proDiscountLine": "Tarif pro ({percent})",
+  "@proDiscountLine": {
+    "description": "Ligne du récapitulatif : remise du tarif pro des boutiques.",
+    "placeholders": { "percent": { "type": "String" } }
+  },
+  "promoBeatenByPro": "Votre tarif pro (−{percent}) est plus avantageux : ce code n’est pas utilisé.",
+  "@promoBeatenByPro": {
+    "placeholders": { "percent": { "type": "String" } }
+  },
   "totalLabel": "Total",
   "quoting": "Calcul du prix…",
   "promoLabel": "Code promo",

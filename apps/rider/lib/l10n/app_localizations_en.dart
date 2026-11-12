@@ -424,6 +424,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourEarning => 'Your earning';
 
   @override
+  String bonusIncluded(String details) {
+    return 'includes $details';
+  }
+
+  @override
+  String approachBonus(String amount) {
+    return 'pickup distance bonus $amount';
+  }
+
+  @override
+  String boostBonus(String amount) {
+    return 'boost $amount';
+  }
+
+  @override
   String pickupLabel(String distance) {
     return 'PICKUP · $distance';
   }

@@ -56,6 +56,28 @@ final bulkyOffer = Offer(
   loadingHelp: true,
 );
 
+/// Vendeur à 3,6 km sous la pluie : prime d'approche et prime de renfort payées par Tara.
+final bonusOffer = Offer(
+  id: '00000000-0000-4000-8000-000000000005',
+  orderId: '00000000-0000-4000-8000-000000000006',
+  expiresAt: expiresAt,
+  approachMeters: 3600,
+  pickupName: 'Saveurs de Deïdo',
+  pickupNeighborhood: 'Deïdo',
+  dropoffNeighborhood: 'Logbessou',
+  dropoffCity: 'Douala',
+  distanceMeters: 16800,
+  estimatedMinutes: 34,
+  riderEarning: 1295 + 200 + 300,
+  approachBonus: 200,
+  boostBonus: 300,
+  codAmount: 0,
+  cashFee: 0,
+  packageSize: 'S',
+  isFragile: false,
+  isExpress: false,
+);
+
 Widget scope(Widget child) => ProviderScope(
   overrides: [
     keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
@@ -124,6 +146,28 @@ void main() {
       expect(find.text('Nouvelle course · Gros objet'), findsOneWidget);
       expect(find.text('Venir à deux'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/07_proposition_gros_objet/${brightness.name}.png'));
+    });
+  }
+
+  for (final brightness in Brightness.values) {
+    goldenTest('07 proposition avec primes ${brightness.name}', (tester) async {
+      await pumpVariant(
+        tester,
+        Variant(brightness, ScreenSize.regular, 1),
+        scope(
+          OfferScreen(
+            offer: bonusOffer,
+            onAccepted: (_) {},
+            onClosed: (_) {},
+            now: () => expiresAt.subtract(const Duration(seconds: 18)),
+          ),
+        ),
+      );
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      // Le gain annoncé comprend les primes, détaillées juste dessous.
+      expect(find.text('dont prime d’approche 200\u00a0F · prime de renfort 300\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/07_proposition_primes/${brightness.name}.png'));
     });
   }
 }
