@@ -32,6 +32,7 @@ Principes : défense en profondeur (chaque risque est couvert par au moins deux 
 - Audit des dépendances de production : la CI échoue sur une vulnérabilité élevée ou critique.
 - Recherche de secrets dans tout l'historique Git (gitleaks).
 - Tests de sécurité (`apps/api/test/security.db-spec.ts`, `privacy.db-spec.ts`, `db-guards.db-spec.ts`), exécutés avec le compte restreint de la base.
+- Garde de toutes les routes (`route-guards.db-spec.ts`) : chaque route `/admin` est réservée à des rôles de l'équipe, et seules les routes publiques revues une à une s'ouvrent sans connexion.
 - Lint strict, typage, contrat OpenAPI à jour.
 
 Dépendance de développement signalée et acceptée : `minimatch` (gravité modérée), utilisée seulement par l'outil de build NestJS, absente de l'API en production.
@@ -42,13 +43,13 @@ Les secrets vivent dans le gestionnaire de secrets de l'hébergeur, jamais dans 
 
 La clé d'API Firebase de `apps/rider/lib/firebase_options.dart` n'est pas un secret : elle identifie le projet et figure dans tout APK publié. Avant le pilote : la restreindre à l'app `cm.tara.rider` et à son empreinte de signature dans la console Google Cloud, et vérifier que Firestore et Storage, inutilisés, ne sont pas ouverts.
 
-| Secret                       | Rôle                                                                  | Rotation                                                                                                                                       |
-| ---------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                 | Signature des jetons d'accès                                          | Mettre l'ancien dans `JWT_SECRET_PREVIOUS`, le nouveau dans `JWT_SECRET`, déployer, retirer l'ancien 15 minutes plus tard. Aucune déconnexion. |
-| `CODE_HASH_SECRET`           | Hachage des codes SMS et des codes colis                              | Possible à tout moment : les codes en cours deviennent invalides (régénérer les codes d'enlèvement des commandes ouvertes).                    |
-| `STORAGE_ENCRYPTION_KEY`     | Chiffrement des pièces KYC et des secrets TOTP                        | Pas encore d'outil de rechiffrement : clé à conserver avec les sauvegardes, rotation à outiller avant la mise en production.                   |
-| Clé d'envoi de l'app livreur | Signature des APK (`TARA_RIDER_KEYSTORE_*` dans les secrets du dépôt) | Google Play signe l'app avec sa propre clé ; la clé d'envoi perdue ou volée se remplace sur demande dans la Play Console.                      |
-| Mots de passe PostgreSQL     | Comptes `tara_migrator` et `tara_app`                                 | Rejouer `infra/postgres/roles.sql` avec les nouveaux mots de passe, puis redéployer.                                                           |
+| Secret                       | Rôle                                                                  | Rotation                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                 | Signature des jetons d'accès                                          | Mettre l'ancien dans `JWT_SECRET_PREVIOUS`, le nouveau dans `JWT_SECRET`, déployer, retirer l'ancien 15 minutes plus tard. Aucune déconnexion.                                                                                                                                                                                            |
+| `CODE_HASH_SECRET`           | Hachage des codes SMS et des codes colis                              | Possible à tout moment : les codes en cours deviennent invalides (régénérer les codes d'enlèvement des commandes ouvertes).                                                                                                                                                                                                               |
+| `STORAGE_ENCRYPTION_KEY`     | Chiffrement des pièces KYC et des secrets TOTP                        | Mettre l'ancienne dans `STORAGE_ENCRYPTION_KEY_PREVIOUS`, la nouvelle dans `STORAGE_ENCRYPTION_KEY`, déployer, lancer `pnpm --filter @tara/api storage:rotate-key` (rechiffre tout, peut être relancé), retirer l'ancienne une fois le script terminé sans élément illisible. Garder l'ancienne clé avec les sauvegardes qu'elle chiffre. |
+| Clé d'envoi de l'app livreur | Signature des APK (`TARA_RIDER_KEYSTORE_*` dans les secrets du dépôt) | Google Play signe l'app avec sa propre clé ; la clé d'envoi perdue ou volée se remplace sur demande dans la Play Console.                                                                                                                                                                                                                 |
+| Mots de passe PostgreSQL     | Comptes `tara_migrator` et `tara_app`                                 | Rejouer `infra/postgres/roles.sql` avec les nouveaux mots de passe, puis redéployer.                                                                                                                                                                                                                                                      |
 
 ## Base de données en production
 
@@ -88,9 +89,28 @@ La clé d'API Firebase de `apps/rider/lib/firebase_options.dart` n'est pas un se
 
 ## Reste à faire, par phase
 
-| Phase | Mesure                                                                                                                                                                                                                         |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2     | Fait : limitation de débit partagée (Redis), temps réel authentifié, webhook signé, SMS Orange avec secours Twilio et alertes de volume                                                                                        |
-| 3     | Fait : signature et dédoublonnage des notifications Mobile Money, plafonds et validation des reversements, rapprochement. Reste : seuils de détection de fraude à régler avec les données du pilote                            |
-| 4, 5  | Fait (app livreur) : pas de sauvegarde Android, HTTPS imposé, code obscurci, signature par clé d'envoi. Reste : sessions dans le stockage chiffré, intégrité de l'appareil (Play Integrity), détection des téléphones modifiés |
-| 7     | HTTPS partout, protection anti-DDoS, sauvegardes chiffrées, outil de rotation de `STORAGE_ENCRYPTION_KEY`, test d'intrusion par un prestataire externe                                                                         |
+| Phase | Mesure                                                                                                                                                                                                                                                                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2     | Fait : limitation de débit partagée (Redis), temps réel authentifié, webhook signé, SMS Orange avec secours Twilio et alertes de volume                                                                                                                                                                                                          |
+| 3     | Fait : signature et dédoublonnage des notifications Mobile Money, plafonds et validation des reversements, rapprochement. Reste : seuils de détection de fraude à régler avec les données du pilote                                                                                                                                              |
+| 4, 5  | Fait (app livreur) : pas de sauvegarde Android, HTTPS imposé, code obscurci, signature par clé d'envoi. Reste : sessions dans le stockage chiffré, intégrité de l'appareil (Play Integrity), détection des téléphones modifiés                                                                                                                   |
+| 7     | Fait : revue de sécurité (ci-dessous), garde de toutes les routes testée, rotation de `STORAGE_ENCRYPTION_KEY` outillée, test de charge. Reste au déploiement : stockage objet compatible S3 (le disque local est refusé en production), HTTPS partout, protection anti-DDoS, sauvegardes chiffrées, test d'intrusion par un prestataire externe |
+
+## Revue de sécurité de la phase 7 (13 novembre 2026)
+
+Périmètre : back-office (H1 à H8) et routes `/admin`, modèle de prix (tarif pro, primes), routes publiques, dépendances, chiffrement du stockage. **Aucun défaut critique ni majeur.**
+
+- **Droits** : les 73 routes `/admin` (sur 176) exigent un rôle de l'équipe (et donc le second facteur) ; vérifié par un test sur toutes les routes. Un administrateur ne peut ni se retirer ses propres droits ni supprimer le dernier administrateur.
+- **Routes sans connexion** : 15, revues une à une (santé, textes légaux, configuration publique, connexion par SMS, pages par jeton aléatoire, avis signés des prestataires). Liste figée dans le test.
+- **Traçabilité** : chaque action du back-office qui modifie quelque chose (tarifs, promotions, primes, zones, commandes, équipe, finance, support, livreurs) est inscrite au journal d'audit.
+- **Entrées** : formes des zones validées par PostGIS, export comptable protégé contre les formules de tableur, requêtes SQL paramétrées, aucun HTML injecté dans les pages.
+- **Back-office** : session chiffrée dans un cookie `httpOnly`, `SameSite=Strict` ; politique de contenu stricte avec nonce, pas d'affichage dans un cadre.
+- **Dépendances de production** : aucune vulnérabilité connue (`pnpm audit`).
+- **Corrigé** : rotation de la clé de chiffrement du stockage (lecture avec l'ancienne clé pendant la transition, script de rechiffrement testé, écriture atomique des fichiers).
+
+Points à surveiller pendant le pilote (risques faibles, montants plafonnés) :
+
+| Point                    | Pourquoi                                                                                                 | Mesure en place / proposée                                                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prime d'approche (200 F) | Calculée sur la position envoyée par le téléphone : un livreur pourrait se déclarer loin pour la toucher | Positions simulées signalées ; trajet de chaque course enregistré. Proposé : comparer chaque mois la distance parcourue jusqu'au vendeur aux primes versées |
+| Primes de renfort        | Un répartiteur peut en créer (5 000 F par course et 7 jours au plus)                                     | Plafonds, journal d'audit, arrêt à tout moment. Proposé : prévenir les administrateurs par SMS à chaque prime créée                                         |

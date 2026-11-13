@@ -30,7 +30,8 @@
     "demo:riders": "node test/simulator/launch.mjs test/simulator/demo-riders.ts",
     "demo:support": "node test/simulator/launch.mjs test/simulator/demo-support.ts",
     "load:setup": "node test/simulator/launch.mjs test/load/setup.ts",
-    "load:run": "node test/simulator/launch.mjs test/load/run.ts"
+    "load:run": "node test/simulator/launch.mjs test/load/run.ts",
+    "storage:rotate-key": "node dist/storage/rotate-key.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",

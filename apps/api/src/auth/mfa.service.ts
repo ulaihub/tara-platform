@@ -2,9 +2,9 @@ import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuditService } from '../audit/audit.service.js';
 import { ENV } from '../config/config.module.js';
-import type { Env } from '../config/env.js';
+import { type Env, storageKeys } from '../config/env.js';
 import { AppError } from '../common/errors/app-error.js';
-import { decrypt, deriveKey, encrypt } from '../common/crypto.js';
+import { decryptWithAny, deriveKey, encrypt } from '../common/crypto.js';
 import { renderSms, type SmsTemplate } from '../common/i18n/sms-templates.js';
 import { addMinutes } from '../common/time.js';
 import type { User } from '../generated/prisma/client.js';
@@ -18,6 +18,9 @@ import { generateTotpSecret, otpauthUrl, verifyTotp } from './totp.js';
 const MAX_FAILURES = 5;
 const LOCK_MINUTES = 15;
 
+/** Usage de la clé dérivée qui chiffre les secrets TOTP (rotation : storage:rotate-key). */
+export const MFA_KEY_PURPOSE = 'tara:mfa-totp:v1';
+
 /**
  * Double authentification de l'équipe (TOTP). Le secret est chiffré en base avec une clé
  * dérivée réservée à cet usage. Chaque activation ou réinitialisation est auditée et
@@ -26,7 +29,8 @@ const LOCK_MINUTES = 15;
 @Injectable()
 export class MfaService {
   private readonly logger = new Logger(MfaService.name);
-  private readonly key: Buffer;
+  /** Clé dérivée actuelle d'abord, puis l'ancienne pendant une rotation de la clé maîtresse. */
+  private readonly keys: Buffer[];
 
   constructor(
     private readonly prisma: PrismaService,
@@ -35,7 +39,7 @@ export class MfaService {
     @Inject(SMS_PROVIDER) private readonly sms: SmsProvider,
     @Inject(ENV) env: Env,
   ) {
-    this.key = deriveKey(Buffer.from(env.STORAGE_ENCRYPTION_KEY, 'base64'), 'tara:mfa-totp:v1');
+    this.keys = storageKeys(env).map((master) => deriveKey(master, MFA_KEY_PURPOSE));
   }
 
   /** Le compte doit détenir un rôle de l'équipe (lu en base : les rôles effectifs l'excluent). */
@@ -52,7 +56,7 @@ export class MfaService {
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
-        totpSecretEnc: encrypt(this.key, Buffer.from(secret)).toString('base64'),
+        totpSecretEnc: encrypt(this.keys[0] as Buffer, Buffer.from(secret)).toString('base64'),
         totpLastUsedStep: null,
         totpFailedAttempts: 0,
         totpLockedUntil: null,
@@ -106,7 +110,7 @@ export class MfaService {
     if (!user.totpSecretEnc) throw AppError.unprocessable('MFA_NOT_SET_UP');
     if (user.totpLockedUntil && user.totpLockedUntil > now) throw AppError.tooMany('MFA_LOCKED');
 
-    const secret = decrypt(this.key, Buffer.from(user.totpSecretEnc, 'base64')).toString();
+    const secret = decryptWithAny(this.keys, Buffer.from(user.totpSecretEnc, 'base64')).toString();
     const step = verifyTotp(secret, code, now, user.totpLastUsedStep);
     if (step !== null) {
       // Mise à jour conditionnelle : deux requêtes simultanées avec le même code ne

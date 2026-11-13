@@ -70,6 +70,22 @@ export function decrypt(key: Buffer, payload: Buffer): Buffer {
 }
 
 /**
+ * Déchiffre avec la première clé qui convient : la clé actuelle, puis l'ancienne pendant une
+ * rotation. Le chiffrement authentifié (GCM) rejette toute autre clé : pas de faux positif.
+ */
+export function decryptWithAny(keys: readonly Buffer[], payload: Buffer): Buffer {
+  let failure: unknown = new Error('aucune clé de déchiffrement');
+  for (const key of keys) {
+    try {
+      return decrypt(key, payload);
+    } catch (error) {
+      failure = error;
+    }
+  }
+  throw failure;
+}
+
+/**
  * UUID version 7 (horodaté, RFC 9562), pour les insertions en SQL brut.
  * Prisma génère les mêmes identifiants pour les insertions qu'il gère lui-même.
  */

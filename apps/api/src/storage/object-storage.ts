@@ -1,4 +1,5 @@
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve, sep } from 'node:path';
 
 export const OBJECT_STORAGE = Symbol('OBJECT_STORAGE');
@@ -27,7 +28,10 @@ export class LocalFsStorage implements ObjectStorage {
   async put(key: string, body: Buffer): Promise<void> {
     const path = this.pathOf(key);
     await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, body);
+    // Écriture puis renommage : un fichier n'est jamais lu à moitié écrit (rotation de clé).
+    const temporary = `${path}.${randomUUID()}.tmp`;
+    await writeFile(temporary, body);
+    await rename(temporary, path);
   }
 
   get(key: string): Promise<Buffer> {

@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import type { Job } from 'bullmq';
 import { ENV } from '../config/config.module.js';
-import type { Env } from '../config/env.js';
-import { decrypt, deriveKey, encrypt } from '../common/crypto.js';
+import { type Env, storageKeys } from '../config/env.js';
+import { decryptWithAny, deriveKey, encrypt } from '../common/crypto.js';
 import type { AppLocale } from '../common/i18n/locale.js';
 import { renderSms, type SmsTemplate } from '../common/i18n/sms-templates.js';
 import { maskPhone } from '../common/phone.js';
@@ -71,7 +71,8 @@ const DELIVERY_ATTEMPTS = 3;
 @Injectable()
 export class NotificationService implements OnModuleInit {
   private readonly logger = new Logger(NotificationService.name);
-  private readonly secretKey: Buffer;
+  /** Clé actuelle d'abord, puis l'ancienne pendant une rotation de la clé maîtresse. */
+  private readonly secretKeys: Buffer[];
 
   constructor(
     private readonly prisma: PrismaService,
@@ -81,10 +82,7 @@ export class NotificationService implements OnModuleInit {
     @Inject(WHATSAPP_PROVIDER) private readonly whatsapp: WhatsAppProvider | null,
     @Inject(ENV) private readonly env: Env,
   ) {
-    this.secretKey = deriveKey(
-      Buffer.from(env.STORAGE_ENCRYPTION_KEY, 'base64'),
-      'notification-secrets',
-    );
+    this.secretKeys = storageKeys(env).map((master) => deriveKey(master, 'notification-secrets'));
   }
 
   onModuleInit(): void {
@@ -351,13 +349,15 @@ export class NotificationService implements OnModuleInit {
   // --- Secrets ------------------------------------------------------------------------------
 
   private seal(secrets: Record<string, string>): string {
-    return encrypt(this.secretKey, Buffer.from(JSON.stringify(secrets))).toString('base64');
+    return encrypt(this.secretKeys[0] as Buffer, Buffer.from(JSON.stringify(secrets))).toString(
+      'base64',
+    );
   }
 
   private unseal(sealed: string | undefined): Record<string, string> {
     if (!sealed) return {};
     return JSON.parse(
-      decrypt(this.secretKey, Buffer.from(sealed, 'base64')).toString('utf8'),
+      decryptWithAny(this.secretKeys, Buffer.from(sealed, 'base64')).toString('utf8'),
     ) as Record<string, string>;
   }
 }

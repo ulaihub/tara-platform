@@ -63,6 +63,11 @@ const envSchema = z
     STORAGE_LOCAL_DIR: z.string().min(1).default('./var/storage'),
     /** Clé de chiffrement des pièces d'identité (AES-256-GCM). */
     STORAGE_ENCRYPTION_KEY: base64Key32,
+    /**
+     * Rotation de la clé : l'ancienne, encore acceptée pour lire, le temps que
+     * `storage:rotate-key` rechiffre tout avec la nouvelle (docs/SECURITE.md).
+     */
+    STORAGE_ENCRYPTION_KEY_PREVIOUS: base64Key32.optional(),
 
     /**
      * SMS : Orange Cameroun (API officielle, tous opérateurs) en principal et Twilio en
@@ -300,6 +305,13 @@ const envSchema = z
           });
       }
     }
+    if (env.STORAGE_ENCRYPTION_KEY_PREVIOUS === env.STORAGE_ENCRYPTION_KEY) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['STORAGE_ENCRYPTION_KEY_PREVIOUS'],
+        message: 'doit différer de STORAGE_ENCRYPTION_KEY',
+      });
+    }
     const radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
     if (radii.some((r) => !Number.isInteger(r) || r <= 0)) {
       ctx.addIssue({
@@ -377,4 +389,13 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
     );
   }
   return result.data;
+}
+
+/** Clés de chiffrement du stockage : l'actuelle d'abord, puis l'ancienne pendant une rotation. */
+export function storageKeys(env: Env): Buffer[] {
+  const keys = [Buffer.from(env.STORAGE_ENCRYPTION_KEY, 'base64')];
+  if (env.STORAGE_ENCRYPTION_KEY_PREVIOUS) {
+    keys.push(Buffer.from(env.STORAGE_ENCRYPTION_KEY_PREVIOUS, 'base64'));
+  }
+  return keys;
 }
