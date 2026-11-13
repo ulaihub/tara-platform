@@ -66,6 +66,8 @@ tara apk
 
 Construit l'app livreur et l'app expéditeur pour ce serveur (20 à 60 minutes la première fois, davantage sur un KVM 1) et affiche l'adresse `https://apps.<domaine>`, l'identifiant et le mot de passe. Sur chaque téléphone Android (8.0 ou plus) : ouvrir l'adresse, télécharger `tara-livreur.apk` ou `tara-expediteur.apk`, accepter « installer des applis inconnues » pour le navigateur, installer.
 
+Pour les iPhone, voir [`docs/IOS.md`](IOS.md) (compte Apple Developer, construction sur Codemagic, TestFlight).
+
 Ces apps sont signées avec une clé de test, gardée sur le serveur : après `tara update` puis `tara apk`, la nouvelle version s'installe par-dessus l'ancienne. Avant de passer à Google Play, il faudra les désinstaller (la version du Play Store est signée autrement).
 
 ## Téléphones de test sans crédit SMS

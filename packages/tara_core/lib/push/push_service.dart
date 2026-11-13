@@ -31,8 +31,14 @@ class PushService {
     // Jeton d'enregistrement classique : c'est la cible attendue par l'API (champ `token`
     // de FCM HTTP v1). Le nouvel identifiant d'installation (register/onRegistered) ne
     // sera adopté qu'une fois l'envoi côté serveur adapté et vérifié.
-    // ignore: deprecated_member_use
-    final token = await messaging.getToken();
+    String? token;
+    try {
+      // ignore: deprecated_member_use
+      token = await messaging.getToken();
+    } catch (_) {
+      // iPhone : le jeton Apple (APNs) peut arriver un peu après le lancement ; le jeton
+      // est alors donné par onTokenRefresh ci-dessous.
+    }
     if (token != null) await register(token);
     await _refresh?.cancel();
     // ignore: deprecated_member_use
