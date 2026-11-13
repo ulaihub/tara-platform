@@ -64,7 +64,8 @@ describe('Adresses, zones et lien de localisation (B1 à B6)', () => {
         name: `Akwa ${suffix}`,
         city: 'Douala',
         kind: 'NEIGHBORHOOD',
-        geometry: square(PLACES.akwa, 0.008),
+        // Plus petit que les quartiers chargés à l'installation : c'est lui qui est retenu.
+        geometry: square(PLACES.akwa, 0.0015),
       })
       .expect(201);
     await request(ctx.http)
@@ -109,6 +110,29 @@ describe('Adresses, zones et lien de localisation (B1 à B6)', () => {
       .set(user.auth)
       .expect(200);
     expect(zones.body.some((zone: { name: string }) => zone.name === `Akwa ${suffix}`)).toBe(true);
+
+    // Sous l'épingle (B1) : quartier déduit dans la zone desservie, rien en dehors.
+    const here = await request(ctx.http)
+      .get('/v1/zones/locate')
+      .query(PLACES.akwa)
+      .set(user.auth)
+      .expect(200);
+    expect(here.body).toMatchObject({
+      inServiceArea: true,
+      neighborhood: { name: expect.any(String) },
+    });
+    const away = await request(ctx.http)
+      .get('/v1/zones/locate')
+      .query(PLACES.yaounde)
+      .set(user.auth)
+      .expect(200);
+    expect(away.body).toEqual({ inServiceArea: false, neighborhood: null });
+    await request(ctx.http).get('/v1/zones/locate').query(PLACES.akwa).expect(401);
+    await request(ctx.http)
+      .get('/v1/zones/locate')
+      .query({ latitude: 'nord', longitude: 9.7 })
+      .set(user.auth)
+      .expect(400);
   });
 
   it('refuse une adresse hors zone desservie et un repère vide', async () => {

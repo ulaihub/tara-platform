@@ -869,8 +869,20 @@ abstract class AppLocalizations {
   /// No description provided for @pinHint.
   ///
   /// In fr, this message translates to:
-  /// **'Déplacez la carte pour placer l’épingle sur l’entrée exacte.'**
+  /// **'Faites glisser la carte : l’épingle au centre marque l’entrée exacte. Le quartier s’affiche dès qu’elle est posée.'**
   String get pinHint;
+
+  /// No description provided for @pinPlaced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Point placé'**
+  String get pinPlaced;
+
+  /// No description provided for @pinOutOfArea.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors de la zone desservie'**
+  String get pinOutOfArea;
 
   /// No description provided for @neighborhoodLabel.
   ///

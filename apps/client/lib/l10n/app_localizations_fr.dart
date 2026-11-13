@@ -422,7 +422,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get myPosition => 'Ma position';
 
   @override
-  String get pinHint => 'Déplacez la carte pour placer l’épingle sur l’entrée exacte.';
+  String get pinHint =>
+      'Faites glisser la carte : l’épingle au centre marque l’entrée exacte. Le quartier s’affiche dès qu’elle est posée.';
+
+  @override
+  String get pinPlaced => 'Point placé';
+
+  @override
+  String get pinOutOfArea => 'Hors de la zone desservie';
 
   @override
   String get neighborhoodLabel => 'Quartier';

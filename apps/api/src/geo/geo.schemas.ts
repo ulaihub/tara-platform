@@ -23,6 +23,20 @@ export const ZoneListQuery = z.object({
   kind: ZoneKindEnum.optional(),
 });
 
+/** Point placé sur la carte (B1), lu à chaque arrêt de la carte. */
+export const LocateQuery = z.object({
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
+});
+
+/** Ce que l'app affiche sous l'épingle : quartier déduit, ou point hors de la zone desservie. */
+export const LocateDto = z
+  .object({
+    inServiceArea: z.boolean(),
+    neighborhood: z.object({ id: z.uuid(), name: z.string() }).nullable(),
+  })
+  .meta({ id: 'PointLocation' });
+
 /** Polygone GeoJSON (coordonnées en [longitude, latitude]). */
 export const ZoneBody = z.object({
   name: z.string().trim().min(2).max(80),

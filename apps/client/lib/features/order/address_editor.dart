@@ -61,6 +61,11 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
   final _media = AddressMedia();
   late MapPoint _point = widget.initial ?? MapPoint.douala;
   Neighborhood? _neighborhood;
+
+  /// Ce que l'API dit du point sous l'épingle (quartier, zone desservie) ; null pendant la
+  /// lecture. [_placeSeq] écarte une réponse arrivée après un nouveau déplacement.
+  PointLocation? _place;
+  int _placeSeq = 0;
   String? _label;
   bool _locating = false;
   bool _saving = false;
@@ -73,6 +78,19 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
     if (widget.forPickup) _label = pickupLabels.first;
     _landmark.addListener(() => setState(() => _error = null));
     if (widget.initial == null) unawaited(_locate());
+    unawaited(_lookUp(_point));
+  }
+
+  /// Quartier du point et zone desservie, lus dès que la carte s'arrête.
+  Future<void> _lookUp(MapPoint point) async {
+    final seq = ++_placeSeq;
+    setState(() => _place = null);
+    try {
+      final place = await ref.read(clientApiProvider).locate(point.latitude, point.longitude);
+      if (mounted && seq == _placeSeq) setState(() => _place = place);
+    } catch (_) {
+      // Réseau : la bulle reste cachée, le quartier sera déduit à l'enregistrement.
+    }
   }
 
   @override
@@ -156,7 +174,11 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
           handle: _map,
           real: ref.watch(realMapProvider),
           bottomPadding: panelHeight - 24,
-          onChanged: (point) => setState(() => _point = point),
+          label: _PlaceBubble(place: _place),
+          onChanged: (point) {
+            setState(() => _point = point);
+            unawaited(_lookUp(point));
+          },
         ),
       ),
       child: Stack(
@@ -231,9 +253,9 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
                         children: [
                           Expanded(
                             child: Text(
-                              _neighborhood?.name ?? l.neighborhoodAuto,
+                              _neighborhood?.name ?? _place?.neighborhood?.name ?? l.neighborhoodAuto,
                               style: TaraText.body.copyWith(
-                                color: _neighborhood == null ? c.placeholder : c.textPrimary,
+                                color: (_neighborhood ?? _place?.neighborhood) == null ? c.placeholder : c.textPrimary,
                               ),
                             ),
                           ),
@@ -283,6 +305,47 @@ String labelText(AppLocalizations l, String code) => switch (code) {
 };
 
 /// Choix du quartier : recherche dans la liste, ou « Déduire du point ».
+/// Bulle sous l'épingle : quartier du point, ou point hors de la zone desservie.
+/// Rien pendant la lecture.
+class _PlaceBubble extends StatelessWidget {
+  const _PlaceBubble({required this.place});
+
+  final PointLocation? place;
+
+  @override
+  Widget build(BuildContext context) {
+    final place = this.place;
+    if (place == null) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final outside = !place.inServiceArea;
+    final color = outside ? c.dangerText : c.textPrimary;
+    return Semantics(
+      liveRegion: true,
+      child: GlassCard(
+        radius: 14,
+        fill: c.glassStrong,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TaraIcon(
+              outside ? TaraIcons.alertCircle : TaraIcons.mapPin,
+              size: 16,
+              color: outside ? color : c.accentText,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              outside ? l.pinOutOfArea : place.neighborhood?.name ?? l.pinPlaced,
+              style: TaraText.label.copyWith(color: color, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _NeighborhoodSheet extends ConsumerStatefulWidget {
   const _NeighborhoodSheet();
 

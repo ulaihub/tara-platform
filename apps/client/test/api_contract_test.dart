@@ -27,6 +27,7 @@ void main() {
     'OrderSummary': OrderSummary.fields,
     'Wallet': Wallet.fields,
     'Zone': Neighborhood.fields,
+    'PointLocation': PointLocation.fields,
     'Address': Address.fields,
     'Recipient': Recipient.fields,
     'LocationLink': LocationLink.fields,

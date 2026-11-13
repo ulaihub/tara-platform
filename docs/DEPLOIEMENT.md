@@ -50,7 +50,7 @@ bash /opt/tara/src/infra/production/tara install
 - Docker et le pare-feu (seuls SSH, HTTP et HTTPS restent ouverts) ;
 - tous les secrets internes, créés au hasard et gardés sur le serveur (`/opt/tara`, lisibles par root seulement) ;
 - la carte des itinéraires du Cameroun ;
-- la base de données (comptes à moindre privilège, zone « tout Douala », grilles de prix, administrateur) ;
+- la base de données (comptes à moindre privilège, zone « tout Douala » et ses 134 quartiers tirés d'OpenStreetMap, grilles de prix, administrateur) ;
 - les services : API, back-office, page de suivi, stockage des fichiers, HTTPS automatique ;
 - une sauvegarde chaque nuit à 2 h.
 

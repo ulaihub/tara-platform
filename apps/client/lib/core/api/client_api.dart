@@ -76,6 +76,11 @@ class ClientApi {
       Neighborhood.fromJson(item! as Json),
   ];
 
+  /// Point placé sur la carte (B1) : desservi ou non, et quartier déduit.
+  Future<PointLocation> locate(double latitude, double longitude) async => PointLocation.fromJson(
+    await _api.get('/zones/locate', query: {'latitude': latitude, 'longitude': longitude}) as Json,
+  );
+
   /// Destinataires fréquents (B5), filtrés par nom ou numéro.
   Future<List<Recipient>> recipients({String? query}) async => [
     for (final item in await _api.get('/recipients', query: {'q': ?query}) as List<Object?>)

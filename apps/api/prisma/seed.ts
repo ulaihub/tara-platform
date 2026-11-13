@@ -47,6 +47,23 @@ async function seedServiceArea(): Promise<void> {
   );
 }
 
+/**
+ * Quartiers de Douala (B1) : liste du sélecteur et quartier déduit du point placé. Tirés
+ * des lieux nommés d'OpenStreetMap (quartiers, villages de la périphérie) ; chaque point
+ * de la zone desservie appartient au lieu nommé le plus proche. Un quartier déjà présent
+ * n'est pas modifié (retouches possibles au back-office, Marchands › Zones).
+ */
+async function seedNeighborhoods(): Promise<void> {
+  const data = readFileSync(new URL('./data/douala-quartiers.json', import.meta.url), 'utf8');
+  const inserted = await prisma.$executeRaw`
+    INSERT INTO zones (id, name, city, kind, area, updated_at)
+    SELECT gen_random_uuid(), feature->'properties'->>'name', 'Douala', 'NEIGHBORHOOD'::zone_kind,
+           ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(feature->>'geometry'), 4326))::geography, now()
+      FROM json_array_elements(${data}::json->'features') AS feature
+    ON CONFLICT (city, kind, name) DO NOTHING`;
+  console.log(`Quartiers de Douala : ${inserted} ajouté(s)`);
+}
+
 async function seedPricing(): Promise<void> {
   const active = await prisma.pricingGrid.findFirst({
     where: { city: 'Douala', vehicleType: 'MOTORBIKE', active: true },
@@ -166,6 +183,7 @@ async function seedAdmin(): Promise<void> {
 
 try {
   await seedServiceArea();
+  await seedNeighborhoods();
   await seedPricing();
   await seedBulkyPricing();
   await seedWelcomeOffer();

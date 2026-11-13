@@ -500,6 +500,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/zones/locate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Addresses_locate'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/addresses': {
     parameters: {
       query?: never;
@@ -3872,6 +3888,14 @@ export interface components {
     PickupCode: {
       pickupCode: string;
     };
+    PointLocation: {
+      inServiceArea: boolean;
+      neighborhood: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      } | null;
+    };
     PointRef:
       | {
           /** Format: uuid */
@@ -5376,6 +5400,29 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Zone'][];
+        };
+      };
+    };
+  };
+  Addresses_locate: {
+    parameters: {
+      query: {
+        latitude: number;
+        longitude: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PointLocation'];
         };
       };
     };
