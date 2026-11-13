@@ -1,12 +1,45 @@
 name: CI
 
+# Chaque exécution consomme des minutes GitHub Actions (quota mensuel du compte). Ce
+# workflow vérifie l'API, le back-office et la page de suivi : il ne tourne pas quand une
+# modification ne touche que les apps Flutter, qui ont leurs propres workflows (rider.yml,
+# client.yml). Les styles de carte restent surveillés : le back-office les importe.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'apps/rider/**'
+      - 'apps/client/**'
+      - 'packages/tara_core/**'
+      - 'packages/tara_ui/**'
+      - 'packages/tara_test/**'
+      - 'packages/tara_map/*'
+      - 'packages/tara_map/lib/**'
+      - 'packages/tara_map/tool/**'
+      - '.github/workflows/rider.yml'
+      - '.github/workflows/client.yml'
+      - '.github/workflows/map-preview.yml'
+      - '.github/workflows/secrets.yml'
+      - '.github/dependabot.yml'
   pull_request:
+    paths-ignore:
+      - 'apps/rider/**'
+      - 'apps/client/**'
+      - 'packages/tara_core/**'
+      - 'packages/tara_ui/**'
+      - 'packages/tara_test/**'
+      - 'packages/tara_map/*'
+      - 'packages/tara_map/lib/**'
+      - 'packages/tara_map/tool/**'
+      - '.github/workflows/rider.yml'
+      - '.github/workflows/client.yml'
+      - '.github/workflows/map-preview.yml'
+      - '.github/workflows/secrets.yml'
+      - '.github/dependabot.yml'
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 # Droits minimaux du jeton GitHub pour tous les jobs.
@@ -106,226 +139,3 @@ jobs:
         run: |
           pnpm --filter @tara/backoffice api:types
           git diff --exit-code apps/backoffice/src/lib/api-schema.d.ts
-
-  rider:
-    name: App livreur (Flutter)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: apps/rider
-    steps:
-      - uses: actions/checkout@v7
-
-      # Java 21 : exigé par le module MapLibre, pris en charge par le plugin Android
-      # Gradle 9. Dépendances Gradle en cache : la construction ne dépend plus de la
-      # disponibilité de Maven Central à chaque fois.
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
-          cache-dependency-path: |
-            apps/rider/android/*.gradle*
-            apps/rider/android/app/*.gradle*
-            apps/rider/android/gradle/wrapper/gradle-wrapper.properties
-            apps/rider/pubspec.lock
-
-      # Version de Flutter épinglée : les captures de référence en dépendent.
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.47.9
-          channel: stable
-          cache: true
-
-      - name: Dépendances
-        run: flutter pub get --enforce-lockfile
-
-      # Design et cœur partagés avec l'app expéditeur : mis en forme et analysés comme l'app.
-      - name: Paquets partagés (design, cœur, carte, tests)
-        working-directory: packages
-        run: |
-          for package in tara_ui tara_core tara_map tara_test; do
-            (cd "$package" && flutter pub get && dart format --output=none --set-exit-if-changed lib && flutter analyze)
-          done
-
-      - name: Traductions générées à jour
-        run: |
-          flutter gen-l10n
-          git diff --exit-code lib/l10n
-
-      - name: Formatage
-        run: dart format --output=none --set-exit-if-changed lib test
-
-      - name: Analyse
-        run: flutter analyze
-
-      - name: Tests et captures de référence
-        run: flutter test
-
-      - name: Écarts de captures
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rider-golden-failures
-          path: apps/rider/test/**/failures/
-          retention-days: 7
-
-      # Code Dart obscurci ; les symboles gardés à part servent à lire les plantages.
-      # Signature par la clé d'envoi si les secrets du dépôt existent, sinon clé de test.
-      - name: APK par architecture
-        env:
-          TARA_RIDER_KEYSTORE_BASE64: ${{ secrets.TARA_RIDER_KEYSTORE_BASE64 }}
-          TARA_RIDER_KEYSTORE_PASSWORD: ${{ secrets.TARA_RIDER_KEYSTORE_PASSWORD }}
-          TARA_RIDER_KEY_ALIAS: ${{ secrets.TARA_RIDER_KEY_ALIAS }}
-          TARA_RIDER_KEY_PASSWORD: ${{ secrets.TARA_RIDER_KEY_PASSWORD }}
-        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
-
-      # Cahier des charges : moins de 25 Mo à télécharger depuis le Play Store et au plus
-      # 32 Mo une fois installée (carte comprise). Détail par bibliothèque, code et ressources.
-      - name: Poids des APK (téléchargement 25 Mo, installée 32 Mo)
-        run: >-
-          python3 tool/apk_report.py --download-max-mo 25 --installed-max-mo 32
-          build/app/outputs/flutter-apk/app-*-release.apk
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tara-livreur-apk
-          path: apps/rider/build/app/outputs/flutter-apk/app-*-release.apk
-          retention-days: 14
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tara-livreur-symboles
-          path: apps/rider/build/symbols/
-          retention-days: 14
-
-  client:
-    name: App expéditeur (Flutter)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: apps/client
-    steps:
-      - uses: actions/checkout@v7
-
-      # Java 21 comme l'app livreur ; dépendances Gradle en cache.
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
-          cache-dependency-path: |
-            apps/client/android/*.gradle*
-            apps/client/android/app/*.gradle*
-            apps/client/android/gradle/wrapper/gradle-wrapper.properties
-            apps/client/pubspec.lock
-
-      # Version de Flutter épinglée : les captures de référence en dépendent.
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.47.9
-          channel: stable
-          cache: true
-
-      - name: Dépendances
-        run: flutter pub get --enforce-lockfile
-
-      - name: Traductions générées à jour
-        run: |
-          flutter gen-l10n
-          git diff --exit-code lib/l10n
-
-      - name: Formatage
-        run: dart format --output=none --set-exit-if-changed lib test
-
-      - name: Analyse
-        run: flutter analyze
-
-      - name: Tests et captures de référence
-        run: flutter test
-
-      - name: Écarts de captures
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: client-golden-failures
-          path: apps/client/test/**/failures/
-          retention-days: 7
-
-      # Code Dart obscurci ; les symboles gardés à part servent à lire les plantages.
-      # Signature par la clé d'envoi si les secrets du dépôt existent, sinon clé de test.
-      - name: APK par architecture
-        env:
-          TARA_CLIENT_KEYSTORE_BASE64: ${{ secrets.TARA_CLIENT_KEYSTORE_BASE64 }}
-          TARA_CLIENT_KEYSTORE_PASSWORD: ${{ secrets.TARA_CLIENT_KEYSTORE_PASSWORD }}
-          TARA_CLIENT_KEY_ALIAS: ${{ secrets.TARA_CLIENT_KEY_ALIAS }}
-          TARA_CLIENT_KEY_PASSWORD: ${{ secrets.TARA_CLIENT_KEY_PASSWORD }}
-        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
-
-      # Cahier des charges : moins de 25 Mo à télécharger depuis le Play Store et au plus
-      # 32 Mo une fois installée (carte comprise). Détail par bibliothèque, code et ressources.
-      - name: Poids des APK (téléchargement 25 Mo, installée 32 Mo)
-        run: >-
-          python3 ../rider/tool/apk_report.py --download-max-mo 25 --installed-max-mo 32
-          build/app/outputs/flutter-apk/app-*-release.apk
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tara-apk
-          path: apps/client/build/app/outputs/flutter-apk/app-*-release.apk
-          retention-days: 14
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tara-symboles
-          path: apps/client/build/symbols/
-          retention-days: 14
-
-  map-preview:
-    name: Aperçus de la carte (Douala)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    # Dépend d'un serveur de tuiles public : un aperçu manqué ne bloque pas la PR.
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v7
-
-      # Pas de pnpm dans ce job : le cache automatique de setup-node est désactivé.
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-
-      - name: Rendu des styles sombre et clair
-        working-directory: apps/rider/tool/map_preview
-        run: |
-          npm install --no-save --no-audit --no-fund playwright@1.48.2
-          npx playwright install --with-deps chromium
-          node render.mjs ../../build/map-preview
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: carte-apercus
-          path: apps/rider/build/map-preview/
-          retention-days: 14
-
-  secrets:
-    name: Secrets oubliés dans le code
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      # Binaire officiel, version épinglée, empreinte SHA-256 vérifiée avant exécution.
-      # Historique complet de la branche testée seulement (HEAD) : sans cela, gitleaks lit
-      # aussi les autres branches récupérées, avec une configuration qui n'est pas la leur.
-      - name: Gitleaks sur tout l'historique de la branche
-        run: |
-          curl -sSfL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz
-          echo "9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c  gitleaks.tgz" | sha256sum --check
-          tar xzf gitleaks.tgz gitleaks
-          ./gitleaks git --config .gitleaks.toml --redact --no-banner --verbose --log-opts="--full-history HEAD" .

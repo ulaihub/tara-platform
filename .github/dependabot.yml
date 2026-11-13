@@ -1,13 +1,13 @@
-# Mises à jour automatiques des dépendances : une pull request par semaine et par groupe,
-# validée par la CI comme toute autre modification. Les alertes de sécurité sont traitées
-# en priorité par GitHub, en dehors de ce calendrier.
+# Mises à jour automatiques des dépendances : une pull request par mois et par groupe,
+# validée par la CI comme toute autre modification (moins de minutes GitHub Actions
+# consommées). Les alertes de sécurité sont traitées en priorité par GitHub, en dehors de
+# ce calendrier.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
     open-pull-requests-limit: 5
     groups:
       production:
@@ -20,12 +20,10 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
 
   - package-ecosystem: pub
     directory: /apps/rider
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
     open-pull-requests-limit: 3
