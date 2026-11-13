@@ -1,13 +1,13 @@
 import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import { normalizeCameroonMobile } from '../src/common/phone.js';
 
 /**
  * Données de départ pour Douala, rejouables sans doublon (`pnpm db:seed`) :
- * - zone desservie APPROXIMATIVE (rectangle autour de l'agglomération) : à remplacer par
- *   le polygone tracé par l'équipe des opérations avant le pilote ;
+ * - zone desservie : tout Douala (contour de l'agglomération, ajustable au back-office) ;
  * - grille tarifaire de lancement du business plan ;
  * - offre de bienvenue BIENVENUE : 5 livraisons à 500 FCFA par compte ;
  * - compte administrateur si SEED_ADMIN_PHONE est défini.
@@ -16,30 +16,34 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env['DATABASE_URL'] ?? '' }),
 });
 
-const DOUALA_APPROXIMATE_AREA = {
-  type: 'Polygon',
-  coordinates: [
-    [
-      [9.62, 3.95],
-      [9.84, 3.95],
-      [9.84, 4.15],
-      [9.62, 4.15],
-      [9.62, 3.95],
-    ],
-  ],
-};
+/**
+ * Tout Douala (choix du porteur du projet, 13 novembre 2026) : contour de l'agglomération
+ * tracé à partir du réseau de rues OpenStreetMap, avec ~300 m de marge (environ 425 km²,
+ * de Bonabéri à Japoma, de Lendi à Yassa). Ajustable au back-office (Marchands › Zones).
+ */
+const DOUALA_CITY_AREA = JSON.parse(
+  readFileSync(new URL('./data/douala-zone.json', import.meta.url), 'utf8'),
+) as { type: 'Polygon'; coordinates: number[][][] };
+const DOUALA_AREA_NAME = 'Douala (toute la ville)';
+const OLD_APPROXIMATE_NAME = 'Douala (approximatif, à remplacer)';
 
 async function seedServiceArea(): Promise<void> {
   const inserted = await prisma.$executeRaw`
     INSERT INTO zones (id, name, city, kind, area, updated_at)
     VALUES (
-      ${randomUUID()}::uuid, 'Douala (approximatif, à remplacer)', 'Douala', 'SERVICE_AREA',
-      ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(${JSON.stringify(DOUALA_APPROXIMATE_AREA)}), 4326))::geography,
+      ${randomUUID()}::uuid, ${DOUALA_AREA_NAME}, 'Douala', 'SERVICE_AREA',
+      ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(${JSON.stringify(DOUALA_CITY_AREA)}), 4326))::geography,
       now()
     )
     ON CONFLICT (city, kind, name) DO NOTHING`;
+  // L'ancien rectangle approximatif des premières bases n'est plus utilisé.
+  await prisma.$executeRaw`
+    UPDATE zones SET active = false, updated_at = now()
+     WHERE city = 'Douala' AND kind = 'SERVICE_AREA' AND name = ${OLD_APPROXIMATE_NAME} AND active`;
   console.log(
-    inserted ? 'Zone desservie de Douala créée' : 'Zone desservie de Douala déjà présente',
+    inserted
+      ? 'Zone desservie : tout Douala, créée'
+      : 'Zone desservie : tout Douala, déjà présente',
   );
 }
 

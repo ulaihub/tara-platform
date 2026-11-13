@@ -46,7 +46,9 @@ tara-platform/
 │   ├── tracking/            page de suivi web (Hono, rendue côté serveur) — phase 5
 │   └── backoffice/          back-office Next.js — phase 6
 ├── packages/                code partagé (client d'API généré, à partir de la phase 1)
+├── Dockerfile               images de production (API, migrations, back-office, suivi)
 ├── infra/
+│   ├── production/          mise en ligne sur un VPS : assemblage, commande `tara` (DEPLOIEMENT.md)
 │   ├── docker-compose.yml   PostgreSQL + PostGIS, Redis, OSRM (optionnel)
 │   ├── postgres/init/       scripts exécutés à la création du volume
 │   └── osrm/prepare.sh      préparation des itinéraires du Cameroun

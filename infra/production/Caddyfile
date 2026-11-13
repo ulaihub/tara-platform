@@ -1,0 +1,43 @@
+# Proxy HTTPS : certificats Let's Encrypt obtenus et renouvelés automatiquement pour les
+# trois adresses (enregistrements DNS de type A vers l'adresse IP du serveur).
+{
+	email {$ACME_EMAIL}
+}
+
+(securite) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+}
+
+api.{$TARA_DOMAIN} {
+	import securite
+	# Photos et pièces jusqu'à 1 Mo ; marge pour l'encodage multipart.
+	request_body {
+		max_size 3MB
+	}
+	reverse_proxy api:3000
+}
+
+admin.{$TARA_DOMAIN} {
+	import securite
+	reverse_proxy backoffice:3100
+}
+
+suivi.{$TARA_DOMAIN} {
+	import securite
+	reverse_proxy tracking:3001
+}
+
+# Fichiers d'installation des apps (APK) pour les téléphones de test, protégés par un mot de
+# passe (affiché par `tara apk`).
+apps.{$TARA_DOMAIN} {
+	import securite
+	basic_auth {
+		{$APK_USER} {$APK_PASSWORD_HASH}
+	}
+	root * /srv/apk
+	file_server browse
+}

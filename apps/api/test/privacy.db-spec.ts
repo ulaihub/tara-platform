@@ -1,5 +1,7 @@
 import request from 'supertest';
 import { RetentionService } from '../src/privacy/retention.service.js';
+import { MediaService } from '../src/storage/media.service.js';
+import { OBJECT_STORAGE, type ObjectStorage } from '../src/storage/object-storage.js';
 import {
   createTestApp,
   otpFrom,
@@ -209,5 +211,117 @@ describe('Données personnelles (loi n° 2024/017)', () => {
     expect(notification.recipientPhone).toBeNull();
     const recipients = await request(ctx.http).get('/v1/recipients').set(user.auth).expect(200);
     expect(recipients.body).toEqual([]);
+  });
+
+  it('efface après 90 jours photos, demandes closes et pièces des livreurs refusés, sauf litige ouvert', async () => {
+    const media = ctx.app.get(MediaService);
+    const storage = ctx.app.get<ObjectStorage>(OBJECT_STORAGE);
+    const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4]);
+    const photo = (ownerId: string, kind: 'PROOF_PHOTO' | 'PARCEL_PHOTO') =>
+      media.store(ownerId, kind, { buffer: jpeg, mimetype: 'image/jpeg', size: jpeg.length });
+    const exists = (key: string) =>
+      storage.get(key).then(
+        () => true,
+        () => false,
+      );
+
+    // Commande sans litige : preuve et photo du colis anciennes.
+    const quiet = await customerWithOrder();
+    const proofPhoto = await photo(quiet.userId, 'PROOF_PHOTO');
+    const parcelPhoto = await photo(quiet.userId, 'PARCEL_PHOTO');
+    await ctx.prisma.$executeRaw`
+      UPDATE orders SET parcel_photo_key = ${parcelPhoto.key} WHERE id = ${quiet.orderId}::uuid`;
+    const proof = await ctx.prisma.deliveryProof.create({
+      data: {
+        orderId: quiet.orderId,
+        kind: 'PICKUP',
+        photoKey: proofPhoto.key,
+        latitude: PLACES.akwa.latitude,
+        longitude: PLACES.akwa.longitude,
+        occurredAt: new Date(),
+      },
+    });
+    // Commande avec une demande au support encore ouverte : sa preuve est gardée.
+    const disputed = await customerWithOrder();
+    const keptPhoto = await photo(disputed.userId, 'PROOF_PHOTO');
+    await ctx.prisma.deliveryProof.create({
+      data: {
+        orderId: disputed.orderId,
+        kind: 'DELIVERY',
+        photoKey: keptPhoto.key,
+        latitude: PLACES.bonapriso.latitude,
+        longitude: PLACES.bonapriso.longitude,
+        occurredAt: new Date(),
+      },
+    });
+    const ticket = (
+      status: 'OPEN' | 'RESOLVED',
+      resolvedDaysAgo: number | null,
+      orderId?: string,
+    ) =>
+      ctx.prisma.ticket.create({
+        data: {
+          orderId: orderId ?? null,
+          openedById: disputed.userId,
+          contactPhone: disputed.phone,
+          category: 'LOST_PARCEL',
+          status,
+          subject: 'Colis introuvable',
+          resolvedAt:
+            resolvedDaysAgo === null ? null : new Date(Date.now() - resolvedDaysAgo * 86_400_000),
+          messages: { create: { authorId: disputed.userId, body: 'Je n’ai rien reçu.' } },
+        },
+      });
+    await ticket('OPEN', null, disputed.orderId);
+    const oldTicket = await ticket('RESOLVED', 91);
+    const recentTicket = await ticket('RESOLVED', 10);
+    await ctx.prisma.$executeRaw`
+      UPDATE media_files SET created_at = now() - interval '91 days'
+       WHERE storage_key IN (${proofPhoto.key}, ${parcelPhoto.key}, ${keptPhoto.key})`;
+
+    // Livreur refusé il y a plus de 90 jours, et un autre refusé récemment.
+    const rejectedRider = async (daysAgo: number) => {
+      const user = await signIn(ctx);
+      const document = await media.store(user.userId, 'KYC_DOCUMENT', {
+        buffer: Buffer.from('%PDF-1.4 pièce fictive'),
+        mimetype: 'application/pdf',
+        size: 22,
+      });
+      const rider = await ctx.prisma.riderProfile.create({
+        data: {
+          userId: user.userId,
+          status: 'REJECTED',
+          documents: { create: { type: 'NATIONAL_ID_FRONT', storageKey: document.key } },
+        },
+      });
+      await ctx.prisma.$executeRaw`
+        UPDATE rider_profiles SET updated_at = now() - make_interval(days => ${daysAgo})
+         WHERE id = ${rider.id}::uuid`;
+      return document.key;
+    };
+    const oldDocument = await rejectedRider(91);
+    const recentDocument = await rejectedRider(10);
+
+    const report = await ctx.app.get(RetentionService).run(new Date());
+    expect(report.photosDeleted).toBeGreaterThanOrEqual(2);
+    expect(report.ticketsDeleted).toBeGreaterThanOrEqual(1);
+    expect(report.kycDocumentsDeleted).toBeGreaterThanOrEqual(1);
+
+    expect(await exists(proofPhoto.key)).toBe(false);
+    expect(await exists(parcelPhoto.key)).toBe(false);
+    expect(
+      (await ctx.prisma.deliveryProof.findUniqueOrThrow({ where: { id: proof.id } })).photoKey,
+    ).toBeNull();
+    expect(
+      (await ctx.prisma.order.findUniqueOrThrow({ where: { id: quiet.orderId } })).parcelPhotoKey,
+    ).toBeNull();
+    expect(await exists(keptPhoto.key)).toBe(true);
+
+    expect(await ctx.prisma.ticket.findUnique({ where: { id: oldTicket.id } })).toBeNull();
+    expect(await ctx.prisma.ticket.findUnique({ where: { id: recentTicket.id } })).not.toBeNull();
+
+    expect(await exists(oldDocument)).toBe(false);
+    expect(await ctx.prisma.kycDocument.count({ where: { storageKey: oldDocument } })).toBe(0);
+    expect(await exists(recentDocument)).toBe(true);
   });
 });

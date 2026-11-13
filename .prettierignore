@@ -16,3 +16,4 @@ packages/tara_test
 packages/tara_map
 apps/client
 apps/backoffice/public/maplibre-gl-worker.mjs
+apps/api/prisma/data
