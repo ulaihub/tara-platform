@@ -34,7 +34,17 @@ API construite (`node dist/main.js`), une seule instance, tâches de fond active
 
 Routes les plus lentes (95e centile) : création de commande 127 ms (prix, distance, codes, grand livre, attribution), carte en direct du back-office 181 ms, livraison 88 ms.
 
-**Marge : trois fois l'heure de pointe** : voir plus bas.
+**Marge : trois fois l'heure de pointe (3 000 commandes par heure), 12 minutes, trajets deux fois plus courts** : réussi.
+
+| Mesure                                    | Résultat                                                                    |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
+| Appels en moins de 500 ms (régime établi) | **100 %**                                                                   |
+| Temps de réponse : médiane / 95 % / 99 %  | 5 ms / 37 ms / 77 ms                                                        |
+| Commandes                                 | 593 passées en 12 minutes, 565 acceptées, 0 refusée ; 0 erreur côté serveur |
+| Commande acceptée par un livreur          | médiane 10 s, 95 % en moins de 64 s                                         |
+| Processeur / mémoire de l'API             | 30 % d'un cœur en médiane, 33 % au plus / 655 Mo au plus                    |
+
+Le serveur garde donc une large marge : une seule instance de l'API suffit pour le pilote et bien au-delà ; une seconde instance sert à la disponibilité (redémarrage sans coupure), pas à la charge.
 
 ## Corrigé grâce au test
 
