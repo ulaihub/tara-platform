@@ -65,6 +65,28 @@ describe('parseEnv', () => {
     ).toThrow(/STORAGE_ENCRYPTION_KEY/);
   });
 
+  it('exige le compartiment et les clés du stockage S3', () => {
+    expect(() => parseEnv({ ...valid, STORAGE_DRIVER: 's3' })).toThrow(
+      /S3_BUCKET[\s\S]*S3_ACCESS_KEY_ID[\s\S]*S3_SECRET_ACCESS_KEY/,
+    );
+    const env = parseEnv({
+      ...valid,
+      STORAGE_DRIVER: 's3',
+      S3_ENDPOINT: 'https://s3.example.cm',
+      S3_BUCKET: 'tara-fichiers',
+      S3_ACCESS_KEY_ID: 'cle',
+      S3_SECRET_ACCESS_KEY: 'secret',
+      S3_FORCE_PATH_STYLE: 'false',
+    });
+    expect(env).toMatchObject({ STORAGE_DRIVER: 's3', S3_FORCE_PATH_STYLE: false });
+  });
+
+  it('refuse la même clé de stockage en actuelle et en ancienne', () => {
+    expect(() =>
+      parseEnv({ ...valid, STORAGE_ENCRYPTION_KEY_PREVIOUS: valid.STORAGE_ENCRYPTION_KEY }),
+    ).toThrow(/STORAGE_ENCRYPTION_KEY_PREVIOUS/);
+  });
+
   it('interdit le SMS factice et le stockage local en production', () => {
     expect(() => parseEnv({ ...valid, NODE_ENV: 'production' })).toThrow(
       /SMS_PROVIDER[\s\S]*PUSH_PROVIDER[\s\S]*PAYMENT_PROVIDER[\s\S]*STORAGE_DRIVER/,

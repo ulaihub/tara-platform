@@ -59,8 +59,24 @@ const envSchema = z
     /** Origines web autorisées (back-office, page de suivi), séparées par des virgules. */
     CORS_ORIGINS: z.string().default(''),
 
-    STORAGE_DRIVER: z.enum(['local']).default('local'),
+    /**
+     * Fichiers (photos, notes vocales, pièces d'identité chiffrées) : disque local en
+     * développement, stockage objet compatible S3 en production (tout hébergeur : le lieu
+     * des données se choisit avec l'avis juridique sur les transferts hors du Cameroun).
+     */
+    STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
     STORAGE_LOCAL_DIR: z.string().min(1).default('./var/storage'),
+    /** Adresse du service S3 de l'hébergeur ; vide pour Amazon S3 lui-même. */
+    S3_ENDPOINT: z.url().optional(),
+    S3_REGION: z.string().min(1).default('us-east-1'),
+    S3_BUCKET: z.string().min(3).max(63).optional(),
+    S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+    S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+    /** Adresses « endpoint/bucket/clé » (MinIO et la plupart des hébergeurs hors Amazon). */
+    S3_FORCE_PATH_STYLE: z
+      .enum(['true', 'false'])
+      .default('true')
+      .transform((value) => value === 'true'),
     /** Clé de chiffrement des pièces d'identité (AES-256-GCM). */
     STORAGE_ENCRYPTION_KEY: base64Key32,
     /**
@@ -303,6 +319,17 @@ const envSchema = z
               ? 'clé réelle (_live_) envoyée au bac à sable'
               : 'clé de test (_test_) envoyée au serveur réel',
           });
+      }
+    }
+    if (env.STORAGE_DRIVER === 's3') {
+      for (const name of ['S3_BUCKET', 'S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY'] as const) {
+        if (!env[name]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [name],
+            message: 'obligatoire avec STORAGE_DRIVER=s3',
+          });
+        }
       }
     }
     if (env.STORAGE_ENCRYPTION_KEY_PREVIOUS === env.STORAGE_ENCRYPTION_KEY) {
