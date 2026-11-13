@@ -35,7 +35,7 @@ mkdir -p /root/.ssh && ssh-keygen -t ed25519 -N "" -C tara-vps -f /root/.ssh/tar
 cat /root/.ssh/tara_deploy.pub
 ```
 
-La dernière ligne affichée commence par `ssh-ed25519`. C'est une clé **publique** (sans danger) : la transmettre à l'équipe technique, qui l'autorise en lecture seule sur le dépôt GitHub. Puis :
+La dernière ligne affichée commence par `ssh-ed25519` : c'est une clé **publique**, sans danger. L'autoriser en lecture seule sur le dépôt GitHub : sur github.com, dépôt `ulaihub/tara-platform` › **Settings** › **Deploy keys** › **Add deploy key** ; titre `Serveur Hostinger`, coller la ligne dans **Key**, laisser **Allow write access** décoché, valider. Puis, dans le terminal du serveur :
 
 ```bash
 GIT_SSH_COMMAND="ssh -i /root/.ssh/tara_deploy -o StrictHostKeyChecking=accept-new" \
