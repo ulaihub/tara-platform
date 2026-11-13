@@ -46,7 +46,7 @@ jobs:
       # Java 21 : exigé par le module MapLibre, pris en charge par le plugin Android
       # Gradle 9. Dépendances Gradle en cache : la construction ne dépend plus de la
       # disponibilité de Maven Central à chaque fois.
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
