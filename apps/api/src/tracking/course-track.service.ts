@@ -27,6 +27,13 @@ export const LONG_STOP_SECONDS = 15 * 60;
 export const NEAR_STOP_METERS = 150;
 /** Plus aucune position pendant ce temps : alerte. */
 export const TRACK_GAP_SECONDS = 20 * 60;
+/**
+ * Prime d'approche : trajet réellement parcouru de l'acceptation à l'enlèvement, en part de
+ * la distance annoncée au moment de la proposition. En dessous : alerte (position déclarée
+ * loin du vendeur pour toucher la prime). La route est d'ordinaire plus longue que la ligne
+ * droite : la moitié laisse une large marge aux positions manquantes.
+ */
+export const APPROACH_MIN_TRAVEL_SHARE = 0.5;
 /** Un point toutes les ~10 s au plus par course (les positions arrivent toutes les 10 s). */
 const MIN_POINT_INTERVAL_MS = 8_000;
 /** Points différés acceptés : de l'acceptation à la fin de la course, à ces marges près. */
@@ -48,7 +55,8 @@ type ActionKind = 'PICKUP' | 'DELIVERY' | 'FAILURE' | 'RETURN';
  * Trajet des courses (sécurité, litiges, fraude) : chaque position reçue pendant une course
  * est enregistrée, de l'acceptation à la fin, jamais en dehors. Les positions gardées sur le
  * téléphone sans réseau arrivent en lot. Alertes au support : action validée loin de
- * l'adresse, long arrêt avec le colis à bord, position simulée, trajet coupé. Résumé calculé
+ * l'adresse, long arrêt avec le colis à bord, position simulée, trajet coupé, prime
+ * d'approche sans trajet correspondant. Résumé calculé
  * à la fin ; points détaillés effacés après 90 jours sauf litige ou incident ouvert.
  */
 @Injectable()
@@ -241,6 +249,43 @@ export class CourseTrackService implements OnModuleInit {
         minutes: Math.round(summary.longestGapSeconds / 60),
       });
     }
+    await this.checkApproach(orderId, riderId);
+  }
+
+  /**
+   * Prime d'approche payée pour une course : le trajet enregistré jusqu'au vendeur doit
+   * correspondre à la distance annoncée dans la proposition (revue de sécurité, phase 7).
+   * Sans assez de points, l'alerte de trajet coupé couvre déjà le cas.
+   */
+  private async checkApproach(orderId: string, riderId: string): Promise<void> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { riderId: true, approachBonus: true, assignedAt: true, pickedUpAt: true },
+    });
+    if (!order?.assignedAt || !order.pickedUpAt) return;
+    if (order.approachBonus <= 0 || order.riderId !== riderId) return;
+    const offer = await this.prisma.dispatchOffer.findFirst({
+      where: { orderId, riderId, outcome: 'ACCEPTED' },
+      orderBy: { offeredAt: 'desc' },
+      select: { approachMeters: true },
+    });
+    const announced = offer?.approachMeters;
+    if (!announced) return;
+    const points = await this.prisma.courseTrackPoint.findMany({
+      where: { orderId, riderId, recordedAt: { gte: order.assignedAt, lte: order.pickedUpAt } },
+      orderBy: { recordedAt: 'asc' },
+      select: { latitude: true, longitude: true, recordedAt: true, mocked: true },
+    });
+    if (points.length < 2) return;
+    const traveled = summarizeTrack(
+      points.map((p) => ({ latitude: p.latitude, longitude: p.longitude, at: p.recordedAt })),
+    ).distanceMeters;
+    if (traveled >= announced * APPROACH_MIN_TRAVEL_SHARE) return;
+    await this.alert(orderId, riderId, 'APPROACH_BONUS', 'APPROACH_BONUS', {
+      announcedMeters: announced,
+      traveledMeters: Math.round(traveled),
+      bonus: order.approachBonus,
+    });
   }
 
   /** Chaque nuit : points de plus de 90 jours effacés, sauf litige ou incident ouvert. */

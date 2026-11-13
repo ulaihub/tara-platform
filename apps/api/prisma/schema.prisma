@@ -1248,6 +1248,8 @@ enum CourseAlertKind {
   MOCK_LOCATION
   /// Plus aucune position reçue pendant longtemps.
   TRACK_GAP
+  /// Prime d'approche payée alors que le trajet jusqu'au vendeur est bien plus court qu'annoncé.
+  APPROACH_BONUS
 
   @@map("course_alert_kind")
 }

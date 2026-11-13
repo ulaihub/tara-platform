@@ -27,6 +27,7 @@ export const COURSE_ALERT_LABELS: Record<CourseAlert['kind'], string> = {
   LONG_STOP: 'arrêt prolongé avec le colis',
   MOCK_LOCATION: 'position falsifiée',
   TRACK_GAP: 'plus de position pendant la course',
+  APPROACH_BONUS: 'prime d’approche sans trajet correspondant',
 };
 
 export interface Point {

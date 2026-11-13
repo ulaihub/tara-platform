@@ -304,6 +304,46 @@ describe('Trajet des courses (sécurité, litiges, fraude)', () => {
     expect(await alertsOf(silent.order.id)).toHaveLength(1);
   });
 
+  it('signale une prime d’approche payée sans trajet correspondant jusqu’au vendeur', async () => {
+    // Livreur à environ 3,9 km du vendeur : au-delà du seuil de la prime d'approche.
+    const far = nearAkwa(0.035);
+    async function course(path: { latitude: number; longitude: number }[]) {
+      const rider = await activeRider(ctx);
+      await goOnline(ctx, rider, far);
+      const order = await placeOrder(ctx, shop);
+      const offer = await ctx.prisma.dispatchOffer.findFirstOrThrow({
+        where: { orderId: order.id, riderId: rider.riderId },
+      });
+      expect(offer.approachBonus).toBeGreaterThan(0);
+      await request(ctx.http)
+        .post(`/v1/rider/offers/${offer.id}/accept`)
+        .set(rider.auth)
+        .expect(200);
+      await ctx.prisma.order.update({
+        where: { id: order.id },
+        data: { assignedAt: new Date(Date.now() - 12 * MINUTE) },
+      });
+      const { pickup } = await addresses(rider, order);
+      await request(ctx.http)
+        .post(`/v1/rider/orders/${order.id}/track`)
+        .set(rider.auth)
+        .send({ points: path.map((place, i) => point(11 - i, place)) })
+        .expect(200);
+      await pickUp(rider, order, pickup);
+      await tracks.finish(order.id, rider.riderId);
+      return (await alertsOf(order.id)).map((alert) => alert.kind);
+    }
+    const akwa = nearAkwa(0);
+    // Trajet réel : de sa position jusqu'au vendeur, une position par minute.
+    const driven = Array.from({ length: 10 }, (_, i) => ({
+      latitude: far.latitude + ((akwa.latitude - far.latitude) * i) / 9,
+      longitude: far.longitude + ((akwa.longitude - far.longitude) * i) / 9,
+    }));
+    expect(await course(driven)).not.toContain('APPROACH_BONUS');
+    // Position annoncée loin, mais le téléphone ne bouge pas d'à côté du vendeur.
+    expect(await course(Array.from({ length: 10 }, () => akwa))).toContain('APPROACH_BONUS');
+  });
+
   it('le compte de l’API ne peut pas modifier un point de trajet', async () => {
     await expect(
       ctx.prisma

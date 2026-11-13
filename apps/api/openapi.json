@@ -11417,7 +11417,8 @@
           "ACTION_FAR",
           "LONG_STOP",
           "MOCK_LOCATION",
-          "TRACK_GAP"
+          "TRACK_GAP",
+          "APPROACH_BONUS"
         ]
       },
       "CourseTrack": {

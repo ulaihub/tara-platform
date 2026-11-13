@@ -62,6 +62,10 @@ const TEMPLATES = {
     fr: 'Tara FINANCE : {rider} ({phone}) n a pas depose ses especes depuis {days} j. Compte suspendu, {offset} FCFA retenus sur ses gains, {amount} FCFA encore dus. Garant : {guarantor} ({guarantorPhone}).',
     en: 'Tara FINANCE: {rider} ({phone}) has not paid back cash for {days} d. Account suspended, {offset} XAF taken from earnings, {amount} XAF still due. Guarantor: {guarantor} ({guarantorPhone}).',
   },
+  OPS_RIDER_BOOST: {
+    fr: 'Tara ADMIN : {author} a cree une prime de renfort de {amount} FCFA par course ({city}), jusqu au {until}. Motif : {reason}. Arret possible dans le back-office, Tarifs.',
+    en: 'Tara ADMIN: {author} created a rider boost of {amount} XAF per delivery ({city}) until {until}. Reason: {reason}. It can be stopped in the back-office, Pricing.',
+  },
   OPS_SAFETY_ALERT_CANCELLED: {
     fr: 'Tara OPS : le livreur {rider} ({phone}) a annule son alerte. Rappelez-le pour confirmer qu il va bien.',
     en: 'Tara OPS: rider {rider} ({phone}) cancelled the alert. Call back to confirm they are safe.',
