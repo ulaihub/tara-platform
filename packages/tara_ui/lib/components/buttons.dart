@@ -41,7 +41,7 @@ class PrimaryButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
-    this.height = 58,
+    this.height = 50,
     this.strong = false,
     this.sheenPeriod = const Duration(milliseconds: 3600),
     this.loading = false,
@@ -100,7 +100,7 @@ class PrimaryButton extends StatelessWidget {
                   ),
                   if (enabled) Sheen(period: sheenPeriod, opacity: c.isDark ? .55 : .6),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -137,7 +137,7 @@ class GlassButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
-    this.height = 54,
+    this.height = 48,
     this.radius = 18,
     this.color,
   });

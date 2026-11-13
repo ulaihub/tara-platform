@@ -25,7 +25,7 @@ class TaraTextField extends StatefulWidget {
     this.autofocus = false,
     this.leading,
     this.trailing,
-    this.height = 56,
+    this.height = 48,
     this.textCapitalization = TextCapitalization.none,
     this.minLines = 1,
     this.maxLines = 1,
@@ -116,7 +116,7 @@ class _TaraTextFieldState extends State<TaraTextField> {
                 border: InputBorder.none,
                 hintText: widget.hint,
                 hintStyle: TaraText.body.copyWith(color: c.placeholder, fontSize: 16),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
           ),
@@ -162,7 +162,7 @@ class PhonePrefixButton extends StatelessWidget {
       child: GestureDetector(
         onTap: onPressed,
         child: Container(
-          constraints: const BoxConstraints(minHeight: 56, minWidth: 48),
+          constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
             color: c.isDark ? const Color.fromRGBO(255, 255, 255, 0.08) : c.inputBg,

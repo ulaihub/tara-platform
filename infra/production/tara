@@ -9,6 +9,7 @@
 #   tara apk       construit les apps Android pour les téléphones de test
 #   tara testeur [numéro | retirer numéro]   téléphones de test, sans SMS payant
 #   tara sms       derniers SMS des téléphones de test (codes de connexion, de livraison…)
+#   tara paiements derniers paiements Mobile Money et motif d'un échec (réponse du prestataire)
 #   tara osrm      (re)prépare la carte des itinéraires du Cameroun
 #
 # Guide pas à pas : docs/DEPLOIEMENT.md.
@@ -388,6 +389,17 @@ cmd_sms() {
   printf '%s\n' "$messages" | tac
 }
 
+# Derniers paiements, sans numéro de téléphone : le motif d'un échec est la réponse du
+# prestataire (Sebpay), à transmettre au support technique.
+cmd_paiements() {
+  need_root
+  dc exec -T postgres psql -U tara -d tara -P pager=off -c "
+    SELECT to_char(created_at AT TIME ZONE 'Africa/Douala', 'DD/MM HH24:MI') AS heure,
+           purpose AS objet, method AS moyen, amount + surcharge AS montant, status AS statut,
+           left(coalesce(failure_reason, ''), 160) AS motif
+    FROM payments ORDER BY created_at DESC LIMIT 10;"
+}
+
 case "${1:-}" in
   install) cmd_install ;;
   config) cmd_config ;;
@@ -405,5 +417,6 @@ case "${1:-}" in
     cmd_testeur "$@"
     ;;
   sms) cmd_sms ;;
+  paiements) cmd_paiements ;;
   *) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

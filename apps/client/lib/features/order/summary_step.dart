@@ -321,7 +321,7 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
                   width: 110,
                   child: GlassButton(
                     label: l.applyPromo,
-                    height: 56,
+                    height: 48,
                     color: c.accentText,
                     onPressed: _applying ? null : () => unawaited(_applyPromo()),
                   ),

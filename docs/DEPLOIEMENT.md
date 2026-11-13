@@ -66,7 +66,7 @@ tara apk
 
 Construit l'app livreur et l'app expéditeur pour ce serveur (20 à 60 minutes la première fois, davantage sur un KVM 1) et affiche l'adresse `https://apps.<domaine>`, l'identifiant et le mot de passe. Sur chaque téléphone Android (8.0 ou plus) : ouvrir l'adresse, télécharger `tara-livreur.apk` ou `tara-expediteur.apk`, accepter « installer des applis inconnues » pour le navigateur, installer.
 
-Ces apps sont signées avec une clé de test : avant de passer à Google Play, il faudra les désinstaller (la version du Play Store est signée autrement).
+Ces apps sont signées avec une clé de test, gardée sur le serveur : après `tara update` puis `tara apk`, la nouvelle version s'installe par-dessus l'ancienne. Avant de passer à Google Play, il faudra les désinstaller (la version du Play Store est signée autrement).
 
 ## Téléphones de test sans crédit SMS
 
@@ -84,16 +84,17 @@ Ne jamais y mettre le numéro d'un vrai client : il ne recevrait plus aucun SMS.
 
 ## Au quotidien
 
-| Commande        | Effet                                                                           |
-| --------------- | ------------------------------------------------------------------------------- |
-| `tara status`   | état des services                                                               |
-| `tara logs api` | journal de l'API en direct (Ctrl+C pour sortir)                                 |
-| `tara update`   | installe la dernière version validée (migrations comprises, données conservées) |
-| `tara config`   | change les clés des prestataires                                                |
-| `tara backup`   | sauvegarde immédiate (automatique chaque nuit)                                  |
-| `tara apk`      | reconstruit les apps après une mise à jour                                      |
-| `tara testeur`  | téléphones de test (voir plus haut)                                             |
-| `tara sms`      | derniers SMS des téléphones de test                                             |
+| Commande         | Effet                                                                           |
+| ---------------- | ------------------------------------------------------------------------------- |
+| `tara status`    | état des services                                                               |
+| `tara logs api`  | journal de l'API en direct (Ctrl+C pour sortir)                                 |
+| `tara update`    | installe la dernière version validée (migrations comprises, données conservées) |
+| `tara config`    | change les clés des prestataires                                                |
+| `tara backup`    | sauvegarde immédiate (automatique chaque nuit)                                  |
+| `tara apk`       | reconstruit les apps après une mise à jour                                      |
+| `tara testeur`   | téléphones de test (voir plus haut)                                             |
+| `tara sms`       | derniers SMS des téléphones de test                                             |
+| `tara paiements` | derniers paiements et motif d'un échec (réponse du prestataire, sans numéro)    |
 
 **Sauvegardes** : base et fichiers dans `/opt/tara/backups`, deux semaines gardées. Activer aussi les instantanés automatiques du VPS dans Hostinger, et copier de temps en temps une sauvegarde hors du serveur. Sans la clé `STORAGE_ENCRYPTION_KEY` (dans `/opt/tara/api.env`), les pièces d'identité sauvegardées sont illisibles : la garder en lieu sûr, hors du serveur.
 
