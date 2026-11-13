@@ -65,6 +65,22 @@ install_docker() {
   systemctl enable --now docker
 }
 
+# Petits serveurs (KVM 1 : 4 Go) : mémoire d'appoint sur le disque, pour que la construction
+# des services et des apps ne manque jamais de mémoire. Sans effet au-delà de 6 Go.
+swap() {
+  local ram_mb
+  ram_mb=$(awk '/MemTotal/ {print int($2 / 1024)}' /proc/meminfo)
+  if ((ram_mb >= 6000)) || swapon --show | grep -q .; then return; fi
+  say "Mémoire d'appoint : 4 Go sur le disque (serveur de ${ram_mb} Mo)"
+  fallocate -l 4G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile >/dev/null
+  swapon /swapfile
+  grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >>/etc/fstab
+  sysctl -q vm.swappiness=10
+  echo 'vm.swappiness=10' >/etc/sysctl.d/99-tara-swap.conf
+}
+
 firewall() {
   say "Pare-feu : seuls SSH, HTTP et HTTPS sont ouverts"
   apt-get install -y -q ufw >/dev/null
@@ -140,6 +156,7 @@ cmd_install() {
   fi
 
   install_docker
+  swap
   firewall
   ln -sf "$SRC/infra/production/tara" /usr/local/bin/tara
   write_s3_config
@@ -309,7 +326,7 @@ cmd_apk() {
   local domain password
   domain=$(get_var "$COMPOSE_ENV" TARA_DOMAIN)
   password=$(get_var "$COMPOSE_ENV" APK_PASSWORD)
-  say "Construction des apps Android pour https://api.$domain (20 à 40 minutes la première fois)"
+  say "Construction des apps Android pour https://api.$domain (20 à 60 minutes la première fois)"
   docker build -t tara-flutter "$SRC/infra/production/apk"
   docker volume create tara_flutter_cache >/dev/null
   for app in rider client; do
