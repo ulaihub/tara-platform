@@ -1,12 +1,13 @@
 import { Global, Module } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { ENV } from '../config/config.module.js';
-import type { Env } from '../config/env.js';
+import { smsTestNumbers, type Env } from '../config/env.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { REDIS } from '../redis/redis.constants.js';
 import { OrangeSmsProvider } from './orange-sms.provider.js';
 import { FailoverSmsProvider, MeteredSmsProvider } from './resilient-sms.provider.js';
 import { FakeSmsProvider, SMS_PROVIDER, type SmsProvider } from './sms.provider.js';
+import { TestNumbersSmsProvider } from './test-numbers-sms.provider.js';
 import { TwilioSmsProvider } from './twilio-sms.provider.js';
 
 function build(name: 'orange' | 'twilio', env: Env): SmsProvider {
@@ -35,7 +36,7 @@ function build(name: 'orange' | 'twilio', env: Env): SmsProvider {
         if (env.SMS_PROVIDER === 'fake') return new FakeSmsProvider();
         const chain = [build(env.SMS_PROVIDER, env)];
         if (env.SMS_FALLBACK_PROVIDER !== 'none') chain.push(build(env.SMS_FALLBACK_PROVIDER, env));
-        return new MeteredSmsProvider(
+        const metered = new MeteredSmsProvider(
           new FailoverSmsProvider(chain),
           redis,
           env.SMS_DAILY_ALERT_COUNT,
@@ -43,6 +44,10 @@ function build(name: 'orange' | 'twilio', env: Env): SmsProvider {
             realtime.toOps('ops.sms-volume', { level, count, limit, at: new Date().toISOString() });
           },
         );
+        const testNumbers = smsTestNumbers(env);
+        return testNumbers.size > 0
+          ? new TestNumbersSmsProvider(metered, testNumbers, redis)
+          : metered;
       },
     },
   ],

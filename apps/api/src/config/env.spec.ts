@@ -1,4 +1,4 @@
-import { InvalidEnvironmentError, parseEnv } from './env.js';
+import { InvalidEnvironmentError, parseEnv, smsTestNumbers } from './env.js';
 
 describe('parseEnv', () => {
   const valid = {
@@ -52,6 +52,19 @@ describe('parseEnv', () => {
     );
     expect(() => parseEnv({ ...orange, SMS_FALLBACK_PROVIDER: 'twilio' })).toThrow(
       /TWILIO_ACCOUNT_SID/,
+    );
+  });
+
+  it('lit les téléphones de test et refuse une liste invalide ou trop longue', () => {
+    const env = parseEnv({ ...valid, SMS_TEST_NUMBERS: ' 640 11 40 64, +237677123456 ,,' });
+    expect([...smsTestNumbers(env)]).toEqual(['+237640114064', '+237677123456']);
+    expect(smsTestNumbers(parseEnv(valid)).size).toBe(0);
+    expect(() => parseEnv({ ...valid, SMS_TEST_NUMBERS: '+237640114064,12345' })).toThrow(
+      /SMS_TEST_NUMBERS/,
+    );
+    const many = Array.from({ length: 21 }, (_, i) => `+2376770000${String(i).padStart(2, '0')}`);
+    expect(() => parseEnv({ ...valid, SMS_TEST_NUMBERS: many.join(',') })).toThrow(
+      /SMS_TEST_NUMBERS : 20 numéros de test au plus/,
     );
   });
 

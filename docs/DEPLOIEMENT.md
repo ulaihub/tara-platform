@@ -68,6 +68,20 @@ Construit l'app livreur et l'app expéditeur pour ce serveur (20 à 60 minutes l
 
 Ces apps sont signées avec une clé de test : avant de passer à Google Play, il faudra les désinstaller (la version du Play Store est signée autrement).
 
+## Téléphones de test sans crédit SMS
+
+En essai, Twilio n'envoie qu'aux numéros vérifiés, et refuse de vérifier un numéro camerounais par SMS. Pour tester quand même, déclarer les téléphones de test sur le serveur : leurs SMS (code de connexion, code de livraison, lien de suivi…) ne partent pas chez l'opérateur, ils restent 24 h sur le serveur.
+
+```bash
+tara testeur 640114064
+tara sms
+```
+
+- `tara testeur 6XXXXXXXX` ajoute un téléphone (20 au plus), `tara testeur` affiche la liste, `tara testeur retirer 6XXXXXXXX` le retire.
+- `tara sms` affiche les 20 derniers messages, le plus récent en bas : y lire le code, puis le taper dans l'app ou le back-office.
+
+Ne jamais y mettre le numéro d'un vrai client : il ne recevrait plus aucun SMS. Vider la liste avant l'ouverture au public.
+
 ## Au quotidien
 
 | Commande        | Effet                                                                           |
@@ -78,6 +92,8 @@ Ces apps sont signées avec une clé de test : avant de passer à Google Play, i
 | `tara config`   | change les clés des prestataires                                                |
 | `tara backup`   | sauvegarde immédiate (automatique chaque nuit)                                  |
 | `tara apk`      | reconstruit les apps après une mise à jour                                      |
+| `tara testeur`  | téléphones de test (voir plus haut)                                             |
+| `tara sms`      | derniers SMS des téléphones de test                                             |
 
 **Sauvegardes** : base et fichiers dans `/opt/tara/backups`, deux semaines gardées. Activer aussi les instantanés automatiques du VPS dans Hostinger, et copier de temps en temps une sauvegarde hors du serveur. Sans la clé `STORAGE_ENCRYPTION_KEY` (dans `/opt/tara/api.env`), les pièces d'identité sauvegardées sont illisibles : la garder en lieu sûr, hors du serveur.
 

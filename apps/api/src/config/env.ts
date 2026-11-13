@@ -1,11 +1,13 @@
 import { z } from 'zod';
-import { CameroonMobile } from '../common/phone.js';
+import { CameroonMobile, normalizeCameroonMobile } from '../common/phone.js';
 
 /**
  * Variables d'environnement de l'API, validées au démarrage.
  * Une variable manquante ou invalide arrête le processus avec un message clair,
  * plutôt qu'une erreur obscure plus tard en production.
  */
+const MAX_SMS_TEST_NUMBERS = 20;
+
 const base64Key32 = z.string().refine((value) => Buffer.from(value, 'base64').length === 32, {
   message: 'doit être une clé de 32 octets encodée en base64 (openssl rand -base64 32)',
 });
@@ -107,6 +109,12 @@ const envSchema = z
     TWILIO_AUTH_TOKEN: z.string().min(16).optional(),
     /** Expéditeur Twilio : nom alphanumérique enregistré (ex. TARA) ou numéro E.164. */
     TWILIO_FROM: z.string().min(1).max(16).optional(),
+    /**
+     * Téléphones de test, séparés par des virgules (20 au plus) : leurs SMS ne partent pas chez
+     * l'opérateur, ils restent 24 h sur le serveur, lisibles par root avec `tara sms`. Sert à
+     * tester les apps sans crédit SMS ; jamais le numéro d'un vrai client.
+     */
+    SMS_TEST_NUMBERS: z.string().default(''),
     /** Au-delà de ce nombre de SMS dans la journée, l'équipe est alertée (80 % puis 100 %). */
     SMS_DAILY_ALERT_COUNT: z.coerce.number().int().min(1).default(3000),
     /** Notifications push (Firebase Cloud Messaging) : compte de service JSON encodé en base64. */
@@ -347,6 +355,22 @@ const envSchema = z
         message: 'liste de rayons en mètres attendue',
       });
     }
+    const testNumbers = env.SMS_TEST_NUMBERS.split(',')
+      .map((phone) => phone.trim())
+      .filter(Boolean);
+    if (testNumbers.some((phone) => !normalizeCameroonMobile(phone))) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SMS_TEST_NUMBERS'],
+        message: 'numéros de mobile camerounais séparés par des virgules attendus',
+      });
+    } else if (testNumbers.length > MAX_SMS_TEST_NUMBERS) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SMS_TEST_NUMBERS'],
+        message: `${MAX_SMS_TEST_NUMBERS} numéros de test au plus`,
+      });
+    }
     if (env.NODE_ENV !== 'production') return;
     if (env.SMS_PROVIDER === 'fake') {
       ctx.addIssue({
@@ -425,4 +449,13 @@ export function storageKeys(env: Env): Buffer[] {
     keys.push(Buffer.from(env.STORAGE_ENCRYPTION_KEY_PREVIOUS, 'base64'));
   }
   return keys;
+}
+
+/** Téléphones de test (SMS gardés sur le serveur), normalisés au format +2376XXXXXXXX. */
+export function smsTestNumbers(env: Env): Set<string> {
+  return new Set(
+    env.SMS_TEST_NUMBERS.split(',')
+      .map((phone) => normalizeCameroonMobile(phone.trim()))
+      .filter((phone): phone is string => phone !== null),
+  );
 }
