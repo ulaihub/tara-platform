@@ -32,6 +32,8 @@ import {
   AddressDto,
   LocationLinkBody,
   LocationLinkDto,
+  LocateDto,
+  LocateQuery,
   LocationLinkListQuery,
   PublicLocationLinkDto,
   PublicLocationSubmitBody,
@@ -98,6 +100,27 @@ export class AddressesController {
       select: { id: true, name: true, city: true, kind: true, active: true },
       orderBy: [{ city: 'asc' }, { name: 'asc' }],
     });
+  }
+
+  /**
+   * Point placé sur la carte (B1) : desservi ou non, et quartier déduit. L'app l'affiche
+   * sous l'épingle dès que la carte s'arrête.
+   */
+  @Get('zones/locate')
+  @ApiZodQuery(LocateQuery)
+  @ApiZodResponse(LocateDto)
+  async locate(
+    @ValidQuery(LocateQuery) query: z.output<typeof LocateQuery>,
+  ): Promise<z.output<typeof LocateDto>> {
+    const [areas, neighborhoods] = await Promise.all([
+      this.zoneShapes.findContaining(query.latitude, query.longitude, 'SERVICE_AREA'),
+      this.zoneShapes.findContaining(query.latitude, query.longitude, 'NEIGHBORHOOD'),
+    ]);
+    const neighborhood = areas.length > 0 ? neighborhoods[0] : undefined;
+    return {
+      inServiceArea: areas.length > 0,
+      neighborhood: neighborhood ? { id: neighborhood.id, name: neighborhood.name } : null,
+    };
   }
 
   @Post('addresses')

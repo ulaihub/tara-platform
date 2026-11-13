@@ -1535,6 +1535,53 @@
         ]
       }
     },
+    "/v1/zones/locate": {
+      "get": {
+        "operationId": "Addresses_locate",
+        "parameters": [
+          {
+            "name": "latitude",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "longitude",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PointLocation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Adresses"
+        ]
+      }
+    },
     "/v1/addresses": {
       "post": {
         "operationId": "Addresses_create",
@@ -14209,6 +14256,37 @@
         },
         "required": [
           "pickupCode"
+        ],
+        "additionalProperties": false
+      },
+      "PointLocation": {
+        "type": "object",
+        "properties": {
+          "inServiceArea": {
+            "type": "boolean"
+          },
+          "neighborhood": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "inServiceArea",
+          "neighborhood"
         ],
         "additionalProperties": false
       },

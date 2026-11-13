@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:tara_ui/components/map_backdrop.dart';
@@ -43,6 +44,7 @@ class PinPickerMap extends StatefulWidget {
     this.real = true,
     this.zoom = 17,
     this.bottomPadding = 0,
+    this.label,
   });
 
   final MapPoint initial;
@@ -54,6 +56,10 @@ class PinPickerMap extends StatefulWidget {
   /// Hauteur cachée par le panneau du bas : l'épingle se place au centre de la partie
   /// visible.
   final double bottomPadding;
+
+  /// Bulle sous l'épingle quand la carte est arrêtée (quartier du point, point hors de la
+  /// zone desservie) : elle confirme que le point est bien placé.
+  final Widget? label;
 
   @override
   State<PinPickerMap> createState() => _PinPickerMapState();
@@ -97,6 +103,8 @@ class _PinPickerMapState extends State<PinPickerMap> {
 
   void _onIdle() {
     final target = _controller?.cameraPosition?.target;
+    // L'épingle se pose sous le doigt : un petit retour au toucher le confirme.
+    if (_moving) unawaited(HapticFeedback.selectionClick());
     if (mounted) setState(() => _moving = false);
     if (target != null) widget.onChanged(MapPoint(target.latitude, target.longitude));
   }
@@ -142,6 +150,27 @@ class _PinPickerMapState extends State<PinPickerMap> {
             ),
           ),
         ),
+        // Bulle juste sous la pointe de l'épingle (loin du titre de l'écran), cachée pendant
+        // le geste.
+        if (widget.label != null)
+          Positioned.fill(
+            bottom: widget.bottomPadding,
+            child: IgnorePointer(
+              child: Center(
+                child: FractionalTranslation(
+                  translation: const Offset(0, .5),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 160),
+                      opacity: _moving ? 0 : 1,
+                      child: widget.label,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

@@ -57,6 +57,14 @@ class FakeClientApi extends ClientApi {
   ];
 
   @override
+  Future<PointLocation> locate(double latitude, double longitude) async => latitude > 3.9 && latitude < 4.2
+      ? const PointLocation(
+          inServiceArea: true,
+          neighborhood: Neighborhood(id: '00000000-0000-4000-8000-000000000100', name: 'Akwa'),
+        )
+      : const PointLocation(inServiceArea: false);
+
+  @override
   Future<Address> createAddress({
     required double latitude,
     required double longitude,

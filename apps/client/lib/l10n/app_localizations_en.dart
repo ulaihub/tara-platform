@@ -417,7 +417,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myPosition => 'My location';
 
   @override
-  String get pinHint => 'Move the map to put the pin on the exact entrance.';
+  String get pinHint =>
+      'Drag the map: the pin in the middle marks the exact entrance. The neighbourhood shows as soon as it lands.';
+
+  @override
+  String get pinPlaced => 'Pin placed';
+
+  @override
+  String get pinOutOfArea => 'Outside the delivery area';
 
   @override
   String get neighborhoodLabel => 'Neighbourhood';

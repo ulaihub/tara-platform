@@ -344,6 +344,24 @@ class Neighborhood {
   final String name;
 }
 
+/// Point placé sur la carte (B1) : desservi ou non, et quartier déduit, affichés sous
+/// l'épingle dès que la carte s'arrête.
+@immutable
+class PointLocation {
+  const PointLocation({required this.inServiceArea, this.neighborhood});
+  factory PointLocation.fromJson(Json json) {
+    final neighborhood = json['neighborhood'];
+    return PointLocation(
+      inServiceArea: json['inServiceArea'] == true,
+      neighborhood: neighborhood is Json ? Neighborhood.fromJson(neighborhood) : null,
+    );
+  }
+  static const fields = ['inServiceArea', 'neighborhood'];
+
+  final bool inServiceArea;
+  final Neighborhood? neighborhood;
+}
+
 /// Adresse (B1) : point, quartier, repère écrit ; confirmée par une livraison (B4).
 @immutable
 class Address {
