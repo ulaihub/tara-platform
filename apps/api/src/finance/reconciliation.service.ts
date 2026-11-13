@@ -130,12 +130,12 @@ export class ReconciliationService {
           reference: payment.id,
           detail: 'Paiement réussi sans écriture',
         });
-      } else if (recorded !== payment.amount - payment.fee) {
+      } else if (recorded !== payment.amount + payment.surcharge - payment.fee) {
         discrepancies.push({
           type: 'PAYMENT_AMOUNT_MISMATCH',
           reference: payment.id,
           detail: 'Écritures différentes du montant encaissé',
-          expected: payment.amount - payment.fee,
+          expected: payment.amount + payment.surcharge - payment.fee,
           actual: recorded,
         });
       }
@@ -170,12 +170,12 @@ export class ReconciliationService {
           reference: payout.id,
           detail: 'Reversement envoyé sans écriture',
         });
-      } else if (recorded !== -(payout.amount + payout.fee)) {
+      } else if (recorded !== -(payout.amount - payout.charge + payout.fee)) {
         discrepancies.push({
           type: 'PAYOUT_AMOUNT_MISMATCH',
           reference: payout.id,
           detail: 'Écritures différentes du montant envoyé',
-          expected: -(payout.amount + payout.fee),
+          expected: -(payout.amount - payout.charge + payout.fee),
           actual: recorded,
         });
       }
@@ -195,7 +195,16 @@ export class ReconciliationService {
     }
 
     // 4. Relevé du prestataire, opération par opération (fenêtre élargie pour les opérations à cheval sur minuit).
-    discrepancies.push(...(await this.compareWithProvider(from, to, payments, payouts)));
+    // Montants tels que le prestataire les a traités : frais du client compris à l'encaissement,
+    // frais de retrait retenus au reversement.
+    discrepancies.push(
+      ...(await this.compareWithProvider(
+        from,
+        to,
+        payments.map((payment) => ({ ...payment, amount: payment.amount + payment.surcharge })),
+        payouts.map((payout) => ({ ...payout, amount: payout.amount - payout.charge })),
+      )),
+    );
 
     // 5. Contre-remboursements déclarés : crédités au marchand.
     const collections = await this.prisma.codCollection.findMany({
@@ -267,6 +276,38 @@ export class ReconciliationService {
     return report;
   }
 
+  /**
+   * Relevé du prestataire autour de la journée. Sans relevé (Sebpay), chacune de nos
+   * opérations est relue une à une : les écarts de statut et de montant sont trouvés, mais
+   * pas une opération que le prestataire aurait faite sans nous (à vérifier sur son tableau
+   * de bord).
+   */
+  private async statement(
+    from: Date,
+    to: Date,
+    payments: { id: string; providerReference: string | null; provider: string }[],
+    payouts: { id: string; providerReference: string | null; provider: string }[],
+  ): Promise<ProviderTransaction[]> {
+    if (this.provider.transactions) {
+      return this.provider.transactions(
+        new Date(from.getTime() - 86_400_000),
+        new Date(to.getTime() + 86_400_000),
+      );
+    }
+    const lookup = this.provider.lookup?.bind(this.provider);
+    if (!lookup) throw new Error(`${this.provider.name} : ni relevé ni relecture d'opération`);
+    const found: ProviderTransaction[] = [];
+    const ours = [
+      ...payments.map((p) => ({ ...p, kind: 'COLLECT' as const })),
+      ...payouts.map((p) => ({ ...p, kind: 'DISBURSE' as const })),
+    ].filter((item) => item.provider === this.provider.name);
+    for (const item of ours) {
+      const transaction = await lookup(item.kind, item.id);
+      if (transaction) found.push(transaction);
+    }
+    return found;
+  }
+
   private async compareWithProvider(
     from: Date,
     to: Date,
@@ -276,10 +317,7 @@ export class ReconciliationService {
     const discrepancies: Discrepancy[] = [];
     let statement: ProviderTransaction[];
     try {
-      statement = await this.provider.transactions(
-        new Date(from.getTime() - 86_400_000),
-        new Date(to.getTime() + 86_400_000),
-      );
+      statement = await this.statement(from, to, payments, payouts);
     } catch (error) {
       this.logger.warn(`Relevé du prestataire indisponible : ${String(error)}`);
       return [

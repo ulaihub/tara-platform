@@ -17,6 +17,8 @@ import { type FullQuote, PricingService } from '../pricing/pricing.service.js';
 import { PromoService } from '../pricing/promo.service.js';
 import { ratingDto } from './ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { prohibitedWarning } from '../parcel-analysis/parcel-analysis.schemas.js';
+import { MediaService } from '../storage/media.service.js';
 import { BEFORE_PICKUP } from './order-state-machine.js';
 import { OrderTransitionsService } from './order-transitions.service.js';
 import {
@@ -113,6 +115,7 @@ export class OrdersService {
     private readonly events: OrderEventsBus,
     private readonly hooks: OrderTransitionHooks,
     private readonly audit: AuditService,
+    private readonly media: MediaService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -146,6 +149,7 @@ export class OrdersService {
       packageContents: order.packageContents,
       packageDescription: order.packageDescription,
       isFragile: order.isFragile,
+      loadingHelp: order.loadingHelp,
       declaredValue: order.declaredValue,
       instructions: order.instructions,
       pickup,
@@ -281,6 +285,23 @@ export class OrdersService {
 
   // --- Création (C1, C3, C4) -------------------------------------------------------------
 
+  /**
+   * Photos de colis jointes : à l'expéditeur, du bon type ; l'avertissement de leur analyse
+   * (objets interdits vus sur la photo) suit la commande pour l'équipe et le livreur.
+   */
+  private async parcelWarnings(
+    user: AuthUser,
+    items: z.output<typeof DeliveryItem>[],
+  ): Promise<Map<string, string | null>> {
+    const warnings = new Map<string, string | null>();
+    for (const key of new Set(items.flatMap((item) => item.parcelPhotoKey ?? []))) {
+      await this.media.assertOwned(user.id, key, ['PARCEL_PHOTO']);
+      const analysis = await this.prisma.parcelAnalysis.findUnique({ where: { photoKey: key } });
+      warnings.set(key, analysis ? prohibitedWarning(analysis.result) : null);
+    }
+    return warnings;
+  }
+
   private async checkCommercialRules(
     user: AuthUser,
     shared: Shared,
@@ -319,9 +340,15 @@ export class OrdersService {
       pickupCode: string;
       batchId?: string;
       idempotencyKey?: string | undefined;
+      /** Objets interdits que l'analyse de chaque photo de colis a cru voir. */
+      parcelWarnings: Map<string, string | null>;
     },
   ): Prisma.OrderUncheckedCreateInput {
     return {
+      parcelPhotoKey: item.parcelPhotoKey ?? null,
+      parcelAiWarning: item.parcelPhotoKey
+        ? (context.parcelWarnings.get(item.parcelPhotoKey) ?? null)
+        : null,
       reference: context.reference,
       trackingToken: randomToken(16),
       senderId: user.id,
@@ -335,6 +362,7 @@ export class OrdersService {
       packageContents: item.packageContents,
       packageDescription: item.packageDescription ?? null,
       isFragile: item.isFragile,
+      loadingHelp: item.packageSize === 'BULKY' && item.loadingHelp,
       declaredValue: item.declaredValue ?? null,
       instructions: item.instructions ?? null,
       isExpress: shared.isExpress,
@@ -344,6 +372,7 @@ export class OrdersService {
       basePrice: quote.price.basePrice,
       surchargesTotal: quote.price.surchargesTotal,
       discountTotal: quote.price.discountTotal,
+      proDiscountBps: quote.price.proDiscountBps,
       totalPrice: quote.price.totalPrice,
       riderEarning: quote.price.riderEarning,
       platformFee: quote.price.platformFee,
@@ -408,12 +437,16 @@ export class OrdersService {
     const replay = await this.replay(user, idempotencyKey);
     if (replay) return replay;
 
-    const context = await this.checkCommercialRules(user, body, [body]);
+    const context = {
+      ...(await this.checkCommercialRules(user, body, [body])),
+      parcelWarnings: await this.parcelWarnings(user, [body]),
+    };
     const quote = await this.pricing.quote(user, {
       pickup: { addressId: body.pickupAddressId },
       dropoff: { addressId: body.dropoffAddressId },
       packageSize: body.packageSize,
       isExpress: body.isExpress,
+      loadingHelp: body.loadingHelp,
       scheduledFor: body.scheduledFor,
       promoCode: body.promoCode,
     });
@@ -491,7 +524,10 @@ export class OrdersService {
       }
     }
 
-    const context = await this.checkCommercialRules(user, body, body.items);
+    const context = {
+      ...(await this.checkCommercialRules(user, body, body.items)),
+      parcelWarnings: await this.parcelWarnings(user, body.items),
+    };
     const quotes = await Promise.all(
       body.items.map((item) =>
         this.pricing.quote(user, {
@@ -499,6 +535,7 @@ export class OrdersService {
           dropoff: { addressId: item.dropoffAddressId },
           packageSize: item.packageSize,
           isExpress: body.isExpress,
+          loadingHelp: item.loadingHelp,
           scheduledFor: body.scheduledFor,
         }),
       ),

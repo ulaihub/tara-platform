@@ -6,7 +6,7 @@ import type { AuthUser } from '../auth/auth.types.js';
 import { AppError } from '../common/errors/app-error.js';
 import { pageOf } from '../common/pagination.js';
 import { cameroonDate } from '../common/time.js';
-import type { KycDocument, RiderProfile } from '../generated/prisma/client.js';
+import type { KycDocument, Prisma, RiderProfile } from '../generated/prisma/client.js';
 import type { KycDocumentType } from '../generated/prisma/enums.js';
 import { NotificationService } from '../notifications/notification.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -14,6 +14,8 @@ import { MediaService, type UploadedMedia } from '../storage/media.service.js';
 import {
   type AdminRiderDto,
   type AdminRiderListQuery,
+  type AdminRiderPageDto,
+  AdminRiderViewEnum,
   type ApplyRiderBody,
   DOCUMENT_LABELS,
   type EmergencyContactBody,
@@ -26,6 +28,49 @@ import {
 } from './riders.schemas.js';
 
 type RiderWithDocuments = RiderProfile & { documents: KycDocument[] };
+
+const ADMIN_INCLUDE = {
+  documents: true,
+  user: { select: { id: true, phone: true, fullName: true } },
+} as const;
+
+type AdminRider = RiderWithDocuments & {
+  user: { id: string; phone: string; fullName: string | null };
+};
+
+const DAY = 86_400_000;
+const daysAgo = (days: number): Date => new Date(Date.now() - days * DAY);
+const daysAhead = (days: number): Date => new Date(Date.now() + days * DAY);
+const round1 = (value: number): number => Math.round(value * 10) / 10;
+
+/** Livreurs d'une vue de la liste du back-office. */
+function viewFilter(view: z.output<typeof AdminRiderViewEnum>): Prisma.RiderProfileWhereInput {
+  switch (view) {
+    case 'TO_REVIEW':
+      // Candidature à traiter, ou pièce envoyée qui attend l'examen.
+      return {
+        OR: [{ status: 'PENDING' }, { documents: { some: { status: 'PENDING' } } }],
+        NOT: { status: 'REJECTED' },
+      };
+    case 'ALL':
+      return {};
+    default:
+      return { status: view };
+  }
+}
+
+/** Nom (sans tenir compte des majuscules), numéro de téléphone, ou plaque déjà trouvée. */
+function searchFilter(q: string, plateIds: string[]): Prisma.RiderProfileWhereInput {
+  // Numéro seulement si la saisie n'est faite que de chiffres (« LT 123 » est une plaque).
+  const digits = /^[+\d\s]+$/.test(q) ? q.replace(/\D/g, '') : '';
+  return {
+    OR: [
+      { user: { fullName: { contains: q, mode: 'insensitive' } } },
+      ...(plateIds.length > 0 ? [{ id: { in: plateIds } }] : []),
+      ...(digits.length >= 2 ? [{ user: { phone: { contains: digits } } }] : []),
+    ],
+  };
+}
 
 function toDocumentDto(doc: KycDocument): z.output<typeof KycDocumentDto> {
   return {
@@ -217,37 +262,82 @@ export class RidersService {
 
   // --- Back-office (H3) -------------------------------------------------------------
 
+  /** Livreurs d'une vue, recherche par nom, numéro ou plaque ; nombre par vue pour le menu. */
   async list(
     query: z.output<typeof AdminRiderListQuery>,
-  ): Promise<{ items: z.output<typeof AdminRiderDto>[]; nextCursor: string | null }> {
+  ): Promise<z.output<typeof AdminRiderPageDto>> {
+    const view = query.status ?? query.view;
     const rows = await this.prisma.riderProfile.findMany({
       where: {
-        ...(query.status ? { status: query.status } : {}),
-        ...(query.cursor ? { id: { lt: query.cursor } } : {}),
+        AND: [
+          viewFilter(view),
+          query.q ? searchFilter(query.q, await this.idsByPlate(query.q)) : {},
+          query.cursor ? { id: { lt: query.cursor } } : {},
+        ],
       },
       orderBy: { id: 'desc' },
       take: query.limit + 1,
-      include: { documents: true, user: true },
+      include: ADMIN_INCLUDE,
     });
     const page = pageOf(rows, query.limit);
+    const delivered = await this.deliveredSince(
+      page.items.map((rider) => rider.id),
+      daysAgo(30),
+    );
+    // Une requête après l'autre : le pool reste disponible pour les autres écrans.
+    const counts = {} as Record<z.output<typeof AdminRiderViewEnum>, number>;
+    for (const name of AdminRiderViewEnum.options) {
+      counts[name] = await this.prisma.riderProfile.count({ where: viewFilter(name) });
+    }
     return {
-      items: page.items.map((rider) => this.toAdminDto(rider)),
+      items: page.items.map((rider) => this.toAdminDto(rider, delivered.get(rider.id) ?? 0)),
       nextCursor: page.nextCursor,
+      counts,
     };
   }
 
   async get(riderId: string): Promise<z.output<typeof AdminRiderDto>> {
     const rider = await this.prisma.riderProfile.findUnique({
       where: { id: riderId },
-      include: { documents: true, user: true },
+      include: ADMIN_INCLUDE,
     });
     if (!rider) throw AppError.notFound('RIDER_NOT_FOUND');
-    return this.toAdminDto(rider);
+    const delivered = await this.deliveredSince([rider.id], daysAgo(30));
+    return this.toAdminDto(rider, delivered.get(rider.id) ?? 0);
+  }
+
+  /** Plaque saisie avec ou sans espaces (« LT123 » trouve « LT 123 AB »). */
+  private async idsByPlate(q: string): Promise<string[]> {
+    const needle = q
+      .replace(/\s+/g, '')
+      .toUpperCase()
+      .replace(/[\\%_]/g, '\\$&');
+    if (needle.length < 2) return [];
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM rider_profiles
+      WHERE replace(upper(plate_number), ' ', '') LIKE ${`%${needle}%`}
+      LIMIT 200`;
+    return rows.map((row) => row.id);
+  }
+
+  /** Courses livrées depuis une date, par livreur. */
+  private async deliveredSince(riderIds: string[], since: Date): Promise<Map<string, number>> {
+    if (riderIds.length === 0) return new Map();
+    const groups = await this.prisma.order.groupBy({
+      by: ['riderId'],
+      where: { riderId: { in: riderIds }, status: 'DELIVERED', deliveredAt: { gte: since } },
+      _count: { _all: true },
+    });
+    return new Map(groups.map((group) => [group.riderId ?? '', group._count._all]));
   }
 
   private toAdminDto(
-    rider: RiderWithDocuments & { user: { id: string; phone: string; fullName: string | null } },
+    rider: AdminRider,
+    deliveredLast30Days: number,
   ): z.output<typeof AdminRiderDto> {
+    const today = cameroonDate(new Date());
+    const soon = cameroonDate(daysAhead(30));
+    const latest = [...latestByType(rider.documents).values()];
     return {
       ...this.toProfileDto(rider),
       user: { id: rider.user.id, phone: rider.user.phone, fullName: rider.user.fullName },
@@ -255,6 +345,21 @@ export class RidersService {
       documentHistory: [...rider.documents]
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
         .map(toDocumentDto),
+      pendingDocuments: latest.filter((doc) => doc.status === 'PENDING').length,
+      expiringSoon: latest
+        .filter((doc) => doc.status === 'APPROVED' && doc.expiresOn)
+        .map((doc) => ({
+          type: doc.type,
+          expiresOn: (doc.expiresOn as Date).toISOString().slice(0, 10),
+        }))
+        .filter((doc) => doc.expiresOn >= today && doc.expiresOn <= soon)
+        .sort((a, b) => a.expiresOn.localeCompare(b.expiresOn)),
+      rating: {
+        average: rider.ratingCount > 0 ? round1(rider.ratingSum / rider.ratingCount) : null,
+        count: rider.ratingCount,
+      },
+      deliveredLast30Days,
+      cashSuspendedAt: rider.cashSuspendedAt?.toISOString() ?? null,
     };
   }
 

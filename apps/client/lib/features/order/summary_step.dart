@@ -125,6 +125,7 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
         pickupAddressId: _draft.pickup!.id,
         dropoffAddressId: delivery.dropoff!.id,
         packageSize: delivery.size,
+        loadingHelp: delivery.bulky && delivery.loadingHelp,
         scheduledFor: _draft.later ? _draft.scheduledFor : null,
         promoCode: promoCode,
       );
@@ -161,10 +162,19 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
       _promoError = null;
     });
     try {
-      delivery.quote = await _quote(delivery, promoCode: code);
-      _draft
-        ..promoCode = code
-        ..touch();
+      final quote = await _quote(delivery, promoCode: code);
+      delivery.quote = quote;
+      if (quote.discountSource == 'VOLUME') {
+        // Le tarif pro de la boutique est plus avantageux : le code n'est pas utilisé.
+        _draft.touch();
+        if (mounted) {
+          setState(() => _promoError = AppLocalizations.of(context).promoBeatenByPro(percent(quote.proDiscountBps)));
+        }
+      } else {
+        _draft
+          ..promoCode = code
+          ..touch();
+      }
     } catch (error) {
       if (mounted) setState(() => _promoError = errorMessage(context, error));
     } finally {
@@ -200,6 +210,8 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
     final c = TaraColors.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
     final draft = _draft;
+    // Taux des frais Mobile Money : la ligne s'affiche dès que Mobile Money est choisi.
+    draft.mobileMoneyFeeBps = ref.watch(appConfigProvider).value?.mobileMoneyFeeBps ?? 0;
     final pickup = draft.pickup!;
     final shop = widget.me.merchant != null;
     final wallet = ref.watch(walletProvider).value;
@@ -265,6 +277,14 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
             l.failureFeesNote('${formatAmount(quote.retryFee)} F', '${formatAmount(quote.returnFee)} F'),
             style: TaraText.small.copyWith(color: c.textTertiary),
           ),
+          // Colis non conforme refusé à l'enlèvement : le déplacement se paie, annoncé ici.
+          if (quote.retryFee > 0) ...[
+            const SizedBox(height: 6),
+            Text(
+              l.refusalFeeNote('${formatAmount(quote.retryFee)} F'),
+              style: TaraText.small.copyWith(color: c.textTertiary),
+            ),
+          ],
         ],
         if (!_batch) ...[
           const SizedBox(height: 18),
@@ -399,7 +419,8 @@ class _DeliveryCard extends StatelessWidget {
     final first = d.recipientName.trim().split(RegExp(r'\s+')).first;
     final package = [
       contentsText(l, d.contents ?? 'OTHER'),
-      d.size,
+      d.bulky ? l.sizeBulky : d.size,
+      if (d.bulky && d.loadingHelp) l.loadingHelpShort,
       if (d.fragile) l.fragileTitle,
       if (d.codAmount > 0) '${l.codLabel} : ${formatAmount(d.codAmount)} F',
     ].join(' · ');
@@ -499,19 +520,28 @@ class _PriceCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (single != null) ...[
-            line(l.priceBase, amount(single.basePrice)),
+            line(single.vehicleType == 'TRICYCLE' ? l.priceBaseTricycle : l.priceBase, amount(single.basePrice)),
             for (final surcharge in single.surcharges)
               line(switch (surcharge.code) {
                 'EXPRESS' => l.surchargeExpress,
                 'HEAVY_PARCEL' => l.surchargeHeavy,
+                'HANDLING' => l.surchargeHandling,
                 'NIGHT' => l.surchargeNight,
                 'WEATHER' => l.surchargeWeather,
                 _ => l.surchargeOther,
               }, '+${amount(surcharge.amount)}'),
-            if (single.discountTotal > 0) line(l.discount, '−${amount(single.discountTotal)}', color: c.success),
+            if (single.discountTotal > 0)
+              line(
+                single.discountSource == 'VOLUME' ? l.proDiscountLine(percent(single.proDiscountBps)) : l.discount,
+                '−${amount(single.discountTotal)}',
+                color: c.success,
+              ),
           ] else if (deliveries.length > 1)
             for (final (i, d) in deliveries.indexed)
               line('${i + 1}. ${d.recipientName.trim()}', d.quote == null ? '…' : amount(d.quote!.totalPrice)),
+          // Frais de l'opérateur, payés en plus seulement par Mobile Money.
+          if (draft.allQuoted && draft.mobileMoneyFeeAmount > 0)
+            line(l.mobileMoneyFeeLine, '+${amount(draft.mobileMoneyFeeAmount)}'),
           if (single != null || deliveries.length > 1) Divider(height: 18, color: c.glassBorder),
           Row(
             children: [
@@ -523,7 +553,7 @@ class _PriceCard extends StatelessWidget {
               ),
               if (draft.allQuoted)
                 Text(
-                  amount(draft.total),
+                  amount(draft.amountToPay),
                   style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontFeatures: TaraText.tabular),
                 )
               else
@@ -534,4 +564,11 @@ class _PriceCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Pourcentage lisible depuis des points de base : 1000 → « 10 % », 1250 → « 12,5 % ».
+String percent(int bps) {
+  final whole = bps % 100 == 0;
+  final value = whole ? '${bps ~/ 100}' : (bps / 100).toStringAsFixed(1).replaceAll('.', ',');
+  return '$value %';
 }

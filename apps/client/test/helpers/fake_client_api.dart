@@ -105,6 +105,30 @@ class FakeClientApi extends ClientApi {
     return 'address/${kind.toLowerCase()}-${uploads.length}';
   }
 
+  /// Réponse de l'analyse de la photo du colis (par défaut : carton moyen).
+  ParcelAnalysis? parcelAnalysis;
+
+  /// Refus renvoyé par l'analyse (indisponible, trop de photos).
+  ApiException? parcelAnalysisError;
+  final analyzed = <String>[];
+
+  @override
+  Future<ParcelAnalysis> analyzeParcel(String photoKey) async {
+    analyzed.add(photoKey);
+    if (parcelAnalysisError case final error?) throw error;
+    return parcelAnalysis ??
+        ParcelAnalysis(
+          photoKey: photoKey,
+          isParcel: true,
+          size: 'M',
+          contents: 'OTHER',
+          description: 'Carton fermé',
+          fragile: false,
+          prohibited: const [],
+          confidence: 'medium',
+        );
+  }
+
   /// Adresses retirées du carnet.
   final deletedAddresses = <String>[];
 
@@ -136,33 +160,54 @@ class FakeClientApi extends ClientApi {
   /// États successifs du paiement relu (le dernier est répété).
   List<String> paymentStatuses = ['PENDING'];
 
+  /// Tarif pro de la boutique (points de base), comme le calcule le serveur.
+  int proDiscountBps = 0;
+
   @override
   Future<Quote> quote({
     required String pickupAddressId,
     required String dropoffAddressId,
     required String packageSize,
+    bool loadingHelp = false,
     DateTime? scheduledFor,
     String? promoCode,
   }) async {
-    quotes.add({'dropoff': dropoffAddressId, 'size': packageSize, 'promo': promoCode, 'at': scheduledFor});
+    quotes.add({
+      'dropoff': dropoffAddressId,
+      'size': packageSize,
+      'promo': promoCode,
+      'at': scheduledFor,
+      'loadingHelp': loadingHelp,
+    });
     if (promoCode != null && promoCode != 'BIENVENUE') {
       throw const ApiException(code: 'PROMO_INVALID', message: 'Code promo inconnu.', status: 422);
     }
+    // Gros objet : grille tricycle, manutention si l'expéditeur demande de l'aide.
+    final bulky = packageSize == 'BULKY';
     final surcharges = [
       if (packageSize == 'XL') (code: 'HEAVY_PARCEL', amount: 500),
+      if (bulky && loadingHelp) (code: 'HANDLING', amount: 1500),
       if (scheduledFor != null && (scheduledFor.hour >= 20 || scheduledFor.hour < 6)) (code: 'NIGHT', amount: 300),
     ];
-    final discount = promoCode == null ? 0 : 500;
-    const base = 1200;
+    final base = bulky ? 3000 : 1200;
+    final subtotal = base + surcharges.fold<int>(0, (sum, s) => sum + s.amount);
+    // Le plus avantageux du code promo et du tarif pro (arrondi à 50 F), jamais les deux.
+    final promoDiscount = promoCode == null ? 0 : 500;
+    final proDiscount = (subtotal * proDiscountBps / 10000 / 50).round() * 50;
+    final pro = proDiscount > promoDiscount;
+    final discount = pro ? proDiscount : promoDiscount;
     return Quote(
       distanceMeters: 4200,
       estimatedMinutes: 18,
       basePrice: base,
       surcharges: surcharges,
       discountTotal: discount,
-      totalPrice: base + surcharges.fold<int>(0, (sum, s) => sum + s.amount) - discount,
-      promoCode: promoCode,
-      retryFee: 500,
+      totalPrice: subtotal - discount,
+      promoCode: pro ? null : promoCode,
+      discountSource: pro ? 'VOLUME' : (promoDiscount > 0 ? 'PROMO' : null),
+      proDiscountBps: pro ? proDiscountBps : 0,
+      vehicleType: bulky ? 'TRICYCLE' : 'MOTORBIKE',
+      retryFee: bulky ? 1500 : 500,
       returnFee: base ~/ 2,
     );
   }

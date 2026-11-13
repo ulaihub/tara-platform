@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -5,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_client/app/providers.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/core/location.dart';
+import 'package:tara_client/core/media/address_media.dart';
 import 'package:tara_client/features/home/home_flow.dart';
 import 'package:tara_client/features/order/address_editor.dart';
 import 'package:tara_client/features/order/new_order_flow.dart';
@@ -51,8 +55,22 @@ FakeClientApi orderApi() => FakeClientApi()
     ),
   ];
 
-List<Override> overrides(FakeClientApi api, {Future<bool> Function(Uri uri)? launcher, FakeRealtime? realtime}) => [
-  keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
+/// Photo du colis prise dans les tests (petite image du dossier fixtures).
+final parcelPhoto = File('test/fixtures/colis.jpg').absolute.path;
+
+/// Réglages de l'app gardés sur le téléphone, frais Mobile Money à 6 % (compte Sebpay particulier).
+MemoryKeyValueStore storeWithMobileMoneyFee() =>
+    MemoryKeyValueStore()
+      ..values['tara.app-config'] = jsonEncode({...AppConfigController.fallback, 'mobileMoneyFeeBps': 600});
+
+List<Override> overrides(
+  FakeClientApi api, {
+  Future<bool> Function(Uri uri)? launcher,
+  FakeRealtime? realtime,
+  MemoryKeyValueStore? store,
+}) => [
+  keyValueStoreProvider.overrideWithValue(store ?? MemoryKeyValueStore()),
+  takeParcelPhotoProvider.overrideWithValue(() async => parcelPhoto),
   clientApiProvider.overrideWithValue(api),
   realMapProvider.overrideWithValue(false),
   currentPositionProvider.overrideWithValue(() async => MapPoint.douala),
@@ -66,8 +84,9 @@ Widget flow(
   VoidCallback? onClose,
   Future<bool> Function(Uri uri)? launcher,
   FakeRealtime? realtime,
+  MemoryKeyValueStore? store,
 }) => ProviderScope(
-  overrides: overrides(api, launcher: launcher, realtime: realtime),
+  overrides: overrides(api, launcher: launcher, realtime: realtime, store: store),
   child: NewOrderFlow(me: me, onClose: onClose ?? () {}, now: () => homeNow),
 );
 
@@ -83,6 +102,9 @@ Future<void> toPackage(WidgetTester tester) async {
 /// Étape 4 : colis « Documents ».
 Future<void> toWhen(WidgetTester tester) async {
   await toPackage(tester);
+  // Petit écran, grand texte : la carte photo pousse les natures sous le pli.
+  await tester.ensureVisible(find.text('Documents'));
+  await settle(tester);
   await tester.tap(find.text('Documents'));
   await tester.tap(find.text('Continuer'));
   await settle(tester);
@@ -223,6 +245,87 @@ void main() {
       expect(find.text('125\u00a0000'), findsNWidgets(2));
       expect(fragileOn(tester), isTrue);
       await expectLater(capture, matchesGoldenFile('goldens/05_colis/rempli_${brightness.name}.png'));
+    });
+
+    goldenTest('05 colis gros objet puis récapitulatif ${brightness.name}', (tester) async {
+      final api = orderApi();
+      await pumpVariant(tester, variant, flow(api), surface: const Size(390, 1760));
+      await toPackage(tester);
+      await tester.tap(find.text('Cuisine, maison'));
+      await tester.enterText(find.byType(TextField).at(0), 'Réfrigérateur 2 portes');
+      await tester.tap(find.text('Gros objet'));
+      await settle(tester);
+      expect(
+        find.text('Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.'),
+        findsOne,
+      );
+      await tester.tap(find.text('Aide pour charger'));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      await expectLater(capture, matchesGoldenFile('goldens/05_colis/gros_objet_${brightness.name}.png'));
+
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      // Prix tricycle et manutention annoncés avant de commander, comme le déplacement
+      // facturé si le colis est refusé.
+      expect(api.quotes.last, containsPair('size', 'BULKY'));
+      expect(api.quotes.last, containsPair('loadingHelp', true));
+      expect(find.text('Manutention (chargement à deux)'), findsOneWidget);
+      expect(find.text('Commander · 4\u00a0500\u00a0F'), findsOneWidget);
+      expect(find.textContaining('son déplacement (1\u00a0500 F) reste à votre charge'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/gros_objet_${brightness.name}.png'));
+    });
+
+    goldenTest('05 colis photo analysée ${brightness.name}', (tester) async {
+      final api = orderApi()
+        ..parcelAnalysis = const ParcelAnalysis(
+          photoKey: 'parcel_photo-1',
+          isParcel: true,
+          size: 'BULKY',
+          contents: 'HOUSEHOLD',
+          description: 'Réfrigérateur 2 portes',
+          fragile: true,
+          prohibited: ['matière dangereuse (gaz, carburant…)'],
+          confidence: 'high',
+        );
+      await pumpVariant(tester, variant, flow(api), surface: const Size(390, 1900));
+      await toPackage(tester);
+      final context = tester.element(find.text('Photographier le colis'));
+      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(parcelPhoto)), width: 168), context));
+      await tester.tap(find.text('Prendre la photo'));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await settle(tester);
+      expect(api.uploads.last, (parcelPhoto, 'PARCEL_PHOTO'));
+      expect(api.analyzed, ['address/parcel_photo-1']);
+      expect(find.text('Proposition appliquée'), findsOneWidget);
+      expect(find.text('Réfrigérateur 2 portes'), findsOneWidget);
+      expect(find.textContaining('La photo semble montrer : matière dangereuse'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_colis/photo_${brightness.name}.png'));
+    });
+
+    goldenTest('05 récapitulatif Mobile Money ${brightness.name}', (tester) async {
+      await pumpVariant(
+        tester,
+        variant,
+        flow(orderApi(), store: storeWithMobileMoneyFee()),
+        surface: const Size(390, 1500),
+      );
+      await toSummary(tester);
+      await tapVisible(tester, 'MTN Mobile Money');
+      await settle(tester);
+      // 1 200 F de course, 77 F de frais Mobile Money (6 %), payés en plus.
+      expect(find.text('Frais Mobile Money'), findsOneWidget);
+      expect(find.text('+77\u00a0F'), findsOneWidget);
+      expect(find.text('Commander · 1\u00a0277\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/mobile_money_${brightness.name}.png'));
+
+      // En espèces : rien de plus.
+      await tapVisible(tester, 'Espèces à l’enlèvement');
+      await settle(tester);
+      expect(find.text('Frais Mobile Money'), findsNothing);
+      expect(find.text('Commander · 1\u00a0200\u00a0F'), findsOneWidget);
     });
 
     goldenTest('05 quand programmé ${brightness.name}', (tester) async {
@@ -483,6 +586,59 @@ void main() {
     expect(find.text('500 000 F au plus par livraison.'), findsOneWidget);
   });
 
+  testWidgets('l’aide pour charger ne se propose que pour un gros objet et part avec la commande', (tester) async {
+    final api = orderApi();
+    await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1760));
+    await toPackage(tester);
+    await tester.tap(find.text('Cuisine, maison'));
+    await settle(tester);
+    expect(find.text('Aide pour charger'), findsNothing);
+    await tester.tap(find.text('Gros objet'));
+    await settle(tester);
+    await tester.tap(find.text('Aide pour charger'));
+    await settle(tester);
+    // Retour à une taille ordinaire : l'option disparaît et ne part pas.
+    await tester.tap(find.text('L'));
+    await settle(tester);
+    expect(find.text('Aide pour charger'), findsNothing);
+    await tester.tap(find.text('Gros objet'));
+    await settle(tester);
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tapVisible(tester, 'Espèces à l’enlèvement');
+    await slideToOrder(tester);
+    await settle(tester);
+    expect(api.created.single.body, containsPair('packageSize', 'BULKY'));
+    expect(api.created.single.body, containsPair('loadingHelp', true));
+  });
+
+  testWidgets('photo du colis : jointe à la commande ; analyse indisponible, on choisit soi-même', (tester) async {
+    final api = orderApi()
+      ..parcelAnalysisError = const ApiException(
+        code: 'PARCEL_ANALYSIS_UNAVAILABLE',
+        message: 'L’analyse de la photo est momentanément indisponible. Choisissez la taille et la nature vous-même.',
+        status: 503,
+      );
+    await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1800));
+    await toPackage(tester);
+    await tester.tap(find.text('Prendre la photo'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await settle(tester);
+    expect(find.text('Photo jointe'), findsOneWidget);
+    expect(find.textContaining('momentanément indisponible'), findsOneWidget);
+    await tester.tap(find.text('Documents'));
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    await tapVisible(tester, 'Espèces à l’enlèvement');
+    await slideToOrder(tester);
+    await settle(tester);
+    expect(api.created.single.body, containsPair('parcelPhotoKey', 'address/parcel_photo-1'));
+  });
+
   testWidgets('un particulier n’a pas de montant à encaisser', (tester) async {
     await pumpVariant(tester, Variant.matrix.first, flow(orderApi(), me: person), surface: const Size(390, 1400));
     await toPackage(tester);
@@ -554,6 +710,7 @@ void main() {
         'size': 'S',
         'promo': null,
         'at': null,
+        'loadingHelp': false,
       });
       await slideToOrder(tester);
 
@@ -671,6 +828,31 @@ void main() {
       expect(find.text('Commander · 700\u00a0F'), findsOneWidget);
       await slideToOrder(tester);
       expect(api.created.single.body['promoCode'], 'BIENVENUE');
+    });
+
+    testWidgets('tarif pro : remise affichée avant de commander ; un code moins avantageux n’est pas utilisé', (
+      tester,
+    ) async {
+      final api = orderApi()..proDiscountBps = 1000;
+      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1500));
+      await toSummary(tester);
+      // 10 % de 1 200 F = 120 F, arrondis à 100 F pour la monnaie.
+      expect(find.text('Tarif pro (10\u00a0%)'), findsOneWidget);
+      expect(find.text('−100\u00a0F'), findsOneWidget);
+      expect(find.text('Commander · 1\u00a0100\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/tarif_pro.png'));
+
+      // Tarif pro de 50 % : plus avantageux que le code de 500 F, qui n'est pas consommé.
+      api.proDiscountBps = 5000;
+      await tester.enterText(find.widgetWithText(TextField, 'Ex. BIENVENUE'), 'bienvenue');
+      await tapVisible(tester, 'Appliquer');
+      expect(
+        find.text('Votre tarif pro (−50\u00a0%) est plus avantageux : ce code n’est pas utilisé.'),
+        findsOneWidget,
+      );
+      expect(find.text('Code BIENVENUE appliqué'), findsNothing);
+      await slideToOrder(tester);
+      expect(api.created.single.body['promoCode'], isNull);
     });
 
     testWidgets('plusieurs livraisons : un lot, un seul code, un seul paiement Mobile Money', (tester) async {

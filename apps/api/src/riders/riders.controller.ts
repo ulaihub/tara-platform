@@ -21,7 +21,6 @@ import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
 import { CurrentUser, Roles } from '../auth/decorators.js';
 import { AppError } from '../common/errors/app-error.js';
-import { pageSchema } from '../common/pagination.js';
 import {
   ApiZodBody,
   ApiZodQuery,
@@ -33,6 +32,7 @@ import {
 import {
   AdminRiderDto,
   AdminRiderListQuery,
+  AdminRiderPageDto,
   ApplyRiderBody,
   DOCUMENT_LABELS,
   DocumentRequirementDto,
@@ -43,8 +43,10 @@ import {
   ReviewDocumentBody,
   RiderDecisionBody,
   RiderProfileDto,
+  RiderReliabilityDto,
   UploadDocumentBody,
 } from './riders.schemas.js';
+import { RiderReliabilityService } from './rider-reliability.service.js';
 import { RidersService } from './riders.service.js';
 
 @ApiTags('Livreurs')
@@ -142,15 +144,28 @@ export class RidersController {
 @Roles('ADMIN', 'DISPATCHER')
 @Controller('admin')
 export class AdminRidersController {
-  constructor(private readonly riders: RidersService) {}
+  constructor(
+    private readonly riders: RidersService,
+    private readonly reliability: RiderReliabilityService,
+  ) {}
 
+  /** Liste par vue (à examiner, en attente, actifs…), recherche par nom, numéro ou plaque. */
   @Get('riders')
   @ApiZodQuery(AdminRiderListQuery)
-  @ApiZodResponse(pageSchema(AdminRiderDto))
+  @ApiZodResponse(AdminRiderPageDto)
   list(
     @ValidQuery(AdminRiderListQuery) query: z.output<typeof AdminRiderListQuery>,
-  ): Promise<{ items: z.output<typeof AdminRiderDto>[]; nextCursor: string | null }> {
+  ): Promise<z.output<typeof AdminRiderPageDto>> {
     return this.riders.list(query);
+  }
+
+  /** Fiabilité sur 30 jours et depuis l'inscription, historique des décisions (H3). */
+  @Get('riders/:riderId/reliability')
+  @ApiZodResponse(RiderReliabilityDto)
+  riderReliability(
+    @Param('riderId', ParseUUIDPipe) riderId: string,
+  ): Promise<z.output<typeof RiderReliabilityDto>> {
+    return this.reliability.reliability(riderId);
   }
 
   @Get('riders/:riderId')

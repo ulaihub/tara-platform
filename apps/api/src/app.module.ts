@@ -15,7 +15,11 @@ import { GeoModule } from './geo/geo.module.js';
 import { HealthModule } from './health/health.module.js';
 import { LegalModule } from './legal/legal.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
+import { OpsModule } from './ops/ops.module.js';
 import { OrdersModule } from './orders/orders.module.js';
+import { MerchantsModule } from './merchants/merchants.module.js';
+import { MetricsModule } from './metrics/metrics.module.js';
+import { TeamModule } from './team/team.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrivacyModule } from './privacy/privacy.module.js';
 import { PublicTrackingModule } from './public-tracking/public-tracking.module.js';
@@ -25,8 +29,10 @@ import { RealtimeModule } from './realtime/realtime.module.js';
 import { RedisModule } from './redis/redis.module.js';
 import { RedisThrottlerStorage } from './redis/redis-throttler.storage.js';
 import { RiderAppModule } from './rider-app/rider-app.module.js';
+import { SupportModule } from './support/support.module.js';
 import { RidersModule } from './riders/riders.module.js';
 import { SmsModule } from './sms/sms.module.js';
+import { ParcelAnalysisModule } from './parcel-analysis/parcel-analysis.module.js';
 import { StorageModule } from './storage/storage.module.js';
 import { UsersModule } from './users/users.module.js';
 
@@ -60,10 +66,16 @@ import { UsersModule } from './users/users.module.js';
     GeoModule,
     PricingModule,
     OrdersModule,
+    ParcelAnalysisModule,
     PublicTrackingModule,
     RiderAppModule,
     FinanceModule,
     PrivacyModule,
+    OpsModule,
+    SupportModule,
+    MerchantsModule,
+    MetricsModule,
+    TeamModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },

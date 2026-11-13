@@ -41,6 +41,7 @@ import {
   ZoneDto,
   ZoneListQuery,
   ZonePatchBody,
+  AdminZonesMapDto,
 } from './geo.schemas.js';
 import { LocationLinksService } from './location-links.service.js';
 import { ZonesRepository } from './zones.repository.js';
@@ -210,6 +211,43 @@ export class AdminZonesController {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
+
+  /** Toutes les zones, actives ou coupées, pour l'écran Zones du back-office (H4). */
+  @Get()
+  @ApiZodQuery(ZoneListQuery)
+  @ApiZodResponse(z.array(ZoneDto))
+  list(
+    @ValidQuery(ZoneListQuery) query: z.output<typeof ZoneListQuery>,
+  ): Promise<z.output<typeof ZoneDto>[]> {
+    return this.prisma.zone.findMany({
+      where: {
+        ...(query.city ? { city: query.city } : {}),
+        ...(query.kind ? { kind: query.kind } : {}),
+      },
+      select: { id: true, name: true, city: true, kind: true, active: true },
+      orderBy: [{ kind: 'asc' }, { name: 'asc' }],
+    });
+  }
+
+  /** Contours de toutes les zones, pour la carte où l'équipe dessine les nouvelles (H4). */
+  @Get('map')
+  @ApiZodQuery(MapZonesQuery)
+  @ApiZodResponse(AdminZonesMapDto)
+  async map(
+    @ValidQuery(MapZonesQuery) query: z.output<typeof MapZonesQuery>,
+  ): Promise<z.output<typeof AdminZonesMapDto>> {
+    const rows = await this.zones.adminFeatures(query.city);
+    return {
+      type: 'FeatureCollection',
+      features: rows.map((row) => ({
+        type: 'Feature',
+        properties: { id: row.id, name: row.name, kind: row.kind, active: row.active },
+        geometry: JSON.parse(row.geometry) as z.output<
+          typeof AdminZonesMapDto
+        >['features'][number]['geometry'],
+      })),
+    };
+  }
 
   /** Importe un polygone GeoJSON (coordonnées [longitude, latitude]). */
   @Post()

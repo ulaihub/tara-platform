@@ -30,9 +30,17 @@ export const PLATFORM_ACCOUNTS = {
   payoutsInTransit: platform('payouts_in_transit', 'Reversements en cours d’envoi', 'LIABILITY'),
   commission: platform('revenue:commission', 'Commission sur les livraisons', 'REVENUE'),
   codFees: platform('revenue:cod_fees', 'Frais d’encaissement', 'REVENUE'),
+  /** Frais Mobile Money payés par les clients et retenus sur les retraits : ils couvrent providerFees. */
+  mobileMoneyFeesCharged: platform(
+    'revenue:mobile_money_fees',
+    'Frais Mobile Money facturés',
+    'REVENUE',
+  ),
   providerFees: platform('expense:provider_fees', 'Frais Mobile Money', 'EXPENSE'),
   promotions: platform('expense:promotions', 'Remises financées par Tara', 'EXPENSE'),
   goodwill: platform('expense:goodwill', 'Avoirs commerciaux', 'EXPENSE'),
+  /** Primes d'approche et de renfort versées aux livreurs (H4), en plus de leur part. */
+  riderBonuses: platform('expense:rider_bonuses', 'Primes des livreurs', 'EXPENSE'),
   /** Paiement reçu sans emploi (doublon, commande déjà réglée) : à rembourser ou affecter. */
   unallocated: platform('unallocated', 'Encaissements à affecter', 'LIABILITY'),
 } as const;

@@ -44,6 +44,16 @@ const TEMPLATES = {
     fr: { title: 'Commande annulée', body: 'La commande {reference} a été annulée.' },
     en: { title: 'Order cancelled', body: 'Order {reference} has been cancelled.' },
   },
+  ORDER_PARCEL_REFUSED: {
+    fr: {
+      title: 'Colis refusé à l’enlèvement',
+      body: '{reference} · {reason}. La commande est annulée et le déplacement du livreur ({fee} FCFA) est à votre charge.',
+    },
+    en: {
+      title: 'Parcel refused at pickup',
+      body: '{reference} · {reason}. The order is cancelled and the rider’s trip ({fee} FCFA) is charged to you.',
+    },
+  },
   RIDER_ORDER_CANCELLED: {
     fr: {
       title: 'Course annulée',
@@ -137,6 +147,11 @@ const TEMPLATES = {
       title: 'Address received',
       body: 'Your recipient placed their point: “{landmark}”. You can confirm the delivery.',
     },
+  },
+  // Réponse du service client à une demande (H6).
+  SUPPORT_REPLY: {
+    fr: { title: 'Service client Tara', body: 'Demande {reference} : {excerpt}' },
+    en: { title: 'Tara customer service', body: 'Request {reference}: {excerpt}' },
   },
   RIDER_FAILURE_DECISION: {
     fr: { title: 'Décision de l’expéditeur', body: '{reference} : {decision}.' },

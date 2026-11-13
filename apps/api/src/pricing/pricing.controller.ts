@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -25,10 +26,19 @@ import {
 } from '../common/validation/zod.js';
 import type { PromoCode } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { computePrice } from './pricing.engine.js';
+import { PricingSettingsService } from './pricing-settings.service.js';
 import {
+  PriceSimulationBody,
+  PriceSimulationDto,
   PricingGridBody,
   PricingGridDto,
   PricingGridListQuery,
+  PricingSettingsBody,
+  PricingSettingsDto,
+  RiderBoostBody,
+  RiderBoostDto,
+  RiderBoostListQuery,
   PromoCodeBody,
   PromoCodeDto,
   PromoPatchBody,
@@ -65,9 +75,98 @@ export class QuoteController {
 export class AdminPricingController {
   constructor(
     private readonly pricing: PricingService,
+    private readonly settings: PricingSettingsService,
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
+
+  /** Prix d'une grille en projet pour quelques distances, avant de l'enregistrer (H4). */
+  @Post('pricing-grids/simulate')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(PriceSimulationBody)
+  @ApiZodResponse(PriceSimulationDto)
+  simulate(
+    @ValidBody(PriceSimulationBody) body: z.output<typeof PriceSimulationBody>,
+  ): z.output<typeof PriceSimulationDto> {
+    const rules = {
+      riderShareBps: body.riderShareBps,
+      perKmBeyondLastTier: body.perKmBeyondLastTier,
+      tiers: body.tiers,
+      surcharges: [],
+    };
+    const at = new Date(Date.UTC(2026, 0, 1, 11));
+    return {
+      rows: body.distancesMeters.map((distanceMeters) => {
+        const price = computePrice(rules, {
+          distanceMeters,
+          packageSize: 'S',
+          isExpress: false,
+          at,
+        });
+        return {
+          distanceMeters,
+          price: price.totalPrice,
+          riderEarning: price.riderEarning,
+          platformShare: price.platformFee,
+        };
+      }),
+    };
+  }
+
+  /** Tarif pro des boutiques et prime d'approche des livreurs d'une ville (H4). */
+  @Get('pricing-settings/:city')
+  @ApiZodResponse(PricingSettingsDto)
+  async pricingSettings(@Param('city') city: string): Promise<z.output<typeof PricingSettingsDto>> {
+    return this.settings.toDto(await this.settings.get(city));
+  }
+
+  @Put('pricing-settings/:city')
+  @ApiZodBody(PricingSettingsBody)
+  @ApiZodResponse(PricingSettingsDto)
+  updatePricingSettings(
+    @CurrentUser() user: AuthUser,
+    @Param('city') city: string,
+    @ValidBody(PricingSettingsBody) body: z.output<typeof PricingSettingsBody>,
+    @Req() request: Request,
+  ): Promise<z.output<typeof PricingSettingsDto>> {
+    if (city.length < 2 || city.length > 60) throw AppError.notFound();
+    return this.settings.update(user, city, body, request);
+  }
+
+  /** Primes de renfort : activées par le dispatch (pluie, heures de pointe) ou l'admin. */
+  @Get('rider-boosts')
+  @Roles('ADMIN', 'DISPATCHER')
+  @ApiZodQuery(RiderBoostListQuery)
+  @ApiZodResponse(z.array(RiderBoostDto))
+  boosts(
+    @ValidQuery(RiderBoostListQuery) query: z.output<typeof RiderBoostListQuery>,
+  ): Promise<z.output<typeof RiderBoostDto>[]> {
+    return this.settings.listBoosts(query.city);
+  }
+
+  @Post('rider-boosts')
+  @Roles('ADMIN', 'DISPATCHER')
+  @ApiZodBody(RiderBoostBody)
+  @ApiZodResponse(RiderBoostDto, HttpStatus.CREATED)
+  createBoost(
+    @CurrentUser() user: AuthUser,
+    @ValidBody(RiderBoostBody) body: z.output<typeof RiderBoostBody>,
+    @Req() request: Request,
+  ): Promise<z.output<typeof RiderBoostDto>> {
+    return this.settings.createBoost(user, body, request);
+  }
+
+  @Post('rider-boosts/:id/cancel')
+  @Roles('ADMIN', 'DISPATCHER')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodResponse(RiderBoostDto)
+  cancelBoost(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() request: Request,
+  ): Promise<z.output<typeof RiderBoostDto>> {
+    return this.settings.cancelBoost(user, id, request);
+  }
 
   @Get('pricing-grids')
   @ApiZodQuery(PricingGridListQuery)

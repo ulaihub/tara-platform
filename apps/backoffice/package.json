@@ -1,0 +1,39 @@
+{
+  "name": "@tara/backoffice",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Back-office de l'équipe Tara (H1 à H8) : carte en direct, commandes, livreurs, support, finance, marchands et tarifs, indicateurs, équipe et audit.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/copy-map-worker.mjs",
+    "dev": "next dev --port 3100",
+    "prebuild": "node scripts/copy-map-worker.mjs",
+    "build": "next build",
+    "start": "next start --port 3100",
+    "lint": "oxlint --type-aware --deny-warnings src/ test/",
+    "typecheck": "next typegen && tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "api:types": "openapi-typescript ../api/openapi.json -o src/lib/api-schema.d.ts && prettier --write src/lib/api-schema.d.ts"
+  },
+  "dependencies": {
+    "maplibre-gl": "6.15.0",
+    "next": "16.4.2",
+    "qrcode": "1.5.4",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^22.0.0",
+    "@types/qrcode": "1.5.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "openapi-typescript": "^7.13.0",
+    "oxlint": "^1.90.0",
+    "oxlint-tsgolint": "^7.0.2005",
+    "tailwindcss": "4.3.3",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.2"
+  }
+}

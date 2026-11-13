@@ -291,6 +291,9 @@ const Payment: FC<{ data: PublicTracking; t: Strings }> = ({ data, t }) => {
         </>
       ) : null}
       <p class="small">{t.payHow}</p>
+      {data.mobileMoneyFee > 0 ? (
+        <p class="small">{t.mobileMoneyFee(formatAmount(data.mobileMoneyFee))}</p>
+      ) : null}
       {data.paymentPending ? (
         <p class="note" role="status">
           {t.paymentPending(formatAmount(data.paymentPending.amount))}

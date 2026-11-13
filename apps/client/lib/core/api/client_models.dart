@@ -24,6 +24,7 @@ class AppConfig {
     required this.currency,
     required this.supportPhone,
     required this.operators,
+    this.mobileMoneyFeeBps = 0,
   });
 
   factory AppConfig.fromJson(Json json) {
@@ -36,15 +37,20 @@ class AppConfig {
         for (final item in _field<List<Object?>>(json, 'mobileMoneyOperators'))
           MobileMoneyOperator(_field(item! as Json, 'code'), _field(item as Json, 'name')),
       ],
+      // Réglages gardés d'une version antérieure : sans taux, pas de frais affichés.
+      mobileMoneyFeeBps: (json['mobileMoneyFeeBps'] as num?)?.toInt() ?? 0,
     );
   }
 
-  static const fields = ['country', 'supportPhone', 'mobileMoneyOperators'];
+  static const fields = ['country', 'supportPhone', 'mobileMoneyOperators', 'mobileMoneyFeeBps'];
 
   final String dialCode;
   final String currency;
   final String? supportPhone;
   final List<MobileMoneyOperator> operators;
+
+  /// Frais Mobile Money payés par le client, en points de base (600 = 6 %).
+  final int mobileMoneyFeeBps;
 }
 
 /// Boutique du marchand (A2) : reversements vers son numéro Mobile Money.
@@ -187,6 +193,8 @@ class Wallet {
     this.plan,
     this.payoutPhone,
     this.payoutHour = 18,
+    this.withdrawalFreeFrom = 0,
+    this.withdrawalFeeBps = 0,
     this.openPayout,
   });
 
@@ -202,6 +210,8 @@ class Wallet {
       plan: merchant == null ? null : _field<String>(merchant, 'plan'),
       payoutPhone: merchant == null ? null : _field<String>(merchant, 'payoutPhone'),
       payoutHour: merchant == null ? 18 : _field<num>(merchant, 'payoutHour').toInt(),
+      withdrawalFreeFrom: merchant == null ? 0 : _field<num>(_field<Json>(merchant, 'withdrawal'), 'freeFrom').toInt(),
+      withdrawalFeeBps: merchant == null ? 0 : _field<num>(_field<Json>(merchant, 'withdrawal'), 'feeBps').toInt(),
       openPayout: open == null
           ? null
           : (amount: _field<num>(open, 'amount').toInt(), status: _field<String>(open, 'status')),
@@ -219,6 +229,7 @@ class Wallet {
     'payoutHour',
     'todaySales',
     'todayDeliveries',
+    'withdrawal',
   ];
 
   final int customerBalance;
@@ -238,6 +249,10 @@ class Wallet {
 
   /// Numéro Mobile Money des reversements de la boutique.
   final String? payoutPhone;
+
+  /// Reversement gratuit à partir de ce montant ; en dessous, ce taux (points de base) est retenu.
+  final int withdrawalFreeFrom;
+  final int withdrawalFeeBps;
 
   /// Heure du reversement quotidien (heure du Cameroun).
   final int payoutHour;
@@ -450,6 +465,53 @@ class LocationLink {
   final Address? address;
 }
 
+/// Proposition tirée de la photo du colis : à confirmer ou corriger par l'expéditeur.
+@immutable
+class ParcelAnalysis {
+  const ParcelAnalysis({
+    required this.photoKey,
+    required this.isParcel,
+    required this.size,
+    required this.contents,
+    required this.description,
+    required this.fragile,
+    required this.prohibited,
+    required this.confidence,
+  });
+
+  factory ParcelAnalysis.fromJson(Json json) {
+    final suggestion = _field<Json>(json, 'suggestion');
+    return ParcelAnalysis(
+      photoKey: _field(json, 'photoKey'),
+      isParcel: _field(json, 'isParcel'),
+      size: _field(suggestion, 'size'),
+      contents: _field(suggestion, 'contents'),
+      description: suggestion['description'] as String?,
+      fragile: _field(suggestion, 'fragile'),
+      prohibited: [
+        for (final item in _field<List<Object?>>(json, 'prohibited')) _field<String>(item! as Json, 'label'),
+      ],
+      confidence: _field(json, 'confidence'),
+    );
+  }
+  static const fields = ['photoKey', 'isParcel', 'suggestion', 'prohibited', 'confidence'];
+
+  final String photoKey;
+
+  /// Faux : la photo ne montre pas de colis, elle est à reprendre.
+  final bool isParcel;
+  final String size;
+  final String contents;
+  final String? description;
+  final bool fragile;
+
+  /// Objets interdits que la photo semble montrer (libellés).
+  final List<String> prohibited;
+
+  /// low, medium ou high.
+  final String confidence;
+}
+
 /// Prix d'une livraison avant validation (C2).
 @immutable
 class Quote {
@@ -461,6 +523,9 @@ class Quote {
     required this.discountTotal,
     required this.totalPrice,
     required this.promoCode,
+    this.discountSource,
+    this.proDiscountBps = 0,
+    this.vehicleType = 'MOTORBIKE',
     this.retryFee = 0,
     this.returnFee = 0,
   });
@@ -475,6 +540,9 @@ class Quote {
     discountTotal: _field<num>(json, 'discountTotal').toInt(),
     totalPrice: _field<num>(json, 'totalPrice').toInt(),
     promoCode: _field(json, 'promoCode'),
+    discountSource: json['discountSource'] as String?,
+    proDiscountBps: (json['proDiscountBps'] as num?)?.toInt() ?? 0,
+    vehicleType: json['vehicleType'] as String? ?? 'MOTORBIKE',
     retryFee: _field<num>(json, 'retryFee').toInt(),
     returnFee: _field<num>(json, 'returnFee').toInt(),
   );
@@ -486,6 +554,9 @@ class Quote {
     'discountTotal',
     'totalPrice',
     'promoCode',
+    'discountSource',
+    'proDiscountBps',
+    'vehicleType',
     'retryFee',
     'returnFee',
   ];
@@ -497,6 +568,15 @@ class Quote {
   final int discountTotal;
   final int totalPrice;
   final String? promoCode;
+
+  /// D'où vient la remise : PROMO (code promo), VOLUME (tarif pro de la boutique) ou rien.
+  final String? discountSource;
+
+  /// Tarif pro appliqué, en points de base (1000 = 10 %).
+  final int proDiscountBps;
+
+  /// MOTORBIKE, ou TRICYCLE pour un gros objet.
+  final String vehicleType;
 
   /// Seulement si la livraison échoue (E6) : nouvelle tentative, retour à l'expéditeur.
   final int retryFee;
@@ -551,21 +631,32 @@ class Placement {
 /// Paiement Mobile Money (G1) : en attente de validation sur le téléphone, réussi ou refusé.
 @immutable
 class Payment {
-  const Payment({required this.id, required this.status, required this.amount, required this.failureReason});
+  const Payment({
+    required this.id,
+    required this.status,
+    required this.amount,
+    required this.failureReason,
+    this.mobileMoneyFee = 0,
+  });
   factory Payment.fromJson(Json json) => Payment(
     id: _field(json, 'id'),
     status: _field(json, 'status'),
     amount: _field<num>(json, 'amount').toInt(),
     failureReason: _field(json, 'failureReason'),
+    mobileMoneyFee: _field<num>(json, 'mobileMoneyFee').toInt(),
   );
-  static const fields = ['id', 'status', 'amount', 'failureReason'];
+  static const fields = ['id', 'status', 'amount', 'failureReason', 'mobileMoneyFee', 'total'];
 
   final String id;
 
   /// PENDING, SUCCEEDED, FAILED ou CANCELLED.
   final String status;
+
+  /// Montant dû à Tara ; le téléphone reçoit une demande de amount + mobileMoneyFee.
   final int amount;
   final String? failureReason;
+  final int mobileMoneyFee;
+  int get total => amount + mobileMoneyFee;
 }
 
 /// Livreur d'une course, vu par l'expéditeur (F1) : numéro seulement pendant la course.
@@ -612,6 +703,7 @@ class TrackedOrder {
     this.rating,
     this.retryFee = 0,
     this.returnFee = 0,
+    this.refusalReason,
   });
 
   factory TrackedOrder.fromJson(Json json) {
@@ -621,6 +713,11 @@ class TrackedOrder {
     final failure = json['failure'] as Json?;
     final rating = json['rating'] as Json?;
     final scheduled = json['scheduledFor'] as String?;
+    // Annulée par le livreur : colis non conforme refusé à l'enlèvement, motif à l'appui.
+    final refused = _field<List<Object?>>(
+      json,
+      'timeline',
+    ).cast<Json>().any((step) => step['status'] == 'CANCELLED' && step['actorRole'] == 'RIDER');
     return TrackedOrder(
       id: _field(json, 'id'),
       reference: _field(json, 'reference'),
@@ -645,6 +742,7 @@ class TrackedOrder {
       createdAt: DateTime.parse(_field(json, 'createdAt')),
       failure: failure == null ? null : OrderFailure.fromJson(failure),
       rating: rating == null ? null : OrderRating.fromJson(rating),
+      refusalReason: refused ? (json['cancelReason'] as String? ?? '') : null,
     );
   }
 
@@ -662,6 +760,7 @@ class TrackedOrder {
     'pricing',
     'rider',
     'failure',
+    'cancelReason',
     'rating',
     'timeline',
     'createdAt',
@@ -696,6 +795,10 @@ class TrackedOrder {
   final int retryFee;
   final int returnFee;
 
+  /// Colis refusé par le livreur à l'enlèvement (non conforme) : le motif, sinon null. Le
+  /// déplacement ([retryFee]) est alors à la charge de l'expéditeur.
+  final String? refusalReason;
+
   /// Heure du premier passage à [status] (null s'il n'a pas eu lieu).
   DateTime? reachedAt(String status) => timeline.where((step) => step.status == status).firstOrNull?.at;
 
@@ -724,6 +827,7 @@ class TrackedOrder {
     rating: rating ?? this.rating,
     retryFee: retryFee,
     returnFee: returnFee,
+    refusalReason: refusalReason,
   );
 }
 

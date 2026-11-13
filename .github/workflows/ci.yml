@@ -102,6 +102,11 @@ jobs:
           pnpm --filter @tara/api openapi
           git diff --exit-code apps/api/openapi.json
 
+      - name: Types du back-office alignés sur le contrat
+        run: |
+          pnpm --filter @tara/backoffice api:types
+          git diff --exit-code apps/backoffice/src/lib/api-schema.d.ts
+
   rider:
     name: App livreur (Flutter)
     runs-on: ubuntu-24.04
@@ -193,7 +198,7 @@ jobs:
         with:
           name: tara-livreur-symboles
           path: apps/rider/build/symbols/
-          retention-days: 90
+          retention-days: 14
 
   client:
     name: App expéditeur (Flutter)
@@ -276,7 +281,7 @@ jobs:
         with:
           name: tara-symboles
           path: apps/client/build/symbols/
-          retention-days: 90
+          retention-days: 14
 
   map-preview:
     name: Aperçus de la carte (Douala)

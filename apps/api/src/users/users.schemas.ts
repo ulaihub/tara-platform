@@ -39,6 +39,11 @@ export const MeDto = z
         vehicleType: z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']),
       })
       .nullable(),
+    /**
+     * Membre de l'équipe (back-office) : second facteur enrôlé, et vérifié pour cette
+     * session (sinon les routes de l'équipe répondent MFA_REQUIRED). Null sinon.
+     */
+    staff: z.object({ mfaEnrolled: z.boolean(), mfaVerified: z.boolean() }).nullable(),
   })
   .meta({ id: 'Me' });
 

@@ -142,6 +142,13 @@ const envSchema = z
     DISPATCH_RADII_METERS: z.string().default('3000,5000,8000,12000'),
     DISPATCH_RETRY_SECONDS: z.coerce.number().min(0.2).max(300).default(20),
     DISPATCH_ALERT_AFTER_SECONDS: z.coerce.number().min(1).max(3600).default(300),
+    /**
+     * Retards signalés sur la carte du back-office (H1) : livreur pas encore au vendeur
+     * [LATE_PICKUP_MINUTES] après l'attribution ; colis pas livré après le trajet estimé
+     * (300 m par minute) plus [LATE_DELIVERY_MARGIN_MINUTES].
+     */
+    LATE_PICKUP_MINUTES: z.coerce.number().int().min(1).max(240).default(25),
+    LATE_DELIVERY_MARGIN_MINUTES: z.coerce.number().int().min(0).max(240).default(15),
     /** Position considérée comme périmée au-delà de ce délai (livreur hors ligne de fait). */
     RIDER_POSITION_TTL_SECONDS: z.coerce.number().int().min(10).max(600).default(90),
     /** Au-delà de ce montant à encaisser, une livraison sans code exige un administrateur. */
@@ -149,17 +156,51 @@ const envSchema = z
 
     /**
      * Agrégateur Mobile Money (G1, G3). « fake » simule les paiements (interdit en
-     * production) ; « campay » : MTN MoMo et Orange Money par CamPay.
+     * production) ; « campay » ou « sebpay » : MTN MoMo et Orange Money au Cameroun.
      */
-    PAYMENT_PROVIDER: z.enum(['fake', 'campay']).default('fake'),
+    PAYMENT_PROVIDER: z.enum(['fake', 'campay', 'sebpay']).default('fake'),
+    /** Bac à sable par défaut ; réel : https://newapi.sebpay.bj/api/v1 (clés pk_live_). */
+    SEBPAY_BASE_URL: z.url({ protocol: /^https$/ }).default('https://api.sandbox.sebpay.bj/api/v1'),
+    SEBPAY_PUBLIC_KEY: z
+      .string()
+      .regex(/^pk_(test|live)_/, 'clé publique pk_test_… ou pk_live_…')
+      .optional(),
+    SEBPAY_SECRET_KEY: z
+      .string()
+      .regex(/^sk_(test|live)_/, 'clé secrète sk_test_… ou sk_live_…')
+      .optional(),
+    /**
+     * Adresse publique de l'API (https), d'où Sebpay est rappelé :
+     * {PUBLIC_API_URL}/v1/webhooks/payments/sebpay.
+     */
+    PUBLIC_API_URL: z.url({ protocol: /^https$/ }).optional(),
     CAMPAY_BASE_URL: z.url({ protocol: /^https$/ }).default('https://demo.campay.net/api'),
     CAMPAY_USERNAME: z.string().min(1).optional(),
     CAMPAY_PASSWORD: z.string().min(1).optional(),
     CAMPAY_WEBHOOK_KEY: z.string().min(16).optional(),
+    /**
+     * Analyse de la photo du colis (taille, nature, objets interdits proposés) : « claude »
+     * (ANTHROPIC_API_KEY), « fake » (développement, interdit en production) ou « none »
+     * (l'expéditeur choisit seul).
+     */
+    PARCEL_VISION_PROVIDER: z.enum(['none', 'fake', 'claude']).default('fake'),
+    ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    PARCEL_VISION_MODEL: z.string().min(1).default('claude-opus-5-5'),
+    /** Analyses de photo par compte et par heure (coût du modèle). */
+    PARCEL_ANALYSIS_PER_HOUR: z.coerce.number().int().min(1).max(500).default(20),
     /** Une demande de paiement sans réponse est abandonnée après ce délai. */
     PAYMENT_REQUEST_TIMEOUT_MINUTES: z.coerce.number().int().min(1).max(60).default(10),
     /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */
     PAYOUT_MIN_AMOUNT: z.coerce.number().int().min(1).default(500),
+    /**
+     * Frais Mobile Money du prestataire à l'encaissement, en points de base (600 = 6 % pour un
+     * compte Sebpay particulier) : ajoutés au montant payé par le client.
+     */
+    MOBILE_MONEY_FEE_BPS: z.coerce.number().int().min(0).max(2000).default(0),
+    /** Frais du prestataire sur un reversement (250 = 2,5 %) : retenus sur le montant envoyé. */
+    PAYOUT_FEE_BPS: z.coerce.number().int().min(0).max(2000).default(0),
+    /** Seuil général de retrait gratuit (boutiques et livreurs sans seuil propre). */
+    FREE_PAYOUT_FROM: z.coerce.number().int().min(0).default(50_000),
     PAYOUT_APPROVAL_THRESHOLD: z.coerce.number().int().min(1).default(200_000),
     /** Heure du reversement quotidien des marchands, heure du Cameroun (G3). */
     PAYOUT_DAILY_HOUR: z.coerce.number().int().min(0).max(23).default(18),
@@ -229,6 +270,36 @@ const envSchema = z
           });
       }
     }
+    if (env.PARCEL_VISION_PROVIDER === 'claude' && !env.ANTHROPIC_API_KEY) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['ANTHROPIC_API_KEY'],
+        message: 'requis avec PARCEL_VISION_PROVIDER=claude',
+      });
+    }
+    if (env.PAYMENT_PROVIDER === 'sebpay') {
+      for (const key of ['SEBPAY_PUBLIC_KEY', 'SEBPAY_SECRET_KEY', 'PUBLIC_API_URL'] as const) {
+        if (!env[key])
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: 'requis avec PAYMENT_PROVIDER=sebpay',
+          });
+      }
+      // Clés et serveur du même environnement : sandbox avec _test_, réel avec _live_.
+      const sandbox = env.SEBPAY_BASE_URL.includes('sandbox');
+      for (const key of ['SEBPAY_PUBLIC_KEY', 'SEBPAY_SECRET_KEY'] as const) {
+        const value = env[key];
+        if (value && value.includes('_test_') !== sandbox)
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: sandbox
+              ? 'clé réelle (_live_) envoyée au bac à sable'
+              : 'clé de test (_test_) envoyée au serveur réel',
+          });
+      }
+    }
     const radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
     if (radii.some((r) => !Number.isInteger(r) || r <= 0)) {
       ctx.addIssue({
@@ -264,6 +335,20 @@ const envSchema = z
         code: 'custom',
         path: ['PAYMENT_PROVIDER'],
         message: 'le prestataire de paiement factice est interdit en production',
+      });
+    }
+    if (env.PARCEL_VISION_PROVIDER === 'fake') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['PARCEL_VISION_PROVIDER'],
+        message: 'l’analyse factice des photos de colis est interdite en production',
+      });
+    }
+    if (env.PAYMENT_PROVIDER === 'sebpay' && env.SEBPAY_BASE_URL.includes('sandbox')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SEBPAY_BASE_URL'],
+        message: 'le bac à sable Sebpay est interdit en production',
       });
     }
     if (env.STORAGE_DRIVER === 'local') {

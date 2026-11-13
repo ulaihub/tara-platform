@@ -67,7 +67,11 @@ export const DeliveryItem = z.object({
   /** Précision libre, ex. « 2 paires de chaussures ». */
   packageDescription: z.string().trim().max(120).optional(),
   isFragile: z.boolean().default(false),
+  /** Gros objet : aide au chargement par deux personnes (supplément manutention). */
+  loadingHelp: z.boolean().default(false),
   declaredValue: Fcfa.optional(),
+  /** Photo du colis (POST /media, kind=PARCEL_PHOTO), analysée par POST /orders/parcel-analysis. */
+  parcelPhotoKey: z.string().min(1).max(200).optional(),
   /** Montant à encaisser auprès du destinataire, 0 si aucun (réservé aux marchands). */
   codAmount: Fcfa.default(0),
   instructions: z.string().trim().max(300).optional(),
@@ -130,6 +134,7 @@ export const OrderDto = z
     packageContents: PackageContentsEnum.nullable(),
     packageDescription: z.string().nullable(),
     isFragile: z.boolean(),
+    loadingHelp: z.boolean(),
     declaredValue: z.int().nullable(),
     instructions: z.string().nullable(),
     pickup: AddressDto,
@@ -307,7 +312,9 @@ export const PublicTrackingDto = z
       .nullable(),
     /** À payer à la porte : frais de livraison (si le destinataire les paie) et colis. */
     due: z.object({ fee: z.int(), cod: z.int(), total: z.int() }),
-    /** Demande Mobile Money envoyée par le livreur, à valider sur le téléphone. */
+    /** Frais Mobile Money ajoutés si le destinataire paie par Mobile Money (en espèces : rien). */
+    mobileMoneyFee: z.int(),
+    /** Demande Mobile Money envoyée par le livreur, à valider sur le téléphone (frais compris). */
     paymentPending: z.object({ amount: z.int() }).nullable(),
     /** Après un échec : nouvelle tentative ou retour à l'expéditeur, si c'est décidé. */
     failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),

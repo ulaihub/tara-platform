@@ -111,6 +111,24 @@ void main() {
     expect(find.text('En retard\u00a0: plus de courses jusqu’au dépôt.'), findsOneWidget);
   });
 
+  testWidgets('solde : retrait gratuit à partir du seuil, frais Mobile Money en dessous', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 18000,
+        available: 18000,
+        cashHeld: 0,
+        cashLimit: 25000,
+        withdrawalFreeFrom: 20000,
+        withdrawalFeeBps: 250,
+      );
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    expect(
+      find.text('Retrait gratuit dès 20\u00a0000\u00a0F ; en dessous, 2,5\u00a0% de frais Mobile Money retenus.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('dernières courses : trois, puis toutes ; statut, encaissement et gain', (tester) async {
     await pumpVariant(tester, Variant.matrix.first, activity(activityApi()));
     await settle(tester);

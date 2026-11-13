@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:tara_core/money/mobile_money_fees.dart';
 
 import '../../core/api/client_models.dart';
 
@@ -29,8 +30,15 @@ class DeliveryDraft {
 
   String? contents;
   String description = '';
+
+  /// S, M, L, XL, ou BULKY (gros objet : tricycle ou voiture, jamais à moto).
   String size = 'S';
   bool fragile = false;
+
+  /// Gros objet : l'expéditeur demande deux personnes pour charger (supplément manutention).
+  bool loadingHelp = false;
+
+  bool get bulky => size == 'BULKY';
 
   /// Taille et fragilité choisies par l'expéditeur : la nature du contenu ne les suggère
   /// plus ensuite.
@@ -39,6 +47,12 @@ class DeliveryDraft {
   int? declaredValue;
   int codAmount = 0;
   String instructions = '';
+
+  /// Photo du colis : fichier sur le téléphone, clé une fois envoyée, et ce que l'analyse en
+  /// a tiré (null tant qu'elle n'a pas répondu).
+  String? parcelPhotoPath;
+  String? parcelPhotoKey;
+  ParcelAnalysis? parcelAnalysis;
 
   /// Prix calculé au récapitulatif (null tant qu'il ne l'est pas).
   Quote? quote;
@@ -69,6 +83,8 @@ class DeliveryDraft {
     'packageContents': contents ?? 'OTHER',
     if (description.trim().isNotEmpty) 'packageDescription': description.trim(),
     'isFragile': fragile,
+    if (bulky) 'loadingHelp': loadingHelp,
+    'parcelPhotoKey': ?parcelPhotoKey,
     'declaredValue': ?declaredValue,
     'codAmount': codAmount,
     if (instructions.trim().isNotEmpty) 'instructions': instructions.trim(),
@@ -107,6 +123,15 @@ class OrderDraft extends ChangeNotifier {
   /// Toutes les livraisons ont leur adresse et leur prix.
   bool get allQuoted => deliveries.every((d) => d.dropoff != null && d.quote != null);
   int get total => deliveries.fold(0, (sum, d) => sum + (d.quote?.totalPrice ?? 0));
+
+  /// Taux des frais Mobile Money (réglages de l'app), en points de base.
+  int mobileMoneyFeeBps = 0;
+
+  /// Payé par Mobile Money par l'expéditeur : frais en plus de la course ; sinon rien.
+  int get mobileMoneyFeeAmount => momo ? mobileMoneyFee(total, mobileMoneyFeeBps) : 0;
+
+  /// Ce que l'expéditeur paie maintenant : courses et frais Mobile Money éventuels.
+  int get amountToPay => total + mobileMoneyFeeAmount;
 
   /// Moyen de paiement choisi et utilisable (Mobile Money : numéro valide).
   bool get hasPayment =>

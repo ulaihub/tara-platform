@@ -424,6 +424,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourEarning => 'Your earning';
 
   @override
+  String bonusIncluded(String details) {
+    return 'includes $details';
+  }
+
+  @override
+  String approachBonus(String amount) {
+    return 'pickup distance bonus $amount';
+  }
+
+  @override
+  String boostBonus(String amount) {
+    return 'boost $amount';
+  }
+
+  @override
   String pickupLabel(String distance) {
     return 'PICKUP · $distance';
   }
@@ -452,6 +467,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packageLarge => 'Large parcel';
+
+  @override
+  String get packageBulky => 'Bulky item';
+
+  @override
+  String get comeWithHelper => 'Come with a helper';
 
   @override
   String get fragile => 'Fragile';
@@ -513,6 +534,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get parcelCollected => 'Parcel collected';
+
+  @override
+  String get parcelNotConforming => 'Parcel not as declared?';
+
+  @override
+  String get bulkyNotice => 'Bulky item: check that it fits your vehicle before loading it.';
+
+  @override
+  String get bulkyWithHelpNotice => 'Bulky item, loading help paid by the sender: come with a helper.';
+
+  @override
+  String get refusalTitle => 'Parcel not as declared';
+
+  @override
+  String get refusalBody =>
+      'Do not take a parcel that is too big, too heavy, different from what was declared, or forbidden. Report it here before entering the code.';
+
+  @override
+  String get refusalReasonLabel => 'Why?';
+
+  @override
+  String get refusalTooBig => 'Too big for my vehicle';
+
+  @override
+  String get refusalTooHeavy => 'Too heavy';
+
+  @override
+  String get refusalNotAsDeclared => 'Not what was declared';
+
+  @override
+  String get refusalForbidden => 'Forbidden item';
+
+  @override
+  String get refusalNoteLabel => 'Details (optional)';
+
+  @override
+  String get refusalNoteHint => 'E.g. 3-door wardrobe instead of a box';
+
+  @override
+  String get refusalPhotoHint => 'Whole parcel visible: it is the proof';
+
+  @override
+  String get refusalNotice =>
+      'The job will be cancelled and your trip will be paid. The sender sees the reason and the photo. A refusal without a valid reason is reported to the team.';
+
+  @override
+  String get refusalConfirm => 'Refuse the parcel';
+
+  @override
+  String get parcelRefusedNotice => 'Parcel refused. Your trip is paid.';
+
+  @override
+  String get refusalQueuedTitle => 'Refusal saved';
+
+  @override
+  String get refusalQueuedBody => 'It will be sent as soon as the network is back. You can leave.';
+
+  @override
+  String get queuedRefuseParcel => 'Non-conforming parcel refused';
 
   @override
   String get actionSavedOffline => 'Saved on the phone: sent automatically when the network is back.';
@@ -1542,4 +1622,112 @@ class AppLocalizationsEn extends AppLocalizations {
   String addressPhotoTitle(String name) {
     return 'Entrance · $name';
   }
+
+  @override
+  String get toCollectByMomo => 'To request by Mobile Money';
+
+  @override
+  String momoFeeIncluded(String amount, String fee) {
+    return '$amount for the delivery and parcel, plus $fee Mobile Money fee paid by the customer.';
+  }
+
+  @override
+  String withdrawalRule(String amount, String rate) {
+    return 'Free withdrawal from $amount; below that, a $rate Mobile Money fee is deducted.';
+  }
+
+  @override
+  String get supportTitle => 'Help and customer service';
+
+  @override
+  String get supportIntro =>
+      'A problem with a job, your earnings or the app? Write to us: the Tara team answers here and you are notified of its reply.';
+
+  @override
+  String get supportNewRequest => 'New request';
+
+  @override
+  String get supportEmpty => 'No requests yet.';
+
+  @override
+  String supportCallUs(String phone) {
+    return 'Urgent? Call $phone';
+  }
+
+  @override
+  String get supportCategoryPayment => 'Earnings, balance or withdrawal';
+
+  @override
+  String get supportCategoryLostParcel => 'Lost parcel';
+
+  @override
+  String get supportCategoryDamagedParcel => 'Damaged parcel';
+
+  @override
+  String get supportCategoryAppBug => 'Problem in the app';
+
+  @override
+  String get supportCategoryOther => 'Other';
+
+  @override
+  String get supportStatusOpen => 'Sent';
+
+  @override
+  String get supportStatusInProgress => 'In progress';
+
+  @override
+  String get supportStatusResolved => 'Resolved';
+
+  @override
+  String get supportStatusClosed => 'Closed';
+
+  @override
+  String get supportNewTitle => 'New request';
+
+  @override
+  String get supportReasonLabel => 'Reason';
+
+  @override
+  String get supportSubjectLabel => 'In a few words';
+
+  @override
+  String get supportSubjectHint => 'E.g. withdrawal not received';
+
+  @override
+  String get supportMessageLabel => 'Tell us more';
+
+  @override
+  String get supportMessageHint => 'What happened, and the job concerned if any.';
+
+  @override
+  String supportOrderLine(String reference) {
+    return 'Job $reference';
+  }
+
+  @override
+  String get supportSend => 'Send the request';
+
+  @override
+  String get supportReplyHint => 'Your reply…';
+
+  @override
+  String get supportReplySend => 'Send';
+
+  @override
+  String get supportClosedNote => 'This request is closed. Open a new request if needed.';
+
+  @override
+  String get supportFromTara => 'Tara customer service';
+
+  @override
+  String get supportNewAnswer => 'Reply';
+
+  @override
+  String get supportWaitingNote => 'The Tara team answers here; you will be notified.';
+
+  @override
+  String get supportMenuRow => 'Write to customer service';
+
+  @override
+  String get supportMenuRowSubtitle => 'Your requests and Tara’s replies';
 }

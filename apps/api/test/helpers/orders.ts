@@ -3,10 +3,14 @@ import request from 'supertest';
 import { type SignedIn, signIn, type TestContext } from './app.js';
 import { createAddress, ensureDoualaServiceArea, PLACES } from './geo.js';
 
+/** Part du livreur validée (70 %), aussi la valeur par défaut d'une grille. */
+export const RIDER_SHARE_BPS = 7000;
+
 /** Grille du business plan (C2). */
 export const DOUALA_GRID = {
   name: 'Douala moto',
   city: 'Douala',
+  riderShareBps: RIDER_SHARE_BPS,
   perKmBeyondLastTier: 150,
   tiers: [
     { upToMeters: 5_000, price: 1000 },
@@ -17,6 +21,25 @@ export const DOUALA_GRID = {
     { code: 'EXPRESS', amount: 500 },
     { code: 'NIGHT', amount: 500 },
     { code: 'FAILED_ATTEMPT', amount: 500 },
+    { code: 'RETURN', percentBps: 5000 },
+  ],
+  activate: true,
+};
+
+/** Grille des gros objets : tricycle, manutention à deux, déplacement payé si refus. */
+export const DOUALA_TRICYCLE_GRID = {
+  name: 'Douala tricycle',
+  city: 'Douala',
+  vehicleType: 'TRICYCLE',
+  perKmBeyondLastTier: 300,
+  tiers: [
+    { upToMeters: 5_000, price: 3000 },
+    { upToMeters: 10_000, price: 4500 },
+    { upToMeters: 15_000, price: 6000 },
+  ],
+  surcharges: [
+    { code: 'HANDLING', amount: 1500 },
+    { code: 'FAILED_ATTEMPT', amount: 1500 },
     { code: 'RETURN', percentBps: 5000 },
   ],
   activate: true,

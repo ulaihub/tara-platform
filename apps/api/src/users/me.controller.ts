@@ -29,7 +29,7 @@ export class MeController {
   @Get()
   @ApiZodResponse(MeDto)
   me(@CurrentUser() user: AuthUser): Promise<z.output<typeof MeDto>> {
-    return this.users.me(user.id);
+    return this.users.me(user.id, user.roles);
   }
 
   @Patch()

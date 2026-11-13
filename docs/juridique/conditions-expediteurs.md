@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11 · Projet à faire valider par un juriste avant publication. Les points marqués
+Version 2026-11.1 · Projet à faire valider par un juriste avant publication. Les points marqués
 **[À VALIDER]** demandent son avis.
 
 Ces conditions s'appliquent à toute personne qui envoie un colis avec l'application Tara, qu'elle
@@ -34,6 +34,17 @@ encaisse les paiements et suit chaque course.
   distance et, s'il y a lieu, des suppléments affichés : livraison express, colis très
   volumineux (XL), livraison de nuit (de 20 h à 6 h), fortes pluies. Un code promo réduit le
   prix affiché.
+- **Tarif pro des boutiques** : en mode marchand, une remise s'applique automatiquement selon
+  le nombre de vos livraisons réussies du mois en cours (par exemple 10 % à partir de 100,
+  15 % à partir de 300). Elle est affichée avant que vous commandiez et ne se cumule pas avec
+  un code promo : le prix le plus avantageux des deux est retenu.
+- **Paiement par Mobile Money** (MTN MoMo, Orange Money) : des frais Mobile Money s'ajoutent
+  au montant, affichés avant que vous validiez. En espèces, vous ne payez rien de plus. Ces
+  frais couvrent ceux de l'opérateur ; ils ne sont pas rendus si la commande est annulée.
+- **Gros objets** (réfrigérateur, cuisinière, matelas, meuble…) : choisissez « Gros objet ».
+  La course se fait en tricycle ou en voiture, à un tarif propre affiché avant de commander.
+  Si vous demandez de l'aide pour charger (deux personnes), un supplément de manutention
+  s'ajoute, lui aussi affiché avant de commander.
 - Vous pouvez programmer une livraison jusqu'à plusieurs jours à l'avance.
 - Vous pouvez annuler gratuitement tant que le livreur n'a pas récupéré le colis : ce que vous
   avez payé revient sur votre solde Tara. Une fois le colis récupéré, la commande ne peut plus
@@ -54,6 +65,28 @@ qui lui paraît interdit ou mal emballé. Un colis interdit découvert en cours 
 au bureau de Tara et, si la loi l'exige, aux autorités.
 
 Emballez le colis pour qu'il supporte un trajet à moto. Signalez s'il est fragile.
+
+### Photo du colis
+
+Vous pouvez photographier le colis en commandant. La photo est analysée automatiquement pour
+vous proposer sa taille et sa nature : vous gardez toujours le dernier mot. Si la photo semble
+montrer un objet interdit, l'application vous prévient ; si vous commandez quand même,
+l'équipe Tara et le livreur en sont informés. La photo est jointe à la commande et montrée au
+livreur. Photographiez le colis seul, sans personne dans le cadre.
+
+### Colis non conforme
+
+Déclarez le colis tel qu'il est : sa taille, son contenu, et « Gros objet » s'il ne tient pas
+sur une moto. Si, à l'enlèvement, le colis ne correspond pas à ce que vous avez déclaré (trop
+grand ou trop lourd pour le véhicule, autre chose que ce qui est annoncé, objet interdit), le
+livreur peut le refuser, photo à l'appui. Dans ce cas :
+
+- la commande est annulée et ce que vous aviez payé d'avance revient sur votre solde Tara ;
+- **le déplacement du livreur vous est facturé** : le même montant que les frais de nouvelle
+  tentative, affiché au récapitulatif avant que vous commandiez. Il est pris sur votre solde
+  Tara ; s'il ne suffit pas, vous réglez ce montant avant votre prochaine commande.
+
+Vous pouvez contester auprès du service client : la photo prise par le livreur est gardée.
 
 **[À VALIDER : responsabilité de Tara en cas de perte ou de dommage, par exemple dans la
 limite de la valeur déclarée et d'un plafond par colis ; procédure et délai de réclamation.]**
@@ -82,6 +115,9 @@ Vous choisissez, avant de commander :
   des frais de 2 % (250 FCFA au moins).
 - Votre portefeuille vous est reversé chaque jour (par défaut à 18 h) sur votre numéro Mobile
   Money, à partir de 500 FCFA disponibles.
+- **Frais de retrait** : un reversement est gratuit à partir d'un montant fixé pour votre
+  boutique selon vos transactions avec Tara (affiché dans l'application). En dessous, les frais
+  Mobile Money de l'envoi (2,5 % aujourd'hui) sont retenus sur le montant reçu.
 - Votre relevé mensuel est disponible dans l'application.
 
 **[À VALIDER : encaisser pour le compte de boutiques puis leur reverser peut relever de la

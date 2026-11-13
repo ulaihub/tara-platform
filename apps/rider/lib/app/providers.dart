@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
 import 'package:tara_core/api/legal_api.dart';
+import 'package:tara_core/api/support_api.dart';
 import 'package:tara_core/network/network_status.dart';
 import 'package:tara_core/push/push_service.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
@@ -74,6 +75,9 @@ final authApiProvider = Provider<AuthApi>(
 );
 
 final riderApiProvider = Provider<RiderApi>((ref) => RiderApi(ref.watch(apiClientProvider)));
+
+/// Service client : demandes du livreur et réponses de l'équipe Tara (H6).
+final supportBackendProvider = Provider<SupportBackend>((ref) => SupportApi(ref.watch(apiClientProvider)));
 
 final legalApiProvider = Provider<LegalApi>(
   (ref) => LegalApi(ref.watch(apiClientProvider), ref.watch(sessionStoreProvider), app: 'rider'),

@@ -73,6 +73,93 @@ Chaque position reçue pendant une course (de l'acceptation à la livraison, au 
 | Équipe  | `GET /v1/admin/orders/{id}/track`                                                                                  | Support, dispatch, administrateur : points, résumé et alertes. Chaque consultation est tracée dans le journal d'audit.                                                                                                                                                                                                                                    |
 | Équipe  | `GET /v1/admin/course-alerts?status=open\|all`, `POST /v1/admin/course-alerts/{id}/acknowledge`                    | Alertes (une par sujet et par course, aussi en temps réel : `ops.course-alert`) : `ACTION_FAR` (enlèvement, livraison, échec ou retour déclaré à plus de 200 m de l'adresse), `LONG_STOP` (plus de 15 min au même endroit avec le colis, loin du vendeur et du client), `MOCK_LOCATION` (position simulée), `TRACK_GAP` (aucune position pendant 20 min). |
 
+## Back-office d'exploitation (H1 à H8)
+
+Le back-office (`apps/backoffice`) appelle l'API depuis son serveur avec le jeton du membre
+de l'équipe (second facteur vérifié) ; le navigateur ne voit jamais ce jeton. `GET /me`
+indique où en est le second facteur (`staff.mfaEnrolled`, `staff.mfaVerified`).
+
+**Carte en direct (H1)** : `GET /admin/live-map` (`ADMIN`, `DISPATCHER`, `SUPPORT`), lue
+toutes les 5 secondes par le back-office. Elle donne :
+
+- les livreurs validés et ceux en course : `FREE` (en ligne, sans course), `ON_COURSE`,
+  `OFFLINE`, dernière position (gardée 15 min), `signalLost` quand un livreur en ligne
+  n'envoie plus de position depuis `RIDER_POSITION_TTL_SECONDS` ;
+- les commandes en cours (les programmées une heure avant leur départ) avec leur retard :
+  `NO_RIDER` (recherche au-delà de `DISPATCH_ALERT_AFTER_SECONDS`), `PICKUP` (pas enlevée
+  `LATE_PICKUP_MINUTES` après l'attribution, 25 par défaut), `DELIVERY` (pas livrée après
+  le trajet estimé à 300 m/min plus `LATE_DELIVERY_MARGIN_MINUTES`, 15 par défaut ; après
+  un échec, le compte repart de l'échec) ; `awaitingValidation` (remise sans code à valider)
+  et `awaitingDecision` (échec, choix de l'expéditeur attendu) ;
+- les alertes de sécurité non closes et les alertes de trajet pas encore vues.
+
+Avec OSRM (`OSRM_URL`), chaque livreur porte aussi `roadPosition` : sa position ramenée sur
+la rue la plus proche (à moins de 40 m, sinon null), calculée une fois par nouvelle position.
+
+**Course d'un livreur sur la carte** : `GET /admin/riders/{riderId}/trail?orderId=`
+(mêmes rôles). Pour la course en cours (la plus récente, ou `orderId`) : `traveled`, le
+chemin parcouru depuis l'acceptation, recalé sur les rues par OSRM (`match`) ou, à défaut,
+les positions GPS reliées (`onRoads: false`) ; `remaining`, l'itinéraire routier jusqu'au
+prochain arrêt (vendeur, client, ou rien si une décision est attendue après un échec), avec
+distance et durée prudente (au moins 18 km/h de moyenne). Rien en dehors des courses : seul
+le trajet enregistré pendant la course est lu.
+
+**Livreurs (H3)** (dispatch et administrateurs) :
+
+- `GET /admin/riders?view=&q=&limit=&cursor=` : vues `TO_REVIEW` (candidature en attente ou
+  pièce envoyée à examiner), `PENDING`, `ACTIVE`, `SUSPENDED`, `REJECTED`, `ALL` ; recherche
+  par nom, numéro (saisie en chiffres) ou plaque (avec ou sans espaces) ; `counts` donne le
+  nombre de livreurs par vue. Chaque livreur porte ses pièces, la note moyenne,
+  les courses livrées en 30 jours et les pièces qui expirent dans les 30 jours.
+- Un candidat est validé (`decision: APPROVE`) dès que toutes ses pièces exigées sont
+  validées ; aucun entretien n'est demandé.
+- `GET /admin/riders/{id}/reliability` : sur 30 jours et depuis l'inscription, propositions
+  acceptées, refusées ou sans réponse, courses livrées et à l'heure, échecs déclarés, colis
+  refusés à l'enlèvement, notes, temps en ligne, alertes de course et SOS ; historique des
+  décisions lu dans le journal d'audit (pièces examinées, validation, refus,
+  suspension, réactivation, suspension faute de dépôt, seuil de retrait gratuit).
+- Le back-office ouvre une pièce (`GET /admin/kyc-documents/{id}/file`, consultation tracée)
+  dans un onglet isolé : images seulement affichées, PDF téléchargés.
+
+**Service client (H6)** :
+
+- Apps (tout utilisateur connecté) : `POST /support/tickets` (`category`, `subject`,
+  `message`, `orderId` d'une commande qu'il envoie, reçoit ou livre), `GET /support/tickets`,
+  `GET /support/tickets/{id}`, `POST /support/tickets/{id}/messages`. Cinq demandes en cours
+  au plus (`TICKET_LIMIT_REACHED`) ; colis perdu et paiement en priorité haute ; une demande
+  résolue est rouverte par une réponse du client, une demande close ne l'est plus
+  (`TICKET_CLOSED`). Les notes internes ne sont jamais renvoyées.
+- Back-office (support et administrateurs) : `GET /admin/support/tickets?view=&q=` (vues
+  `TO_HANDLE`, `MINE`, `URGENT`, `RESOLVED`, `ALL` ; recherche par `SUP-…`, commande,
+  téléphone ou sujet ; urgentes puis plus anciennes d'abord ; `counts` par vue),
+  `POST /admin/support/tickets` (après un appel : `phone` et/ou `orderReference`, même pour une
+  personne sans compte ; la demande est confiée à qui l'ouvre), `GET /admin/support/tickets/{id}`,
+  `POST /admin/support/tickets/{id}/messages` (`internal` : note interne ; sinon le client est
+  prévenu par notification, à défaut par SMS `SUPPORT_REPLY` ; sans l'app, `requesterHasApp`
+  est faux et le back-office demande à l'équipe d'appeler la personne), `PATCH /admin/support/tickets/{id}`
+  (`status`, `priority`, `assigneeId`, tracé).
+- Litiges (support, dispatch, administrateurs) : `GET /admin/support/orders/{id}/evidence`
+  (preuves : heure, position, code vérifié, photo, appels du livreur avant un échec ; notes ;
+  photo du colis ; points du trajet), `GET /admin/support/proofs/{id}/photo` et
+  `GET /admin/support/orders/{id}/parcel-photo` (consultations tracées).
+
+**Commandes (H2)** :
+
+- `GET /admin/orders?q=&view=&from=&to=&riderId=&limit=&cursor=` (dispatch, support,
+  administrateurs) : recherche par référence, numéro ou nom du destinataire, expéditeur ou
+  boutique ; vues `all`, `active`, `problems` (échec en attente, recherche sans livreur
+  signalée, remise sans code, alerte de trajet non vue, retard), `delivered`, `cancelled`
+  (annulées ou retournées) ; jours de création à l'heure de Douala ; du plus récent au plus
+  ancien, avec le total.
+- `GET /admin/orders/{id}` : fiche complète (colis, personnes, arrêts, prix et parts,
+  encaissement, échec, historique des statuts avec l'auteur, preuves, alertes de trajet,
+  notes internes, actions possibles).
+- `POST /admin/orders/{id}/notes` : note interne (jamais montrée aux clients ni aux
+  livreurs).
+- `POST /admin/orders/{id}/cancel` (dispatch, administrateurs) : annulation avant
+  l'enlèvement, raison obligatoire, tracée et envoyée à l'expéditeur. La réattribution
+  passe par `GET /admin/orders/{id}/candidates` et `POST /admin/orders/{id}/assign`.
+
 ## Couverture des exigences de la phase 1
 
 | Exigence | Routes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -103,12 +190,56 @@ Chaque position reçue pendant une course (de l'acceptation à la livraison, au 
 
 Le code d'enlèvement (4 chiffres) n'est renvoyé qu'une fois, à la création ; s'il est perdu, `POST /orders/{id}/pickup-code` en génère un nouveau. Le code de livraison est créé à l'enlèvement et envoyé au destinataire (WhatsApp, ou SMS en repli). Après 5 codes faux saisis par le livreur, le code est bloqué : nouveau code d'enlèvement par l'expéditeur, validation de la livraison par le support.
 
+## Photo du colis analysée
+
+1. L'app envoie la photo : `POST /v1/media` avec `kind=PARCEL_PHOTO` (image, 1 Mo au plus).
+2. `POST /v1/orders/parcel-analysis` `{ photoKey }` renvoie une proposition à faire confirmer : `suggestion` (taille `S`…`XL` ou `BULKY`, nature, précision en quelques mots, fragile), `prohibited` (objets interdits que la photo semble montrer, avec leur libellé), `isParcel` (faux : photo à reprendre) et `confidence`. Une photo n'est analysée qu'une fois (la même réponse ensuite). `503 PARCEL_ANALYSIS_UNAVAILABLE` ou `429 PARCEL_ANALYSIS_LIMIT` (`PARCEL_ANALYSIS_PER_HOUR` par compte) : l'expéditeur choisit lui-même.
+3. La commande porte `parcelPhotoKey`. Si l'analyse a signalé un objet interdit, l'avertissement suit la commande : `parcelWarning` pour le livreur (avec `hasParcelPhoto` et `GET /v1/rider/orders/{id}/parcel-photo` tant que la course est en cours) et `parcel.aiWarning` au back-office.
+
+Moteur : `PARCEL_VISION_PROVIDER=claude` (vision de Claude, `ANTHROPIC_API_KEY`, modèle `PARCEL_VISION_MODEL`, `claude-opus-5-5` par défaut, effort bas, sortie structurée), `fake` en développement, `none` pour couper l'analyse. Seule la photo est envoyée, jamais le nom ni le numéro.
+
+## Modèle de prix : tarif pro et primes des livreurs (H4)
+
+Tout se règle au back-office, sans nouvelle version des apps : le devis est toujours calculé par le serveur et affiché avant la commande.
+
+- **Grille de lancement de Douala** (moto) : 1 000 F jusqu'à 5 km, +100 F par km commencé jusqu'à 10 km (paliers d'un km), puis +50 F par km (`perKmBeyondLastTier`). Part du livreur : 70 % (`riderShareBps: 7000`, valeur par défaut d'une grille).
+- **Tarif pro** : une boutique (mode marchand) a une remise selon ses livraisons réussies du mois en cours, heure du Cameroun (par défaut −10 % dès 100, −15 % dès 300). Arrondie à 50 F, prise sur la part de Tara (la part du livreur ne change pas). Jamais cumulée avec un code promo : le plus avantageux est retenu, et un code moins avantageux n'est pas consommé. Le devis renvoie `discountSource` (`PROMO`, `VOLUME` ou `null`) et `proDiscountBps` ; la commande garde `proDiscountBps`.
+- **Prime d'approche** : quand le vendeur est au-delà d'une distance (3 km par défaut) du livreur au moment de la proposition, Tara ajoute un montant (200 F par défaut).
+- **Prime de renfort** : montant ajouté à chaque course proposée pendant une période (pluie, heures de pointe), au lieu d'augmenter le prix du client. Plusieurs primes qui se chevauchent ne se cumulent pas : la plus forte s'applique.
+- Les primes sont annoncées dans la proposition (`approachBonus`, `boostBonus` ; `riderEarning` est le gain total), figées sur la commande quand le livreur accepte (ou quand le dispatch l'attribue, depuis sa dernière position), remises à zéro s'il rend la course, et payées à la livraison sur le compte `platform:expense:rider_bonuses`.
+
+Routes (`ADMIN`, double authentification) : `GET` et `PUT /admin/pricing-settings/{ville}` (paliers du tarif pro, montant et seuil de la prime d'approche ; `updatedAt: null` tant que les valeurs validées s'appliquent), `POST /admin/pricing-grids/simulate` (prix, part du livreur et part de Tara d'une grille en projet pour quelques distances). Primes de renfort (`ADMIN` ou `DISPATCHER`) : `GET` et `POST /admin/rider-boosts`, `POST /admin/rider-boosts/{id}/cancel` (les courses déjà acceptées gardent leur prime).
+
+Boutiques (`ADMIN`, `FINANCE`) : `GET /admin/merchants?q&page` (les plus actives du mois d'abord : livraisons réussies du mois, tarif pro atteint, solde, dernière commande ; `onProRate` compte les boutiques au tarif pro), `GET /admin/merchants/{id}` (30 derniers jours, prochain palier du tarif pro, dernières commandes et reversements). Zones : `GET /admin/zones` liste aussi les zones coupées ; `GET /admin/zones/map` donne les contours de toutes les zones (quartiers et zones coupées compris) pour la carte où l'équipe dessine une nouvelle zone (`POST /admin/zones`, contour vérifié : `422 ZONE_GEOMETRY_INVALID` s'il se croise).
+
+## Indicateurs (H7)
+
+`GET /admin/metrics?days=7|30|90` (toute l'équipe ; 30 par défaut), heure du Cameroun, comparés à la période précédente de même durée : livraisons réussies par jour (avec échecs, retours, annulations), taux de réussite (livrées / livrées + retournées) et réussite au premier passage, délais médians et « 9 sur 10 » (trouver un livreur, trajet, total ; hors courses programmées, horodatages incohérents écartés), reversements aux boutiques faits le jour même, livreurs actifs et courses par livreur et par jour, cinq livreurs les plus actifs, fidélité des boutiques (actives la période d'avant et encore actives), journées du contrôle des comptes avec écarts, note moyenne reçue par les livreurs et livreurs sous 4/5.
+
+## Équipe et audit (H8)
+
+Routes `ADMIN` (double authentification) :
+
+- `GET /admin/team` : membres de l'équipe, rôles, double authentification configurée ou non, dernière connexion.
+- `POST /admin/team` `{ phone, fullName, roles }` : donne l'accès à un numéro (compte créé s'il n'existe pas, sinon rôles ajoutés). La personne se connecte ensuite au back-office avec son numéro et configure sa double authentification.
+- `PUT /admin/team/{userId}/roles` : remplace les rôles d'équipe ; les sessions du membre sont fermées pour que les nouveaux droits s'appliquent tout de suite.
+- `DELETE /admin/team/{userId}` : retire l'accès (rôles d'équipe, sessions, double authentification). Il reste toujours un administrateur (`422 TEAM_LAST_ADMIN`) et personne ne retire ses propres droits d'administrateur (`422 TEAM_SELF_DEMOTION`).
+- `GET /admin/audit-log?entityType&entityId&actorId&cursor&limit` : journal des actions sensibles, les plus récentes d'abord, avec l'auteur, l'avant et l'après ; `entityTypes` liste les types d'objets présents pour le filtre. Le journal ne peut être ni modifié ni effacé (règle de la base de données).
+
+## Gros objets (frigo, cuisinière, matelas…)
+
+- Taille `BULKY` (« Gros objet ») : la course se fait en tricycle ou en voiture, jamais à moto. Le prix vient de la grille **tricycle** de la ville (`vehicleType: TRICYCLE` dans `POST /admin/pricing-grids`), distincte de la grille moto ; le devis renvoie `vehicleType`.
+- `loadingHelp: true` (devis et commande) : l'expéditeur demande deux personnes pour charger ; le supplément `HANDLING` de la grille s'ajoute. Sans effet sur un colis ordinaire.
+- Pas de grille tricycle active dans la ville : devis et commande refusés (`422 BULKY_UNAVAILABLE`).
+- Attribution : un livreur à moto est écarté (`VEHICLE` dans `GET /admin/orders/{id}/candidates`), y compris à la main (`422 VEHICLE_NOT_SUITABLE`).
+- Colis non conforme à l'enlèvement (trop grand, trop lourd, pas ce qui a été déclaré, objet interdit) : le livreur le refuse par `POST /v1/rider/orders/{id}/refuse-parcel` (motif, photo obligatoire, note facultative), pour tout colis et pas seulement les gros objets. La commande est annulée, la photo gardée comme preuve (`PICKUP_REFUSED`), et l'expéditeur paie le déplacement : le montant des frais de nouvelle tentative figés à la commande (`retryFee`), partagé comme une course entre le livreur et Tara. Après l'enlèvement : `409 PARCEL_REFUSAL_NOT_ALLOWED`.
+
 ## Attribution des courses (D1 à D4)
 
 1. Dès qu'une commande passe en `SEARCHING_RIDER`, elle est proposée au livreur en ligne le mieux placé : distance d'approche, courses en cours, espèces détenues et note.
 2. Il a 30 secondes pour répondre. Refus ou silence : la course part au suivant. Après 3 tours sans preneur, elle est diffusée à 5 livreurs à la fois ; le premier qui accepte l'emporte.
 3. Le rayon de recherche s'élargit (3, 5, 8 puis 12 km). Sans livreur, nouvelle tentative toutes les 20 secondes ; après 5 minutes, le dispatch est alerté (temps réel et SMS d'astreinte), une seule fois.
-4. Sont exclus : pièces manquantes ou expirées, plafond d'espèces atteint (en comptant les espèces de la course), 2 courses déjà en cours, une autre proposition en attente. Un livreur qui a refusé ou rendu la course ne la revoit pas.
+4. Sont exclus : pièces manquantes ou expirées, plafond d'espèces atteint (en comptant les espèces de la course), 2 courses déjà en cours, une autre proposition en attente, véhicule trop petit pour un gros objet, alerte SOS encore ouverte (le livreur redevient disponible quand l'équipe clôt l'alerte). Un livreur qui a refusé ou rendu la course ne la revoit pas.
 
 Le dispatcheur voit les livreurs proches et la raison de chaque exclusion (`GET /admin/orders/{id}/candidates`), l'historique des propositions (`GET /admin/orders/{id}/dispatch`), et peut attribuer ou réattribuer à la main (`POST /admin/orders/{id}/assign`) ; le livreur retiré est prévenu.
 
@@ -128,6 +259,7 @@ Toutes les routes sont sous `/v1/rider` et réservées au rôle `RIDER`.
 | Itinéraire            | `GET /orders/{id}/route?latitude=…&longitude=…`                                                                                                                        | Prochaine étape (`PICKUP` : vendeur, à l'enlèvement comme au retour ; `DROPOFF` : destinataire), distance, durée et tracé simplifié en paires `[longitude, latitude]` calculé par OSRM. Sans OSRM : ligne droite et distance estimée (`source: estimate`). `ORDER_NOT_IN_PROGRESS` si la course est terminée. 30 demandes par minute.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Aide à l'adresse (B2) | `GET /orders/{id}/address-media/{pickup\|dropoff}/{photo\|voice}`                                                                                                      | Photo de façade ou note vocale laissée par l'expéditeur, fichier brut, pour le livreur de la course tant qu'elle est en cours (sinon `404 MEDIA_NOT_FOUND`). L'adresse indique `photoKey` / `voiceNoteKey` quand elles existent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Enlèvement (E3)       | `POST /orders/{id}/pickup`                                                                                                                                             | Code de l'expéditeur + `photoKey` (photo envoyée avant par `POST /media` avec `kind=PROOF_PHOTO`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Colis non conforme    | `POST /orders/{id}/refuse-parcel`                                                                                                                                      | Avant l'enlèvement seulement. Motif (`TOO_BIG`, `TOO_HEAVY`, `NOT_AS_DECLARED`, `FORBIDDEN_ITEM`), `photoKey` obligatoire, note facultative. La commande est annulée et l'expéditeur paie le déplacement (voir « Gros objets »).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Départ                | `POST /orders/{id}/depart`                                                                                                                                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Livraison (E4)        | `POST /orders/{id}/deliver`                                                                                                                                            | Code du destinataire + photo. Sans code : `receivedBy` (qui a reçu le colis), `awaitingSupportValidation: true`, le support appelle le destinataire puis valide.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Échec (E6)            | `POST /orders/{id}/fail`                                                                                                                                               | Motif, photo du lieu et journal des appels passés depuis l'app. Appels exigés : client absent, injoignable ou adresse introuvable, 2 appels au destinataire à 5 min d'écart au moins (`FAILURE_MIN_CALLS`, `FAILURE_CALL_SPACING_MINUTES`, sinon `FAILURE_CALLS_REQUIRED`) ; autre motif, 1 appel et une note ; colis ou paiement refusé, aucun. L'expéditeur choisit ensuite : `POST /v1/orders/{id}/failure-decision` (`RETRY` ou `RETURN`) ; sans réponse après 15 min (`FAILURE_DECISION_TIMEOUT_MINUTES`, heure dans `failureDecisionDueAt` pour le livreur, `failure.decisionDueAt` dans `GET /v1/orders/{id}` pour l'expéditeur), retour automatique et expéditeur prévenu. Le choix de l'expéditeur est définitif (409 ensuite) ; seul le support peut le changer. |
@@ -181,6 +313,10 @@ Les événements servent à rafraîchir l'écran ; l'état qui fait foi reste ce
 
 Montants en FCFA entiers. Chaque mouvement est une écriture du grand livre ; les soldes affichés en sont tirés.
 
+**Frais Mobile Money.** Un client qui paie par Mobile Money (course, recharge, encaissement à la porte, frais de retour) paie en plus `mobileMoneyFee` = arrondi supérieur de montant × taux / (10 000 − taux), taux `MOBILE_MONEY_FEE_BPS` (600 pour un compte Sebpay particulier), donné aux apps par `mobileMoneyFeeBps` de `GET /v1/public/config` ; un paiement renvoie `amount` (dû à Tara), `mobileMoneyFee` et `total` (demandé sur le téléphone), l'encaissement à la porte donne `mobileMoneyFee`. Les recharges et dépôts des livreurs restent sans frais. Un reversement (boutique, livreur) est gratuit à partir du seuil du bénéficiaire (`FREE_PAYOUT_FROM`, ou celui fixé par la finance : `GET/PUT /v1/admin/finance/{merchants|riders}/{id}/free-payout`, avec la moyenne mensuelle des retraits pour repère, action tracée) ; en dessous, `withdrawalFee` (taux `PAYOUT_FEE_BPS`) est retenu et le bénéficiaire reçoit `received`. Les remboursements des clients restent gratuits. Grand livre : frais facturés au compte `revenue:mobile_money_fees`, en face des frais du prestataire.
+
+**Agrégateur Mobile Money.** `PAYMENT_PROVIDER=sebpay` (MTN Money et Orange Money au Cameroun, en XAF) avec `SEBPAY_PUBLIC_KEY`, `SEBPAY_SECRET_KEY` (clés `_test_` sur le bac à sable `SEBPAY_BASE_URL`, `_live_` sur `https://newapi.sebpay.bj/api/v1`) et `PUBLIC_API_URL` : Sebpay rappelle `POST {PUBLIC_API_URL}/v1/webhooks/payments/sebpay`, signé (`X-SebPay-Signature`, HMAC-SHA256 du corps brut avec la clé secrète), puis la transaction est relue par l'API avant d'être crue. L'opérateur suit le choix du payeur, sinon les premiers chiffres du numéro. Les frais d'encaissement sont lus au tarif du compte (`GET /c/calculate-fee`), ceux des reversements dans la réponse de Sebpay. L'adresse IP du serveur doit être déclarée dans le tableau de bord Sebpay (« Adresses IP autorisées », avec l'adresse du site) et validée par Sebpay : sinon `403 IP_NOT_ALLOWED`. Il faut donc un serveur à adresse sortante fixe.
+
 **Paiement des frais d'une commande (G1).**
 
 | `feePaymentMethod` (payé par l'expéditeur) | Ce qui se passe                                                                                                                                                                                                                                                                                              |
@@ -211,7 +347,7 @@ Le livreur garde sa part sur les espèces qu'il encaisse : son disponible au ret
 
 **Espèces d'avant le solde prépayé.** Les espèces encore dues (`cashHeld`) se déposent sous 24 h (`CASH_DEPOSIT_DEADLINE_HOURS`), par Mobile Money (`POST /rider/cash-deposits`) ou au bureau ; rappel à 18 h ; en retard, plus de courses ni de passage en ligne (`CASH_OVERDUE`) ; 72 h de retard (`CASH_OVERDUE_SUSPEND_HOURS`) : compte suspendu, gains retenus sur la dette, SMS à l'équipe ; suspension levée par la finance.
 
-**Back-office finance** (`ADMIN`, `FINANCE`, double authentification) : `GET /admin/finance/overview`, `GET /admin/finance/payouts`, `POST /admin/finance/payouts/{id}/approve` et `/reject`, `POST /admin/finance/riders/{riderId}/cash-deposits` (dépôt au bureau), `POST /admin/finance/users/{userId}/credits` (avoir), `POST /admin/finance/treasury-transfers`, `GET /admin/finance/reconciliations`, `POST /admin/finance/reconciliations/{jour}/run`, `GET /admin/finance/journal.csv?from&to` (export comptable, séparateur point-virgule), `GET /admin/finance/merchants/{merchantId}/statements/{AAAA-MM}`.
+**Back-office finance** (`ADMIN`, `FINANCE`, double authentification) : `GET /admin/finance/overview`, `GET /admin/finance/payouts?view=TO_APPROVE|IN_PROGRESS|FAILED|SENT|ALL` (bénéficiaire avec nom, téléphone et boutique, qui a validé et quand, nombre par vue dans `counts` ; `ALL` par défaut), `POST /admin/finance/payouts/{id}/approve` et `/reject`, `POST /admin/finance/riders/{riderId}/cash-deposits` (dépôt au bureau), `POST /admin/finance/users/{userId}/credits` (avoir), `POST /admin/finance/treasury-transfers`, `GET /admin/finance/reconciliations`, `POST /admin/finance/reconciliations/{jour}/run`, `GET /admin/finance/journal.csv?from&to` (export comptable, séparateur point-virgule), `GET /admin/finance/merchants/{merchantId}/statements/{AAAA-MM}`.
 
 Notifications de l'agrégateur : `GET` ou `POST /v1/webhooks/payments/{prestataire}`, signées.
 
@@ -219,7 +355,7 @@ Notifications de l'agrégateur : `GET` ou `POST /v1/webhooks/payments/{prestatai
 
 | Exigence | Réalisation                                                                                           |
 | -------- | ----------------------------------------------------------------------------------------------------- |
-| G1       | Espèces, Mobile Money (CamPay), solde Tara, destinataire payeur                                       |
+| G1       | Espèces, Mobile Money (Sebpay, CamPay en secours), solde Tara, destinataire payeur                    |
 | G2       | Portefeuille marchand ligne par ligne                                                                 |
 | G3       | Reversement quotidien à 18 h, à la demande pour Pro et Business, validation au-delà d'un seuil        |
 | G4       | Portefeuille livreur : gains, espèces détenues, retrait                                               |

@@ -108,6 +108,20 @@ describe('Sécurité', () => {
       return session;
     }
 
+    it('indique au back-office où en est le second facteur (GET /me)', async () => {
+      const customer = await signIn(ctx);
+      const plain = await request(ctx.http).get('/v1/me').set(customer.auth).expect(200);
+      expect(plain.body.staff).toBeNull();
+
+      const admin = await adminWithoutMfa();
+      const fresh = await request(ctx.http).get('/v1/me').set(admin.auth).expect(200);
+      expect(fresh.body.staff).toEqual({ mfaEnrolled: false, mfaVerified: false });
+
+      const verified = await staffUser(ctx, ['SUPPORT']);
+      const me = await request(ctx.http).get('/v1/me').set(verified.auth).expect(200);
+      expect(me.body.staff).toEqual({ mfaEnrolled: true, mfaVerified: true });
+    });
+
     it('refuse le back-office et retire les droits de l’équipe sans second facteur', async () => {
       const admin = await adminWithoutMfa();
       const res = await request(ctx.http).get('/v1/admin/riders').set(admin.auth).expect(403);

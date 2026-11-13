@@ -168,6 +168,8 @@ enum SurchargeCode {
   FAILED_ATTEMPT
   RETURN
   WEATHER
+  /// Aide au chargement (deux personnes) pour un gros objet.
+  HANDLING
 
   @@map("surcharge_code")
 }
@@ -193,6 +195,8 @@ enum PackageSize {
   M
   L
   XL
+  /// Gros objet (électroménager, meuble, plus de 20 kg) : tricycle ou camionnette seulement.
+  BULKY
 
   @@map("package_size")
 }
@@ -263,6 +267,8 @@ enum ProofKind {
   DELIVERY
   FAILED_ATTEMPT
   RETURN
+  /// Colis refusé à l'enlèvement : il ne correspond pas à ce qui a été déclaré.
+  PICKUP_REFUSED
 
   @@map("proof_kind")
 }
@@ -422,6 +428,8 @@ enum MediaKind {
   VOICE_NOTE
   KYC_DOCUMENT
   PROOF_PHOTO
+  /// Photo du colis prise par l'expéditeur à la commande (analysée automatiquement).
+  PARCEL_PHOTO
 
   @@map("media_kind")
 }
@@ -486,6 +494,7 @@ model User {
   notifications            Notification[]
   ticketsOpened            Ticket[]               @relation("TicketOpenedBy")
   ticketsAssigned          Ticket[]               @relation("TicketAssignee")
+  ticketsRequested         Ticket[]               @relation("TicketRequester")
   ticketMessages           TicketMessage[]
   mediaFiles               MediaFile[]
   safetyAlertsHandled      SafetyAlert[]          @relation("SafetyAlertHandledBy")
@@ -493,6 +502,8 @@ model User {
   payoutsReceived          Payout[]               @relation("PayoutUser")
   payoutsApproved          Payout[]               @relation("PayoutApprover")
   courseAlertsAcknowledged CourseAlert[]          @relation("CourseAlertAcknowledgedBy")
+  orderNotes               OrderNote[]            @relation("OrderNoteAuthor")
+  parcelAnalyses           ParcelAnalysis[]
   reconciliationsRun       ReconciliationReport[]
 
   @@map("users")
@@ -587,6 +598,9 @@ model MerchantProfile {
   payoutPhone          String              @map("payout_phone")
   payoutOperator       MobileMoneyOperator @map("payout_operator")
   payoutSchedule       PayoutSchedule      @default(DAILY) @map("payout_schedule")
+  /// Retrait gratuit à partir de ce montant (fixé par l'équipe d'après la moyenne des
+  /// transactions de la boutique) ; null : seuil général FREE_PAYOUT_FROM.
+  freePayoutFrom       Int?                @map("free_payout_from")
   /// Dernier changement du numéro de reversement : reversements gelés pendant PAYOUT_HOLD_HOURS.
   payoutPhoneChangedAt DateTime?           @map("payout_phone_changed_at") @db.Timestamptz(3)
   plan                 MerchantPlan        @default(FREE)
@@ -612,6 +626,8 @@ model RiderProfile {
   plateNumber           String?     @map("plate_number")
   /// Plafond d'espèces détenues, en FCFA (G5, D4).
   cashLimit             Int         @default(25000) @map("cash_limit")
+  /// Retrait gratuit à partir de ce montant (fixé par l'équipe) ; null : seuil général.
+  freePayoutFrom        Int?        @map("free_payout_from")
   /// Espèces gardées au-delà du délai de dépôt (24 h) depuis cette heure : plus de courses
   /// tant qu'elles ne sont pas déposées (G5).
   cashOverdueSince      DateTime?   @map("cash_overdue_since") @db.Timestamptz(3)
@@ -902,6 +918,13 @@ model Order {
   declaredValue      Int?             @map("declared_value")
   instructions       String?
   isExpress          Boolean          @default(false) @map("is_express")
+  /// Gros objet : l'expéditeur demande l'aide au chargement (supplément manutention).
+  loadingHelp        Boolean          @default(false) @map("loading_help")
+  /// Photo du colis jointe par l'expéditeur (clé de stockage, type PARCEL_PHOTO).
+  parcelPhotoKey     String?          @map("parcel_photo_key")
+  /// Objets interdits que l'analyse de la photo a cru voir, maintenus par l'expéditeur :
+  /// signalés à l'équipe et au livreur, jamais bloquants à eux seuls.
+  parcelAiWarning    String?          @map("parcel_ai_warning")
   scheduledFor       DateTime?        @map("scheduled_for") @db.Timestamptz(3)
   status             OrderStatus      @default(CREATED)
 
@@ -914,6 +937,11 @@ model Order {
   totalPrice       Int           @map("total_price")
   riderEarning     Int           @map("rider_earning")
   platformFee      Int           @map("platform_fee")
+  /// Tarif pro appliqué à la commande, en points de base ; 0 sinon (H4).
+  proDiscountBps   Int           @default(0) @map("pro_discount_bps")
+  /// Primes payées par Tara au livreur, figées quand il accepte la course (H4).
+  approachBonus    Int           @default(0) @map("approach_bonus")
+  boostBonus       Int           @default(0) @map("boost_bonus")
   /// Frais d'échec figés à la commande (E6), annoncés avant de commander : nouvelle tentative
   /// et retour à l'expéditeur, à sa charge, partagés comme la course.
   retryFee         Int           @default(0) @map("retry_fee")
@@ -972,6 +1000,7 @@ model Order {
   proofs          DeliveryProof[]
   offers          DispatchOffer[]
   ratings         Rating[]
+  notes           OrderNote[]
   codCollection   CodCollection?
   payments        Payment[]
   promoRedemption PromoRedemption?
@@ -1050,6 +1079,9 @@ model DispatchOffer {
   riderId        String               @map("rider_id") @db.Uuid
   round          Int
   approachMeters Int?                 @map("approach_meters")
+  /// Primes annoncées dans la proposition, reprises sur la commande si elle est acceptée.
+  approachBonus  Int                  @default(0) @map("approach_bonus")
+  boostBonus     Int                  @default(0) @map("boost_bonus")
   offeredAt      DateTime             @default(now()) @map("offered_at") @db.Timestamptz(3)
   expiresAt      DateTime             @map("expires_at") @db.Timestamptz(3)
   respondedAt    DateTime?            @map("responded_at") @db.Timestamptz(3)
@@ -1220,6 +1252,39 @@ enum CourseAlertKind {
   @@map("course_alert_kind")
 }
 
+/// Analyse automatique d'une photo de colis : taille, nature et objets interdits proposés à
+/// l'expéditeur, qui confirme ou corrige. Une analyse par photo (aucun second appel payant).
+model ParcelAnalysis {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  ownerId   String   @map("owner_id") @db.Uuid
+  photoKey  String   @unique @map("photo_key")
+  /// Moteur utilisé : « claude:<modèle> » ou « fake ».
+  engine    String
+  result    Json
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  owner User @relation(fields: [ownerId], references: [id])
+
+  @@index([ownerId, createdAt])
+  @@map("parcel_analyses")
+}
+
+/// Note interne de l'équipe sur une commande (H2) : jamais montrée à l'expéditeur, au
+/// destinataire ni au livreur.
+model OrderNote {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order  Order @relation(fields: [orderId], references: [id])
+  author User  @relation("OrderNoteAuthor", fields: [authorId], references: [id])
+
+  @@index([orderId, createdAt])
+  @@map("order_notes")
+}
+
 /// Alerte du support née du trajet d'une course (une par sujet et par course).
 model CourseAlert {
   id               String          @id @default(uuid(7)) @db.Uuid
@@ -1289,6 +1354,9 @@ model Payment {
   confirmedAt       DateTime?      @map("confirmed_at") @db.Timestamptz(3)
   /// Frais retenus par le prestataire Mobile Money, s'il les communique.
   fee               Int            @default(0)
+  /// Frais Mobile Money payés par le payeur, en plus du montant : le prestataire encaisse
+  /// amount + surcharge (0 pour les espèces et les recharges des livreurs).
+  surcharge         Int            @default(0)
   /// Dernière interrogation du prestataire (paiement en attente).
   lastCheckedAt     DateTime?      @map("last_checked_at") @db.Timestamptz(3)
 
@@ -1335,6 +1403,9 @@ model Payout {
   riderId           String?             @map("rider_id") @db.Uuid
   amount            Int
   fee               Int                 @default(0)
+  /// Frais de retrait retenus sur le montant : le bénéficiaire reçoit amount − charge
+  /// (0 au-delà de son seuil de retrait gratuit).
+  charge            Int                 @default(0)
   phone             String
   operator          MobileMoneyOperator
   provider          String
@@ -1473,26 +1544,38 @@ model Notification {
   @@map("notifications")
 }
 
+/// Demande au service client (H6) : réclamation, litige, question. Ouverte depuis une app
+/// par l'utilisateur, ou par l'équipe à la suite d'un appel (la personne n'a pas forcément
+/// de compte : un destinataire, par exemple).
 model Ticket {
-  id         String         @id @default(uuid(7)) @db.Uuid
-  orderId    String?        @map("order_id") @db.Uuid
-  openedById String         @map("opened_by_id") @db.Uuid
-  assigneeId String?        @map("assignee_id") @db.Uuid
-  category   TicketCategory
-  priority   TicketPriority @default(NORMAL)
-  status     TicketStatus   @default(OPEN)
-  subject    String
-  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt  DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
-  resolvedAt DateTime?      @map("resolved_at") @db.Timestamptz(3)
+  id           String         @id @default(uuid(7)) @db.Uuid
+  /// Numéro lisible, donné au client au téléphone : SUP-1024.
+  number       Int            @unique @default(autoincrement())
+  orderId      String?        @map("order_id") @db.Uuid
+  openedById   String         @map("opened_by_id") @db.Uuid
+  /// Personne concernée quand elle a un compte (l'auteur, ou l'appelant retrouvé).
+  requesterId  String?        @map("requester_id") @db.Uuid
+  /// Numéro à rappeler (E.164).
+  contactPhone String         @map("contact_phone")
+  assigneeId   String?        @map("assignee_id") @db.Uuid
+  category     TicketCategory
+  priority     TicketPriority @default(NORMAL)
+  status       TicketStatus   @default(OPEN)
+  subject      String
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  resolvedAt   DateTime?      @map("resolved_at") @db.Timestamptz(3)
 
-  order    Order?          @relation(fields: [orderId], references: [id])
-  openedBy User            @relation("TicketOpenedBy", fields: [openedById], references: [id])
-  assignee User?           @relation("TicketAssignee", fields: [assigneeId], references: [id])
-  messages TicketMessage[]
+  order     Order?          @relation(fields: [orderId], references: [id])
+  openedBy  User            @relation("TicketOpenedBy", fields: [openedById], references: [id])
+  requester User?           @relation("TicketRequester", fields: [requesterId], references: [id])
+  assignee  User?           @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  messages  TicketMessage[]
 
   @@index([status, priority])
   @@index([orderId])
+  @@index([requesterId, createdAt])
+  @@index([assigneeId, status])
   @@map("tickets")
 }
 
@@ -1549,4 +1632,36 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([actorId, createdAt])
   @@map("audit_logs")
+}
+
+/// Réglages commerciaux d'une ville (H4) : tarif pro des boutiques, prime d'approche.
+/// Sans ligne pour la ville, les valeurs validées s'appliquent (pricing-settings.service).
+model PricingSettings {
+  city                    String   @id
+  /// Tarif pro : [{ fromDeliveries, percentBps }] selon les livraisons réussies du mois.
+  volumeDiscounts         Json     @map("volume_discounts")
+  /// Prime d'approche : versée par Tara quand le vendeur est au-delà de cette distance.
+  approachBonusAmount     Int      @map("approach_bonus_amount")
+  approachBonusFromMeters Int      @map("approach_bonus_from_meters")
+  updatedById             String?  @map("updated_by_id") @db.Uuid
+  updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("pricing_settings")
+}
+
+/// Prime de renfort (H4) : ajoutée au gain des courses proposées pendant la période, au lieu
+/// d'augmenter le prix pour le client (heures de pointe, forte pluie).
+model RiderBoost {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  city        String
+  amount      Int
+  reason      String
+  startsAt    DateTime  @map("starts_at") @db.Timestamptz(3)
+  endsAt      DateTime  @map("ends_at") @db.Timestamptz(3)
+  createdById String    @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(3)
+
+  @@index([city, endsAt])
+  @@map("rider_boosts")
 }

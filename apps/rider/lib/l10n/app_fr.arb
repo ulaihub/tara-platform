@@ -230,6 +230,19 @@
   "today": "Aujourd’hui",
   "newJob": "Nouvelle course",
   "yourEarning": "Votre gain",
+  "bonusIncluded": "dont {details}",
+  "@bonusIncluded": {
+    "description": "Sous le gain d’une proposition : primes payées par Tara, comprises dans le gain.",
+    "placeholders": { "details": { "type": "String" } }
+  },
+  "approachBonus": "prime d’approche {amount}",
+  "@approachBonus": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "boostBonus": "prime de renfort {amount}",
+  "@boostBonus": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "pickupLabel": "ENLÈVEMENT · {distance}",
   "dropoffLabel": "LIVRAISON · {distance} · ~{minutes} min",
   "toCollect": "À encaisser : {amount}",
@@ -238,6 +251,8 @@
   "packageSmall": "Petit colis",
   "packageMedium": "Colis moyen",
   "packageLarge": "Grand colis",
+  "packageBulky": "Gros objet",
+  "comeWithHelper": "Venir à deux",
   "fragile": "Fragile",
   "express": "Express",
   "offerTaken": "Course attribuée à un autre livreur",
@@ -281,6 +296,25 @@
   "photoParcelTaken": "Photo du colis · prise à {time}",
   "retakePhoto": "Reprendre",
   "parcelCollected": "Colis récupéré",
+  "parcelNotConforming": "Colis non conforme ?",
+  "bulkyNotice": "Gros objet : vérifiez qu’il tient dans votre véhicule avant de le charger.",
+  "bulkyWithHelpNotice": "Gros objet, aide au chargement payée par l’expéditeur : venez à deux.",
+  "refusalTitle": "Colis non conforme",
+  "refusalBody": "Ne prenez pas un colis trop grand, trop lourd, différent de ce qui a été déclaré ou interdit. Signalez-le ici avant de saisir le code.",
+  "refusalReasonLabel": "Pourquoi ?",
+  "refusalTooBig": "Trop grand pour mon véhicule",
+  "refusalTooHeavy": "Trop lourd",
+  "refusalNotAsDeclared": "Pas ce qui a été déclaré",
+  "refusalForbidden": "Objet interdit",
+  "refusalNoteLabel": "Précisez (facultatif)",
+  "refusalNoteHint": "Ex. armoire 3 portes au lieu d’un carton",
+  "refusalPhotoHint": "Colis entier visible : c’est la preuve",
+  "refusalNotice": "La course sera annulée et votre déplacement vous sera payé. L’expéditeur voit le motif et la photo. Un refus sans raison valable est signalé à l’équipe.",
+  "refusalConfirm": "Refuser le colis",
+  "parcelRefusedNotice": "Colis refusé. Votre déplacement vous est payé.",
+  "refusalQueuedTitle": "Refus enregistré",
+  "refusalQueuedBody": "Il sera envoyé dès le retour du réseau. Vous pouvez repartir.",
+  "queuedRefuseParcel": "Colis non conforme refusé",
   "actionSavedOffline": "Enregistré sur le téléphone : envoi automatique au retour du réseau.",
   "noPositionYet": "Position en cours de recherche : patientez quelques secondes à l’extérieur.",
   "orderCancelledNotice": "Course annulée par l’expéditeur.",
@@ -976,5 +1010,72 @@
         "type": "String"
       }
     }
-  }
+  },
+  "toCollectByMomo": "À demander par Mobile Money",
+  "momoFeeIncluded": "{amount} de course et de colis, plus {fee} de frais Mobile Money payés par le client.",
+  "@momoFeeIncluded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawalRule": "Retrait gratuit dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.",
+  "@withdrawalRule": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "supportTitle": "Aide et service client",
+  "supportIntro": "Un souci avec une course, vos gains ou l’app ? Écrivez-nous : l’équipe Tara vous répond ici et vous êtes prévenu de sa réponse.",
+  "supportNewRequest": "Nouvelle demande",
+  "supportEmpty": "Aucune demande pour l’instant.",
+  "supportCallUs": "Urgent ? Appelez le {phone}",
+  "@supportCallUs": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "supportCategoryPayment": "Gains, solde ou retrait",
+  "supportCategoryLostParcel": "Colis perdu",
+  "supportCategoryDamagedParcel": "Colis abîmé",
+  "supportCategoryAppBug": "Problème dans l’app",
+  "supportCategoryOther": "Autre",
+  "supportStatusOpen": "Envoyée",
+  "supportStatusInProgress": "En cours",
+  "supportStatusResolved": "Résolue",
+  "supportStatusClosed": "Close",
+  "supportNewTitle": "Nouvelle demande",
+  "supportReasonLabel": "Motif",
+  "supportSubjectLabel": "En quelques mots",
+  "supportSubjectHint": "Ex. : retrait non reçu",
+  "supportMessageLabel": "Expliquez-nous",
+  "supportMessageHint": "Ce qui s’est passé, la course concernée si besoin.",
+  "supportOrderLine": "Course {reference}",
+  "@supportOrderLine": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "supportSend": "Envoyer la demande",
+  "supportReplyHint": "Votre réponse…",
+  "supportReplySend": "Envoyer",
+  "supportClosedNote": "Cette demande est close. Ouvrez une nouvelle demande si besoin.",
+  "supportFromTara": "Service client Tara",
+  "supportNewAnswer": "Réponse",
+  "supportWaitingNote": "L’équipe Tara vous répond ici ; vous serez prévenu.",
+  "supportMenuRow": "Écrire au service client",
+  "supportMenuRowSubtitle": "Vos demandes et les réponses de Tara"
 }

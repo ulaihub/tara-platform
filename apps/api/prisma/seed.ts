@@ -56,15 +56,20 @@ async function seedPricing(): Promise<void> {
       name: 'Douala moto — tarif de lancement',
       city: 'Douala',
       vehicleType: 'MOTORBIKE',
-      riderShareBps: 8000,
-      perKmBeyondLastTier: 150,
+      // Grille validée le 12 novembre 2026 : 70 % au livreur ; 1 000 F jusqu'à 5 km, +100 F par
+      // km commencé jusqu'à 10 km, puis +50 F par km (prix du marché sur les longues courses).
+      riderShareBps: 7000,
+      perKmBeyondLastTier: 50,
       active: true,
       validFrom: new Date(),
       tiers: {
         create: [
           { upToMeters: 5_000, price: 1000 },
+          { upToMeters: 6_000, price: 1100 },
+          { upToMeters: 7_000, price: 1200 },
+          { upToMeters: 8_000, price: 1300 },
+          { upToMeters: 9_000, price: 1400 },
           { upToMeters: 10_000, price: 1500 },
-          { upToMeters: 15_000, price: 2000 },
         ],
       },
       surcharges: {
@@ -81,6 +86,50 @@ async function seedPricing(): Promise<void> {
     },
   });
   console.log('Grille tarifaire de lancement créée et activée');
+}
+
+/**
+ * Grille des gros objets (tricycle) : créée INACTIVE. L'offre « Gros objet » s'ouvre quand
+ * l'équipe l'active au back-office, une fois des livreurs en tricycle recrutés. Montants
+ * de départ à confirmer auprès de transporteurs de Douala.
+ */
+async function seedBulkyPricing(): Promise<void> {
+  const existing = await prisma.pricingGrid.findFirst({
+    where: { city: 'Douala', vehicleType: 'TRICYCLE' },
+  });
+  if (existing) {
+    console.log(`Grille tricycle déjà présente : ${existing.name}`);
+    return;
+  }
+  await prisma.pricingGrid.create({
+    data: {
+      name: 'Douala tricycle — gros objets',
+      city: 'Douala',
+      vehicleType: 'TRICYCLE',
+      riderShareBps: 7000,
+      perKmBeyondLastTier: 300,
+      active: false,
+      validFrom: new Date(),
+      tiers: {
+        create: [
+          { upToMeters: 5_000, price: 3000 },
+          { upToMeters: 10_000, price: 4500 },
+          { upToMeters: 15_000, price: 6000 },
+        ],
+      },
+      surcharges: {
+        create: [
+          { code: 'HANDLING', amount: 1500 },
+          { code: 'EXPRESS', amount: 1000 },
+          { code: 'NIGHT', amount: 1000 },
+          { code: 'WEATHER', amount: 500, active: false },
+          { code: 'FAILED_ATTEMPT', amount: 1500 },
+          { code: 'RETURN', percentBps: 5000 },
+        ],
+      },
+    },
+  });
+  console.log('Grille tricycle (gros objets) créée, inactive');
 }
 
 async function seedWelcomeOffer(): Promise<void> {
@@ -114,6 +163,7 @@ async function seedAdmin(): Promise<void> {
 try {
   await seedServiceArea();
   await seedPricing();
+  await seedBulkyPricing();
   await seedWelcomeOffer();
   await seedAdmin();
 } finally {

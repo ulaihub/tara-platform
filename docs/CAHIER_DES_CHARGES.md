@@ -158,6 +158,7 @@ Point à valider par un juriste avant le développement : encaisser pour le comp
 | H8 | Rôles et permissions ; journal d'audit des actions sensibles | MVP |
 | H9 | Portail marchand web, API REST avec webhooks de statut, plugins WooCommerce et Shopify | V2 |
 | H10 | Points relais : réception, stockage et remise de colis avec code | V2 |
+| H11 | Agences de livraison partenaires : Tara fournit sa technologie à d'autres agences (validation de leurs livreurs, répartition des courses, rémunération, marque à cadrer) | V2 |
 
 ## 3. Exigences non fonctionnelles
 

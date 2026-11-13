@@ -97,11 +97,17 @@ class ClientApi {
   Future<LocationLink> locationLink(String id) async =>
       LocationLink.fromJson(await _api.get('/location-links/$id') as Json);
 
+  /// Analyse de la photo du colis (envoyée avant avec le type `PARCEL_PHOTO`) : taille, nature,
+  /// fragilité proposées, objets interdits signalés.
+  Future<ParcelAnalysis> analyzeParcel(String photoKey) async =>
+      ParcelAnalysis.fromJson(await _api.post('/orders/parcel-analysis', body: {'photoKey': photoKey}) as Json);
+
   /// Prix d'une livraison (C2), recalculé ensuite par le serveur à la création.
   Future<Quote> quote({
     required String pickupAddressId,
     required String dropoffAddressId,
     required String packageSize,
+    bool loadingHelp = false,
     DateTime? scheduledFor,
     String? promoCode,
   }) async => Quote.fromJson(
@@ -111,6 +117,7 @@ class ClientApi {
         'pickup': {'addressId': pickupAddressId},
         'dropoff': {'addressId': dropoffAddressId},
         'packageSize': packageSize,
+        if (loadingHelp) 'loadingHelp': true,
         'scheduledFor': ?scheduledFor?.toUtc().toIso8601String(),
         'promoCode': ?promoCode,
       },

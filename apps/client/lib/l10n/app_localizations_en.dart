@@ -551,6 +551,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get packageBody => 'So the rider knows how to carry it.';
 
   @override
+  String get parcelPhotoTitle => 'Take a photo of the parcel';
+
+  @override
+  String get parcelPhotoBody => 'Optional · we suggest the size and contents, you check.';
+
+  @override
+  String get parcelPhotoAnalyzing => 'Analysing the photo…';
+
+  @override
+  String get parcelPhotoAnalyzingBody => 'A few seconds.';
+
+  @override
+  String get parcelPhotoApplied => 'Suggestion applied';
+
+  @override
+  String parcelPhotoAppliedBody(String summary) {
+    return '$summary. Check below.';
+  }
+
+  @override
+  String get parcelPhotoNotParcel => 'No parcel recognised';
+
+  @override
+  String get parcelPhotoNotParcelBody => 'Retake the photo with only the parcel in frame.';
+
+  @override
+  String get parcelPhotoAttached => 'Photo attached';
+
+  @override
+  String get parcelPhotoAttachedBody => 'The rider will see it. Choose the size and contents below.';
+
+  @override
+  String parcelPhotoProhibited(String items) {
+    return 'The photo seems to show: $items. These items are forbidden. If this is a mistake, you can continue: the Tara team and the rider will be informed.';
+  }
+
+  @override
+  String sizeShort(String size) {
+    return 'Size $size';
+  }
+
+  @override
   String get contentsLabel => 'Contents';
 
   @override
@@ -644,6 +686,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sizeHelpXL => 'Up to 20 kg · large box, small appliance. XL parcel surcharge.';
+
+  @override
+  String get sizeBulky => 'Bulky item';
+
+  @override
+  String get sizeBulkyBody => 'Fridge, cooker, mattress, furniture · delivered by tricycle';
+
+  @override
+  String get sizeHelpBulky => 'Too big or too heavy for a motorbike. Tricycle rate, shown before you order.';
+
+  @override
+  String get loadingHelpTitle => 'Help with loading';
+
+  @override
+  String get loadingHelpBody => 'The rider comes with a helper. Handling surcharge shown before you order.';
+
+  @override
+  String get loadingHelpShort => 'two-person loading';
 
   @override
   String get fragileTitle => 'Fragile';
@@ -796,10 +856,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceBase => 'Delivery';
 
   @override
+  String get mobileMoneyFeeLine => 'Mobile Money fee';
+
+  @override
+  String get priceBaseTricycle => 'Delivery by tricycle';
+
+  @override
   String get surchargeExpress => 'Express';
 
   @override
   String get surchargeHeavy => 'XL parcel';
+
+  @override
+  String get surchargeHandling => 'Handling (two-person loading)';
 
   @override
   String get surchargeNight => 'Night surcharge';
@@ -812,6 +881,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discount => 'Discount';
+
+  @override
+  String proDiscountLine(String percent) {
+    return 'Pro rate ($percent)';
+  }
+
+  @override
+  String promoBeatenByPro(String percent) {
+    return 'Your pro rate (−$percent) is better: this code isn\'t used.';
+  }
 
   @override
   String get totalLabel => 'Total';
@@ -1002,6 +1081,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackCancelled => 'Delivery cancelled';
+
+  @override
+  String get trackRefused => 'Parcel refused at pickup';
+
+  @override
+  String trackRefusedBody(String reason, String fee) {
+    return '$reason. The order is cancelled; the rider’s trip ($fee) is charged to you. Disagree? Call customer service.';
+  }
 
   @override
   String trackEta(int minutes) {
@@ -1260,6 +1347,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String refusalFeeNote(String fee) {
+    return 'Parcel different from what you declare (too big, too heavy, forbidden): the rider may refuse it, and their trip ($fee) is charged to you.';
+  }
+
+  @override
   String get retryUsed => 'Only one more attempt is possible: the parcel will be brought back to you.';
 
   @override
@@ -1394,6 +1486,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String shopWithdrawalRule(String amount, String rate) {
+    return 'Free payout from $amount; below that, a $rate Mobile Money fee is deducted.';
+  }
+
+  @override
   String shopDebt(String amount) {
     return 'Failure fees due: $amount. They will be taken from your next sales; above 3,000 F, new orders wait until they are paid.';
   }
@@ -1425,6 +1522,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get topUpHowMuch => 'How much do you want to add?';
+
+  @override
+  String topUpFeeNote(String fee) {
+    return '+ $fee Mobile Money fee (operator fee).';
+  }
 
   @override
   String topUpDone(String amount) {
@@ -1646,4 +1748,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facadePhotoLabel => 'Photo of the entrance taken';
+
+  @override
+  String get supportTitle => 'Help and customer service';
+
+  @override
+  String get supportIntro =>
+      'A question or a problem with a delivery? Write to us: the Tara team answers here and you are notified of its reply.';
+
+  @override
+  String get supportNewRequest => 'New request';
+
+  @override
+  String get supportEmpty =>
+      'No requests yet. For a problem with a delivery, you can also report it from its tracking screen.';
+
+  @override
+  String supportCallUs(String phone) {
+    return 'Urgent? Call $phone';
+  }
+
+  @override
+  String get supportCategoryLostParcel => 'Parcel lost or not received';
+
+  @override
+  String get supportCategoryDamagedParcel => 'Damaged parcel';
+
+  @override
+  String get supportCategoryLateDelivery => 'Late delivery';
+
+  @override
+  String get supportCategoryPayment => 'Payment';
+
+  @override
+  String get supportCategoryRiderBehavior => 'Rider behaviour';
+
+  @override
+  String get supportCategoryAppBug => 'Problem in the app';
+
+  @override
+  String get supportCategoryOther => 'Other';
+
+  @override
+  String get supportStatusOpen => 'Sent';
+
+  @override
+  String get supportStatusInProgress => 'In progress';
+
+  @override
+  String get supportStatusResolved => 'Resolved';
+
+  @override
+  String get supportStatusClosed => 'Closed';
+
+  @override
+  String get supportNewTitle => 'New request';
+
+  @override
+  String get supportReasonLabel => 'Reason';
+
+  @override
+  String get supportSubjectLabel => 'In a few words';
+
+  @override
+  String get supportSubjectHint => 'E.g. parcel not received by my customer';
+
+  @override
+  String get supportMessageLabel => 'Tell us more';
+
+  @override
+  String get supportMessageHint => 'What happened and what you expect from Tara.';
+
+  @override
+  String supportOrderLine(String reference) {
+    return 'Order $reference';
+  }
+
+  @override
+  String get supportSend => 'Send the request';
+
+  @override
+  String get supportReplyHint => 'Your reply…';
+
+  @override
+  String get supportReplySend => 'Send';
+
+  @override
+  String get supportClosedNote => 'This request is closed. Open a new request if needed.';
+
+  @override
+  String get supportFromTara => 'Tara customer service';
+
+  @override
+  String get supportNewAnswer => 'Reply';
+
+  @override
+  String get supportWaitingNote => 'The Tara team answers here; you will be notified.';
+
+  @override
+  String get supportMenuRow => 'Write to customer service';
+
+  @override
+  String get supportMenuRowSubtitle => 'Your requests and Tara’s replies';
+
+  @override
+  String get reportProblem => 'Report a problem';
 }

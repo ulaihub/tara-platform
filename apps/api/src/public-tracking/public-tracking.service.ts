@@ -97,7 +97,8 @@ export class PublicTrackingService {
           ? await this.eta(order.rider.id, order.pickupAddress, order.dropoffAddress, now)
           : null,
       due: settled ? { fee: 0, cod: 0, total: 0 } : collection.due,
-      paymentPending: !settled && collection.payment ? { amount: collection.payment.amount } : null,
+      mobileMoneyFee: settled ? 0 : collection.mobileMoneyFee,
+      paymentPending: !settled && collection.payment ? { amount: collection.payment.total } : null,
       failureDecision: order.status === 'DELIVERY_FAILED' ? order.failureDecision : null,
     };
   }

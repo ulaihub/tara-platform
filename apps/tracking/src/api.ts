@@ -19,6 +19,8 @@ export interface PublicTracking {
   } | null;
   eta: { minutes: number; distanceMeters: number; progress: number } | null;
   due: { fee: number; cod: number; total: number };
+  /** Frais ajoutés si le destinataire paie par Mobile Money. */
+  mobileMoneyFee: number;
   paymentPending: { amount: number } | null;
   failureDecision: 'RETRY' | 'RETURN' | null;
 }
@@ -50,6 +52,7 @@ export const PUBLIC_TRACKING_FIELDS: (keyof PublicTracking)[] = [
   'rider',
   'eta',
   'due',
+  'mobileMoneyFee',
   'paymentPending',
   'failureDecision',
 ];

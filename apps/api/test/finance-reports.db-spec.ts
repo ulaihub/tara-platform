@@ -6,8 +6,19 @@ import { join } from 'node:path';
 import request from 'supertest';
 import { cameroonDate } from '../src/common/time.js';
 import { csvCell } from '../src/finance/journal-export.service.js';
+import {
+  type FakePaymentProvider,
+  PAYMENT_PROVIDER,
+  type ProviderTransaction,
+} from '../src/payments/payment.provider.js';
 import { PaymentsService } from '../src/payments/payments.service.js';
-import { createTestApp, type SignedIn, staffUser, type TestContext } from './helpers/app.js';
+import {
+  createTestApp,
+  type SignedIn,
+  signIn,
+  staffUser,
+  type TestContext,
+} from './helpers/app.js';
 import { merchant, placeOrder, setupDouala } from './helpers/orders.js';
 import { activeRider } from './helpers/riders.js';
 
@@ -47,6 +58,65 @@ describe('Rapprochement, export comptable et relevés (G6, G7, H5)', () => {
   });
   afterAll(async () => {
     await ctx.app.close();
+  });
+
+  it('sans relevé du prestataire (Sebpay) : chaque opération est relue une à une', async () => {
+    const provider = ctx.app.get<FakePaymentProvider>(PAYMENT_PROVIDER);
+    // Paiement Mobile Money du jour : recharge d'un portefeuille, confirmée.
+    const customer = await signIn(ctx);
+    const topUp = await request(ctx.http)
+      .post('/v1/me/wallet/topup')
+      .set(customer.auth)
+      .set('Idempotency-Key', randomUUID())
+      .send({ amount: 2_000, phone: customer.phone, operator: 'MTN' })
+      .expect(201);
+    const payment = await ctx.prisma.payment.findUniqueOrThrow({ where: { id: topUp.body.id } });
+    const { body, signature } = await provider.settle(payment.providerReference ?? '', 'SUCCEEDED');
+    await request(ctx.http)
+      .post('/v1/webhooks/payments/fake')
+      .set('Content-Type', 'application/json')
+      .set('X-Fake-Signature', signature)
+      .send(body)
+      .expect(200);
+    await ctx.app.get(PaymentsService).refreshPending(new Date(Date.now() + 3_600_000));
+
+    // Prestataire sans relevé par période : seul `lookup` reste.
+    Object.defineProperty(provider, 'transactions', { value: undefined, configurable: true });
+    const original = provider.lookup.bind(provider);
+    const asked: string[] = [];
+    let inflate = false;
+    provider.lookup = async (kind, reference): Promise<ProviderTransaction | null> => {
+      asked.push(reference);
+      const found = await original(kind, reference);
+      return found && inflate && reference === payment.id
+        ? { ...found, amount: found.amount + 100 }
+        : found;
+    };
+    const run = () =>
+      request(ctx.http)
+        .post(`/v1/admin/finance/reconciliations/${cameroonDate(new Date())}/run`)
+        .set(finance.auth)
+        .expect(200);
+    try {
+      const balanced = await run();
+      expect(asked).toContain(payment.id);
+      expect(balanced.body.discrepancies).toEqual([]);
+
+      // Montant différent chez le prestataire : l'écart est trouvé.
+      inflate = true;
+      const off = await run();
+      expect(off.body.discrepancies).toEqual([
+        expect.objectContaining({
+          type: 'PROVIDER_AMOUNT_MISMATCH',
+          reference: payment.id,
+          expected: 2_000,
+          actual: 2_100,
+        }),
+      ]);
+    } finally {
+      Reflect.deleteProperty(provider, 'transactions');
+      Reflect.deleteProperty(provider, 'lookup');
+    }
   });
 
   it('écrit des cellules CSV sûres pour un tableur', () => {

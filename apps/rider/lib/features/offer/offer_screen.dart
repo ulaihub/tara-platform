@@ -132,8 +132,9 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     // à encaisser et le colis visibles au-dessus des boutons.
     final tight = height / textScale < 560;
     final package = switch (offer.packageSize) {
-      'SMALL' => l.packageSmall,
-      'LARGE' => l.packageLarge,
+      'S' => l.packageSmall,
+      'L' || 'XL' => l.packageLarge,
+      'BULKY' => l.packageBulky,
       _ => l.packageMedium,
     };
     final ring = CountdownRing(
@@ -145,6 +146,19 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     );
     final earningLabel = Text(l.yourEarning, style: TaraText.label.copyWith(color: c.textSecondary));
     final earning = AmountText(offer.riderEarning, style: TaraText.amountXL.copyWith(fontSize: 40));
+    // Primes payées par Tara, comprises dans le gain : annoncées pour décider en connaissance.
+    final bonuses = [
+      if (offer.approachBonus > 0) l.approachBonus('${formatAmount(offer.approachBonus)}\u00a0F'),
+      if (offer.boostBonus > 0) l.boostBonus('${formatAmount(offer.boostBonus)}\u00a0F'),
+    ];
+    final bonusLine = bonuses.isEmpty
+        ? null
+        : Text(
+            l.bonusIncluded(bonuses.join(' · ')),
+            key: const ValueKey('offer-bonus'),
+            textAlign: tight ? TextAlign.start : TextAlign.center,
+            style: TaraText.label.copyWith(color: c.success, fontWeight: FontWeight.w700),
+          );
     return TaraScreen(
       safeBottom: false,
       blobs: _blobs,
@@ -153,7 +167,11 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
         top: 12,
         content: [
           Center(
-            child: InfoPill(label: '${l.newJob} · ${l.vehicleShort}', dot: TaraBrand.orange, blinkDot: true),
+            child: InfoPill(
+              label: '${l.newJob} · ${offer.bulky ? l.packageBulky : l.vehicleShort}',
+              dot: TaraBrand.orange,
+              blinkDot: true,
+            ),
           ),
           SizedBox(height: compact ? 8 : 16),
           if (tight)
@@ -167,6 +185,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
                     children: [
                       earningLabel,
                       FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: earning),
+                      ?bonusLine,
                     ],
                   ),
                 ),
@@ -177,6 +196,7 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
             const SizedBox(height: 16),
             Center(child: earningLabel),
             Center(child: earning),
+            if (bonusLine != null) Center(child: bonusLine),
           ],
           SizedBox(height: tight ? 12 : 16),
           GlassCard(
@@ -197,7 +217,9 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
                   icon: TaraIcons.cash,
                   tone: TintTone.accent,
                 ),
-              InfoPill(label: package, icon: TaraIcons.package),
+              InfoPill(label: package, icon: TaraIcons.package, tone: offer.bulky ? TintTone.accent : null),
+              // Aide au chargement payée par l'expéditeur : à savoir avant d'accepter.
+              if (offer.loadingHelp) InfoPill(label: l.comeWithHelper, icon: TaraIcons.user, tone: TintTone.accent),
               if (offer.isFragile) InfoPill(label: l.fragile, icon: TaraIcons.alertCircle),
               if (offer.isExpress) InfoPill(label: l.express, icon: TaraIcons.clock),
             ],

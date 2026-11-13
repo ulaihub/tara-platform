@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11 · Projet à faire valider par un juriste avant publication. Les points marqués
+Version 2026-11.1 · Projet à faire valider par un juriste avant publication. Les points marqués
 **[À VALIDER]** demandent son avis.
 
 Ces conditions s'appliquent à toute personne qui livre avec l'application Tara Livreur. Elles
@@ -28,6 +28,13 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
   sans réponse, la course est proposée à un autre livreur.
 - Vous récupérez le colis avec le **code d'enlèvement** que vous donne l'expéditeur, et vous le
   photographiez.
+- **Gros objets** : ils sont proposés seulement aux tricycles et aux voitures. Si l'expéditeur
+  a demandé de l'aide pour charger, venez à deux.
+- **Colis non conforme** : si le colis est trop grand ou trop lourd pour votre véhicule, n'est
+  pas ce qui a été déclaré, ou vous paraît interdit, ne le prenez pas. Signalez-le dans
+  l'application avec une photo, **avant** de saisir le code d'enlèvement : la course est
+  annulée et votre déplacement vous est payé. Un refus sans raison valable est signalé à
+  l'équipe.
 - Vous remettez le colis contre le **code de livraison** que le destinataire a reçu par SMS, et
   vous photographiez la remise.
 - Votre prénom, l'initiale de votre nom, votre véhicule et sa plaque sont montrés à
@@ -40,14 +47,29 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
 
 ## 4. Votre argent
 
-- **Gain par course** : 80 % du prix de la course, plus 80 % des frais de nouvelle tentative et
-  de retour quand il y en a. Le pourcentage exact est celui affiché dans l'application.
+- **Gain par course** : 70 % du prix de la course, plus 70 % des frais de nouvelle tentative et
+  de retour quand il y en a, et 70 % du déplacement facturé à l'expéditeur quand vous refusez
+  un colis non conforme. Le pourcentage exact est celui affiché dans l'application. Une remise
+  accordée à l'expéditeur (code promo, tarif pro) ne réduit jamais votre gain : Tara la prend
+  sur sa part.
+- **Primes payées par Tara**, en plus de votre gain :
+  - **prime d'approche** quand le vendeur est loin de vous au moment de la proposition (par
+    exemple 200 FCFA au-delà de 3 km) ;
+  - **primes de renfort** annoncées dans l'application quand Tara a besoin de plus de livreurs
+    (heures de pointe, forte pluie), pour les courses acceptées pendant la période annoncée.
+
+  Le montant de chaque prime est affiché dans la proposition, avant que vous acceptiez, et
+  reste acquis pour cette course.
+
 - **Solde prépayé** : vous rechargez votre solde par Mobile Money (frais payés par Tara) ou au
   bureau. Quand vous encaissez de l'argent en espèces (frais de livraison, prix d'un article,
   frais de retour), **vous gardez les espèces** et le même montant est pris sur votre solde.
   L'argent à encaisser pour une course est mis de côté sur votre solde dès que vous
   l'acceptez : votre solde ne peut jamais devenir négatif, et vous ne devez jamais rien à Tara.
-- Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money.
+- Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money. Le
+  retrait est gratuit à partir d'un montant fixé pour vous selon votre activité (affiché dans
+  l'application) ; en dessous, les frais Mobile Money de l'envoi (2,5 % aujourd'hui) sont
+  retenus sur le montant reçu.
 
 ## 5. Encaisser correctement
 

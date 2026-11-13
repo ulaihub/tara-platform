@@ -61,6 +61,24 @@ export class ZonesRepository {
    * Contours des zones actives d'une ville, simplifiés à environ 5 m et arrondis à 6
    * décimales : assez précis pour la carte, assez légers pour un réseau mobile.
    */
+  /** Toutes les zones d'une ville, actives ou coupées, contours simplifiés (back-office). */
+  async adminFeatures(city: string | undefined): Promise<
+    {
+      id: string;
+      name: string;
+      kind: ZoneKind;
+      active: boolean;
+      geometry: string;
+    }[]
+  > {
+    return this.prisma.$queryRaw`
+      SELECT id, name, kind, active,
+             ST_AsGeoJSON(ST_SimplifyPreserveTopology(area::geometry, 0.00005), 6) AS geometry
+        FROM zones
+       WHERE (${city ?? null}::text IS NULL OR city = ${city ?? null})
+       ORDER BY kind, name`;
+  }
+
   async mapFeatures(
     city: string | undefined,
   ): Promise<{ id: string; name: string; kind: ZoneKind; geometry: string; updatedAt: Date }[]> {

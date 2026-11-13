@@ -22,7 +22,12 @@ export const PaymentDto = z
       'RIDER_TOPUP',
     ]),
     status: z.enum(['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED']),
+    /** Montant dû à Tara (course, recharge, encaissement). */
     amount: z.int(),
+    /** Frais Mobile Money payés en plus par le client (0 sinon). */
+    mobileMoneyFee: z.int(),
+    /** Total demandé sur le téléphone : montant + frais Mobile Money. */
+    total: z.int(),
     orderId: z.uuid().nullable(),
     /** Lot de livraisons payé en une fois (C4). */
     batchId: z.uuid().nullable(),
@@ -70,14 +75,42 @@ export const CollectBody = z.discriminatedUnion('method', [
 export const CollectionDto = z
   .object({
     due: z.object({ fee: z.int(), cod: z.int(), total: z.int() }),
+    /** Payé par Mobile Money, le client paie en plus ces frais (en espèces : rien de plus). */
+    mobileMoneyFee: z.int(),
     /** DELIVERY : auprès du destinataire ; RETURN : frais de retour, auprès de l'expéditeur. */
     reason: z.enum(['DELIVERY', 'RETURN']),
     complete: z.boolean(),
-    payment: z.object({ id: z.uuid(), status: z.string(), amount: z.int() }).nullable(),
+    /** Demande Mobile Money en attente ; `total` : montant demandé au téléphone, frais compris. */
+    payment: z
+      .object({ id: z.uuid(), status: z.string(), amount: z.int(), total: z.int() })
+      .nullable(),
   })
   .meta({ id: 'Collection' });
 
 const OpenPayout = z.object({ id: z.uuid(), amount: z.int(), status: z.string() }).nullable();
+
+/** Retrait gratuit à partir de `freeFrom` ; en dessous, `feeBps` du montant est retenu. */
+const Withdrawal = z.object({ freeFrom: z.int(), feeBps: z.int() });
+
+/** Retrait gratuit d'une boutique ou d'un livreur : seuil propre, seuil général, repère. */
+export const FreePayoutDto = z
+  .object({
+    /** Seuil en vigueur : un retrait de ce montant ou plus est gratuit. */
+    freeFrom: z.int(),
+    /** Seuil fixé par l'équipe pour ce bénéficiaire ; null : seuil général. */
+    custom: z.int().nullable(),
+    default: z.int(),
+    /** Moyenne mensuelle des retraits réussis sur les 3 derniers mois, pour fixer le seuil. */
+    averageMonthlyPayouts: z.int(),
+    /** Taux des frais de retrait sous le seuil, en points de base. */
+    feeBps: z.int(),
+  })
+  .meta({ id: 'FreePayout' });
+
+export const FreePayoutBody = z.object({
+  /** Montant à partir duquel le retrait est gratuit ; null : revenir au seuil général. */
+  freeFrom: z.int().min(0).max(10_000_000).nullable(),
+});
 
 export const WalletDto = z
   .object({
@@ -94,6 +127,7 @@ export const WalletDto = z
         /** Encaissé à la livraison aujourd'hui (heure du Cameroun) et livraisons du jour. */
         todaySales: z.int(),
         todayDeliveries: z.int(),
+        withdrawal: Withdrawal,
       })
       .nullable(),
     openPayout: OpenPayout,
@@ -116,6 +150,7 @@ export const RiderWalletDto = z
     cashOverdue: z.boolean(),
     /** Disponible : solde moins l'argent mis de côté et les anciennes espèces dues. */
     available: z.int(),
+    withdrawal: Withdrawal,
     openPayout: OpenPayout,
   })
   .meta({ id: 'RiderWallet' });
@@ -142,7 +177,12 @@ export const PayoutDto = z
   .object({
     id: z.uuid(),
     beneficiary: z.enum(['MERCHANT', 'RIDER', 'CUSTOMER']),
+    /** Montant retiré du solde. */
     amount: z.int(),
+    /** Frais de retrait retenus (0 au-delà du seuil de retrait gratuit). */
+    withdrawalFee: z.int(),
+    /** Montant reçu sur le téléphone : montant − frais de retrait. */
+    received: z.int(),
     fee: z.int(),
     phone: z.string(),
     status: z.enum([
@@ -164,6 +204,44 @@ export const PayoutListQuery = PageQuery.extend({
     .enum(['PENDING', 'AWAITING_APPROVAL', 'PROCESSING', 'SUCCEEDED', 'FAILED', 'CANCELLED'])
     .optional(),
 });
+
+/** Vues des reversements au back-office (H5) : à valider, en cours, échoués, versés. */
+export const AdminPayoutViewEnum = z
+  .enum(['TO_APPROVE', 'IN_PROGRESS', 'FAILED', 'SENT', 'ALL'])
+  .meta({ id: 'AdminPayoutView' });
+
+export const AdminPayoutListQuery = PayoutListQuery.extend({
+  view: AdminPayoutViewEnum.default('ALL'),
+});
+
+/** Reversement vu par la finance : qui le reçoit, et qui l'a validé. */
+export const AdminPayoutDto = PayoutDto.extend({
+  /** Boutique, livreur ou client remboursé ; lien vers sa fiche par son identifiant. */
+  owner: z
+    .object({
+      id: z.uuid(),
+      name: z.string().nullable(),
+      phone: z.string(),
+      shopName: z.string().nullable(),
+    })
+    .nullable(),
+  approvedBy: z.string().nullable(),
+  approvedAt: z.iso.datetime().nullable(),
+}).meta({ id: 'AdminPayout' });
+
+export const AdminPayoutPageDto = z
+  .object({
+    items: z.array(AdminPayoutDto),
+    nextCursor: z.uuid().nullable(),
+    counts: z.object({
+      TO_APPROVE: z.int(),
+      IN_PROGRESS: z.int(),
+      FAILED: z.int(),
+      SENT: z.int(),
+      ALL: z.int(),
+    }),
+  })
+  .meta({ id: 'AdminPayoutPage' });
 
 export const RejectPayoutBody = z.object({ reason: z.string().trim().min(3).max(300) });
 export const OfficeDepositBody = z.object({

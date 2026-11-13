@@ -16,6 +16,7 @@ import {
   type ProviderEvent,
   ProviderUnavailableError,
 } from '../payments/payment.provider.js';
+import { payoutCharge } from '../payments/mobile-money-fees.js';
 import { PaymentsService } from '../payments/payments.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
@@ -110,6 +111,84 @@ export class PayoutsService implements OnModuleInit {
     return Math.max(0, balance - Math.max(0, cash) - (holds._sum.amount ?? 0));
   }
 
+  /**
+   * Seuil de retrait gratuit : celui fixé par l'équipe pour la boutique ou le livreur, sinon
+   * le seuil général. Les remboursements des clients sont toujours gratuits.
+   */
+  async freePayoutFrom(
+    beneficiary: PayoutBeneficiary,
+    ownerId: string,
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<number | null> {
+    switch (beneficiary) {
+      case 'MERCHANT': {
+        const merchant = await db.merchantProfile.findUnique({ where: { id: ownerId } });
+        return merchant?.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM;
+      }
+      case 'RIDER': {
+        const rider = await db.riderProfile.findUnique({ where: { id: ownerId } });
+        return rider?.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM;
+      }
+      case 'CUSTOMER':
+        return null;
+    }
+  }
+
+  /** Seuil de retrait gratuit d'une boutique ou d'un livreur, et la moyenne de ses retraits. */
+  async freePayoutSettings(beneficiary: 'MERCHANT' | 'RIDER', ownerId: string) {
+    const profile =
+      beneficiary === 'MERCHANT'
+        ? await this.prisma.merchantProfile.findUnique({ where: { id: ownerId } })
+        : await this.prisma.riderProfile.findUnique({ where: { id: ownerId } });
+    if (!profile) throw AppError.notFound();
+    const since = new Date(Date.now() - 90 * 86_400_000);
+    const sum = await this.prisma.payout.aggregate({
+      where: {
+        status: 'SUCCEEDED',
+        completedAt: { gte: since },
+        ...(beneficiary === 'MERCHANT' ? { merchantId: ownerId } : { riderId: ownerId }),
+      },
+      _sum: { amount: true },
+    });
+    return {
+      freeFrom: profile.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM,
+      custom: profile.freePayoutFrom,
+      default: this.env.FREE_PAYOUT_FROM,
+      averageMonthlyPayouts: Math.round((sum._sum.amount ?? 0) / 3),
+      feeBps: this.env.PAYOUT_FEE_BPS,
+    };
+  }
+
+  async setFreePayoutFrom(
+    beneficiary: 'MERCHANT' | 'RIDER',
+    ownerId: string,
+    freeFrom: number | null,
+  ): Promise<void> {
+    const { count } =
+      beneficiary === 'MERCHANT'
+        ? await this.prisma.merchantProfile.updateMany({
+            where: { id: ownerId },
+            data: { freePayoutFrom: freeFrom },
+          })
+        : await this.prisma.riderProfile.updateMany({
+            where: { id: ownerId },
+            data: { freePayoutFrom: freeFrom },
+          });
+    if (count !== 1) throw AppError.notFound();
+  }
+
+  /** Frais de retrait retenus sur ce montant (0 au-delà du seuil de retrait gratuit). */
+  async chargeFor(
+    beneficiary: PayoutBeneficiary,
+    ownerId: string,
+    amount: number,
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<number> {
+    const freeFrom = await this.freePayoutFrom(beneficiary, ownerId, db);
+    if (freeFrom === null || amount >= freeFrom) return 0;
+    return payoutCharge(amount, this.env.PAYOUT_FEE_BPS);
+  }
+
   // --- Demande ------------------------------------------------------------------------------
 
   async request(input: PayoutRequest): Promise<Payout> {
@@ -132,6 +211,7 @@ export class PayoutsService implements OnModuleInit {
         }
         if (amount > available)
           throw AppError.unprocessable('INSUFFICIENT_BALANCE', { balance: available });
+        const charge = await this.chargeFor(input.beneficiary, input.ownerId, amount, tx);
         const created = await tx.payout.create({
           data: {
             beneficiary: input.beneficiary,
@@ -139,6 +219,7 @@ export class PayoutsService implements OnModuleInit {
             riderId: input.beneficiary === 'RIDER' ? input.ownerId : null,
             userId: input.beneficiary === 'CUSTOMER' ? input.ownerId : null,
             amount,
+            charge,
             phone: input.phone,
             operator: input.operator,
             provider: this.provider.name,
@@ -203,8 +284,11 @@ export class PayoutsService implements OnModuleInit {
     try {
       const operation = await this.provider.disburse({
         reference: payout.id,
-        amount: payout.amount,
+        // Le bénéficiaire reçoit le montant moins les frais de retrait éventuels.
+        amount: payout.amount - payout.charge,
         phone: payout.phone,
+        operator: payout.operator,
+        recipientName: await this.recipientName(payout),
         description: `Tara reversement ${payout.id.slice(0, 8)}`,
       });
       await this.prisma.payout.update({
@@ -222,6 +306,25 @@ export class PayoutsService implements OnModuleInit {
       }
       await this.settle(payout.id, 'FAILED', { failureReason: String(error).slice(0, 300) });
     }
+  }
+
+  /** Nom du bénéficiaire tel que l'opérateur le connaît le mieux : boutique, livreur, client. */
+  private async recipientName(payout: Payout): Promise<string> {
+    const found = await this.prisma.payout.findUniqueOrThrow({
+      where: { id: payout.id },
+      select: {
+        merchant: { select: { shopName: true, user: { select: { fullName: true } } } },
+        rider: { select: { user: { select: { fullName: true } } } },
+        user: { select: { fullName: true } },
+      },
+    });
+    return (
+      found.merchant?.user.fullName ??
+      found.merchant?.shopName ??
+      found.rider?.user.fullName ??
+      found.user?.fullName ??
+      'Bénéficiaire Tara'
+    );
   }
 
   /** Clôture un reversement en cours ; une seconde clôture est sans effet. */
@@ -258,7 +361,10 @@ export class PayoutsService implements OnModuleInit {
           payoutId: id,
           postings: [
             { account: PLATFORM_ACCOUNTS.payoutsInTransit, amount: current.amount },
-            { account: PLATFORM_ACCOUNTS.mobileMoney, amount: -current.amount },
+            { account: PLATFORM_ACCOUNTS.mobileMoney, amount: -(current.amount - current.charge) },
+            ...(current.charge > 0
+              ? [{ account: PLATFORM_ACCOUNTS.mobileMoneyFeesCharged, amount: -current.charge }]
+              : []),
             { account: PLATFORM_ACCOUNTS.providerFees, amount: fee },
             { account: PLATFORM_ACCOUNTS.mobileMoney, amount: -fee },
           ],

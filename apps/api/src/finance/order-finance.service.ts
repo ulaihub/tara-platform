@@ -21,6 +21,7 @@ import {
   riderCashHeld,
   riderPayable,
 } from './ledger.accounts.js';
+import { mobileMoneySurcharge } from '../payments/mobile-money-fees.js';
 import { LedgerService, type PostingInput } from './ledger.service.js';
 import { RiderBalanceService } from './rider-balance.service.js';
 
@@ -34,10 +35,18 @@ export interface CollectionDue {
 
 export interface CollectionState {
   due: CollectionDue;
+  /** Frais Mobile Money payés en plus si le client règle par Mobile Money. */
+  mobileMoneyFee: number;
   reason: 'DELIVERY' | 'RETURN';
   /** Tout ce qui devait être encaissé l'a été. */
   complete: boolean;
-  payment: { id: string; status: string; amount: number } | null;
+  /** Demande Mobile Money en attente ; `total` : montant demandé au téléphone, frais compris. */
+  payment: { id: string; status: string; amount: number; total: number } | null;
+}
+
+function pendingPayment(payment: Payment): NonNullable<CollectionState['payment']> {
+  const { id, status, amount, surcharge } = payment;
+  return { id, status, amount, total: amount + surcharge };
 }
 
 /** Colis qui repart chez l'expéditeur (retour décidé, pas encore rendu). */
@@ -366,9 +375,10 @@ export class OrderFinanceService implements OnModuleInit {
       });
       return {
         due: { fee: total, cod: 0, total },
+        mobileMoneyFee: mobileMoneySurcharge(total, this.env.MOBILE_MONEY_FEE_BPS),
         reason: 'RETURN',
         complete: total === 0,
-        payment: topUp ? { id: topUp.id, status: topUp.status, amount: topUp.amount } : null,
+        payment: topUp ? pendingPayment(topUp) : null,
       };
     }
     // Une requête après l'autre : `db` peut être une transaction (une seule connexion).
@@ -381,9 +391,10 @@ export class OrderFinanceService implements OnModuleInit {
     const cod = order.codAmount > 0 && !collection ? order.codAmount : 0;
     return {
       due: { fee, cod, total: fee + cod },
+      mobileMoneyFee: mobileMoneySurcharge(fee + cod, this.env.MOBILE_MONEY_FEE_BPS),
       reason: 'DELIVERY',
       complete: fee + cod === 0,
-      payment: payment ? { id: payment.id, status: payment.status, amount: payment.amount } : null,
+      payment: payment ? pendingPayment(payment) : null,
     };
   }
 
@@ -642,6 +653,14 @@ export class OrderFinanceService implements OnModuleInit {
     } else {
       postings.push({ account: PLATFORM_ACCOUNTS.promotions, amount: -order.platformFee });
     }
+    // Primes d'approche et de renfort (H4) : payées par Tara, en plus de la part du livreur.
+    const bonus = order.approachBonus + order.boostBonus;
+    if (bonus > 0) {
+      postings.push(
+        { account: riderPayable(order.riderId), amount: -bonus },
+        { account: PLATFORM_ACCOUNTS.riderBonuses, amount: bonus },
+      );
+    }
     await this.ledger.post(tx, {
       kind: 'DELIVERY_COMPLETED',
       description: `Course ${order.reference} ${returned ? 'retournée' : 'livrée'}`,
@@ -653,7 +672,7 @@ export class OrderFinanceService implements OnModuleInit {
 
     // Le livreur garde sa part sur les espèces encaissées pour cette course (G4).
     const cash = await this.orderSum(tx, order.id, riderCashHeld(order.riderId).code);
-    const kept = Math.min(order.riderEarning, Math.max(0, cash));
+    const kept = Math.min(order.riderEarning + bonus, Math.max(0, cash));
     if (kept > 0) {
       await this.ledger.post(tx, {
         kind: 'CASH_COMPENSATED',
@@ -704,6 +723,49 @@ export class OrderFinanceService implements OnModuleInit {
       postings: [
         { account, amount: order.retryFee },
         { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.retryFee },
+      ],
+    });
+  }
+
+  /**
+   * Colis refusé à l'enlèvement (non conforme à la commande) : l'expéditeur paie le
+   * déplacement du livreur, au prix d'une nouvelle tentative, partagé comme une course
+   * entre le livreur et Tara. Le reste de ce qu'il avait payé lui est rendu par
+   * l'annulation. Pris sur son solde, même au-delà de la dette tolérée.
+   */
+  async chargeRefusedParcel(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    riderId: string,
+  ): Promise<void> {
+    const fee = order.retryFee;
+    if (fee <= 0) return;
+    const account = senderAccount(order);
+    await this.ledger.lock(tx, [account]);
+    await this.ledger.post(tx, {
+      kind: 'FAILURE_FEE_CHARGED',
+      description: `Déplacement pour un colis non conforme ${order.reference}`,
+      idempotencyKey: `order:${order.id}:refused-fee`,
+      orderId: order.id,
+      postings: [
+        { account, amount: fee },
+        { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -fee },
+      ],
+    });
+    const grid = await tx.pricingGrid.findUniqueOrThrow({
+      where: { id: order.pricingGridId },
+      select: { riderShareBps: true },
+    });
+    const riderPart = Math.floor((fee * grid.riderShareBps) / 10_000);
+    await this.ledger.post(tx, {
+      kind: 'DELIVERY_COMPLETED',
+      description: `Déplacement de ${order.reference} partagé`,
+      idempotencyKey: `order:${order.id}:refused-fee-share`,
+      orderId: order.id,
+      postings: [
+        { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: fee },
+        { account: riderPayable(riderId), amount: -riderPart },
+        { account: PLATFORM_ACCOUNTS.commission, amount: -(fee - riderPart) },
       ],
     });
   }

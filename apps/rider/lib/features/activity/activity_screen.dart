@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
@@ -423,6 +424,14 @@ class _BalanceBox extends StatelessWidget {
           wallet.reserved > 0 ? l.balanceReserved('${formatAmount(wallet.reserved)}\u00a0F') : l.balanceExplain,
           style: TaraText.small.copyWith(color: c.textSecondary),
         ),
+        if (wallet.withdrawalFeeBps > 0)
+          Text(
+            l.withdrawalRule(
+              '${formatAmount(wallet.withdrawalFreeFrom)}\u00a0F',
+              '${NumberFormat('#0.##', 'fr').format(wallet.withdrawalFeeBps / 100)}\u00a0%',
+            ),
+            style: TaraText.small.copyWith(color: c.textSecondary),
+          ),
       ],
       action: l.topUpAction,
       onAction: onTopUp,

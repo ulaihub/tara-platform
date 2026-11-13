@@ -13,7 +13,7 @@ auprès de l'autorité de protection des données.]**
 
 | Qui           | Données                                                                                                          | Pourquoi                                              |
 | ------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Expéditeurs   | numéro, nom, adresses, commandes, paiements, notes données                                                       | faire et suivre les livraisons, encaisser             |
+| Expéditeurs   | numéro, nom, adresses, commandes, paiements, notes données ; photo du colis s'ils en prennent une                | faire et suivre les livraisons, encaisser             |
 | Boutiques     | nom de la boutique, numéro de reversement, ventes encaissées                                                     | encaisser pour elles et leur reverser                 |
 | Destinataires | nom, numéro, adresse ou point placé, réponse « serez-vous là ? »                                                 | livrer le colis                                       |
 | Livreurs      | pièces d'identité et du véhicule, garant, contact d'urgence, positions pendant les courses, encaissements, gains | sécurité, attribution des courses, paiement des gains |
@@ -49,5 +49,9 @@ chiffrement des échanges, l'accès restreint de l'équipe (double authentificat
 journalisation des actions sensibles. Les pièces des livreurs sont chiffrées.
 
 Prestataires qui reçoivent des données pour le service : opérateurs SMS et WhatsApp (numéro,
-message), agrégateur Mobile Money (numéro, montant), service de notifications des téléphones.
+message), agrégateur Mobile Money Sebpay (numéro, montant, nom du bénéficiaire d'un
+reversement), service de notifications des téléphones, et Anthropic (États-Unis) pour
+l'analyse automatique de la photo du colis : seule la photo lui est envoyée, sans nom ni
+numéro, pour proposer la taille et la nature du colis et signaler un objet interdit visible.
+Cette analyse ne décide rien seule : vous confirmez ou corrigez la proposition.
 **[À VALIDER : liste nominative et transferts hors du Cameroun.]**

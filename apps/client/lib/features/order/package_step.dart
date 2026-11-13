@@ -4,11 +4,14 @@ import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/tara_colors.dart';
+import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
+import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import 'order_draft.dart';
+import 'parcel_photo_card.dart';
 import 'prohibited_items.dart';
 
 /// Libellé d'une nature de contenu (C1) dans la langue de l'app.
@@ -41,9 +44,10 @@ String _descriptionHint(AppLocalizations l, String? code) => switch (code) {
 /// Tailles (C2) et poids maximal de chacune.
 const packageSizes = [('S', 2), ('M', 5), ('L', 10), ('XL', 20)];
 
-/// Étape 3 · Colis : nature (tout type d'objet), précision, taille, fragile, montant à
-/// encaisser (marchands), valeur, instructions, rappel des objets interdits. La nature
-/// suggère taille et fragilité tant que l'expéditeur ne les a pas choisies.
+/// Étape 3 · Colis : nature (tout type d'objet), précision, taille (ou « Gros objet », livré
+/// en tricycle, avec aide au chargement à la demande), fragile, montant à encaisser
+/// (marchands), valeur, instructions, rappel des objets interdits. La nature suggère taille
+/// et fragilité tant que l'expéditeur ne les a pas choisies.
 class PackageStep extends StatefulWidget {
   const PackageStep({super.key, required this.draft, required this.merchant, required this.showErrors});
 
@@ -93,6 +97,25 @@ class _PackageStepState extends State<PackageStep> {
     super.dispose();
   }
 
+  /// Proposition tirée de la photo : elle remplit le formulaire, l'expéditeur vérifie. Une
+  /// précision déjà écrite par l'expéditeur est gardée.
+  void _applyAnalysis(ParcelAnalysis analysis) {
+    widget.draft.update((d) {
+      d.parcelAnalysis = analysis;
+      if (!analysis.isParcel) return;
+      d
+        ..contents = analysis.contents
+        ..size = analysis.size
+        ..sizeChosen = true
+        ..fragile = analysis.fragile
+        ..fragileChosen = true;
+    });
+    final description = analysis.description;
+    if (analysis.isParcel && description != null && _description.text.trim().isEmpty) {
+      _description.text = description;
+    }
+  }
+
   /// Nature choisie : documents → petit colis ; vaisselle, électronique → fragile.
   void _chooseContents(String code) => widget.draft.update((d) {
     d.contents = code;
@@ -125,6 +148,17 @@ class _PackageStepState extends State<PackageStep> {
         const SizedBox(height: 8),
         Text(l.packageBody, style: TaraText.body.copyWith(color: c.textSecondary)),
         const SizedBox(height: 18),
+        ParcelPhotoCard(
+          delivery: d,
+          onAnalyzed: _applyAnalysis,
+          onPhoto: (path, key) => widget.draft.update(
+            (d) => d
+              ..parcelPhotoPath = path
+              ..parcelPhotoKey = key
+              ..parcelAnalysis = null,
+          ),
+        ),
+        const SizedBox(height: 18),
         label(l.contentsLabel),
         ChoiceChips<String>(
           options: [for (final code in packageContentsCodes) ChoiceOption(code, contentsText(l, code))],
@@ -154,14 +188,35 @@ class _PackageStepState extends State<PackageStep> {
               ..sizeChosen = true,
           ),
         ),
+        const SizedBox(height: 8),
+        _BulkyTile(
+          selected: d.bulky,
+          onTap: () => widget.draft.update(
+            (d) => d
+              ..size = 'BULKY'
+              ..sizeChosen = true,
+          ),
+        ),
         help(switch (d.size) {
           'M' => l.sizeHelpM,
           'L' => l.sizeHelpL,
           'XL' => l.sizeHelpXL,
+          'BULKY' => l.sizeHelpBulky,
           _ => l.sizeHelpS,
         }),
+        if (d.bulky) ...[
+          const SizedBox(height: 14),
+          _SwitchRow(
+            title: l.loadingHelpTitle,
+            body: l.loadingHelpBody,
+            value: d.loadingHelp,
+            onChanged: (value) => widget.draft.update((d) => d.loadingHelp = value),
+          ),
+        ],
         const SizedBox(height: 14),
-        _FragileRow(
+        _SwitchRow(
+          title: l.fragileTitle,
+          body: l.fragileBody,
           value: d.fragile,
           onChanged: (value) => widget.draft.update(
             (d) => d
@@ -268,16 +323,80 @@ class _SizeTiles extends StatelessWidget {
   }
 }
 
-/// « Fragile » : toute la ligne bascule l'interrupteur.
-class _FragileRow extends StatelessWidget {
-  const _FragileRow({required this.value, required this.onChanged});
+/// « Gros objet » : sous les quatre tailles, sur toute la largeur. Il ne tient pas sur une
+/// moto ; la course se fait en tricycle, à un tarif propre.
+class _BulkyTile extends StatelessWidget {
+  const _BulkyTile({required this.selected, required this.onTap});
 
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return Semantics(
+      inMutuallyExclusiveGroup: true,
+      checked: selected,
+      button: true,
+      label: '${l.sizeBulky}, ${l.sizeBulkyBody}',
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            gradient: selected ? c.chipSelected : null,
+            color: selected ? null : c.glass,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: selected ? c.chipSelectedBorder : c.glassBorder,
+              width: selected ? c.chipSelectedBorderWidth : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              TaraIcon(TaraIcons.package, size: 22, color: selected ? c.accentText : c.textSecondary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l.sizeBulky,
+                      style: TaraText.text.copyWith(
+                        color: selected ? c.accentText : c.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(l.sizeBulkyBody, style: TaraText.small.copyWith(color: c.textSecondary)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Option à interrupteur (« Fragile », « Aide pour charger ») : toute la ligne le bascule.
+class _SwitchRow extends StatelessWidget {
+  const _SwitchRow({required this.title, required this.body, required this.value, required this.onChanged});
+
+  final String title;
+  final String body;
   final bool value;
   final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     return MergeSemantics(
       child: GestureDetector(
@@ -297,11 +416,11 @@ class _FragileRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l.fragileTitle,
+                      title,
                       style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 2),
-                    Text(l.fragileBody, style: TaraText.small.copyWith(color: c.textSecondary)),
+                    Text(body, style: TaraText.small.copyWith(color: c.textSecondary)),
                   ],
                 ),
               ),

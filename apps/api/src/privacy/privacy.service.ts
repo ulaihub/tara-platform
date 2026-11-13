@@ -65,6 +65,23 @@ export class PrivacyService {
             order: { select: { reference: true } },
           },
         },
+        // Demandes au service client (H6) : ses messages et les réponses, sans les notes internes.
+        ticketsRequested: {
+          orderBy: { createdAt: 'asc' },
+          select: {
+            number: true,
+            category: true,
+            status: true,
+            subject: true,
+            createdAt: true,
+            order: { select: { reference: true } },
+            messages: {
+              where: { isInternal: false },
+              orderBy: { createdAt: 'asc' },
+              select: { body: true, createdAt: true, authorId: true },
+            },
+          },
+        },
       },
     });
     const orders = await this.prisma.order.findMany({
@@ -168,6 +185,19 @@ export class PrivacyService {
         score,
         comment,
         createdAt,
+      })),
+      supportRequests: user.ticketsRequested.map((ticket) => ({
+        reference: `SUP-${ticket.number}`,
+        category: ticket.category,
+        status: ticket.status,
+        subject: ticket.subject,
+        order: ticket.order?.reference ?? null,
+        createdAt: ticket.createdAt,
+        messages: ticket.messages.map((message) => ({
+          from: message.authorId === actor.id ? 'vous' : 'Tara',
+          body: message.body,
+          createdAt: message.createdAt,
+        })),
       })),
       locationLinks: user.locationLinks.map(
         ({ recipientName, recipientPhone, createdAt, submittedAt }) => ({

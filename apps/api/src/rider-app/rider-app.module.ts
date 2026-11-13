@@ -34,5 +34,6 @@ import { SafetyAlertsService } from './safety-alerts.service.js';
     AdminSupportController,
   ],
   providers: [RiderOrdersService, OrderSupportService, SafetyAlertsService, RealtimeGateway],
+  exports: [SafetyAlertsService],
 })
 export class RiderAppModule {}

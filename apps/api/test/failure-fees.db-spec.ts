@@ -16,6 +16,7 @@ import {
   nearAkwa,
   type PlacedOrder,
   placeOrder,
+  RIDER_SHARE_BPS,
   setupDouala,
   type TestMerchant,
 } from './helpers/orders.js';
@@ -180,7 +181,7 @@ describe('Frais de nouvelle tentative et de retour (E6)', () => {
     const riderPart = shared.postings.find(
       (p) => p.account.code === riderPayable(rider.riderId).code,
     );
-    expect(riderPart?.amount).toBe(-Math.floor(((500 + returnFee) * 8000) / 10_000));
+    expect(riderPart?.amount).toBe(-Math.floor(((500 + returnFee) * RIDER_SHARE_BPS) / 10_000));
     const earnings = await request(ctx.http)
       .get('/v1/rider/earnings?period=day')
       .set(rider.auth)

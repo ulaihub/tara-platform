@@ -35,7 +35,11 @@ export const OfferDto = z
     distanceMeters: z.int(),
     /** Durée estimée du trajet enlèvement → livraison, en minutes. */
     estimatedMinutes: z.int(),
+    /** Gain total de la course : part du livreur plus primes payées par Tara. */
     riderEarning: z.int(),
+    /** Dont prime d'approche (vendeur éloigné) et prime de renfort (H4). */
+    approachBonus: z.int(),
+    boostBonus: z.int(),
     /** Montant à encaisser auprès du destinataire. */
     codAmount: z.int(),
     /** Frais de livraison réglés en espèces au livreur. */
@@ -44,6 +48,8 @@ export const OfferDto = z
     /** Nature du contenu (C1) : le livreur sait ce qu'il transporte avant d'accepter. */
     packageContents: PackageContentsEnum.nullable(),
     isFragile: z.boolean(),
+    /** Gros objet : venir à deux, aide au chargement demandée. */
+    loadingHelp: z.boolean(),
     isExpress: z.boolean(),
   })
   .meta({ id: 'DispatchOffer' });
@@ -80,6 +86,8 @@ export const CandidateDto = z
         'CASH_OVERDUE',
         'TOO_MANY_ORDERS',
         'PENDING_OFFER',
+        'VEHICLE',
+        'SAFETY_ALERT',
       ]),
     ),
     position: z

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/money/mobile_money_fees.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
@@ -30,6 +31,9 @@ final payoutsProvider = FutureProvider<List<Payout>>((ref) => ref.read(clientApi
 
 /// « 12 500 F », espace insécable comme partout dans l'app.
 String _f(int amount) => '${formatAmount(amount)} F';
+
+/// Taux en points de base, en pourcentage lisible : 250 → « 2,5 % ».
+String _percent(int bps) => '${NumberFormat('#0.##', 'fr').format(bps / 100)}\u00a0%';
 
 /// Clé d'idempotence : une demande renvoyée (réseau coupé) n'en crée pas une seconde.
 String _key() {
@@ -302,6 +306,13 @@ class _ShopCard extends StatelessWidget {
             l.shopToday(_f(wallet.todaySales), wallet.todayDeliveries),
             style: TaraText.small.copyWith(color: c.textSecondary),
           ),
+          if (wallet.withdrawalFeeBps > 0) ...[
+            const SizedBox(height: 2),
+            Text(
+              l.shopWithdrawalRule(_f(wallet.withdrawalFreeFrom), _percent(wallet.withdrawalFeeBps)),
+              style: TaraText.small.copyWith(color: c.textSecondary),
+            ),
+          ],
           if (balance < 0) ...[
             const SizedBox(height: 10),
             Text(l.shopDebt(_f(-balance)), style: TaraText.label.copyWith(color: c.dangerTextStrong)),
@@ -354,6 +365,9 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
   static const _amounts = [2000, 5000, 10000, 20000];
 
   int _amount = 5000;
+
+  /// Frais Mobile Money payés en plus de la recharge (réglages de l'app).
+  int get _fee => mobileMoneyFee(_amount, ref.watch(appConfigProvider).value?.mobileMoneyFeeBps ?? 0);
   String _operator = 'MTN';
   late final _payer = TextEditingController(text: _grouped(widget.phone));
   bool _paying = false;
@@ -529,7 +543,11 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
             if (_failed) ...[const SizedBox(height: 10), ErrorLine(l.topUpFailed)],
             if (_error != null) ...[const SizedBox(height: 10), ErrorLine(_error!)],
             const SizedBox(height: 12),
-            if (!pending) PrimaryButton(label: l.topUpPay(_f(_amount)), loading: _paying, onPressed: _pay),
+            if (_fee > 0) ...[
+              Text(l.topUpFeeNote(_f(_fee)), style: TaraText.small.copyWith(color: c.textSecondary)),
+              const SizedBox(height: 8),
+            ],
+            if (!pending) PrimaryButton(label: l.topUpPay(_f(_amount + _fee)), loading: _paying, onPressed: _pay),
             Center(
               child: TaraLink(
                 label: l.cancel,

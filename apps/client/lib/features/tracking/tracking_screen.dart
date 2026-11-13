@@ -32,6 +32,7 @@ import '../common/error_text.dart';
 import '../home/home_screen.dart';
 import '../order/address_editor.dart' show SheetPanel;
 import '../order/pickup_step.dart' show AddressChoice;
+import '../support/support.dart';
 import 'tracking_map.dart';
 
 /// Vitesse moyenne d'une moto dans Douala, pour une estimation prudente de l'arrivée.
@@ -457,6 +458,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                         onCancel: () => unawaited(_cancel()),
                         onShare: () => unawaited(_share(order)),
                         onCall: (phone) => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
+                        onReport: () =>
+                            unawaited(reportProblem(context, ref, orderId: order.id, orderReference: order.reference)),
                       ),
               ),
             ),
@@ -500,6 +503,7 @@ class _Panel extends StatelessWidget {
     this.topUp,
     required this.onShare,
     required this.onCall,
+    required this.onReport,
   });
 
   final TrackedOrder order;
@@ -524,6 +528,9 @@ class _Panel extends StatelessWidget {
   final _TopUpState? topUp;
   final VoidCallback onShare;
   final ValueChanged<String> onCall;
+
+  /// « Signaler un problème » : demande au service client sur cette commande.
+  final VoidCallback onReport;
 
   @override
   Widget build(BuildContext context) {
@@ -560,6 +567,11 @@ class _Panel extends StatelessWidget {
       'DELIVERY_FAILED' => (l.trackFailed, l.trackFailedBody),
       'DELIVERED' => (l.trackDelivered, l.trackDeliveredBody(recipientFirst, formatClock(deliveredAt ?? now))),
       'RETURNED' => (l.trackReturned, l.trackReturnedBody(formatClock(o.reachedAt('RETURNED') ?? now))),
+      // Colis non conforme refusé à l'enlèvement : le motif et le déplacement facturé.
+      'CANCELLED' when o.refusalReason != null => (
+        l.trackRefused,
+        l.trackRefusedBody(o.refusalReason!, '${formatAmount(o.retryFee)} F'),
+      ),
       _ => (l.trackCancelled, ''),
     };
     final eta = _eta(o);
@@ -689,6 +701,10 @@ class _Panel extends StatelessWidget {
           ),
           if (confirmCancel) Text(l.cancelConfirm, style: TaraText.small.copyWith(color: c.dangerText)),
         ],
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TaraLink(label: l.reportProblem, onPressed: onReport),
+        ),
       ],
       if (error != null) ...[const SizedBox(height: 8), ErrorLine(error!)],
     ];

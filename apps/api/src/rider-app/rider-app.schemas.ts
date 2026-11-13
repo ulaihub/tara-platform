@@ -74,6 +74,19 @@ export const CallLogEntry = z.object({
   durationSeconds: z.int().min(0).max(3_600),
 });
 
+/** Pourquoi le livreur refuse le colis à l'enlèvement (il ne correspond pas à la commande). */
+export const ParcelRefusalReasonEnum = z
+  .enum(['TOO_BIG', 'TOO_HEAVY', 'NOT_AS_DECLARED', 'FORBIDDEN_ITEM'])
+  .meta({ id: 'ParcelRefusalReason' });
+
+export const RefuseParcelBody = z.object({
+  reason: ParcelRefusalReasonEnum,
+  note: z.string().trim().max(300).optional(),
+  /** Photo du colis, preuve pour l'expéditeur et le support. */
+  photoKey: MediaKey,
+  ...ActionContext,
+});
+
 export const FailBody = z.object({
   reason: FailureReasonEnum,
   note: z.string().trim().max(300).optional(),
@@ -145,6 +158,12 @@ export const RiderOrderDto = z
     packageContents: PackageContentsEnum.nullable(),
     packageDescription: z.string().nullable(),
     isFragile: z.boolean(),
+    /** Gros objet : venir à deux, aide au chargement demandée. */
+    loadingHelp: z.boolean(),
+    /** Photo du colis jointe par l'expéditeur (GET /rider/orders/{id}/parcel-photo). */
+    hasParcelPhoto: z.boolean(),
+    /** Objets interdits que l'analyse de cette photo a cru voir : à vérifier à l'enlèvement. */
+    parcelWarning: z.string().nullable(),
     isExpress: z.boolean(),
     instructions: z.string().nullable(),
     pickup: AddressDto,
@@ -260,5 +279,7 @@ export const RiderConfigDto = z
     emergencyNumbers: z.object({ police: z.string(), fire: z.string(), medical: z.string() }),
     mobileMoneyOperators: z.array(z.object({ code: z.string(), name: z.string() })),
     offerTimeoutSeconds: z.number(),
+    /** Frais Mobile Money payés par le client en plus du montant encaissé, en points de base. */
+    mobileMoneyFeeBps: z.int(),
   })
   .meta({ id: 'RiderConfig' });

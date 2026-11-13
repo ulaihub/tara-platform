@@ -20,7 +20,13 @@ import {
   type TestContext,
 } from './helpers/app.js';
 import { createAddress, PLACES } from './helpers/geo.js';
-import { merchant, type PlacedOrder, placeOrder, setupDouala } from './helpers/orders.js';
+import {
+  merchant,
+  type PlacedOrder,
+  placeOrder,
+  setupDouala,
+  RIDER_SHARE_BPS,
+} from './helpers/orders.js';
 import { activeRider, RIDER_START_BALANCE, type TestRider } from './helpers/riders.js';
 
 describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à G8)', () => {
@@ -396,7 +402,7 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       -(o.totalPrice + o.returnFee),
     );
     expect(await ledger.balance(riderPayable(rider.riderId))).toBe(
-      RIDER_START_BALANCE + o.riderEarning + Math.floor((o.returnFee * 8000) / 10_000),
+      RIDER_START_BALANCE + o.riderEarning + Math.floor((o.returnFee * RIDER_SHARE_BPS) / 10_000),
     );
   });
 

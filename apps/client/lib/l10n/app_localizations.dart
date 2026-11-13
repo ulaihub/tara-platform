@@ -1118,6 +1118,78 @@ abstract class AppLocalizations {
   /// **'Le livreur sait ainsi comment le transporter.'**
   String get packageBody;
 
+  /// No description provided for @parcelPhotoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier le colis'**
+  String get parcelPhotoTitle;
+
+  /// No description provided for @parcelPhotoBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif · nous proposons la taille et la nature, vous vérifiez.'**
+  String get parcelPhotoBody;
+
+  /// No description provided for @parcelPhotoAnalyzing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse de la photo…'**
+  String get parcelPhotoAnalyzing;
+
+  /// No description provided for @parcelPhotoAnalyzingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelques secondes.'**
+  String get parcelPhotoAnalyzingBody;
+
+  /// No description provided for @parcelPhotoApplied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposition appliquée'**
+  String get parcelPhotoApplied;
+
+  /// No description provided for @parcelPhotoAppliedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{summary}. Vérifiez ci-dessous.'**
+  String parcelPhotoAppliedBody(String summary);
+
+  /// No description provided for @parcelPhotoNotParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de colis reconnu'**
+  String get parcelPhotoNotParcel;
+
+  /// No description provided for @parcelPhotoNotParcelBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprenez la photo en cadrant le colis seul.'**
+  String get parcelPhotoNotParcelBody;
+
+  /// No description provided for @parcelPhotoAttached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo jointe'**
+  String get parcelPhotoAttached;
+
+  /// No description provided for @parcelPhotoAttachedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur la verra. Choisissez la taille et la nature ci-dessous.'**
+  String get parcelPhotoAttachedBody;
+
+  /// No description provided for @parcelPhotoProhibited.
+  ///
+  /// In fr, this message translates to:
+  /// **'La photo semble montrer : {items}. Ces objets sont interdits. Si c’est une erreur, vous pouvez continuer : l’équipe Tara et le livreur en seront informés.'**
+  String parcelPhotoProhibited(String items);
+
+  /// No description provided for @sizeShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille {size}'**
+  String sizeShort(String size);
+
   /// No description provided for @contentsLabel.
   ///
   /// In fr, this message translates to:
@@ -1303,6 +1375,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Jusqu’à 20 kg · gros carton, petit électroménager. Supplément colis XL.'**
   String get sizeHelpXL;
+
+  /// No description provided for @sizeBulky.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gros objet'**
+  String get sizeBulky;
+
+  /// No description provided for @sizeBulkyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frigo, cuisinière, matelas, meuble · livré en tricycle'**
+  String get sizeBulkyBody;
+
+  /// No description provided for @sizeHelpBulky.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.'**
+  String get sizeHelpBulky;
+
+  /// No description provided for @loadingHelpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide pour charger'**
+  String get loadingHelpTitle;
+
+  /// No description provided for @loadingHelpBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur vient à deux. Supplément de manutention affiché avant de commander.'**
+  String get loadingHelpBody;
+
+  /// No description provided for @loadingHelpShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'chargement à deux'**
+  String get loadingHelpShort;
 
   /// No description provided for @fragileTitle.
   ///
@@ -1556,6 +1664,18 @@ abstract class AppLocalizations {
   /// **'Course'**
   String get priceBase;
 
+  /// No description provided for @mobileMoneyFeeLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais Mobile Money'**
+  String get mobileMoneyFeeLine;
+
+  /// No description provided for @priceBaseTricycle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course en tricycle'**
+  String get priceBaseTricycle;
+
   /// No description provided for @surchargeExpress.
   ///
   /// In fr, this message translates to:
@@ -1567,6 +1687,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Colis XL'**
   String get surchargeHeavy;
+
+  /// No description provided for @surchargeHandling.
+  ///
+  /// In fr, this message translates to:
+  /// **'Manutention (chargement à deux)'**
+  String get surchargeHandling;
 
   /// No description provided for @surchargeNight.
   ///
@@ -1591,6 +1717,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réduction'**
   String get discount;
+
+  /// Ligne du récapitulatif : remise du tarif pro des boutiques.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tarif pro ({percent})'**
+  String proDiscountLine(String percent);
+
+  /// No description provided for @promoBeatenByPro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre tarif pro (−{percent}) est plus avantageux : ce code n’est pas utilisé.'**
+  String promoBeatenByPro(String percent);
 
   /// No description provided for @totalLabel.
   ///
@@ -1921,6 +2059,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Livraison annulée'**
   String get trackCancelled;
+
+  /// No description provided for @trackRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis refusé à l’enlèvement'**
+  String get trackRefused;
+
+  /// No description provided for @trackRefusedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{reason}. La commande est annulée ; le déplacement du livreur ({fee}) est à votre charge. Un désaccord ? Appelez le service client.'**
+  String trackRefusedBody(String reason, String fee);
 
   /// No description provided for @trackEta.
   ///
@@ -2342,6 +2492,12 @@ abstract class AppLocalizations {
   /// **'En cas d’échec de livraison : nouvelle tentative {retry}, retour du colis {ret}, à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.'**
   String failureFeesNote(String retry, String ret);
 
+  /// No description provided for @refusalFeeNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis différent de ce que vous déclarez (trop grand, trop lourd, interdit) : le livreur peut le refuser, et son déplacement ({fee}) reste à votre charge.'**
+  String refusalFeeNote(String fee);
+
   /// No description provided for @retryUsed.
   ///
   /// In fr, this message translates to:
@@ -2546,6 +2702,12 @@ abstract class AppLocalizations {
   /// **'Aujourd’hui : {amount} encaissés · {count, plural, =0{aucune livraison} =1{1 livraison} other{{count} livraisons}}'**
   String shopToday(String amount, int count);
 
+  /// No description provided for @shopWithdrawalRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversement gratuit dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.'**
+  String shopWithdrawalRule(String amount, String rate);
+
   /// No description provided for @shopDebt.
   ///
   /// In fr, this message translates to:
@@ -2599,6 +2761,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Combien voulez-vous ajouter ?'**
   String get topUpHowMuch;
+
+  /// No description provided for @topUpFeeNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'+ {fee} de frais Mobile Money (frais de l’opérateur).'**
+  String topUpFeeNote(String fee);
 
   /// No description provided for @topUpDone.
   ///
@@ -2983,6 +3151,204 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Photo de la façade prise'**
   String get facadePhotoLabel;
+
+  /// No description provided for @supportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide et service client'**
+  String get supportTitle;
+
+  /// No description provided for @supportIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une question, un souci avec une livraison ? Écrivez-nous : l’équipe Tara vous répond ici et vous êtes prévenu de sa réponse.'**
+  String get supportIntro;
+
+  /// No description provided for @supportNewRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande'**
+  String get supportNewRequest;
+
+  /// No description provided for @supportEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande pour l’instant. Pour un souci avec une livraison, vous pouvez aussi la signaler depuis son suivi.'**
+  String get supportEmpty;
+
+  /// No description provided for @supportCallUs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Urgent ? Appelez le {phone}'**
+  String supportCallUs(String phone);
+
+  /// No description provided for @supportCategoryLostParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis perdu ou non reçu'**
+  String get supportCategoryLostParcel;
+
+  /// No description provided for @supportCategoryDamagedParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis abîmé'**
+  String get supportCategoryDamagedParcel;
+
+  /// No description provided for @supportCategoryLateDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retard'**
+  String get supportCategoryLateDelivery;
+
+  /// No description provided for @supportCategoryPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement'**
+  String get supportCategoryPayment;
+
+  /// No description provided for @supportCategoryRiderBehavior.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comportement du livreur'**
+  String get supportCategoryRiderBehavior;
+
+  /// No description provided for @supportCategoryAppBug.
+  ///
+  /// In fr, this message translates to:
+  /// **'Problème dans l’app'**
+  String get supportCategoryAppBug;
+
+  /// No description provided for @supportCategoryOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get supportCategoryOther;
+
+  /// No description provided for @supportStatusOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyée'**
+  String get supportStatusOpen;
+
+  /// No description provided for @supportStatusInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get supportStatusInProgress;
+
+  /// No description provided for @supportStatusResolved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résolue'**
+  String get supportStatusResolved;
+
+  /// No description provided for @supportStatusClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Close'**
+  String get supportStatusClosed;
+
+  /// No description provided for @supportNewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande'**
+  String get supportNewTitle;
+
+  /// No description provided for @supportReasonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get supportReasonLabel;
+
+  /// No description provided for @supportSubjectLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'En quelques mots'**
+  String get supportSubjectLabel;
+
+  /// No description provided for @supportSubjectHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. : colis non reçu par ma cliente'**
+  String get supportSubjectHint;
+
+  /// No description provided for @supportMessageLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expliquez-nous'**
+  String get supportMessageLabel;
+
+  /// No description provided for @supportMessageHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui s’est passé et ce que vous attendez de Tara.'**
+  String get supportMessageHint;
+
+  /// No description provided for @supportOrderLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande {reference}'**
+  String supportOrderLine(String reference);
+
+  /// No description provided for @supportSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get supportSend;
+
+  /// No description provided for @supportReplyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre réponse…'**
+  String get supportReplyHint;
+
+  /// No description provided for @supportReplySend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get supportReplySend;
+
+  /// No description provided for @supportClosedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette demande est close. Ouvrez une nouvelle demande si besoin.'**
+  String get supportClosedNote;
+
+  /// No description provided for @supportFromTara.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service client Tara'**
+  String get supportFromTara;
+
+  /// No description provided for @supportNewAnswer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse'**
+  String get supportNewAnswer;
+
+  /// No description provided for @supportWaitingNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’équipe Tara vous répond ici ; vous serez prévenu.'**
+  String get supportWaitingNote;
+
+  /// No description provided for @supportMenuRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire au service client'**
+  String get supportMenuRow;
+
+  /// No description provided for @supportMenuRowSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos demandes et les réponses de Tara'**
+  String get supportMenuRowSubtitle;
+
+  /// No description provided for @reportProblem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler un problème'**
+  String get reportProblem;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

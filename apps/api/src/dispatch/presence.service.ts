@@ -86,6 +86,21 @@ export class PresenceService {
     return true;
   }
 
+  /** Livreurs passés en ligne → heure de leur dernier signe de vie (ms), frais ou non. */
+  async onlineRiders(): Promise<Map<string, number>> {
+    const raw = await this.redis.zrange(SEEN_KEY, 0, -1, 'WITHSCORES');
+    const result = new Map<string, number>();
+    for (let index = 0; index + 1 < raw.length; index += 2) {
+      result.set(raw[index] as string, Number(raw[index + 1]));
+    }
+    return result;
+  }
+
+  /** Délai au-delà duquel une position est périmée (signal perdu), en ms. */
+  get staleAfterMs(): number {
+    return this.ttlMs;
+  }
+
   async position(riderId: string): Promise<RiderPosition | null> {
     const raw = await this.redis.hgetall(positionKey(riderId));
     return deserialize(raw);

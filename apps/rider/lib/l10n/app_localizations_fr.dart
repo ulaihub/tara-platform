@@ -426,6 +426,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get yourEarning => 'Votre gain';
 
   @override
+  String bonusIncluded(String details) {
+    return 'dont $details';
+  }
+
+  @override
+  String approachBonus(String amount) {
+    return 'prime d’approche $amount';
+  }
+
+  @override
+  String boostBonus(String amount) {
+    return 'prime de renfort $amount';
+  }
+
+  @override
   String pickupLabel(String distance) {
     return 'ENLÈVEMENT · $distance';
   }
@@ -454,6 +469,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get packageLarge => 'Grand colis';
+
+  @override
+  String get packageBulky => 'Gros objet';
+
+  @override
+  String get comeWithHelper => 'Venir à deux';
 
   @override
   String get fragile => 'Fragile';
@@ -515,6 +536,65 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get parcelCollected => 'Colis récupéré';
+
+  @override
+  String get parcelNotConforming => 'Colis non conforme ?';
+
+  @override
+  String get bulkyNotice => 'Gros objet : vérifiez qu’il tient dans votre véhicule avant de le charger.';
+
+  @override
+  String get bulkyWithHelpNotice => 'Gros objet, aide au chargement payée par l’expéditeur : venez à deux.';
+
+  @override
+  String get refusalTitle => 'Colis non conforme';
+
+  @override
+  String get refusalBody =>
+      'Ne prenez pas un colis trop grand, trop lourd, différent de ce qui a été déclaré ou interdit. Signalez-le ici avant de saisir le code.';
+
+  @override
+  String get refusalReasonLabel => 'Pourquoi ?';
+
+  @override
+  String get refusalTooBig => 'Trop grand pour mon véhicule';
+
+  @override
+  String get refusalTooHeavy => 'Trop lourd';
+
+  @override
+  String get refusalNotAsDeclared => 'Pas ce qui a été déclaré';
+
+  @override
+  String get refusalForbidden => 'Objet interdit';
+
+  @override
+  String get refusalNoteLabel => 'Précisez (facultatif)';
+
+  @override
+  String get refusalNoteHint => 'Ex. armoire 3 portes au lieu d’un carton';
+
+  @override
+  String get refusalPhotoHint => 'Colis entier visible : c’est la preuve';
+
+  @override
+  String get refusalNotice =>
+      'La course sera annulée et votre déplacement vous sera payé. L’expéditeur voit le motif et la photo. Un refus sans raison valable est signalé à l’équipe.';
+
+  @override
+  String get refusalConfirm => 'Refuser le colis';
+
+  @override
+  String get parcelRefusedNotice => 'Colis refusé. Votre déplacement vous est payé.';
+
+  @override
+  String get refusalQueuedTitle => 'Refus enregistré';
+
+  @override
+  String get refusalQueuedBody => 'Il sera envoyé dès le retour du réseau. Vous pouvez repartir.';
+
+  @override
+  String get queuedRefuseParcel => 'Colis non conforme refusé';
 
   @override
   String get actionSavedOffline => 'Enregistré sur le téléphone : envoi automatique au retour du réseau.';
@@ -1550,4 +1630,112 @@ class AppLocalizationsFr extends AppLocalizations {
   String addressPhotoTitle(String name) {
     return 'Façade · $name';
   }
+
+  @override
+  String get toCollectByMomo => 'À demander par Mobile Money';
+
+  @override
+  String momoFeeIncluded(String amount, String fee) {
+    return '$amount de course et de colis, plus $fee de frais Mobile Money payés par le client.';
+  }
+
+  @override
+  String withdrawalRule(String amount, String rate) {
+    return 'Retrait gratuit dès $amount ; en dessous, $rate de frais Mobile Money retenus.';
+  }
+
+  @override
+  String get supportTitle => 'Aide et service client';
+
+  @override
+  String get supportIntro =>
+      'Un souci avec une course, vos gains ou l’app ? Écrivez-nous : l’équipe Tara vous répond ici et vous êtes prévenu de sa réponse.';
+
+  @override
+  String get supportNewRequest => 'Nouvelle demande';
+
+  @override
+  String get supportEmpty => 'Aucune demande pour l’instant.';
+
+  @override
+  String supportCallUs(String phone) {
+    return 'Urgent ? Appelez le $phone';
+  }
+
+  @override
+  String get supportCategoryPayment => 'Gains, solde ou retrait';
+
+  @override
+  String get supportCategoryLostParcel => 'Colis perdu';
+
+  @override
+  String get supportCategoryDamagedParcel => 'Colis abîmé';
+
+  @override
+  String get supportCategoryAppBug => 'Problème dans l’app';
+
+  @override
+  String get supportCategoryOther => 'Autre';
+
+  @override
+  String get supportStatusOpen => 'Envoyée';
+
+  @override
+  String get supportStatusInProgress => 'En cours';
+
+  @override
+  String get supportStatusResolved => 'Résolue';
+
+  @override
+  String get supportStatusClosed => 'Close';
+
+  @override
+  String get supportNewTitle => 'Nouvelle demande';
+
+  @override
+  String get supportReasonLabel => 'Motif';
+
+  @override
+  String get supportSubjectLabel => 'En quelques mots';
+
+  @override
+  String get supportSubjectHint => 'Ex. : retrait non reçu';
+
+  @override
+  String get supportMessageLabel => 'Expliquez-nous';
+
+  @override
+  String get supportMessageHint => 'Ce qui s’est passé, la course concernée si besoin.';
+
+  @override
+  String supportOrderLine(String reference) {
+    return 'Course $reference';
+  }
+
+  @override
+  String get supportSend => 'Envoyer la demande';
+
+  @override
+  String get supportReplyHint => 'Votre réponse…';
+
+  @override
+  String get supportReplySend => 'Envoyer';
+
+  @override
+  String get supportClosedNote => 'Cette demande est close. Ouvrez une nouvelle demande si besoin.';
+
+  @override
+  String get supportFromTara => 'Service client Tara';
+
+  @override
+  String get supportNewAnswer => 'Réponse';
+
+  @override
+  String get supportWaitingNote => 'L’équipe Tara vous répond ici ; vous serez prévenu.';
+
+  @override
+  String get supportMenuRow => 'Écrire au service client';
+
+  @override
+  String get supportMenuRowSubtitle => 'Vos demandes et les réponses de Tara';
 }

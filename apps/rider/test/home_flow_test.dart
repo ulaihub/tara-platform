@@ -20,6 +20,7 @@ import 'package:tara_rider/features/course/collection_screen.dart';
 import 'package:tara_rider/features/course/delivery_screen.dart';
 import 'package:tara_rider/features/course/failure_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
+import 'package:tara_rider/features/course/refuse_parcel_screen.dart';
 import 'package:tara_rider/features/course/return_screen.dart';
 import 'package:tara_rider/features/home/home_flow.dart';
 import 'package:tara_rider/features/home/home_summary.dart';
@@ -176,6 +177,52 @@ void main() {
     expect(find.byType(PickupScreen), findsOneWidget);
     expect(find.text('Code de l’expéditeur incorrect. Essais restants : 4.'), findsOneWidget);
   });
+  testWidgets('« Colis non conforme ? » : refus avec motif et photo, la course s’annule', (tester) async {
+    final sent = <(String, Json)>[];
+    final home = await pumpHome(
+      tester,
+      order(packageSize: 'BULKY'),
+      send: (path, body) async {
+        sent.add((path, body));
+        return null;
+      },
+    );
+    await tester.ensureVisible(find.text('Colis non conforme\u00a0?'));
+    await tester.tap(find.text('Colis non conforme\u00a0?'));
+    await settle(tester);
+    expect(find.byType(RefuseParcelScreen), findsOneWidget);
+    // Retour : l'enlèvement est toujours là.
+    await tester.tap(find.bySemanticsLabel('Retour').last);
+    await settle(tester);
+    expect(find.byType(RefuseParcelScreen), findsNothing);
+    expect(find.byType(PickupScreen), findsOneWidget);
+
+    await tester.tap(find.text('Colis non conforme\u00a0?'));
+    await settle(tester);
+    await tester.tap(find.text('Trop lourd'));
+    // L'enlèvement, dessous, a aussi sa photo : celle du refus est au-dessus.
+    await tester.ensureVisible(find.text('Photographier le colis').last);
+    await tester.tap(find.text('Photographier le colis').last);
+    await settle(tester);
+    await tester.ensureVisible(find.text('Refuser le colis'));
+    await tester.tap(find.text('Refuser le colis'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await settle(tester);
+
+    expect(sent.single.$1, endsWith('/refuse-parcel'));
+    expect(sent.single.$2, containsPair('reason', 'TOO_HEAVY'));
+    expect(home.active.order, isNull);
+    expect(find.byType(PickupScreen), findsNothing);
+    expect(find.text('Colis refusé. Votre déplacement vous est payé.'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('colis refusé sans réseau : « Refus enregistré », envoyé au retour du réseau', (tester) async {
+    await pumpHome(tester, order().withChanges({RiderOrder.refusalQueuedKey: true}));
+    expect(find.text('Refus enregistré'), findsOneWidget);
+    expect(find.byType(PickupScreen), findsNothing);
+  });
+
   testWidgets('« Livraison impossible ? » ouvre l’écran d’échec ; retour à la livraison', (tester) async {
     await pumpHome(tester, order(status: 'IN_DELIVERY'));
     await tester.ensureVisible(find.text('Livraison impossible\u00a0?'));
