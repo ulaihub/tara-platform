@@ -1,6 +1,6 @@
 # Politique de confidentialité de Tara
 
-Version 2026-11 · Projet à faire valider par un juriste, au regard de la loi n° 2024/017 relative
+Version 2026-11.1 · Projet à faire valider par un juriste, au regard de la loi n° 2024/017 relative
 à la protection des données à caractère personnel au Cameroun. Les
 points marqués **[À VALIDER]** demandent son avis.
 
@@ -27,6 +27,11 @@ pendant la course (le livreur voit le numéro du destinataire tant que la course
 - Coordonnées des destinataires : **masquées 30 jours** après la fin de la livraison.
 - SMS envoyés, liens de localisation : numéro et nom effacés après 30 jours.
 - Trajets détaillés des livreurs : **90 jours**, sauf litige ou incident encore ouvert.
+- Photos de preuve (enlèvement, livraison) et photos du colis : **90 jours**, sauf litige ou
+  incident encore ouvert.
+- Demandes au support : **90 jours** après leur clôture.
+- Pièces d'identité d'un livreur dont la candidature est refusée : **90 jours** après le refus.
+  Un livreur qui arrête peut supprimer son compte : ses pièces sont alors effacées aussitôt.
 - Commandes et écritures comptables : gardées pour les obligations comptables et fiscales,
   rattachées à un compte anonyme après suppression du compte.
   **[À VALIDER : durée légale de conservation des pièces comptables.]**
