@@ -2,6 +2,7 @@ import { Redis } from 'ioredis';
 import { OrangeSmsProvider } from './orange-sms.provider.js';
 import { FailoverSmsProvider, MeteredSmsProvider } from './resilient-sms.provider.js';
 import type { SmsProvider } from './sms.provider.js';
+import { TEST_OUTBOX_KEY, TestNumbersSmsProvider } from './test-numbers-sms.provider.js';
 import { TwilioSmsProvider } from './twilio-sms.provider.js';
 
 interface Call {
@@ -156,6 +157,32 @@ describe('fournisseurs SMS', () => {
       const metered = new MeteredSmsProvider(inner, redis, 5, (level) => alerts.push(level));
       for (let i = 0; i < 7; i += 1) await metered.send('+237677123456', 'x');
       expect(alerts).toEqual([80, 100]);
+    });
+
+    it('garde sur le serveur les SMS des téléphones de test, sans passer par l’opérateur', async () => {
+      const sent: string[] = [];
+      const inner: SmsProvider = {
+        name: 'twilio',
+        send: (to) => {
+          sent.push(to);
+          return Promise.resolve({ providerReference: 'SM1' });
+        },
+      };
+      const sms = new TestNumbersSmsProvider(inner, new Set(['+237640114064']), redis);
+
+      const kept = await sms.send('+237640114064', 'Votre code Tara : 123456');
+      expect(kept.provider).toBe('test');
+      expect(await sms.send('+237677123456', 'Bonjour')).toEqual({ providerReference: 'SM1' });
+      expect(sent).toEqual(['+237677123456']);
+
+      const outbox = await redis.lrange(TEST_OUTBOX_KEY, 0, -1);
+      expect(outbox).toHaveLength(1);
+      expect(outbox[0]).toMatch(
+        /^\d{2}\/\d{2} \d{2}:\d{2} {2}\+237640114064 {2}Votre code Tara : 123456$/,
+      );
+      const ttl = await redis.ttl(TEST_OUTBOX_KEY);
+      expect(ttl).toBeGreaterThan(86_000);
+      expect(ttl).toBeLessThanOrEqual(86_400);
     });
   });
 });

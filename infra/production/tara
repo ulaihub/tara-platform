@@ -7,6 +7,8 @@
 #   tara status    état des services        tara logs [service]   journaux en direct
 #   tara backup    sauvegarde de la base et des fichiers (aussi chaque nuit à 2 h)
 #   tara apk       construit les apps Android pour les téléphones de test
+#   tara testeur [numéro | retirer numéro]   téléphones de test, sans SMS payant
+#   tara sms       derniers SMS des téléphones de test (codes de connexion, de livraison…)
 #   tara osrm      (re)prépare la carte des itinéraires du Cameroun
 #
 # Guide pas à pas : docs/DEPLOIEMENT.md.
@@ -336,6 +338,56 @@ cmd_apk() {
   ok "Apps prêtes : https://apps.$domain (identifiant : testeur, mot de passe : $password)"
 }
 
+# Mobile camerounais au format +2376XXXXXXXX (« 640 11 40 64 », « +237640114064 »…).
+phone_e164() {
+  local digits
+  digits=$(printf '%s' "$1" | tr -cd '0-9')
+  digits=${digits#00}
+  if [[ ${#digits} -eq 12 && $digits == 237* ]]; then digits=${digits#237}; fi
+  [[ $digits =~ ^6[0-9]{8}$ ]] || die "Numéro de mobile camerounais attendu, ex. 640114064"
+  printf '+237%s' "$digits"
+}
+
+# Téléphones de test : leurs SMS (codes de connexion, de livraison…) ne partent pas chez
+# l'opérateur ; ils restent 24 h sur le serveur et se lisent avec `tara sms`.
+cmd_testeur() {
+  need_root
+  local action=${1:-} list before phone
+  before=$(get_var "$API_ENV" SMS_TEST_NUMBERS)
+  list=$before
+  if [[ $action == retirer ]]; then
+    phone=$(phone_e164 "${2:-}") || exit 1
+    list=$(printf '%s' "$list" | tr ',' '\n' | { grep -vxF "$phone" || true; } | paste -sd, -)
+  elif [[ -n $action ]]; then
+    phone=$(phone_e164 "$action") || exit 1
+    printf '%s' "$list" | tr ',' '\n' | grep -qxF "$phone" || list=${list:+$list,}$phone
+  fi
+  if [[ $list != "$before" ]]; then
+    set_var "$API_ENV" SMS_TEST_NUMBERS "$list"
+    say "Redémarrage de l'API (une dizaine de secondes)"
+    dc up -d --no-deps --force-recreate api
+  fi
+  if [[ $action == retirer ]]; then
+    ok "$phone n'est plus un téléphone de test : ses SMS repartent par l'opérateur"
+  elif [[ -n $action ]]; then
+    ok "$phone est un téléphone de test : ses codes s'affichent avec « tara sms »"
+  fi
+  echo "Téléphones de test : ${list:-aucun}" | tr ',' ' '
+}
+
+cmd_sms() {
+  need_root
+  local messages
+  messages=$(dc exec -T -e REDISCLI_AUTH="$(get_var "$COMPOSE_ENV" REDIS_PASSWORD)" redis \
+    redis-cli LRANGE tara:sms:test-outbox 0 19)
+  if [[ -z $messages ]]; then
+    echo "Aucun SMS de test ces dernières 24 h (téléphones de test : tara testeur)."
+    return
+  fi
+  echo "SMS des téléphones de test, le plus récent en bas :"
+  printf '%s\n' "$messages" | tac
+}
+
 case "${1:-}" in
   install) cmd_install ;;
   config) cmd_config ;;
@@ -348,5 +400,10 @@ case "${1:-}" in
   backup) cmd_backup ;;
   apk) cmd_apk ;;
   osrm) cmd_osrm ;;
-  *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
+  testeur)
+    shift
+    cmd_testeur "$@"
+    ;;
+  sms) cmd_sms ;;
+  *) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac
