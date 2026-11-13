@@ -215,8 +215,8 @@ Chaque prestataire externe est branché derrière une interface : changer d'agr�
 - [ ] Aucun plantage sur 100 courses simulées avec 3 téléphones Android réels de 2 Go de RAM
 - [ ] 20 actions faites sans réseau, synchronisées sans perte ni doublon
 - [ ] 500 commandes simulées : rapprochement à 0 FCFA d'écart, aucun reversement en double après coupure réseau ou notification répétée
-- [ ] Charge de 5 000 commandes par jour et 500 livreurs connectés : 95 % des appels en moins de 500 ms
-- [ ] Revue de sécurité sans défaut critique ni majeur ; documents d'identité chiffrés
+- [x] Charge de 5 000 commandes par jour et 500 livreurs connectés : 95 % des appels en moins de 500 ms (13 novembre 2026 : 100 % à l'heure de pointe et au triple, voir [`TEST_DE_CHARGE.md`](TEST_DE_CHARGE.md) ; à refaire sur l'hébergement de production)
+- [x] Revue de sécurité sans défaut critique ni majeur ; documents d'identité chiffrés (13 novembre 2026, voir [`SECURITE.md`](SECURITE.md) ; test d'intrusion externe à prévoir avant l'ouverture au public)
 - [ ] Tous les écrans disponibles en français et en anglais
 - [ ] Remise du code source, des accès (stores, cloud, prestataires), de la documentation d'architecture et d'exploitation, et d'une procédure de restauration testée
 - [ ] Si un prestataire externe développe : garantie de correction gratuite des anomalies pendant 3 mois après la mise en production

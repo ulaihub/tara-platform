@@ -6,6 +6,7 @@ import type { AuthUser } from '../auth/auth.types.js';
 import { AppError } from '../common/errors/app-error.js';
 import { periodStart } from '../common/time.js';
 import type { Prisma, RiderBoost } from '../generated/prisma/client.js';
+import { NotificationService } from '../notifications/notification.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { approachBonusFor, volumeDiscountFor } from './pricing.engine.js';
 import {
@@ -49,6 +50,7 @@ export class PricingSettingsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationService,
   ) {}
 
   async get(city: string, db: Db = this.prisma): Promise<CitySettings> {
@@ -213,9 +215,49 @@ export class PricingSettingsService {
       },
       request,
     });
+    // Prime créée par un répartiteur : les administrateurs sont prévenus (revue de sécurité,
+    // phase 7). Elle est payée par Tara : une prime abusive doit se voir tout de suite.
+    if (!actor.roles.includes('ADMIN')) await this.alertAdmins(actor, boost);
     const [dto] = await this.boostDtos([boost], now);
     if (!dto) throw AppError.notFound();
     return dto;
+  }
+
+  private async alertAdmins(actor: AuthUser, boost: RiderBoost): Promise<void> {
+    const [author, admins] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: actor.id },
+        select: { fullName: true, phone: true },
+      }),
+      this.prisma.user.findMany({
+        where: { roles: { has: 'ADMIN' }, status: 'ACTIVE', id: { not: actor.id } },
+        select: { phone: true },
+      }),
+    ]);
+    const until = new Intl.DateTimeFormat('fr-FR', {
+      timeZone: 'Africa/Douala',
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(boost.endsAt);
+    for (const admin of admins) {
+      await this.notifications
+        .toPhone({
+          phone: admin.phone,
+          template: 'OPS_RIDER_BOOST',
+          locale: 'fr',
+          smsOnly: true,
+          params: {
+            author: author?.fullName ?? author?.phone ?? 'un membre de l equipe',
+            amount: String(boost.amount),
+            city: boost.city,
+            until,
+            reason: boost.reason,
+          },
+        })
+        .catch(() => undefined);
+    }
   }
 
   /** Arrête une prime : les courses déjà acceptées la gardent. */

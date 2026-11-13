@@ -3,12 +3,13 @@
 Projets rédigés en langage simple, à faire relire par un juriste avant toute mise en service.
 Chaque point qui demande son avis est marqué **[À VALIDER]**.
 
-| Document                                                     | Pour qui                    | Où il apparaît                                |
-| ------------------------------------------------------------ | --------------------------- | --------------------------------------------- |
-| [Conditions expéditeurs](conditions-expediteurs.md)          | particuliers et boutiques   | app Tara : inscription, puis à chaque version |
-| [Conditions livreurs](conditions-livreurs.md)                | livreurs partenaires        | app Tara Livreur + contrat papier au bureau   |
-| [À savoir pour le destinataire](conditions-destinataires.md) | destinataires (sans compte) | page de suivi web, lien des SMS               |
-| [Politique de confidentialité](politique-confidentialite.md) | tous                        | les deux apps et la page de suivi             |
+| Document                                                     | Pour qui                    | Où il apparaît                                     |
+| ------------------------------------------------------------ | --------------------------- | -------------------------------------------------- |
+| [Conditions expéditeurs](conditions-expediteurs.md)          | particuliers et boutiques   | app Tara : inscription, puis à chaque version      |
+| [Conditions livreurs](conditions-livreurs.md)                | livreurs partenaires        | app Tara Livreur + contrat papier au bureau        |
+| [À savoir pour le destinataire](conditions-destinataires.md) | destinataires (sans compte) | page de suivi web, lien des SMS                    |
+| [Politique de confidentialité](politique-confidentialite.md) | tous                        | les deux apps et la page de suivi                  |
+| [Registre des traitements](registre-des-traitements.md)      | juriste, APDP               | dossier de déclaration (pas affiché dans les apps) |
 
 ## Acceptation « dûment signée » (en place dans les deux apps)
 

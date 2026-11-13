@@ -24,7 +24,7 @@ export const TrackBatchDto = z
   .meta({ id: 'TrackBatchResult' });
 
 export const CourseAlertKindEnum = z
-  .enum(['ACTION_FAR', 'LONG_STOP', 'MOCK_LOCATION', 'TRACK_GAP'])
+  .enum(['ACTION_FAR', 'LONG_STOP', 'MOCK_LOCATION', 'TRACK_GAP', 'APPROACH_BONUS'])
   .meta({ id: 'CourseAlertKind' });
 
 export const CourseAlertDto = z

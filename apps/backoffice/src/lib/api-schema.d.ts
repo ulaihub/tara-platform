@@ -3031,7 +3031,7 @@ export interface components {
       note: string | null;
     };
     /** @enum {string} */
-    CourseAlertKind: 'ACTION_FAR' | 'LONG_STOP' | 'MOCK_LOCATION' | 'TRACK_GAP';
+    CourseAlertKind: 'ACTION_FAR' | 'LONG_STOP' | 'MOCK_LOCATION' | 'TRACK_GAP' | 'APPROACH_BONUS';
     CourseTrack: {
       /** Format: uuid */
       orderId: string;

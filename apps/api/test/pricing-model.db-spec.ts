@@ -164,6 +164,10 @@ describe('Modèle de prix (H4) : tarif pro et primes des livreurs', () => {
       })
       .expect(201);
     expect(boost.body).toMatchObject({ status: 'ACTIVE', amount: 300, orders: 0 });
+    // Créée par un répartiteur : les administrateurs sont prévenus par SMS.
+    expect(ctx.sms.lastTo(admin.phone)?.text).toMatch(
+      /prime de renfort de 300 FCFA par course \(Douala\).*Motif : Forte pluie/,
+    );
 
     const shop = await merchant(ctx);
     // Environ 3,9 km du vendeur : au-delà du seuil de 3 km.
@@ -213,6 +217,20 @@ describe('Modèle de prix (H4) : tarif pro et primes des livreurs', () => {
       .set(ops.auth)
       .expect(200);
     expect(stopped.body.status).toBe('CANCELLED');
+
+    // Créée par un administrateur : pas de SMS aux autres administrateurs.
+    const other = await staffUser(ctx, ['ADMIN']);
+    const before = ctx.sms.outbox.length;
+    const own = await request(ctx.http)
+      .post('/v1/admin/rider-boosts')
+      .set(admin.auth)
+      .send({ amount: 100, reason: 'Essai', endsAt: new Date(Date.now() + 60_000).toISOString() })
+      .expect(201);
+    expect(ctx.sms.outbox.slice(before).filter((sms) => sms.to === other.phone)).toEqual([]);
+    await request(ctx.http)
+      .post(`/v1/admin/rider-boosts/${own.body.id as string}/cancel`)
+      .set(admin.auth)
+      .expect(200);
   });
 
   it('simule une grille pour quelques distances avant de l’enregistrer', async () => {

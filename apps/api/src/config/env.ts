@@ -59,10 +59,31 @@ const envSchema = z
     /** Origines web autorisées (back-office, page de suivi), séparées par des virgules. */
     CORS_ORIGINS: z.string().default(''),
 
-    STORAGE_DRIVER: z.enum(['local']).default('local'),
+    /**
+     * Fichiers (photos, notes vocales, pièces d'identité chiffrées) : disque local en
+     * développement, stockage objet compatible S3 en production (tout hébergeur : le lieu
+     * des données se choisit avec l'avis juridique sur les transferts hors du Cameroun).
+     */
+    STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
     STORAGE_LOCAL_DIR: z.string().min(1).default('./var/storage'),
+    /** Adresse du service S3 de l'hébergeur ; vide pour Amazon S3 lui-même. */
+    S3_ENDPOINT: z.url().optional(),
+    S3_REGION: z.string().min(1).default('us-east-1'),
+    S3_BUCKET: z.string().min(3).max(63).optional(),
+    S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+    S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+    /** Adresses « endpoint/bucket/clé » (MinIO et la plupart des hébergeurs hors Amazon). */
+    S3_FORCE_PATH_STYLE: z
+      .enum(['true', 'false'])
+      .default('true')
+      .transform((value) => value === 'true'),
     /** Clé de chiffrement des pièces d'identité (AES-256-GCM). */
     STORAGE_ENCRYPTION_KEY: base64Key32,
+    /**
+     * Rotation de la clé : l'ancienne, encore acceptée pour lire, le temps que
+     * `storage:rotate-key` rechiffre tout avec la nouvelle (docs/SECURITE.md).
+     */
+    STORAGE_ENCRYPTION_KEY_PREVIOUS: base64Key32.optional(),
 
     /**
      * SMS : Orange Cameroun (API officielle, tous opérateurs) en principal et Twilio en
@@ -300,6 +321,24 @@ const envSchema = z
           });
       }
     }
+    if (env.STORAGE_DRIVER === 's3') {
+      for (const name of ['S3_BUCKET', 'S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY'] as const) {
+        if (!env[name]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [name],
+            message: 'obligatoire avec STORAGE_DRIVER=s3',
+          });
+        }
+      }
+    }
+    if (env.STORAGE_ENCRYPTION_KEY_PREVIOUS === env.STORAGE_ENCRYPTION_KEY) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['STORAGE_ENCRYPTION_KEY_PREVIOUS'],
+        message: 'doit différer de STORAGE_ENCRYPTION_KEY',
+      });
+    }
     const radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
     if (radii.some((r) => !Number.isInteger(r) || r <= 0)) {
       ctx.addIssue({
@@ -377,4 +416,13 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
     );
   }
   return result.data;
+}
+
+/** Clés de chiffrement du stockage : l'actuelle d'abord, puis l'ancienne pendant une rotation. */
+export function storageKeys(env: Env): Buffer[] {
+  const keys = [Buffer.from(env.STORAGE_ENCRYPTION_KEY, 'base64')];
+  if (env.STORAGE_ENCRYPTION_KEY_PREVIOUS) {
+    keys.push(Buffer.from(env.STORAGE_ENCRYPTION_KEY_PREVIOUS, 'base64'));
+  }
+  return keys;
 }

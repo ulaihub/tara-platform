@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ENV } from '../config/config.module.js';
-import type { Env } from '../config/env.js';
+import { type Env, storageKeys } from '../config/env.js';
 import { AppError } from '../common/errors/app-error.js';
-import { decrypt, encrypt } from '../common/crypto.js';
+import { decryptWithAny, encrypt } from '../common/crypto.js';
 import type { MediaKind } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OBJECT_STORAGE, type ObjectStorage } from './object-storage.js';
@@ -76,14 +76,15 @@ export interface StoredMedia {
 
 @Injectable()
 export class MediaService {
-  private readonly encryptionKey: Buffer;
+  /** Clé actuelle d'abord (chiffrement), puis l'ancienne pendant une rotation (lecture). */
+  private readonly keys: Buffer[];
 
   constructor(
     private readonly prisma: PrismaService,
     @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
     @Inject(ENV) env: Env,
   ) {
-    this.encryptionKey = Buffer.from(env.STORAGE_ENCRYPTION_KEY, 'base64');
+    this.keys = storageKeys(env);
   }
 
   async store(ownerId: string, kind: MediaKind, file: UploadedMedia): Promise<StoredMedia> {
@@ -103,7 +104,7 @@ export class MediaService {
     const key = `${kind.toLowerCase().replace('_', '-')}/${now.getUTCFullYear()}/${String(
       now.getUTCMonth() + 1,
     ).padStart(2, '0')}/${randomUUID()}`;
-    const body = rule.encrypted ? encrypt(this.encryptionKey, file.buffer) : file.buffer;
+    const body = rule.encrypted ? encrypt(this.keys[0] as Buffer, file.buffer) : file.buffer;
     await this.storage.put(key, body);
 
     const media = await this.prisma.mediaFile.create({
@@ -133,7 +134,7 @@ export class MediaService {
     if (!media) throw AppError.notFound('MEDIA_NOT_FOUND');
     const stored = await this.storage.get(key);
     return {
-      buffer: media.encrypted ? decrypt(this.encryptionKey, stored) : stored,
+      buffer: media.encrypted ? decryptWithAny(this.keys, stored) : stored,
       mimeType: media.mimeType,
     };
   }
