@@ -51,7 +51,7 @@ tara-platform/
 │   ├── postgres/init/       scripts exécutés à la création du volume
 │   └── osrm/prepare.sh      préparation des itinéraires du Cameroun
 ├── docs/                    cahier des charges, architecture, plan des phases
-└── .github/workflows/ci.yml intégration continue
+└── .github/workflows/     intégration continue : un workflow par partie (décision 37)
 ```
 
 ## Versions retenues
@@ -194,7 +194,7 @@ tara-platform/
     (APK arm64 : 18,6 → 30,2 Mo) mais seulement 3,7 Mo au téléchargement (≈ 13 Mo au total,
     le Play Store compressant ce qu'il envoie). Choix validé : garder notre carte, et mesurer
     le poids au téléchargement (25 Mo au plus) et une fois installée (32 Mo au plus). La CI
-    contrôle les deux sur les APK ARM (`tool/apk_report.py`). Google Maps aurait allégé l'app
+    contrôle les deux sur les APK ARM (`tool/apk_report.py`), à chaque fusion sur `main`. Google Maps aurait allégé l'app
     de 11 Mo, mais au prix d'une clé tierce, sans carte hors connexion ni maîtrise des styles.
 32. **Trajet des courses enregistré.** Sécurité du livreur et des colis, preuves en cas de
     litige, détection des fraudes : chaque position reçue pendant une course (de
@@ -247,6 +247,15 @@ tara-platform/
     plus exigée. Une course
     dont le destinataire paiera peut-être par Mobile Money est aussi couverte (on ne le sait
     qu'à la porte) : la réservation est libérée à la fin sans rien prendre.
+37. **Intégration continue économe.** Le dépôt est privé sur un compte GitHub gratuit : les
+    minutes d'Actions et le stockage des fichiers produits sont limités chaque mois. Un
+    workflow par partie, lancé seulement quand ses fichiers changent : API, back-office et
+    page de suivi (`ci.yml`), app livreur (`rider.yml`), app expéditeur (`client.yml`),
+    aperçus de la carte quand un style change (`map-preview.yml`) ; la recherche de secrets
+    (`secrets.yml`) tourne à chaque fois. Dans une PR, les apps sont testées (format,
+    analyse, tests, captures) sans construire les APK : ceux-ci, leur poids et leurs symboles
+    sont produits à la fusion sur `main` ou sur demande (« Run workflow »), gardés 14 jours.
+    Une modification du seul back-office coûte environ 7 minutes au lieu d'environ 42.
 
 ## Cycle de vie d'une commande
 

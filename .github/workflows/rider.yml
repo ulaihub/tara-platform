@@ -1,0 +1,135 @@
+name: App livreur
+
+# Tests, analyse et captures de l'app livreur, seulement quand elle ou un paquet partagé
+# change. Chaque exécution consomme des minutes GitHub Actions (quota mensuel du compte).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/rider/**'
+      - '!apps/rider/tool/map_preview/**'
+      - 'packages/tara_core/**'
+      - 'packages/tara_ui/**'
+      - 'packages/tara_map/**'
+      - 'packages/tara_test/**'
+      - '.github/workflows/rider.yml'
+  pull_request:
+    paths:
+      - 'apps/rider/**'
+      - '!apps/rider/tool/map_preview/**'
+      - 'packages/tara_core/**'
+      - 'packages/tara_ui/**'
+      - 'packages/tara_map/**'
+      - 'packages/tara_test/**'
+      - '.github/workflows/rider.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Droits minimaux du jeton GitHub pour tous les jobs.
+permissions:
+  contents: read
+
+jobs:
+  rider:
+    name: App livreur (Flutter)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/rider
+    steps:
+      - uses: actions/checkout@v7
+
+      # Java 21 : exigé par le module MapLibre, pris en charge par le plugin Android
+      # Gradle 9. Dépendances Gradle en cache : la construction ne dépend plus de la
+      # disponibilité de Maven Central à chaque fois.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: |
+            apps/rider/android/*.gradle*
+            apps/rider/android/app/*.gradle*
+            apps/rider/android/gradle/wrapper/gradle-wrapper.properties
+            apps/rider/pubspec.lock
+
+      # Version de Flutter épinglée : les captures de référence en dépendent.
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+
+      - name: Dépendances
+        run: flutter pub get --enforce-lockfile
+
+      # Design et cœur partagés avec l'app expéditeur : mis en forme et analysés comme l'app.
+      - name: Paquets partagés (design, cœur, carte, tests)
+        working-directory: packages
+        run: |
+          for package in tara_ui tara_core tara_map tara_test; do
+            (cd "$package" && flutter pub get && dart format --output=none --set-exit-if-changed lib && flutter analyze)
+          done
+
+      - name: Traductions générées à jour
+        run: |
+          flutter gen-l10n
+          git diff --exit-code lib/l10n
+
+      - name: Formatage
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyse
+        run: flutter analyze
+
+      - name: Tests et captures de référence
+        run: flutter test
+
+      - name: Écarts de captures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rider-golden-failures
+          path: apps/rider/test/**/failures/
+          retention-days: 7
+
+      # Fichiers d'installation : construits seulement à la fusion sur main ou sur demande
+      # (bouton « Run workflow »), pas à chaque modification d'une PR. C'est la partie la
+      # plus longue (environ 12 minutes par app) et les APK remplissent vite le stockage.
+      #
+      # Code Dart obscurci ; les symboles gardés à part servent à lire les plantages.
+      # Signature par la clé d'envoi si les secrets du dépôt existent, sinon clé de test.
+      - name: APK par architecture
+        if: github.event_name != 'pull_request'
+        env:
+          TARA_RIDER_KEYSTORE_BASE64: ${{ secrets.TARA_RIDER_KEYSTORE_BASE64 }}
+          TARA_RIDER_KEYSTORE_PASSWORD: ${{ secrets.TARA_RIDER_KEYSTORE_PASSWORD }}
+          TARA_RIDER_KEY_ALIAS: ${{ secrets.TARA_RIDER_KEY_ALIAS }}
+          TARA_RIDER_KEY_PASSWORD: ${{ secrets.TARA_RIDER_KEY_PASSWORD }}
+        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
+
+      # Cahier des charges : moins de 25 Mo à télécharger depuis le Play Store et au plus
+      # 32 Mo une fois installée (carte comprise). Détail par bibliothèque, code et ressources.
+      - name: Poids des APK (téléchargement 25 Mo, installée 32 Mo)
+        if: github.event_name != 'pull_request'
+        run: >-
+          python3 tool/apk_report.py --download-max-mo 25 --installed-max-mo 32
+          build/app/outputs/flutter-apk/app-*-release.apk
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: tara-livreur-apk
+          path: apps/rider/build/app/outputs/flutter-apk/app-*-release.apk
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: tara-livreur-symboles
+          path: apps/rider/build/symbols/
+          retention-days: 14
