@@ -9,8 +9,10 @@ RUN apt-get update -q && apt-get install -y -q --no-install-recommends curl git 
 RUN curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
     | tar -xJ -C /opt \
  && git config --global --add safe.directory /opt/flutter
+# Clé de test (debug.keystore) gardée dans le cache : chaque nouvelle version des apps
+# s'installe par-dessus la précédente, sans désinstaller.
 ENV ANDROID_HOME=/opt/android-sdk PATH=/opt/flutter/bin:/opt/android-sdk/cmdline-tools/latest/bin:$PATH \
-    PUB_CACHE=/cache/pub GRADLE_USER_HOME=/cache/gradle
+    PUB_CACHE=/cache/pub GRADLE_USER_HOME=/cache/gradle ANDROID_USER_HOME=/cache/android
 RUN mkdir -p $ANDROID_HOME/cmdline-tools \
  && curl -fsSL -o /tmp/tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS}_latest.zip" \
  && unzip -q /tmp/tools.zip -d $ANDROID_HOME/cmdline-tools && mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest \
