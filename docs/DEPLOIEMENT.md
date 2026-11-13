@@ -84,16 +84,17 @@ Ne jamais y mettre le numéro d'un vrai client : il ne recevrait plus aucun SMS.
 
 ## Au quotidien
 
-| Commande        | Effet                                                                           |
-| --------------- | ------------------------------------------------------------------------------- |
-| `tara status`   | état des services                                                               |
-| `tara logs api` | journal de l'API en direct (Ctrl+C pour sortir)                                 |
-| `tara update`   | installe la dernière version validée (migrations comprises, données conservées) |
-| `tara config`   | change les clés des prestataires                                                |
-| `tara backup`   | sauvegarde immédiate (automatique chaque nuit)                                  |
-| `tara apk`      | reconstruit les apps après une mise à jour                                      |
-| `tara testeur`  | téléphones de test (voir plus haut)                                             |
-| `tara sms`      | derniers SMS des téléphones de test                                             |
+| Commande         | Effet                                                                           |
+| ---------------- | ------------------------------------------------------------------------------- |
+| `tara status`    | état des services                                                               |
+| `tara logs api`  | journal de l'API en direct (Ctrl+C pour sortir)                                 |
+| `tara update`    | installe la dernière version validée (migrations comprises, données conservées) |
+| `tara config`    | change les clés des prestataires                                                |
+| `tara backup`    | sauvegarde immédiate (automatique chaque nuit)                                  |
+| `tara apk`       | reconstruit les apps après une mise à jour                                      |
+| `tara testeur`   | téléphones de test (voir plus haut)                                             |
+| `tara sms`       | derniers SMS des téléphones de test                                             |
+| `tara paiements` | derniers paiements et motif d'un échec (réponse du prestataire, sans numéro)    |
 
 **Sauvegardes** : base et fichiers dans `/opt/tara/backups`, deux semaines gardées. Activer aussi les instantanés automatiques du VPS dans Hostinger, et copier de temps en temps une sauvegarde hors du serveur. Sans la clé `STORAGE_ENCRYPTION_KEY` (dans `/opt/tara/api.env`), les pièces d'identité sauvegardées sont illisibles : la garder en lieu sûr, hors du serveur.
 
