@@ -39,7 +39,7 @@ Dépendance de développement signalée et acceptée : `minimatch` (gravité mod
 
 ## Secrets et clés
 
-Les secrets vivent dans le gestionnaire de secrets de l'hébergeur, jamais dans le dépôt. Les valeurs de `apps/api/.env.example` sont factices.
+Les secrets vivent sur le serveur, jamais dans le dépôt : tirés au hasard par `tara install` dans `/opt/tara/compose.env` (mots de passe internes) et `/opt/tara/api.env` (secrets de l'API et clés des prestataires saisies par `tara config`), lisibles par root seulement (voir [`DEPLOIEMENT.md`](DEPLOIEMENT.md)). Les valeurs de `apps/api/.env.example` sont factices.
 
 La clé d'API Firebase de `apps/rider/lib/firebase_options.dart` n'est pas un secret : elle identifie le projet et figure dans tout APK publié. Avant le pilote : la restreindre à l'app `cm.tara.rider` et à son empreinte de signature dans la console Google Cloud, et vérifier que Firestore et Storage, inutilisés, ne sont pas ouverts.
 

@@ -1,0 +1,23 @@
+# Contexte de construction des images (Dockerfile) : seulement ce que les services utilisent.
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/.env
+**/.env.*
+!**/.env.example
+.git
+apps/rider
+apps/client
+apps/api/src/generated
+apps/api/var
+apps/api/test
+apps/backoffice/test
+apps/tracking/test
+docs
+infra/osrm/data
+packages/tara_core
+packages/tara_ui
+packages/tara_test
+packages/tara_map/lib
+packages/tara_map/tool
