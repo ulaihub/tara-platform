@@ -2,6 +2,21 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tara Livreur utilise votre position pour vous proposer les courses proches et, pendant une course, pour guider l’équipe et le client jusqu’à vous.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Pendant une course, votre position reste envoyée quand l’app est en arrière-plan (indicateur bleu en haut de l’écran). L’envoi s’arrête dès que vous passez hors ligne.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Tara Livreur utilise l’appareil photo pour vos pièces (permis, carte grise, selfie) et la photo de preuve de livraison.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Tara Livreur prend ses photos avec l’appareil photo et n’a pas besoin de votre galerie.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>remote-notification</string>
+	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

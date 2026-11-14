@@ -8,15 +8,33 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
 abstract final class DefaultFirebaseOptions {
-  /// `null` sur une plateforme pas encore enregistrée dans Firebase (iOS : à ajouter
-  /// avec GoogleService-Info.plist et une clé APNs).
+  /// `null` sur une plateforme pas encore enregistrée dans Firebase : l'app tourne alors
+  /// sans notifications.
   static FirebaseOptions? get currentPlatform {
     if (kIsWeb) return null;
     return switch (defaultTargetPlatform) {
       TargetPlatform.android => android,
+      TargetPlatform.iOS => ios,
       _ => null,
     };
   }
+
+  /// iPhone : identifiant et clé de l'app iOS cm.tara.rider (fichier GoogleService-Info.plist,
+  /// GOOGLE_APP_ID et API_KEY), donnés à la construction par Codemagic (`--dart-define`,
+  /// voir docs/IOS.md). Les notifications demandent aussi la clé APNs déposée dans Firebase.
+  static const _iosAppId = String.fromEnvironment('FIREBASE_IOS_APP_ID');
+  static const _iosApiKey = String.fromEnvironment('FIREBASE_IOS_API_KEY');
+
+  static FirebaseOptions? get ios => _iosAppId.isEmpty || _iosApiKey.isEmpty
+      ? null
+      : const FirebaseOptions(
+          apiKey: _iosApiKey,
+          appId: _iosAppId,
+          messagingSenderId: '450017083015',
+          projectId: 'tara-ulaihub',
+          storageBucket: 'tara-ulaihub.firebasestorage.app',
+          iosBundleId: 'cm.tara.rider',
+        );
 
   static const android = FirebaseOptions(
     apiKey: 'AIzaSyAAFXUiQJrDCai9kntF0pIbfQTXw2lxRnM',

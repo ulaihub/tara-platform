@@ -1,0 +1,85 @@
+# Construction des apps iPhone sur Codemagic (Mac en ligne) et envoi sur TestFlight.
+# Guide pas à pas : docs/IOS.md. Les constructions se lancent à la main depuis Codemagic
+# (aucun déclenchement automatique : les minutes gratuites sont comptées).
+#
+# À préparer une fois dans Codemagic (docs/IOS.md, étapes 3 et 4) :
+#   - intégration App Store Connect nommée « Tara App Store Connect » (clé d'API Apple) ;
+#   - groupe de variables « tara_ios » : TARA_API_URL (https://api.tara.<domaine>) et, pour
+#     les notifications de l'app livreur, FIREBASE_IOS_APP_ID et FIREBASE_IOS_API_KEY.
+
+workflows:
+  ios-livreur:
+    name: Tara Livreur · iPhone (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: Tara App Store Connect
+    environment:
+      flutter: 3.47.9 # même version que la CI et le serveur
+      xcode: latest
+      groups:
+        - tara_ios
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: cm.tara.rider
+    scripts:
+      - name: Paquets Flutter
+        script: |
+          cd apps/rider
+          flutter pub get --enforce-lockfile
+      - name: Profils de signature
+        script: |
+          cd apps/rider/ios
+          xcode-project use-profiles
+      - name: Construction de l'app
+        script: |
+          cd apps/rider
+          flutter build ipa --release \
+            --build-number="$BUILD_NUMBER" \
+            --export-options-plist=/Users/builder/export_options.plist \
+            --dart-define=TARA_API_URL="$TARA_API_URL" \
+            --dart-define=FIREBASE_IOS_APP_ID="$FIREBASE_IOS_APP_ID" \
+            --dart-define=FIREBASE_IOS_API_KEY="$FIREBASE_IOS_API_KEY"
+    artifacts:
+      - apps/rider/build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  ios-expediteur:
+    name: Tara (expéditeur) · iPhone (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: Tara App Store Connect
+    environment:
+      flutter: 3.47.9 # même version que la CI et le serveur
+      xcode: latest
+      groups:
+        - tara_ios
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: cm.tara.app
+    scripts:
+      - name: Paquets Flutter
+        script: |
+          cd apps/client
+          flutter pub get --enforce-lockfile
+      - name: Profils de signature
+        script: |
+          cd apps/client/ios
+          xcode-project use-profiles
+      - name: Construction de l'app
+        script: |
+          cd apps/client
+          flutter build ipa --release \
+            --build-number="$BUILD_NUMBER" \
+            --export-options-plist=/Users/builder/export_options.plist \
+            --dart-define=TARA_API_URL="$TARA_API_URL"
+    artifacts:
+      - apps/client/build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
