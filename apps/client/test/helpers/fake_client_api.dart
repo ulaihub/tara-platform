@@ -17,9 +17,14 @@ class FakeClientApi extends ClientApi {
   List<OrderSummary> history = [];
   Wallet wallet0 = const Wallet(customerBalance: 0, merchantBalance: null, payoutSchedule: null);
 
+  /// Réseau coupé : la liste des commandes échoue tant que ce champ est vrai.
+  bool offline = false;
+
   @override
-  Future<List<OrderSummary>> orders({required String scope, int limit = 20}) async =>
-      scope == 'active' ? active : history;
+  Future<List<OrderSummary>> orders({required String scope, int limit = 20}) async {
+    if (offline) throw const ApiException(code: 'NETWORK', message: 'Pas de réseau', status: 0);
+    return scope == 'active' ? active : history;
+  }
 
   @override
   Future<Wallet> wallet() async => wallet0;

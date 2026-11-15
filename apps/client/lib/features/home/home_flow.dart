@@ -45,6 +45,8 @@ class HomeFlow extends ConsumerStatefulWidget {
 class _HomeFlowState extends ConsumerState<HomeFlow> {
   int _tab = 0;
   StreamSubscription<RealtimeEvent>? _events;
+  ValueNotifier<bool>? _connected;
+  bool _cut = false;
   StreamSubscription<Json>? _pushOpened;
 
   /// Reversement arrivé sur le Mobile Money (montant), affiché quelques secondes.
@@ -60,6 +62,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     super.initState();
     final realtime = ref.read(realtimeProvider)..connect();
     _events = realtime.stream.listen(_onEvent);
+    _connected = realtime.connected..addListener(_onConnection);
     // Notifications : jeton enregistré, et une notification touchée ouvre sa commande.
     final push = ref.read(pushServiceProvider);
     _pushOpened = push.opened.listen(_openFromPush);
@@ -74,6 +77,22 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     );
   }
 
+  /// Retour du réseau après une coupure : les listes sont relues (statuts manqués pendant la
+  /// coupure, message d'erreur affiché sans réseau).
+  void _onConnection() {
+    final connected = _connected?.value ?? false;
+    if (!connected) {
+      _cut = true;
+      return;
+    }
+    if (!_cut || !mounted) return;
+    _cut = false;
+    ref
+      ..invalidate(activeOrdersProvider)
+      ..invalidate(ordersProvider)
+      ..invalidate(walletProvider);
+  }
+
   void _openFromPush(Json data) {
     final orderId = data['orderId'];
     if (orderId is String && orderId.isNotEmpty && mounted) _openOrder(orderId);
@@ -82,6 +101,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   @override
   void dispose() {
     unawaited(_events?.cancel());
+    _connected?.removeListener(_onConnection);
     unawaited(_pushOpened?.cancel());
     _payoutTimer?.cancel();
     _failedTimer?.cancel();

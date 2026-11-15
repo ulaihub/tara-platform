@@ -460,6 +460,39 @@ void main() {
     expect(find.byType(TrackingScreen), findsNothing);
   });
 
+  testWidgets('au retour du réseau, la liste en erreur se recharge seule', (tester) async {
+    final api = shopApi()..offline = true;
+    final realtime = FakeRealtime();
+    await pumpVariant(
+      tester,
+      Variant.matrix.first,
+      ProviderScope(
+        overrides: [
+          keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
+          clientApiProvider.overrideWithValue(api),
+          realtimeProvider.overrideWithValue(realtime),
+          realMapProvider.overrideWithValue(false),
+        ],
+        child: HomeFlow(me: shopOwner, now: () => homeNow),
+      ),
+    );
+    await settle(tester);
+    // Coupure longue : les nouveaux essais automatiques s'arrêtent, l'erreur reste affichée.
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(seconds: 10));
+    }
+    expect(find.text('Impossible de charger vos livraisons.'), findsOneWidget);
+
+    // Coupure puis retour du temps réel : réseau revenu.
+    api.offline = false;
+    realtime.connected.value = true;
+    realtime.connected.value = false;
+    realtime.connected.value = true;
+    await settle(tester);
+    expect(find.text('Impossible de charger vos livraisons.'), findsNothing);
+    expect(find.text('Marie Ngo · Bonapriso'), findsOneWidget);
+  });
+
   testWidgets('une notification touchée ouvre le suivi de sa commande', (tester) async {
     final api = shopApi()..tracked['00000000-0000-4000-8000-000000000001'] = tracked('IN_DELIVERY');
     final push = _FakePush();
