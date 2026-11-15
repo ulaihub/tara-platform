@@ -1,14 +1,19 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tara_core/api/support_api.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/app/providers.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/location/location_tracker.dart';
 import 'package:tara_rider/core/location/online_controller.dart';
 import 'package:tara_rider/features/account/account_screen.dart';
+import 'package:tara_rider/features/account/close_account_screen.dart';
 import 'package:tara_rider/features/account/emergency_contact_screen.dart';
 import 'package:tara_rider/features/onboarding/documents_screen.dart';
+import 'package:tara_test/fake_support.dart';
 import 'package:tara_ui/app_settings.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/tara_effects.dart';
@@ -94,8 +99,8 @@ void main() {
     final harness = AccountHarness();
     await pumpVariant(tester, Variant.matrix.first, harness.screen());
     await settle(tester);
-    // Réglages d'affichage au-dessus de la barre d'onglets : section suivante à l'écran.
-    await show(tester, 'Conditions et confidentialité');
+    // Réglages d'affichage amenés en haut de l'écran, au-dessus de la barre d'onglets.
+    await show(tester, 'Clair');
 
     await tapText(tester, 'Clair');
     expect(settingsOf(tester).themeMode, ThemeMode.light);
@@ -223,5 +228,62 @@ void main() {
     await tester.tap(find.text('Se déconnecter'), warnIfMissed: false);
     await settle(tester);
     expect(auth.logouts, 0);
+  });
+
+  testWidgets('télécharger mes données : copie en fichier JSON, par la feuille de partage', (tester) async {
+    final harness = AccountHarness();
+    final shared = <(String name, String mimeType, Object? data)>[];
+    await pumpVariant(
+      tester,
+      Variant.matrix.first,
+      harness.screen(
+        extra: [
+          shareFileProvider.overrideWithValue((bytes, name, mimeType, text) async {
+            shared.add((name, mimeType, jsonDecode(utf8.decode(bytes))));
+          }),
+        ],
+      ),
+    );
+    await settle(tester);
+    await show(tester, 'Télécharger mes données');
+    await tapText(tester, 'Télécharger mes données');
+    expect(harness.api.exports, 1);
+    expect(shared.single.$1, matches(RegExp(r'^tara-donnees-\d{4}-\d{2}-\d{2}\.json$')));
+    expect(shared.single.$2, 'application/json');
+    expect((shared.single.$3! as Map)['user'], {'phone': '+237677123456', 'fullName': 'Awa Ngono'});
+  });
+
+  testWidgets('fermer mon compte : bloqué tant qu’il reste de l’argent, puis demandé au support', (tester) async {
+    final harness = AccountHarness();
+    harness.api.wallet0 = const RiderWallet(earnings: 2000, available: 2000, cashHeld: 0, cashLimit: 25000);
+    final support = FakeSupportBackend();
+    await pumpVariant(
+      tester,
+      Variant.matrix.first,
+      harness.screen(extra: [supportBackendProvider.overrideWithValue(support)]),
+    );
+    await settle(tester);
+    await show(tester, 'Fermer mon compte');
+    await tapText(tester, 'Fermer mon compte');
+    expect(find.byType(CloseAccountScreen), findsOneWidget);
+    expect(
+      find.text('Il vous reste 2\u00a0000\u00a0F : retirez-les d’abord vers votre Mobile Money (onglet Activité).'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Demander la fermeture'), warnIfMissed: false);
+    await settle(tester);
+    expect(support.opened, isEmpty);
+
+    // Solde retiré : la demande part au service client.
+    harness.api.wallet0 = const RiderWallet(earnings: 0, available: 0, cashHeld: 0, cashLimit: 25000);
+    await tester.tap(find.bySemanticsLabel('Retour').last);
+    await settle(tester);
+    await tapText(tester, 'Fermer mon compte');
+    await tapText(tester, 'Demander la fermeture');
+    expect(support.opened.single.category, SupportCategory.other);
+    expect(support.opened.single.subject, 'Fermeture de mon compte livreur');
+    expect(find.text('Demande envoyée. L’équipe Tara vous répond dans « Écrire au service client ».'), findsOneWidget);
+    await tapText(tester, 'Fermer');
+    expect(find.byType(CloseAccountScreen), findsNothing);
   });
 }

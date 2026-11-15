@@ -128,6 +128,26 @@ class RiderApi {
     ) as Json,
   );
 
+  /// Retrait des gains vers le Mobile Money du livreur (son propre numéro) : [amount] pris
+  /// sur le disponible (tout le disponible si absent). Sous le seuil gratuit, une part des
+  /// frais Mobile Money est retenue. [idempotencyKey] : la même demande renvoyée n'en crée pas
+  /// une seconde.
+  Future<Payout> withdraw({
+    int? amount,
+    required String phone,
+    required String operator,
+    required String idempotencyKey,
+  }) async => Payout.fromJson(
+    await _api.post(
+      '/rider/withdrawals',
+      body: {'amount': ?amount, 'phone': phone, 'operator': operator},
+      headers: {'Idempotency-Key': idempotencyKey},
+    ) as Json,
+  );
+
+  /// Toutes les données personnelles du compte (droit d'accès), en JSON.
+  Future<Json> exportData() async => await _api.get('/me/export') as Json;
+
   /// Dépôt des espèces détenues par Mobile Money (G5) : demande au téléphone du livreur.
   /// [idempotencyKey] : la même demande renvoyée n'en crée pas une seconde.
   Future<PaymentRequest> depositCash({

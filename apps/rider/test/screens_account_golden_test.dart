@@ -11,6 +11,7 @@ import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/course/active_order.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/features/account/account_screen.dart';
+import 'package:tara_rider/features/account/close_account_screen.dart';
 import 'package:tara_rider/features/account/emergency_contact_screen.dart';
 import 'package:tara_rider/features/onboarding/documents_controller.dart';
 import 'package:tara_rider/features/onboarding/documents_screen.dart';
@@ -140,12 +141,26 @@ void main() {
   }
 
   for (final brightness in Brightness.values) {
+    goldenTest('16 fermer mon compte ${brightness.name}', (tester) async {
+      final harness = AccountHarness()
+        ..api.wallet0 = const RiderWallet(earnings: 2000, available: 2000, cashHeld: 0, cashLimit: 25000);
+      await pumpVariant(tester, Variant(brightness, ScreenSize.regular, 1), harness.screen());
+      await settle(tester);
+      await tester.scrollUntilVisible(find.text('Fermer mon compte'), 120, scrollable: find.byType(Scrollable).first);
+      await settle(tester);
+      await tester.tap(find.text('Fermer mon compte'));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CloseAccountScreen), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/16_fermer_compte/${brightness.name}.png'));
+    });
+
     goldenTest('16 profil complet ${brightness.name}', (tester) async {
       await pumpVariant(
         tester,
         Variant(brightness, ScreenSize.regular, 1),
         AccountHarness(rejected: false).screen(),
-        surface: const Size(390, 1640),
+        surface: const Size(390, 1840),
       );
       await settle(tester);
       expect(tester.takeException(), isNull);

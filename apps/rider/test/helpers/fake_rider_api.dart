@@ -124,6 +124,34 @@ class FakeRiderApi extends RiderApi {
     return PaymentRequest(id: 'top1', status: 'PENDING', amount: amount);
   }
 
+  /// Retraits demandés (montant absent : tout le disponible) et état renvoyé par le serveur.
+  final withdrawals = <(int? amount, String phone, String operator, String key)>[];
+  String withdrawStatus = 'PENDING';
+
+  @override
+  Future<Payout> withdraw({
+    int? amount,
+    required String phone,
+    required String operator,
+    required String idempotencyKey,
+  }) async {
+    withdrawals.add((amount, phone, operator, idempotencyKey));
+    final taken = amount ?? wallet0.available;
+    final fee = wallet0.withdrawalFeeFor(taken);
+    return Payout(id: 'pay1', amount: taken, withdrawalFee: fee, received: taken - fee, status: withdrawStatus);
+  }
+
+  /// Copies de données demandées.
+  int exports = 0;
+
+  @override
+  Future<Json> exportData() async {
+    exports++;
+    return {
+      'user': {'phone': '+237677123456', 'fullName': 'Awa Ngono'},
+    };
+  }
+
   @override
   Future<PaymentRequest> payment(String id) async => PaymentRequest(
     id: id,

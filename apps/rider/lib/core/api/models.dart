@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:tara_core/api/models.dart';
+import 'package:tara_core/money/mobile_money_fees.dart';
 
 export 'package:tara_core/api/models.dart';
 
@@ -767,6 +768,8 @@ class RiderWallet {
     this.cashOverdue = false,
     this.withdrawalFreeFrom = 0,
     this.withdrawalFeeBps = 0,
+    this.withdrawalFeeSharePercent = 100,
+    this.openPayout,
   });
 
   factory RiderWallet.fromJson(Json json) => RiderWallet(
@@ -779,6 +782,11 @@ class RiderWallet {
     cashOverdue: json['cashOverdue'] == true,
     withdrawalFreeFrom: _field<num>(_field<Json>(json, 'withdrawal'), 'freeFrom').toInt(),
     withdrawalFeeBps: _field<num>(_field<Json>(json, 'withdrawal'), 'feeBps').toInt(),
+    withdrawalFeeSharePercent: (_field<Json>(json, 'withdrawal')['feeSharePercent'] as num? ?? 100).toInt(),
+    openPayout: switch (json['openPayout']) {
+      final Json payout => OpenPayout.fromJson(payout),
+      _ => null,
+    },
   );
 
   static const fields = [
@@ -790,6 +798,7 @@ class RiderWallet {
     'cashDueBy',
     'cashOverdue',
     'withdrawal',
+    'openPayout',
   ];
 
   /// Solde prépayé (G5) : gains et recharges, moins l'argent encaissé en espèces.
@@ -815,6 +824,64 @@ class RiderWallet {
   /// Retrait gratuit à partir de ce montant ; en dessous, frais Mobile Money retenus.
   final int withdrawalFreeFrom;
   final int withdrawalFeeBps;
+
+  /// Part des frais payée par le livreur, en % ; Tara paie le reste.
+  final int withdrawalFeeSharePercent;
+
+  /// Retrait vers Mobile Money pas encore arrivé (un seul à la fois).
+  final OpenPayout? openPayout;
+
+  /// Frais retenus sur un retrait de [amount] (même calcul que le serveur).
+  int withdrawalFeeFor(int amount) =>
+      withdrawalFee(amount, withdrawalFeeBps, withdrawalFreeFrom, sharePercent: withdrawalFeeSharePercent);
+}
+
+/// Retrait en cours : montant et état (en attente, à valider par l'équipe, en cours d'envoi).
+@immutable
+class OpenPayout {
+  const OpenPayout({required this.id, required this.amount, required this.status});
+  factory OpenPayout.fromJson(Json json) =>
+      OpenPayout(id: _field(json, 'id'), amount: _field<num>(json, 'amount').toInt(), status: _field(json, 'status'));
+
+  final String id;
+  final int amount;
+
+  /// PENDING, AWAITING_APPROVAL ou PROCESSING.
+  final String status;
+}
+
+/// Retrait des gains vers Mobile Money (G5), tel que le serveur l'a enregistré.
+@immutable
+class Payout {
+  const Payout({
+    required this.id,
+    required this.amount,
+    required this.withdrawalFee,
+    required this.received,
+    required this.status,
+  });
+  factory Payout.fromJson(Json json) => Payout(
+    id: _field(json, 'id'),
+    amount: _field<num>(json, 'amount').toInt(),
+    withdrawalFee: _field<num>(json, 'withdrawalFee').toInt(),
+    received: _field<num>(json, 'received').toInt(),
+    status: _field(json, 'status'),
+  );
+  static const fields = ['id', 'amount', 'withdrawalFee', 'received', 'status'];
+
+  final String id;
+
+  /// Pris sur le solde.
+  final int amount;
+
+  /// Part des frais Mobile Money payée par le livreur (0 au-delà du seuil gratuit).
+  final int withdrawalFee;
+
+  /// Reçu sur le téléphone.
+  final int received;
+
+  /// PENDING, AWAITING_APPROVAL, PROCESSING, SUCCEEDED ou FAILED.
+  final String status;
 }
 
 /// Paiement Mobile Money demandé au téléphone du payeur (recharge du solde, dépôt d'espèces, G5).

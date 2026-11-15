@@ -3085,6 +3085,216 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vos demandes et les réponses de Tara'**
   String get supportMenuRowSubtitle;
+
+  /// No description provided for @withdrawalRuleShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait gratuit dès {amount} ; en dessous, frais Mobile Money de {rate}, dont vous payez {share} et Tara le reste.'**
+  String withdrawalRuleShared(String amount, String rate, String share);
+
+  /// No description provided for @withdrawAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get withdrawAction;
+
+  /// No description provided for @withdrawTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer vers Mobile Money'**
+  String get withdrawTitle;
+
+  /// No description provided for @withdrawAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout · {amount}'**
+  String withdrawAll(String amount);
+
+  /// No description provided for @withdrawOtherHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. 5000'**
+  String get withdrawOtherHint;
+
+  /// No description provided for @withdrawTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé sur votre numéro {phone}, le seul permis pour un retrait.'**
+  String withdrawTo(String phone);
+
+  /// No description provided for @withdrawFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais Mobile Money : {fee} pour vous, {tara} payés par Tara.'**
+  String withdrawFee(String fee, String tara);
+
+  /// No description provided for @withdrawFeeFull.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais Mobile Money : {fee}.'**
+  String withdrawFeeFull(String fee);
+
+  /// No description provided for @withdrawFreeFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait gratuit dès {amount}.'**
+  String withdrawFreeFrom(String amount);
+
+  /// No description provided for @withdrawFree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait gratuit : Tara paie les frais Mobile Money.'**
+  String get withdrawFree;
+
+  /// No description provided for @withdrawReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous recevez'**
+  String get withdrawReceive;
+
+  /// No description provided for @withdrawConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir {amount}'**
+  String withdrawConfirm(String amount);
+
+  /// No description provided for @withdrawRange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entre {min} et {max}, ou tout le solde.'**
+  String withdrawRange(String min, String max);
+
+  /// No description provided for @withdrawProcessing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait demandé : {amount} arrivent sur votre Mobile Money dans quelques minutes. Une notification vous préviendra.'**
+  String withdrawProcessing(String amount);
+
+  /// No description provided for @withdrawApproval.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gros montant : l’équipe Tara valide le retrait de {amount} avant l’envoi. Une notification vous préviendra.'**
+  String withdrawApproval(String amount);
+
+  /// No description provided for @withdrawSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} envoyés sur votre Mobile Money.'**
+  String withdrawSent(String amount);
+
+  /// No description provided for @withdrawFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le retrait n’a pas abouti : l’argent reste sur votre solde. Réessayez plus tard.'**
+  String get withdrawFailed;
+
+  /// No description provided for @withdrawOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait de {amount} en cours'**
+  String withdrawOpen(String amount);
+
+  /// No description provided for @accountDataSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon compte et mes données'**
+  String get accountDataSection;
+
+  /// No description provided for @exportDataRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger mes données'**
+  String get exportDataRow;
+
+  /// No description provided for @exportDataRowSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une copie de tout ce que Tara garde sur vous'**
+  String get exportDataRowSubtitle;
+
+  /// No description provided for @exportDataShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes données Tara'**
+  String get exportDataShare;
+
+  /// No description provided for @closeAccountRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer mon compte'**
+  String get closeAccountRow;
+
+  /// No description provided for @closeAccountRowSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande à l’équipe Tara'**
+  String get closeAccountRowSubtitle;
+
+  /// No description provided for @closeAccountTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer mon compte'**
+  String get closeAccountTitle;
+
+  /// No description provided for @closeAccountBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’équipe Tara ferme le compte après vérification : aucune course en cours, rien à reverser à Tara et plus d’argent sur votre solde.'**
+  String get closeAccountBody;
+
+  /// No description provided for @closeAccountErased.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos pièces d’identité, votre garant et votre contact d’urgence sont alors effacés. Vos courses passées restent, sans votre nom, pour la comptabilité.'**
+  String get closeAccountErased;
+
+  /// No description provided for @closeAccountBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il vous reste {amount} : retirez-les d’abord vers votre Mobile Money (onglet Activité).'**
+  String closeAccountBalance(String amount);
+
+  /// No description provided for @closeAccountDebt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous devez {amount} à Tara : rechargez d’abord votre solde (onglet Activité).'**
+  String closeAccountDebt(String amount);
+
+  /// No description provided for @closeAccountPayout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un retrait vers votre Mobile Money est en cours : attendez qu’il arrive.'**
+  String get closeAccountPayout;
+
+  /// No description provided for @closeAccountCourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminez votre course avant de demander la fermeture.'**
+  String get closeAccountCourse;
+
+  /// No description provided for @closeAccountSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander la fermeture'**
+  String get closeAccountSend;
+
+  /// No description provided for @closeAccountSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée. L’équipe Tara vous répond dans « Écrire au service client ».'**
+  String get closeAccountSent;
+
+  /// No description provided for @closeAccountTicketSubject.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermeture de mon compte livreur'**
+  String get closeAccountTicketSubject;
+
+  /// No description provided for @closeAccountTicketMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je souhaite fermer mon compte livreur Tara et effacer mes données.'**
+  String get closeAccountTicketMessage;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

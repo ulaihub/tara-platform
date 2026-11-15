@@ -1738,4 +1738,139 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get supportMenuRowSubtitle => 'Vos demandes et les réponses de Tara';
+
+  @override
+  String withdrawalRuleShared(String amount, String rate, String share) {
+    return 'Retrait gratuit dès $amount ; en dessous, frais Mobile Money de $rate, dont vous payez $share et Tara le reste.';
+  }
+
+  @override
+  String get withdrawAction => 'Retirer';
+
+  @override
+  String get withdrawTitle => 'Retirer vers Mobile Money';
+
+  @override
+  String withdrawAll(String amount) {
+    return 'Tout · $amount';
+  }
+
+  @override
+  String get withdrawOtherHint => 'Ex. 5000';
+
+  @override
+  String withdrawTo(String phone) {
+    return 'Envoyé sur votre numéro $phone, le seul permis pour un retrait.';
+  }
+
+  @override
+  String withdrawFee(String fee, String tara) {
+    return 'Frais Mobile Money : $fee pour vous, $tara payés par Tara.';
+  }
+
+  @override
+  String withdrawFeeFull(String fee) {
+    return 'Frais Mobile Money : $fee.';
+  }
+
+  @override
+  String withdrawFreeFrom(String amount) {
+    return 'Retrait gratuit dès $amount.';
+  }
+
+  @override
+  String get withdrawFree => 'Retrait gratuit : Tara paie les frais Mobile Money.';
+
+  @override
+  String get withdrawReceive => 'Vous recevez';
+
+  @override
+  String withdrawConfirm(String amount) {
+    return 'Recevoir $amount';
+  }
+
+  @override
+  String withdrawRange(String min, String max) {
+    return 'Entre $min et $max, ou tout le solde.';
+  }
+
+  @override
+  String withdrawProcessing(String amount) {
+    return 'Retrait demandé : $amount arrivent sur votre Mobile Money dans quelques minutes. Une notification vous préviendra.';
+  }
+
+  @override
+  String withdrawApproval(String amount) {
+    return 'Gros montant : l’équipe Tara valide le retrait de $amount avant l’envoi. Une notification vous préviendra.';
+  }
+
+  @override
+  String withdrawSent(String amount) {
+    return '$amount envoyés sur votre Mobile Money.';
+  }
+
+  @override
+  String get withdrawFailed => 'Le retrait n’a pas abouti : l’argent reste sur votre solde. Réessayez plus tard.';
+
+  @override
+  String withdrawOpen(String amount) {
+    return 'Retrait de $amount en cours';
+  }
+
+  @override
+  String get accountDataSection => 'Mon compte et mes données';
+
+  @override
+  String get exportDataRow => 'Télécharger mes données';
+
+  @override
+  String get exportDataRowSubtitle => 'Une copie de tout ce que Tara garde sur vous';
+
+  @override
+  String get exportDataShare => 'Mes données Tara';
+
+  @override
+  String get closeAccountRow => 'Fermer mon compte';
+
+  @override
+  String get closeAccountRowSubtitle => 'Demande à l’équipe Tara';
+
+  @override
+  String get closeAccountTitle => 'Fermer mon compte';
+
+  @override
+  String get closeAccountBody =>
+      'L’équipe Tara ferme le compte après vérification : aucune course en cours, rien à reverser à Tara et plus d’argent sur votre solde.';
+
+  @override
+  String get closeAccountErased =>
+      'Vos pièces d’identité, votre garant et votre contact d’urgence sont alors effacés. Vos courses passées restent, sans votre nom, pour la comptabilité.';
+
+  @override
+  String closeAccountBalance(String amount) {
+    return 'Il vous reste $amount : retirez-les d’abord vers votre Mobile Money (onglet Activité).';
+  }
+
+  @override
+  String closeAccountDebt(String amount) {
+    return 'Vous devez $amount à Tara : rechargez d’abord votre solde (onglet Activité).';
+  }
+
+  @override
+  String get closeAccountPayout => 'Un retrait vers votre Mobile Money est en cours : attendez qu’il arrive.';
+
+  @override
+  String get closeAccountCourse => 'Terminez votre course avant de demander la fermeture.';
+
+  @override
+  String get closeAccountSend => 'Demander la fermeture';
+
+  @override
+  String get closeAccountSent => 'Demande envoyée. L’équipe Tara vous répond dans « Écrire au service client ».';
+
+  @override
+  String get closeAccountTicketSubject => 'Fermeture de mon compte livreur';
+
+  @override
+  String get closeAccountTicketMessage => 'Je souhaite fermer mon compte livreur Tara et effacer mes données.';
 }

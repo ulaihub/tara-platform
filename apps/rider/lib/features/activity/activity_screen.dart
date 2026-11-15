@@ -20,6 +20,7 @@ import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import 'deposit_screen.dart';
+import 'withdraw_screen.dart';
 
 /// 13 · Activité (E9) : gains du jour, de la semaine ou du mois avec leur histogramme,
 /// solde prépayé et sa recharge (G5), anciennes espèces à reverser, dernières courses.
@@ -139,7 +140,11 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: 12),
-                          _BalanceBox(wallet: wallet, onTopUp: () => setState(() => _paying = _Payment.topUp)),
+                          _BalanceBox(
+                            wallet: wallet,
+                            onTopUp: () => setState(() => _paying = _Payment.topUp),
+                            onWithdraw: () => setState(() => _paying = _Payment.withdraw),
+                          ),
                           if (wallet.cashHeld > 0) ...[
                             const SizedBox(height: 12),
                             _CashBox(
@@ -223,6 +228,10 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                       onDone: done,
                     ),
                     _Payment.deposit => DepositScreen(amount: snapshot.data?.cashHeld ?? 0, onBack: back, onDone: done),
+                    _Payment.withdraw => switch (snapshot.data) {
+                      final wallet? => WithdrawScreen(wallet: wallet, onBack: back, onDone: done),
+                      null => const SizedBox.shrink(),
+                    },
                   };
                 },
               ),
@@ -398,19 +407,25 @@ class _Histogram extends StatelessWidget {
   static bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
-enum _Payment { topUp, deposit }
+/// Écran ouvert par-dessus l'activité : recharge, dépôt des espèces ou retrait des gains.
+enum _Payment { topUp, deposit, withdraw }
 
-/// Solde prépayé (G5) : disponible, montant mis de côté pour les courses en cours, bouton
-/// « Recharger ». Une course avec encaissement n'est proposée que si le disponible la couvre.
+/// Solde prépayé (G5) : disponible, montant mis de côté pour les courses en cours, boutons
+/// « Recharger » et « Retirer » (vers son Mobile Money). Une course avec encaissement n'est
+/// proposée que si le disponible la couvre.
 class _BalanceBox extends StatelessWidget {
-  const _BalanceBox({required this.wallet, required this.onTopUp});
+  const _BalanceBox({required this.wallet, required this.onTopUp, required this.onWithdraw});
   final RiderWallet wallet;
   final VoidCallback onTopUp;
+  final VoidCallback onWithdraw;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
+    final free = '${formatAmount(wallet.withdrawalFreeFrom)}\u00a0F';
+    final rate = '${NumberFormat('#0.##', 'fr').format(wallet.withdrawalFeeBps / 100)}\u00a0%';
+    final open = wallet.openPayout;
     return _ActionBox(
       tone: TintTone.accent,
       icon: TaraIcons.wallet,
@@ -424,17 +439,27 @@ class _BalanceBox extends StatelessWidget {
           wallet.reserved > 0 ? l.balanceReserved('${formatAmount(wallet.reserved)}\u00a0F') : l.balanceExplain,
           style: TaraText.small.copyWith(color: c.textSecondary),
         ),
-        if (wallet.withdrawalFeeBps > 0)
+        if (wallet.withdrawalFeeBps > 0 && wallet.withdrawalFeeSharePercent > 0)
           Text(
-            l.withdrawalRule(
-              '${formatAmount(wallet.withdrawalFreeFrom)}\u00a0F',
-              '${NumberFormat('#0.##', 'fr').format(wallet.withdrawalFeeBps / 100)}\u00a0%',
-            ),
+            wallet.withdrawalFeeSharePercent >= 100
+                ? l.withdrawalRule(free, rate)
+                : l.withdrawalRuleShared(free, rate, '${wallet.withdrawalFeeSharePercent}\u00a0%'),
             style: TaraText.small.copyWith(color: c.textSecondary),
           ),
+        if (open != null) ...[
+          const SizedBox(height: 6),
+          InfoPill(
+            label: l.withdrawOpen('${formatAmount(open.amount)}\u00a0F'),
+            tone: TintTone.accent,
+            icon: TaraIcons.clock,
+          ),
+        ],
       ],
       action: l.topUpAction,
       onAction: onTopUp,
+      // Un seul retrait à la fois ; rien à retirer sans disponible.
+      secondaryAction: open == null && wallet.available > 0 ? l.withdrawAction : null,
+      onSecondary: onWithdraw,
     );
   }
 }
@@ -448,12 +473,18 @@ class _ActionBox extends StatelessWidget {
     required this.lines,
     required this.action,
     required this.onAction,
+    this.secondaryAction,
+    this.onSecondary,
   });
   final TintTone tone;
   final TaraIconData icon;
   final List<Widget> lines;
   final String action;
   final VoidCallback onAction;
+
+  /// Second bouton (« Retirer ») : les deux boutons passent alors sous le texte.
+  final String? secondaryAction;
+  final VoidCallback? onSecondary;
 
   @override
   Widget build(BuildContext context) {
@@ -470,6 +501,28 @@ class _ActionBox extends StatelessWidget {
       ],
     );
     final button = GlassButton(label: action, height: 44, radius: 14, onPressed: onAction);
+    if (secondaryAction case final secondary?) {
+      return TintBox(
+        tone: tone,
+        padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            text,
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(child: button),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GlassButton(label: secondary, height: 44, radius: 14, onPressed: onSecondary),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
     return TintBox(
       tone: tone,
       padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),

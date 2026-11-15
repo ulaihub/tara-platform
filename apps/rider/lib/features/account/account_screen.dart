@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,14 +24,16 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
+import '../common/error_text.dart';
 import '../common/scoped_page.dart';
 import '../legal/terms_screen.dart';
 import '../onboarding/documents_controller.dart';
 import '../onboarding/documents_screen.dart';
 import '../support/support.dart';
+import 'close_account_screen.dart';
 import 'emergency_contact_screen.dart';
 
-enum _Sub { documents, contact }
+enum _Sub { documents, contact, close }
 
 /// Profil et réglages (onglet Profil, non dessiné dans la maquette : passation §7) :
 /// identité et véhicule, pièces et leur état (une pièce refusée ou expirée se renvoie
@@ -55,6 +58,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   _Sub? _sub;
   bool _confirmLogout = false;
   bool _loggingOut = false;
+  bool _exporting = false;
+  String? _exportError;
 
   void _reload() {
     setState(() => _me = ref.read(riderApiProvider).me());
@@ -83,6 +88,26 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       }
     }
     await ref.read(authControllerProvider.notifier).logout();
+  }
+
+  /// Copie de toutes ses données (droit d'accès), en fichier JSON partagé ou enregistré
+  /// depuis la feuille de partage du téléphone.
+  Future<void> _exportData() async {
+    final l = AppLocalizations.of(context);
+    setState(() {
+      _exporting = true;
+      _exportError = null;
+    });
+    try {
+      final data = await ref.read(riderApiProvider).exportData();
+      final bytes = utf8.encode(const JsonEncoder.withIndent('  ').convert(data));
+      final date = DateTime.now().toIso8601String().substring(0, 10);
+      await ref.read(shareFileProvider)(bytes, 'tara-donnees-$date.json', 'application/json', l.exportDataShare);
+    } catch (error) {
+      if (mounted) setState(() => _exportError = errorMessage(context, error));
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
   }
 
   @override
@@ -181,6 +206,35 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.accountDataSection),
+                  const SizedBox(height: 8),
+                  GlassCard(
+                    radius: 22,
+                    shadow: false,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    child: Column(
+                      children: [
+                        ListRow(
+                          leading: const IconTile(icon: TaraIcons.download),
+                          title: l.exportDataRow,
+                          subtitle: l.exportDataRowSubtitle,
+                          trailing: _exporting
+                              ? const SizedBox(width: 44, child: GooLoader(compact: true))
+                              : TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+                          onTap: _exporting ? null : () => unawaited(_exportData()),
+                        ),
+                        ListRow(
+                          leading: const IconTile(icon: TaraIcons.close),
+                          title: l.closeAccountRow,
+                          subtitle: l.closeAccountRowSubtitle,
+                          trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+                          onTap: () => setState(() => _sub = _Sub.close),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_exportError case final error?) ...[const SizedBox(height: 8), ErrorLine(error)],
                   const SizedBox(height: 24),
                   ListenableBuilder(
                     listenable: Listenable.merge([activeOrder, queue]),
@@ -216,6 +270,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 onDone: () => setState(() => _sub = null),
               ),
             ),
+          ),
+        if (_sub == _Sub.close)
+          Positioned.fill(
+            child: HideTabBar(child: CloseAccountScreen(onBack: () => setState(() => _sub = null))),
           ),
         if (_sub == _Sub.contact && profile != null)
           Positioned.fill(

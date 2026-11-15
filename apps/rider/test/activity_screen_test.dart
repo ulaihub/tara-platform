@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/features/activity/deposit_screen.dart';
+import 'package:tara_rider/features/activity/withdraw_screen.dart';
 
 import 'helpers/harness.dart';
 import 'screens_activity_golden_test.dart' show activity, activityApi;
@@ -127,6 +128,125 @@ void main() {
       find.text('Retrait gratuit dès 20\u00a0000\u00a0F ; en dessous, 2,5\u00a0% de frais Mobile Money retenus.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('frais de retrait partagés : la part du livreur annoncée', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 18000,
+        available: 18000,
+        cashHeld: 0,
+        cashLimit: 25000,
+        withdrawalFreeFrom: 20000,
+        withdrawalFeeBps: 250,
+        withdrawalFeeSharePercent: 50,
+      );
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    expect(
+      find.text(
+        'Retrait gratuit dès 20\u00a0000\u00a0F ; en dessous, frais Mobile Money de 2,5\u00a0%, dont vous payez 50\u00a0% et Tara le reste.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('retirer : tout le disponible, frais partagés et montant reçu avant de confirmer', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 18000,
+        available: 18000,
+        cashHeld: 0,
+        cashLimit: 25000,
+        withdrawalFreeFrom: 20000,
+        withdrawalFeeBps: 250,
+        withdrawalFeeSharePercent: 50,
+      );
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    await tapText(tester, 'Retirer');
+    expect(find.text('Retirer vers Mobile Money'), findsOneWidget);
+    // 440 F de frais Mobile Money sur 18 000 F : 220 F pour le livreur, 220 F pour Tara.
+    expect(find.text('Frais Mobile Money : 220\u00a0F pour vous, 220\u00a0F payés par Tara.'), findsOneWidget);
+    expect(find.text('Retrait gratuit dès 20\u00a0000\u00a0F.'), findsOneWidget);
+    expect(
+      find.text('Envoyé sur votre numéro +237\u00a06\u00a077\u00a012\u00a034\u00a056, le seul permis pour un retrait.'),
+      findsOneWidget,
+    );
+
+    await tapText(tester, 'Recevoir 17\u00a0780\u00a0F');
+    // Tout le disponible : le montant est laissé au serveur ; MTN deviné d'après le 677.
+    expect(api.withdrawals.single.$1, isNull);
+    expect(api.withdrawals.single.$2, '+237677123456');
+    expect(api.withdrawals.single.$3, 'MTN');
+    expect(
+      find.text(
+        'Retrait demandé : 17\u00a0780\u00a0F arrivent sur votre Mobile Money dans quelques minutes. Une notification vous préviendra.',
+      ),
+      findsOneWidget,
+    );
+    await tapText(tester, 'Fermer');
+    expect(find.byType(WithdrawScreen), findsNothing);
+  });
+
+  testWidgets('retirer : un montant partiel sous 500 F refusé, un petit solde retiré en entier', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 18000,
+        available: 18000,
+        cashHeld: 0,
+        cashLimit: 25000,
+        withdrawalFreeFrom: 20000,
+        withdrawalFeeBps: 250,
+        withdrawalFeeSharePercent: 50,
+      );
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    await tapText(tester, 'Retirer');
+    await tester.enterText(find.byType(EditableText).first, '200');
+    await settle(tester);
+    await tapText(tester, 'Recevoir 0\u00a0F');
+    expect(find.text('Entre 500\u00a0F et 18\u00a0000\u00a0F, ou tout le solde.'), findsOneWidget);
+    expect(api.withdrawals, isEmpty);
+
+    // Un autre montant : envoyé tel quel.
+    await tester.enterText(find.byType(EditableText).first, '5000');
+    await settle(tester);
+    await tapText(tester, 'Recevoir 4\u00a0939\u00a0F');
+    expect(api.withdrawals.single.$1, 5000);
+
+    // Petit solde (300 F, sous le minimum) : retiré en entier.
+    final small = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 300,
+        available: 300,
+        cashHeld: 0,
+        cashLimit: 25000,
+        withdrawalFreeFrom: 20000,
+        withdrawalFeeBps: 250,
+        withdrawalFeeSharePercent: 50,
+      );
+    await tester.pumpWidget(const SizedBox());
+    await pumpVariant(tester, Variant.matrix.first, activity(small));
+    await settle(tester);
+    await tapText(tester, 'Retirer');
+    await tapText(tester, 'Recevoir 296\u00a0F');
+    expect(small.withdrawals.single.$1, isNull);
+  });
+
+  testWidgets('retrait en cours : mentionné, pas de second retrait', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 18000,
+        available: 18000,
+        cashHeld: 0,
+        cashLimit: 25000,
+        openPayout: OpenPayout(id: 'pay0', amount: 5000, status: 'PROCESSING'),
+      );
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    expect(find.text('Retrait de 5\u00a0000\u00a0F en cours'), findsOneWidget);
+    expect(find.text('Retirer'), findsNothing);
   });
 
   testWidgets('dernières courses : trois, puis toutes ; statut, encaissement et gain', (tester) async {
