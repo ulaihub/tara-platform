@@ -1,7 +1,7 @@
 # Ce qu'il faut savoir quand vous recevez un colis Tara
 
-Version 2026-11.1 · Projet à faire valider par un juriste. Texte affiché sur la page de suivi et
-accessible depuis le lien des SMS.
+Version 2026-11.1 · Texte affiché sur la page de suivi et accessible depuis le lien des SMS. Les
+informations marquées **[À COMPLÉTER]** sont à renseigner avant la publication.
 
 Vous recevez un colis envoyé par une boutique ou un particulier avec Tara. Vous n'avez pas besoin
 de compte ni d'application.
@@ -25,4 +25,5 @@ de compte ni d'application.
    frais ne vous sont jamais demandés.
 5. **Vos données** : votre nom, votre numéro et votre adresse servent uniquement à cette
    livraison. Ils sont masqués 30 jours après la fin de la livraison.
-6. **Un problème ?** Contactez le service client de Tara : **[À VALIDER : numéro et horaires]**.
+6. **Un problème ?** Contactez le service client de Tara : **[À COMPLÉTER : numéro et
+   horaires]**.

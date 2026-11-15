@@ -1,7 +1,8 @@
 # Documents juridiques de Tara
 
-Projets rédigés en langage simple, à faire relire par un juriste avant toute mise en service.
-Chaque point qui demande son avis est marqué **[À VALIDER]**.
+Textes rédigés en langage simple au regard du droit camerounais et du droit OHADA (sources
+ci-dessous). Les informations sur la société, à renseigner avant la publication, sont marquées
+**[À COMPLÉTER]**. Les points à faire confirmer par un avocat sont regroupés en fin de document.
 
 | Document                                                         | Pour qui                    | Où il apparaît                                           |
 | ---------------------------------------------------------------- | --------------------------- | -------------------------------------------------------- |
@@ -62,7 +63,32 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
 - **Garant** : engagement écrit avec mention manuscrite du montant maximal en chiffres et en
   lettres (Acte uniforme sur les sûretés, art. 14), 100 000 FCFA proposés.
 
-Points à faire confirmer par un avocat avant l'ouverture au public : texte exact des articles
-cités (le Journal officiel de l'OHADA n'était pas accessible pendant la rédaction), qualification
-de Tara comme transporteur, indépendance des livreurs (risque de requalification en contrat de
-travail), retenue sur le solde d'un partenaire.
+## Données personnelles, contrat en ligne, encaissements (version 2026-11.3)
+
+- **Loi n° 2024/017 du 23 décembre 2024** (applicable depuis le 23 juin 2026) : accord des
+  personnes recueilli par case à cocher et code SMS ; référent pour la protection des données ;
+  déclaration des traitements à l'APDP ; **tout transfert hors du Cameroun soumis à son
+  autorisation préalable** (hébergement en France, Twilio, Google, Meta, Anthropic), sanctions
+  élevées sinon ; notification d'une violation à l'APDP sous 72 heures (engagement de Tara) ;
+  réponse aux demandes sous 30 jours.
+- **Conservation** : pièces comptables 10 ans (Acte uniforme OHADA relatif au droit comptable, 2017) ; journal d'audit 5 ans (prescription commerciale).
+- **Contrat en ligne** : loi n° 2010/021 du 21 décembre 2010 sur le commerce électronique (le
+  document électronique conservé fait foi comme l'écrit ; l'offre en ligne s'accompagne des
+  conditions contractuelles).
+- **Encaissements des boutiques** : Tara agit comme mandataire de la boutique, via un
+  prestataire de paiement agréé (règlement n° 04/18/CEMAC/UMAC/COBAC relatif aux services de
+  paiement : seuls les établissements agréés fournissent des services de paiement).
+
+## À faire confirmer par un avocat avant l'ouverture au public
+
+1. Texte exact des articles cités : le Journal officiel de l'OHADA et celui du Cameroun
+   n'étaient pas accessibles pendant la rédaction ; les règles viennent de commentaires
+   concordants.
+2. Qualification de Tara comme transporteur (et non simple intermédiaire) et plafonds de
+   remboursement.
+3. Indépendance des livreurs (risque de requalification en contrat de travail) et retenue sur
+   le solde d'un partenaire.
+4. Encaissement pour les boutiques : confirmation écrite par Sebpay de son agrément et du
+   statut de Tara dans ce montage (marchand, mandataire ou distributeur).
+5. Formalités auprès de l'APDP : forme exacte de la déclaration et des demandes d'autorisation
+   de transfert, une fois l'autorité en état de les recevoir.

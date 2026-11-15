@@ -1,7 +1,8 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.3 · Projet à faire valider par un juriste avant publication. Les points marqués
-**[À VALIDER]** demandent son avis.
+Version 2026-11.3 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
+**[À COMPLÉTER]** sont à renseigner avant la publication.
 
 Ces conditions s'appliquent à toute personne qui livre avec l'application Tara Livreur. Elles
 complètent le contrat de partenariat signé au bureau de Tara lors de la validation des pièces.
@@ -154,4 +155,15 @@ enregistrés. Le contrat de partenariat est en plus signé sur papier au bureau 
 validation de vos pièces. Si les conditions changent, la nouvelle version vous est présentée
 dans l'application et doit être acceptée pour recevoir de nouvelles courses.
 
-**[À VALIDER : résiliation, préavis, droit applicable et tribunal compétent.]**
+## 13. Fin du partenariat et litiges
+
+- Vous pouvez arrêter à tout moment : demandez la fermeture de votre compte depuis l'application
+  (article 11).
+- Tara peut mettre fin au partenariat avec un préavis de 7 jours, annoncé dans l'application et
+  par SMS. Sans préavis, en cas de faute grave : vol, fraude, violence, pièces fausses ou
+  expirées, mise en danger d'autrui.
+- Dans tous les cas, les gains déjà acquis vous restent dus et vous sont versés une fois les
+  sommes dues à Tara réglées.
+- Ces conditions et le contrat de partenariat relèvent du droit camerounais et du droit OHADA.
+  En cas de désaccord, cherchons d'abord une solution amiable pendant 30 jours ; à défaut, les
+  tribunaux compétents de Douala peuvent être saisis.

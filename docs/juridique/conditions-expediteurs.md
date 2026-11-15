@@ -1,7 +1,8 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.3 · Projet à faire valider par un juriste avant publication. Les points marqués
-**[À VALIDER]** demandent son avis.
+Version 2026-11.3 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
+**[À COMPLÉTER]** sont à renseigner avant la publication.
 
 Ces conditions s'appliquent à toute personne qui envoie un colis avec l'application Tara, qu'elle
 soit un particulier ou une boutique. Elles sont écrites pour être comprises sans connaissances
@@ -9,7 +10,7 @@ juridiques. En cas de doute, appelez le service client de Tara avant de commande
 
 ## 1. Qui sommes-nous
 
-Tara est un service de livraison de colis à la demande à Douala, exploité par **[À VALIDER :
+Tara est un service de livraison de colis à la demande à Douala, exploité par **[À COMPLÉTER :
 raison sociale, forme, capital, RCCM, NIU, adresse du siège, téléphone et e-mail du service
 client]**.
 
@@ -128,9 +129,10 @@ Vous choisissez, avant de commander :
   de retrait (1,25 % aujourd'hui) sont retenus sur le montant reçu.
 - Votre relevé mensuel est disponible dans l'application.
 
-**[À VALIDER : encaisser pour le compte de boutiques puis leur reverser peut relever de la
-réglementation CEMAC des services de paiement ; le montage retenu (agrégateur agréé) est à
-confirmer.]**
+Pour ces encaissements, Tara agit **en votre nom, comme votre mandataire**. Les paiements Mobile
+Money passent par un prestataire de paiement agréé ; Tara ne reçoit pas de dépôts et votre
+portefeuille ne produit pas d'intérêts. Les sommes vous sont reversées au plus tard au
+reversement automatique qui suit (chaque jour par défaut).
 
 ## 8. Si la livraison échoue
 
@@ -170,8 +172,11 @@ Ces frais sont pris sur votre solde Tara :
   paiement, le livreur ne vous remet pas le colis : il est gardé au bureau de Tara et vous est
   rendu dès que les frais sont réglés.
 
-**[À VALIDER : durée de garde au bureau d'un colis non réclamé (proposition : 30 jours après un
-rappel par SMS), puis sort du colis (destruction, don, vente pour couvrir les frais).]**
+**Colis non réclamé** : quand un colis est gardé au bureau, le service client vous prévient (SMS ou
+appel) le jour même, puis 7 et 21 jours plus tard. Sans réponse 30 jours après le premier message, Tara peut le vendre pour
+couvrir les frais dus (le reste vous est versé sur votre solde Tara), le donner à une œuvre de
+bienfaisance s'il n'a pas de valeur marchande, ou le détruire s'il est dangereux. Un produit
+périssable peut être donné ou détruit après 48 heures.
 
 ## 9. Solde négatif et plafond de dette
 
@@ -259,8 +264,9 @@ loi-cadre n° 2011/012 du 6 mai 2011 portant protection du consommateur.
 - Vous acceptez ces conditions dans l'application, en cochant la case « J'ai lu et j'accepte »,
   puis en confirmant avec le code reçu par SMS sur votre numéro. Tara enregistre la version
   acceptée, la date, l'heure et l'appareil utilisé : cet enregistrement vaut signature
-  électronique. **[À VALIDER : valeur de cette acceptation au regard de la loi n° 2010/021 du 21
-  décembre 2010 régissant le commerce électronique au Cameroun.]**
+  électronique. Le texte accepté et son enregistrement sont conservés sous forme électronique,
+  qui fait foi comme un écrit sur papier (loi n° 2010/021 du 21 décembre 2010 régissant le
+  commerce électronique au Cameroun).
 - Une copie de la version acceptée reste consultable à tout moment dans l'application.
 - Si les conditions changent, la nouvelle version vous est présentée à l'ouverture de
   l'application. Vous devez l'accepter pour passer une nouvelle commande ; les commandes en
