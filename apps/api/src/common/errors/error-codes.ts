@@ -425,8 +425,8 @@ export const ERROR_MESSAGES = {
     en: 'A payout is already in progress.',
   },
   PAYOUT_NOT_ALLOWED: {
-    fr: 'Le reversement à la demande est réservé aux offres Pro et Business.',
-    en: 'On-demand payouts are for Pro and Business plans.',
+    fr: 'Le reversement à la demande est réservé aux offres Pro et Business : vos ventes vous sont versées chaque jour à 18 h.',
+    en: 'On-demand payouts are for Pro and Business plans: your sales are paid out every day at 6 pm.',
   },
   PAYOUT_NOT_FOUND: { fr: 'Reversement introuvable.', en: 'Payout not found.' },
   PAYOUT_NOT_AWAITING_APPROVAL: {

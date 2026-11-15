@@ -230,6 +230,19 @@ class ClientApi {
         ) as Json,
       );
 
+  /// Toutes les données personnelles du compte (droit d'accès), en JSON.
+  Future<Json> exportData() async => await _api.get('/me/export') as Json;
+
+  /// Code SMS qui confirme la suppression du compte ; refusé s'il reste une commande en
+  /// cours, de l'argent dû, un solde ou un retrait en cours.
+  Future<OtpChallenge> requestDeletionCode() async =>
+      OtpChallenge.fromJson(await _api.post('/me/deletion/code') as Json);
+
+  /// Suppression définitive du compte (droit à l'effacement), confirmée par le code reçu.
+  Future<void> deleteAccount({required String challengeId, required String code}) async {
+    await _api.post('/me/deletion', body: {'challengeId': challengeId, 'code': code});
+  }
+
   /// Relevé mensuel PDF de la boutique (G7), [month] au format AAAA-MM.
   Future<Uint8List> statement(String month) => _api.getBytes('/me/merchant/statements/$month');
 

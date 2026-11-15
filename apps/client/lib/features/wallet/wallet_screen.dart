@@ -306,10 +306,16 @@ class _ShopCard extends StatelessWidget {
             l.shopToday(_f(wallet.todaySales), wallet.todayDeliveries),
             style: TaraText.small.copyWith(color: c.textSecondary),
           ),
-          if (wallet.withdrawalFeeBps > 0) ...[
+          if (wallet.withdrawalFeeBps > 0 && wallet.withdrawalFeeSharePercent > 0) ...[
             const SizedBox(height: 2),
             Text(
-              l.shopWithdrawalRule(_f(wallet.withdrawalFreeFrom), _percent(wallet.withdrawalFeeBps)),
+              wallet.withdrawalFeeSharePercent >= 100
+                  ? l.shopWithdrawalRule(_f(wallet.withdrawalFreeFrom), _percent(wallet.withdrawalFeeBps))
+                  : l.shopWithdrawalRuleShared(
+                      _f(wallet.withdrawalFreeFrom),
+                      _percent(wallet.withdrawalFeeBps),
+                      '${wallet.withdrawalFeeSharePercent}\u00a0%',
+                    ),
               style: TaraText.small.copyWith(color: c.textSecondary),
             ),
           ],
@@ -323,7 +329,7 @@ class _ShopCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: InfoPill(label: l.payoutOpen(_f(open.amount)), tone: TintTone.accent, icon: TaraIcons.clock),
             ),
-          ] else if (wallet.canPayoutNow && balance >= 500) ...[
+          ] else if (wallet.canPayoutBalanceNow) ...[
             const SizedBox(height: 12),
             PrimaryButton(label: l.payoutNow(_f(balance)), loading: busy, onPressed: () => onPayoutNow(balance)),
           ],
@@ -461,7 +467,8 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final balance = widget.wallet.customerBalance;
-    final canWithdraw = balance >= 500 && widget.wallet.openPayout == null;
+    // Retrait gratuit de tout le solde, même petit : rien ne reste chez Tara.
+    final canWithdraw = balance > 0 && widget.wallet.openPayout == null;
     final pending = _paymentId != null;
     return GlassCard(
       radius: 22,

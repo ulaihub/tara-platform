@@ -112,6 +112,15 @@ export class PayoutsService implements OnModuleInit {
   }
 
   /**
+   * Petit solde : positif mais sous le minimum d'un reversement automatique, il ne partirait
+   * jamais seul ; il peut toujours être retiré en entier (rien n'est perdu à la fermeture).
+   */
+  async smallBalance(beneficiary: PayoutBeneficiary, ownerId: string): Promise<boolean> {
+    const available = await this.available(beneficiary, ownerId);
+    return available > 0 && available < this.env.PAYOUT_MIN_AMOUNT;
+  }
+
+  /**
    * Seuil de retrait gratuit : celui fixé par l'équipe pour la boutique ou le livreur, sinon
    * le seuil général. Les remboursements des clients sont toujours gratuits.
    */

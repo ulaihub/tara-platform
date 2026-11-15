@@ -195,6 +195,7 @@ class Wallet {
     this.payoutHour = 18,
     this.withdrawalFreeFrom = 0,
     this.withdrawalFeeBps = 0,
+    this.withdrawalFeeSharePercent = 100,
     this.openPayout,
   });
 
@@ -212,6 +213,9 @@ class Wallet {
       payoutHour: merchant == null ? 18 : _field<num>(merchant, 'payoutHour').toInt(),
       withdrawalFreeFrom: merchant == null ? 0 : _field<num>(_field<Json>(merchant, 'withdrawal'), 'freeFrom').toInt(),
       withdrawalFeeBps: merchant == null ? 0 : _field<num>(_field<Json>(merchant, 'withdrawal'), 'feeBps').toInt(),
+      withdrawalFeeSharePercent: merchant == null
+          ? 100
+          : (_field<Json>(merchant, 'withdrawal')['feeSharePercent'] as num? ?? 100).toInt(),
       openPayout: open == null
           ? null
           : (amount: _field<num>(open, 'amount').toInt(), status: _field<String>(open, 'status')),
@@ -254,6 +258,9 @@ class Wallet {
   final int withdrawalFreeFrom;
   final int withdrawalFeeBps;
 
+  /// Part des frais payée par la boutique, en % ; Tara paie le reste.
+  final int withdrawalFeeSharePercent;
+
   /// Heure du reversement quotidien (heure du Cameroun).
   final int payoutHour;
 
@@ -261,6 +268,16 @@ class Wallet {
   final ({int amount, String status})? openPayout;
 
   bool get canPayoutNow => plan != null && plan != 'FREE';
+
+  /// Reversement possible tout de suite : offre payante, ou petit solde (sous 500 F) que le
+  /// reversement de 18 h ne prendrait jamais, versé en entier.
+  bool get canPayoutBalanceNow {
+    final balance = merchantBalance ?? 0;
+    return openPayout == null && balance > 0 && (canPayoutNow || balance < payoutMinimum);
+  }
+
+  /// Plus petit reversement automatique (comme le serveur).
+  static const payoutMinimum = 500;
 }
 
 /// Ligne du portefeuille (G2) : recharge, vente encaissée, frais, reversement…

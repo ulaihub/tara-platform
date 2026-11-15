@@ -466,11 +466,19 @@
   "proDiscountLine": "Tarif pro ({percent})",
   "@proDiscountLine": {
     "description": "Ligne du récapitulatif : remise du tarif pro des boutiques.",
-    "placeholders": { "percent": { "type": "String" } }
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
   },
   "promoBeatenByPro": "Votre tarif pro (−{percent}) est plus avantageux : ce code n’est pas utilisé.",
   "@promoBeatenByPro": {
-    "placeholders": { "percent": { "type": "String" } }
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
   },
   "totalLabel": "Total",
   "quoting": "Calcul du prix…",
@@ -1265,5 +1273,58 @@
   "supportWaitingNote": "L’équipe Tara vous répond ici ; vous serez prévenu.",
   "supportMenuRow": "Écrire au service client",
   "supportMenuRowSubtitle": "Vos demandes et les réponses de Tara",
-  "reportProblem": "Signaler un problème"
+  "reportProblem": "Signaler un problème",
+  "shopWithdrawalRuleShared": "Reversement gratuit dès {amount} ; en dessous, frais Mobile Money de {rate}, dont vous payez {share} et Tara le reste.",
+  "@shopWithdrawalRuleShared": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDataSection": "Mon compte et mes données",
+  "exportDataRow": "Télécharger mes données",
+  "exportDataRowSubtitle": "Une copie de tout ce que Tara garde sur vous",
+  "exportDataShare": "Mes données Tara",
+  "deleteAccountRow": "Supprimer mon compte",
+  "deleteAccountRowSubtitle": "Définitif, confirmé par un code SMS",
+  "deleteAccountTitle": "Supprimer mon compte",
+  "deleteAccountBody": "Votre nom, votre numéro, vos adresses, photos et notes vocales sont effacés, et l’app se déconnecte. Vos livraisons passées restent, sans votre nom, pour la comptabilité.",
+  "deleteAccountFinal": "C’est définitif : avec le même numéro, vous repartirez d’un compte vide.",
+  "deleteAccountBalance": "Il vous reste {amount} chez Tara : retirez-les d’abord vers votre Mobile Money.",
+  "@deleteAccountBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountDebt": "Votre boutique doit {amount} à Tara : ils doivent être réglés avant la suppression.",
+  "@deleteAccountDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountPayout": "Un retrait vers votre Mobile Money est en cours : attendez qu’il arrive.",
+  "openWallet": "Ouvrir mon portefeuille",
+  "deleteAccountSendCode": "Recevoir le code par SMS",
+  "deleteAccountCodeSent": "Code envoyé au {phone}. Tapez-le pour confirmer la suppression.",
+  "@deleteAccountCodeSent": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountCodeLabel": "Code reçu par SMS",
+  "deleteAccountResend": "Renvoyer le code",
+  "deleteAccountConfirm": "Supprimer définitivement"
 }

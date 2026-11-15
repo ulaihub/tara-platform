@@ -380,6 +380,40 @@ class FakeClientApi extends ClientApi {
     );
   }
 
+  /// Copies de données demandées.
+  int exports = 0;
+
+  @override
+  Future<Json> exportData() async {
+    exports++;
+    return {
+      'user': {'phone': '+237677123456', 'fullName': 'Awa Ngono'},
+    };
+  }
+
+  /// Codes de suppression demandés ; [deletionErrors] : refus renvoyés d'abord, un par demande.
+  int deletionCodes = 0;
+  final deletionErrors = <ApiException>[];
+
+  /// Suppressions confirmées : (identifiant du code, code tapé).
+  final deletions = <(String, String)>[];
+
+  @override
+  Future<OtpChallenge> requestDeletionCode() async {
+    deletionCodes++;
+    if (deletionErrors.isNotEmpty) throw deletionErrors.removeAt(0);
+    return OtpChallenge(
+      challengeId: 'del-$deletionCodes',
+      expiresAt: DateTime.utc(2026, 11, 4, 9, 40),
+      resendAfterSeconds: 60,
+    );
+  }
+
+  @override
+  Future<void> deleteAccount({required String challengeId, required String code}) async {
+    deletions.add((challengeId, code));
+  }
+
   /// Relevés téléchargés (mois AAAA-MM).
   final statements = <String>[];
 

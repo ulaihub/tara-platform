@@ -3361,6 +3361,120 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Signaler un problème'**
   String get reportProblem;
+
+  /// No description provided for @shopWithdrawalRuleShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversement gratuit dès {amount} ; en dessous, frais Mobile Money de {rate}, dont vous payez {share} et Tara le reste.'**
+  String shopWithdrawalRuleShared(String amount, String rate, String share);
+
+  /// No description provided for @accountDataSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon compte et mes données'**
+  String get accountDataSection;
+
+  /// No description provided for @exportDataRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger mes données'**
+  String get exportDataRow;
+
+  /// No description provided for @exportDataRowSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une copie de tout ce que Tara garde sur vous'**
+  String get exportDataRowSubtitle;
+
+  /// No description provided for @exportDataShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes données Tara'**
+  String get exportDataShare;
+
+  /// No description provided for @deleteAccountRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon compte'**
+  String get deleteAccountRow;
+
+  /// No description provided for @deleteAccountRowSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Définitif, confirmé par un code SMS'**
+  String get deleteAccountRowSubtitle;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon compte'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre nom, votre numéro, vos adresses, photos et notes vocales sont effacés, et l’app se déconnecte. Vos livraisons passées restent, sans votre nom, pour la comptabilité.'**
+  String get deleteAccountBody;
+
+  /// No description provided for @deleteAccountFinal.
+  ///
+  /// In fr, this message translates to:
+  /// **'C’est définitif : avec le même numéro, vous repartirez d’un compte vide.'**
+  String get deleteAccountFinal;
+
+  /// No description provided for @deleteAccountBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il vous reste {amount} chez Tara : retirez-les d’abord vers votre Mobile Money.'**
+  String deleteAccountBalance(String amount);
+
+  /// No description provided for @deleteAccountDebt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre boutique doit {amount} à Tara : ils doivent être réglés avant la suppression.'**
+  String deleteAccountDebt(String amount);
+
+  /// No description provided for @deleteAccountPayout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un retrait vers votre Mobile Money est en cours : attendez qu’il arrive.'**
+  String get deleteAccountPayout;
+
+  /// No description provided for @openWallet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir mon portefeuille'**
+  String get openWallet;
+
+  /// No description provided for @deleteAccountSendCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir le code par SMS'**
+  String get deleteAccountSendCode;
+
+  /// No description provided for @deleteAccountCodeSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code envoyé au {phone}. Tapez-le pour confirmer la suppression.'**
+  String deleteAccountCodeSent(String phone);
+
+  /// No description provided for @deleteAccountCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code reçu par SMS'**
+  String get deleteAccountCodeLabel;
+
+  /// No description provided for @deleteAccountResend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le code'**
+  String get deleteAccountResend;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer définitivement'**
+  String get deleteAccountConfirm;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -463,6 +463,37 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     expect(await ledger.balance(merchantPayable(merchantId))).toBe(0);
   });
 
+  it('offre gratuite : pas de reversement à la demande, sauf un petit solde versé en entier', async () => {
+    const shop = await merchant(ctx);
+    const merchantId = (
+      await ctx.prisma.merchantProfile.findUniqueOrThrow({ where: { userId: shop.userId } })
+    ).id;
+    const credit = (amount: number) =>
+      request(ctx.http)
+        .post(`/v1/admin/finance/users/${shop.userId}/credits`)
+        .set(finance.auth)
+        .set('Idempotency-Key', key())
+        .send({ amount, reason: 'Geste commercial (test)' })
+        .expect(201);
+    await credit(300);
+    // 300 F : sous le minimum du reversement de 18 h, il ne partirait jamais seul.
+    const small = await request(ctx.http)
+      .post('/v1/me/merchant/payouts')
+      .set(shop.auth)
+      .set('Idempotency-Key', key())
+      .expect(201);
+    expect(small.body).toMatchObject({ amount: 300 });
+    expect(await ledger.balance(merchantPayable(merchantId))).toBe(0);
+
+    await credit(1000);
+    const refused = await request(ctx.http)
+      .post('/v1/me/merchant/payouts')
+      .set(shop.auth)
+      .set('Idempotency-Key', key())
+      .expect(403);
+    expect(refused.body.error.code).toBe('PAYOUT_NOT_ALLOWED');
+  });
+
   it('gros montant : validé par la finance ; refusé, il revient au portefeuille', async () => {
     const shop = await merchant(ctx);
     await ctx.prisma.merchantProfile.update({
