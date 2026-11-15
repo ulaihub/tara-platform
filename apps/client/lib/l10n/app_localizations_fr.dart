@@ -1868,11 +1868,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportProblem => 'Signaler un problème';
 
   @override
-  String shopWithdrawalRuleShared(String amount, String rate, String share) {
-    return 'Reversement gratuit dès $amount ; en dessous, frais Mobile Money de $rate, dont vous payez $share et Tara le reste.';
-  }
-
-  @override
   String get accountDataSection => 'Mon compte et mes données';
 
   @override
@@ -1932,4 +1927,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deleteAccountConfirm => 'Supprimer définitivement';
+
+  @override
+  String get topUpOther => 'Autre montant (F)';
+
+  @override
+  String get topUpOtherHint => 'Ex. 15000';
+
+  @override
+  String topUpRange(String min, String max) {
+    return 'Montant entre $min et $max.';
+  }
 }

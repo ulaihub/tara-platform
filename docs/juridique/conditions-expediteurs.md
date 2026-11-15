@@ -119,9 +119,8 @@ Vous choisissez, avant de commander :
   Money, à partir de 500 FCFA disponibles. Un solde plus petit peut vous être reversé en entier
   à votre demande, même avec l'offre gratuite : rien ne reste bloqué chez Tara.
 - **Frais de retrait** : un reversement est gratuit à partir d'un montant fixé pour votre
-  boutique selon vos transactions avec Tara (affiché dans l'application). En dessous, les frais
-  Mobile Money de l'envoi (2,5 % aujourd'hui) sont partagés : la moitié est retenue sur le
-  montant reçu, Tara paie l'autre moitié.
+  boutique selon vos transactions avec Tara (affiché dans l'application). En dessous, des frais
+  de retrait (1,25 % aujourd'hui) sont retenus sur le montant reçu.
 - Votre relevé mensuel est disponible dans l'application.
 
 **[À VALIDER : encaisser pour le compte de boutiques puis leur reverser peut relever de la

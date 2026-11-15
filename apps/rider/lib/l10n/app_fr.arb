@@ -1090,20 +1090,6 @@
   "supportWaitingNote": "L’équipe Tara vous répond ici ; vous serez prévenu.",
   "supportMenuRow": "Écrire au service client",
   "supportMenuRowSubtitle": "Vos demandes et les réponses de Tara",
-  "withdrawalRuleShared": "Retrait gratuit dès {amount} ; en dessous, frais Mobile Money de {rate}, dont vous payez {share} et Tara le reste.",
-  "@withdrawalRuleShared": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "rate": {
-        "type": "String"
-      },
-      "share": {
-        "type": "String"
-      }
-    }
-  },
   "withdrawAction": "Retirer",
   "withdrawTitle": "Retirer vers Mobile Money",
   "withdrawAll": "Tout · {amount}",
@@ -1119,17 +1105,6 @@
   "@withdrawTo": {
     "placeholders": {
       "phone": {
-        "type": "String"
-      }
-    }
-  },
-  "withdrawFee": "Frais Mobile Money : {fee} pour vous, {tara} payés par Tara.",
-  "@withdrawFee": {
-    "placeholders": {
-      "fee": {
-        "type": "String"
-      },
-      "tara": {
         "type": "String"
       }
     }

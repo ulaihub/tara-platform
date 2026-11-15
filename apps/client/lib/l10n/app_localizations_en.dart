@@ -1862,11 +1862,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportProblem => 'Report a problem';
 
   @override
-  String shopWithdrawalRuleShared(String amount, String rate, String share) {
-    return 'Free payout from $amount; below that, a $rate Mobile Money fee, of which you pay $share and Tara the rest.';
-  }
-
-  @override
   String get accountDataSection => 'My account and data';
 
   @override
@@ -1927,4 +1922,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountConfirm => 'Delete permanently';
+
+  @override
+  String get topUpOther => 'Other amount (F)';
+
+  @override
+  String get topUpOtherHint => 'E.g. 15000';
+
+  @override
+  String topUpRange(String min, String max) {
+    return 'Amount between $min and $max.';
+  }
 }

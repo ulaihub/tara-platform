@@ -424,7 +424,9 @@ class _BalanceBox extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final free = '${formatAmount(wallet.withdrawalFreeFrom)}\u00a0F';
-    final rate = '${NumberFormat('#0.##', 'fr').format(wallet.withdrawalFeeBps / 100)}\u00a0%';
+    // Seule la part du livreur est annoncée (taux effectif).
+    final rate =
+        '${NumberFormat('#0.##', 'fr').format(wallet.withdrawalFeeBps * wallet.withdrawalFeeSharePercent / 10000)}\u00a0%';
     final open = wallet.openPayout;
     return _ActionBox(
       tone: TintTone.accent,
@@ -440,12 +442,7 @@ class _BalanceBox extends StatelessWidget {
           style: TaraText.small.copyWith(color: c.textSecondary),
         ),
         if (wallet.withdrawalFeeBps > 0 && wallet.withdrawalFeeSharePercent > 0)
-          Text(
-            wallet.withdrawalFeeSharePercent >= 100
-                ? l.withdrawalRule(free, rate)
-                : l.withdrawalRuleShared(free, rate, '${wallet.withdrawalFeeSharePercent}\u00a0%'),
-            style: TaraText.small.copyWith(color: c.textSecondary),
-          ),
+          Text(l.withdrawalRule(free, rate), style: TaraText.small.copyWith(color: c.textSecondary)),
         if (open != null) ...[
           const SizedBox(height: 6),
           InfoPill(

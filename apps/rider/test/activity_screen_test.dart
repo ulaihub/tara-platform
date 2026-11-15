@@ -130,7 +130,7 @@ void main() {
     );
   });
 
-  testWidgets('frais de retrait partagés : la part du livreur annoncée', (tester) async {
+  testWidgets('frais de retrait : seule la part du livreur est annoncée', (tester) async {
     final api = activityApi()
       ..wallet0 = const RiderWallet(
         earnings: 18000,
@@ -145,7 +145,7 @@ void main() {
     await settle(tester);
     expect(
       find.text(
-        'Retrait gratuit dès 20\u00a0000\u00a0F ; en dessous, frais Mobile Money de 2,5\u00a0%, dont vous payez 50\u00a0% et Tara le reste.',
+        'Retrait gratuit dès 20\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.',
       ),
       findsOneWidget,
     );
@@ -166,8 +166,9 @@ void main() {
     await settle(tester);
     await tapText(tester, 'Retirer');
     expect(find.text('Retirer vers Mobile Money'), findsOneWidget);
-    // 440 F de frais Mobile Money sur 18 000 F : 220 F pour le livreur, 220 F pour Tara.
-    expect(find.text('Frais Mobile Money : 220\u00a0F pour vous, 220\u00a0F payés par Tara.'), findsOneWidget);
+    // 440 F de frais Mobile Money sur 18 000 F : seule la part du livreur (220 F) est annoncée.
+    expect(find.text('Frais Mobile Money : 220\u00a0F.'), findsOneWidget);
+    expect(find.textContaining('Tara'), findsNothing);
     expect(find.text('Retrait gratuit dès 20\u00a0000\u00a0F.'), findsOneWidget);
     expect(
       find.text('Envoyé sur votre numéro +237\u00a06\u00a077\u00a012\u00a034\u00a056, le seul permis pour un retrait.'),

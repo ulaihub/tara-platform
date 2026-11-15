@@ -190,7 +190,7 @@ void main() {
       await settle(tester);
       expect(tester.takeException(), isNull);
       expect(find.byType(WithdrawScreen), findsOneWidget);
-      // 29 500 F sous le seuil gratuit : 720 F de frais, 360 F pour le livreur, 360 F pour Tara.
+      // 29 500 F sous le seuil gratuit : 720 F de frais Mobile Money, 360 F à la charge du livreur.
       expect(find.text('Recevoir 29\u00a0140\u00a0F'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/13_retirer/${variant.name}.png'));
     });

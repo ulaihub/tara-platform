@@ -131,6 +131,29 @@ void main() {
     expect(api.topUps, [(5000, '699112233', 'MTN')]);
   });
 
+  testWidgets('recharge : autre montant tapé, bornes vérifiées', (tester) async {
+    final api = walletApi()..paymentStatuses = ['PENDING'];
+    await pumpVariant(tester, Variant.matrix.first, wallet(api, me: person));
+    await settle(tester);
+    await tester.tap(find.text('Recharger'));
+    await settle(tester);
+    expect(find.text('Autre montant (F)'), findsOneWidget);
+
+    await tester.enterText(find.byType(EditableText).first, '300');
+    await settle(tester);
+    await tester.tap(find.text('Payer 300\u00a0F'));
+    await settle(tester);
+    expect(find.text('Montant entre 500\u00a0F et 500\u00a0000\u00a0F.'), findsOneWidget);
+    expect(api.topUps, isEmpty);
+
+    await tester.enterText(find.byType(EditableText).first, '7500');
+    await settle(tester);
+    await tester.tap(find.text('Payer 7\u00a0500\u00a0F'));
+    await tester.pump(const Duration(seconds: 1));
+    await settle(tester);
+    expect(api.topUps, [(7500, '699112233', 'MTN')]);
+  });
+
   testWidgets('boutique : retrait gratuit à partir du seuil, frais en dessous', (tester) async {
     final api = walletApi();
     api.wallet0 = const Wallet(
@@ -152,7 +175,7 @@ void main() {
     );
   });
 
-  testWidgets('boutique : frais de reversement partagés avec Tara', (tester) async {
+  testWidgets('boutique : seule sa part des frais est annoncée', (tester) async {
     final api = walletApi();
     api.wallet0 = const Wallet(
       customerBalance: 3500,
@@ -168,7 +191,7 @@ void main() {
     await settle(tester);
     expect(
       find.text(
-        'Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, frais Mobile Money de 2,5\u00a0%, dont vous payez 50\u00a0% et Tara le reste.',
+        'Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.',
       ),
       findsOneWidget,
     );

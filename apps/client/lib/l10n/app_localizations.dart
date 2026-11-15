@@ -3362,12 +3362,6 @@ abstract class AppLocalizations {
   /// **'Signaler un problème'**
   String get reportProblem;
 
-  /// No description provided for @shopWithdrawalRuleShared.
-  ///
-  /// In fr, this message translates to:
-  /// **'Reversement gratuit dès {amount} ; en dessous, frais Mobile Money de {rate}, dont vous payez {share} et Tara le reste.'**
-  String shopWithdrawalRuleShared(String amount, String rate, String share);
-
   /// No description provided for @accountDataSection.
   ///
   /// In fr, this message translates to:
@@ -3475,6 +3469,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Supprimer définitivement'**
   String get deleteAccountConfirm;
+
+  /// No description provided for @topUpOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre montant (F)'**
+  String get topUpOther;
+
+  /// No description provided for @topUpOtherHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. 15000'**
+  String get topUpOtherHint;
+
+  /// No description provided for @topUpRange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant entre {min} et {max}.'**
+  String topUpRange(String min, String max);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1274,20 +1274,6 @@
   "supportMenuRow": "Écrire au service client",
   "supportMenuRowSubtitle": "Vos demandes et les réponses de Tara",
   "reportProblem": "Signaler un problème",
-  "shopWithdrawalRuleShared": "Reversement gratuit dès {amount} ; en dessous, frais Mobile Money de {rate}, dont vous payez {share} et Tara le reste.",
-  "@shopWithdrawalRuleShared": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "rate": {
-        "type": "String"
-      },
-      "share": {
-        "type": "String"
-      }
-    }
-  },
   "accountDataSection": "Mon compte et mes données",
   "exportDataRow": "Télécharger mes données",
   "exportDataRowSubtitle": "Une copie de tout ce que Tara garde sur vous",
@@ -1326,5 +1312,18 @@
   },
   "deleteAccountCodeLabel": "Code reçu par SMS",
   "deleteAccountResend": "Renvoyer le code",
-  "deleteAccountConfirm": "Supprimer définitivement"
+  "deleteAccountConfirm": "Supprimer définitivement",
+  "topUpOther": "Autre montant (F)",
+  "topUpOtherHint": "Ex. 15000",
+  "topUpRange": "Montant entre {min} et {max}.",
+  "@topUpRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  }
 }

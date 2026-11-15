@@ -3086,12 +3086,6 @@ abstract class AppLocalizations {
   /// **'Vos demandes et les réponses de Tara'**
   String get supportMenuRowSubtitle;
 
-  /// No description provided for @withdrawalRuleShared.
-  ///
-  /// In fr, this message translates to:
-  /// **'Retrait gratuit dès {amount} ; en dessous, frais Mobile Money de {rate}, dont vous payez {share} et Tara le reste.'**
-  String withdrawalRuleShared(String amount, String rate, String share);
-
   /// No description provided for @withdrawAction.
   ///
   /// In fr, this message translates to:
@@ -3121,12 +3115,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Envoyé sur votre numéro {phone}, le seul permis pour un retrait.'**
   String withdrawTo(String phone);
-
-  /// No description provided for @withdrawFee.
-  ///
-  /// In fr, this message translates to:
-  /// **'Frais Mobile Money : {fee} pour vous, {tara} payés par Tara.'**
-  String withdrawFee(String fee, String tara);
 
   /// No description provided for @withdrawFeeFull.
   ///

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tara_core/api/api_exception.dart';
@@ -33,7 +34,7 @@ final payoutsProvider = FutureProvider<List<Payout>>((ref) => ref.read(clientApi
 String _f(int amount) => '${formatAmount(amount)} F';
 
 /// Taux en points de base, en pourcentage lisible : 250 → « 2,5 % ».
-String _percent(int bps) => '${NumberFormat('#0.##', 'fr').format(bps / 100)}\u00a0%';
+String _percent(num bps) => '${NumberFormat('#0.##', 'fr').format(bps / 100)}\u00a0%';
 
 /// Clé d'idempotence : une demande renvoyée (réseau coupé) n'en crée pas une seconde.
 String _key() {
@@ -309,13 +310,11 @@ class _ShopCard extends StatelessWidget {
           if (wallet.withdrawalFeeBps > 0 && wallet.withdrawalFeeSharePercent > 0) ...[
             const SizedBox(height: 2),
             Text(
-              wallet.withdrawalFeeSharePercent >= 100
-                  ? l.shopWithdrawalRule(_f(wallet.withdrawalFreeFrom), _percent(wallet.withdrawalFeeBps))
-                  : l.shopWithdrawalRuleShared(
-                      _f(wallet.withdrawalFreeFrom),
-                      _percent(wallet.withdrawalFeeBps),
-                      '${wallet.withdrawalFeeSharePercent}\u00a0%',
-                    ),
+              // Seule la part de la boutique est annoncée (taux effectif).
+              l.shopWithdrawalRule(
+                _f(wallet.withdrawalFreeFrom),
+                _percent(wallet.withdrawalFeeBps * wallet.withdrawalFeeSharePercent / 100),
+              ),
               style: TaraText.small.copyWith(color: c.textSecondary),
             ),
           ],
@@ -370,7 +369,14 @@ class _BalanceCard extends ConsumerStatefulWidget {
 class _BalanceCardState extends ConsumerState<_BalanceCard> {
   static const _amounts = [2000, 5000, 10000, 20000];
 
-  int _amount = 5000;
+  /// Bornes d'une recharge (comme l'app livreur).
+  static const _min = 500;
+  static const _max = 500000;
+
+  /// Montant choisi parmi les puces ; un autre montant tapé l'emporte.
+  int _chip = 5000;
+  final _other = TextEditingController();
+  int get _amount => int.tryParse(_other.text) ?? _chip;
 
   /// Frais Mobile Money payés en plus de la recharge (réglages de l'app).
   int get _fee => mobileMoneyFee(_amount, ref.watch(appConfigProvider).value?.mobileMoneyFeeBps ?? 0);
@@ -399,6 +405,7 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
   void dispose() {
     _poll?.cancel();
     _payer.dispose();
+    _other.dispose();
     super.dispose();
   }
 
@@ -414,6 +421,10 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
     final phone = digitsOf(_payer.text);
     if (!isCameroonMobile(phone)) {
       setState(() => _error = l.phoneInvalid);
+      return;
+    }
+    if (_amount < _min || _amount > _max) {
+      setState(() => _error = l.topUpRange(_f(_min), _f(_max)));
       return;
     }
     setState(() {
@@ -514,8 +525,25 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
               columns: 4,
               height: 44,
               options: [for (final amount in _amounts) ChoiceOption(amount, formatAmount(amount))],
-              selected: _amount,
-              onSelected: pending ? (_) {} : (amount) => setState(() => _amount = amount),
+              selected: _other.text.isEmpty ? _chip : null,
+              onSelected: pending
+                  ? (_) {}
+                  : (amount) => setState(() {
+                      _other.clear();
+                      _chip = amount;
+                    }),
+            ),
+            const SizedBox(height: 10),
+            IgnorePointer(
+              ignoring: pending,
+              child: TaraTextField(
+                label: l.topUpOther,
+                hint: l.topUpOtherHint,
+                controller: _other,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
+                onChanged: (_) => setState(() => _error = null),
+              ),
             ),
             const SizedBox(height: 10),
             ChoiceChips<String>(

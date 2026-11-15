@@ -1732,11 +1732,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportMenuRowSubtitle => 'Your requests and Tara’s replies';
 
   @override
-  String withdrawalRuleShared(String amount, String rate, String share) {
-    return 'Free withdrawal from $amount; below that, a $rate Mobile Money fee, of which you pay $share and Tara the rest.';
-  }
-
-  @override
   String get withdrawAction => 'Withdraw';
 
   @override
@@ -1753,11 +1748,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String withdrawTo(String phone) {
     return 'Sent to your number $phone, the only one allowed for a withdrawal.';
-  }
-
-  @override
-  String withdrawFee(String fee, String tara) {
-    return 'Mobile Money fee: $fee for you, $tara paid by Tara.';
   }
 
   @override

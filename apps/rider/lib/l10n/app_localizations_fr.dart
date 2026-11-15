@@ -1740,11 +1740,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get supportMenuRowSubtitle => 'Vos demandes et les réponses de Tara';
 
   @override
-  String withdrawalRuleShared(String amount, String rate, String share) {
-    return 'Retrait gratuit dès $amount ; en dessous, frais Mobile Money de $rate, dont vous payez $share et Tara le reste.';
-  }
-
-  @override
   String get withdrawAction => 'Retirer';
 
   @override
@@ -1761,11 +1756,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String withdrawTo(String phone) {
     return 'Envoyé sur votre numéro $phone, le seul permis pour un retrait.';
-  }
-
-  @override
-  String withdrawFee(String fee, String tara) {
-    return 'Frais Mobile Money : $fee pour vous, $tara payés par Tara.';
   }
 
   @override

@@ -69,9 +69,9 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
 - Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money
   (bouton « Retirer », écran Activité), à partir de 500 FCFA, ou tout le disponible quel que
   soit le montant. Le retrait est gratuit à partir d'un montant fixé pour vous selon votre
-  activité (affiché dans l'application) ; en dessous, les frais Mobile Money de l'envoi (2,5 %
-  aujourd'hui) sont partagés : la moitié est retenue sur le montant reçu, Tara paie l'autre
-  moitié. Les frais et le montant reçu sont affichés avant que vous confirmiez.
+  activité (affiché dans l'application) ; en dessous, des frais de retrait (1,25 %
+  aujourd'hui) sont retenus sur le montant reçu. Les frais et le montant reçu sont affichés
+  avant que vous confirmiez.
 
 ## 5. Encaisser correctement
 

@@ -620,7 +620,6 @@
   "supportMenuRow": "Write to customer service",
   "supportMenuRowSubtitle": "Your requests and Tara’s replies",
   "reportProblem": "Report a problem",
-  "shopWithdrawalRuleShared": "Free payout from {amount}; below that, a {rate} Mobile Money fee, of which you pay {share} and Tara the rest.",
   "accountDataSection": "My account and data",
   "exportDataRow": "Download my data",
   "exportDataRowSubtitle": "A copy of everything Tara keeps about you",
@@ -638,5 +637,8 @@
   "deleteAccountCodeSent": "Code sent to {phone}. Type it to confirm the deletion.",
   "deleteAccountCodeLabel": "Code received by SMS",
   "deleteAccountResend": "Send the code again",
-  "deleteAccountConfirm": "Delete permanently"
+  "deleteAccountConfirm": "Delete permanently",
+  "topUpOther": "Other amount (F)",
+  "topUpOtherHint": "E.g. 15000",
+  "topUpRange": "Amount between {min} and {max}."
 }

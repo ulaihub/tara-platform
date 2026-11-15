@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/api/api_exception.dart';
-import 'package:tara_core/money/mobile_money_fees.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -176,7 +175,6 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
     };
     final amount = _payout?.amount ?? _amount;
     final fee = _payout?.withdrawalFee ?? wallet.withdrawalFeeFor(amount);
-    final fullFee = withdrawalFee(amount, wallet.withdrawalFeeBps, wallet.withdrawalFreeFrom);
     final received = _payout?.received ?? amount - fee;
 
     return TaraScreen(
@@ -274,14 +272,10 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      fullFee == 0
-                          ? l.withdrawFree
-                          : fee < fullFee
-                          ? l.withdrawFee(_f(fee), _f(fullFee - fee))
-                          : l.withdrawFeeFull(_f(fee)),
+                      fee == 0 ? l.withdrawFree : l.withdrawFeeFull(_f(fee)),
                       style: TaraText.small.copyWith(color: c.textSecondary),
                     ),
-                    if (fullFee > 0)
+                    if (fee > 0)
                       Text(
                         l.withdrawFreeFrom(_f(wallet.withdrawalFreeFrom)),
                         style: TaraText.small.copyWith(color: c.textSecondary),
