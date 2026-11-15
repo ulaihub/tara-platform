@@ -228,6 +228,11 @@ const envSchema = z
     MOBILE_MONEY_FEE_BPS: z.coerce.number().int().min(0).max(2000).default(0),
     /** Frais du prestataire sur un reversement (250 = 2,5 %) : retenus sur le montant envoyé. */
     PAYOUT_FEE_BPS: z.coerce.number().int().min(0).max(2000).default(0),
+    /**
+     * Part des frais de retrait payée par le bénéficiaire sous le seuil de gratuité, en % ;
+     * Tara paie le reste (50 : moitié-moitié, 100 : tout pour le bénéficiaire).
+     */
+    PAYOUT_FEE_SHARE_PERCENT: z.coerce.number().int().min(0).max(100).default(50),
     /** Seuil général de retrait gratuit (boutiques et livreurs sans seuil propre). */
     FREE_PAYOUT_FROM: z.coerce.number().int().min(0).default(50_000),
     PAYOUT_APPROVAL_THRESHOLD: z.coerce.number().int().min(1).default(200_000),

@@ -89,8 +89,11 @@ export const CollectionDto = z
 
 const OpenPayout = z.object({ id: z.uuid(), amount: z.int(), status: z.string() }).nullable();
 
-/** Retrait gratuit à partir de `freeFrom` ; en dessous, `feeBps` du montant est retenu. */
-const Withdrawal = z.object({ freeFrom: z.int(), feeBps: z.int() });
+/**
+ * Retrait gratuit à partir de `freeFrom` ; en dessous, frais Mobile Money de `feeBps`, dont le
+ * bénéficiaire paie `feeSharePercent` % (Tara le reste).
+ */
+const Withdrawal = z.object({ freeFrom: z.int(), feeBps: z.int(), feeSharePercent: z.int() });
 
 /** Retrait gratuit d'une boutique ou d'un livreur : seuil propre, seuil général, repère. */
 export const FreePayoutDto = z
@@ -104,6 +107,8 @@ export const FreePayoutDto = z
     averageMonthlyPayouts: z.int(),
     /** Taux des frais de retrait sous le seuil, en points de base. */
     feeBps: z.int(),
+    /** Part de ces frais payée par le bénéficiaire, en % (Tara le reste). */
+    feeSharePercent: z.int(),
   })
   .meta({ id: 'FreePayout' });
 

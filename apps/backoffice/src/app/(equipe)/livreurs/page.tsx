@@ -185,9 +185,11 @@ function RiderRow({ rider }: { rider: AdminRider }) {
           href={`/livreurs/${rider.id}`}
           className="font-display font-bold after:absolute after:inset-0 after:content-['']"
         >
-          {rider.user.fullName ?? 'Sans nom'}
+          {rider.user.closed ? 'Ancien livreur' : (rider.user.fullName ?? 'Sans nom')}
         </Link>
-        <span className="block text-[12px] text-muted">{displayPhone(rider.user.phone)}</span>
+        <span className="block text-[12px] text-muted">
+          {rider.user.closed ? 'Compte fermé' : displayPhone(rider.user.phone)}
+        </span>
       </td>
       <td className="px-4 py-3 whitespace-nowrap">
         {VEHICLE_LABELS[rider.vehicleType]}

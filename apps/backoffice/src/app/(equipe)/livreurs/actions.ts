@@ -103,3 +103,16 @@ export async function setFreePayout(_: ActionState, form: FormData): Promise<Act
   }
   return done(riderId);
 }
+
+/** Fermeture du compte à la demande du livreur (administrateurs) ; l'API refuse s'il reste une course ou de l'argent. */
+export async function closeRiderAccount(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireStaff(['ADMIN']);
+  const riderId = field(form, 'riderId');
+  if (!UUID.test(riderId)) return { error: 'Livreur inconnu.', done: false };
+  try {
+    await staffApi(`/admin/riders/${riderId}/close-account`, { method: 'POST' });
+  } catch (error) {
+    return failure(error);
+  }
+  return done(riderId);
+}

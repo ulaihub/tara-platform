@@ -1,11 +1,23 @@
-import { Controller, Get, Headers, HttpCode, HttpStatus, Ip, Post, Req, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Ip,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { OtpChallengeDto } from '../auth/auth.schemas.js';
 import type { AuthUser } from '../auth/auth.types.js';
-import { CurrentUser } from '../auth/decorators.js';
+import { CurrentUser, Roles } from '../auth/decorators.js';
 import { resolveLocale } from '../common/i18n/locale.js';
 import { ApiZodBody, ApiZodResponse, ValidBody } from '../common/validation/zod.js';
 import { PrivacyService } from './privacy.service.js';
@@ -65,5 +77,28 @@ export class PrivacyController {
     @Req() request: Request,
   ): Promise<void> {
     return this.privacy.deleteAccount(user, body.challengeId, body.code, request);
+  }
+}
+
+/** Fermeture du compte d'un livreur, à sa demande, par un administrateur (H3). */
+@ApiTags('Back-office · livreurs')
+@ApiBearerAuth()
+@Roles('ADMIN')
+@Controller('admin')
+export class AdminPrivacyController {
+  constructor(private readonly privacy: PrivacyService) {}
+
+  /**
+   * Refusée tant qu'une course est en cours, qu'il reste de l'argent dû dans un sens ou dans
+   * l'autre, ou qu'un retrait est en cours. Inscrite au journal d'audit.
+   */
+  @Post('riders/:riderId/close-account')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  closeRiderAccount(
+    @CurrentUser() user: AuthUser,
+    @Param('riderId', ParseUUIDPipe) riderId: string,
+    @Req() request: Request,
+  ): Promise<void> {
+    return this.privacy.closeRiderAccount(user, riderId, request);
   }
 }

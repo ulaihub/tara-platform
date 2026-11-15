@@ -28,7 +28,12 @@ import {
   reactivationBlockers,
 } from '@/lib/riders';
 import type { AdminRider, FreePayout, RiderReliability } from '@/lib/schemas';
-import { DecisionButton, DocumentReview, FreePayoutForm } from './rider-actions';
+import {
+  CloseAccountButton,
+  DecisionButton,
+  DocumentReview,
+  FreePayoutForm,
+} from './rider-actions';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -63,7 +68,9 @@ export default async function RiderPage({ params }: { params: Promise<{ id: stri
   const payout = canSetFreePayout(session.roles)
     ? await staffApi<FreePayout>(`/admin/finance/riders/${id}/free-payout`)
     : null;
-  const name = rider.user.fullName ?? displayPhone(rider.user.phone);
+  const name = rider.user.closed
+    ? 'Ancien livreur'
+    : (rider.user.fullName ?? displayPhone(rider.user.phone));
   const lines = documentLines(rider.documents);
   // Pièces validées qui expirent dans les 30 jours (le livreur a été prévenu, A5).
   const expiring = new Set(
@@ -95,19 +102,26 @@ export default async function RiderPage({ params }: { params: Promise<{ id: stri
         >
           {RIDER_STATUS_LABELS[rider.status]}
         </span>
+        {rider.user.closed ? (
+          <span className="rounded-full bg-danger-bg px-3 py-1 text-[13px] font-bold text-danger">
+            Compte fermé
+          </span>
+        ) : null}
         <span className="text-[14px] text-muted">
           {VEHICLE_LABELS[rider.vehicleType]}
           {rider.plateNumber ? ` · ${rider.plateNumber}` : ''} · inscrit le{' '}
           {dateTime(rider.createdAt)}
         </span>
         <span className="ml-auto" />
-        <a
-          href={`tel:${rider.user.phone}`}
-          className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-accent-bg px-3 text-[13px] font-bold text-accent"
-        >
-          <Icon name="phone" size={16} />
-          {displayPhone(rider.user.phone)}
-        </a>
+        {rider.user.closed ? null : (
+          <a
+            href={`tel:${rider.user.phone}`}
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-accent-bg px-3 text-[13px] font-bold text-accent"
+          >
+            <Icon name="phone" size={16} />
+            {displayPhone(rider.user.phone)}
+          </a>
+        )}
       </header>
 
       {rider.status === 'SUSPENDED' && rider.suspendedReason ? (
@@ -274,7 +288,7 @@ export default async function RiderPage({ params }: { params: Promise<{ id: stri
                 Gratuit à partir de <strong>{money(payout.freeFrom)}</strong>
                 {payout.custom === null ? ' (seuil général)' : ''}.
                 {payout.feeBps > 0
-                  ? ` En dessous, ${(payout.feeBps / 100).toLocaleString('fr-FR')} % de frais Mobile Money retenus.`
+                  ? ` En dessous, frais Mobile Money de ${(payout.feeBps / 100).toLocaleString('fr-FR')} % : ${payout.feeSharePercent} % payés par le livreur, le reste par Tara.`
                   : ' Aucun frais de retrait réglé pour l’instant.'}
               </p>
               <p className="mt-1 text-[13px] text-muted">
@@ -282,6 +296,19 @@ export default async function RiderPage({ params }: { params: Promise<{ id: stri
                 jours).
               </p>
               <FreePayoutForm riderId={rider.id} custom={payout.custom} fallback={payout.default} />
+            </Section>
+          ) : null}
+
+          {session.roles.includes('ADMIN') && !rider.user.closed ? (
+            <Section title="Fermer le compte">
+              <p className="text-[14px] text-muted">
+                À la demande du livreur. Possible seulement sans course en cours, sans argent dû
+                dans un sens ou dans l’autre ni retrait en cours. Pièces d’identité, garant et
+                contact d’urgence sont effacés ; ses courses restent, anonymes.
+              </p>
+              <div className="mt-3">
+                <CloseAccountButton riderId={rider.id} />
+              </div>
             </Section>
           ) : null}
         </div>

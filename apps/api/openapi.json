@@ -7824,6 +7824,34 @@
         ]
       }
     },
+    "/v1/admin/riders/{riderId}/close-account": {
+      "post": {
+        "operationId": "AdminPrivacy_closeRiderAccount",
+        "parameters": [
+          {
+            "name": "riderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · livreurs"
+        ]
+      }
+    },
     "/v1/admin/live-map": {
       "get": {
         "operationId": "Ops_map",
@@ -10477,12 +10505,16 @@
               "fullName": {
                 "nullable": true,
                 "type": "string"
+              },
+              "closed": {
+                "type": "boolean"
               }
             },
             "required": [
               "id",
               "phone",
-              "fullName"
+              "fullName",
+              "closed"
             ],
             "additionalProperties": false
           },
@@ -12175,6 +12207,8 @@
                   "RETRY_LIMIT_REACHED",
                   "MERCHANT_DEBT_LIMIT",
                   "ACCOUNT_HAS_DEBT",
+                  "ACCOUNT_HAS_BALANCE",
+                  "ACCOUNT_HAS_PAYOUT_IN_PROGRESS",
                   "WALLET_IN_DEBT",
                   "COLLECTION_REQUIRED",
                   "RETURN_COLLECTION_REQUIRED",
@@ -12298,6 +12332,9 @@
           },
           "feeBps": {
             "type": "integer"
+          },
+          "feeSharePercent": {
+            "type": "integer"
           }
         },
         "required": [
@@ -12305,7 +12342,8 @@
           "custom",
           "default",
           "averageMonthlyPayouts",
-          "feeBps"
+          "feeBps",
+          "feeSharePercent"
         ],
         "additionalProperties": false
       },
@@ -16095,11 +16133,15 @@
               },
               "feeBps": {
                 "type": "integer"
+              },
+              "feeSharePercent": {
+                "type": "integer"
               }
             },
             "required": [
               "freeFrom",
-              "feeBps"
+              "feeBps",
+              "feeSharePercent"
             ],
             "additionalProperties": false
           },
@@ -16643,11 +16685,15 @@
                   },
                   "feeBps": {
                     "type": "integer"
+                  },
+                  "feeSharePercent": {
+                    "type": "integer"
                   }
                 },
                 "required": [
                   "freeFrom",
-                  "feeBps"
+                  "feeBps",
+                  "feeSharePercent"
                 ],
                 "additionalProperties": false
               }

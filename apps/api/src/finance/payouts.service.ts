@@ -156,6 +156,7 @@ export class PayoutsService implements OnModuleInit {
       default: this.env.FREE_PAYOUT_FROM,
       averageMonthlyPayouts: Math.round((sum._sum.amount ?? 0) / 3),
       feeBps: this.env.PAYOUT_FEE_BPS,
+      feeSharePercent: this.env.PAYOUT_FEE_SHARE_PERCENT,
     };
   }
 
@@ -177,7 +178,11 @@ export class PayoutsService implements OnModuleInit {
     if (count !== 1) throw AppError.notFound();
   }
 
-  /** Frais de retrait retenus sur ce montant (0 au-delà du seuil de retrait gratuit). */
+  /**
+   * Frais de retrait retenus sur ce montant : 0 au-delà du seuil de retrait gratuit ; en
+   * dessous, la part du bénéficiaire (PAYOUT_FEE_SHARE_PERCENT), Tara payant le reste. Arrondi
+   * en faveur du bénéficiaire.
+   */
   async chargeFor(
     beneficiary: PayoutBeneficiary,
     ownerId: string,
@@ -186,7 +191,9 @@ export class PayoutsService implements OnModuleInit {
   ): Promise<number> {
     const freeFrom = await this.freePayoutFrom(beneficiary, ownerId, db);
     if (freeFrom === null || amount >= freeFrom) return 0;
-    return payoutCharge(amount, this.env.PAYOUT_FEE_BPS);
+    return Math.floor(
+      (payoutCharge(amount, this.env.PAYOUT_FEE_BPS) * this.env.PAYOUT_FEE_SHARE_PERCENT) / 100,
+    );
   }
 
   // --- Demande ------------------------------------------------------------------------------
@@ -206,7 +213,9 @@ export class PayoutsService implements OnModuleInit {
         await this.ledger.lock(tx, locked);
         const available = await this.available(input.beneficiary, input.ownerId, tx);
         const amount = input.amount ?? available;
-        if (amount < this.env.PAYOUT_MIN_AMOUNT) {
+        // Sous le minimum, seul le retrait de tout le solde est permis (rien n'est perdu à la
+        // fermeture d'un compte) ; jamais un montant nul.
+        if (amount <= 0 || (amount < this.env.PAYOUT_MIN_AMOUNT && amount !== available)) {
           throw AppError.unprocessable('PAYOUT_TOO_SMALL', { min: this.env.PAYOUT_MIN_AMOUNT });
         }
         if (amount > available)

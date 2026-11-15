@@ -95,6 +95,7 @@ export class WalletsService implements OnModuleInit {
             withdrawal: {
               freeFrom: merchant.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM,
               feeBps: this.env.PAYOUT_FEE_BPS,
+              feeSharePercent: this.env.PAYOUT_FEE_SHARE_PERCENT,
             },
           }
         : null,
@@ -125,6 +126,7 @@ export class WalletsService implements OnModuleInit {
       withdrawal: {
         freeFrom: rider.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM,
         feeBps: this.env.PAYOUT_FEE_BPS,
+        feeSharePercent: this.env.PAYOUT_FEE_SHARE_PERCENT,
       },
       openPayout: openPayout
         ? { id: openPayout.id, amount: openPayout.amount, status: openPayout.status }

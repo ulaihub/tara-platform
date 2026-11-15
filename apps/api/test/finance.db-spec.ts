@@ -653,6 +653,22 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
     expect(refund.body).toMatchObject({ status: 'SUCCEEDED', beneficiary: 'CUSTOMER' });
     expect(await ledger.balance(customerWallet(customer.userId))).toBe(2_000);
 
+    // Il reste de l'argent : la suppression du compte attend qu'il soit retiré.
+    const withMoney = await request(ctx.http)
+      .post('/v1/me/deletion/code')
+      .set(customer.auth)
+      .expect(422);
+    expect(withMoney.body.error).toMatchObject({ code: 'ACCOUNT_HAS_BALANCE' });
+    expect(withMoney.body.error.message).toContain('2000');
+    // Sous le minimum (500 F), un retrait partiel est refusé.
+    const tiny = await request(ctx.http)
+      .post('/v1/me/wallet/refund')
+      .set(customer.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: 200, phone: customer.phone, operator: 'ORANGE' })
+      .expect(422);
+    expect(tiny.body.error.code).toBe('PAYOUT_TOO_SMALL');
+
     // Dette envers Tara (retour non payé) : pas de nouvelle commande.
     await ctx.prisma.$transaction((tx) =>
       ledger.post(tx, {
@@ -685,6 +701,33 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       .expect(422);
     expect(deletion.body.error).toMatchObject({ code: 'ACCOUNT_HAS_DEBT' });
     expect(deletion.body.error.message).toContain('1000');
+  });
+
+  it('petit solde : retiré en entier même sous le minimum, puis le compte peut être supprimé', async () => {
+    const customer = await signIn(ctx);
+    await ctx.prisma.$transaction((tx) =>
+      ledger.post(tx, {
+        kind: 'ADJUSTMENT',
+        description: 'Avoir de test',
+        idempotencyKey: `test-credit:${customer.userId}`,
+        postings: [
+          { account: customerWallet(customer.userId), amount: -300 },
+          { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: 300 },
+        ],
+      }),
+    );
+    expect(await ledger.balance(customerWallet(customer.userId))).toBe(300);
+    const all = await request(ctx.http)
+      .post('/v1/me/wallet/refund')
+      .set(customer.auth)
+      .set('Idempotency-Key', key())
+      .send({ amount: 300, phone: customer.phone, operator: 'MTN' })
+      .expect(201);
+    expect(all.body).toMatchObject({ status: 'SUCCEEDED', amount: 300, withdrawalFee: 0 });
+    expect(await ledger.balance(customerWallet(customer.userId))).toBe(0);
+    // Code de connexion récent : délai entre deux codes levé pour le test.
+    await ctx.prisma.otpChallenge.deleteMany({ where: { phone: customer.phone } });
+    await request(ctx.http).post('/v1/me/deletion/code').set(customer.auth).expect(201);
   });
 
   it('marchand : dette tolérée jusqu’au plafond (3 000 F), puis nouvelles commandes bloquées', async () => {

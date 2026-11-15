@@ -11,13 +11,15 @@ import {
   type TestContext,
 } from './helpers/app.js';
 import { createAddress, ensureDoualaServiceArea, PLACES } from './helpers/geo.js';
+import { activeRider } from './helpers/riders.js';
 
 describe('Données personnelles (loi n° 2024/017)', () => {
   let ctx: TestContext;
+  let admin: SignedIn;
 
   beforeAll(async () => {
     ctx = await createTestApp();
-    const admin = await staffUser(ctx, ['ADMIN']);
+    admin = await staffUser(ctx, ['ADMIN']);
     await ensureDoualaServiceArea(ctx, admin);
     await request(ctx.http)
       .post('/v1/admin/pricing-grids')
@@ -109,6 +111,43 @@ describe('Données personnelles (loi n° 2024/017)', () => {
       .set(customer.auth)
       .expect(422);
     expect(busy.body.error.code).toBe('ACCOUNT_HAS_ACTIVE_ORDERS');
+  });
+
+  it('ferme le compte d’un livreur à sa demande, une fois son argent versé (administrateur)', async () => {
+    const rider = await activeRider(ctx);
+    const dispatcher = await staffUser(ctx, ['DISPATCHER']);
+    const close = (who: SignedIn) =>
+      request(ctx.http).post(`/v1/admin/riders/${rider.riderId}/close-account`).set(who.auth);
+    await close(dispatcher).expect(403);
+
+    // Il lui reste de l'argent : il le retire d'abord.
+    const refused = await close(admin).expect(422);
+    expect(refused.body.error.code).toBe('ACCOUNT_HAS_BALANCE');
+    const wallet = await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(200);
+    await request(ctx.http)
+      .post('/v1/rider/withdrawals')
+      .set(rider.auth)
+      .set('Idempotency-Key', crypto.randomUUID())
+      .send({ amount: wallet.body.available, phone: rider.phone, operator: 'MTN' })
+      .expect(201);
+
+    await close(admin).expect(204);
+    const user = await ctx.prisma.user.findUniqueOrThrow({ where: { id: rider.userId } });
+    expect(user).toMatchObject({ status: 'DELETED', fullName: null });
+    expect(user.phone.startsWith('deleted:')).toBe(true);
+    expect(await ctx.prisma.kycDocument.count({ where: { riderId: rider.riderId } })).toBe(0);
+    const profile = await ctx.prisma.riderProfile.findUniqueOrThrow({
+      where: { id: rider.riderId },
+    });
+    expect(profile).toMatchObject({ status: 'SUSPENDED', guarantorName: null, plateNumber: null });
+    expect(
+      await ctx.prisma.auditLog.count({
+        where: { entityId: rider.riderId, action: 'rider.account_closed' },
+      }),
+    ).toBe(1);
+    // Plus de session : l'app livreur repart à la connexion.
+    await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(401);
+    await close(admin).expect(404);
   });
 
   it('supprime le compte après confirmation par SMS et libère le numéro (droit à l’effacement)', async () => {
