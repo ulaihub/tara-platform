@@ -3064,7 +3064,14 @@ export interface components {
       note: string | null;
     };
     /** @enum {string} */
-    CourseAlertKind: 'ACTION_FAR' | 'LONG_STOP' | 'MOCK_LOCATION' | 'TRACK_GAP' | 'APPROACH_BONUS';
+    CourseAlertKind:
+      | 'ACTION_FAR'
+      | 'LONG_STOP'
+      | 'MOCK_LOCATION'
+      | 'TRACK_GAP'
+      | 'APPROACH_BONUS'
+      | 'OVERDUE'
+      | 'MOVING_AWAY';
     CourseTrack: {
       /** Format: uuid */
       orderId: string;
@@ -3147,6 +3154,7 @@ export interface components {
         | 'PENDING_OFFER'
         | 'VEHICLE'
         | 'SAFETY_ALERT'
+        | 'PARCEL_VALUE'
       )[];
       position: {
         latitude: number;
@@ -3347,6 +3355,7 @@ export interface components {
           | 'ALREADY_COLLECTED'
           | 'PAYOUT_TOO_SMALL'
           | 'PAYOUT_IN_PROGRESS'
+          | 'PAYOUT_FROZEN'
           | 'PAYOUT_NOT_ALLOWED'
           | 'PAYOUT_NOT_FOUND'
           | 'PAYOUT_NOT_AWAITING_APPROVAL'

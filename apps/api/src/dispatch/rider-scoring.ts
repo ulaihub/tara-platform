@@ -34,6 +34,8 @@ export interface RiderSnapshot {
   cashOverdue: boolean;
   ratingSum: number;
   ratingCount: number;
+  /** Courses livrées depuis l'inscription : la confiance se gagne course après course. */
+  deliveredCount: number;
 }
 
 export type Ineligibility =
@@ -44,16 +46,64 @@ export type Ineligibility =
   | 'TOO_MANY_ORDERS'
   | 'PENDING_OFFER'
   | 'VEHICLE'
-  | 'SAFETY_ALERT';
+  | 'SAFETY_ALERT'
+  | 'PARCEL_VALUE';
 
 /** Ce que la course demande au livreur : argent à encaisser, véhicule pour le colis. */
 export interface CourseNeeds {
   cash: number;
   packageSize: 'S' | 'M' | 'L' | 'XL' | 'BULKY';
+  /** Valeur déclarée par l'expéditeur (jamais montrée au livreur) ; null si non déclarée. */
+  declaredValue?: number | null;
+}
+
+/**
+ * Confiance progressive selon la valeur déclarée du colis : un nouveau livreur ne transporte
+ * que des colis modestes ; les colis de grande valeur vont aux livreurs confirmés et bien notés.
+ */
+export interface ValueRules {
+  /** Livraisons à faire avant de transporter un colis de plus de `newRiderMaxValue`. */
+  newRiderDeliveries: number;
+  newRiderMaxValue: number;
+  /** Au-delà de cette valeur : livreur confirmé (`highValueMinDeliveries`) et bien noté. */
+  highValueFrom: number;
+  highValueMinDeliveries: number;
+  highValueMinRating: number;
+}
+
+export const DEFAULT_VALUE_RULES: ValueRules = {
+  newRiderDeliveries: 20,
+  newRiderMaxValue: 25_000,
+  highValueFrom: 100_000,
+  highValueMinDeliveries: 50,
+  highValueMinRating: 4.5,
+};
+
+/** Le livreur peut-il transporter un colis de cette valeur ? */
+export function trustedForValue(
+  rider: Pick<RiderSnapshot, 'deliveredCount' | 'ratingSum' | 'ratingCount'>,
+  value: number | null | undefined,
+  rules: ValueRules = DEFAULT_VALUE_RULES,
+): boolean {
+  if (!value) return true;
+  if (value > rules.newRiderMaxValue && rider.deliveredCount < rules.newRiderDeliveries) {
+    return false;
+  }
+  if (value > rules.highValueFrom) {
+    if (rider.deliveredCount < rules.highValueMinDeliveries) return false;
+    // Une note se juge sur assez d'avis.
+    if (rider.ratingCount < MIN_RATINGS) return false;
+    if (rider.ratingSum / rider.ratingCount < rules.highValueMinRating) return false;
+  }
+  return true;
 }
 
 /** Raisons pour lesquelles le livreur ne peut pas recevoir cette course (vide si éligible). */
-export function ineligibilities(rider: RiderSnapshot, needs: CourseNeeds): Ineligibility[] {
+export function ineligibilities(
+  rider: RiderSnapshot,
+  needs: CourseNeeds,
+  rules: ValueRules = DEFAULT_VALUE_RULES,
+): Ineligibility[] {
   const reasons: Ineligibility[] = [];
   const orderCash = needs.cash;
   if (rider.safetyAlertOpen) reasons.push('SAFETY_ALERT');
@@ -65,6 +115,7 @@ export function ineligibilities(rider: RiderSnapshot, needs: CourseNeeds): Ineli
   if (rider.cashOverdue) reasons.push('CASH_OVERDUE');
   if (rider.activeOrders >= MAX_ACTIVE_ORDERS) reasons.push('TOO_MANY_ORDERS');
   if (rider.hasPendingOffer) reasons.push('PENDING_OFFER');
+  if (!trustedForValue(rider, needs.declaredValue, rules)) reasons.push('PARCEL_VALUE');
   return reasons;
 }
 

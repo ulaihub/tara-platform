@@ -88,6 +88,7 @@ export const CandidateDto = z
         'PENDING_OFFER',
         'VEHICLE',
         'SAFETY_ALERT',
+        'PARCEL_VALUE',
       ]),
     ),
     position: z

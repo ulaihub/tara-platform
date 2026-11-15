@@ -200,6 +200,27 @@ describe('Attribution des courses (D1 à D4)', () => {
     expect(byId.get(ok.riderId)?.ineligibleBecause).toEqual(['PENDING_OFFER']);
   });
 
+  it('un colis de valeur ne part pas avec un livreur sans expérience, et le dispatch voit pourquoi', async () => {
+    const newcomer = await onlineRider(0.001);
+    // 80 000 FCFA déclarés : au-delà de 25 000 FCFA, il faut 20 livraisons faites.
+    const precious = await placeOrder(ctx, shop, { declaredValue: 80_000 });
+    expect(await pendingOffers(precious.id)).toEqual([]);
+    const candidates = await request(ctx.http)
+      .get(`/v1/admin/orders/${precious.id}/candidates`)
+      .set(ops.auth)
+      .expect(200);
+    const mine = (candidates.body as { riderId: string; ineligibleBecause: string[] }[]).find(
+      (c) => c.riderId === newcomer.riderId,
+    );
+    expect(mine?.ineligibleBecause).toEqual(['PARCEL_VALUE']);
+
+    // Un colis modeste lui est proposé.
+    const modest = await placeOrder(ctx, shop, { declaredValue: 15_000 });
+    expect((await pendingOffers(modest.id)).map((offer) => offer.riderId)).toEqual([
+      newcomer.riderId,
+    ]);
+  });
+
   it('alerte le dispatch une seule fois après 5 minutes sans livreur (D2)', async () => {
     const order = await placeOrder(ctx, shop);
     const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } });

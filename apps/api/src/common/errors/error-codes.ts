@@ -424,6 +424,10 @@ export const ERROR_MESSAGES = {
     fr: 'Un reversement est déjà en cours.',
     en: 'A payout is already in progress.',
   },
+  PAYOUT_FROZEN: {
+    fr: 'Votre compte est suspendu : les retraits sont bloqués jusqu’à la décision de l’équipe Tara. Contactez le support.',
+    en: 'Your account is suspended: withdrawals are blocked until the Tara team decides. Please contact support.',
+  },
   PAYOUT_NOT_ALLOWED: {
     fr: 'Le reversement à la demande est réservé aux offres Pro et Business : vos ventes vous sont versées chaque jour à 18 h.',
     en: 'On-demand payouts are for Pro and Business plans: your sales are paid out every day at 6 pm.',

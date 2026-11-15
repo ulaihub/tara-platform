@@ -11497,7 +11497,9 @@
           "LONG_STOP",
           "MOCK_LOCATION",
           "TRACK_GAP",
-          "APPROACH_BONUS"
+          "APPROACH_BONUS",
+          "OVERDUE",
+          "MOVING_AWAY"
         ]
       },
       "CourseTrack": {
@@ -11772,7 +11774,8 @@
                 "TOO_MANY_ORDERS",
                 "PENDING_OFFER",
                 "VEHICLE",
-                "SAFETY_ALERT"
+                "SAFETY_ALERT",
+                "PARCEL_VALUE"
               ]
             }
           },
@@ -12216,6 +12219,7 @@
                   "ALREADY_COLLECTED",
                   "PAYOUT_TOO_SMALL",
                   "PAYOUT_IN_PROGRESS",
+                  "PAYOUT_FROZEN",
                   "PAYOUT_NOT_ALLOWED",
                   "PAYOUT_NOT_FOUND",
                   "PAYOUT_NOT_AWAITING_APPROVAL",

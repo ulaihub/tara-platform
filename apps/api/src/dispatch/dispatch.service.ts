@@ -26,6 +26,7 @@ import { PresenceService } from './presence.service.js';
 import {
   cashCarried,
   type Ineligibility,
+  type ValueRules,
   ineligibilities,
   offersForRound,
   type RiderSnapshot,
@@ -90,6 +91,7 @@ type RoundResult =
 export class DispatchService implements OnModuleInit {
   private readonly logger = new Logger(DispatchService.name);
   private readonly radii: number[];
+  private readonly valueRules: ValueRules;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -104,6 +106,13 @@ export class DispatchService implements OnModuleInit {
     @Inject(ENV) private readonly env: Env,
   ) {
     this.radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
+    this.valueRules = {
+      newRiderDeliveries: env.DISPATCH_NEW_RIDER_DELIVERIES,
+      newRiderMaxValue: env.DISPATCH_NEW_RIDER_MAX_VALUE,
+      highValueFrom: env.DISPATCH_HIGH_VALUE_FROM,
+      highValueMinDeliveries: env.DISPATCH_HIGH_VALUE_MIN_DELIVERIES,
+      highValueMinRating: env.DISPATCH_HIGH_VALUE_MIN_RATING,
+    };
   }
 
   onModuleInit(): void {
@@ -241,7 +250,11 @@ export class DispatchService implements OnModuleInit {
     silent: Set<string>,
     size: number,
   ): Promise<Candidate[]> {
-    const needs = { cash: cashCarried(order), packageSize: order.packageSize };
+    const needs = {
+      cash: cashCarried(order),
+      packageSize: order.packageSize,
+      declaredValue: order.declaredValue,
+    };
     const seen = new Set<string>();
     let eligible: Candidate[] = [];
     for (const radius of this.radii) {
@@ -259,7 +272,7 @@ export class DispatchService implements OnModuleInit {
       // « une offre en attente par livreur » tranche si un livreur est sollicité entre-temps.
       const snapshots = await this.snapshots(this.prisma, fresh);
       eligible = eligible.concat(
-        snapshots.filter((rider) => ineligibilities(rider, needs).length === 0),
+        snapshots.filter((rider) => ineligibilities(rider, needs, this.valueRules).length === 0),
       );
       const preferred = eligible.filter((rider) => !silent.has(rider.riderId));
       if (preferred.length >= size) break;
@@ -294,6 +307,15 @@ export class DispatchService implements OnModuleInit {
       },
     });
     const available = await this.balances.availableFor(ids);
+    const delivered = new Map(
+      (
+        await tx.order.groupBy({
+          by: ['riderId'],
+          where: { riderId: { in: ids }, status: 'DELIVERED' },
+          _count: { _all: true },
+        })
+      ).map((row) => [row.riderId, row._count._all]),
+    );
     const distance = new Map(nearby.map((rider) => [rider.riderId, rider.distanceMeters]));
     const today = cameroonDate(new Date());
     return riders.map((rider) => {
@@ -313,6 +335,7 @@ export class DispatchService implements OnModuleInit {
         cashOverdue: rider.cashOverdueSince !== null,
         ratingSum: rider.ratingSum,
         ratingCount: rider.ratingCount,
+        deliveredCount: delivered.get(rider.id) ?? 0,
       };
       return { ...snapshot, userId: rider.userId, score: score(snapshot) };
     });
@@ -572,13 +595,17 @@ export class DispatchService implements OnModuleInit {
     });
     const byId = new Map(riders.map((rider) => [rider.id, rider]));
     const positions = await this.presence.positions(snapshots.map((s) => s.riderId));
-    const needs = { cash: cashCarried(order), packageSize: order.packageSize };
+    const needs = {
+      cash: cashCarried(order),
+      packageSize: order.packageSize,
+      declaredValue: order.declaredValue,
+    };
     return snapshots
       .sort((a, b) => a.score - b.score)
       .map((snapshot) => {
         const rider = byId.get(snapshot.riderId);
         const position = positions.get(snapshot.riderId);
-        const reasons: Ineligibility[] = ineligibilities(snapshot, needs);
+        const reasons: Ineligibility[] = ineligibilities(snapshot, needs, this.valueRules);
         return {
           riderId: snapshot.riderId,
           name: rider?.user.fullName ?? null,
