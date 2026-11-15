@@ -7,6 +7,11 @@ const SHAPES = {
       <path d="M3 11l18-8-8 18-2-8z" />
     </>
   ),
+  menu: (
+    <>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </>
+  ),
   home: (
     <>
       <path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" />

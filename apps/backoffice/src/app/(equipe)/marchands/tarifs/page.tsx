@@ -85,35 +85,37 @@ export default async function PricingPage() {
                     ? describeGrid(simple)
                     : `${moto.tiers.length} paliers, puis +${money(moto.perKmBeyondLastTier)} par km.`}
                 </p>
-                <table className="w-full text-left text-[14px]">
-                  <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
-                    <tr>
-                      <th className="py-2">Exemple de trajet</th>
-                      <th className="py-2 text-right">Client</th>
-                      <th className="py-2 text-right">Livreur</th>
-                      <th className="py-2 text-right">Tara</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {EXAMPLE_TRIPS.map((trip, index) => (
-                      <tr key={trip.label} className="border-b border-line last:border-0">
-                        <td className="py-2.5">
-                          <span className="font-semibold">{trip.label}</span>
-                          <span className="ml-2 text-[12px] text-faint">{km(trip.meters)}</span>
-                        </td>
-                        <td className="py-2.5 text-right font-bold tabular-nums">
-                          {rows[index] ? money(rows[index].price) : '—'}
-                        </td>
-                        <td className="py-2.5 text-right tabular-nums">
-                          {rows[index] ? money(rows[index].riderEarning) : '—'}
-                        </td>
-                        <td className="py-2.5 text-right tabular-nums text-muted">
-                          {rows[index] ? money(rows[index].platformShare) : '—'}
-                        </td>
+                <div className="relative overflow-x-auto">
+                  <table className="w-full text-left text-[14px]">
+                    <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
+                      <tr>
+                        <th className="py-2">Exemple de trajet</th>
+                        <th className="py-2 text-right">Client</th>
+                        <th className="py-2 text-right">Livreur</th>
+                        <th className="py-2 text-right">Tara</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {EXAMPLE_TRIPS.map((trip, index) => (
+                        <tr key={trip.label} className="border-b border-line last:border-0">
+                          <td className="py-2.5">
+                            <span className="font-semibold">{trip.label}</span>
+                            <span className="ml-2 text-[12px] text-faint">{km(trip.meters)}</span>
+                          </td>
+                          <td className="py-2.5 pl-2 text-right font-bold whitespace-nowrap tabular-nums">
+                            {rows[index] ? money(rows[index].price) : '—'}
+                          </td>
+                          <td className="py-2.5 pl-2 text-right whitespace-nowrap tabular-nums">
+                            {rows[index] ? money(rows[index].riderEarning) : '—'}
+                          </td>
+                          <td className="py-2.5 pl-2 text-right whitespace-nowrap tabular-nums text-muted">
+                            {rows[index] ? money(rows[index].platformShare) : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
                 <p className="mt-2 mb-4 text-[12px] text-faint">
                   Distances par la route, de centre de quartier à centre de quartier ; l’app calcule
                   d’adresse exacte à adresse exacte. Sans suppléments ni remise.

@@ -424,31 +424,33 @@ function Reliability({ reliability }: { reliability: RiderReliability }) {
   ];
   return (
     <Section title="Fiabilité">
-      <table className="w-full text-[14px]">
-        <thead className="text-[12px] font-bold text-faint uppercase">
-          <tr>
-            <th className="pb-2 text-left font-bold">
-              <span className="sr-only">Indicateur</span>
-            </th>
-            <th className="w-[140px] pb-2 text-right">30 derniers jours</th>
-            <th className="w-[140px] pb-2 text-right">Depuis l’inscription</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(([label, last30, total, hint]) => (
-            <tr key={label} className="border-t border-line">
-              <th scope="row" className="py-2 text-left font-semibold">
-                {label}
-                {hint ? (
-                  <span className="block text-[12px] font-normal text-faint">{hint}</span>
-                ) : null}
+      <div className="relative overflow-x-auto">
+        <table className="w-full text-[14px]">
+          <thead className="text-[12px] font-bold text-faint uppercase">
+            <tr>
+              <th className="pb-2 text-left font-bold">
+                <span className="sr-only">Indicateur</span>
               </th>
-              <td className="py-2 text-right font-bold tabular-nums">{last30}</td>
-              <td className="py-2 text-right tabular-nums text-muted">{total}</td>
+              <th className="w-[140px] pb-2 text-right">30 derniers jours</th>
+              <th className="w-[140px] pb-2 text-right">Depuis l’inscription</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map(([label, last30, total, hint]) => (
+              <tr key={label} className="border-t border-line">
+                <th scope="row" className="py-2 text-left font-semibold">
+                  {label}
+                  {hint ? (
+                    <span className="block text-[12px] font-normal text-faint">{hint}</span>
+                  ) : null}
+                </th>
+                <td className="py-2 text-right font-bold tabular-nums">{last30}</td>
+                <td className="py-2 text-right tabular-nums text-muted">{total}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Section>
   );
 }

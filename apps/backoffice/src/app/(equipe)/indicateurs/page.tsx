@@ -106,28 +106,30 @@ export default async function MetricsPage({
         <DailyChart days={m.daily} />
         <details className="mt-2 text-[13px]">
           <summary className="cursor-pointer font-bold text-accent">Voir le tableau</summary>
-          <table className="mt-2 w-full text-left">
-            <thead className="text-[12px] font-bold text-faint uppercase">
-              <tr>
-                <th className="py-1">Jour</th>
-                <th className="py-1 text-right">Livrées</th>
-                <th className="py-1 text-right">Échecs</th>
-                <th className="py-1 text-right">Retours</th>
-                <th className="py-1 text-right">Annulées</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...m.daily].reverse().map((row) => (
-                <tr key={row.day} className="border-t border-line">
-                  <td className="py-1">{day(row.day)}</td>
-                  <td className="py-1 text-right tabular-nums">{row.delivered}</td>
-                  <td className="py-1 text-right tabular-nums">{row.failed}</td>
-                  <td className="py-1 text-right tabular-nums">{row.returned}</td>
-                  <td className="py-1 text-right tabular-nums">{row.cancelled}</td>
+          <div className="relative overflow-x-auto">
+            <table className="mt-2 w-full text-left">
+              <thead className="text-[12px] font-bold text-faint uppercase">
+                <tr>
+                  <th className="py-1">Jour</th>
+                  <th className="py-1 text-right">Livrées</th>
+                  <th className="py-1 text-right">Échecs</th>
+                  <th className="py-1 text-right">Retours</th>
+                  <th className="py-1 text-right">Annulées</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {[...m.daily].reverse().map((row) => (
+                  <tr key={row.day} className="border-t border-line">
+                    <td className="py-1">{day(row.day)}</td>
+                    <td className="py-1 text-right tabular-nums">{row.delivered}</td>
+                    <td className="py-1 text-right tabular-nums">{row.failed}</td>
+                    <td className="py-1 text-right tabular-nums">{row.returned}</td>
+                    <td className="py-1 text-right tabular-nums">{row.cancelled}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </details>
       </section>
 

@@ -88,8 +88,8 @@ export default async function MerchantsPage({ searchParams }: { searchParams: Pr
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-line bg-panel shadow-card">
-          <table className="w-full text-left text-[14px]">
+        <div className="relative overflow-x-auto rounded-3xl border border-line bg-panel shadow-card">
+          <table className="w-full min-w-[640px] text-left text-[14px]">
             <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
               <tr>
                 <th className="px-4 py-3">Boutique</th>
