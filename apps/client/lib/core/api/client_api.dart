@@ -76,6 +76,10 @@ class ClientApi {
       Neighborhood.fromJson(item! as Json),
   ];
 
+  /// Jeton de notifications de ce téléphone (null : plus de notifications).
+  Future<void> registerPushToken(String installationId, String? token) =>
+      _api.put('/me/devices/$installationId/push-token', body: {'pushToken': token});
+
   /// Point placé sur la carte (B1) : desservi ou non, et quartier déduit.
   Future<PointLocation> locate(double latitude, double longitude) async => PointLocation.fromJson(
     await _api.get('/zones/locate', query: {'latitude': latitude, 'longitude': longitude}) as Json,

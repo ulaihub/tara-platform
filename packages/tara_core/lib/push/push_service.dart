@@ -15,11 +15,24 @@ class PushService {
   final Future<void> Function(String? token) register;
 
   final _messages = StreamController<Json>.broadcast();
+  final _opened = StreamController<Json>.broadcast();
   StreamSubscription<String>? _refresh;
   StreamSubscription<RemoteMessage>? _foreground;
+  StreamSubscription<RemoteMessage>? _openedSub;
+  Json? _initialOpened;
 
   /// Messages reçus app ouverte (données : type, orderId, offerId…).
   Stream<Json> get messages => _messages.stream;
+
+  /// Notification touchée alors que l'app était en arrière-plan (données : orderId…).
+  Stream<Json> get opened => _opened.stream;
+
+  /// Notification touchée qui a lancé l'app, rendue une seule fois après [start].
+  Json? takeInitialOpened() {
+    final initial = _initialOpened;
+    _initialOpened = null;
+    return initial;
+  }
 
   bool get available => Firebase.apps.isNotEmpty;
 
@@ -47,13 +60,21 @@ class PushService {
     _foreground = FirebaseMessaging.onMessage.listen(
       (message) => _messages.add(Map<String, Object?>.from(message.data)),
     );
+    await _openedSub?.cancel();
+    _openedSub = FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) => _opened.add(Map<String, Object?>.from(message.data)),
+    );
+    final initial = await messaging.getInitialMessage();
+    if (initial != null) _initialOpened = Map<String, Object?>.from(initial.data);
   }
 
   /// Déconnexion : l'appareil ne reçoit plus les notifications de ce compte.
   Future<void> stop() async {
     await _refresh?.cancel();
     await _foreground?.cancel();
-    _refresh = _foreground = null;
+    await _openedSub?.cancel();
+    _refresh = null;
+    _foreground = _openedSub = null;
     if (available) {
       try {
         await register(null);
@@ -66,5 +87,6 @@ class PushService {
   Future<void> dispose() async {
     await stop();
     await _messages.close();
+    await _opened.close();
   }
 }

@@ -45,6 +45,7 @@ class HomeFlow extends ConsumerStatefulWidget {
 class _HomeFlowState extends ConsumerState<HomeFlow> {
   int _tab = 0;
   StreamSubscription<RealtimeEvent>? _events;
+  StreamSubscription<Json>? _pushOpened;
 
   /// Reversement arrivé sur le Mobile Money (montant), affiché quelques secondes.
   int? _payout;
@@ -59,11 +60,29 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     super.initState();
     final realtime = ref.read(realtimeProvider)..connect();
     _events = realtime.stream.listen(_onEvent);
+    // Notifications : jeton enregistré, et une notification touchée ouvre sa commande.
+    final push = ref.read(pushServiceProvider);
+    _pushOpened = push.opened.listen(_openFromPush);
+    unawaited(
+      push
+          .start()
+          .then((_) {
+            final initial = push.takeInitialOpened();
+            if (initial != null) _openFromPush(initial);
+          })
+          .catchError((Object _) {}),
+    );
+  }
+
+  void _openFromPush(Json data) {
+    final orderId = data['orderId'];
+    if (orderId is String && orderId.isNotEmpty && mounted) _openOrder(orderId);
   }
 
   @override
   void dispose() {
     unawaited(_events?.cancel());
+    unawaited(_pushOpened?.cancel());
     _payoutTimer?.cancel();
     _failedTimer?.cancel();
     super.dispose();

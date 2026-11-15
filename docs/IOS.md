@@ -5,9 +5,9 @@ Les apps Tara sont écrites en Flutter : le même code tourne sur Android et sur
 | App            | Identifiant     | Sur iPhone                                                                                                                      |
 | -------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Tara Livreur   | `cm.tara.rider` | position pendant les courses, y compris app en arrière-plan (indicateur bleu en haut de l'écran), photos, notifications, appels |
-| Tara (clients) | `cm.tara.app`   | position pour placer une adresse, photo de façade, note vocale                                                                  |
+| Tara (clients) | `cm.tara.app`   | position pour placer une adresse, photo de façade, note vocale, notifications                                                   |
 
-Déjà prêt dans le code : autorisations iPhone des deux apps, suivi de position en arrière-plan et notifications de l'app livreur, construction et envoi sur TestFlight (`codemagic.yaml` à la racine du dépôt). La première construction sur Codemagic peut demander quelques ajustements : en cas d'échec, copier les dernières lignes du journal de construction au support technique.
+Déjà prêt dans le code : autorisations iPhone des deux apps, suivi de position en arrière-plan de l’app livreur, notifications des deux apps, construction et envoi sur TestFlight (`codemagic.yaml` à la racine du dépôt). La première construction sur Codemagic peut demander quelques ajustements : en cas d'échec, copier les dernières lignes du journal de construction au support technique.
 
 Ne jamais envoyer de clé (`.p8`), de mot de passe ou de fichier de compte par messagerie : ils se saisissent seulement dans Apple, Codemagic ou Firebase.
 
@@ -19,7 +19,7 @@ Sur [developer.apple.com/programs](https://developer.apple.com/programs/), « En
 
 1. [developer.apple.com/account](https://developer.apple.com/account) › Certificates, Identifiers & Profiles › **Identifiers** › « + » › App IDs › App :
    - `cm.tara.rider`, description « Tara Livreur », cocher **Push Notifications** ;
-   - `cm.tara.app`, description « Tara ».
+   - `cm.tara.app`, description « Tara », cocher **Push Notifications**.
 2. [appstoreconnect.apple.com](https://appstoreconnect.apple.com) › Apps › « + » › **Nouvelle app**, pour chacune : plateforme iOS, nom (« Tara Livreur », « Tara »), langue Français, identifiant choisi dans la liste, référence (SKU) `tara-rider` ou `tara-app`.
 3. App Store Connect › Utilisateurs et accès › **Intégrations** › Clés d'API App Store Connect › « + » : nom « Codemagic », accès **App Manager**. Télécharger la clé (fichier `.p8`, téléchargeable une seule fois) et noter l'**Issuer ID** et le **Key ID**.
 
@@ -29,15 +29,15 @@ Sur [developer.apple.com/programs](https://developer.apple.com/programs/), « En
 2. Réglages du compte › Integrations › **Developer Portal** (App Store Connect) › ajouter la clé : nom **exactement** `Tara App Store Connect`, Issuer ID, Key ID, fichier `.p8`.
 3. Réglages de l'app › **Environment variables**, groupe `tara_ios` :
 
-| Variable               | Valeur                                                                            |
-| ---------------------- | --------------------------------------------------------------------------------- |
-| `TARA_API_URL`         | `https://api.tara.ulaihub.tech` (l'adresse de l'API du serveur)                   |
-| `FIREBASE_IOS_APP_ID`  | étape 4, facultatif au début (sans elle, l'app livreur marche sans notifications) |
-| `FIREBASE_IOS_API_KEY` | étape 4, facultatif au début, cocher « Secure »                                   |
+| Variable                                                    | Valeur                                                                                                          |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `TARA_API_URL`                                              | `https://api.tara.ulaihub.tech` (l'adresse de l'API du serveur)                                                 |
+| `FIREBASE_IOS_RIDER_APP_ID`, `FIREBASE_IOS_RIDER_API_KEY`   | étape 4, app livreur ; facultatif au début (sans elles, l'app marche sans notifications) ; la clé en « Secure » |
+| `FIREBASE_IOS_CLIENT_APP_ID`, `FIREBASE_IOS_CLIENT_API_KEY` | étape 4, app clients ; même principe                                                                            |
 
-## 4. Notifications de l'app livreur sur iPhone (facultatif au début)
+## 4. Notifications sur iPhone (facultatif au début)
 
-1. [Console Firebase](https://console.firebase.google.com) › projet **tara-ulaihub** › Ajouter une app › **iOS** › identifiant `cm.tara.rider`. Télécharger `GoogleService-Info.plist` et l'ouvrir : la valeur de `GOOGLE_APP_ID` va dans `FIREBASE_IOS_APP_ID`, celle de `API_KEY` dans `FIREBASE_IOS_API_KEY` (étape 3).
+1. [Console Firebase](https://console.firebase.google.com) › projet **tara-ulaihub** › Ajouter une app › **iOS**, une fois par app : identifiant `cm.tara.rider`, puis `cm.tara.app`. Pour chacune, télécharger `GoogleService-Info.plist` et l'ouvrir : la valeur de `GOOGLE_APP_ID` va dans `FIREBASE_IOS_RIDER_APP_ID` (ou `FIREBASE_IOS_CLIENT_APP_ID`), celle de `API_KEY` dans `FIREBASE_IOS_RIDER_API_KEY` (ou `FIREBASE_IOS_CLIENT_API_KEY`), à l'étape 3.
 2. Apple Developer › **Keys** › « + » › cocher **Apple Push Notifications service (APNs)**. Télécharger la clé `.p8`, noter son Key ID et l'identifiant d'équipe (Team ID, en haut à droite de la page).
 3. Firebase › Paramètres du projet › **Cloud Messaging** › app iOS › Clé d'authentification APNs › importer la clé `.p8` avec son Key ID et le Team ID.
 
@@ -54,5 +54,3 @@ Les testeurs iPhone se déclarent comme les autres sur le serveur (`tara testeur
 ## Plus tard : l'App Store
 
 Depuis la même version TestFlight : fiche de l'app (description, captures d'écran, adresse de la politique de confidentialité, contact), puis « Soumettre pour vérification ». Pour l'app livreur, Apple demande pourquoi la position est utilisée en arrière-plan : la réponse est dans le texte affiché par l'app (suivi de la course en cours, arrêté hors ligne).
-
-Reste à faire : les notifications de l'app clients (`cm.tara.app`) ne sont branchées ni sur Android ni sur iPhone ; il faudra l'enregistrer dans Firebase (Android et iOS) et ajouter sa configuration, comme pour l'app livreur.

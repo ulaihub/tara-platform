@@ -5,7 +5,8 @@
 # À préparer une fois dans Codemagic (docs/IOS.md, étapes 3 et 4) :
 #   - intégration App Store Connect nommée « Tara App Store Connect » (clé d'API Apple) ;
 #   - groupe de variables « tara_ios » : TARA_API_URL (https://api.tara.<domaine>) et, pour
-#     les notifications de l'app livreur, FIREBASE_IOS_APP_ID et FIREBASE_IOS_API_KEY.
+#     les notifications, FIREBASE_IOS_RIDER_APP_ID / FIREBASE_IOS_RIDER_API_KEY (livreur) et
+#     FIREBASE_IOS_CLIENT_APP_ID / FIREBASE_IOS_CLIENT_API_KEY (clients).
 
 workflows:
   ios-livreur:
@@ -38,8 +39,8 @@ workflows:
             --build-number="$BUILD_NUMBER" \
             --export-options-plist=/Users/builder/export_options.plist \
             --dart-define=TARA_API_URL="$TARA_API_URL" \
-            --dart-define=FIREBASE_IOS_APP_ID="$FIREBASE_IOS_APP_ID" \
-            --dart-define=FIREBASE_IOS_API_KEY="$FIREBASE_IOS_API_KEY"
+            --dart-define=FIREBASE_IOS_RIDER_APP_ID="$FIREBASE_IOS_RIDER_APP_ID" \
+            --dart-define=FIREBASE_IOS_RIDER_API_KEY="$FIREBASE_IOS_RIDER_API_KEY"
     artifacts:
       - apps/rider/build/ios/ipa/*.ipa
     publishing:
@@ -76,7 +77,9 @@ workflows:
           flutter build ipa --release \
             --build-number="$BUILD_NUMBER" \
             --export-options-plist=/Users/builder/export_options.plist \
-            --dart-define=TARA_API_URL="$TARA_API_URL"
+            --dart-define=TARA_API_URL="$TARA_API_URL" \
+            --dart-define=FIREBASE_IOS_CLIENT_APP_ID="$FIREBASE_IOS_CLIENT_APP_ID" \
+            --dart-define=FIREBASE_IOS_CLIENT_API_KEY="$FIREBASE_IOS_CLIENT_API_KEY"
     artifacts:
       - apps/client/build/ios/ipa/*.ipa
     publishing:

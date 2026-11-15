@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +9,7 @@ import 'package:tara_client/core/location.dart';
 import 'package:tara_client/features/home/home_flow.dart';
 import 'package:tara_client/features/tracking/tracking_screen.dart';
 import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/push/push_service.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
@@ -456,4 +459,47 @@ void main() {
     await settle(tester);
     expect(find.byType(TrackingScreen), findsNothing);
   });
+
+  testWidgets('une notification touchée ouvre le suivi de sa commande', (tester) async {
+    final api = shopApi()..tracked['00000000-0000-4000-8000-000000000001'] = tracked('IN_DELIVERY');
+    final push = _FakePush();
+    await pumpVariant(
+      tester,
+      Variant.matrix.first,
+      ProviderScope(
+        overrides: [
+          keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
+          clientApiProvider.overrideWithValue(api),
+          realtimeProvider.overrideWithValue(FakeRealtime()),
+          realMapProvider.overrideWithValue(false),
+          pushServiceProvider.overrideWithValue(push),
+        ],
+        child: HomeFlow(me: shopOwner, now: () => homeNow),
+      ),
+    );
+    await settle(tester);
+    expect(push.started, isTrue);
+    expect(find.byType(TrackingScreen), findsNothing);
+
+    push.tap({'type': 'order.status', 'orderId': '00000000-0000-4000-8000-000000000001'});
+    await settle(tester);
+    expect(find.byType(TrackingScreen), findsOneWidget);
+    expect(find.text('TR-48301'), findsOneWidget);
+  });
+}
+
+/// Notifications sans Firebase : on déclenche à la main le toucher d'une notification.
+class _FakePush extends PushService {
+  _FakePush() : super(register: (_) async {});
+
+  final _tapped = StreamController<Json>.broadcast();
+  bool started = false;
+
+  void tap(Json data) => _tapped.add(data);
+
+  @override
+  Stream<Json> get opened => _tapped.stream;
+
+  @override
+  Future<void> start() async => started = true;
 }
