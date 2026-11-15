@@ -9,6 +9,7 @@ import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
 import 'package:tara_core/api/legal_api.dart';
 import 'package:tara_core/api/support_api.dart';
+import 'package:tara_core/push/push_service.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_ui/app_settings.dart';
@@ -129,6 +130,16 @@ final realtimeProvider = Provider<RealtimeClient>((ref) {
   );
   ref.onDispose(() => unawaited(client.dispose()));
   return client;
+});
+
+/// Notifications du téléphone (Firebase), démarrées sur l'accueil une fois connecté. La
+/// déconnexion efface le jeton côté serveur.
+final pushServiceProvider = Provider<PushService>((ref) {
+  final api = ref.watch(clientApiProvider);
+  final store = ref.watch(sessionStoreProvider);
+  final push = PushService(register: (token) async => api.registerPushToken(await store.installationId(), token));
+  ref.onDispose(() => unawaited(push.dispose()));
+  return push;
 });
 
 enum AuthStatus { signedOut, signedIn }

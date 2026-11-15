@@ -22,8 +22,8 @@ abstract final class DefaultFirebaseOptions {
   /// iPhone : identifiant et clé de l'app iOS cm.tara.rider (fichier GoogleService-Info.plist,
   /// GOOGLE_APP_ID et API_KEY), donnés à la construction par Codemagic (`--dart-define`,
   /// voir docs/IOS.md). Les notifications demandent aussi la clé APNs déposée dans Firebase.
-  static const _iosAppId = String.fromEnvironment('FIREBASE_IOS_APP_ID');
-  static const _iosApiKey = String.fromEnvironment('FIREBASE_IOS_API_KEY');
+  static const _iosAppId = String.fromEnvironment('FIREBASE_IOS_RIDER_APP_ID');
+  static const _iosApiKey = String.fromEnvironment('FIREBASE_IOS_RIDER_API_KEY');
 
   static FirebaseOptions? get ios => _iosAppId.isEmpty || _iosApiKey.isEmpty
       ? null
