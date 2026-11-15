@@ -113,13 +113,13 @@ Détail dans [`docs/SECURITE.md`](../SECURITE.md). En résumé : connexion par c
 
 ## Droits des personnes
 
-| Droit                     | Comment                                                                                                                            |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Information               | politique de confidentialité affichée en entier dans les apps et sur la page de suivi, acceptée par case à cocher et code SMS      |
-| Accès et portabilité      | depuis l'app : téléchargement de toutes ses données (fichier lisible)                                                              |
-| Effacement                | depuis l'app : suppression du compte, confirmée par code SMS ; refusée tant qu'une commande est en cours ou qu'une somme reste due |
-| Rectification, opposition | auprès du contact ci-dessus **[À VALIDER : délai de réponse]**                                                                     |
-| Destinataires sans compte | contact indiqué sur la page de suivi **[À VALIDER]**                                                                               |
+| Droit                     | Comment                                                                                                                                                                                                                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Information               | politique de confidentialité affichée en entier dans les apps et sur la page de suivi, acceptée par case à cocher et code SMS                                                                                                                                         |
+| Accès et portabilité      | depuis l'app : téléchargement de toutes ses données (fichier lisible)                                                                                                                                                                                                 |
+| Effacement                | depuis l'app : suppression du compte, confirmée par code SMS (livreurs : fermeture demandée depuis l'app, faite par un administrateur) ; refusée tant qu'une commande est en cours, qu'une somme reste due, qu'un solde reste chez Tara ou qu'un retrait est en cours |
+| Rectification, opposition | auprès du contact ci-dessus **[À VALIDER : délai de réponse]**                                                                                                                                                                                                        |
+| Destinataires sans compte | contact indiqué sur la page de suivi **[À VALIDER]**                                                                                                                                                                                                                  |
 
 ## Violation de données
 
