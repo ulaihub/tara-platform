@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.1 · Projet à faire valider par un juriste avant publication. Les points marqués
+Version 2026-11.2 · Projet à faire valider par un juriste avant publication. Les points marqués
 **[À VALIDER]** demandent son avis.
 
 Ces conditions s'appliquent à toute personne qui envoie un colis avec l'application Tara, qu'elle
@@ -96,7 +96,9 @@ limite de la valeur déclarée et d'un plafond par colis ; procédure et délai 
 Vous choisissez, avant de commander :
 
 - **Mobile Money** (MTN ou Orange) : vous validez le paiement sur votre téléphone ;
-- **votre solde Tara** (rechargé par Mobile Money, ou vos ventes pour une boutique) ;
+- **votre solde Tara** (rechargé par Mobile Money, ou vos ventes pour une boutique). Vous
+  pouvez à tout moment retirer gratuitement tout votre solde sur votre numéro Mobile Money,
+  quel que soit le montant ;
 - **en espèces au livreur**, au moment de l'enlèvement ;
 - **« le destinataire paie »** : le destinataire paie la livraison à la porte, en espèces ou par
   Mobile Money.
@@ -114,10 +116,11 @@ Vous choisissez, avant de commander :
   livraison »). Cette somme est créditée sur votre portefeuille Tara dès l'encaissement, moins
   des frais de 2 % (250 FCFA au moins).
 - Votre portefeuille vous est reversé chaque jour (par défaut à 18 h) sur votre numéro Mobile
-  Money, à partir de 500 FCFA disponibles.
+  Money, à partir de 500 FCFA disponibles. Un solde plus petit peut vous être reversé en entier
+  à votre demande, même avec l'offre gratuite : rien ne reste bloqué chez Tara.
 - **Frais de retrait** : un reversement est gratuit à partir d'un montant fixé pour votre
-  boutique selon vos transactions avec Tara (affiché dans l'application). En dessous, les frais
-  Mobile Money de l'envoi (2,5 % aujourd'hui) sont retenus sur le montant reçu.
+  boutique selon vos transactions avec Tara (affiché dans l'application). En dessous, des frais
+  de retrait (1,25 % aujourd'hui) sont retenus sur le montant reçu.
 - Votre relevé mensuel est disponible dans l'application.
 
 **[À VALIDER : encaisser pour le compte de boutiques puis leur reverser peut relever de la
@@ -190,6 +193,10 @@ interdits, d'insultes ou de violences, ou d'impayés répétés.
 Tara traite les données nécessaires aux livraisons (numéro, adresses, destinataires, paiements).
 Le détail figure dans la politique de confidentialité, que vous acceptez en même temps que ces
 conditions. Vous pouvez télécharger vos données ou supprimer votre compte depuis l'application.
+
+La suppression est refusée tant qu'il vous reste de l'argent chez Tara (solde, ventes à recevoir)
+ou qu'un retrait est en cours : retirez d'abord tout votre solde vers votre Mobile Money, même
+s'il fait moins de 500 FCFA. Ainsi, aucune somme ne se perd à la fermeture d'un compte.
 
 ## 13. Réclamations et litiges
 

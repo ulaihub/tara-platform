@@ -388,6 +388,14 @@ export const ERROR_MESSAGES = {
     fr: 'Votre solde Tara est négatif ({debt} FCFA dus) : réglez-le avant de supprimer le compte.',
     en: 'Your Tara balance is negative ({debt} XAF due): settle it before deleting the account.',
   },
+  ACCOUNT_HAS_BALANCE: {
+    fr: 'Il vous reste {balance} FCFA chez Tara : retirez-les vers votre Mobile Money avant de supprimer le compte.',
+    en: 'You still have {balance} XAF with Tara: withdraw it to your Mobile Money before deleting the account.',
+  },
+  ACCOUNT_HAS_PAYOUT_IN_PROGRESS: {
+    fr: 'Un retrait vers votre Mobile Money est en cours : attendez qu’il arrive avant de supprimer le compte.',
+    en: 'A withdrawal to your Mobile Money is in progress: wait until it arrives before deleting the account.',
+  },
   WALLET_IN_DEBT: {
     fr: 'Votre solde Tara est négatif : réglez-le avant une nouvelle commande.',
     en: 'Your Tara balance is negative: settle it before placing a new order.',
@@ -417,8 +425,8 @@ export const ERROR_MESSAGES = {
     en: 'A payout is already in progress.',
   },
   PAYOUT_NOT_ALLOWED: {
-    fr: 'Le reversement à la demande est réservé aux offres Pro et Business.',
-    en: 'On-demand payouts are for Pro and Business plans.',
+    fr: 'Le reversement à la demande est réservé aux offres Pro et Business : vos ventes vous sont versées chaque jour à 18 h.',
+    en: 'On-demand payouts are for Pro and Business plans: your sales are paid out every day at 6 pm.',
   },
   PAYOUT_NOT_FOUND: { fr: 'Reversement introuvable.', en: 'Payout not found.' },
   PAYOUT_NOT_AWAITING_APPROVAL: {

@@ -315,7 +315,10 @@ export class WalletController {
     return toPayoutDto(payout);
   }
 
-  /** Reversement à la demande du portefeuille marchand, réservé aux offres Pro et Business (G3). */
+  /**
+   * Reversement à la demande du portefeuille marchand, réservé aux offres Pro et Business (G3) ;
+   * offre gratuite : seulement un petit solde, que le reversement de 18 h ne prendrait jamais.
+   */
   @Post('me/merchant/payouts')
   @MONEY_HEADER
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
@@ -326,7 +329,9 @@ export class WalletController {
   ): Out<typeof PayoutDto> {
     const merchant = await this.prisma.merchantProfile.findUnique({ where: { userId: user.id } });
     if (!merchant) throw AppError.notFound();
-    if (merchant.plan === 'FREE') throw AppError.forbidden('PAYOUT_NOT_ALLOWED');
+    if (merchant.plan === 'FREE' && !(await this.payouts.smallBalance('MERCHANT', merchant.id))) {
+      throw AppError.forbidden('PAYOUT_NOT_ALLOWED');
+    }
     const payout = await this.payouts.request({
       beneficiary: 'MERCHANT',
       ownerId: merchant.id,

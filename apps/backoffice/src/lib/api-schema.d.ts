@@ -2100,6 +2100,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/riders/{riderId}/close-account': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminPrivacy_closeRiderAccount'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/admin/live-map': {
     parameters: {
       query?: never;
@@ -2800,6 +2816,7 @@ export interface components {
         id: string;
         phone: string;
         fullName: string | null;
+        closed: boolean;
       };
       /** Format: date-time */
       createdAt: string;
@@ -3321,6 +3338,8 @@ export interface components {
           | 'RETRY_LIMIT_REACHED'
           | 'MERCHANT_DEBT_LIMIT'
           | 'ACCOUNT_HAS_DEBT'
+          | 'ACCOUNT_HAS_BALANCE'
+          | 'ACCOUNT_HAS_PAYOUT_IN_PROGRESS'
           | 'WALLET_IN_DEBT'
           | 'COLLECTION_REQUIRED'
           | 'RETURN_COLLECTION_REQUIRED'
@@ -3370,6 +3389,7 @@ export interface components {
       default: number;
       averageMonthlyPayouts: number;
       feeBps: number;
+      feeSharePercent: number;
     };
     KycDocument: {
       /** Format: uuid */
@@ -4338,6 +4358,7 @@ export interface components {
       withdrawal: {
         freeFrom: number;
         feeBps: number;
+        feeSharePercent: number;
       };
       openPayout: {
         /** Format: uuid */
@@ -4483,6 +4504,7 @@ export interface components {
         withdrawal: {
           freeFrom: number;
           feeBps: number;
+          feeSharePercent: number;
         };
       } | null;
       openPayout: {
@@ -8520,6 +8542,25 @@ export interface operations {
         };
       };
     };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminPrivacy_closeRiderAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        riderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
     responses: {
       204: {
         headers: {

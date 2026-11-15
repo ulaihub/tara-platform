@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,7 @@ import '../order/address_editor.dart';
 import '../order/pickup_step.dart' show pickupAddressesProvider;
 import '../support/support.dart';
 import '../wallet/wallet_screen.dart';
+import 'delete_account_screen.dart';
 
 /// Onglet Profil de l'expéditeur (non dessiné : style Tara) : identité et boutique, code de
 /// parrainage à partager (C6), affichage (thème, langue, animations), support, déconnexion.
@@ -52,6 +54,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   bool _confirmLogout = false;
   bool _loggingOut = false;
+  bool _exporting = false;
+  String? _exportError;
+
+  /// Copie de toutes ses données (droit d'accès), en fichier JSON partagé ou enregistré
+  /// depuis la feuille de partage du téléphone.
+  Future<void> _exportData() async {
+    final l = AppLocalizations.of(context);
+    setState(() {
+      _exporting = true;
+      _exportError = null;
+    });
+    try {
+      final data = await ref.read(clientApiProvider).exportData();
+      final bytes = utf8.encode(const JsonEncoder.withIndent('  ').convert(data));
+      final date = DateTime.now().toIso8601String().substring(0, 10);
+      await ref.read(shareFileProvider)(bytes, 'tara-donnees-$date.json', 'application/json', l.exportDataShare);
+    } catch (error) {
+      if (mounted) setState(() => _exportError = errorMessage(context, error));
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
 
   void _setLanguage(AppSettings settings, String? code) {
     settings.locale = code == null ? null : Locale(code);
@@ -175,6 +199,42 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 20),
+          SectionHeader(title: l.accountDataSection),
+          const SizedBox(height: 8),
+          GlassCard(
+            radius: 22,
+            shadow: false,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Column(
+              children: [
+                ListRow(
+                  leading: const IconTile(icon: TaraIcons.download),
+                  title: l.exportDataRow,
+                  subtitle: l.exportDataRowSubtitle,
+                  trailing: _exporting
+                      ? const SizedBox(width: 44, child: GooLoader(compact: true))
+                      : TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+                  onTap: _exporting ? null : () => unawaited(_exportData()),
+                ),
+                ListRow(
+                  leading: const IconTile(icon: TaraIcons.close),
+                  title: l.deleteAccountRow,
+                  subtitle: l.deleteAccountRowSubtitle,
+                  trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+                  onTap: () => unawaited(
+                    Navigator.of(context).push(
+                      scopedPage<void>(
+                        context,
+                        (route) => DeleteAccountScreen(me: me, onBack: () => Navigator.of(route).pop()),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_exportError case final error?) ...[const SizedBox(height: 8), ErrorLine(error)],
           const SizedBox(height: 24),
           _LogoutBlock(
             confirming: _confirmLogout,

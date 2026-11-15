@@ -31,11 +31,11 @@ type RiderWithDocuments = RiderProfile & { documents: KycDocument[] };
 
 const ADMIN_INCLUDE = {
   documents: true,
-  user: { select: { id: true, phone: true, fullName: true } },
+  user: { select: { id: true, phone: true, fullName: true, status: true } },
 } as const;
 
 type AdminRider = RiderWithDocuments & {
-  user: { id: string; phone: string; fullName: string | null };
+  user: { id: string; phone: string; fullName: string | null; status: string };
 };
 
 const DAY = 86_400_000;
@@ -340,7 +340,12 @@ export class RidersService {
     const latest = [...latestByType(rider.documents).values()];
     return {
       ...this.toProfileDto(rider),
-      user: { id: rider.user.id, phone: rider.user.phone, fullName: rider.user.fullName },
+      user: {
+        id: rider.user.id,
+        phone: rider.user.phone,
+        fullName: rider.user.fullName,
+        closed: rider.user.status === 'DELETED',
+      },
       createdAt: rider.createdAt.toISOString(),
       documentHistory: [...rider.documents]
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())

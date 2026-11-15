@@ -47,7 +47,7 @@ function rider(overrides: Partial<AdminRider> = {}): AdminRider {
     suspendedReason: null,
     documents: ALL_APPROVED,
     missingDocuments: [],
-    user: { id: 'u1', phone: '+237690000001', fullName: 'Ibrahim Nfor' },
+    user: { id: 'u1', phone: '+237690000001', fullName: 'Ibrahim Nfor', closed: false },
     createdAt: '2026-11-01T08:00:00Z',
     documentHistory: ALL_APPROVED,
     pendingDocuments: 0,

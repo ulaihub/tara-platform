@@ -1866,4 +1866,76 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportProblem => 'Signaler un problème';
+
+  @override
+  String get accountDataSection => 'Mon compte et mes données';
+
+  @override
+  String get exportDataRow => 'Télécharger mes données';
+
+  @override
+  String get exportDataRowSubtitle => 'Une copie de tout ce que Tara garde sur vous';
+
+  @override
+  String get exportDataShare => 'Mes données Tara';
+
+  @override
+  String get deleteAccountRow => 'Supprimer mon compte';
+
+  @override
+  String get deleteAccountRowSubtitle => 'Définitif, confirmé par un code SMS';
+
+  @override
+  String get deleteAccountTitle => 'Supprimer mon compte';
+
+  @override
+  String get deleteAccountBody =>
+      'Votre nom, votre numéro, vos adresses, photos et notes vocales sont effacés, et l’app se déconnecte. Vos livraisons passées restent, sans votre nom, pour la comptabilité.';
+
+  @override
+  String get deleteAccountFinal => 'C’est définitif : avec le même numéro, vous repartirez d’un compte vide.';
+
+  @override
+  String deleteAccountBalance(String amount) {
+    return 'Il vous reste $amount chez Tara : retirez-les d’abord vers votre Mobile Money.';
+  }
+
+  @override
+  String deleteAccountDebt(String amount) {
+    return 'Votre boutique doit $amount à Tara : ils doivent être réglés avant la suppression.';
+  }
+
+  @override
+  String get deleteAccountPayout => 'Un retrait vers votre Mobile Money est en cours : attendez qu’il arrive.';
+
+  @override
+  String get openWallet => 'Ouvrir mon portefeuille';
+
+  @override
+  String get deleteAccountSendCode => 'Recevoir le code par SMS';
+
+  @override
+  String deleteAccountCodeSent(String phone) {
+    return 'Code envoyé au $phone. Tapez-le pour confirmer la suppression.';
+  }
+
+  @override
+  String get deleteAccountCodeLabel => 'Code reçu par SMS';
+
+  @override
+  String get deleteAccountResend => 'Renvoyer le code';
+
+  @override
+  String get deleteAccountConfirm => 'Supprimer définitivement';
+
+  @override
+  String get topUpOther => 'Autre montant (F)';
+
+  @override
+  String get topUpOtherHint => 'Ex. 15000';
+
+  @override
+  String topUpRange(String min, String max) {
+    return 'Montant entre $min et $max.';
+  }
 }

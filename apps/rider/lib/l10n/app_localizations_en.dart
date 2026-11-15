@@ -1730,4 +1730,129 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportMenuRowSubtitle => 'Your requests and Tara’s replies';
+
+  @override
+  String get withdrawAction => 'Withdraw';
+
+  @override
+  String get withdrawTitle => 'Withdraw to Mobile Money';
+
+  @override
+  String withdrawAll(String amount) {
+    return 'All · $amount';
+  }
+
+  @override
+  String get withdrawOtherHint => 'E.g. 5000';
+
+  @override
+  String withdrawTo(String phone) {
+    return 'Sent to your number $phone, the only one allowed for a withdrawal.';
+  }
+
+  @override
+  String withdrawFeeFull(String fee) {
+    return 'Mobile Money fee: $fee.';
+  }
+
+  @override
+  String withdrawFreeFrom(String amount) {
+    return 'Free withdrawal from $amount.';
+  }
+
+  @override
+  String get withdrawFree => 'Free withdrawal: Tara pays the Mobile Money fee.';
+
+  @override
+  String get withdrawReceive => 'You receive';
+
+  @override
+  String withdrawConfirm(String amount) {
+    return 'Receive $amount';
+  }
+
+  @override
+  String withdrawRange(String min, String max) {
+    return 'Between $min and $max, or the whole balance.';
+  }
+
+  @override
+  String withdrawProcessing(String amount) {
+    return 'Withdrawal requested: $amount will reach your Mobile Money within a few minutes. A notification will let you know.';
+  }
+
+  @override
+  String withdrawApproval(String amount) {
+    return 'Large amount: the Tara team approves the $amount withdrawal before sending it. A notification will let you know.';
+  }
+
+  @override
+  String withdrawSent(String amount) {
+    return '$amount sent to your Mobile Money.';
+  }
+
+  @override
+  String get withdrawFailed => 'The withdrawal did not go through: the money stays in your balance. Try again later.';
+
+  @override
+  String withdrawOpen(String amount) {
+    return '$amount withdrawal in progress';
+  }
+
+  @override
+  String get accountDataSection => 'My account and data';
+
+  @override
+  String get exportDataRow => 'Download my data';
+
+  @override
+  String get exportDataRowSubtitle => 'A copy of everything Tara keeps about you';
+
+  @override
+  String get exportDataShare => 'My Tara data';
+
+  @override
+  String get closeAccountRow => 'Close my account';
+
+  @override
+  String get closeAccountRowSubtitle => 'Request to the Tara team';
+
+  @override
+  String get closeAccountTitle => 'Close my account';
+
+  @override
+  String get closeAccountBody =>
+      'The Tara team closes the account after checking: no job in progress, nothing owed to Tara and no money left in your balance.';
+
+  @override
+  String get closeAccountErased =>
+      'Your ID documents, guarantor and emergency contact are then erased. Your past jobs remain, without your name, for the accounts.';
+
+  @override
+  String closeAccountBalance(String amount) {
+    return 'You still have $amount: withdraw it to your Mobile Money first (Activity tab).';
+  }
+
+  @override
+  String closeAccountDebt(String amount) {
+    return 'You owe Tara $amount: top up your balance first (Activity tab).';
+  }
+
+  @override
+  String get closeAccountPayout => 'A withdrawal to your Mobile Money is in progress: wait for it to arrive.';
+
+  @override
+  String get closeAccountCourse => 'Finish your job before asking to close your account.';
+
+  @override
+  String get closeAccountSend => 'Ask to close my account';
+
+  @override
+  String get closeAccountSent => 'Request sent. The Tara team answers in “Write to customer service”.';
+
+  @override
+  String get closeAccountTicketSubject => 'Closing my rider account';
+
+  @override
+  String get closeAccountTicketMessage => 'I would like to close my Tara rider account and erase my data.';
 }

@@ -35,6 +35,7 @@ describe('Frais Mobile Money payés par le client', () => {
     ctx = await createTestApp({
       MOBILE_MONEY_FEE_BPS: '600',
       PAYOUT_FEE_BPS: '250',
+      PAYOUT_FEE_SHARE_PERCENT: '50',
       FREE_PAYOUT_FROM: '20000',
     });
     const admin = await staffUser(ctx, ['ADMIN']);
@@ -190,18 +191,19 @@ describe('Frais Mobile Money payés par le client', () => {
     await credit(10_000);
     const charged = await ledger.balance(PLATFORM_ACCOUNTS.mobileMoneyFeesCharged);
 
-    // 10 000 F, sous le seuil général de 20 000 F : 2,5 % retenus.
+    // 10 000 F, sous le seuil général de 20 000 F : frais Mobile Money (244 F) partagés
+    // moitié-moitié, la boutique paie 122 F, Tara le reste.
     const small = await withdraw();
     expect(small.body).toMatchObject({
       status: 'SUCCEEDED',
       amount: 10_000,
-      withdrawalFee: 244,
-      received: 9756,
+      withdrawalFee: 122,
+      received: 9878,
     });
     const sent = await ctx.prisma.payout.findUniqueOrThrow({ where: { id: small.body.id } });
-    expect(await providerAmount(sent.providerReference)).toBe(9756);
+    expect(await providerAmount(sent.providerReference)).toBe(9878);
     expect(await ledger.balance(merchantPayable(merchantId))).toBe(0);
-    expect(await ledger.balance(PLATFORM_ACCOUNTS.mobileMoneyFeesCharged)).toBe(charged + 244);
+    expect(await ledger.balance(PLATFORM_ACCOUNTS.mobileMoneyFeesCharged)).toBe(charged + 122);
 
     // L'équipe fixe le seuil de cette boutique d'après ses transactions : 5 000 F.
     const settings = await request(ctx.http)
@@ -214,6 +216,7 @@ describe('Frais Mobile Money payés par le client', () => {
       default: 20_000,
       averageMonthlyPayouts: Math.round(10_000 / 3),
       feeBps: 250,
+      feeSharePercent: 50,
     });
     await request(ctx.http)
       .put(`/v1/admin/finance/merchants/${merchantId}/free-payout`)
@@ -245,9 +248,10 @@ describe('Frais Mobile Money payés par le client', () => {
       .set('Idempotency-Key', key())
       .send({ amount: 4000, phone: rider.phone, operator: 'MTN' })
       .expect(201);
-    expect(out.body).toMatchObject({ amount: 4000, withdrawalFee: 98, received: 3902 });
+    // Frais de 98 F partagés : 49 F pour le livreur (arrondi en sa faveur), le reste pour Tara.
+    expect(out.body).toMatchObject({ amount: 4000, withdrawalFee: 49, received: 3951 });
     const wallet = await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(200);
-    expect(wallet.body.withdrawal).toEqual({ freeFrom: 20_000, feeBps: 250 });
+    expect(wallet.body.withdrawal).toEqual({ freeFrom: 20_000, feeBps: 250, feeSharePercent: 50 });
     expect(await ledger.balance(riderPayable(rider.riderId))).toBe(RIDER_START_BALANCE - 4000);
   });
 

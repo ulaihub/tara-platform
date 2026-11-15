@@ -1,6 +1,6 @@
 # Politique de confidentialité de Tara
 
-Version 2026-11.1 · Projet à faire valider par un juriste, au regard de la loi n° 2024/017 relative
+Version 2026-11.2 · Projet à faire valider par un juriste, au regard de la loi n° 2024/017 relative
 à la protection des données à caractère personnel au Cameroun. Les
 points marqués **[À VALIDER]** demandent son avis.
 
@@ -31,7 +31,8 @@ pendant la course (le livreur voit le numéro du destinataire tant que la course
   incident encore ouvert.
 - Demandes au support : **90 jours** après leur clôture.
 - Pièces d'identité d'un livreur dont la candidature est refusée : **90 jours** après le refus.
-  Un livreur qui arrête peut supprimer son compte : ses pièces sont alors effacées aussitôt.
+  Un livreur qui arrête peut demander la fermeture de son compte depuis l'application : ses
+  pièces sont alors effacées aussitôt.
 - Commandes et écritures comptables : gardées pour les obligations comptables et fiscales,
   rattachées à un compte anonyme après suppression du compte.
   **[À VALIDER : durée légale de conservation des pièces comptables.]**
@@ -43,7 +44,10 @@ Depuis l'application, vous pouvez :
 - **télécharger toutes vos données** (fichier lisible) ;
 - **supprimer votre compte**, après confirmation par un code SMS. Vos données personnelles sont
   effacées ou anonymisées et votre numéro redevient libre. La suppression n'est pas possible
-  tant qu'une commande est en cours ou qu'une somme reste due à Tara.
+  tant qu'une commande est en cours, qu'une somme reste due à Tara, qu'il vous reste de l'argent
+  chez Tara ou qu'un retrait est en cours : retirez d'abord votre solde, même petit, pour ne
+  rien perdre. Livreurs : la fermeture se demande depuis l'application et l'équipe Tara la fait,
+  avec les mêmes vérifications.
 
 Pour toute autre demande (rectification, opposition), contactez **[À VALIDER : contact]**.
 

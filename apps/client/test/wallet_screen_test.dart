@@ -131,6 +131,29 @@ void main() {
     expect(api.topUps, [(5000, '699112233', 'MTN')]);
   });
 
+  testWidgets('recharge : autre montant tapé, bornes vérifiées', (tester) async {
+    final api = walletApi()..paymentStatuses = ['PENDING'];
+    await pumpVariant(tester, Variant.matrix.first, wallet(api, me: person));
+    await settle(tester);
+    await tester.tap(find.text('Recharger'));
+    await settle(tester);
+    expect(find.text('Autre montant (F)'), findsOneWidget);
+
+    await tester.enterText(find.byType(EditableText).first, '300');
+    await settle(tester);
+    await tester.tap(find.text('Payer 300\u00a0F'));
+    await settle(tester);
+    expect(find.text('Montant entre 500\u00a0F et 500\u00a0000\u00a0F.'), findsOneWidget);
+    expect(api.topUps, isEmpty);
+
+    await tester.enterText(find.byType(EditableText).first, '7500');
+    await settle(tester);
+    await tester.tap(find.text('Payer 7\u00a0500\u00a0F'));
+    await tester.pump(const Duration(seconds: 1));
+    await settle(tester);
+    expect(api.topUps, [(7500, '699112233', 'MTN')]);
+  });
+
   testWidgets('boutique : retrait gratuit à partir du seuil, frais en dessous', (tester) async {
     final api = walletApi();
     api.wallet0 = const Wallet(
@@ -150,6 +173,49 @@ void main() {
       find.text('Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, 2,5\u00a0% de frais Mobile Money retenus.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('boutique : seule sa part des frais est annoncée', (tester) async {
+    final api = walletApi();
+    api.wallet0 = const Wallet(
+      customerBalance: 3500,
+      merchantBalance: 128500,
+      payoutSchedule: 'DAILY',
+      plan: 'PRO',
+      payoutPhone: '+237677123456',
+      withdrawalFreeFrom: 50000,
+      withdrawalFeeBps: 250,
+      withdrawalFeeSharePercent: 50,
+    );
+    await pumpVariant(tester, Variant.matrix.first, wallet(api));
+    await settle(tester);
+    expect(
+      find.text(
+        'Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('offre gratuite : un petit solde de boutique se reverse en entier', (tester) async {
+    final api = walletApi(plan: 'FREE', shopBalance: 300);
+    await pumpVariant(tester, Variant.matrix.first, wallet(api));
+    await settle(tester);
+    await tester.tap(find.text('Recevoir 300\u00a0F maintenant'));
+    await settle(tester);
+    expect(api.payoutsNow, 1);
+  });
+
+  testWidgets('petit solde Tara : retiré en entier, même sous 500 F', (tester) async {
+    final api = walletApi();
+    api.wallet0 = const Wallet(customerBalance: 300, merchantBalance: null, payoutSchedule: null);
+    await pumpVariant(tester, Variant.matrix.first, wallet(api, me: person));
+    await settle(tester);
+    await tester.tap(find.text('Retirer'));
+    await settle(tester);
+    await tester.tap(find.text('Retirer 300\u00a0F'));
+    await settle(tester);
+    expect(api.withdrawals, [('+237699112233', 'MTN')]);
   });
 
   testWidgets('reversement immédiat avec l’offre Pro', (tester) async {

@@ -1860,4 +1860,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportProblem => 'Report a problem';
+
+  @override
+  String get accountDataSection => 'My account and data';
+
+  @override
+  String get exportDataRow => 'Download my data';
+
+  @override
+  String get exportDataRowSubtitle => 'A copy of everything Tara keeps about you';
+
+  @override
+  String get exportDataShare => 'My Tara data';
+
+  @override
+  String get deleteAccountRow => 'Delete my account';
+
+  @override
+  String get deleteAccountRowSubtitle => 'Permanent, confirmed by an SMS code';
+
+  @override
+  String get deleteAccountTitle => 'Delete my account';
+
+  @override
+  String get deleteAccountBody =>
+      'Your name, number, addresses, photos and voice notes are erased, and the app signs out. Your past deliveries remain, without your name, for the accounts.';
+
+  @override
+  String get deleteAccountFinal =>
+      'This is permanent: with the same number, you will start again from an empty account.';
+
+  @override
+  String deleteAccountBalance(String amount) {
+    return 'You still have $amount with Tara: withdraw it to your Mobile Money first.';
+  }
+
+  @override
+  String deleteAccountDebt(String amount) {
+    return 'Your shop owes Tara $amount: it must be settled before deleting the account.';
+  }
+
+  @override
+  String get deleteAccountPayout => 'A withdrawal to your Mobile Money is in progress: wait for it to arrive.';
+
+  @override
+  String get openWallet => 'Open my wallet';
+
+  @override
+  String get deleteAccountSendCode => 'Get the code by SMS';
+
+  @override
+  String deleteAccountCodeSent(String phone) {
+    return 'Code sent to $phone. Type it to confirm the deletion.';
+  }
+
+  @override
+  String get deleteAccountCodeLabel => 'Code received by SMS';
+
+  @override
+  String get deleteAccountResend => 'Send the code again';
+
+  @override
+  String get deleteAccountConfirm => 'Delete permanently';
+
+  @override
+  String get topUpOther => 'Other amount (F)';
+
+  @override
+  String get topUpOtherHint => 'E.g. 15000';
+
+  @override
+  String topUpRange(String min, String max) {
+    return 'Amount between $min and $max.';
+  }
 }

@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.1 · Projet à faire valider par un juriste avant publication. Les points marqués
+Version 2026-11.2 · Projet à faire valider par un juriste avant publication. Les points marqués
 **[À VALIDER]** demandent son avis.
 
 Ces conditions s'appliquent à toute personne qui livre avec l'application Tara Livreur. Elles
@@ -66,10 +66,12 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
   frais de retour), **vous gardez les espèces** et le même montant est pris sur votre solde.
   L'argent à encaisser pour une course est mis de côté sur votre solde dès que vous
   l'acceptez : votre solde ne peut jamais devenir négatif, et vous ne devez jamais rien à Tara.
-- Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money. Le
-  retrait est gratuit à partir d'un montant fixé pour vous selon votre activité (affiché dans
-  l'application) ; en dessous, les frais Mobile Money de l'envoi (2,5 % aujourd'hui) sont
-  retenus sur le montant reçu.
+- Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money
+  (bouton « Retirer », écran Activité), à partir de 500 FCFA, ou tout le disponible quel que
+  soit le montant. Le retrait est gratuit à partir d'un montant fixé pour vous selon votre
+  activité (affiché dans l'application) ; en dessous, des frais de retrait (1,25 %
+  aujourd'hui) sont retenus sur le montant reçu. Les frais et le montant reçu sont affichés
+  avant que vous confirmiez.
 
 ## 5. Encaisser correctement
 
@@ -109,7 +111,13 @@ dans l'attribution des courses : les livreurs les mieux notés en reçoivent dav
 
 Tara traite vos pièces, vos positions pendant les courses et vos paiements pour faire
 fonctionner le service, payer vos gains et assurer la sécurité. Le détail figure dans la
-politique de confidentialité.
+politique de confidentialité. Vous pouvez télécharger vos données depuis l'application.
+
+Pour arrêter, demandez la fermeture de votre compte depuis l'application (Profil). L'équipe Tara
+la fait après avoir vérifié qu'aucune course n'est en cours, que vous ne devez rien à Tara et
+que votre solde a été retiré : aucune somme ne se perd. Vos pièces d'identité, votre garant et
+votre contact d'urgence sont alors effacés ; vos courses passées restent, sans votre nom, pour
+la comptabilité.
 
 ## 11. Acceptation et modification
 

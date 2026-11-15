@@ -15,5 +15,9 @@ void main() {
     expect(withdrawalFee(4000, 250, 20000), 98);
     expect(withdrawalFee(20000, 250, 20000), 0);
     expect(withdrawalFee(10000, 0, 20000), 0);
+    // Frais partagés : le bénéficiaire en paie la moitié (arrondi inférieur), Tara le reste.
+    expect(withdrawalFee(10000, 250, 20000, sharePercent: 50), 122);
+    expect(withdrawalFee(4000, 250, 20000, sharePercent: 50), 49);
+    expect(withdrawalFee(10000, 250, 20000, sharePercent: 0), 0);
   });
 }

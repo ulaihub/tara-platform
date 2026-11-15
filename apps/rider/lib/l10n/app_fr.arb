@@ -233,15 +233,27 @@
   "bonusIncluded": "dont {details}",
   "@bonusIncluded": {
     "description": "Sous le gain d’une proposition : primes payées par Tara, comprises dans le gain.",
-    "placeholders": { "details": { "type": "String" } }
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
   },
   "approachBonus": "prime d’approche {amount}",
   "@approachBonus": {
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "boostBonus": "prime de renfort {amount}",
   "@boostBonus": {
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "pickupLabel": "ENLÈVEMENT · {distance}",
   "dropoffLabel": "LIVRAISON · {distance} · ~{minutes} min",
@@ -1077,5 +1089,125 @@
   "supportNewAnswer": "Réponse",
   "supportWaitingNote": "L’équipe Tara vous répond ici ; vous serez prévenu.",
   "supportMenuRow": "Écrire au service client",
-  "supportMenuRowSubtitle": "Vos demandes et les réponses de Tara"
+  "supportMenuRowSubtitle": "Vos demandes et les réponses de Tara",
+  "withdrawAction": "Retirer",
+  "withdrawTitle": "Retirer vers Mobile Money",
+  "withdrawAll": "Tout · {amount}",
+  "@withdrawAll": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawOtherHint": "Ex. 5000",
+  "withdrawTo": "Envoyé sur votre numéro {phone}, le seul permis pour un retrait.",
+  "@withdrawTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawFeeFull": "Frais Mobile Money : {fee}.",
+  "@withdrawFeeFull": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawFreeFrom": "Retrait gratuit dès {amount}.",
+  "@withdrawFreeFrom": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawFree": "Retrait gratuit : Tara paie les frais Mobile Money.",
+  "withdrawReceive": "Vous recevez",
+  "withdrawConfirm": "Recevoir {amount}",
+  "@withdrawConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawRange": "Entre {min} et {max}, ou tout le solde.",
+  "@withdrawRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawProcessing": "Retrait demandé : {amount} arrivent sur votre Mobile Money dans quelques minutes. Une notification vous préviendra.",
+  "@withdrawProcessing": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawApproval": "Gros montant : l’équipe Tara valide le retrait de {amount} avant l’envoi. Une notification vous préviendra.",
+  "@withdrawApproval": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawSent": "{amount} envoyés sur votre Mobile Money.",
+  "@withdrawSent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withdrawFailed": "Le retrait n’a pas abouti : l’argent reste sur votre solde. Réessayez plus tard.",
+  "withdrawOpen": "Retrait de {amount} en cours",
+  "@withdrawOpen": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDataSection": "Mon compte et mes données",
+  "exportDataRow": "Télécharger mes données",
+  "exportDataRowSubtitle": "Une copie de tout ce que Tara garde sur vous",
+  "exportDataShare": "Mes données Tara",
+  "closeAccountRow": "Fermer mon compte",
+  "closeAccountRowSubtitle": "Demande à l’équipe Tara",
+  "closeAccountTitle": "Fermer mon compte",
+  "closeAccountBody": "L’équipe Tara ferme le compte après vérification : aucune course en cours, rien à reverser à Tara et plus d’argent sur votre solde.",
+  "closeAccountErased": "Vos pièces d’identité, votre garant et votre contact d’urgence sont alors effacés. Vos courses passées restent, sans votre nom, pour la comptabilité.",
+  "closeAccountBalance": "Il vous reste {amount} : retirez-les d’abord vers votre Mobile Money (onglet Activité).",
+  "@closeAccountBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "closeAccountDebt": "Vous devez {amount} à Tara : rechargez d’abord votre solde (onglet Activité).",
+  "@closeAccountDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "closeAccountPayout": "Un retrait vers votre Mobile Money est en cours : attendez qu’il arrive.",
+  "closeAccountCourse": "Terminez votre course avant de demander la fermeture.",
+  "closeAccountSend": "Demander la fermeture",
+  "closeAccountSent": "Demande envoyée. L’équipe Tara vous répond dans « Écrire au service client ».",
+  "closeAccountTicketSubject": "Fermeture de mon compte livreur",
+  "closeAccountTicketMessage": "Je souhaite fermer mon compte livreur Tara et effacer mes données."
 }

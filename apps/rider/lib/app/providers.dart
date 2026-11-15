@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
 import 'package:tara_core/api/legal_api.dart';
@@ -287,6 +288,20 @@ final networkStatusProvider = Provider<NetworkStatus>((ref) {
 
 /// Ouverture d'un lien `tel:` ou `sms:` (application Téléphone ou Messages du téléphone).
 final launcherProvider = Provider<Future<bool> Function(Uri uri)>((ref) => launchUrl);
+
+/// Partage d'un fichier (copie de ses données) par la feuille de partage du téléphone :
+/// enregistrement, e-mail, WhatsApp… (remplacé dans les tests).
+final shareFileProvider = Provider<Future<void> Function(Uint8List bytes, String name, String mimeType, String text)>(
+  (ref) => (bytes, name, mimeType, text) async {
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        files: [XFile.fromData(bytes, name: name, mimeType: mimeType)],
+        fileNameOverrides: [name],
+      ),
+    );
+  },
+);
 
 /// Appels passés depuis l'app pendant la course : preuve d'appel en cas d'échec (E6).
 final callJournalProvider = Provider<CallJournal>((ref) {

@@ -3,7 +3,13 @@
 import { useActionState, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { cx } from '@/components/ui';
-import { type ActionState, decideRider, reviewDocument, setFreePayout } from '../actions';
+import {
+  type ActionState,
+  closeRiderAccount,
+  decideRider,
+  reviewDocument,
+  setFreePayout,
+} from '../actions';
 
 const IDLE: ActionState = { error: null, done: false };
 
@@ -269,6 +275,58 @@ export function FreePayoutForm({
       </label>
       <p className="mt-1 text-[12px] text-faint">Laissez vide pour revenir au seuil général.</p>
       <Feedback state={state} done="Seuil enregistré." />
+    </form>
+  );
+}
+
+/** Fermeture du compte, en deux temps : le bouton ouvre la confirmation. */
+export function CloseAccountButton({ riderId }: { riderId: string }) {
+  const [open, setOpen] = useState(false);
+  const [state, action, pending] = useActionState(closeRiderAccount, IDLE);
+  if (state.done) {
+    return (
+      <p role="status" className="text-[14px] font-bold text-ok">
+        Compte fermé. Le numéro du livreur redevient libre.
+      </p>
+    );
+  }
+  if (!open) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-danger/40 px-3 text-[14px] font-extrabold text-danger hover:bg-danger-bg"
+        >
+          Fermer le compte
+        </button>
+        <Feedback state={state} />
+      </>
+    );
+  }
+  return (
+    <form action={action} className="rounded-2xl border border-danger/30 bg-danger-bg p-3">
+      <input type="hidden" name="riderId" value={riderId} />
+      <p className="text-[13px] font-bold">
+        Fermeture définitive : il ne pourra plus se connecter avec ce compte. Confirmer ?
+      </p>
+      <div className="mt-2 flex gap-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="min-h-10 rounded-xl bg-danger px-4 text-[13px] font-extrabold text-white disabled:opacity-60"
+        >
+          {pending ? 'Envoi…' : 'Fermer définitivement'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="min-h-10 rounded-xl px-3 text-[13px] font-bold text-muted hover:text-text"
+        >
+          Retour
+        </button>
+      </div>
+      <Feedback state={state} />
     </form>
   );
 }

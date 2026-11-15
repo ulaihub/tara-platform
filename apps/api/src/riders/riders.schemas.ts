@@ -124,7 +124,13 @@ export const RiderProfileDto = z
   .meta({ id: 'RiderProfile' });
 
 export const AdminRiderDto = RiderProfileDto.extend({
-  user: z.object({ id: z.uuid(), phone: z.string(), fullName: z.string().nullable() }),
+  user: z.object({
+    id: z.uuid(),
+    phone: z.string(),
+    fullName: z.string().nullable(),
+    /** Compte fermé à la demande du livreur (données personnelles effacées). */
+    closed: z.boolean(),
+  }),
   createdAt: z.iso.datetime(),
   /** Historique complet des pièces, de la plus récente à la plus ancienne. */
   documentHistory: z.array(KycDocumentDto),

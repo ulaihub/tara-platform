@@ -6,6 +6,7 @@ import 'package:tara_rider/app/providers.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/features/activity/activity_screen.dart';
 import 'package:tara_rider/features/activity/deposit_screen.dart';
+import 'package:tara_rider/features/activity/withdraw_screen.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/fonts.dart';
@@ -64,7 +65,16 @@ FakeRiderApi activityApi({bool legacyCash = false}) {
             cashLimit: 50000,
             cashDueBy: DateTime(2026, 11, 5, 9, 40),
           )
-        : const RiderWallet(earnings: 42000, reserved: 12500, available: 29500, cashHeld: 0, cashLimit: 50000)
+        : const RiderWallet(
+            earnings: 42000,
+            reserved: 12500,
+            available: 29500,
+            cashHeld: 0,
+            cashLimit: 50000,
+            withdrawalFreeFrom: 50000,
+            withdrawalFeeBps: 250,
+            withdrawalFeeSharePercent: 50,
+          )
     ..earningsByPeriod['day'] = earningsOf('day', 'two_hours', [
       for (final (hour, value, count) in [
         (6, 0, 0),
@@ -169,6 +179,20 @@ void main() {
       expect(find.byType(DepositScreen), findsOneWidget);
       expect(find.text('Recharger mon solde'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/13_recharger/${variant.name}.png'));
+    });
+
+    goldenTest('13 retirer ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, activity(activityApi()));
+      await settle(tester);
+      await tester.ensureVisible(find.text('Retirer'));
+      await settle(tester);
+      await tester.tap(find.text('Retirer'));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(WithdrawScreen), findsOneWidget);
+      // 29 500 F sous le seuil gratuit : 720 F de frais Mobile Money, 360 F à la charge du livreur.
+      expect(find.text('Recevoir 29\u00a0140\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/13_retirer/${variant.name}.png'));
     });
 
     goldenTest('13 reverser ${variant.name}', (tester) async {
