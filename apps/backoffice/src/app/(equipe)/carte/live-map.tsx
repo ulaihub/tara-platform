@@ -208,8 +208,11 @@ export function LiveMap({
   }, [focusOrder, choose]);
 
   return (
-    <div className="-mx-10 -my-8 flex h-screen">
-      <section className="relative min-w-0 flex-1" aria-label="Carte de Douala">
+    <div className="-mx-4 -my-5 flex flex-col sm:-mx-6 lg:-mx-10 lg:-my-8 lg:h-screen lg:flex-row">
+      <section
+        className="relative h-[58vh] min-h-[320px] lg:h-auto lg:min-w-0 lg:flex-1"
+        aria-label="Carte de Douala"
+      >
         <MapView
           data={data}
           selection={selection}
@@ -217,7 +220,8 @@ export function LiveMap({
           focus={focus}
           onSelect={setSelection}
         />
-        <div className="pointer-events-none absolute inset-x-4 top-4 flex flex-wrap items-start gap-2">
+        {/* Téléphone : une seule ligne qui défile ; grand écran : sur plusieurs lignes. */}
+        <div className="absolute inset-x-0 top-0 flex items-start gap-2 overflow-x-auto px-3 pt-3 lg:pointer-events-none lg:inset-x-4 lg:top-4 lg:flex-wrap lg:overflow-visible lg:p-0">
           <Counter tone="free" label="Libres" value={counts.free} />
           <Counter tone="course" label="En course" value={counts.onCourse} />
           <Counter tone="offline" label="Hors ligne" value={counts.offline} />
@@ -227,11 +231,11 @@ export function LiveMap({
             label="En retard"
             value={counts.late}
           />
-          <span className="ml-auto" />
+          <span className="ml-auto hidden lg:block" />
           <p
             role="status"
             className={cx(
-              'pointer-events-auto rounded-2xl border px-3 py-2 text-[13px] font-bold shadow-card backdrop-blur',
+              'pointer-events-auto shrink-0 rounded-2xl border px-3 py-2 text-[13px] font-bold whitespace-nowrap shadow-card backdrop-blur',
               failing
                 ? 'border-danger/30 bg-danger-bg text-danger'
                 : 'border-line bg-panel/90 text-muted',
@@ -242,10 +246,11 @@ export function LiveMap({
               : `À jour · ${ago(new Date(receivedAt).toISOString(), now)}`}
           </p>
         </div>
-        <Legend />
+        <Legend className="absolute bottom-4 left-4 hidden space-y-1 rounded-2xl border border-line bg-panel/90 px-3 py-2.5 shadow-card backdrop-blur lg:block" />
       </section>
 
-      <aside className="flex w-[400px] shrink-0 flex-col border-l border-line bg-panel-soft">
+      <aside className="flex w-full flex-col border-t border-line bg-panel-soft lg:w-[400px] lg:shrink-0 lg:border-t-0 lg:border-l">
+        <Legend className="flex flex-wrap gap-x-4 gap-y-1 border-b border-line px-4 py-2.5 lg:hidden" />
         <div
           role="tablist"
           aria-label="Contenu du panneau"
@@ -321,7 +326,7 @@ function Counter({
   return (
     <p
       className={cx(
-        'pointer-events-auto flex items-center gap-2 rounded-2xl border border-line bg-panel/90 px-3 py-2 shadow-card backdrop-blur',
+        'pointer-events-auto flex shrink-0 items-center gap-2 rounded-2xl border border-line bg-panel/90 px-3 py-2 whitespace-nowrap shadow-card backdrop-blur',
         tone === 'late' && 'border-danger/30 text-danger',
       )}
     >
@@ -332,7 +337,7 @@ function Counter({
   );
 }
 
-function Legend() {
+function Legend({ className }: { className: string }) {
   const items: [string, string][] = [
     ['bg-[#12805a]', 'Livreur libre'],
     ['bg-[#ff6a00]', 'Livreur en course'],
@@ -342,7 +347,7 @@ function Legend() {
     ['bg-[#d93025]', 'En retard'],
   ];
   return (
-    <ul className="absolute bottom-4 left-4 space-y-1 rounded-2xl border border-line bg-panel/90 px-3 py-2.5 text-[12px] font-bold text-muted shadow-card backdrop-blur">
+    <ul aria-label="Légende" className={cx('text-[12px] font-bold text-muted', className)}>
       {items.map(([dot, label]) => (
         <li key={label} className="flex items-center gap-2">
           <span aria-hidden="true" className={cx('size-2.5 rounded-full', dot)} />

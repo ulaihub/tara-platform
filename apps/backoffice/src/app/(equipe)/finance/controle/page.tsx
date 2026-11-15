@@ -120,38 +120,40 @@ function Day({ report }: { report: Reconciliation }) {
       {issues.length > 0 ? (
         <section className="overflow-hidden rounded-3xl border border-line bg-panel shadow-card">
           <h3 className="px-5 pt-5 font-display text-[17px] font-bold">Écarts</h3>
-          <table className="mt-3 w-full text-left text-[14px]">
-            <thead className="border-y border-line text-[12px] font-bold text-faint uppercase">
-              <tr>
-                <th className="px-5 py-2">Écart</th>
-                <th className="px-5 py-2">Référence</th>
-                <th className="px-5 py-2 text-right">Attendu</th>
-                <th className="px-5 py-2 text-right">Constaté</th>
-              </tr>
-            </thead>
-            <tbody>
-              {issues.map((issue, index) => (
-                <tr
-                  key={`${issue.reference}-${index}`}
-                  className="border-b border-line align-top last:border-0"
-                >
-                  <td className="px-5 py-3">
-                    <span className="font-bold">{discrepancyLabel(issue.type)}</span>
-                    <span className="block text-[13px] text-muted">{issue.detail}</span>
-                  </td>
-                  <td className="px-5 py-3 font-mono text-[12px] break-all text-muted">
-                    {issue.reference}
-                  </td>
-                  <td className="px-5 py-3 text-right whitespace-nowrap tabular-nums">
-                    {issue.expected === undefined ? '—' : money(issue.expected)}
-                  </td>
-                  <td className="px-5 py-3 text-right font-bold whitespace-nowrap tabular-nums">
-                    {issue.actual === undefined ? '—' : money(issue.actual)}
-                  </td>
+          <div className="relative overflow-x-auto">
+            <table className="min-w-[560px] mt-3 w-full text-left text-[14px]">
+              <thead className="border-y border-line text-[12px] font-bold text-faint uppercase">
+                <tr>
+                  <th className="px-5 py-2">Écart</th>
+                  <th className="px-5 py-2">Référence</th>
+                  <th className="px-5 py-2 text-right">Attendu</th>
+                  <th className="px-5 py-2 text-right">Constaté</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {issues.map((issue, index) => (
+                  <tr
+                    key={`${issue.reference}-${index}`}
+                    className="border-b border-line align-top last:border-0"
+                  >
+                    <td className="px-5 py-3">
+                      <span className="font-bold">{discrepancyLabel(issue.type)}</span>
+                      <span className="block text-[13px] text-muted">{issue.detail}</span>
+                    </td>
+                    <td className="px-5 py-3 font-mono text-[12px] break-all text-muted">
+                      {issue.reference}
+                    </td>
+                    <td className="px-5 py-3 text-right whitespace-nowrap tabular-nums">
+                      {issue.expected === undefined ? '—' : money(issue.expected)}
+                    </td>
+                    <td className="px-5 py-3 text-right font-bold whitespace-nowrap tabular-nums">
+                      {issue.actual === undefined ? '—' : money(issue.actual)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       ) : null}
 

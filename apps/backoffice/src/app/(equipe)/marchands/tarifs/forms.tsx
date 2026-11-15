@@ -129,55 +129,57 @@ export function GridEditor({
         ))}
       </div>
 
-      <table className="mt-4 w-full text-left text-[13px]">
-        <thead className="text-[11px] font-bold text-faint uppercase">
-          <tr>
-            <th className="py-2">Trajet</th>
-            <th className="py-2 text-right">Aujourd’hui</th>
-            <th className="py-2 text-right">Nouvelle grille</th>
-            <th className="py-2 text-right">Livreur</th>
-            <th className="py-2 text-right">Tara</th>
-          </tr>
-        </thead>
-        <tbody>
-          {EXAMPLE_TRIPS.map((trip, index) => {
-            const before = current[index];
-            const after = rows[index];
-            const diff = before && after ? after.price - before.price : 0;
-            return (
-              <tr key={trip.label} className="border-t border-line">
-                <td className="py-2">
-                  <span className="font-semibold">{trip.label}</span>
-                  <span className="block text-[12px] text-faint">{km(trip.meters)}</span>
-                </td>
-                <td className="py-2 text-right text-muted tabular-nums">
-                  {before ? money(before.price) : '—'}
-                </td>
-                <td
-                  className={cx(
-                    'py-2 text-right font-bold tabular-nums',
-                    computing && 'opacity-50',
-                  )}
-                >
-                  {after ? money(after.price) : '—'}
-                  {diff !== 0 ? (
-                    <span className={cx('block text-[12px]', diff > 0 ? 'text-warn' : 'text-ok')}>
-                      {diff > 0 ? '+' : '−'}
-                      {money(Math.abs(diff))}
-                    </span>
-                  ) : null}
-                </td>
-                <td className="py-2 text-right tabular-nums">
-                  {after ? money(after.riderEarning) : '—'}
-                </td>
-                <td className="py-2 text-right tabular-nums">
-                  {after ? money(after.platformShare) : '—'}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="relative overflow-x-auto">
+        <table className="mt-4 w-full text-left text-[13px]">
+          <thead className="text-[11px] font-bold text-faint uppercase">
+            <tr>
+              <th className="py-2">Trajet</th>
+              <th className="py-2 text-right">Aujourd’hui</th>
+              <th className="py-2 text-right">Nouvelle grille</th>
+              <th className="py-2 text-right">Livreur</th>
+              <th className="py-2 text-right">Tara</th>
+            </tr>
+          </thead>
+          <tbody>
+            {EXAMPLE_TRIPS.map((trip, index) => {
+              const before = current[index];
+              const after = rows[index];
+              const diff = before && after ? after.price - before.price : 0;
+              return (
+                <tr key={trip.label} className="border-t border-line">
+                  <td className="py-2">
+                    <span className="font-semibold">{trip.label}</span>
+                    <span className="block text-[12px] text-faint">{km(trip.meters)}</span>
+                  </td>
+                  <td className="py-2 text-right text-muted tabular-nums">
+                    {before ? money(before.price) : '—'}
+                  </td>
+                  <td
+                    className={cx(
+                      'py-2 text-right font-bold tabular-nums',
+                      computing && 'opacity-50',
+                    )}
+                  >
+                    {after ? money(after.price) : '—'}
+                    {diff !== 0 ? (
+                      <span className={cx('block text-[12px]', diff > 0 ? 'text-warn' : 'text-ok')}>
+                        {diff > 0 ? '+' : '−'}
+                        {money(Math.abs(diff))}
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="py-2 text-right tabular-nums">
+                    {after ? money(after.riderEarning) : '—'}
+                  </td>
+                  <td className="py-2 text-right tabular-nums">
+                    {after ? money(after.platformShare) : '—'}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
       {problem ? (
         <p role="alert" className="mt-3 text-[13px] font-bold text-warn">

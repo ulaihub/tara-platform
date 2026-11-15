@@ -96,34 +96,36 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
           {shop.recentOrders.length === 0 ? (
             <p className="px-5 py-5 text-muted">Aucune commande.</p>
           ) : (
-            <table className="mt-3 w-full text-left text-[14px]">
-              <tbody>
-                {shop.recentOrders.map((order) => (
-                  <tr key={order.id} className="border-t border-line">
-                    <td className="px-5 py-2.5">
-                      <Link
-                        href={`/commandes/${order.id}`}
-                        className="font-mono font-bold text-accent hover:underline"
-                      >
-                        {order.reference}
-                      </Link>
-                      <span className="block text-[12px] text-muted">
-                        {dateTime(order.createdAt)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-2.5 text-muted">{statusLabel(order.status, null)}</td>
-                    <td className="px-5 py-2.5 text-right font-bold tabular-nums">
-                      {money(order.totalPrice)}
-                      {order.proDiscountBps > 0 ? (
-                        <span className="block text-[12px] font-normal text-ok">
-                          tarif pro −{percent(order.proDiscountBps)}
+            <div className="relative overflow-x-auto">
+              <table className="min-w-[560px] mt-3 w-full text-left text-[14px]">
+                <tbody>
+                  {shop.recentOrders.map((order) => (
+                    <tr key={order.id} className="border-t border-line">
+                      <td className="px-5 py-2.5">
+                        <Link
+                          href={`/commandes/${order.id}`}
+                          className="font-mono font-bold text-accent hover:underline"
+                        >
+                          {order.reference}
+                        </Link>
+                        <span className="block text-[12px] text-muted">
+                          {dateTime(order.createdAt)}
                         </span>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </td>
+                      <td className="px-5 py-2.5 text-muted">{statusLabel(order.status, null)}</td>
+                      <td className="px-5 py-2.5 text-right font-bold tabular-nums">
+                        {money(order.totalPrice)}
+                        {order.proDiscountBps > 0 ? (
+                          <span className="block text-[12px] font-normal text-ok">
+                            tarif pro −{percent(order.proDiscountBps)}
+                          </span>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </section>
         <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
