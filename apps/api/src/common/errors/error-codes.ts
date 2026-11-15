@@ -425,8 +425,8 @@ export const ERROR_MESSAGES = {
     en: 'A payout is already in progress.',
   },
   DAMAGE_CLAIM_TOO_LATE: {
-    fr: 'Le délai pour signaler un colis abîmé est dépassé : 7 jours après la livraison, dimanches non compris. Contactez le service client par téléphone.',
-    en: 'The deadline to report a damaged parcel has passed: 7 days after delivery, Sundays excluded. Please call customer service.',
+    fr: 'Le délai pour signaler un colis abîmé est dépassé : 7 jours après la livraison, dimanches et jours fériés non compris. Contactez le service client par téléphone.',
+    en: 'The deadline to report a damaged parcel has passed: 7 days after delivery, Sundays and public holidays excluded. Please call customer service.',
   },
   PAYOUT_FROZEN: {
     fr: 'Votre compte est suspendu : les retraits sont bloqués jusqu’à la décision de l’équipe Tara. Contactez le support.',

@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.2 · Projet à faire valider par un juriste avant publication. Les points marqués
+Version 2026-11.3 · Projet à faire valider par un juriste avant publication. Les points marqués
 **[À VALIDER]** demandent son avis.
 
 Ces conditions s'appliquent à toute personne qui livre avec l'application Tara Livreur. Elles
@@ -8,9 +8,11 @@ complètent le contrat de partenariat signé au bureau de Tara lors de la valida
 
 ## 1. Votre statut
 
-Vous êtes un partenaire **indépendant** : vous choisissez quand vous êtes en ligne et quelles
-courses vous acceptez. **[À VALIDER : statut juridique du livreur (travailleur indépendant,
-auto-entrepreneur), obligations fiscales et sociales, assurance.]**
+Vous êtes un partenaire **indépendant**, pas un salarié de Tara : vous choisissez quand vous
+êtes en ligne et quelles courses vous acceptez, vous utilisez votre propre véhicule et vous
+pouvez travailler pour d'autres. Vous déclarez vous-même votre activité aux impôts (impôt
+libératoire ou patente, selon votre situation) et assurez votre véhicule ; Tara peut vous
+orienter vers les démarches.
 
 ## 2. Inscription et pièces
 
@@ -37,6 +39,12 @@ Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alert
   l'équipe.
 - Vous remettez le colis contre le **code de livraison** que le destinataire a reçu par SMS, et
   vous photographiez la remise.
+- **Colis abîmé** : si le destinataire refuse un colis abîmé, choisissez « Colis abîmé,
+  refusé » dans « Livraison impossible », photographiez le dommage et ramenez le colis comme un
+  retour. L'équipe Tara ouvre une réclamation pour l'expéditeur.
+- **Colis de valeur** : un colis déclaré à plus de 25 000 FCFA vous est proposé après 20
+  livraisons réussies ; au-delà de 100 000 FCFA, après 50 livraisons et avec une note d'au
+  moins 4,5 sur 5. La valeur ne vous est jamais montrée.
 - Votre prénom, l'initiale de votre nom, votre véhicule et sa plaque sont montrés à
   l'expéditeur et au destinataire. Votre numéro leur est visible seulement pendant la course
   (au destinataire, pendant que vous lui apportez le colis), pour qu'ils puissent vous appeler.
@@ -94,7 +102,26 @@ suivez son choix. Un échec déclaré sans ces appels ou loin de l'adresse est s
 Le bouton **SOS** alerte immédiatement l'équipe Tara et votre contact d'urgence, avec votre
 position. Utilisez-le en cas de danger. Ne prenez aucun risque pour un colis.
 
-## 8. Comportement attendu et suspension
+## 8. Le colis vous est confié
+
+- Du code d'enlèvement au code de livraison, le colis est sous votre garde : ne l'ouvrez pas,
+  ne le laissez pas sans surveillance, attachez-le bien et suivez le trajet vers le
+  destinataire.
+- Garder ou détourner un colis est une infraction pénale (vol, abus de confiance) : Tara porte
+  plainte et transmet à la police vos pièces, le trajet enregistré et les photos.
+- **Si Tara dédommage un expéditeur pour un colis perdu, volé ou abîmé par votre faute**, Tara
+  vous demande de rembourser :
+  - la totalité de ce que Tara a payé, en cas de vol, de fraude ou de faute volontaire ;
+  - la moitié, sans dépasser 25 000 FCFA par course, en cas de négligence (chute, colis mal
+    attaché, consignes non suivies).
+- Avant toute retenue, vous êtes prévenu dans l'application et vous avez **7 jours** pour donner
+  votre version (photos, explications). La somme est ensuite prise sur votre solde Tara ; s'il ne
+  suffit pas, elle est demandée à votre garant, dans la limite de son engagement écrit.
+- Pendant l'enquête, votre compte peut être suspendu : vous ne recevez plus de courses et vous
+  ne pouvez plus retirer votre solde. Si votre responsabilité n'est pas retenue, tout est
+  débloqué et votre solde reste à vous.
+
+## 9. Comportement attendu et suspension
 
 Respect des clients et du code de la route, colis intact, aucun colis ouvert, aucune somme
 demandée en plus. Tara peut suspendre votre compte en cas de fraude (fausse livraison, faux
@@ -102,12 +129,12 @@ demandée en plus. Tara peut suspendre votre compte en cas de fraude (fausse liv
 solde prépayé encore dues doivent être déposées sous 24 heures ; au-delà de 72 heures de retard,
 le compte est suspendu jusqu'au règlement.
 
-## 9. Notes
+## 10. Notes
 
 Les clients vous notent après chaque course, et vous pouvez les noter. Votre note moyenne compte
 dans l'attribution des courses : les livreurs les mieux notés en reçoivent davantage.
 
-## 10. Données personnelles
+## 11. Données personnelles
 
 Tara traite vos pièces, vos positions pendant les courses et vos paiements pour faire
 fonctionner le service, payer vos gains et assurer la sécurité. Le détail figure dans la
@@ -119,7 +146,7 @@ que votre solde a été retiré : aucune somme ne se perd. Vos pièces d'identit
 votre contact d'urgence sont alors effacés ; vos courses passées restent, sans votre nom, pour
 la comptabilité.
 
-## 11. Acceptation et modification
+## 12. Acceptation et modification
 
 Vous acceptez ces conditions dans l'application en cochant « J'ai lu et j'accepte », puis en
 confirmant avec le code reçu par SMS. La version, la date, l'heure et l'appareil sont

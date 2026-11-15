@@ -306,7 +306,7 @@
   "valueLabel": "Value of the contents (optional)",
   "valueHint": "E.g. 25,000",
   "valueHelp": "In FCFA. Never shown to the rider. Used to compensate you for loss or damage, within the limit set in the terms.",
-  "valueTooHigh": "10,000,000 F at most.",
+  "valueTooHigh": "500,000 F at most. For a more valuable parcel, call customer service before sending.",
   "instructionsLabel": "Instructions for the rider (optional)",
   "instructionsHint": "E.g. Call on arrival, ring at the green gate",
   "soundsLabel": "Sounds",

@@ -70,7 +70,8 @@ export const DeliveryItem = z.object({
   isFragile: z.boolean().default(false),
   /** Gros objet : aide au chargement par deux personnes (supplément manutention). */
   loadingHelp: z.boolean().default(false),
-  declaredValue: Fcfa.optional(),
+  /** Valeur du contenu : plafond du remboursement en cas de perte ou de dommage (500 000 F au plus). */
+  declaredValue: Fcfa.max(500_000).optional(),
   /** Photo du colis (POST /media, kind=PARCEL_PHOTO), analysée par POST /orders/parcel-analysis. */
   parcelPhotoKey: z.string().min(1).max(200).optional(),
   /** Montant à encaisser auprès du destinataire, 0 si aucun (réservé aux marchands). */

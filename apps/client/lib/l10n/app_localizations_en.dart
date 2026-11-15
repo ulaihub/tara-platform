@@ -742,7 +742,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'In FCFA. Never shown to the rider. Used to compensate you for loss or damage, within the limit set in the terms.';
 
   @override
-  String get valueTooHigh => '10,000,000 F at most.';
+  String get valueTooHigh => '500,000 F at most. For a more valuable parcel, call customer service before sending.';
 
   @override
   String get instructionsLabel => 'Instructions for the rider (optional)';

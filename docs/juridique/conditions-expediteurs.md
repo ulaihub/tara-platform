@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.2 · Projet à faire valider par un juriste avant publication. Les points marqués
+Version 2026-11.3 · Projet à faire valider par un juriste avant publication. Les points marqués
 **[À VALIDER]** demandent son avis.
 
 Ces conditions s'appliquent à toute personne qui envoie un colis avec l'application Tara, qu'elle
@@ -13,8 +13,9 @@ Tara est un service de livraison de colis à la demande à Douala, exploité par
 raison sociale, forme, capital, RCCM, NIU, adresse du siège, téléphone et e-mail du service
 client]**.
 
-Tara met en relation des expéditeurs avec des livreurs partenaires indépendants, fixe les prix,
-encaisse les paiements et suit chaque course.
+Tara organise et assure la livraison de votre colis avec des livreurs partenaires indépendants :
+Tara fixe les prix, encaisse les paiements, suit chaque course et **répond envers vous du colis
+qui lui est confié**, de l'enlèvement à la remise (article 13).
 
 ## 2. Votre compte
 
@@ -88,8 +89,12 @@ livreur peut le refuser, photo à l'appui. Dans ce cas :
 
 Vous pouvez contester auprès du service client : la photo prise par le livreur est gardée.
 
-**[À VALIDER : responsabilité de Tara en cas de perte ou de dommage, par exemple dans la
-limite de la valeur déclarée et d'un plafond par colis ; procédure et délai de réclamation.]**
+### Valeur du colis
+
+Indiquez la valeur du contenu à la commande (500 000 FCFA au plus ; pour un colis de plus
+grande valeur, appelez le service client avant d'envoyer). Elle n'est jamais montrée au livreur.
+Elle fixe le plafond de ce que Tara vous rembourse en cas de perte ou de dommage (article 13).
+Un colis de grande valeur est confié seulement à un livreur expérimenté et bien noté.
 
 ## 5. Payer la livraison
 
@@ -198,14 +203,56 @@ La suppression est refusée tant qu'il vous reste de l'argent chez Tara (solde, 
 ou qu'un retrait est en cours : retirez d'abord tout votre solde vers votre Mobile Money, même
 s'il fait moins de 500 FCFA. Ainsi, aucune somme ne se perd à la fermeture d'un compte.
 
-## 13. Réclamations et litiges
+## 13. Perte, vol, dommage et réclamations
 
-- Pour toute réclamation (colis, paiement, comportement), contactez le service client depuis
-  l'application, dans les **[À VALIDER : délai]** jours suivant la course.
+Tara répond du colis de l'enlèvement à la remise, selon l'Acte uniforme OHADA relatif aux
+contrats de transport de marchandises par route (AUCTMR), en vigueur au Cameroun.
+
+### Ce que Tara rembourse
+
+- **Colis perdu, volé ou abîmé pendant la course** : la valeur du contenu, prouvée (facture,
+  reçu, prix de vente), et le prix de la livraison.
+- **Plafond** : la valeur déclarée à la commande. Sans valeur déclarée : 25 000 FCFA par colis,
+  ou 5 000 FCFA par kilogramme si ce montant est plus élevé (plafond légal, AUCTMR art. 18).
+- En cas de faute volontaire ou inexcusable de Tara ou du livreur (un vol, par exemple), le
+  plafond ne s'applique pas : la valeur prouvée est remboursée (AUCTMR art. 21).
+- **Retard** : si le retard est dû à Tara et signalé par écrit dans les 21 jours, Tara rembourse
+  au plus le prix de la livraison.
+
+### Ce que Tara ne rembourse pas
+
+Le dommage qui vient (AUCTMR art. 17) :
+
+- d'un emballage insuffisant, ou d'un colis fragile non signalé comme tel ;
+- d'un défaut propre au contenu (produit périssable, objet déjà abîmé : la photo prise à
+  l'enlèvement fait foi) ;
+- d'un objet interdit ou d'un contenu différent de ce qui a été déclaré ;
+- d'un cas de force majeure (événement imprévisible et irrésistible : émeute, catastrophe…).
+
+### Comment et quand réclamer
+
+- **Dommage visible** : le destinataire refuse le colis à la remise (le livreur le
+  photographie et une réclamation s'ouvre aussitôt), ou vous le signalez au plus tard le jour
+  ouvrable qui suit la livraison.
+- **Dommage caché**, découvert à l'ouverture : signalez-le dans les **7 jours** qui suivent la
+  livraison, dimanches et jours fériés non compris, avec des photos. Passé ces délais, le colis
+  est présumé remis en bon état (AUCTMR art. 14).
+- **Colis ni livré ni rendu 7 jours après la commande** : il est considéré comme perdu ;
+  signalez-le.
+- Réclamez depuis l'application (« Signaler un problème » sur la commande) ou par téléphone au
+  service client. Tara vous répond sous 7 jours et, une fois le montant arrêté, vous rembourse
+  sous 15 jours sur votre solde Tara ou par Mobile Money.
 - Chaque étape de la course est enregistrée (heures, photos, codes, position du livreur) et sert
   de preuve en cas de désaccord.
-- **[À VALIDER : droit applicable (camerounais), tentative de règlement amiable, tribunal
-  compétent (Douala).]**
+- Toute action en justice se prescrit par un an à compter de la livraison (ou de la date où le
+  colis aurait dû être livré), trois ans en cas de dol (AUCTMR art. 25).
+
+### Litiges
+
+Ces conditions relèvent du droit camerounais et du droit OHADA. En cas de désaccord, cherchons
+d'abord une solution amiable avec le service client, pendant 30 jours. À défaut, les tribunaux
+compétents de Douala peuvent être saisis, sans que vous perdiez les droits que vous donne la
+loi-cadre n° 2011/012 du 6 mai 2011 portant protection du consommateur.
 
 ## 14. Acceptation et modification de ces conditions
 

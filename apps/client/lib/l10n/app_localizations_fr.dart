@@ -747,7 +747,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.';
 
   @override
-  String get valueTooHigh => '10 000 000 F au plus.';
+  String get valueTooHigh =>
+      '500 000 F au plus. Pour un colis de plus grande valeur, appelez le service client avant d\'envoyer.';
 
   @override
   String get instructionsLabel => 'Instructions pour le livreur (facultatif)';

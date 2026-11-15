@@ -255,7 +255,7 @@ describe('Service client (H6)', () => {
       .expect(404);
   });
 
-  it('colis abîmé : à signaler dans les 7 jours suivant la livraison, dimanches non compris', async () => {
+  it('colis abîmé : à signaler dans les 7 jours suivant la livraison, dimanches et jours fériés non compris', async () => {
     const recent = await placeOrder(ctx, shop);
     await ctx.prisma.order.update({
       where: { id: recent.id },
@@ -271,7 +271,7 @@ describe('Service client (H6)', () => {
     const old = await placeOrder(ctx, shop);
     await ctx.prisma.order.update({
       where: { id: old.id },
-      data: { deliveredAt: new Date(Date.now() - 12 * 86_400_000) },
+      data: { deliveredAt: new Date(Date.now() - 15 * 86_400_000) },
     });
     const late = await open(shop, {
       category: 'DAMAGED_PARCEL',

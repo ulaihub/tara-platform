@@ -1481,7 +1481,7 @@ abstract class AppLocalizations {
   /// No description provided for @valueTooHigh.
   ///
   /// In fr, this message translates to:
-  /// **'10 000 000 F au plus.'**
+  /// **'500 000 F au plus. Pour un colis de plus grande valeur, appelez le service client avant d\'envoyer.'**
   String get valueTooHigh;
 
   /// No description provided for @instructionsLabel.

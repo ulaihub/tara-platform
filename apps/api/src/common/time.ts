@@ -59,21 +59,27 @@ export function periodStart(period: 'day' | 'week' | 'month', now: Date): Date {
   }
 }
 
+/** Jours fériés à date fixe au Cameroun (MM-JJ). */
+const FIXED_HOLIDAYS = new Set(['01-01', '02-11', '05-01', '05-20', '08-15', '12-25']);
+/** Marge pour les fêtes à date mobile (Vendredi saint, Ascension, Aïd) : jamais moins que la loi. */
+const MOVABLE_HOLIDAYS_GRACE_DAYS = 2;
+
 /**
- * Fin du délai pour signaler un colis abîmé : 7 jours après la livraison, dimanches non
- * compris (Acte uniforme OHADA relatif aux contrats de transport de marchandises par route,
- * art. 14), soit la fin du 7e jour non dimanche suivant la date de livraison, heure du Cameroun.
+ * Fin du délai pour signaler un colis abîmé : 7 jours après la livraison, dimanches et jours
+ * fériés non compris (Acte uniforme OHADA relatif aux contrats de transport de marchandises
+ * par route, art. 14), plus une marge pour les fêtes à date mobile ; minuit, heure du Cameroun.
  */
 export function damageClaimDeadline(deliveredAt: Date): Date {
   // Minuit au Cameroun (UTC+1, sans heure d'été) du jour de la livraison.
-  const day = new Date(`${cameroonDate(deliveredAt)}T00:00:00+01:00`);
+  let cursor = new Date(`${cameroonDate(deliveredAt)}T00:00:00+01:00`);
   let counted = 0;
-  let cursor = day;
   while (counted < 7) {
     cursor = addDays(cursor, 1);
-    // Jour de la semaine au Cameroun : midi local évite toute ambiguïté de fuseau.
-    const weekday = new Date(cursor.getTime() + 12 * 3_600_000).getUTCDay();
-    if (weekday !== 0) counted += 1;
+    // Midi local : jour de la semaine et date sans ambiguïté de fuseau.
+    const noon = new Date(cursor.getTime() + 12 * 3_600_000);
+    const sunday = noon.getUTCDay() === 0;
+    const holiday = FIXED_HOLIDAYS.has(cameroonDate(noon).slice(5));
+    if (!sunday && !holiday) counted += 1;
   }
-  return addDays(cursor, 1);
+  return addDays(cursor, 1 + MOVABLE_HOLIDAYS_GRACE_DAYS);
 }

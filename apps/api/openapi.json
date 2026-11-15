@@ -3103,7 +3103,7 @@
                   "declaredValue": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 10000000
+                    "maximum": 500000
                   },
                   "parcelPhotoKey": {
                     "type": "string",
@@ -3361,7 +3361,7 @@
                         "declaredValue": {
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 10000000
+                          "maximum": 500000
                         },
                         "parcelPhotoKey": {
                           "type": "string",
