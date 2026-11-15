@@ -20,8 +20,8 @@ abstract final class DefaultFirebaseOptions {
   }
 
   /// Android : valeurs `mobilesdk_app_id` et `current_key` de google-services.json.
-  static const _androidAppId = '';
-  static const _androidApiKey = '';
+  static const _androidAppId = '1:450017083015:android:ab30c01ff60126e55e8222';
+  static const _androidApiKey = 'AIzaSyAAFXUiQJrDCai9kntF0pIbfQTXw2lxRnM';
 
   static FirebaseOptions? get android => _androidAppId.isEmpty || _androidApiKey.isEmpty
       ? null
