@@ -22,5 +22,10 @@ cd "$work/apps/$APP"
 flutter pub get --enforce-lockfile
 flutter build apk --release --dart-define=TARA_API_URL="$API_URL"
 name=$([[ $APP == rider ]] && echo tara-livreur || echo tara-expediteur)
-cp build/app/outputs/flutter-apk/app-release.apk "/out/$name.apk"
+# Publication sans fichier à moitié écrit : copie à côté, vérification de l'archive, puis
+# remplacement d'un coup (un téléchargement en cours finit avec l'ancienne version, intacte).
+tmp="/out/.$name.apk.tmp"
+cp build/app/outputs/flutter-apk/app-release.apk "$tmp"
+unzip -tq "$tmp" >/dev/null || { rm -f "$tmp"; echo "APK abîmée, non publiée" >&2; exit 1; }
+mv -f "$tmp" "/out/$name.apk"
 echo "OK : /out/$name.apk ($(du -h "/out/$name.apk" | cut -f1))"
