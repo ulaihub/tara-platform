@@ -58,7 +58,7 @@ const fr: Strings = {
     `Une demande de ${amount} est arrivée sur votre téléphone : validez-la avec votre code secret Mobile Money.`,
   nothingToPay: 'Rien à payer : la livraison est réglée.',
   codeHint:
-    'À la remise, donnez au livreur le code à 4 chiffres reçu par SMS, seulement une fois le colis en main.',
+    'À la remise, vérifiez d’abord l’état du colis, puis donnez au livreur le code à 4 chiffres reçu par SMS. Colis abîmé ? Refusez-le : le livreur le photographie et Tara s’en occupe.',
   address: 'Adresse de livraison',
   available: 'Serez-vous là pour recevoir le colis ?',
   notePlaceholder: 'Précision pour le livreur (facultatif)',
@@ -174,7 +174,7 @@ const en: Strings = {
     `A payment request of ${amount} reached your phone: approve it with your Mobile Money PIN.`,
   nothingToPay: 'Nothing to pay: the delivery is settled.',
   codeHint:
-    'At handover, give the rider the 4-digit code you got by SMS, only once the parcel is in your hands.',
+    'At handover, first check the parcel, then give the rider the 4-digit code you got by SMS. Damaged parcel? Refuse it: the rider photographs it and Tara handles it.',
   address: 'Delivery address',
   available: 'Will you be there to receive the parcel?',
   notePlaceholder: 'Note for the rider (optional)',

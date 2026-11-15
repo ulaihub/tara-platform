@@ -68,7 +68,7 @@ describe('Actions du livreur (E2 à E9)', () => {
 
   function deliveryCodeFor(order: PlacedOrder): string {
     const text = ctx.sms.lastTo(order.recipientPhone)?.text ?? '';
-    const code = /donner au livreur : (\d{4})/.exec(text)?.[1];
+    const code = /le code au livreur : (\d{4})/.exec(text)?.[1];
     if (!code) throw new Error(`Pas de code de livraison pour ${order.reference}`);
     return code;
   }
@@ -573,6 +573,26 @@ describe('Actions du livreur (E2 à E9)', () => {
       .expect(200);
     expect(returned.body.status).toBe('RETURNED');
     expect(returned.body.completedAt).not.toBeNull();
+  });
+
+  it('colis refusé car abîmé : photo, aucun appel exigé, réclamation ouverte pour l’expéditeur', async () => {
+    const { rider, order } = await assigned();
+    await pickUp(rider, order);
+    const photoKey = await proofPhoto(ctx, rider);
+    const failed = await request(ctx.http)
+      .post(`/v1/rider/orders/${order.id}/fail`)
+      .set(rider.auth)
+      .send({ reason: 'DAMAGED', note: 'Carton écrasé, liquide qui coule', photoKey, ...HERE })
+      .expect(200);
+    expect(failed.body).toMatchObject({ status: 'DELIVERY_FAILED', failureReason: 'DAMAGED' });
+    const claims = await ctx.prisma.ticket.findMany({
+      where: { orderId: order.id, category: 'DAMAGED_PARCEL' },
+      include: { messages: true },
+    });
+    expect(claims).toHaveLength(1);
+    const placed = await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+    expect(claims[0]).toMatchObject({ priority: 'HIGH', requesterId: placed.senderId });
+    expect(claims[0]?.messages[0]?.body).toContain('Carton écrasé');
   });
 
   it('échec sans réponse de l’expéditeur : retour automatique ; le support peut choisir à sa place (E6)', async () => {

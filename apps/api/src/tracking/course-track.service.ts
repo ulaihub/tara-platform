@@ -28,6 +28,22 @@ export const NEAR_STOP_METERS = 150;
 /** Plus aucune position pendant ce temps : alerte. */
 export const TRACK_GAP_SECONDS = 20 * 60;
 /**
+ * Durée prévue de la livraison (colis à bord) : distance de la course à 15 km/h, vitesse
+ * prudente d'une moto dans les embouteillages de Douala, 15 minutes au moins. Alerte au double.
+ */
+export const EXPECTED_SPEED_MPS = 15_000 / 3600;
+export const MIN_EXPECTED_SECONDS = 15 * 60;
+export const OVERDUE_FACTOR = 2;
+/** Éloignement toléré au-delà de la distance de départ (détours, rues à sens unique). */
+export const MOVING_AWAY_METERS = 2_000;
+/** Position assez récente pour juger de l'éloignement. */
+const FRESH_POINT_SECONDS = 10 * 60;
+
+/** Durée prévue, en secondes, pour livrer une course de cette distance. */
+export function expectedDeliverySeconds(distanceMeters: number): number {
+  return Math.max(MIN_EXPECTED_SECONDS, Math.round(distanceMeters / EXPECTED_SPEED_MPS));
+}
+/**
  * Prime d'approche : trajet réellement parcouru de l'acceptation à l'enlèvement, en part de
  * la distance annoncée au moment de la proposition. En dessous : alerte (position déclarée
  * loin du vendeur pour toucher la prime). La route est d'ordinaire plus longue que la ligne
@@ -172,7 +188,10 @@ export class CourseTrackService implements OnModuleInit {
 
   // --- Surveillance des courses en cours -----------------------------------------------------
 
-  /** Toutes les 5 minutes : long arrêt avec le colis à bord, trajet coupé. */
+  /**
+   * Toutes les 5 minutes : long arrêt avec le colis à bord, trajet coupé, livraison bien plus
+   * longue que prévu, livreur qui s'éloigne de la destination.
+   */
   @Cron('*/5 * * * *', { name: 'course-track-scan', timeZone: CAMEROON_TIME_ZONE })
   async scheduledScan(): Promise<void> {
     if (!this.env.JOBS_ENABLED) return;
@@ -202,6 +221,34 @@ export class CourseTrackService implements OnModuleInit {
         });
       }
       if (!PARCEL_ON_BOARD.includes(order.status)) continue;
+
+      // Livraison bien plus longue que prévu, colis à bord.
+      if (order.pickedUpAt) {
+        const elapsed = (now.getTime() - order.pickedUpAt.getTime()) / 1000;
+        const expected = expectedDeliverySeconds(order.distanceMeters);
+        if (elapsed >= OVERDUE_FACTOR * expected) {
+          raised += await this.alert(order.id, riderId, 'OVERDUE', 'OVERDUE', {
+            pickedUpAt: order.pickedUpAt.toISOString(),
+            minutes: Math.round(elapsed / 60),
+            expectedMinutes: Math.round(expected / 60),
+          });
+        }
+      }
+
+      // Livreur bien plus loin de la destination qu'au moment de l'enlèvement.
+      if (last && (now.getTime() - last.recordedAt.getTime()) / 1000 <= FRESH_POINT_SECONDS) {
+        const start = haversineMeters(order.pickupAddress, order.dropoffAddress);
+        const away = haversineMeters(last, order.dropoffAddress);
+        if (away >= start + MOVING_AWAY_METERS) {
+          raised += await this.alert(order.id, riderId, 'MOVING_AWAY', 'MOVING_AWAY', {
+            kilometersFromDropoff: Math.round(away / 100) / 10,
+            kilometersAtPickup: Math.round(start / 100) / 10,
+            latitude: last.latitude,
+            longitude: last.longitude,
+          });
+        }
+      }
+
       const stop = currentStop(
         recent.map((p) => ({ latitude: p.latitude, longitude: p.longitude, at: p.recordedAt })),
       );

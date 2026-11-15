@@ -164,7 +164,8 @@ function connect(token: string): Promise<Socket> {
 
 const deliveryCodes = new Map<string, string>();
 let logOffset = statSync(values.log).size;
-const SMS_CODE = /colis (TR-[0-9A-Z]+) est en route\. Code a donner au livreur : (\d{4})/g;
+const SMS_CODE =
+  /colis (TR-[0-9A-Z]+) est en route\. Verifiez-le avant de donner le code au livreur : (\d{4})/g;
 function readLog(): void {
   const size = statSync(values.log as string).size;
   if (size <= logOffset) return;

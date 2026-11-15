@@ -50,6 +50,7 @@ export const FAILURE_LABELS: Record<string, string> = {
   REFUSED: 'Colis refusé',
   ADDRESS_NOT_FOUND: 'Adresse introuvable',
   PAYMENT_REFUSED: 'Refus de payer',
+  DAMAGED: 'Colis abîmé, refusé',
   OTHER: 'Autre raison',
 };
 
@@ -91,6 +92,7 @@ export const INELIGIBLE_LABELS: Record<DispatchCandidate['ineligibleBecause'][nu
   PENDING_OFFER: 'proposition en attente',
   VEHICLE: 'véhicule trop petit pour un gros objet',
   SAFETY_ALERT: 'alerte SOS en cours',
+  PARCEL_VALUE: 'colis de trop grande valeur pour son expérience',
 };
 
 /** Ce que cette personne de l'équipe peut faire sur une commande. */

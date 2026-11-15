@@ -171,6 +171,12 @@ const envSchema = z
     DISPATCH_RADII_METERS: z.string().default('3000,5000,8000,12000'),
     DISPATCH_RETRY_SECONDS: z.coerce.number().min(0.2).max(300).default(20),
     DISPATCH_ALERT_AFTER_SECONDS: z.coerce.number().min(1).max(3600).default(300),
+    /** Confiance progressive selon la valeur déclarée du colis (voir rider-scoring.ts). */
+    DISPATCH_NEW_RIDER_DELIVERIES: z.coerce.number().int().min(0).max(1000).default(20),
+    DISPATCH_NEW_RIDER_MAX_VALUE: z.coerce.number().int().min(0).default(25_000),
+    DISPATCH_HIGH_VALUE_FROM: z.coerce.number().int().min(0).default(100_000),
+    DISPATCH_HIGH_VALUE_MIN_DELIVERIES: z.coerce.number().int().min(0).max(10_000).default(50),
+    DISPATCH_HIGH_VALUE_MIN_RATING: z.coerce.number().min(1).max(5).default(4.5),
     /**
      * Retards signalés sur la carte du back-office (H1) : livreur pas encore au vendeur
      * [LATE_PICKUP_MINUTES] après l'attribution ; colis pas livré après le trajet estimé

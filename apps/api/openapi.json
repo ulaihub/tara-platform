@@ -3103,7 +3103,7 @@
                   "declaredValue": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 10000000
+                    "maximum": 500000
                   },
                   "parcelPhotoKey": {
                     "type": "string",
@@ -3361,7 +3361,7 @@
                         "declaredValue": {
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 10000000
+                          "maximum": 500000
                         },
                         "parcelPhotoKey": {
                           "type": "string",
@@ -11497,7 +11497,9 @@
           "LONG_STOP",
           "MOCK_LOCATION",
           "TRACK_GAP",
-          "APPROACH_BONUS"
+          "APPROACH_BONUS",
+          "OVERDUE",
+          "MOVING_AWAY"
         ]
       },
       "CourseTrack": {
@@ -11772,7 +11774,8 @@
                 "TOO_MANY_ORDERS",
                 "PENDING_OFFER",
                 "VEHICLE",
-                "SAFETY_ALERT"
+                "SAFETY_ALERT",
+                "PARCEL_VALUE"
               ]
             }
           },
@@ -12216,6 +12219,8 @@
                   "ALREADY_COLLECTED",
                   "PAYOUT_TOO_SMALL",
                   "PAYOUT_IN_PROGRESS",
+                  "DAMAGE_CLAIM_TOO_LATE",
+                  "PAYOUT_FROZEN",
                   "PAYOUT_NOT_ALLOWED",
                   "PAYOUT_NOT_FOUND",
                   "PAYOUT_NOT_AWAITING_APPROVAL",
@@ -12257,6 +12262,7 @@
           "REFUSED",
           "ADDRESS_NOT_FOUND",
           "PAYMENT_REFUSED",
+          "DAMAGED",
           "OTHER"
         ]
       },

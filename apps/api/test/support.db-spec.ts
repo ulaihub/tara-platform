@@ -255,6 +255,33 @@ describe('Service client (H6)', () => {
       .expect(404);
   });
 
+  it('colis abîmé : à signaler dans les 7 jours suivant la livraison, dimanches et jours fériés non compris', async () => {
+    const recent = await placeOrder(ctx, shop);
+    await ctx.prisma.order.update({
+      where: { id: recent.id },
+      data: { deliveredAt: new Date(Date.now() - 2 * 86_400_000) },
+    });
+    await open(shop, {
+      category: 'DAMAGED_PARCEL',
+      subject: 'Article cassé',
+      message: 'Le vase est arrivé fêlé à l’intérieur du carton.',
+      orderId: recent.id,
+    }).expect(201);
+
+    const old = await placeOrder(ctx, shop);
+    await ctx.prisma.order.update({
+      where: { id: old.id },
+      data: { deliveredAt: new Date(Date.now() - 15 * 86_400_000) },
+    });
+    const late = await open(shop, {
+      category: 'DAMAGED_PARCEL',
+      subject: 'Article cassé',
+      message: 'Je découvre que le vase est fêlé.',
+      orderId: old.id,
+    }).expect(422);
+    expect(late.body.error.code).toBe('DAMAGE_CLAIM_TOO_LATE');
+  });
+
   it('limite à 5 demandes en cours par personne', async () => {
     const busy = await signIn(ctx);
     for (let i = 0; i < 5; i += 1) {

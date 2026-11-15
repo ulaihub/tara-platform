@@ -4,6 +4,7 @@ import {
   offersForRound,
   type RiderSnapshot,
   score,
+  trustedForValue,
 } from './rider-scoring.js';
 
 const base: RiderSnapshot = {
@@ -19,6 +20,7 @@ const base: RiderSnapshot = {
   availableBalance: 20_000,
   ratingSum: 0,
   ratingCount: 0,
+  deliveredCount: 0,
 };
 
 const need = (cash: number, packageSize: 'M' | 'BULKY' = 'M') => ({ cash, packageSize });
@@ -63,6 +65,29 @@ describe('choix du livreur (D1, D4)', () => {
       11_500,
     );
     expect(cashCarried({ codAmount: 0, totalPrice: 1_500, feePaymentMethod: 'MOMO_MTN' })).toBe(0);
+  });
+
+  it('confiance progressive : la valeur déclarée du colis suit l’expérience du livreur', () => {
+    const rider = (deliveredCount: number, ratingSum = 0, ratingCount = 0) => ({
+      ...base,
+      deliveredCount,
+      ratingSum,
+      ratingCount,
+    });
+    // Sans valeur déclarée ou jusqu'à 25 000 F : tout livreur.
+    expect(trustedForValue(rider(0), null)).toBe(true);
+    expect(trustedForValue(rider(0), 25_000)).toBe(true);
+    // Au-delà : 20 livraisons faites.
+    expect(trustedForValue(rider(19), 25_001)).toBe(false);
+    expect(trustedForValue(rider(20), 60_000)).toBe(true);
+    // Au-delà de 100 000 F : 50 livraisons et une note d'au moins 4,5 sur 5 avis ou plus.
+    expect(trustedForValue(rider(49, 50, 10), 150_000)).toBe(false);
+    expect(trustedForValue(rider(50, 18, 4), 150_000)).toBe(false);
+    expect(trustedForValue(rider(50, 22, 5), 150_000)).toBe(false);
+    expect(trustedForValue(rider(50, 46, 10), 150_000)).toBe(true);
+    expect(ineligibilities(rider(3), { ...need(0), declaredValue: 80_000 })).toEqual([
+      'PARCEL_VALUE',
+    ]);
   });
 
   it('propose à un seul livreur, puis diffuse après trois refus (D2)', () => {

@@ -236,6 +236,19 @@ void main() {
     expect(find.byType(DeliveryScreen), findsOneWidget);
   });
 
+  testWidgets('colis abîmé : aucun appel exigé, photo du dommage, réclamation annoncée', (tester) async {
+    await pumpHome(tester, order(status: 'IN_DELIVERY'));
+    await tester.ensureVisible(find.text('Livraison impossible\u00a0?'));
+    await tester.tap(find.text('Livraison impossible\u00a0?'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Colis abîmé, refusé'));
+    await tester.tap(find.text('Colis abîmé, refusé'));
+    await settle(tester);
+    expect(find.textContaining('L’équipe Tara ouvre une réclamation pour l’expéditeur'), findsOneWidget);
+    expect(find.text('Photo du colis abîmé · obligatoire'), findsOneWidget);
+    expect(find.text('Encore 2 appels à passer.'), findsNothing);
+  });
+
   testWidgets('échec sans décision : attente de l’expéditeur, heure du retour automatique', (tester) async {
     await pumpHome(
       tester,

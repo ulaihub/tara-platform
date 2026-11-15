@@ -70,6 +70,7 @@ const CALLS_REQUIRED: Record<FailureReason, number | 'policy'> = {
   OTHER: 1,
   REFUSED: 0,
   PAYMENT_REFUSED: 0,
+  DAMAGED: 0,
 };
 
 @Injectable()
@@ -407,7 +408,45 @@ export class RiderOrdersService {
     );
     // Échec déclaré loin de l'adresse du destinataire : alerte au support (faux « absent »).
     await this.tracks.checkAction(order, 'FAILURE', body, order.dropoffAddress);
+    if (body.reason === 'DAMAGED') await this.openDamageClaim(userId, order.id, body.note);
     return this.get(userId, orderId);
+  }
+
+  /**
+   * Colis refusé parce qu'abîmé : une réclamation « Colis abîmé » est ouverte pour
+   * l'expéditeur, en priorité haute, avec la photo prise par le livreur (preuves de la
+   * commande). Une seule par commande.
+   */
+  private async openDamageClaim(
+    riderUserId: string,
+    orderId: string,
+    note: string | undefined,
+  ): Promise<void> {
+    const existing = await this.prisma.ticket.findFirst({
+      where: { orderId, category: 'DAMAGED_PARCEL', status: { in: ['OPEN', 'IN_PROGRESS'] } },
+    });
+    if (existing) return;
+    const order = await this.prisma.order.findUniqueOrThrow({
+      where: { id: orderId },
+      select: { reference: true, sender: { select: { id: true, phone: true } } },
+    });
+    await this.prisma.ticket.create({
+      data: {
+        openedById: riderUserId,
+        requesterId: order.sender.id,
+        contactPhone: order.sender.phone,
+        orderId,
+        category: 'DAMAGED_PARCEL',
+        priority: 'HIGH',
+        subject: `Colis ${order.reference} refusé : abîmé à la livraison`,
+        messages: {
+          create: {
+            authorId: riderUserId,
+            body: `Le destinataire a refusé le colis : il est abîmé. Photo jointe à la commande.${note ? ` Précision du livreur : ${note}` : ''}`,
+          },
+        },
+      },
+    });
   }
 
   /**

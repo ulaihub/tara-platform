@@ -1,5 +1,8 @@
 import request from 'supertest';
-import { CourseTrackService } from '../src/tracking/course-track.service.js';
+import {
+  CourseTrackService,
+  expectedDeliverySeconds,
+} from '../src/tracking/course-track.service.js';
 import { createTestApp, type SignedIn, staffUser, type TestContext } from './helpers/app.js';
 import {
   merchant,
@@ -185,7 +188,7 @@ describe('Trajet des courses (sécurité, litiges, fraude)', () => {
       })
       .expect(200);
     const text = ctx.sms.lastTo(order.recipientPhone)?.text ?? '';
-    const deliveryCode = /donner au livreur : (\d{4})/.exec(text)?.[1];
+    const deliveryCode = /le code au livreur : (\d{4})/.exec(text)?.[1];
     const photoKey = await proofPhoto(ctx, rider);
     await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/deliver`)
@@ -302,6 +305,50 @@ describe('Trajet des courses (sécurité, litiges, fraude)', () => {
     // Une seule alerte par sujet : le passage suivant n'en recrée pas.
     await tracks.scan(new Date());
     expect(await alertsOf(silent.order.id)).toHaveLength(1);
+  });
+
+  it('surveille les courses : livraison bien plus longue que prévu, livreur qui s’éloigne', async () => {
+    const late = await assigned();
+    const { pickup, dropoff } = await addresses(late.rider, late.order);
+    await pickUp(late.rider, late.order, pickup);
+    const order = await ctx.prisma.order.findUniqueOrThrow({ where: { id: late.order.id } });
+    // Colis à bord depuis plus du double du temps prévu pour cette distance.
+    const expected = expectedDeliverySeconds(order.distanceMeters);
+    await ctx.prisma.order.update({
+      where: { id: late.order.id },
+      data: { pickedUpAt: new Date(Date.now() - (2 * expected + 60) * 1000) },
+    });
+    // Position récente à l'opposé du client par rapport au vendeur : deux fois plus loin du
+    // client qu'au moment de l'enlèvement (Akwa → Bonamoussadi, plusieurs kilomètres).
+    const away = {
+      latitude: 2 * pickup.latitude - dropoff.latitude,
+      longitude: 2 * pickup.longitude - dropoff.longitude,
+    };
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${late.order.id}/track`)
+      .set(late.rider.auth)
+      // Après l'enlèvement (sa position est enregistrée à l'instant).
+      .send({ points: [point(0, away)] })
+      .expect(200);
+
+    await tracks.scan(new Date());
+    const kinds = (await alertsOf(late.order.id)).map((a) => a.kind);
+    expect(kinds).toContain('OVERDUE');
+    expect(kinds).toContain('MOVING_AWAY');
+
+    // Une course qui avance normalement ne déclenche ni l'une ni l'autre.
+    const normal = await assigned();
+    const places = await addresses(normal.rider, normal.order);
+    await pickUp(normal.rider, normal.order, places.pickup);
+    await request(ctx.http)
+      .post(`/v1/rider/orders/${normal.order.id}/track`)
+      .set(normal.rider.auth)
+      .send({ points: [point(0, places.dropoff)] })
+      .expect(200);
+    await tracks.scan(new Date());
+    const quiet = (await alertsOf(normal.order.id)).map((a) => a.kind);
+    expect(quiet).not.toContain('OVERDUE');
+    expect(quiet).not.toContain('MOVING_AWAY');
   });
 
   it('signale une prime d’approche payée sans trajet correspondant jusqu’au vendeur', async () => {

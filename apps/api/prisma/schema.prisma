@@ -249,6 +249,8 @@ enum FailureReason {
   ADDRESS_NOT_FOUND
   /// Le destinataire refuse de payer le montant à encaisser.
   PAYMENT_REFUSED
+  /// Le destinataire refuse le colis parce qu'il est abîmé (photo du colis, réclamation ouverte).
+  DAMAGED
   OTHER
 
   @@map("failure_reason")
@@ -1250,6 +1252,10 @@ enum CourseAlertKind {
   TRACK_GAP
   /// Prime d'approche payée alors que le trajet jusqu'au vendeur est bien plus court qu'annoncé.
   APPROACH_BONUS
+  /// Colis à bord depuis plus du double du temps prévu pour la livraison.
+  OVERDUE
+  /// Colis à bord, livreur bien plus loin de la destination qu'au départ.
+  MOVING_AWAY
 
   @@map("course_alert_kind")
 }

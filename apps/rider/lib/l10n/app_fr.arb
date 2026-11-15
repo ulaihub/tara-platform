@@ -1209,5 +1209,10 @@
   "closeAccountSend": "Demander la fermeture",
   "closeAccountSent": "Demande envoyée. L’équipe Tara vous répond dans « Écrire au service client ».",
   "closeAccountTicketSubject": "Fermeture de mon compte livreur",
-  "closeAccountTicketMessage": "Je souhaite fermer mon compte livreur Tara et effacer mes données."
+  "closeAccountTicketMessage": "Je souhaite fermer mon compte livreur Tara et effacer mes données.",
+  "reasonDamaged": "Colis abîmé, refusé",
+  "photoDamaged": "Photo du colis abîmé · obligatoire",
+  "photoDamagedHint": "Le dommage bien visible",
+  "damagedNotice": "Le destinataire refuse un colis abîmé : photographiez le dommage et décrivez-le. L’équipe Tara ouvre une réclamation pour l’expéditeur ; ramenez le colis comme un retour.",
+  "damagedNoteHint": "Ex. carton écrasé, bouteille cassée"
 }

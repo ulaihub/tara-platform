@@ -743,10 +743,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get valueHint => 'Ex. 25 000';
 
   @override
-  String get valueHelp => 'En FCFA. Indiquée au livreur, utile en cas de litige.';
+  String get valueHelp =>
+      'En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.';
 
   @override
-  String get valueTooHigh => '10 000 000 F au plus.';
+  String get valueTooHigh =>
+      '500 000 F au plus. Pour un colis de plus grande valeur, appelez le service client avant d\'envoyer.';
 
   @override
   String get instructionsLabel => 'Instructions pour le livreur (facultatif)';
@@ -1938,4 +1940,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String topUpRange(String min, String max) {
     return 'Montant entre $min et $max.';
   }
+
+  @override
+  String get failureReasonDamaged =>
+      'Le destinataire a refusé le colis : il était abîmé. Une réclamation est ouverte, l’équipe Tara vous contacte.';
 }

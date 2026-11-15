@@ -28,6 +28,8 @@ export const COURSE_ALERT_LABELS: Record<CourseAlert['kind'], string> = {
   MOCK_LOCATION: 'position falsifiée',
   TRACK_GAP: 'plus de position pendant la course',
   APPROACH_BONUS: 'prime d’approche sans trajet correspondant',
+  OVERDUE: 'livraison bien plus longue que prévu',
+  MOVING_AWAY: 's’éloigne de la destination avec le colis',
 };
 
 export interface Point {

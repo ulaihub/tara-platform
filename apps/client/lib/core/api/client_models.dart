@@ -910,7 +910,8 @@ class OrderFailure {
 
   static const fields = ['reason', 'note', 'at', 'decision', 'decisionDueAt', 'retryAllowed'];
 
-  /// RECIPIENT_ABSENT, RECIPIENT_UNREACHABLE, REFUSED, ADDRESS_NOT_FOUND, PAYMENT_REFUSED, OTHER.
+  /// RECIPIENT_ABSENT, RECIPIENT_UNREACHABLE, REFUSED, ADDRESS_NOT_FOUND, PAYMENT_REFUSED, DAMAGED,
+  /// OTHER.
   final String? reason;
 
   /// Explication du livreur (motif « autre »).

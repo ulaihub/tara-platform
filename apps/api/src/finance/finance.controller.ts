@@ -460,7 +460,12 @@ export class RiderFinanceController {
     @Headers('idempotency-key') key: string | undefined,
   ): Out<typeof PayoutDto> {
     assertOwnPhone(user, body.phone);
-    const riderId = await this.riderId(user.id);
+    const rider = await this.prisma.riderProfile.findUnique({ where: { userId: user.id } });
+    if (!rider) throw AppError.forbidden();
+    // Livreur suspendu (colis disparu, fraude, espèces non versées) : son solde reste chez
+    // Tara le temps de l'enquête, pour pouvoir dédommager l'expéditeur.
+    if (rider.status === 'SUSPENDED') throw AppError.forbidden('PAYOUT_FROZEN');
+    const riderId = rider.id;
     const payout = await this.payouts.request({
       beneficiary: 'RIDER',
       ownerId: riderId,

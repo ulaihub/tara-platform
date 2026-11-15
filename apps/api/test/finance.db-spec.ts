@@ -624,6 +624,21 @@ describe('Argent : paiements, encaissements, portefeuilles, reversements (G1 à 
       where: { entityId: rider.riderId, action: 'rider.balance_topped_up' },
     });
     expect(audit).not.toBeNull();
+
+    // Livreur suspendu (colis disparu, enquête) : son solde reste chez Tara.
+    await request(ctx.http)
+      .post(`/v1/admin/riders/${rider.riderId}/decision`)
+      .set(admin.auth)
+      .send({ decision: 'SUSPEND', reason: 'Colis non livré, enquête en cours' })
+      .expect(200);
+    const frozen = await request(ctx.http)
+      .post('/v1/rider/withdrawals')
+      .set(rider.auth)
+      .set('Idempotency-Key', key())
+      .send({ phone: rider.phone, operator: 'MTN' })
+      .expect(403);
+    expect(frozen.body.error.code).toBe('PAYOUT_FROZEN');
+    expect(await ledger.balance(riderPayable(rider.riderId))).toBe(after + 5_000);
   });
 
   it('espèces d’avant le solde prépayé : dépôt Mobile Money ou au bureau, jamais plus que le dû', async () => {

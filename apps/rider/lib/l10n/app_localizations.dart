@@ -3283,6 +3283,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Je souhaite fermer mon compte livreur Tara et effacer mes données.'**
   String get closeAccountTicketMessage;
+
+  /// No description provided for @reasonDamaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis abîmé, refusé'**
+  String get reasonDamaged;
+
+  /// No description provided for @photoDamaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo du colis abîmé · obligatoire'**
+  String get photoDamaged;
+
+  /// No description provided for @photoDamagedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le dommage bien visible'**
+  String get photoDamagedHint;
+
+  /// No description provided for @damagedNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le destinataire refuse un colis abîmé : photographiez le dommage et décrivez-le. L’équipe Tara ouvre une réclamation pour l’expéditeur ; ramenez le colis comme un retour.'**
+  String get damagedNotice;
+
+  /// No description provided for @damagedNoteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. carton écrasé, bouteille cassée'**
+  String get damagedNoteHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
