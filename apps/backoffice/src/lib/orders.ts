@@ -50,6 +50,7 @@ export const FAILURE_LABELS: Record<string, string> = {
   REFUSED: 'Colis refusé',
   ADDRESS_NOT_FOUND: 'Adresse introuvable',
   PAYMENT_REFUSED: 'Refus de payer',
+  DAMAGED: 'Colis abîmé, refusé',
   OTHER: 'Autre raison',
 };
 

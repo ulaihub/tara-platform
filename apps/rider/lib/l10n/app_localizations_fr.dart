@@ -1863,4 +1863,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get closeAccountTicketMessage => 'Je souhaite fermer mon compte livreur Tara et effacer mes données.';
+
+  @override
+  String get reasonDamaged => 'Colis abîmé, refusé';
+
+  @override
+  String get photoDamaged => 'Photo du colis abîmé · obligatoire';
+
+  @override
+  String get photoDamagedHint => 'Le dommage bien visible';
+
+  @override
+  String get damagedNotice =>
+      'Le destinataire refuse un colis abîmé : photographiez le dommage et décrivez-le. L’équipe Tara ouvre une réclamation pour l’expéditeur ; ramenez le colis comme un retour.';
+
+  @override
+  String get damagedNoteHint => 'Ex. carton écrasé, bouteille cassée';
 }

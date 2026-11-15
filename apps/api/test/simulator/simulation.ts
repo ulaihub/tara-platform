@@ -181,7 +181,7 @@ export async function runSimulation(options: SimulationOptions): Promise<Simulat
         .send(here)
         .expect(200);
       await sleep(300 + rng() * 600); // Trajet jusqu'au destinataire.
-      const code = /donner au livreur : (\d{4})/.exec(
+      const code = /le code au livreur : (\d{4})/.exec(
         ctx.sms.lastTo(order.recipientPhone)?.text ?? '',
       )?.[1];
       const there = somewhere(rng);

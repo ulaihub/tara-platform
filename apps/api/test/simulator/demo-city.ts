@@ -409,7 +409,7 @@ try {
   }
 
   async function deliver(bot: Bot, course: Course): Promise<void> {
-    const code = /donner au livreur : (\d{4})/.exec(
+    const code = /le code au livreur : (\d{4})/.exec(
       ctx.sms.lastTo(course.order.recipientPhone)?.text ?? '',
     )?.[1];
     const body =

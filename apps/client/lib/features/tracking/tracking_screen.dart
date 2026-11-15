@@ -797,6 +797,7 @@ class _Panel extends StatelessWidget {
     'REFUSED' => l.failureReasonRefused,
     'ADDRESS_NOT_FOUND' => l.failureReasonAddressNotFound,
     'PAYMENT_REFUSED' => l.failureReasonPaymentRefused,
+    'DAMAGED' => l.failureReasonDamaged,
     _ => l.failureReasonOther,
   };
 

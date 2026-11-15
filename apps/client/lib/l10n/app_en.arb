@@ -305,7 +305,7 @@
   "codTooHigh": "500,000 F at most per delivery.",
   "valueLabel": "Value of the contents (optional)",
   "valueHint": "E.g. 25,000",
-  "valueHelp": "In FCFA. Shown to the rider, useful in case of dispute.",
+  "valueHelp": "In FCFA. Never shown to the rider. Used to compensate you for loss or damage, within the limit set in the terms.",
   "valueTooHigh": "10,000,000 F at most.",
   "instructionsLabel": "Instructions for the rider (optional)",
   "instructionsHint": "E.g. Call on arrival, ring at the green gate",
@@ -640,5 +640,6 @@
   "deleteAccountConfirm": "Delete permanently",
   "topUpOther": "Other amount (F)",
   "topUpOtherHint": "E.g. 15000",
-  "topUpRange": "Amount between {min} and {max}."
+  "topUpRange": "Amount between {min} and {max}.",
+  "failureReasonDamaged": "The recipient refused the parcel: it was damaged. A claim is open; the Tara team will contact you."
 }

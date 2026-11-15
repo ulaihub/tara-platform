@@ -561,7 +561,7 @@ describe('Tarification et commandes (C1 à C7)', () => {
       await request(ctx.http).get(`/v1/orders/${id}`).set(riderUser.auth).expect(200);
 
       await go('PICKED_UP').expect(200);
-      expect(ctx.sms.lastTo('+237655443322')?.text).toMatch(/Code a donner au livreur : \d{4}/);
+      expect(ctx.sms.lastTo('+237655443322')?.text).toMatch(/donner le code au livreur : \d{4}/);
       await go('IN_DELIVERY').expect(200);
       await go('DELIVERY_FAILED').expect(400);
       const failed = await go('DELIVERY_FAILED', { failureReason: 'RECIPIENT_ABSENT' }).expect(200);

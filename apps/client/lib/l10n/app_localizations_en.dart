@@ -738,7 +738,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get valueHint => 'E.g. 25,000';
 
   @override
-  String get valueHelp => 'In FCFA. Shown to the rider, useful in case of dispute.';
+  String get valueHelp =>
+      'In FCFA. Never shown to the rider. Used to compensate you for loss or damage, within the limit set in the terms.';
 
   @override
   String get valueTooHigh => '10,000,000 F at most.';
@@ -1933,4 +1934,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String topUpRange(String min, String max) {
     return 'Amount between $min and $max.';
   }
+
+  @override
+  String get failureReasonDamaged =>
+      'The recipient refused the parcel: it was damaged. A claim is open; the Tara team will contact you.';
 }

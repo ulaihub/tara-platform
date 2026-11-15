@@ -3355,6 +3355,7 @@ export interface components {
           | 'ALREADY_COLLECTED'
           | 'PAYOUT_TOO_SMALL'
           | 'PAYOUT_IN_PROGRESS'
+          | 'DAMAGE_CLAIM_TOO_LATE'
           | 'PAYOUT_FROZEN'
           | 'PAYOUT_NOT_ALLOWED'
           | 'PAYOUT_NOT_FOUND'
@@ -3378,6 +3379,7 @@ export interface components {
       | 'REFUSED'
       | 'ADDRESS_NOT_FOUND'
       | 'PAYMENT_REFUSED'
+      | 'DAMAGED'
       | 'OTHER';
     /** @enum {string} */
     FeePayer: 'SENDER' | 'RECIPIENT';

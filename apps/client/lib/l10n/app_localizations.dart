@@ -1475,7 +1475,7 @@ abstract class AppLocalizations {
   /// No description provided for @valueHelp.
   ///
   /// In fr, this message translates to:
-  /// **'En FCFA. Indiquée au livreur, utile en cas de litige.'**
+  /// **'En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.'**
   String get valueHelp;
 
   /// No description provided for @valueTooHigh.
@@ -3487,6 +3487,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Montant entre {min} et {max}.'**
   String topUpRange(String min, String max);
+
+  /// No description provided for @failureReasonDamaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le destinataire a refusé le colis : il était abîmé. Une réclamation est ouverte, l’équipe Tara vous contacte.'**
+  String get failureReasonDamaged;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

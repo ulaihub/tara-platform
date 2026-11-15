@@ -28,6 +28,7 @@ export const FailureReasonEnum = z
     'REFUSED',
     'ADDRESS_NOT_FOUND',
     'PAYMENT_REFUSED',
+    'DAMAGED',
     'OTHER',
   ])
   .meta({ id: 'FailureReason' });

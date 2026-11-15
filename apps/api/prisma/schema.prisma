@@ -249,6 +249,8 @@ enum FailureReason {
   ADDRESS_NOT_FOUND
   /// Le destinataire refuse de payer le montant à encaisser.
   PAYMENT_REFUSED
+  /// Le destinataire refuse le colis parce qu'il est abîmé (photo du colis, réclamation ouverte).
+  DAMAGED
   OTHER
 
   @@map("failure_reason")

@@ -4,6 +4,7 @@ import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthUser } from '../auth/auth.types.js';
 import { AppError } from '../common/errors/app-error.js';
+import { damageClaimDeadline } from '../common/time.js';
 import type { Prisma, TicketCategory, UserRole } from '../generated/prisma/client.js';
 import { NotificationService } from '../notifications/notification.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -112,6 +113,9 @@ export class SupportService {
       select: { phone: true },
     });
     if (body.orderId) await this.assertOrderConcerns(actor.id, user.phone, body.orderId);
+    if (body.orderId && body.category === 'DAMAGED_PARCEL') {
+      await this.assertDamageClaimInTime(body.orderId, new Date());
+    }
     const open = await this.prisma.ticket.count({
       where: { requesterId: actor.id, status: { in: [...ACTIVE] } },
     });
@@ -191,6 +195,22 @@ export class SupportService {
       }),
     ]);
     return this.mine(actor, id);
+  }
+
+  /**
+   * Colis abîmé : à signaler au plus tard 7 jours après la livraison, dimanches non compris
+   * (dommage caché) ; un dommage visible se signale à la remise. Au-delà, le colis est présumé
+   * remis en bon état : seul le service client, au téléphone, peut encore ouvrir la demande.
+   */
+  private async assertDamageClaimInTime(orderId: string, now: Date): Promise<void> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { deliveredAt: true, returnedAt: true },
+    });
+    const handedOver = order?.deliveredAt ?? order?.returnedAt;
+    if (handedOver && now >= damageClaimDeadline(handedOver)) {
+      throw AppError.unprocessable('DAMAGE_CLAIM_TOO_LATE');
+    }
   }
 
   /** La commande concerne l'utilisateur : il l'a envoyée, la reçoit ou la livre. */

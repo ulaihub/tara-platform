@@ -361,7 +361,7 @@
   "codTooHigh": "500 000 F au plus par livraison.",
   "valueLabel": "Valeur du contenu (facultatif)",
   "valueHint": "Ex. 25 000",
-  "valueHelp": "En FCFA. Indiquée au livreur, utile en cas de litige.",
+  "valueHelp": "En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.",
   "valueTooHigh": "10 000 000 F au plus.",
   "instructionsLabel": "Instructions pour le livreur (facultatif)",
   "instructionsHint": "Ex. Appeler en arrivant, sonner au portail vert",
@@ -1325,5 +1325,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "failureReasonDamaged": "Le destinataire a refusé le colis : il était abîmé. Une réclamation est ouverte, l’équipe Tara vous contacte."
 }

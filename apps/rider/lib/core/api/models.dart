@@ -650,7 +650,7 @@ class RiderOrder {
   final String? failureDecision;
 
   /// Motif du dernier échec (RECIPIENT_ABSENT, RECIPIENT_UNREACHABLE, ADDRESS_NOT_FOUND,
-  /// REFUSED, PAYMENT_REFUSED, OTHER) et son heure.
+  /// REFUSED, DAMAGED, PAYMENT_REFUSED, OTHER) et son heure.
   final String? failureReason;
   final DateTime? failedAt;
 

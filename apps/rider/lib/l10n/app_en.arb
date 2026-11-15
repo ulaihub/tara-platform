@@ -583,5 +583,10 @@
   "closeAccountSend": "Ask to close my account",
   "closeAccountSent": "Request sent. The Tara team answers in “Write to customer service”.",
   "closeAccountTicketSubject": "Closing my rider account",
-  "closeAccountTicketMessage": "I would like to close my Tara rider account and erase my data."
+  "closeAccountTicketMessage": "I would like to close my Tara rider account and erase my data.",
+  "reasonDamaged": "Damaged parcel, refused",
+  "photoDamaged": "Photo of the damaged parcel · required",
+  "photoDamagedHint": "The damage clearly visible",
+  "damagedNotice": "The recipient refuses a damaged parcel: photograph the damage and describe it. The Tara team opens a claim for the sender; bring the parcel back as a return.",
+  "damagedNoteHint": "E.g. crushed box, broken bottle"
 }

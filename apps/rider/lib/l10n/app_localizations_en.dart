@@ -1855,4 +1855,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get closeAccountTicketMessage => 'I would like to close my Tara rider account and erase my data.';
+
+  @override
+  String get reasonDamaged => 'Damaged parcel, refused';
+
+  @override
+  String get photoDamaged => 'Photo of the damaged parcel · required';
+
+  @override
+  String get photoDamagedHint => 'The damage clearly visible';
+
+  @override
+  String get damagedNotice =>
+      'The recipient refuses a damaged parcel: photograph the damage and describe it. The Tara team opens a claim for the sender; bring the parcel back as a return.';
+
+  @override
+  String get damagedNoteHint => 'E.g. crushed box, broken bottle';
 }

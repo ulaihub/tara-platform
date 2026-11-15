@@ -188,7 +188,7 @@ describe('Trajet des courses (sécurité, litiges, fraude)', () => {
       })
       .expect(200);
     const text = ctx.sms.lastTo(order.recipientPhone)?.text ?? '';
-    const deliveryCode = /donner au livreur : (\d{4})/.exec(text)?.[1];
+    const deliveryCode = /le code au livreur : (\d{4})/.exec(text)?.[1];
     const photoKey = await proofPhoto(ctx, rider);
     await request(ctx.http)
       .post(`/v1/rider/orders/${order.id}/deliver`)

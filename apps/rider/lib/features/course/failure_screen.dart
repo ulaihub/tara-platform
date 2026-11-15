@@ -27,6 +27,7 @@ const failureReasons = [
   'RECIPIENT_UNREACHABLE',
   'ADDRESS_NOT_FOUND',
   'REFUSED',
+  'DAMAGED',
   'PAYMENT_REFUSED',
   'OTHER',
 ];
@@ -37,6 +38,7 @@ String failureReasonLabel(AppLocalizations l, String reason) => switch (reason) 
   'ADDRESS_NOT_FOUND' => l.reasonAddressNotFound,
   'REFUSED' => l.reasonRefused,
   'PAYMENT_REFUSED' => l.reasonPaymentRefused,
+  'DAMAGED' => l.reasonDamaged,
   _ => l.reasonOther,
 };
 
@@ -227,11 +229,18 @@ class _FailureScreenState extends ConsumerState<FailureScreen> {
                   }
                 },
               ),
-              if (_reason == 'OTHER') ...[
+              if (_reason == 'DAMAGED') ...[
+                const SizedBox(height: 12),
+                TintBox(
+                  tone: TintTone.accent,
+                  child: Text(l.damagedNotice, style: TaraText.label.copyWith(color: c.textPrimary, height: 1.4)),
+                ),
+              ],
+              if (_reason == 'OTHER' || _reason == 'DAMAGED') ...[
                 const SizedBox(height: 12),
                 TaraTextField(
                   label: l.failureNoteLabel,
-                  hint: l.failureNoteHint,
+                  hint: _reason == 'DAMAGED' ? l.damagedNoteHint : l.failureNoteHint,
                   controller: _note,
                   textCapitalization: TextCapitalization.sentences,
                 ),
@@ -250,8 +259,8 @@ class _FailureScreenState extends ConsumerState<FailureScreen> {
                 path: _photoPath,
                 takenAt: _photoAt,
                 onTake: _busy ? null : _takePhoto,
-                title: l.photoPlace,
-                hint: l.photoPlaceHint,
+                title: _reason == 'DAMAGED' ? l.photoDamaged : l.photoPlace,
+                hint: _reason == 'DAMAGED' ? l.photoDamagedHint : l.photoPlaceHint,
                 takenLabel: l.photoPlaceTaken,
               ),
               const SizedBox(height: 12),

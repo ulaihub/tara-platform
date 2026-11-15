@@ -58,3 +58,22 @@ export function periodStart(period: 'day' | 'week' | 'month', now: Date): Date {
       return localMidnight(year, month, 1);
   }
 }
+
+/**
+ * Fin du délai pour signaler un colis abîmé : 7 jours après la livraison, dimanches non
+ * compris (Acte uniforme OHADA relatif aux contrats de transport de marchandises par route,
+ * art. 14), soit la fin du 7e jour non dimanche suivant la date de livraison, heure du Cameroun.
+ */
+export function damageClaimDeadline(deliveredAt: Date): Date {
+  // Minuit au Cameroun (UTC+1, sans heure d'été) du jour de la livraison.
+  const day = new Date(`${cameroonDate(deliveredAt)}T00:00:00+01:00`);
+  let counted = 0;
+  let cursor = day;
+  while (counted < 7) {
+    cursor = addDays(cursor, 1);
+    // Jour de la semaine au Cameroun : midi local évite toute ambiguïté de fuseau.
+    const weekday = new Date(cursor.getTime() + 12 * 3_600_000).getUTCDay();
+    if (weekday !== 0) counted += 1;
+  }
+  return addDays(cursor, 1);
+}
