@@ -211,6 +211,7 @@ export class RiderOrdersService {
         id: order.id,
         reference: order.reference,
         status: order.status,
+        batchNumber: order.batchNumber,
         packageSize: order.packageSize,
         packageContents: order.packageContents,
         packageDescription: order.packageDescription,

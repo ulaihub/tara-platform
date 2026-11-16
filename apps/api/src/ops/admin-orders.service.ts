@@ -204,6 +204,7 @@ export class AdminOrdersService {
         },
         pickupAddress: STOP_SELECT,
         dropoffAddress: STOP_SELECT,
+        batch: { select: { _count: { select: { orders: true } } } },
         events: {
           orderBy: { occurredAt: 'asc' },
           include: { actor: { select: { fullName: true, phone: true } } },
@@ -260,6 +261,8 @@ export class AdminOrdersService {
         aiWarning: order.parcelAiWarning,
         declaredValue: order.declaredValue,
         instructions: order.instructions,
+        batchNumber: order.batchNumber,
+        batchSize: order.batch?._count.orders ?? null,
       },
       sender: {
         id: order.sender.id,

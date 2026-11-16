@@ -88,7 +88,7 @@ export const CreateOrderBody = DeliveryItem.extend({
   promoCode: z.string().trim().max(32).optional(),
 });
 
-/** Jusqu'à 10 livraisons depuis un même point d'enlèvement (C4). */
+/** Jusqu'à 10 livraisons depuis un même point d'enlèvement (C4), numérotées dans cet ordre. */
 export const CreateBatchBody = z.object({
   pickupAddressId: z.uuid(),
   isExpress: z.boolean().default(false),
@@ -130,6 +130,9 @@ export const OrderDto = z
     status: OrderStatusEnum,
     trackingUrl: z.url(),
     batchId: z.uuid().nullable(),
+    /** Numéro du colis dans son envoi (à écrire sur le colis) et nombre de colis de l'envoi. */
+    batchNumber: z.int().nullable(),
+    batchSize: z.int().nullable(),
     isExpress: z.boolean(),
     scheduledFor: z.iso.datetime().nullable(),
     packageSize: PackageSizeEnum,

@@ -2668,6 +2668,8 @@ export interface components {
         aiWarning: string | null;
         declaredValue: number | null;
         instructions: string | null;
+        batchNumber: number | null;
+        batchSize: number | null;
       };
       sender: {
         /** Format: uuid */
@@ -3771,6 +3773,8 @@ export interface components {
       trackingUrl: string;
       /** Format: uuid */
       batchId: string | null;
+      batchNumber: number | null;
+      batchSize: number | null;
       isExpress: boolean;
       /** Format: date-time */
       scheduledFor: string | null;
@@ -4282,6 +4286,7 @@ export interface components {
       id: string;
       reference: string;
       status: components['schemas']['OrderStatus'];
+      batchNumber: number | null;
       packageSize: components['schemas']['PackageSize'];
       packageContents: components['schemas']['PackageContents'] | null;
       packageDescription: string | null;

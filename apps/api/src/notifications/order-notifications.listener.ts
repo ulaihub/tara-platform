@@ -7,6 +7,11 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationService } from './notification.service.js';
 import type { PushTemplate } from './push-templates.js';
 
+/** Prénom du destinataire, pour dire à l'expéditeur quel colis donner. */
+function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? name;
+}
+
 const SENDER_PUSH: Partial<Record<OrderChange['to'], PushTemplate>> = {
   ASSIGNED: 'ORDER_ASSIGNED',
   PICKED_UP: 'ORDER_PICKED_UP',
@@ -126,7 +131,13 @@ export class OrderNotificationsListener implements OnModuleInit {
     // L'expéditeur est prévenu, sauf de ses propres actions. Colis refusé par le livreur :
     // il apprend pourquoi et ce que coûte le déplacement.
     const refused = to === 'CANCELLED' && actor.role === 'RIDER';
-    const template = refused ? 'ORDER_PARCEL_REFUSED' : SENDER_PUSH[to];
+    // Envoi de plusieurs colis : le numéro dit lequel donner au livreur qui arrive.
+    const numbered = to === 'ASSIGNED' && order.batchNumber !== null;
+    const template = refused
+      ? 'ORDER_PARCEL_REFUSED'
+      : numbered
+        ? 'ORDER_ASSIGNED_BATCH'
+        : SENDER_PUSH[to];
     if (template && actor.id !== order.senderId) {
       await this.notifications.toUser(order.senderId, {
         template,
@@ -135,6 +146,8 @@ export class OrderNotificationsListener implements OnModuleInit {
           rider: full.rider?.user.fullName ?? 'Votre livreur',
           reason: full.cancelReason ?? 'Colis non conforme',
           fee: order.retryFee,
+          number: order.batchNumber ?? '',
+          recipient: firstName(order.recipientName),
         },
         data: { type: 'order.status', orderId: order.id, status: to },
         orderId: order.id,

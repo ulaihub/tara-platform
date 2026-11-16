@@ -113,6 +113,9 @@ export const AdminOrderDto = z
       aiWarning: z.string().nullable(),
       declaredValue: z.int().nullable(),
       instructions: z.string().nullable(),
+      /** Envoi de plusieurs colis : numéro écrit sur ce colis et nombre de colis de l'envoi. */
+      batchNumber: z.int().nullable(),
+      batchSize: z.int().nullable(),
     }),
     sender: Person.extend({ shopName: z.string().nullable() }),
     recipient: z.object({

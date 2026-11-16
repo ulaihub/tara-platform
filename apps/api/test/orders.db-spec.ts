@@ -400,6 +400,31 @@ describe('Tarification et commandes (C1 à C7)', () => {
       expect(new Set(res.body.orders.map((o: { batchId: string }) => o.batchId))).toEqual(
         new Set([res.body.batchId]),
       );
+      // Chaque colis porte son numéro, dans l'ordre de saisie : l'expéditeur l'écrit dessus.
+      expect(
+        res.body.orders.map(
+          (o: { recipient: { name: string }; batchNumber: number; batchSize: number }) => [
+            o.recipient.name,
+            o.batchNumber,
+            o.batchSize,
+          ],
+        ),
+      ).toEqual([
+        ['Awa', 1, 3],
+        ['Brice', 2, 3],
+        ['Carine', 3, 3],
+      ]);
+      const brice = await request(ctx.http)
+        .get(`/v1/orders/${res.body.orders[1].id}`)
+        .set(m.auth)
+        .expect(200);
+      expect(brice.body).toMatchObject({ batchNumber: 2, batchSize: 3 });
+      const single = await request(ctx.http)
+        .post('/v1/orders')
+        .set(m.auth)
+        .send(orderBody(m))
+        .expect(201);
+      expect(single.body.order).toMatchObject({ batchNumber: null, batchSize: null });
 
       const regenerated = await request(ctx.http)
         .post(`/v1/orders/${res.body.orders[0].id}/pickup-code`)
