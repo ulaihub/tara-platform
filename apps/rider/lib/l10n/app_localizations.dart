@@ -3301,6 +3301,198 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ex. carton écrasé, bouteille cassée'**
   String get damagedNoteHint;
+
+  /// No description provided for @pinCreateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre code secret'**
+  String get pinCreateTitle;
+
+  /// No description provided for @pinCreateBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'4 chiffres, comme pour Orange Money ou MoMo. Il protège votre solde et vos retraits. Ne le donnez à personne, même à Tara.'**
+  String get pinCreateBody;
+
+  /// No description provided for @pinConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmez votre code secret'**
+  String get pinConfirmTitle;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux codes sont différents. Recommencez.'**
+  String get pinMismatch;
+
+  /// No description provided for @pinEnterTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code secret'**
+  String get pinEnterTitle;
+
+  /// No description provided for @pinCurrentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre code secret actuel'**
+  String get pinCurrentTitle;
+
+  /// No description provided for @pinNewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau code secret'**
+  String get pinNewTitle;
+
+  /// No description provided for @pinForgot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code oublié ?'**
+  String get pinForgot;
+
+  /// No description provided for @pinUseBiometrics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser aussi mon empreinte'**
+  String get pinUseBiometrics;
+
+  /// No description provided for @pinBiometricButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser mon empreinte'**
+  String get pinBiometricButton;
+
+  /// No description provided for @pinBiometricTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmez avec votre empreinte'**
+  String get pinBiometricTitle;
+
+  /// No description provided for @pinDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer'**
+  String get pinDelete;
+
+  /// No description provided for @pinDigitsEntered.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} chiffre(s) sur 4'**
+  String pinDigitsEntered(int count);
+
+  /// No description provided for @pinLockedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code secret bloqué'**
+  String get pinLockedTitle;
+
+  /// No description provided for @pinLockedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après 5 erreurs, votre code secret est bloqué. Recevez un code sur votre numéro pour en choisir un nouveau.'**
+  String get pinLockedBody;
+
+  /// No description provided for @pinResetBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevez un code sur votre numéro pour choisir un nouveau code secret.'**
+  String get pinResetBody;
+
+  /// No description provided for @pinSendCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir un code'**
+  String get pinSendCode;
+
+  /// No description provided for @pinCodeSentSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code reçu par SMS.'**
+  String get pinCodeSentSms;
+
+  /// No description provided for @pinCodeSentWhatsApp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code reçu sur WhatsApp.'**
+  String get pinCodeSentWhatsApp;
+
+  /// No description provided for @codeBySms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir par SMS'**
+  String get codeBySms;
+
+  /// No description provided for @codeSentWhatsAppTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code envoyé sur WhatsApp au {phone}'**
+  String codeSentWhatsAppTo(String phone);
+
+  /// No description provided for @pinSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code secret enregistré.'**
+  String get pinSaved;
+
+  /// No description provided for @balanceShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher le solde'**
+  String get balanceShow;
+
+  /// No description provided for @balanceHide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer le solde'**
+  String get balanceHide;
+
+  /// No description provided for @pinReasonBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour voir votre solde'**
+  String get pinReasonBalance;
+
+  /// No description provided for @pinReasonWithdraw.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour retirer {amount}'**
+  String pinReasonWithdraw(String amount);
+
+  /// No description provided for @pinRowTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code secret'**
+  String get pinRowTitle;
+
+  /// No description provided for @pinRowSet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer mon code secret'**
+  String get pinRowSet;
+
+  /// No description provided for @pinRowNotSet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir mon code secret'**
+  String get pinRowNotSet;
+
+  /// No description provided for @biometricRowTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Empreinte digitale'**
+  String get biometricRowTitle;
+
+  /// No description provided for @biometricRowBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer avec l\'empreinte au lieu du code'**
+  String get biometricRowBody;
+
+  /// No description provided for @securitySection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sécurité'**
+  String get securitySection;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -13,17 +13,74 @@ String isoUtc(DateTime value) =>
 
 @immutable
 class OtpChallenge {
-  const OtpChallenge({required this.challengeId, required this.expiresAt, required this.resendAfterSeconds});
+  const OtpChallenge({
+    required this.challengeId,
+    required this.expiresAt,
+    required this.resendAfterSeconds,
+    this.channel = OtpChannel.sms,
+    this.autoRead = false,
+  });
   factory OtpChallenge.fromJson(Json json) => OtpChallenge(
     challengeId: _field(json, 'challengeId'),
     expiresAt: DateTime.parse(_field(json, 'expiresAt')),
     resendAfterSeconds: _field<num>(json, 'resendAfterSeconds').toInt(),
+    // Serveur d'avant WhatsApp : SMS sans empreinte.
+    channel: json['channel'] == 'WHATSAPP' ? OtpChannel.whatsapp : OtpChannel.sms,
+    autoRead: json['autoRead'] == true,
   );
-  static const fields = ['challengeId', 'expiresAt', 'resendAfterSeconds'];
+  static const fields = ['challengeId', 'expiresAt', 'resendAfterSeconds', 'channel', 'autoRead'];
 
   final String challengeId;
   final DateTime expiresAt;
   final int resendAfterSeconds;
+
+  /// Canal du code : WhatsApp, ou SMS (choisi, ou en secours de WhatsApp).
+  final OtpChannel channel;
+
+  /// Le SMS porte l'empreinte de l'app : Android remet le code à l'app sans rien demander.
+  final bool autoRead;
+}
+
+/// Canal d'un code de connexion.
+enum OtpChannel {
+  sms('SMS'),
+  whatsapp('WHATSAPP');
+
+  const OtpChannel(this.code);
+  final String code;
+}
+
+/// Code secret du compte (comme Orange Money et MTN MoMo).
+@immutable
+class PinStatus {
+  const PinStatus({required this.set, required this.locked, required this.remainingAttempts});
+  factory PinStatus.fromJson(Json json) => PinStatus(
+    set: _field(json, 'set'),
+    locked: _field(json, 'locked'),
+    remainingAttempts: _field<num>(json, 'remainingAttempts').toInt(),
+  );
+  static const fields = ['set', 'locked', 'remainingAttempts'];
+
+  /// Code choisi.
+  final bool set;
+
+  /// Bloqué après 5 erreurs : un code reçu par SMS ou WhatsApp permet d'en choisir un nouveau.
+  final bool locked;
+  final int remainingAttempts;
+}
+
+/// Preuve du code secret jointe à une action sensible : le code tapé, ou la clé libérée par
+/// l'empreinte sur ce téléphone.
+@immutable
+class PinProof {
+  const PinProof.pin(String this.pin) : biometricKey = null;
+  const PinProof.biometric(String this.biometricKey) : pin = null;
+
+  final String? pin;
+  final String? biometricKey;
+
+  /// Champs à joindre au corps de la requête.
+  Json toJson() => {'pin': ?pin, 'biometricKey': ?biometricKey};
 }
 
 @immutable

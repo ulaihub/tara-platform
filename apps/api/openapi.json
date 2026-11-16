@@ -105,6 +105,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "SMS",
+                      "WHATSAPP"
+                    ]
+                  },
+                  "appHash": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9+/]{11}$"
+                  },
                   "phone": {
                     "description": "Mobile camerounais ; toutes les écritures courantes sont acceptées",
                     "example": "+237690000000",
@@ -4299,6 +4310,15 @@
                   },
                   "operator": {
                     "$ref": "#/components/schemas/MobileMoneyOperator"
+                  },
+                  "pin": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "biometricKey": {
+                    "type": "string",
+                    "minLength": 40,
+                    "maxLength": 100
                   }
                 },
                 "required": [
@@ -4345,6 +4365,27 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pin": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "biometricKey": {
+                    "type": "string",
+                    "minLength": 40,
+                    "maxLength": 100
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "Succès",
@@ -4743,6 +4784,15 @@
                   },
                   "operator": {
                     "$ref": "#/components/schemas/MobileMoneyOperator"
+                  },
+                  "pin": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "biometricKey": {
+                    "type": "string",
+                    "minLength": 40,
+                    "maxLength": 100
                   }
                 },
                 "required": [
@@ -7727,6 +7777,248 @@
         ]
       }
     },
+    "/v1/me/pin": {
+      "get": {
+        "operationId": "Pin_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PinStatus"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      },
+      "put": {
+        "operationId": "Pin_set",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pin": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "currentPin": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "challengeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": [
+                  "pin"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      }
+    },
+    "/v1/me/pin/code": {
+      "post": {
+        "operationId": "Pin_requestCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "SMS",
+                      "WHATSAPP"
+                    ]
+                  },
+                  "appHash": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9+/]{11}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpChallenge"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      }
+    },
+    "/v1/me/pin/verify": {
+      "post": {
+        "operationId": "Pin_verify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pin": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "biometricKey": {
+                    "type": "string",
+                    "minLength": 40,
+                    "maxLength": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      }
+    },
+    "/v1/me/pin/biometric": {
+      "post": {
+        "operationId": "Pin_enableBiometric",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pin": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "installationId": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 64
+                  }
+                },
+                "required": [
+                  "pin",
+                  "installationId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BiometricKey"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      },
+      "delete": {
+        "operationId": "Pin_disableBiometric",
+        "parameters": [
+          {
+            "name": "installationId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 64
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Compte"
+        ]
+      }
+    },
     "/v1/me/export": {
       "get": {
         "operationId": "Privacy_export",
@@ -7797,12 +8089,17 @@
                   "code": {
                     "type": "string",
                     "pattern": "^\\d{6}$"
+                  },
+                  "pin": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "biometricKey": {
+                    "type": "string",
+                    "minLength": 40,
+                    "maxLength": 100
                   }
-                },
-                "required": [
-                  "challengeId",
-                  "code"
-                ]
+                }
               }
             }
           }
@@ -11333,6 +11630,20 @@
         ],
         "additionalProperties": false
       },
+      "BiometricKey": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 40,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "additionalProperties": false
+      },
       "Collection": {
         "type": "object",
         "properties": {
@@ -12124,6 +12435,12 @@
                   "ACCOUNT_DELETION_NOT_ALLOWED",
                   "SMS_SEND_FAILED",
                   "TERMS_ACCEPTANCE_REQUIRED",
+                  "PIN_REQUIRED",
+                  "PIN_INVALID",
+                  "PIN_LOCKED",
+                  "PIN_NOT_SET",
+                  "PIN_TOO_SIMPLE",
+                  "BIOMETRIC_INVALID",
                   "TERMS_OUTDATED",
                   "TERMS_REQUIRED",
                   "ACCOUNT_SUSPENDED",
@@ -14020,12 +14337,24 @@
           },
           "resendAfterSeconds": {
             "type": "integer"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "SMS",
+              "WHATSAPP"
+            ]
+          },
+          "autoRead": {
+            "type": "boolean"
           }
         },
         "required": [
           "challengeId",
           "expiresAt",
-          "resendAfterSeconds"
+          "resendAfterSeconds",
+          "channel",
+          "autoRead"
         ],
         "additionalProperties": false
       },
@@ -14298,6 +14627,26 @@
         },
         "required": [
           "pickupCode"
+        ],
+        "additionalProperties": false
+      },
+      "PinStatus": {
+        "type": "object",
+        "properties": {
+          "set": {
+            "type": "boolean"
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "remainingAttempts": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "set",
+          "locked",
+          "remainingAttempts"
         ],
         "additionalProperties": false
       },

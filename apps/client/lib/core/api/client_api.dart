@@ -217,30 +217,33 @@ class ClientApi {
   }
 
   /// Reversement immédiat de la boutique (offres Pro et Business, G3).
-  Future<Payout> payoutNow({required String key}) async =>
-      Payout.fromJson(await _api.post('/me/merchant/payouts', headers: {'Idempotency-Key': key}) as Json);
+  /// [proof] : code secret ou empreinte, exigé une fois le code choisi.
+  Future<Payout> payoutNow({required String key, PinProof? proof}) async => Payout.fromJson(
+    await _api.post('/me/merchant/payouts', body: {...?proof?.toJson()}, headers: {'Idempotency-Key': key}) as Json,
+  );
 
   /// Retrait du solde Tara vers le Mobile Money de l'expéditeur (G8) : tout le disponible.
-  Future<Payout> withdraw({required String phone, required String operator, required String key}) async =>
-      Payout.fromJson(
-        await _api.post(
-          '/me/wallet/refund',
-          body: {'phone': phone, 'operator': operator},
-          headers: {'Idempotency-Key': key},
-        ) as Json,
-      );
+  Future<Payout> withdraw({
+    required String phone,
+    required String operator,
+    required String key,
+    PinProof? proof,
+  }) async => Payout.fromJson(
+    await _api.post(
+      '/me/wallet/refund',
+      body: {'phone': phone, 'operator': operator, ...?proof?.toJson()},
+      headers: {'Idempotency-Key': key},
+    ) as Json,
+  );
 
   /// Toutes les données personnelles du compte (droit d'accès), en JSON.
   Future<Json> exportData() async => await _api.get('/me/export') as Json;
 
-  /// Code SMS qui confirme la suppression du compte ; refusé s'il reste une commande en
-  /// cours, de l'argent dû, un solde ou un retrait en cours.
-  Future<OtpChallenge> requestDeletionCode() async =>
-      OtpChallenge.fromJson(await _api.post('/me/deletion/code') as Json);
-
-  /// Suppression définitive du compte (droit à l'effacement), confirmée par le code reçu.
-  Future<void> deleteAccount({required String challengeId, required String code}) async {
-    await _api.post('/me/deletion', body: {'challengeId': challengeId, 'code': code});
+  /// Suppression définitive du compte (droit à l'effacement), confirmée par le code secret
+  /// (ou l'empreinte) ; refusée s'il reste une commande en cours, de l'argent dû, un solde ou
+  /// un retrait en cours.
+  Future<void> deleteAccount({required PinProof proof}) async {
+    await _api.post('/me/deletion', body: proof.toJson());
   }
 
   /// Relevé mensuel PDF de la boutique (G7), [month] au format AAAA-MM.

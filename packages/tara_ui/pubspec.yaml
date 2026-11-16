@@ -13,6 +13,9 @@ dependencies:
   # Réglages d'affichage gardés dans le stockage du téléphone (AppSettings).
   tara_core:
     path: ../tara_core
+  # Lecture du code reçu (code secret oublié).
+  tara_sms:
+    path: ../tara_sms
   path_parsing: ^1.1.0
   audioplayers: ^6.8.1
 

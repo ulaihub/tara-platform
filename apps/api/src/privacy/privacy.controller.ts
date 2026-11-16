@@ -20,12 +20,23 @@ import type { AuthUser } from '../auth/auth.types.js';
 import { CurrentUser, Roles } from '../auth/decorators.js';
 import { resolveLocale } from '../common/i18n/locale.js';
 import { ApiZodBody, ApiZodResponse, ValidBody } from '../common/validation/zod.js';
+import { PinProofFields } from '../pin/pin.schemas.js';
 import { PrivacyService } from './privacy.service.js';
 
-const DeletionBody = z.object({
-  challengeId: z.uuid(),
-  code: z.string().regex(/^\d{6}$/, 'six chiffres attendus'),
-});
+/** Confirmation : code secret (ou empreinte) une fois choisi, sinon code reçu par SMS. */
+const DeletionBody = z
+  .object({
+    challengeId: z.uuid().optional(),
+    code: z
+      .string()
+      .regex(/^\d{6}$/, 'six chiffres attendus')
+      .optional(),
+    ...PinProofFields,
+  })
+  .refine((body) => (body.challengeId === undefined) === (body.code === undefined), {
+    message: 'challengeId et code vont ensemble',
+    path: ['code'],
+  });
 
 const ExportDto = z
   .record(z.string(), z.unknown())
@@ -76,7 +87,7 @@ export class PrivacyController {
     @ValidBody(DeletionBody) body: z.output<typeof DeletionBody>,
     @Req() request: Request,
   ): Promise<void> {
-    return this.privacy.deleteAccount(user, body.challengeId, body.code, request);
+    return this.privacy.deleteAccount(user, body, request);
   }
 }
 

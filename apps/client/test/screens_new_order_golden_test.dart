@@ -16,6 +16,7 @@ import 'package:tara_client/features/order/when_step.dart';
 import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_map/pin_picker_map.dart';
+import 'package:tara_test/fake_pin.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
@@ -76,6 +77,10 @@ List<Override> overrides(
   currentPositionProvider.overrideWithValue(() async => MapPoint.douala),
   launcherProvider.overrideWithValue(launcher ?? (_) async => true),
   realtimeProvider.overrideWithValue(realtime ?? FakeRealtime()),
+  // Code secret, empreinte et lecture du SMS sans réseau ni capteur.
+  pinApiProvider.overrideWithValue(api.pins ??= FakePinApi()),
+  biometricsProvider.overrideWithValue(api.biometrics),
+  smsCodeReaderProvider.overrideWithValue(api.sms),
 ];
 
 Widget flow(

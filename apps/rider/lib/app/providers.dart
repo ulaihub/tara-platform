@@ -10,12 +10,16 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
 import 'package:tara_core/api/legal_api.dart';
+import 'package:tara_core/api/pin_api.dart';
 import 'package:tara_core/api/support_api.dart';
 import 'package:tara_core/network/network_status.dart';
 import 'package:tara_core/push/push_service.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
+import 'package:tara_core/security/biometrics.dart';
 import 'package:tara_core/session/session_store.dart';
+import 'package:tara_sms/tara_sms.dart';
 import 'package:tara_ui/app_settings.dart';
+import 'package:tara_ui/components/pin_flow.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/api/models.dart';
@@ -83,6 +87,21 @@ final supportBackendProvider = Provider<SupportBackend>((ref) => SupportApi(ref.
 final legalApiProvider = Provider<LegalApi>(
   (ref) => LegalApi(ref.watch(apiClientProvider), ref.watch(sessionStoreProvider), app: 'rider'),
 );
+
+/// Code secret (comme Orange Money et MTN MoMo) et empreinte digitale.
+final pinApiProvider = Provider<PinApi>((ref) => PinApi(ref.watch(apiClientProvider), ref.watch(sessionStoreProvider)));
+final biometricsProvider = Provider<Biometrics>((ref) => DeviceBiometrics());
+
+/// Lecture du code reçu par SMS (Android).
+final smsCodeReaderProvider = Provider<SmsCodeReader>((ref) => const SmsCodeReader());
+
+/// Solde masqué par défaut, affiché après le code secret ; masqué à la déconnexion.
+final balanceVisibilityProvider = Provider<BalanceVisibility>((ref) {
+  ref.watch(authControllerProvider.select((auth) => auth.value));
+  final visibility = BalanceVisibility();
+  ref.onDispose(visibility.dispose);
+  return visibility;
+});
 
 /// Conditions à accepter (nouvelle version) et versions acceptées ; relu après chaque
 /// acceptation et à chaque changement de session.
@@ -157,8 +176,16 @@ class AuthController extends AsyncNotifier<AuthStatus> {
   Future<AuthStatus> build() async =>
       await ref.read(sessionStoreProvider).read() == null ? AuthStatus.signedOut : AuthStatus.signedIn;
 
-  Future<OtpChallenge> requestCode(String phone) =>
-      ref.read(authApiProvider).requestOtp(phone, locale: ref.read(languageCodeProvider));
+  /// Code par WhatsApp ou SMS ; l'empreinte de l'app est jointe pour la lecture automatique
+  /// du SMS. [channel] SMS : « Recevoir par SMS ».
+  Future<OtpChallenge> requestCode(String phone, {OtpChannel? channel}) async => ref
+      .read(authApiProvider)
+      .requestOtp(
+        phone,
+        locale: ref.read(languageCodeProvider),
+        appHash: await ref.read(smsCodeReaderProvider).appHash(),
+        channel: channel,
+      );
 
   /// Nouveau compte : `TERMS_REQUIRED`, puis le même code avec [terms] (versions acceptées).
   Future<AuthSession> verifyCode({

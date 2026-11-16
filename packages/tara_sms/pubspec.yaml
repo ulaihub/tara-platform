@@ -1,0 +1,23 @@
+name: tara_sms
+description: "Lecture du code SMS sur Android (SMS Retriever de Google) : sans geste quand le SMS porte l'empreinte de l'app, sinon avec l'accord de l'utilisateur. Rien sur iOS (le clavier propose déjà le code)."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: cm.tara.sms
+        pluginClass: TaraSmsPlugin

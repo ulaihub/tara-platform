@@ -18,6 +18,10 @@ const TEMPLATES = {
     fr: 'Tara : code de confirmation de SUPPRESSION de votre compte : {code}. Si vous n avez rien demande, ignorez ce message.',
     en: 'Tara: confirmation code to DELETE your account: {code}. If you did not request this, ignore this message.',
   },
+  PIN_RESET_OTP: {
+    fr: 'Tara : code pour CHANGER votre code secret : {code}. Il expire dans {minutes} min. Ne le donnez a personne, meme a Tara.',
+    en: 'Tara: code to CHANGE your secret PIN: {code}. It expires in {minutes} min. Never share it, not even with Tara.',
+  },
   TERMS_OTP: {
     fr: 'Tara : code pour SIGNER votre acceptation des nouvelles conditions : {code}. Ne le partagez avec personne.',
     en: 'Tara: code to SIGN your acceptance of the new terms: {code}. Do not share it with anyone.',
@@ -96,4 +100,12 @@ export function renderSms(
   params: Record<string, string | number>,
 ): string {
   return interpolate(TEMPLATES[template][locale], params);
+}
+
+/**
+ * Empreinte de l'app Android en dernière ligne d'un SMS de code (SMS Retriever) : le
+ * téléphone remet alors le message à l'app, sans permission ni geste de l'utilisateur.
+ */
+export function withAppHash(text: string, hash: string | null | undefined): string {
+  return hash ? `${text}\n\n${hash}` : text;
 }

@@ -25,7 +25,7 @@ export class AuthController {
     private readonly tokens: TokenService,
   ) {}
 
-  /** Envoie un code de connexion à 6 chiffres par SMS (A1). */
+  /** Envoie un code de connexion à 6 chiffres par WhatsApp ou SMS (A1). */
   @Post('otp')
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @ApiZodBody(RequestOtpBody)
@@ -35,7 +35,10 @@ export class AuthController {
     @Headers('accept-language') acceptLanguage: string | undefined,
     @Ip() ip: string,
   ): Promise<z.output<typeof OtpChallengeDto>> {
-    return this.otp.request(body.phone, body.locale ?? resolveLocale(acceptLanguage), ip);
+    return this.otp.request(body.phone, body.locale ?? resolveLocale(acceptLanguage), ip, 'LOGIN', {
+      channel: body.channel,
+      appHash: body.appHash,
+    });
   }
 
   /** Vérifie le code ; crée le compte au premier passage (conditions acceptées obligatoires). */

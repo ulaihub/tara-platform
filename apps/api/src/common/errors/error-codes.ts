@@ -88,6 +88,31 @@ export const ERROR_MESSAGES = {
     fr: 'Les conditions d’utilisation ont changé : lisez-les et acceptez-les pour continuer.',
     en: 'The terms of use have changed: read and accept them to continue.',
   },
+  // Code secret du compte (comme Orange Money et MTN MoMo)
+  PIN_REQUIRED: {
+    fr: 'Entrez votre code secret.',
+    en: 'Enter your secret PIN.',
+  },
+  PIN_INVALID: {
+    fr: 'Code secret incorrect. Encore {remaining} essai(s) avant blocage.',
+    en: 'Incorrect secret PIN. {remaining} attempt(s) left before it is blocked.',
+  },
+  PIN_LOCKED: {
+    fr: 'Code secret bloqué après 5 erreurs. Choisissez-en un nouveau avec le code reçu par SMS.',
+    en: 'Secret PIN blocked after 5 errors. Choose a new one with the code sent by SMS.',
+  },
+  PIN_NOT_SET: {
+    fr: 'Choisissez d’abord votre code secret.',
+    en: 'Choose your secret PIN first.',
+  },
+  PIN_TOO_SIMPLE: {
+    fr: 'Code trop facile à deviner (ex. 1111 ou 1234). Choisissez-en un autre.',
+    en: 'This PIN is too easy to guess (e.g. 1111 or 1234). Choose another one.',
+  },
+  BIOMETRIC_INVALID: {
+    fr: 'Empreinte à réactiver : entrez votre code secret.',
+    en: 'Fingerprint needs to be set up again: enter your secret PIN.',
+  },
   TERMS_OUTDATED: {
     fr: 'Une nouvelle version des conditions vient de paraître : relisez-la avant d’accepter.',
     en: 'A new version of the terms was just published: read it again before accepting.',

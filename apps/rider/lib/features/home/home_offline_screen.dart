@@ -6,6 +6,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/map_backdrop.dart';
+import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/components/status.dart';
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/format.dart';
@@ -17,6 +18,7 @@ import '../../app/providers.dart';
 import '../../core/location/online_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pin.dart';
 import '../legal/terms_screen.dart';
 import 'home_summary.dart';
 
@@ -238,44 +240,54 @@ final documentLabelsProvider = FutureProvider<Map<String, String Function(String
   };
 });
 
-class _EarningsCard extends StatelessWidget {
+class _EarningsCard extends ConsumerWidget {
   const _EarningsCard({required this.summary, required this.onDetails});
 
   final HomeSummary? summary;
   final VoidCallback onDetails;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final s = summary;
-    Widget tile(String value, String label, {bool accent = false}) => Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          color: accent ? c.accentTintBg : c.chipBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: accent ? c.accentTintBorder : c.chipBorder),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                value,
-                maxLines: 1,
-                style: TaraText.text.copyWith(
-                  color: accent ? c.accentStrongText : c.textPrimary,
-                  fontWeight: FontWeight.w800,
-                  fontFeatures: TaraText.tabular,
-                ),
-              ),
+    // Solde masqué (comme sur MoMo) : affiché après le code secret, d'une touche sur la case.
+    final visibility = ref.watch(balanceVisibilityProvider);
+    Widget tile(String value, String label, {bool accent = false, VoidCallback? onTap, String? hint}) => Expanded(
+      child: Semantics(
+        button: onTap != null,
+        hint: hint,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            decoration: BoxDecoration(
+              color: accent ? c.accentTintBg : c.chipBg,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: accent ? c.accentTintBorder : c.chipBorder),
             ),
-            const SizedBox(height: 2),
-            Text(label, maxLines: 2, style: TaraText.small.copyWith(color: c.textTertiary)),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: TaraText.text.copyWith(
+                      color: accent ? c.accentStrongText : c.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: TaraText.tabular,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(label, maxLines: 2, style: TaraText.small.copyWith(color: c.textTertiary)),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -298,7 +310,16 @@ class _EarningsCard extends StatelessWidget {
               const SizedBox(width: 8),
               tile(formatOnline(s?.onlineSeconds ?? 0), l.onlineTime),
               const SizedBox(width: 8),
-              tile('${formatAmount(s?.available ?? 0)} F', l.balanceShort, accent: true),
+              ListenableBuilder(
+                listenable: visibility,
+                builder: (context, _) => tile(
+                  balanceText(visibility, s?.available ?? 0),
+                  l.balanceShort,
+                  accent: true,
+                  hint: visibility.visible ? l.balanceHide : l.balanceShow,
+                  onTap: visibility.visible ? visibility.hide : () => revealBalance(context, ref),
+                ),
+              ),
             ],
           ),
         ],

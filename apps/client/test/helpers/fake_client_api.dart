@@ -5,6 +5,7 @@ import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
+import 'package:tara_test/fake_pin.dart';
 
 /// API expéditeur sans réseau : compte, nom et boutique enregistrés.
 class FakeClientApi extends ClientApi {
@@ -354,8 +355,22 @@ class FakeClientApi extends ClientApi {
   int payoutsNow = 0;
   final withdrawals = <(String, String)>[];
 
+  /// Code secret contrôlé comme le serveur ; preuves reçues (retraits, suppression).
+  FakePinApi? pins;
+  final proofs = <PinProof?>[];
+
+  /// Empreinte absente par défaut ; lecture du SMS pilotée par le test.
+  FakeBiometrics biometrics = FakeBiometrics(present: false);
+  final sms = FakeSmsCodeReader();
+
+  void _check(PinProof? proof) {
+    if (proof != null) pins?.check(proof);
+    proofs.add(proof);
+  }
+
   @override
-  Future<Payout> payoutNow({required String key}) async {
+  Future<Payout> payoutNow({required String key, PinProof? proof}) async {
+    _check(proof);
     payoutsNow++;
     return Payout(
       id: 'payout-now',
@@ -368,7 +383,13 @@ class FakeClientApi extends ClientApi {
   }
 
   @override
-  Future<Payout> withdraw({required String phone, required String operator, required String key}) async {
+  Future<Payout> withdraw({
+    required String phone,
+    required String operator,
+    required String key,
+    PinProof? proof,
+  }) async {
+    _check(proof);
     withdrawals.add((phone, operator));
     return Payout(
       id: 'withdraw',
@@ -391,27 +412,17 @@ class FakeClientApi extends ClientApi {
     };
   }
 
-  /// Codes de suppression demandés ; [deletionErrors] : refus renvoyés d'abord, un par demande.
-  int deletionCodes = 0;
+  /// [deletionErrors] : refus renvoyés d'abord, un par demande de suppression.
   final deletionErrors = <ApiException>[];
 
-  /// Suppressions confirmées : (identifiant du code, code tapé).
-  final deletions = <(String, String)>[];
+  /// Suppressions confirmées, avec la preuve du code secret.
+  final deletions = <PinProof>[];
 
   @override
-  Future<OtpChallenge> requestDeletionCode() async {
-    deletionCodes++;
+  Future<void> deleteAccount({required PinProof proof}) async {
+    _check(proof);
     if (deletionErrors.isNotEmpty) throw deletionErrors.removeAt(0);
-    return OtpChallenge(
-      challengeId: 'del-$deletionCodes',
-      expiresAt: DateTime.utc(2026, 11, 4, 9, 40),
-      resendAfterSeconds: 60,
-    );
-  }
-
-  @override
-  Future<void> deleteAccount({required String challengeId, required String code}) async {
-    deletions.add((challengeId, code));
+    deletions.add(proof);
   }
 
   /// Relevés téléchargés (mois AAAA-MM).

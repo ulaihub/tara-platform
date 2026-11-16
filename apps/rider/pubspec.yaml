@@ -32,6 +32,8 @@ dependencies:
     path: ../../packages/tara_core
   tara_map:
     path: ../../packages/tara_map
+  tara_sms:
+    path: ../../packages/tara_sms
   tara_ui:
     path: ../../packages/tara_ui
   audioplayers: ^6.8.1
