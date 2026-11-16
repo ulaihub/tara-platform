@@ -14,6 +14,8 @@ void main() {
     expect(codeInSms('Code 12345 trop court'), isNull);
     expect(codeInSms('Tara : 1234567'), isNull);
     expect(codeInSms('Tara : 4821', length: 4), '4821');
+    // SMS d'un autre expéditeur (Mobile Money, opérateur) : jamais pris pour le code.
+    expect(codeInSms('Transfert de 482913 FCFA reçu. Solde : 12 500 FCFA.'), isNull);
   });
 
   test('lit le SMS par le canal Android, avec ou sans accord', () async {

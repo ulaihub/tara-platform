@@ -10,6 +10,8 @@
 #   tara testeur [numéro | retirer numéro]   téléphones de test, sans SMS payant
 #   tara sms       derniers SMS des téléphones de test (codes de connexion, de livraison…)
 #   tara paiements derniers paiements Mobile Money et motif d'un échec (réponse du prestataire)
+#   tara connexions [numéro]   derniers codes de connexion demandés, essais faux, blocage
+#   tara debloquer numéro      lève le blocage d'un numéro (trop de codes faux en 24 h)
 #   tara osrm      (re)prépare la carte des itinéraires du Cameroun
 #
 # Guide pas à pas : docs/DEPLOIEMENT.md.
@@ -436,6 +438,45 @@ cmd_paiements() {
     FROM payments ORDER BY created_at DESC LIMIT 10;"
 }
 
+# Derniers codes demandés (tous les numéros, ou un seul) : essais faux, code utilisé ou
+# expiré, et blocage du numéro (10 codes faux en 24 h). Numéros masqués à l'écran.
+cmd_connexions() {
+  need_root
+  local filter=""
+  if [[ -n ${1:-} ]]; then filter="WHERE phone = '$(phone_e164 "$1")'"; fi
+  dc exec -T postgres psql -U tara -d tara -P pager=off -c "
+    SELECT to_char(created_at AT TIME ZONE 'Africa/Douala', 'DD/MM HH24:MI') AS heure,
+           overlay(phone placing '•••••' from 6 for 6) AS numero,
+           purpose AS motif, attempts AS essais_faux,
+           CASE WHEN consumed_at IS NOT NULL THEN 'utilisé'
+                WHEN expires_at < now() THEN 'expiré' ELSE 'en attente' END AS code
+    FROM otp_challenges $filter ORDER BY created_at DESC LIMIT 10;" \
+    -c "
+    SELECT overlay(phone placing '•••••' from 6 for 6) AS numero,
+           sum(attempts) AS codes_faux_24h,
+           CASE WHEN sum(attempts) >= 10 THEN 'BLOQUÉ (tara debloquer numéro)' ELSE 'ok' END AS etat
+    FROM otp_challenges
+    WHERE created_at >= now() - interval '24 hours' ${filter:+AND ${filter#WHERE }}
+    GROUP BY phone HAVING sum(attempts) > 0 ORDER BY sum(attempts) DESC LIMIT 10;"
+}
+
+# Débloque un numéro (trop de codes faux en 24 h) : les essais faux du jour sont remis à zéro
+# et les codes encore valables expirent (il faut en redemander un). Inscrit au journal d'audit.
+cmd_debloquer() {
+  need_root
+  local phone
+  phone=$(phone_e164 "${1:-}")
+  dc exec -T postgres psql -U tara -d tara -v ON_ERROR_STOP=1 -q -c "
+    BEGIN;
+    UPDATE otp_challenges SET attempts = 0, expires_at = LEAST(expires_at, now())
+    WHERE phone = '$phone' AND created_at >= now() - interval '24 hours';
+    INSERT INTO audit_logs (id, actor_id, actor_roles, action, entity_type, entity_id, after)
+    VALUES (gen_random_uuid(), NULL, '{}'::user_role[], 'otp.unlocked', 'phone', '$phone',
+            '{\"by\": \"tara debloquer\"}'::jsonb);
+    COMMIT;"
+  ok "$phone débloqué : demandez un nouveau code dans l'app"
+}
+
 case "${1:-}" in
   install) cmd_install ;;
   config) cmd_config ;;
@@ -454,5 +495,13 @@ case "${1:-}" in
     ;;
   sms) cmd_sms ;;
   paiements) cmd_paiements ;;
+  connexions)
+    shift
+    cmd_connexions "$@"
+    ;;
+  debloquer)
+    shift
+    cmd_debloquer "$@"
+    ;;
   *) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

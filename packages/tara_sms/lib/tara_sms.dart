@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// Code à [length] chiffres dans le texte d'un SMS : le premier nombre de cette longueur
-/// (l'empreinte de l'app, en dernière ligne, vient après).
-String? codeInSms(String message, {int length = 6}) =>
-    RegExp('(?<![0-9])[0-9]{$length}(?![0-9])').firstMatch(message)?.group(0);
+/// Code à [length] chiffres dans le texte d'un SMS de Tara : le premier nombre de cette
+/// longueur (l'empreinte de l'app, en dernière ligne, vient après). Un autre SMS (Mobile
+/// Money, opérateur…) ne donne rien : il ferait perdre un essai et bloquer le numéro.
+String? codeInSms(String message, {int length = 6}) => message.toLowerCase().contains('tara')
+    ? RegExp('(?<![0-9])[0-9]{$length}(?![0-9])').firstMatch(message)?.group(0)
+    : null;
 
 /// Lecture du code SMS sur Android (SMS Retriever de Google), sans permission de lecture
 /// des SMS. Sur iOS et dans les tests, rien : le clavier propose déjà le code reçu.

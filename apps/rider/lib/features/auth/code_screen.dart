@@ -70,7 +70,13 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
   @override
   void initState() {
     super.initState();
-    _code.addListener(() => setState(() => _error = null));
+    // L'erreur reste affichée quand l'app vide les cases (code refusé) ; elle disparaît dès
+    // que l'utilisateur retape un chiffre.
+    _code.addListener(
+      () => setState(() {
+        if (_code.text.isNotEmpty) _error = null;
+      }),
+    );
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
