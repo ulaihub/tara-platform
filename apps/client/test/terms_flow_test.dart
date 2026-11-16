@@ -105,37 +105,41 @@ void main() {
     ]);
   });
 
-  testWidgets('une nouvelle version se signe avec un code SMS dédié', (tester) async {
+  testWidgets('une nouvelle version s’accepte d’un geste, sans code SMS', (tester) async {
     final legal = FakeLegalApi(status: newVersion());
     var signed = 0;
     await pumpVariant(
       tester,
       _variant,
       _scoped(
-        TermsScreen.update(phone: '+237677123456', onLater: () {}, onSigned: () => signed++),
+        TermsScreen.update(onLater: () {}, onSigned: () => signed++),
         legal: legal,
       ),
     );
     await settle(tester);
+    expect(
+      find.text(
+        'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous suivez '
+        'vos livraisons en cours mais ne pouvez plus en commander de nouvelles.',
+      ),
+      findsOneWidget,
+    );
     await readToEnd(tester);
     await tester.tap(find.byType(TaraCheckRow));
     await settle(tester);
-    await tester.tap(find.text('Recevoir le code pour signer'));
-    await settle(tester);
-    expect(legal.codes, 1);
-    expect(find.textContaining('Il vaut signature de votre acceptation.'), findsOneWidget);
 
-    legal.acceptError = const ApiException(code: 'OTP_INVALID', message: 'Code incorrect.', status: 400);
-    await tester.enterText(find.byType(EditableText).first, '111111');
+    // Refus du serveur : message affiché, rien d'accepté, on peut réessayer.
+    legal.acceptError = const ApiException(code: 'INTERNAL', message: 'Réessayez dans un instant.', status: 500);
+    await tester.tap(find.text('J’accepte la nouvelle version'));
     await settle(tester);
-    expect(find.text('Code incorrect.'), findsOneWidget);
+    expect(find.text('Réessayez dans un instant.'), findsOneWidget);
     expect(signed, 0);
 
     legal.acceptError = null;
-    await tester.enterText(find.byType(EditableText).first, '654321');
+    await tester.tap(find.text('J’accepte la nouvelle version'));
     await settle(tester);
-    expect(legal.signed.single.code, '654321');
-    expect(legal.signed.single.versions, {'expediteurs': '2026-11', 'confidentialite': '2026-11'});
+    expect(find.byType(EditableText), findsNothing);
+    expect(legal.signed.single, {'expediteurs': '2026-11', 'confidentialite': '2026-11'});
     expect(signed, 1);
   });
 

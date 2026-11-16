@@ -136,11 +136,7 @@ class _AccountGateState extends ConsumerState<_AccountGate> {
     // Nouvelle version des conditions : présentée à l'ouverture (sans réseau, plus tard).
     final terms = ref.watch(termsStatusProvider).value;
     if (terms != null && !terms.upToDate && !_termsPostponed) {
-      return TermsScreen.update(
-        phone: account.phone,
-        onLater: () => setState(() => _termsPostponed = true),
-        onSigned: () {},
-      );
+      return TermsScreen.update(onLater: () => setState(() => _termsPostponed = true), onSigned: () {});
     }
     return HomeFlow(me: account);
   }

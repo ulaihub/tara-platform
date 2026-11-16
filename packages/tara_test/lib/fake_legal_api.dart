@@ -45,13 +45,13 @@ TermsStatus upToDate([String app = 'client']) => TermsStatus(
   ],
 );
 
-/// Nouvelle version des conditions de l'app à signer.
+/// Nouvelle version des conditions de l'app à accepter.
 TermsStatus newVersion([String app = 'client']) =>
     TermsStatus(required: {termsOf(app): '2026-12'}, accepted: upToDate(app).accepted);
 
 String termsOf(String app) => app == 'rider' ? 'livreurs' : 'expediteurs';
 
-/// Conditions sans réseau : textes d'exemple, signature enregistrée.
+/// Conditions sans réseau : textes d'exemple, acceptation enregistrée.
 class FakeLegalApi extends LegalApi {
   FakeLegalApi({TermsStatus? status, super.app = 'client'})
     : status0 = status ?? upToDate(app),
@@ -61,10 +61,11 @@ class FakeLegalApi extends LegalApi {
       );
 
   TermsStatus status0;
-  int codes = 0;
-  final signed = <({String code, Map<String, String> versions})>[];
 
-  /// Erreur renvoyée à la signature (code faux, version dépassée).
+  /// Versions envoyées à chaque acceptation.
+  final signed = <Map<String, String>>[];
+
+  /// Erreur renvoyée à l'acceptation (version dépassée, réseau).
   ApiException? acceptError;
 
   @override
@@ -79,23 +80,9 @@ class FakeLegalApi extends LegalApi {
   Future<TermsStatus> status() async => status0;
 
   @override
-  Future<OtpChallenge> requestCode() async {
-    codes++;
-    return OtpChallenge(
-      challengeId: '00000000-0000-4000-8000-0000000000cc',
-      expiresAt: DateTime.utc(2026, 11, 3, 10),
-      resendAfterSeconds: 60,
-    );
-  }
-
-  @override
-  Future<void> accept({
-    required String challengeId,
-    required String code,
-    required Map<String, String> versions,
-  }) async {
+  Future<void> accept({required Map<String, String> versions}) async {
     if (acceptError case final error?) throw error;
-    signed.add((code: code, versions: versions));
+    signed.add(versions);
     status0 = upToDate(app);
   }
 }

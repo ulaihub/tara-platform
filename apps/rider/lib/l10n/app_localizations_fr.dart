@@ -1550,7 +1550,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get termsUpdateIntro =>
-      'Lisez la nouvelle version jusqu’en bas, puis signez-la avec le code reçu par SMS. Sans signature, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.';
+      'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.';
 
   @override
   String get termsLater => 'Plus tard';
@@ -1579,15 +1579,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get termsCreateAccount => 'Accepter et créer mon compte';
 
   @override
-  String get termsGetCode => 'Recevoir le code pour signer';
-
-  @override
-  String termsCodeSent(String phone) {
-    return 'Code envoyé au $phone. Il vaut signature de votre acceptation.';
-  }
-
-  @override
-  String get termsSign => 'Signer';
+  String get termsAcceptUpdate => 'J’accepte la nouvelle version';
 
   @override
   String termsAcceptedOn(String version, String date) {
@@ -1606,13 +1598,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get termsPrivacyTitle => 'Politique de confidentialité';
 
   @override
-  String get termsToSign => 'Nouvelle version à lire et signer';
+  String get termsToSign => 'Nouvelle version à lire et accepter';
 
   @override
-  String get blockerTerms => 'Nos conditions ont changé : lisez-les et signez-les pour recevoir des courses.';
+  String get blockerTerms => 'Nos conditions ont changé : lisez-les et acceptez-les pour recevoir des courses.';
 
   @override
-  String get readAndSign => 'Lire et signer';
+  String get readAndSign => 'Lire et accepter';
 
   @override
   String get addressPhoto => 'Voir la façade';

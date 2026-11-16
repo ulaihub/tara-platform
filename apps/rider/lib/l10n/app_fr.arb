@@ -961,7 +961,7 @@
   "termsTitle": "Conditions des livreurs",
   "termsUpdateTitle": "Nos conditions ont changé",
   "termsSignupIntro": "Avant de créer votre compte, lisez les conditions des livreurs et la politique de confidentialité jusqu’en bas. Elles expliquent votre statut, vos gains, l’encaissement et ce que nous faisons de vos données.",
-  "termsUpdateIntro": "Lisez la nouvelle version jusqu’en bas, puis signez-la avec le code reçu par SMS. Sans signature, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.",
+  "termsUpdateIntro": "Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.",
   "termsLater": "Plus tard",
   "termsEnd": "Vous êtes arrivé au bout des textes.",
   "termsScrollFirst": "Faites défiler les textes jusqu’en bas pour pouvoir les accepter.",
@@ -977,16 +977,7 @@
   "termsCheckAnd": " et la ",
   "termsCheckPrivacy": "politique de confidentialité",
   "termsCreateAccount": "Accepter et créer mon compte",
-  "termsGetCode": "Recevoir le code pour signer",
-  "termsCodeSent": "Code envoyé au {phone}. Il vaut signature de votre acceptation.",
-  "@termsCodeSent": {
-    "placeholders": {
-      "phone": {
-        "type": "String"
-      }
-    }
-  },
-  "termsSign": "Signer",
+  "termsAcceptUpdate": "J’accepte la nouvelle version",
   "termsAcceptedOn": "Version {version} acceptée le {date}",
   "@termsAcceptedOn": {
     "placeholders": {
@@ -1008,9 +999,9 @@
   },
   "termsSection": "Conditions et confidentialité",
   "termsPrivacyTitle": "Politique de confidentialité",
-  "termsToSign": "Nouvelle version à lire et signer",
-  "blockerTerms": "Nos conditions ont changé : lisez-les et signez-les pour recevoir des courses.",
-  "readAndSign": "Lire et signer",
+  "termsToSign": "Nouvelle version à lire et accepter",
+  "blockerTerms": "Nos conditions ont changé : lisez-les et acceptez-les pour recevoir des courses.",
+  "readAndSign": "Lire et accepter",
   "addressPhoto": "Voir la façade",
   "addressVoice": "Écouter la note",
   "addressVoiceStop": "Arrêter la note",

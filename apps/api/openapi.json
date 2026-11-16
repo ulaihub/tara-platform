@@ -564,8 +564,6 @@
                   }
                 },
                 "required": [
-                  "challengeId",
-                  "code",
                   "versions"
                 ]
               }

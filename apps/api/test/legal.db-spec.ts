@@ -20,7 +20,7 @@ const RIDER_TERMS = {
   confidentialite: LEGAL_TEXTS.confidentialite.version,
 };
 
-describe('Conditions d’utilisation : textes, acceptation signée, nouvelle version', () => {
+describe('Conditions d’utilisation : textes, acceptation, nouvelle version', () => {
   let ctx: TestContext;
   let admin: SignedIn;
 
@@ -44,7 +44,7 @@ describe('Conditions d’utilisation : textes, acceptation signée, nouvelle ver
     });
   }
 
-  /** Code SMS de signature : l'app le demande une fois les textes lus et la case cochée. */
+  /** Code SMS de signature d'une ancienne version de l'app. */
   async function signatureCode(user: SignedIn): Promise<string> {
     // Le code de connexion vient d'être envoyé : on passe le délai avant un nouveau SMS.
     await ctx.prisma.otpChallenge.deleteMany({ where: { phone: user.phone } });
@@ -52,7 +52,7 @@ describe('Conditions d’utilisation : textes, acceptation signée, nouvelle ver
     return challenge.body.challengeId as string;
   }
 
-  /** Renvoie le code reçu avec les versions affichées par l'app. */
+  /** Ancienne app : renvoie le code reçu avec les versions affichées. */
   function sign(
     user: SignedIn,
     app: 'client' | 'rider',
@@ -65,6 +65,15 @@ describe('Conditions d’utilisation : textes, acceptation signée, nouvelle ver
       .set(user.auth)
       .set('user-agent', 'TaraLivreur/1.0 (Android)')
       .send({ challengeId, code, versions, installationId: 'installation-signature' });
+  }
+
+  /** App actuelle : textes lus, case cochée, versions affichées ; la session suffit. */
+  function accept(user: SignedIn, app: 'client' | 'rider', versions: Record<string, string>) {
+    return request(ctx.http)
+      .post(`/v1/me/terms?app=${app}`)
+      .set(user.auth)
+      .set('user-agent', 'TaraLivreur/1.1 (Android)')
+      .send({ versions, installationId: 'installation-session' });
   }
 
   it('publie le texte complet de chaque document, sans compte', async () => {
@@ -137,7 +146,8 @@ describe('Conditions d’utilisation : textes, acceptation signée, nouvelle ver
       { document: 'livreurs', version: LEGAL_TEXTS.livreurs.version },
     ]);
 
-    // Mauvais code, puis version qui n'est pas celle en vigueur : rien n'est enregistré.
+    // Ancienne app, qui signe encore par code : mauvais code, puis version qui n'est pas
+    // celle en vigueur, rien n'est enregistré.
     const challengeId = await signatureCode(user);
     const good = otpFrom(ctx.sms, user.phone);
     const wrong = await sign(
@@ -168,6 +178,48 @@ describe('Conditions d’utilisation : textes, acceptation signée, nouvelle ver
     });
   });
 
+  it('accepte une nouvelle version sans code SMS : la session suffit, preuve gardée', async () => {
+    const user = await signIn(ctx);
+    await outdate(user.userId, 'expediteurs');
+    const lastSms = ctx.sms.lastTo(user.phone);
+
+    // Version qui n'est plus en vigueur, code sans identifiant : refusés, rien d'enregistré.
+    expect((await accept(user, 'client', { expediteurs: '2000-01' })).status).toBe(409);
+    await request(ctx.http)
+      .post('/v1/me/terms?app=client')
+      .set(user.auth)
+      .send({ code: '123456', versions: { expediteurs: VERSION } })
+      .expect(400);
+    // Sans session : refusé.
+    await request(ctx.http)
+      .post('/v1/me/terms?app=client')
+      .send({ versions: { expediteurs: VERSION } })
+      .expect(401);
+
+    await accept(user, 'client', { expediteurs: VERSION }).expect(204);
+    // Aucun SMS envoyé.
+    expect(ctx.sms.lastTo(user.phone)).toBe(lastSms);
+    const status = await request(ctx.http)
+      .get('/v1/me/terms?app=client')
+      .set(user.auth)
+      .expect(200);
+    expect(status.body.required).toEqual([]);
+    const consent = await ctx.prisma.consent.findFirst({
+      where: { userId: user.userId, version: `expediteurs:${VERSION}` },
+    });
+    expect(consent).toMatchObject({
+      kind: 'TERMS',
+      installationId: 'installation-session',
+      userAgent: 'TaraLivreur/1.1 (Android)',
+      ip: expect.any(String),
+    });
+    const audit = await ctx.prisma.auditLog.findFirst({
+      where: { action: 'terms.accepted', entityId: user.userId },
+      orderBy: { createdAt: 'desc' },
+    });
+    expect(audit?.after).toMatchObject({ method: 'session' });
+  });
+
   it('bloque les nouvelles commandes jusqu’à l’acceptation d’une nouvelle version', async () => {
     const shop = await merchant(ctx);
     await outdate(shop.userId, 'expediteurs');
@@ -185,7 +237,7 @@ describe('Conditions d’utilisation : textes, acceptation signée, nouvelle ver
       .expect(403);
     expect(refused.body.error.code).toBe('TERMS_ACCEPTANCE_REQUIRED');
 
-    await sign(shop, 'client', await signatureCode(shop), { expediteurs: VERSION }).expect(204);
+    await accept(shop, 'client', { expediteurs: VERSION }).expect(204);
     await placeOrder(ctx, shop);
   });
 
@@ -210,8 +262,7 @@ describe('Conditions d’utilisation : textes, acceptation signée, nouvelle ver
     const state = await request(ctx.http).get('/v1/rider/presence').set(rider.auth).expect(200);
     expect(state.body.blockers).toEqual(['TERMS']);
 
-    const challengeId = await signatureCode(rider);
-    await sign(rider, 'rider', challengeId, { livreurs: LEGAL_TEXTS.livreurs.version }).expect(204);
+    await accept(rider, 'rider', { livreurs: LEGAL_TEXTS.livreurs.version }).expect(204);
     await request(ctx.http)
       .put('/v1/rider/presence')
       .set(rider.auth)

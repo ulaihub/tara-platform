@@ -932,7 +932,7 @@
   "termsTitle": "Conditions d’utilisation",
   "termsUpdateTitle": "Nos conditions ont changé",
   "termsSignupIntro": "Avant de créer votre compte, lisez les conditions et la politique de confidentialité jusqu’en bas. Elles expliquent les prix, les frais quand une livraison échoue et ce que nous faisons de vos données.",
-  "termsUpdateIntro": "Lisez la nouvelle version jusqu’en bas, puis signez-la avec le code reçu par SMS. Sans signature, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.",
+  "termsUpdateIntro": "Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.",
   "termsLater": "Plus tard",
   "termsEnd": "Vous êtes arrivé au bout des textes.",
   "termsScrollFirst": "Faites défiler les textes jusqu’en bas pour pouvoir les accepter.",
@@ -948,16 +948,7 @@
   "termsCheckAnd": " et la ",
   "termsCheckPrivacy": "politique de confidentialité",
   "termsCreateAccount": "Accepter et créer mon compte",
-  "termsGetCode": "Recevoir le code pour signer",
-  "termsCodeSent": "Code envoyé au {phone}. Il vaut signature de votre acceptation.",
-  "@termsCodeSent": {
-    "placeholders": {
-      "phone": {
-        "type": "String"
-      }
-    }
-  },
-  "termsSign": "Signer",
+  "termsAcceptUpdate": "J’accepte la nouvelle version",
   "termsAcceptedOn": "Version {version} acceptée le {date}",
   "@termsAcceptedOn": {
     "placeholders": {
@@ -978,8 +969,8 @@
     }
   },
   "termsSection": "Conditions et confidentialité",
-  "termsToSign": "Nouvelle version à lire et signer",
-  "termsSigned": "Conditions signées. Merci !",
+  "termsToSign": "Nouvelle version à lire et accepter",
+  "termsSigned": "Conditions acceptées. Merci !",
   "termsPrivacyTitle": "Politique de confidentialité",
   "walletTitle": "Portefeuille",
   "shopToReceive": "Ventes à recevoir",

@@ -152,13 +152,10 @@ class _RiderGateState extends ConsumerState<_RiderGate> {
       );
     }
     // Nouvelle version des conditions : présentée à l'ouverture (sans réseau, plus tard). Une
-    // course en cours se termine sans signature : « Plus tard » ramène à l'app.
+    // course en cours se termine sans acceptation : « Plus tard » ramène à l'app.
     final terms = ref.watch(termsStatusProvider).value;
     if (terms != null && !terms.upToDate && !_termsPostponed) {
-      final phone = ref.watch(accountPhoneProvider).value;
-      if (phone != null) {
-        return TermsScreen.update(phone: phone, onLater: () => setState(() => _termsPostponed = true), onSigned: () {});
-      }
+      return TermsScreen.update(onLater: () => setState(() => _termsPostponed = true), onSigned: () {});
     }
     final rider = profile.value;
     if (rider == null) {

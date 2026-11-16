@@ -2747,7 +2747,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsUpdateIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Lisez la nouvelle version jusqu’en bas, puis signez-la avec le code reçu par SMS. Sans signature, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.'**
+  /// **'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.'**
   String get termsUpdateIntro;
 
   /// No description provided for @termsLater.
@@ -2798,23 +2798,11 @@ abstract class AppLocalizations {
   /// **'Accepter et créer mon compte'**
   String get termsCreateAccount;
 
-  /// No description provided for @termsGetCode.
+  /// No description provided for @termsAcceptUpdate.
   ///
   /// In fr, this message translates to:
-  /// **'Recevoir le code pour signer'**
-  String get termsGetCode;
-
-  /// No description provided for @termsCodeSent.
-  ///
-  /// In fr, this message translates to:
-  /// **'Code envoyé au {phone}. Il vaut signature de votre acceptation.'**
-  String termsCodeSent(String phone);
-
-  /// No description provided for @termsSign.
-  ///
-  /// In fr, this message translates to:
-  /// **'Signer'**
-  String get termsSign;
+  /// **'J’accepte la nouvelle version'**
+  String get termsAcceptUpdate;
 
   /// No description provided for @termsAcceptedOn.
   ///
@@ -2843,19 +2831,19 @@ abstract class AppLocalizations {
   /// No description provided for @termsToSign.
   ///
   /// In fr, this message translates to:
-  /// **'Nouvelle version à lire et signer'**
+  /// **'Nouvelle version à lire et accepter'**
   String get termsToSign;
 
   /// No description provided for @blockerTerms.
   ///
   /// In fr, this message translates to:
-  /// **'Nos conditions ont changé : lisez-les et signez-les pour recevoir des courses.'**
+  /// **'Nos conditions ont changé : lisez-les et acceptez-les pour recevoir des courses.'**
   String get blockerTerms;
 
   /// No description provided for @readAndSign.
   ///
   /// In fr, this message translates to:
-  /// **'Lire et signer'**
+  /// **'Lire et accepter'**
   String get readAndSign;
 
   /// No description provided for @addressPhoto.

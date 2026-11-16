@@ -171,7 +171,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 20),
           SectionHeader(title: l.termsSection),
           const SizedBox(height: 8),
-          _TermsCard(phone: me.phone),
+          const _TermsCard(),
           const SizedBox(height: 20),
           SectionHeader(title: l.helpSection),
           const SizedBox(height: 8),
@@ -413,11 +413,9 @@ void _toggleSounds(BuildContext context, AppSettings settings) {
 }
 
 /// Conditions et confidentialité : version acceptée et date (copie consultable), nouvelle
-/// version à signer.
+/// version à accepter.
 class _TermsCard extends ConsumerWidget {
-  const _TermsCard({required this.phone});
-
-  final String phone;
+  const _TermsCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -450,7 +448,7 @@ class _TermsCard extends ConsumerWidget {
               leading: const IconTile(icon: TaraIcons.alertCircle),
               title: l.termsToSign,
               trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.accentText),
-              onTap: () => open((route) => TermsScreen.update(phone: phone, onSigned: () => Navigator.of(route).pop())),
+              onTap: () => open((route) => TermsScreen.update(onSigned: () => Navigator.of(route).pop())),
             ),
           row('expediteurs', l.termsTitle),
           row(LegalApi.privacyDocument, l.termsPrivacyTitle),

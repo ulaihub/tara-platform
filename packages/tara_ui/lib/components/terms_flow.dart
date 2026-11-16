@@ -13,7 +13,6 @@ import '../tara_typography.dart';
 import 'buttons.dart';
 import 'check_row.dart';
 import 'glass.dart';
-import 'inputs.dart';
 import 'layout.dart';
 import 'legal_markdown.dart';
 import 'terms_reader.dart';
@@ -35,10 +34,7 @@ class TermsStrings {
     required this.checkAnd,
     required this.checkPrivacy,
     required this.createAccount,
-    required this.getCode,
-    required this.codeSent,
-    required this.sign,
-    required this.digitLabel,
+    required this.acceptUpdate,
     required this.acceptedOn,
     required this.versionLine,
     required this.errorText,
@@ -58,12 +54,9 @@ class TermsStrings {
   final String checkAnd;
   final String checkPrivacy;
   final String createAccount;
-  final String getCode;
 
-  /// « Code envoyé au … » (numéro déjà mis en forme).
-  final String Function(String phone) codeSent;
-  final String sign;
-  final String Function(int index) digitLabel;
+  /// Bouton qui accepte une nouvelle version (« J'accepte »).
+  final String acceptUpdate;
   final String Function(String version, String date) acceptedOn;
   final String Function(String version) versionLine;
 
@@ -86,12 +79,11 @@ String formatLegalDay(BuildContext context, DateTime date) =>
     MaterialLocalizations.of(context).formatMediumDate(date.toLocal());
 
 /// Conditions de l'app et politique de confidentialité, lues en entier puis acceptées :
-/// case à cocher (non cochée, active une fois les textes lus jusqu'en bas), puis code SMS
-/// qui signe l'acceptation.
+/// case à cocher (non cochée, active une fois les textes lus jusqu'en bas).
 ///
 /// Inscription ([onSignup]) : le code de connexion déjà saisi signe ; « Retour » revient au
-/// code. Nouvelle version ([api] et [phone]) : un code de signature est envoyé, à saisir
-/// ici ; « Plus tard » ([onLater]) remet la signature à plus tard.
+/// code. Nouvelle version ([api]) : l'utilisateur est connecté, la case suffit ; « Plus
+/// tard » ([onLater]) remet l'acceptation à plus tard.
 class TermsAcceptScreen extends StatefulWidget {
   const TermsAcceptScreen.signup({
     super.key,
@@ -101,7 +93,6 @@ class TermsAcceptScreen extends StatefulWidget {
     this.onBack,
   }) : onSignup = onAccept,
        api = null,
-       phone = null,
        onLater = null,
        onSigned = null;
 
@@ -110,7 +101,6 @@ class TermsAcceptScreen extends StatefulWidget {
     required this.strings,
     required this.load,
     required LegalApi this.api,
-    required String this.phone,
     required this.onSigned,
     this.onLater,
   }) : onSignup = null,
@@ -123,9 +113,6 @@ class TermsAcceptScreen extends StatefulWidget {
   final Future<void> Function(Map<String, String> versions)? onSignup;
   final VoidCallback? onBack;
   final LegalApi? api;
-
-  /// Numéro du compte, déjà mis en forme pour l'affichage.
-  final String? phone;
   final VoidCallback? onLater;
   final VoidCallback? onSigned;
 
@@ -134,26 +121,12 @@ class TermsAcceptScreen extends StatefulWidget {
 }
 
 class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
-  final _code = TextEditingController();
   late Future<List<LegalDocument>> _documents = widget.load();
   bool _checked = false;
   bool _busy = false;
-  OtpChallenge? _challenge;
   String? _error;
 
   bool get _signup => widget.onSignup != null;
-
-  @override
-  void initState() {
-    super.initState();
-    _code.addListener(() => setState(() {}));
-  }
-
-  @override
-  void dispose() {
-    _code.dispose();
-    super.dispose();
-  }
 
   Future<void> _run(Future<void> Function() action) async {
     setState(() {
@@ -169,11 +142,8 @@ class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
         if (error.code == 'TERMS_OUTDATED') {
           // Nouvelle version parue entre-temps : textes relus, case à recocher.
           _checked = false;
-          _challenge = null;
           _documents = widget.load();
         }
-        if (error.code == 'OTP_EXPIRED' || error.code == 'OTP_TOO_MANY_ATTEMPTS') _challenge = null;
-        _code.clear();
       });
     } catch (error) {
       if (mounted) setState(() => _error = widget.strings.errorText(error));
@@ -188,14 +158,7 @@ class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
         await widget.onSignup!(versionsOf(documents));
         return;
       }
-      final challenge = await widget.api!.requestCode();
-      if (mounted) setState(() => _challenge = challenge);
-    }),
-  );
-
-  void _sign(List<LegalDocument> documents) => unawaited(
-    _run(() async {
-      await widget.api!.accept(challengeId: _challenge!.challengeId, code: _code.text, versions: versionsOf(documents));
+      await widget.api!.accept(versions: versionsOf(documents));
       widget.onSigned?.call();
     }),
   );
@@ -203,7 +166,6 @@ class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
   @override
   Widget build(BuildContext context) {
     final s = widget.strings;
-    final c = TaraColors.of(context);
     final leading = Row(
       children: [
         if (widget.onBack != null)
@@ -244,44 +206,17 @@ class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
             intro: _signup ? s.signupIntro : s.updateIntro,
             documents: [for (final document in documents) document.markdown],
             readHint: s.end,
-            footer: (context, readToEnd) => _challenge == null
-                ? _AcceptFooter(
-                    strings: s,
-                    version: documents.first.version,
-                    checked: _checked,
-                    readToEnd: readToEnd,
-                    busy: _busy,
-                    error: _error,
-                    actionLabel: _signup ? s.createAccount : s.getCode,
-                    onChecked: (value) => setState(() => _checked = value),
-                    onAccept: () => _accept(documents),
-                  )
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
-                        child: Text(s.codeSent(widget.phone!), style: TaraText.label.copyWith(color: c.textSecondary)),
-                      ),
-                      CodeCells(
-                        length: 6,
-                        controller: _code,
-                        oneTimeCode: true,
-                        cellHeight: 52,
-                        digitLabel: s.digitLabel,
-                        onCompleted: (_) => _sign(documents),
-                      ),
-                      if (_error != null)
-                        Padding(padding: const EdgeInsets.fromLTRB(8, 10, 8, 0), child: _ErrorLine(_error!)),
-                      const SizedBox(height: 10),
-                      PrimaryButton(
-                        label: s.sign,
-                        loading: _busy,
-                        onPressed: _code.text.length == 6 ? () => _sign(documents) : null,
-                      ),
-                    ],
-                  ),
+            footer: (context, readToEnd) => _AcceptFooter(
+              strings: s,
+              version: documents.first.version,
+              checked: _checked,
+              readToEnd: readToEnd,
+              busy: _busy,
+              error: _error,
+              actionLabel: _signup ? s.createAccount : s.acceptUpdate,
+              onChecked: (value) => setState(() => _checked = value),
+              onAccept: () => _accept(documents),
+            ),
           );
         },
       ),

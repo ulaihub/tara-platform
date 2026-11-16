@@ -30,7 +30,6 @@ Widget home({OnlineController? online}) => ProviderScope(
     homeSummaryProvider.overrideWith((ref) async => summary),
     documentLabelsProvider.overrideWith((ref) async => {}),
     legalApiProvider.overrideWithValue(FakeLegalApi(app: 'rider', status: newVersion('rider'))),
-    accountPhoneProvider.overrideWith((ref) async => '+237677123456'),
     if (online != null) onlineControllerProvider.overrideWithValue(online),
   ],
   child: tabs(0, HomeOfflineScreen(onWentOnline: () {}, onDetails: () {}, now: DateTime(2026, 11, 3, 19))),
@@ -64,22 +63,25 @@ OnlineController termsBlocked() => OnlineController(
 void main() {
   setUpAll(loadAppFonts);
 
-  goldenTest('05 accueil hors ligne : nouvelles conditions à signer', (tester) async {
+  goldenTest('05 accueil hors ligne : nouvelles conditions à accepter', (tester) async {
     const variant = Variant(Brightness.light, ScreenSize.regular, 1);
     await pumpVariant(tester, variant, home(online: termsBlocked()));
     await settle(tester);
     await tester.tap(find.text('Passer en ligne'));
     await settle(tester);
-    expect(find.text('Nos conditions ont changé : lisez-les et signez-les pour recevoir des courses.'), findsOneWidget);
+    expect(
+      find.text('Nos conditions ont changé : lisez-les et acceptez-les pour recevoir des courses.'),
+      findsOneWidget,
+    );
     expect(find.text('Pièces à renouveler avant de passer en ligne'), findsNothing);
     await expectLater(capture, matchesGoldenFile('goldens/05_accueil_hors_ligne/conditions_${variant.name}.png'));
 
-    await tester.tap(find.text('Lire et signer'));
+    await tester.tap(find.text('Lire et accepter'));
     await settle(tester);
     expect(find.text('Nos conditions ont changé'), findsOneWidget);
     await tester.tap(find.text('Plus tard'));
     await settle(tester);
-    expect(find.text('Lire et signer'), findsNothing);
+    expect(find.text('Lire et accepter'), findsNothing);
   });
 
   for (final variant in Variant.matrix) {
