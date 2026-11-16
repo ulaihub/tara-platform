@@ -3661,6 +3661,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Sécurité'**
   String get securitySection;
+
+  /// No description provided for @trackPayNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount} par Mobile Money'**
+  String trackPayNow(String amount);
+
+  /// No description provided for @trackPayPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validez la demande de paiement sur votre téléphone…'**
+  String get trackPayPending;
+
+  /// No description provided for @trackPayFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement non abouti. Réessayez, ou annulez la livraison.'**
+  String get trackPayFailed;
+
+  /// No description provided for @trackPayVia.
+  ///
+  /// In fr, this message translates to:
+  /// **'La demande de paiement part vers ce numéro {operator}.'**
+  String trackPayVia(String operator);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

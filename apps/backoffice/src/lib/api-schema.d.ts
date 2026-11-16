@@ -2729,6 +2729,14 @@ export interface components {
         /** Format: date-time */
         feePaidAt: string | null;
       };
+      /** @enum {string|null} */
+      waitingFor: 'PAYMENT' | 'SCHEDULE' | null;
+      lastFeePayment: {
+        status: string;
+        failureReason: string | null;
+        /** Format: date-time */
+        at: string;
+      } | null;
       cod: {
         amount: number;
         collectedAmount: number | null;
@@ -3394,6 +3402,7 @@ export interface components {
           | 'OFFER_NOT_FOUND'
           | 'OFFER_NO_LONGER_AVAILABLE'
           | 'OFFER_EXPIRED'
+          | 'ORDER_AWAITING_PAYMENT'
           | 'ORDER_ALREADY_ASSIGNED_TO_RIDER'
           | 'ACTION_TIME_INVALID'
           | 'PICKUP_CODE_INVALID'
@@ -3792,6 +3801,7 @@ export interface components {
         totalPrice: number;
         feePayer: components['schemas']['FeePayer'];
         feePaymentMethod: components['schemas']['PaymentMethod'];
+        feePaid: boolean;
         codAmount: number;
         retryFee: number;
         returnFee: number;

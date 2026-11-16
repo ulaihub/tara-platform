@@ -16,6 +16,7 @@ import {
   FAILURE_LABELS,
   INELIGIBLE_LABELS,
   PAYMENT_LABELS,
+  PAYMENT_STATUS_LABELS,
   PROOF_LABELS,
   SIZE_LABELS,
   STATUS_TONE,
@@ -210,6 +211,24 @@ export default async function OrderPage({
         <div className="space-y-5">
           {can.cancel || can.reassign ? (
             <Section title="Actions">
+              {order.waitingFor === 'PAYMENT' ? (
+                <p className="mb-3 rounded-xl bg-panel-soft px-3 py-2 text-[13px]">
+                  Paiement Mobile Money des frais pas encore reçu : la commande cherchera un livreur
+                  dès qu’il arrive, elle ne peut pas être confiée avant.{' '}
+                  {order.lastFeePayment
+                    ? `Dernière demande (${dateTime(order.lastFeePayment.at)}) : ${
+                        PAYMENT_STATUS_LABELS[order.lastFeePayment.status] ??
+                        order.lastFeePayment.status
+                      }${order.lastFeePayment.failureReason ? ` (${order.lastFeePayment.failureReason})` : ''}.`
+                    : 'Aucune demande de paiement envoyée.'}
+                </p>
+              ) : null}
+              {order.waitingFor === 'SCHEDULE' ? (
+                <p className="mb-3 rounded-xl bg-panel-soft px-3 py-2 text-[13px]">
+                  Commande programmée : la recherche d’un livreur démarre 20 minutes avant le
+                  créneau. La confier maintenant avance son départ.
+                </p>
+              ) : null}
               <div className="space-y-2">
                 {can.reassign ? (
                   reattribuer === '1' ? (

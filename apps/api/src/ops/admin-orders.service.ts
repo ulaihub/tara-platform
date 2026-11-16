@@ -7,7 +7,7 @@ import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import type { OrderStatus } from '../generated/prisma/enums.js';
 import type { Prisma } from '../generated/prisma/client.js';
-import { OrdersService } from '../orders/orders.service.js';
+import { OrdersService, readyForDispatch } from '../orders/orders.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { lateness, latenessRules } from './lateness.js';
 import type {
@@ -215,10 +215,20 @@ export class AdminOrdersService {
           orderBy: { createdAt: 'desc' },
           include: { author: { select: { fullName: true, phone: true } } },
         },
+        payments: {
+          where: { purpose: 'DELIVERY_FEE' },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { status: true, failureReason: true, createdAt: true },
+        },
       },
     });
     if (!order) throw AppError.notFound('ORDER_NOT_FOUND');
     const delay = lateness(order, latenessRules(this.env), now);
+    // « Créée » : elle attend son paiement Mobile Money, ou son créneau si elle est programmée.
+    const waitingFor =
+      order.status !== 'CREATED' ? null : readyForDispatch(order) ? 'SCHEDULE' : 'PAYMENT';
+    const lastFeePayment = order.payments[0];
     const stop = (address: typeof order.pickupAddress) => ({
       label: address.label,
       landmark: address.landmark,
@@ -342,9 +352,19 @@ export class AdminOrdersService {
         note: alert.note,
       })),
       notes: order.notes.map(noteDto),
+      waitingFor,
+      lastFeePayment: lastFeePayment
+        ? {
+            status: lastFeePayment.status,
+            failureReason: lastFeePayment.failureReason,
+            at: lastFeePayment.createdAt.toISOString(),
+          }
+        : null,
       can: {
         cancel: BEFORE_PICKUP.includes(order.status),
-        reassign: BEFORE_PICKUP.includes(order.status),
+        // Pas de livreur tant que les frais Mobile Money ne sont pas payés ; une commande
+        // programmée peut être confiée tout de suite (le départ est avancé).
+        reassign: BEFORE_PICKUP.includes(order.status) && waitingFor !== 'PAYMENT',
       },
     };
   }

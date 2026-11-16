@@ -10168,6 +10168,37 @@
             ],
             "additionalProperties": false
           },
+          "waitingFor": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "PAYMENT",
+              "SCHEDULE"
+            ]
+          },
+          "lastFeePayment": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
+              },
+              "failureReason": {
+                "nullable": true,
+                "type": "string"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "status",
+              "failureReason",
+              "at"
+            ],
+            "additionalProperties": false
+          },
           "cod": {
             "nullable": true,
             "type": "object",
@@ -10385,6 +10416,8 @@
           "dropoff",
           "rider",
           "price",
+          "waitingFor",
+          "lastFeePayment",
           "cod",
           "attempts",
           "failure",
@@ -12500,6 +12533,7 @@
                   "OFFER_NOT_FOUND",
                   "OFFER_NO_LONGER_AVAILABLE",
                   "OFFER_EXPIRED",
+                  "ORDER_AWAITING_PAYMENT",
                   "ORDER_ALREADY_ASSIGNED_TO_RIDER",
                   "ACTION_TIME_INVALID",
                   "PICKUP_CODE_INVALID",
@@ -13886,6 +13920,9 @@
               "feePaymentMethod": {
                 "$ref": "#/components/schemas/PaymentMethod"
               },
+              "feePaid": {
+                "type": "boolean"
+              },
               "codAmount": {
                 "type": "integer"
               },
@@ -13905,6 +13942,7 @@
               "totalPrice",
               "feePayer",
               "feePaymentMethod",
+              "feePaid",
               "codAmount",
               "retryFee",
               "returnFee"

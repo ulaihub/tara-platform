@@ -157,6 +157,8 @@ export const OrderDto = z
       totalPrice: z.int(),
       feePayer: FeePayerEnum,
       feePaymentMethod: PaymentMethodEnum,
+      /** Frais payés (prépaiement Mobile Money ou solde Tara) : sinon la commande attend. */
+      feePaid: z.boolean(),
       codAmount: z.int(),
       /** Frais d'échec figés à la commande (E6), à la charge de l'expéditeur. */
       retryFee: z.int(),

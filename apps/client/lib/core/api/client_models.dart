@@ -739,6 +739,8 @@ class TrackedOrder {
     this.retryFee = 0,
     this.returnFee = 0,
     this.refusalReason,
+    this.feePaymentMethod = 'CASH',
+    this.feePaid = true,
   });
 
   factory TrackedOrder.fromJson(Json json) {
@@ -778,6 +780,10 @@ class TrackedOrder {
       failure: failure == null ? null : OrderFailure.fromJson(failure),
       rating: rating == null ? null : OrderRating.fromJson(rating),
       refusalReason: refused ? (json['cancelReason'] as String? ?? '') : null,
+      feePaymentMethod: pricing['feePaymentMethod'] as String? ?? 'CASH',
+      // Frais payés par le destinataire : rien à payer d'avance. Serveur d'avant : pas de
+      // champ, on suppose les frais réglés.
+      feePaid: pricing['feePayer'] == 'RECIPIENT' || (pricing['feePaid'] as bool? ?? true),
     );
   }
 
@@ -834,6 +840,13 @@ class TrackedOrder {
   /// déplacement ([retryFee]) est alors à la charge de l'expéditeur.
   final String? refusalReason;
 
+  /// Moyen de paiement des frais (MOMO_MTN, MOMO_ORANGE, CASH, WALLET) et frais réglés.
+  final String feePaymentMethod;
+  final bool feePaid;
+
+  /// Commande en attente du paiement Mobile Money de ses frais (aucun livreur cherché avant).
+  bool get awaitingPayment => status == 'CREATED' && feePaymentMethod.startsWith('MOMO_') && !feePaid;
+
   /// Heure du premier passage à [status] (null s'il n'a pas eu lieu).
   DateTime? reachedAt(String status) => timeline.where((step) => step.status == status).firstOrNull?.at;
 
@@ -863,6 +876,8 @@ class TrackedOrder {
     retryFee: retryFee,
     returnFee: returnFee,
     refusalReason: refusalReason,
+    feePaymentMethod: feePaymentMethod,
+    feePaid: feePaid,
   );
 }
 

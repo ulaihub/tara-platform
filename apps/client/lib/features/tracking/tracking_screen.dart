@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/money/mobile_money_fees.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_map/pin_picker_map.dart';
@@ -80,6 +81,13 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   String? _topUpPayment;
   bool _topUpFailed = false;
   Timer? _topUpPoll;
+
+  /// Paiement Mobile Money des frais relancé depuis le suivi (demande manquée ou refusée),
+  /// sur le numéro saisi (celui du compte par défaut).
+  final _payPhone = TextEditingController();
+  String? _orderPayment;
+  bool _orderPayFailed = false;
+  Timer? _orderPayPoll;
   StreamSubscription<RealtimeEvent>? _events;
   late final RealtimeClient _realtime;
   Timer? _refresh;
@@ -105,6 +113,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     _comment.dispose();
     _topUpPhone.dispose();
     _topUpPoll?.cancel();
+    _payPhone.dispose();
+    _orderPayPoll?.cancel();
     super.dispose();
   }
 
@@ -113,6 +123,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       final order = await ref.read(clientApiProvider).order(widget.orderId);
       if (!mounted) return;
       final before = _order?.status;
+      if (order.awaitingPayment) _prefillPhone(_payPhone);
       setState(() {
         _order = order;
         _error = null;
@@ -211,14 +222,74 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     }
   }
 
-  void _askTopUp(int amount) {
-    final me = ref.read(meProvider).value;
-    if (_topUpPhone.text.isEmpty && me != null) {
-      final local = digitsOf(me.phone).replaceFirst(RegExp(r'^237(?=\d{9}$)'), '');
-      _topUpPhone.text = PhoneInputFormatter()
-          .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: local))
-          .text;
+  /// Relance le paiement Mobile Money des frais, sur le numéro saisi et l'opérateur choisi à
+  /// la commande ; la commande part chercher un livreur dès que le paiement arrive.
+  Future<void> _payOrder(TrackedOrder order) async {
+    final phone = digitsOf(_payPhone.text);
+    if (!isCameroonMobile(phone)) {
+      setState(() => _error = AppLocalizations.of(context).phoneInvalid);
+      return;
     }
+    setState(() {
+      _busy = true;
+      _orderPayFailed = false;
+      _error = null;
+    });
+    try {
+      final payment = await ref
+          .read(clientApiProvider)
+          .payOrder(
+            order.id,
+            phone: '+237$phone',
+            operator: order.feePaymentMethod == 'MOMO_ORANGE' ? 'ORANGE' : 'MTN',
+          );
+      if (!mounted) return;
+      setState(() => _orderPayment = payment.id);
+      _orderPayPoll?.cancel();
+      _orderPayPoll = Timer.periodic(const Duration(seconds: 3), (_) => unawaited(_checkOrderPayment()));
+      if (payment.status != 'PENDING') unawaited(_checkOrderPayment());
+    } catch (error) {
+      if (mounted) setState(() => _error = errorMessage(context, error));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _checkOrderPayment() async {
+    final id = _orderPayment;
+    if (id == null) return;
+    final Payment payment;
+    try {
+      payment = await ref.read(clientApiProvider).payment(id);
+    } on ApiException {
+      return; // Réseau : nouvel essai au prochain tour.
+    }
+    if (!mounted || _orderPayment != id) return;
+    switch (payment.status) {
+      case 'SUCCEEDED':
+        _orderPayPoll?.cancel();
+        setState(() => _orderPayment = null);
+        await _load();
+      case 'FAILED' || 'CANCELLED':
+        _orderPayPoll?.cancel();
+        setState(() {
+          _orderPayment = null;
+          _orderPayFailed = true;
+        });
+    }
+  }
+
+  /// Numéro du compte proposé pour payer, s'il est connu et le champ encore vide.
+  void _prefillPhone(TextEditingController field) {
+    final me = ref.read(meProvider).value;
+    if (field.text.isEmpty && me != null) {
+      final local = digitsOf(me.phone).replaceFirst(RegExp(r'^237(?=\d{9}$)'), '');
+      field.text = PhoneInputFormatter().formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: local)).text;
+    }
+  }
+
+  void _askTopUp(int amount) {
+    _prefillPhone(_topUpPhone);
     setState(() {
       _topUp = amount;
       _topUpFailed = false;
@@ -456,6 +527,19 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                                 onCancel: _cancelTopUp,
                               ),
                         onCancel: () => unawaited(_cancel()),
+                        pay: _PayState(
+                          // Frais Mobile Money en plus, comme à la commande (payés par l'expéditeur).
+                          amount:
+                              order.totalPrice +
+                              mobileMoneyFee(
+                                order.totalPrice,
+                                ref.watch(appConfigProvider).value?.mobileMoneyFeeBps ?? 0,
+                              ),
+                          phone: _payPhone,
+                          pending: _orderPayment != null,
+                          failed: _orderPayFailed,
+                          onPay: () => unawaited(_payOrder(order)),
+                        ),
                         onShare: () => unawaited(_share(order)),
                         onCall: (phone) => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
                         onReport: () =>
@@ -501,6 +585,7 @@ class _Panel extends StatelessWidget {
     required this.onRate,
     required this.onCancel,
     this.topUp,
+    this.pay,
     required this.onShare,
     required this.onCall,
     required this.onReport,
@@ -526,6 +611,9 @@ class _Panel extends StatelessWidget {
 
   /// Recharge demandée avant la nouvelle tentative (solde insuffisant).
   final _TopUpState? topUp;
+
+  /// Frais Mobile Money pas encore payés : numéro qui paie, demande envoyée ou refusée.
+  final _PayState? pay;
   final VoidCallback onShare;
   final ValueChanged<String> onCall;
 
@@ -546,12 +634,12 @@ class _Panel extends StatelessWidget {
     final deciding = o.status == 'DELIVERY_FAILED' && failure?.decision == null;
     final returning = failure?.decision == 'RETURN';
     final (title, body) = switch (o.status) {
-      'CREATED' => (l.trackAwaitingPayment, l.trackAwaitingPaymentBody),
+      _ when o.awaitingPayment => (l.trackAwaitingPayment, l.trackAwaitingPaymentBody),
       _ when scheduled && const ['CREATED', 'SEARCHING_RIDER'].contains(o.status) => (
         l.trackScheduled,
         l.scheduledPickup(formatClock(o.scheduledFor!)),
       ),
-      'SEARCHING_RIDER' => (l.trackSearching, l.trackSearchingBody),
+      'CREATED' || 'SEARCHING_RIDER' => (l.trackSearching, l.trackSearchingBody),
       'ASSIGNED' => (l.trackAssigned(riderName), l.trackAssignedBody),
       'PICKED_UP' ||
       'IN_DELIVERY' => (l.trackOnTheWay(recipientFirst), l.trackOnTheWayBody(formatClock(pickedUpAt ?? now))),
@@ -610,6 +698,10 @@ class _Panel extends StatelessWidget {
       const SizedBox(height: 16),
       // Livré : le récapitulatif reprend les heures, la frise laisse la place à la note.
       if (!delivered) ...[_Steps(order: o), const SizedBox(height: 16)],
+      if (o.awaitingPayment && pay != null) ...[
+        _PayCard(state: pay!, operator: o.feePaymentMethod == 'MOMO_ORANGE' ? l.payOrange : l.payMtn),
+        const SizedBox(height: 16),
+      ],
       if (deciding && topUp != null) ...[
         _TopUpCard(state: topUp!),
       ] else if (deciding) ...[
@@ -708,6 +800,21 @@ class _Panel extends StatelessWidget {
       ],
       if (error != null) ...[const SizedBox(height: 8), ErrorLine(error!)],
     ];
+    // Frais Mobile Money pas encore payés : relancer le paiement (aucun livreur avant).
+    if (o.awaitingPayment && pay != null) {
+      final state = pay!;
+      return ScrollWithFooter(
+        horizontal: 20,
+        top: 4,
+        content: content,
+        footer: PrimaryButton(
+          label: l.trackPayNow('${formatAmount(state.amount)} F'),
+          icon: TaraIcons.phone,
+          loading: busy || state.pending,
+          onPressed: busy || state.pending ? null : state.onPay,
+        ),
+      );
+    }
     // Solde insuffisant pour la nouvelle tentative : on paie d'abord la recharge.
     if (deciding && topUp != null) {
       final state = topUp!;
@@ -1125,6 +1232,70 @@ class _RateCard extends StatelessWidget {
       );
     }
     return GlassCard(radius: 22, shadow: false, padding: const EdgeInsets.fromLTRB(16, 14, 16, 16), child: child);
+  }
+}
+
+/// Paiement Mobile Money des frais relancé depuis le suivi.
+class _PayState {
+  const _PayState({
+    required this.amount,
+    required this.phone,
+    required this.pending,
+    required this.failed,
+    required this.onPay,
+  });
+
+  /// Montant demandé : la course et les frais Mobile Money.
+  final int amount;
+  final TextEditingController phone;
+
+  /// Demande envoyée au téléphone, en attente de validation.
+  final bool pending;
+  final bool failed;
+  final VoidCallback onPay;
+}
+
+/// Numéro qui paie les frais (celui du compte par défaut), puis validation sur le téléphone.
+class _PayCard extends StatelessWidget {
+  const _PayCard({required this.state, required this.operator});
+
+  final _PayState state;
+
+  /// Opérateur choisi à la commande (« MTN MoMo », « Orange Money »).
+  final String operator;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.trackPayVia(operator), style: TaraText.label.copyWith(color: c.textSecondary)),
+          const SizedBox(height: 10),
+          TaraTextField(
+            label: l.payerPhoneLabel,
+            hint: l.phoneHint,
+            controller: state.phone,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [PhoneInputFormatter()],
+            leading: PhonePrefixButton(prefix: '+237', semanticLabel: l.countryCodeLabel('+237')),
+          ),
+          if (state.pending) ...[
+            const SizedBox(height: 10),
+            TintBox(
+              tone: TintTone.accent,
+              child: Text(l.trackPayPending, style: TaraText.label.copyWith(color: c.textPrimary)),
+            ),
+          ],
+          if (state.failed) ...[const SizedBox(height: 10), ErrorLine(l.trackPayFailed)],
+        ],
+      ),
+    );
   }
 }
 

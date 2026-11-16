@@ -510,6 +510,16 @@ export class DispatchService implements OnModuleInit {
         if (order.riderId === riderId) throw AppError.conflict('ORDER_ALREADY_ASSIGNED_TO_RIDER');
         const changes: OrderChange[] = [];
         const previousRiderUserId = order.rider?.userId ?? null;
+        if (order.status === 'CREATED') {
+          // Frais Mobile Money pas encore payés : pas de livreur avant le paiement.
+          if (!readyForDispatch(order)) throw AppError.conflict('ORDER_AWAITING_PAYMENT');
+          // Commande programmée : le dispatch avance son départ.
+          const started = await this.transitions.applyIn(tx, order, 'SEARCHING_RIDER', actor, {
+            note: 'Départ avancé par le dispatch',
+          });
+          changes.push(started.change);
+          order = { ...started.order, rider: null };
+        }
         if (order.status === 'ASSIGNED') {
           const released = await this.transitions.applyIn(tx, order, 'SEARCHING_RIDER', actor, {
             note: note ?? 'Réattribution par le dispatch',

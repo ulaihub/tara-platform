@@ -170,6 +170,7 @@ export class OrdersService {
         totalPrice: order.totalPrice,
         feePayer: order.feePayer,
         feePaymentMethod: order.feePaymentMethod,
+        feePaid: order.feePaidAt !== null,
         codAmount: order.codAmount,
         retryFee: order.retryFee,
         returnFee: order.returnFee,

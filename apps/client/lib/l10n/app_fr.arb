@@ -1361,5 +1361,23 @@
   "biometricRowBody": "Confirmer avec l'empreinte au lieu du code",
   "pinReasonDelete": "Pour supprimer votre compte",
   "deleteAccountConfirmPin": "Supprimer avec mon code secret",
-  "securitySection": "Sécurité"
+  "securitySection": "Sécurité",
+  "trackPayNow": "Payer {amount} par Mobile Money",
+  "@trackPayNow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "trackPayPending": "Validez la demande de paiement sur votre téléphone…",
+  "trackPayFailed": "Paiement non abouti. Réessayez, ou annulez la livraison.",
+  "trackPayVia": "La demande de paiement part vers ce numéro {operator}.",
+  "@trackPayVia": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  }
 }

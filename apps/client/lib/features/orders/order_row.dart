@@ -26,7 +26,9 @@ class OrderRow extends StatelessWidget {
         TintTone.accent,
         l.statusScheduled(_when(l, scheduled, now)),
       ),
-      'CREATED' || 'SEARCHING_RIDER' => (TaraIcons.timer, TintTone.accent, l.statusSearching),
+      // « Créée » sans créneau à venir : les frais Mobile Money ne sont pas encore payés.
+      'CREATED' => (TaraIcons.timer, TintTone.danger, l.trackAwaitingPayment),
+      'SEARCHING_RIDER' => (TaraIcons.timer, TintTone.accent, l.statusSearching),
       'ASSIGNED' => (TaraIcons.navigation, TintTone.accent, l.statusRiderComing),
       'PICKED_UP' || 'IN_DELIVERY' => (TaraIcons.package, TintTone.success, l.statusInDelivery),
       'DELIVERY_FAILED' => switch (order.failureDecision) {

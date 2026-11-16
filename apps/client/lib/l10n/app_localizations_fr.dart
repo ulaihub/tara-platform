@@ -2032,4 +2032,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get securitySection => 'Sécurité';
+
+  @override
+  String trackPayNow(String amount) {
+    return 'Payer $amount par Mobile Money';
+  }
+
+  @override
+  String get trackPayPending => 'Validez la demande de paiement sur votre téléphone…';
+
+  @override
+  String get trackPayFailed => 'Paiement non abouti. Réessayez, ou annulez la livraison.';
+
+  @override
+  String trackPayVia(String operator) {
+    return 'La demande de paiement part vers ce numéro $operator.';
+  }
 }

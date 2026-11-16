@@ -669,5 +669,16 @@
   "biometricRowBody": "Confirm with your fingerprint instead of the PIN",
   "pinReasonDelete": "To delete your account",
   "deleteAccountConfirmPin": "Delete with my secret PIN",
-  "securitySection": "Security"
+  "securitySection": "Security",
+  "trackPayNow": "Pay {amount} by Mobile Money",
+  "trackPayPending": "Approve the payment request on your phone…",
+  "trackPayFailed": "Payment did not go through. Try again, or cancel the delivery.",
+  "trackPayVia": "The payment request goes to this {operator} number.",
+  "@trackPayVia": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  }
 }

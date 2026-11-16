@@ -18,6 +18,7 @@ import 'helpers/fake_client_api.dart';
 import 'helpers/fake_realtime.dart';
 import 'helpers/harness.dart';
 import 'screens_home_golden_test.dart' show homeNow, shopApi, shopOwner;
+import 'screens_new_order_golden_test.dart' show storeWithMobileMoneyFee;
 
 const orderId = '00000000-0000-4000-8000-000000000501';
 
@@ -31,12 +32,14 @@ TrackedOrder tracked(
   int? rated,
   bool retryAllowed = true,
   String? refusalReason,
+  String feePaymentMethod = 'CASH',
+  bool feePaid = true,
 }) {
   DateTime at(int h, int m) => DateTime(2026, 11, 4, h, m);
   const ridden = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED', 'DELIVERED'];
   final reached = <String, DateTime>{
     'CREATED': at(10, 2),
-    'SEARCHING_RIDER': at(10, 2),
+    if (status != 'CREATED') 'SEARCHING_RIDER': at(10, 2),
     if (ridden.contains(status)) 'ASSIGNED': at(10, 4),
     if (ridden.skip(1).contains(status)) 'PICKED_UP': at(10, 12),
     if (ridden.skip(2).contains(status)) 'IN_DELIVERY': at(10, 12),
@@ -94,6 +97,8 @@ TrackedOrder tracked(
     retryFee: 500,
     returnFee: 750,
     refusalReason: refusalReason,
+    feePaymentMethod: feePaymentMethod,
+    feePaid: feePaid,
     rating: rated == null ? null : OrderRating(score: rated, comment: null, at: at(10, 40)),
   );
 }
@@ -101,20 +106,21 @@ TrackedOrder tracked(
 List<Object> launched = [];
 List<(String, bool)> shared = [];
 
-Widget screen(FakeClientApi api, FakeRealtime realtime, {VoidCallback? onBack}) => ProviderScope(
-  overrides: [
-    keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
-    clientApiProvider.overrideWithValue(api),
-    realtimeProvider.overrideWithValue(realtime),
-    realMapProvider.overrideWithValue(false),
-    launcherProvider.overrideWithValue((uri) async {
-      launched.add(uri);
-      return true;
-    }),
-    shareProvider.overrideWithValue((text, png) async => shared.add((text, png != null))),
-  ],
-  child: TrackingScreen(orderId: orderId, onBack: onBack ?? () {}, now: () => DateTime(2026, 11, 4, 10, 20)),
-);
+Widget screen(FakeClientApi api, FakeRealtime realtime, {VoidCallback? onBack, MemoryKeyValueStore? store}) =>
+    ProviderScope(
+      overrides: [
+        keyValueStoreProvider.overrideWithValue(store ?? MemoryKeyValueStore()),
+        clientApiProvider.overrideWithValue(api),
+        realtimeProvider.overrideWithValue(realtime),
+        realMapProvider.overrideWithValue(false),
+        launcherProvider.overrideWithValue((uri) async {
+          launched.add(uri);
+          return true;
+        }),
+        shareProvider.overrideWithValue((text, png) async => shared.add((text, png != null))),
+      ],
+      child: TrackingScreen(orderId: orderId, onBack: onBack ?? () {}, now: () => DateTime(2026, 11, 4, 10, 20)),
+    );
 
 FakeClientApi apiAt(String status) => FakeClientApi()..tracked[orderId] = tracked(status);
 
@@ -163,6 +169,16 @@ void main() {
       await settle(tester);
       expect(find.text('Recherche d’un livreur…'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_recherche/${brightness.name}.png'));
+    });
+
+    goldenTest('06 suivi paiement attendu ${brightness.name}', (tester) async {
+      final api = FakeClientApi()..tracked[orderId] = tracked('CREATED', feePaymentMethod: 'MOMO_MTN', feePaid: false);
+      await pumpVariant(tester, variant, screen(api, FakeRealtime()));
+      await settle(tester);
+      await tester.enterText(find.byType(EditableText), '677 12 34 56');
+      await settle(tester);
+      expect(find.text('En attente du paiement'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_paiement/${brightness.name}.png'));
     });
 
     goldenTest('06 suivi livreur trouvé ${brightness.name}', (tester) async {
@@ -330,6 +346,52 @@ void main() {
     await settle(tester);
     expect(api.cancelled, [orderId]);
     expect(find.text('Livraison annulée'), findsOneWidget);
+  });
+
+  testWidgets('frais Mobile Money pas encore payés : relancer le paiement, puis la recherche démarre', (tester) async {
+    final api = FakeClientApi()
+      ..tracked[orderId] = tracked('CREATED', feePaymentMethod: 'MOMO_ORANGE', feePaid: false)
+      ..paymentStatuses = ['PENDING', 'FAILED'];
+    // Frais Mobile Money à 6 % : 1 500 F de course + 96 F de frais, comme à la commande.
+    await pumpVariant(
+      tester,
+      Variant.matrix.first,
+      screen(api, FakeRealtime(), store: storeWithMobileMoneyFee()),
+      surface: const Size(390, 1000),
+    );
+    await settle(tester);
+    expect(find.text('En attente du paiement'), findsOneWidget);
+    expect(find.text('La demande de paiement part vers ce numéro Orange Money.'), findsOneWidget);
+    expect(find.text('Annuler la livraison'), findsOneWidget);
+
+    // Numéro incomplet : refusé avant toute demande.
+    await tester.enterText(find.byType(EditableText), '655 44');
+    await tester.tap(find.text('Payer 1\u00a0596 F par Mobile Money'));
+    await settle(tester);
+    expect(api.paid, isEmpty);
+
+    // Première demande refusée sur le téléphone : on le dit, le bouton revient.
+    await tester.enterText(find.byType(EditableText), '655 44 33 22');
+    await tester.tap(find.text('Payer 1\u00a0596 F par Mobile Money'));
+    await settle(tester);
+    expect(api.paid, [(orderId: orderId, phone: '+237655443322', operator: 'ORANGE')]);
+    expect(find.text('Validez la demande de paiement sur votre téléphone…'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(seconds: 3));
+    await settle(tester);
+    expect(find.text('Paiement non abouti. Réessayez, ou annulez la livraison.'), findsOneWidget);
+
+    // Deuxième demande validée : la commande est payée et cherche un livreur.
+    api.paymentStatuses = ['SUCCEEDED'];
+    api.tracked[orderId] = tracked('SEARCHING_RIDER', feePaymentMethod: 'MOMO_ORANGE');
+    await tester.tap(find.text('Payer 1\u00a0596 F par Mobile Money'));
+    await settle(tester);
+    await tester.pump(const Duration(seconds: 3));
+    await settle(tester);
+    expect(api.paid, hasLength(2));
+    expect(find.text('Recherche d’un livreur…'), findsOneWidget);
+    expect(find.textContaining('par Mobile Money'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('échec : motif, appeler le destinataire, choisir le retour et glisser', (tester) async {
