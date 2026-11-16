@@ -283,6 +283,60 @@ describe('Attribution des courses (D1 à D4)', () => {
       .expect(403);
   });
 
+  it('commande « créée » : programmée, le dispatch avance son départ ; non payée, il attend le paiement', async () => {
+    const rider = await activeRider(ctx);
+    const slot = new Date(Date.now() + 86_400_000);
+    slot.setUTCHours(9, 0, 0, 0);
+    const scheduled = await placeOrder(ctx, shop, { scheduledFor: slot.toISOString() });
+    expect(scheduled.status).toBe('CREATED');
+    const before = await request(ctx.http)
+      .get(`/v1/admin/orders/${scheduled.id}`)
+      .set(ops.auth)
+      .expect(200);
+    expect(before.body).toMatchObject({ waitingFor: 'SCHEDULE', can: { reassign: true } });
+    const assigned = await request(ctx.http)
+      .post(`/v1/admin/orders/${scheduled.id}/assign`)
+      .set(ops.auth)
+      .send({ riderId: rider.riderId })
+      .expect(200);
+    expect(assigned.body).toMatchObject({ status: 'ASSIGNED', riderId: rider.riderId });
+    const statuses = (assigned.body.timeline as { status: string }[]).map((event) => event.status);
+    expect(statuses).toEqual(['CREATED', 'SEARCHING_RIDER', 'ASSIGNED']);
+
+    // Frais Mobile Money pas encore payés : ni livreur ni bouton « Confier ».
+    const unpaid = await placeOrder(ctx, shop, { feePaymentMethod: 'MOMO_MTN' });
+    expect(unpaid.status).toBe('CREATED');
+    const waiting = await request(ctx.http)
+      .get(`/v1/admin/orders/${unpaid.id}`)
+      .set(ops.auth)
+      .expect(200);
+    expect(waiting.body).toMatchObject({
+      waitingFor: 'PAYMENT',
+      lastFeePayment: null,
+      can: { reassign: false },
+    });
+    const refused = await request(ctx.http)
+      .post(`/v1/admin/orders/${unpaid.id}/assign`)
+      .set(ops.auth)
+      .send({ riderId: rider.riderId })
+      .expect(409);
+    expect(refused.body.error.code).toBe('ORDER_AWAITING_PAYMENT');
+
+    // La demande de paiement apparaît dans la fiche ; l'expéditeur voit les frais impayés.
+    await request(ctx.http)
+      .post(`/v1/orders/${unpaid.id}/pay`)
+      .set(shop.auth)
+      .send({ phone: shop.phone, operator: 'MTN' })
+      .expect(201);
+    const pending = await request(ctx.http)
+      .get(`/v1/admin/orders/${unpaid.id}`)
+      .set(ops.auth)
+      .expect(200);
+    expect(pending.body.lastFeePayment).toMatchObject({ status: expect.any(String) });
+    const mine = await request(ctx.http).get(`/v1/orders/${unpaid.id}`).set(shop.auth).expect(200);
+    expect(mine.body.pricing.feePaid).toBe(pending.body.price.feePaidAt !== null);
+  });
+
   it('ne repropose pas une course au livreur qui l’a rendue', async () => {
     const first = await onlineRider(0.001);
     const second = await onlineRider(0.008);

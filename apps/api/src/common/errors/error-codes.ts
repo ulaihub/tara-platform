@@ -292,6 +292,10 @@ export const ERROR_MESSAGES = {
     fr: 'Le délai pour accepter cette course est dépassé.',
     en: 'The time to accept this job has passed.',
   },
+  ORDER_AWAITING_PAYMENT: {
+    fr: 'Paiement Mobile Money des frais pas encore reçu : la commande cherchera un livreur dès qu’il arrive.',
+    en: 'Mobile Money payment of the fee not received yet: the order will look for a rider as soon as it arrives.',
+  },
   ORDER_ALREADY_ASSIGNED_TO_RIDER: {
     fr: 'La course est déjà confiée à ce livreur.',
     en: 'The job is already assigned to this rider.',

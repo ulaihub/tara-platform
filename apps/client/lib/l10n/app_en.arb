@@ -639,5 +639,16 @@
   "topUpOther": "Other amount (F)",
   "topUpOtherHint": "E.g. 15000",
   "topUpRange": "Amount between {min} and {max}.",
-  "failureReasonDamaged": "The recipient refused the parcel: it was damaged. A claim is open; the Tara team will contact you."
+  "failureReasonDamaged": "The recipient refused the parcel: it was damaged. A claim is open; the Tara team will contact you.",
+  "trackPayNow": "Pay {amount} by Mobile Money",
+  "trackPayPending": "Approve the payment request on your phone…",
+  "trackPayFailed": "Payment did not go through. Try again, or cancel the delivery.",
+  "trackPayVia": "The payment request goes to this {operator} number.",
+  "@trackPayVia": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  }
 }

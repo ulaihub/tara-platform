@@ -142,6 +142,19 @@ export const AdminOrderDto = z
       feePaymentMethod: PaymentMethodEnum,
       feePaidAt: z.iso.datetime().nullable(),
     }),
+    /**
+     * Commande « créée » qui attend encore quelque chose avant la recherche d'un livreur :
+     * le paiement Mobile Money des frais, ou son créneau (commande programmée).
+     */
+    waitingFor: z.enum(['PAYMENT', 'SCHEDULE']).nullable(),
+    /** Dernière demande de paiement Mobile Money des frais : état et motif d'un échec. */
+    lastFeePayment: z
+      .object({
+        status: z.string(),
+        failureReason: z.string().nullable(),
+        at: z.iso.datetime(),
+      })
+      .nullable(),
     /** Montant à encaisser auprès du destinataire et, s'il l'est, l'encaissement. */
     cod: z
       .object({

@@ -114,8 +114,19 @@ export const EVENT_LABELS: Record<OrderStatus, string> = {
   CANCELLED: 'Annulée',
 };
 
-/** Statut d'une commande dans la liste et la fiche (« créée » sans heure programmée). */
+/**
+ * Statut d'une commande dans la liste et la fiche. « Créée » sans heure programmée : elle
+ * attend le paiement Mobile Money de ses frais (sinon elle chercherait déjà un livreur).
+ */
 export function statusLabel(status: OrderStatus, scheduledFor: string | null): string {
-  if (status === 'CREATED') return scheduledFor ? 'Programmée' : 'En attente de départ';
+  if (status === 'CREATED') return scheduledFor ? 'Programmée' : 'En attente du paiement';
   return STATUS_LABELS[status];
 }
+
+/** État d'une demande de paiement Mobile Money, en clair. */
+export const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  PENDING: 'en attente de validation sur le téléphone',
+  SUCCEEDED: 'réussie',
+  FAILED: 'échouée',
+  CANCELLED: 'annulée',
+};

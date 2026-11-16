@@ -1930,4 +1930,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get failureReasonDamaged =>
       'The recipient refused the parcel: it was damaged. A claim is open; the Tara team will contact you.';
+
+  @override
+  String trackPayNow(String amount) {
+    return 'Pay $amount by Mobile Money';
+  }
+
+  @override
+  String get trackPayPending => 'Approve the payment request on your phone…';
+
+  @override
+  String get trackPayFailed => 'Payment did not go through. Try again, or cancel the delivery.';
+
+  @override
+  String trackPayVia(String operator) {
+    return 'The payment request goes to this $operator number.';
+  }
 }

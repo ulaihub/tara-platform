@@ -14,7 +14,7 @@ describe('commandes au back-office', () => {
 
   it('distingue une commande programmée d’une commande en attente', () => {
     expect(statusLabel('CREATED', '2026-11-09T08:00:00Z')).toBe('Programmée');
-    expect(statusLabel('CREATED', null)).toBe('En attente de départ');
+    expect(statusLabel('CREATED', null)).toBe('En attente du paiement');
     expect(statusLabel('DELIVERED', null)).toBe('Livrée');
   });
 
