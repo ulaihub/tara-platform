@@ -169,6 +169,9 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           onCall: phone == null ? null : () => callPhone(phone),
         ),
         AddressHelp(orderId: order.id, stop: 'pickup', address: order.pickup, name: senderName),
+        // Quel colis prendre : l'expéditeur peut en avoir plusieurs, pour d'autres livreurs.
+        const SizedBox(height: 12),
+        ParcelCard(order: order, title: l.parcelToCollect),
         if (order.collectAtPickup > 0) ...[
           const SizedBox(height: 12),
           CollectBox(amount: order.collectAtPickup, title: l.collectAtPickupTitle, body: l.collectAtPickupBody),
@@ -202,7 +205,10 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           takenAt: _photoAt,
           onTake: _busy ? null : _takePhoto,
           title: l.photoParcel,
-          hint: l.photoParcelHint,
+          hint: switch (order.batchNumber) {
+            final number? => l.photoParcelHintNumber(number),
+            null => l.photoParcelHint,
+          },
           takenLabel: l.photoParcelTaken,
         ),
         if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],

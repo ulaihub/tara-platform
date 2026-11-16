@@ -548,6 +548,8 @@ class RiderOrder {
     required this.collectAtDelivery,
     required this.awaitingSupportValidation,
     this.loadingHelp = false,
+    this.batchNumber,
+    this.packageDescription,
     this.instructions,
     this.googleMapsUrl,
     this.wazeUrl,
@@ -571,6 +573,8 @@ class RiderOrder {
       isFragile: _field(json, 'isFragile'),
       isExpress: _field(json, 'isExpress'),
       loadingHelp: json['loadingHelp'] == true,
+      batchNumber: (json['batchNumber'] as num?)?.toInt(),
+      packageDescription: json['packageDescription'] as String?,
       instructions: json['instructions'] as String?,
       pickup: OrderAddress.fromJson(_field(json, 'pickup')),
       dropoff: OrderAddress.fromJson(_field(json, 'dropoff')),
@@ -631,6 +635,12 @@ class RiderOrder {
 
   /// Gros objet : l'expéditeur a payé l'aide au chargement, le livreur vient à deux.
   final bool loadingHelp;
+
+  /// Numéro écrit sur le colis quand l'expéditeur en envoie plusieurs (null sinon).
+  final int? batchNumber;
+
+  /// Ce que contient le colis, selon l'expéditeur (« 2 paires de chaussures »).
+  final String? packageDescription;
   final String? instructions;
   final OrderAddress pickup;
   final OrderAddress dropoff;

@@ -151,7 +151,7 @@
   "pickupCodeLabel": "Pickup code",
   "pickupCodeHint": "given by the sender",
   "photoParcel": "Photograph the parcel",
-  "photoParcelHint": "Tara label visible",
+  "photoParcelHint": "Whole parcel, clearly visible",
   "photoParcelTaken": "Parcel photo · taken at {time}",
   "retakePhoto": "Retake",
   "parcelCollected": "Parcel collected",
@@ -618,5 +618,10 @@
   "pinRowNotSet": "Choose my secret PIN",
   "biometricRowTitle": "Fingerprint",
   "biometricRowBody": "Confirm with your fingerprint instead of the PIN",
-  "securitySection": "Security"
+  "securitySection": "Security",
+  "parcelToCollect": "Parcel to collect",
+  "parcelToDeliver": "Parcel to hand over",
+  "parcelNumber": "no. {n}",
+  "parcelFor": "For {name} · {place}",
+  "photoParcelHintNumber": "Number {n} clearly visible"
 }
