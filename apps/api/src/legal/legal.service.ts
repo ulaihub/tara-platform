@@ -83,20 +83,21 @@ export class LegalService {
     return result;
   }
 
-  /** Code SMS qui signe l'acceptation d'une nouvelle version. */
+  /** Code SMS de signature : gardé pour les anciennes versions des apps. */
   requestCode(user: AuthUser, locale: AppLocale, ip: string | undefined) {
     return this.otp.request(user.phone, locale, ip, 'TERMS');
   }
 
   /**
-   * Acceptation signée : les versions envoyées par l'app (celles qu'elle a affichées) doivent
-   * être celles en vigueur, et le code SMS doit être juste. Preuve gardée sur le consentement
-   * et au journal d'audit.
+   * Acceptation d'une nouvelle version par l'utilisateur connecté : textes lus jusqu'en bas
+   * et case cochée dans l'app, versions envoyées (celles affichées) en vigueur. La session
+   * suffit : le numéro a été vérifié par code SMS à l'inscription. Un code envoyé par une
+   * ancienne app est encore vérifié. Preuve gardée sur le consentement et au journal d'audit.
    */
   async accept(
     user: AuthUser,
     app: LegalApp,
-    body: { challengeId: string; code: string; versions: Record<string, string> },
+    body: { challengeId?: string; code?: string; versions: Record<string, string> },
     evidence: AcceptanceEvidence,
     request: Request,
   ): Promise<void> {
@@ -106,7 +107,10 @@ export class LegalService {
         throw AppError.conflict('TERMS_OUTDATED');
       }
     }
-    await this.otp.confirm(user.phone, body.challengeId, body.code, 'TERMS');
+    const method = body.challengeId && body.code ? 'sms' : 'session';
+    if (body.challengeId && body.code) {
+      await this.otp.confirm(user.phone, body.challengeId, body.code, 'TERMS');
+    }
     if (required.length === 0) return;
     await this.prisma.consent.createMany({
       data: required.map((item) => ({
@@ -124,7 +128,7 @@ export class LegalService {
       action: 'terms.accepted',
       entityType: 'user',
       entityId: user.id,
-      after: { versions: required.map((item) => currentVersion(item.document)) },
+      after: { versions: required.map((item) => currentVersion(item.document)), method },
       request,
     });
   }

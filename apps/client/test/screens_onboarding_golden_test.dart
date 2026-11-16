@@ -92,20 +92,14 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/02_conditions_cochees/${variant.name}.png'));
     });
 
-    goldenTest('02 nouvelle version à signer ${variant.name}', (tester) async {
-      await pumpVariant(
-        tester,
-        variant,
-        scoped(TermsScreen.update(phone: '+237677123456', onLater: () {}, onSigned: () {})),
-      );
+    goldenTest('02 nouvelle version à accepter ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scoped(TermsScreen.update(onLater: () {}, onSigned: () {})));
       await settle(tester);
       await readToEnd(tester);
       await tester.tap(find.byType(TaraCheckRow));
       await settle(tester);
-      await tester.tap(find.text('Recevoir le code pour signer'));
-      await settle(tester);
       expect(tester.takeException(), isNull);
-      await expectLater(capture, matchesGoldenFile('goldens/02_conditions_signature/${variant.name}.png'));
+      await expectLater(capture, matchesGoldenFile('goldens/02_conditions_nouvelle_version/${variant.name}.png'));
     });
 
     goldenTest('03 bienvenue ${variant.name}', (tester) async {

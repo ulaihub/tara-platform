@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.3 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.4 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -261,10 +261,11 @@ loi-cadre n° 2011/012 du 6 mai 2011 portant protection du consommateur.
 
 ## 14. Acceptation et modification de ces conditions
 
-- Vous acceptez ces conditions dans l'application, en cochant la case « J'ai lu et j'accepte »,
-  puis en confirmant avec le code reçu par SMS sur votre numéro. Tara enregistre la version
-  acceptée, la date, l'heure et l'appareil utilisé : cet enregistrement vaut signature
-  électronique. Le texte accepté et son enregistrement sont conservés sous forme électronique,
+- Vous acceptez ces conditions dans l'application, en cochant la case « J'ai lu et j'accepte ».
+  À la création du compte, l'acceptation est confirmée par le code reçu par SMS sur votre
+  numéro ; une nouvelle version s'accepte ensuite depuis votre compte, ouvert avec ce numéro
+  vérifié. Tara enregistre la version acceptée, la date, l'heure, l'appareil utilisé et son
+  adresse IP : cet enregistrement vaut signature électronique. Le texte accepté et son enregistrement sont conservés sous forme électronique,
   qui fait foi comme un écrit sur papier (loi n° 2010/021 du 21 décembre 2010 régissant le
   commerce électronique au Cameroun).
 - Une copie de la version acceptée reste consultable à tout moment dans l'application.

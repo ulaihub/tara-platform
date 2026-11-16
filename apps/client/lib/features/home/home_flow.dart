@@ -164,7 +164,6 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
           scopedPage<void>(
             context,
             (route) => TermsScreen.update(
-              phone: widget.me.phone,
               onLater: () => Navigator.of(route).pop(),
               onSigned: () {
                 Navigator.of(route).pop();

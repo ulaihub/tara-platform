@@ -4888,8 +4888,8 @@ export interface operations {
       content: {
         'application/json': {
           /** Format: uuid */
-          challengeId: string;
-          code: string;
+          challengeId?: string;
+          code?: string;
           versions: components['schemas']['AcceptedVersions'];
           installationId?: string;
         };

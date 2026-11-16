@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/terms_flow.dart';
 
 import '../../app/providers.dart';
@@ -25,36 +24,29 @@ TermsStrings termsStrings(BuildContext context) {
     checkAnd: l.termsCheckAnd,
     checkPrivacy: l.termsCheckPrivacy,
     createAccount: l.termsCreateAccount,
-    getCode: l.termsGetCode,
-    codeSent: l.termsCodeSent,
-    sign: l.termsSign,
-    digitLabel: l.digitLabel,
+    acceptUpdate: l.termsAcceptUpdate,
     acceptedOn: l.termsAcceptedOn,
     versionLine: l.termsVersionLine,
     errorText: (error) => errorMessage(context, error),
   );
 }
 
-/// Conditions des expéditeurs et politique de confidentialité, lues en entier puis signées.
-/// Inscription : le code de connexion signe. Nouvelle version : code SMS dédié ; « Plus
-/// tard » laisse suivre les livraisons en cours, sans nouvelle commande.
+/// Conditions des expéditeurs et politique de confidentialité, lues en entier puis acceptées.
+/// Inscription : le code de connexion signe. Nouvelle version : la case suffit (compte déjà
+/// connecté) ; « Plus tard » laisse suivre les livraisons en cours, sans nouvelle commande.
 class TermsScreen extends ConsumerWidget {
   const TermsScreen.signup({
     super.key,
     required Future<void> Function(Map<String, String> versions) onAccept,
     this.onBack,
   }) : onSignup = onAccept,
-       phone = null,
        onLater = null,
        onSigned = null;
 
-  const TermsScreen.update({super.key, required String this.phone, this.onLater, required this.onSigned})
-    : onSignup = null,
-      onBack = null;
+  const TermsScreen.update({super.key, this.onLater, required this.onSigned}) : onSignup = null, onBack = null;
 
   final Future<void> Function(Map<String, String> versions)? onSignup;
   final VoidCallback? onBack;
-  final String? phone;
   final VoidCallback? onLater;
   final VoidCallback? onSigned;
 
@@ -69,7 +61,6 @@ class TermsScreen extends ConsumerWidget {
       strings: strings,
       load: api.appDocuments,
       api: api,
-      phone: displayPhone(phone!),
       onLater: onLater,
       onSigned: () {
         ref.invalidate(termsStatusProvider);

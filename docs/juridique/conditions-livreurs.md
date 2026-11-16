@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.3 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.4 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -149,9 +149,9 @@ la comptabilité.
 
 ## 12. Acceptation et modification
 
-Vous acceptez ces conditions dans l'application en cochant « J'ai lu et j'accepte », puis en
-confirmant avec le code reçu par SMS. La version, la date, l'heure et l'appareil sont
-enregistrés. Le contrat de partenariat est en plus signé sur papier au bureau de Tara lors de la
+Vous acceptez ces conditions dans l'application en cochant « J'ai lu et j'accepte » : à
+l'inscription, avec le code reçu par SMS ; pour une nouvelle version, depuis votre compte ouvert
+avec ce numéro vérifié. La version, la date, l'heure et l'appareil sont enregistrés. Le contrat de partenariat est en plus signé sur papier au bureau de Tara lors de la
 validation de vos pièces. Si les conditions changent, la nouvelle version vous est présentée
 dans l'application et doit être acceptée pour recevoir de nouvelles courses.
 

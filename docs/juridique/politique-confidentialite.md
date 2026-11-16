@@ -1,6 +1,6 @@
 # Politique de confidentialité de Tara
 
-Version 2026-11.3 · Rédigée au regard de la loi n° 2024/017 du 23 décembre 2024 relative à la
+Version 2026-11.4 · Rédigée au regard de la loi n° 2024/017 du 23 décembre 2024 relative à la
 protection des données à caractère personnel au Cameroun. Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -24,7 +24,7 @@ données à caractère personnel (APDP) et lui demande les autorisations nécess
 | Tous          | appareil, adresse IP, journaux techniques                                                                        | sécurité, prévention de la fraude                     |
 
 Ces traitements reposent sur votre accord, donné en acceptant les conditions et cette politique
-(case à cocher et code SMS), sur l'exécution du service que vous demandez et, pour les
+(case à cocher, et code SMS à la création du compte), sur l'exécution du service que vous demandez et, pour les
 paiements et la comptabilité, sur les obligations légales de Tara. Les données du destinataire
 sont celles que l'expéditeur fournit pour lui livrer le colis : elles servent seulement à cette
 livraison, et le destinataire est informé par la page de suivi.

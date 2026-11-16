@@ -38,7 +38,7 @@ const envSchema = z
     /** Ancien secret, encore accepté en vérification pendant une rotation de clé. */
     JWT_SECRET_PREVIOUS: z.string().min(32, 'doit contenir au moins 32 caractères').optional(),
     JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(900),
-    REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(30),
+    REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(90),
     /** Secret mélangé aux codes courts (SMS, enlèvement, livraison) avant hachage. */
     CODE_HASH_SECRET: z.string().min(32, 'doit contenir au moins 32 caractères'),
     OTP_TTL_SECONDS: z.coerce.number().int().min(60).max(900).default(300),

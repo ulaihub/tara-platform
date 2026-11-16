@@ -22,13 +22,14 @@ Les textes de ce dossier sont ceux que les apps affichent : après une modificat
 1. **Texte complet dans l'app**, pas seulement un lien : l'utilisateur fait défiler le texte.
 2. **Case à cocher explicite**, non cochée par défaut : « J'ai lu et j'accepte les conditions
    (version 2026-11) et la politique de confidentialité ».
-3. **Confirmation par le code SMS** reçu sur son numéro : la personne qui accepte est celle qui
-   détient le numéro.
-4. **Preuve conservée** : version, date et heure, numéro vérifié, appareil et adresse IP,
-   enregistrés au journal d'audit (non modifiable).
+3. **Numéro vérifié** : à l'inscription, le code SMS reçu sur le numéro confirme l'acceptation ;
+   la personne qui accepte est celle qui détient le numéro. Une nouvelle version s'accepte
+   ensuite depuis la session ouverte avec ce numéro (case cochée, sans nouveau code).
+4. **Preuve conservée** : version, date et heure, numéro vérifié, appareil et adresse IP, mode
+   de confirmation (code SMS ou session), enregistrés au journal d'audit (non modifiable).
 5. **Copie consultable** à tout moment dans l'app (Profil › Conditions acceptées).
-6. **Nouvelle version** : présentée à l'ouverture de l'app ; sans acceptation, plus de nouvelle
-   commande (expéditeurs) ni de nouvelle course (livreurs).
+6. **Nouvelle version** : présentée à l'ouverture de l'app, acceptée d'un geste (case cochée) ;
+   sans acceptation, plus de nouvelle commande (expéditeurs) ni de nouvelle course (livreurs).
 7. **Livreurs** : en plus, contrat de partenariat signé sur papier au bureau lors de la
    validation des pièces.
 
@@ -66,7 +67,7 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
 ## Données personnelles, contrat en ligne, encaissements (version 2026-11.3)
 
 - **Loi n° 2024/017 du 23 décembre 2024** (applicable depuis le 23 juin 2026) : accord des
-  personnes recueilli par case à cocher et code SMS ; référent pour la protection des données ;
+  personnes recueilli par case à cocher (et code SMS à l'inscription) ; référent pour la protection des données ;
   déclaration des traitements à l'APDP ; **tout transfert hors du Cameroun soumis à son
   autorisation préalable** (hébergement en France, Twilio, Google, Meta, Anthropic), sanctions
   élevées sinon ; notification d'une violation à l'APDP sous 72 heures (engagement de Tara) ;
@@ -92,3 +93,7 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
    statut de Tara dans ce montage (marchand, mandataire ou distributeur).
 5. Formalités auprès de l'APDP : forme exacte de la déclaration et des demandes d'autorisation
    de transfert, une fois l'autorité en état de les recevoir.
+6. Acceptation d'une nouvelle version sans nouveau code SMS (version 2026-11.4) : la case
+   cochée dans une session ouverte avec le numéro vérifié, et la preuve gardée, suffisent-elles
+   comme signature électronique au sens de la loi n° 2010/021 ? Pratique courante des
+   applications ; à défaut, remettre le code pour les seuls changements importants.

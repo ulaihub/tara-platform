@@ -19,7 +19,6 @@ Widget scoped(Widget child, {FakeLegalApi? legal}) => ProviderScope(
   overrides: [
     keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
     legalApiProvider.overrideWithValue(legal ?? FakeLegalApi(app: 'rider')),
-    accountPhoneProvider.overrideWith((ref) async => '+237677123456'),
   ],
   child: child,
 );
@@ -93,45 +92,41 @@ void main() {
     });
   }
 
-  goldenTest('02 nouvelle version à signer', (tester) async {
+  goldenTest('02 nouvelle version à accepter', (tester) async {
     const variant = Variant(Brightness.dark, ScreenSize.regular, 1);
-    await pumpVariant(
-      tester,
-      variant,
-      scoped(TermsScreen.update(phone: '+237677123456', onLater: () {}, onSigned: () {})),
-    );
+    await pumpVariant(tester, variant, scoped(TermsScreen.update(onLater: () {}, onSigned: () {})));
     await settle(tester);
     await readToEnd(tester);
     await tester.tap(find.byType(TaraCheckRow));
     await settle(tester);
-    await tester.tap(find.text('Recevoir le code pour signer'));
-    await settle(tester);
     expect(tester.takeException(), isNull);
-    await expectLater(capture, matchesGoldenFile('goldens/02_conditions_signature/${variant.name}.png'));
+    await expectLater(capture, matchesGoldenFile('goldens/02_conditions_nouvelle_version/${variant.name}.png'));
   });
 
-  testWidgets('une nouvelle version se signe avec le code reçu, aux versions affichées', (tester) async {
+  testWidgets('une nouvelle version s’accepte sans code, aux versions affichées', (tester) async {
     final legal = FakeLegalApi(app: 'rider', status: newVersion('rider'));
     var signed = 0;
     await pumpVariant(
       tester,
       const Variant(Brightness.dark, ScreenSize.regular, 1),
       scoped(
-        TermsScreen.update(phone: '+237677123456', onLater: () {}, onSigned: () => signed++),
+        TermsScreen.update(onLater: () {}, onSigned: () => signed++),
         legal: legal,
       ),
     );
     await settle(tester);
     expect(find.byType(TaraCheckRow), findsNothing);
     await readToEnd(tester);
+    // Bouton inactif tant que la case n'est pas cochée.
+    await tester.tap(find.text('J’accepte la nouvelle version'));
+    await settle(tester);
+    expect(legal.signed, isEmpty);
     await tester.tap(find.byType(TaraCheckRow));
     await settle(tester);
-    await tester.tap(find.text('Recevoir le code pour signer'));
+    await tester.tap(find.text('J’accepte la nouvelle version'));
     await settle(tester);
-    await tester.enterText(find.byType(EditableText).first, '654321');
-    await settle(tester);
-    expect(legal.codes, 1);
-    expect(legal.signed.single.versions, {'livreurs': '2026-11', 'confidentialite': '2026-11'});
+    expect(find.byType(EditableText), findsNothing);
+    expect(legal.signed.single, {'livreurs': '2026-11', 'confidentialite': '2026-11'});
     expect(signed, 1);
   });
 

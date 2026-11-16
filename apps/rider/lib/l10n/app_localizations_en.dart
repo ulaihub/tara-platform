@@ -1542,7 +1542,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsUpdateIntro =>
-      'Read the new version to the end, then sign it with the code sent by SMS. Until you sign, you can finish your current delivery but will not receive new ones.';
+      'Read the new version to the end, then accept it. Until you accept, you can finish your current delivery but will not receive new ones.';
 
   @override
   String get termsLater => 'Later';
@@ -1571,15 +1571,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsCreateAccount => 'Accept and create my account';
 
   @override
-  String get termsGetCode => 'Get the code to sign';
-
-  @override
-  String termsCodeSent(String phone) {
-    return 'Code sent to $phone. It serves as your signature.';
-  }
-
-  @override
-  String get termsSign => 'Sign';
+  String get termsAcceptUpdate => 'I accept the new version';
 
   @override
   String termsAcceptedOn(String version, String date) {
@@ -1598,13 +1590,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsPrivacyTitle => 'Privacy policy';
 
   @override
-  String get termsToSign => 'New version to read and sign';
+  String get termsToSign => 'New version to read and accept';
 
   @override
-  String get blockerTerms => 'Our terms have changed: read and sign them to receive deliveries.';
+  String get blockerTerms => 'Our terms have changed: read and accept them to receive deliveries.';
 
   @override
-  String get readAndSign => 'Read and sign';
+  String get readAndSign => 'Read and accept';
 
   @override
   String get addressPhoto => 'See the entrance';

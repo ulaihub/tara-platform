@@ -2,8 +2,8 @@ import '../session/session_store.dart';
 import 'api_client.dart';
 import 'models.dart';
 
-/// Conditions d'utilisation et confidentialité : textes en vigueur et acceptation signée
-/// par un code SMS. [app] : `client` (expéditeurs) ou `rider` (livreurs).
+/// Conditions d'utilisation et confidentialité : textes en vigueur et acceptation par
+/// l'utilisateur connecté. [app] : `client` (expéditeurs) ou `rider` (livreurs).
 class LegalApi {
   LegalApi(this._api, this._store, {required this.app});
 
@@ -24,25 +24,14 @@ class LegalApi {
 
   Future<TermsStatus> status() async => TermsStatus.fromJson(await _api.get('/me/terms', query: {'app': app}) as Json);
 
-  /// Code SMS qui signe l'acceptation d'une nouvelle version.
-  Future<OtpChallenge> requestCode() async => OtpChallenge.fromJson(await _api.post('/me/terms/code') as Json);
-
-  /// Signature : versions affichées (refusées si elles ne sont plus en vigueur) et code reçu.
-  Future<void> accept({
-    required String challengeId,
-    required String code,
-    required Map<String, String> versions,
-  }) async {
+  /// Acceptation d'une nouvelle version : textes lus, case cochée ; la session suffit.
+  /// [versions] : celles affichées (refusées si elles ne sont plus en vigueur).
+  Future<void> accept({required Map<String, String> versions}) async {
     await _api.send(
       'POST',
       '/me/terms',
       query: {'app': app},
-      body: {
-        'challengeId': challengeId,
-        'code': code,
-        'versions': versions,
-        'installationId': await _store.installationId(),
-      },
+      body: {'versions': versions, 'installationId': await _store.installationId()},
     );
   }
 }

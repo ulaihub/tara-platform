@@ -34,11 +34,23 @@ export const TermsStatusDto = z
   })
   .meta({ id: 'TermsStatus' });
 
-export const AcceptTermsBody = z.object({
-  challengeId: z.uuid(),
-  code: z.string().regex(/^\d{6}$/),
-  /** Versions affichées par l'app : refusées si elles ne sont plus en vigueur. */
-  versions: AcceptedVersions,
-  /** Installation de l'app qui accepte (preuve). */
-  installationId: z.string().min(8).max(64).optional(),
-});
+export const AcceptTermsBody = z
+  .object({
+    /**
+     * Code SMS : facultatif. La session de l'utilisateur connecté suffit ; les anciennes
+     * versions des apps envoient encore un code, vérifié s'il est là.
+     */
+    challengeId: z.uuid().optional(),
+    code: z
+      .string()
+      .regex(/^\d{6}$/)
+      .optional(),
+    /** Versions affichées par l'app : refusées si elles ne sont plus en vigueur. */
+    versions: AcceptedVersions,
+    /** Installation de l'app qui accepte (preuve). */
+    installationId: z.string().min(8).max(64).optional(),
+  })
+  .refine((body) => (body.challengeId === undefined) === (body.code === undefined), {
+    message: 'challengeId et code vont ensemble',
+    path: ['code'],
+  });
