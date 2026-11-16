@@ -1270,7 +1270,7 @@
   "exportDataRowSubtitle": "Une copie de tout ce que Tara garde sur vous",
   "exportDataShare": "Mes données Tara",
   "deleteAccountRow": "Supprimer mon compte",
-  "deleteAccountRowSubtitle": "Définitif, confirmé par un code SMS",
+  "deleteAccountRowSubtitle": "Définitif, confirmé par votre code secret",
   "deleteAccountTitle": "Supprimer mon compte",
   "deleteAccountBody": "Votre nom, votre numéro, vos adresses, photos et notes vocales sont effacés, et l’app se déconnecte. Vos livraisons passées restent, sans votre nom, pour la comptabilité.",
   "deleteAccountFinal": "C’est définitif : avec le même numéro, vous repartirez d’un compte vide.",
@@ -1292,17 +1292,6 @@
   },
   "deleteAccountPayout": "Un retrait vers votre Mobile Money est en cours : attendez qu’il arrive.",
   "openWallet": "Ouvrir mon portefeuille",
-  "deleteAccountSendCode": "Recevoir le code par SMS",
-  "deleteAccountCodeSent": "Code envoyé au {phone}. Tapez-le pour confirmer la suppression.",
-  "@deleteAccountCodeSent": {
-    "placeholders": {
-      "phone": {
-        "type": "String"
-      }
-    }
-  },
-  "deleteAccountCodeLabel": "Code reçu par SMS",
-  "deleteAccountResend": "Renvoyer le code",
   "deleteAccountConfirm": "Supprimer définitivement",
   "topUpOther": "Autre montant (F)",
   "topUpOtherHint": "Ex. 15000",
@@ -1318,6 +1307,61 @@
     }
   },
   "failureReasonDamaged": "Le destinataire a refusé le colis : il était abîmé. Une réclamation est ouverte, l’équipe Tara vous contacte.",
+  "pinCreateTitle": "Choisissez votre code secret",
+  "pinCreateBody": "4 chiffres, comme pour Orange Money ou MoMo. Il protège votre solde et vos retraits. Ne le donnez à personne, même à Tara.",
+  "pinConfirmTitle": "Confirmez votre code secret",
+  "pinMismatch": "Les deux codes sont différents. Recommencez.",
+  "pinEnterTitle": "Code secret",
+  "pinCurrentTitle": "Votre code secret actuel",
+  "pinNewTitle": "Nouveau code secret",
+  "pinForgot": "Code oublié ?",
+  "pinUseBiometrics": "Utiliser aussi mon empreinte",
+  "pinBiometricButton": "Utiliser mon empreinte",
+  "pinBiometricTitle": "Confirmez avec votre empreinte",
+  "pinDelete": "Effacer",
+  "pinDigitsEntered": "{count} chiffre(s) sur 4",
+  "@pinDigitsEntered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pinLockedTitle": "Code secret bloqué",
+  "pinLockedBody": "Après 5 erreurs, votre code secret est bloqué. Recevez un code sur votre numéro pour en choisir un nouveau.",
+  "pinResetBody": "Recevez un code sur votre numéro pour choisir un nouveau code secret.",
+  "pinSendCode": "Recevoir un code",
+  "pinCodeSentSms": "Entrez le code reçu par SMS.",
+  "pinCodeSentWhatsApp": "Entrez le code reçu sur WhatsApp.",
+  "codeBySms": "Recevoir par SMS",
+  "codeSentWhatsAppTo": "Code envoyé sur WhatsApp au {phone}",
+  "@codeSentWhatsAppTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "pinSaved": "Code secret enregistré.",
+  "balanceShow": "Afficher le solde",
+  "balanceHide": "Masquer le solde",
+  "pinReasonBalance": "Pour voir votre solde",
+  "pinReasonWithdraw": "Pour retirer {amount}",
+  "@pinReasonWithdraw": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pinRowTitle": "Code secret",
+  "pinRowSet": "Changer mon code secret",
+  "pinRowNotSet": "Choisir mon code secret",
+  "biometricRowTitle": "Empreinte digitale",
+  "biometricRowBody": "Confirmer avec l'empreinte au lieu du code",
+  "pinReasonDelete": "Pour supprimer votre compte",
+  "deleteAccountConfirmPin": "Supprimer avec mon code secret",
+  "securitySection": "Sécurité",
   "trackPayNow": "Payer {amount} par Mobile Money",
   "@trackPayNow": {
     "placeholders": {

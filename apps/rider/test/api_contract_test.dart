@@ -19,6 +19,7 @@ void main() {
 
   final models = <String, List<String>>{
     'OtpChallenge': OtpChallenge.fields,
+    'PinStatus': PinStatus.fields,
     'LegalDocument': LegalDocument.fields,
     'Ticket': SupportTicket.fields,
     'TermsStatus': TermsStatus.fields,

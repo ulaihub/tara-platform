@@ -131,6 +131,6 @@ Procédure dans [`docs/SECURITE.md`](../SECURITE.md) (« Réponse à un incident
 2. **Référent pour la protection des données** : à désigner (le gérant au début) ; son contact figure dans la politique de confidentialité.
 3. **Hébergement** : le serveur est en France ; un hébergement au Cameroun réduirait le risque lié aux transferts (sanctions élevées en cas de transfert sans autorisation).
 4. **Purges** : 30 et 90 jours appliqués chaque nuit par le logiciel ; 5 ans (journal d'audit) et 10 ans (comptabilité) à programmer avant les échéances.
-5. **Mise à jour de la politique** : version 2026-11.4, présentée à tous les utilisateurs, qui l'acceptent de nouveau (case cochée, sans nouveau code SMS).
+5. **Mise à jour de la politique** : version 2026-11.5 (code secret, empreinte digitale gardée sur le téléphone, codes par WhatsApp), présentée à tous les utilisateurs, qui l'acceptent de nouveau (case cochée, sans nouveau code SMS).
 
 Le logiciel applique ces durées automatiquement chaque nuit : destinataires (30 jours) ; trajets, photos, demandes au support et pièces des livreurs refusés (90 jours).

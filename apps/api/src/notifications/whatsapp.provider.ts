@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Logger } from '@nestjs/common';
 import type { AppLocale } from '../common/i18n/locale.js';
 
@@ -12,6 +13,8 @@ export interface WhatsAppMessage {
   template: string;
   locale: AppLocale;
   parameters: string[];
+  /** Code du bouton « Copier le code » d'un modèle d'authentification (codes de connexion). */
+  copyCode?: string;
 }
 
 export interface WhatsAppProvider {
@@ -26,14 +29,13 @@ export class FakeWhatsAppProvider implements WhatsAppProvider {
   /** Numéros sans WhatsApp : l'envoi échoue immédiatement. */
   readonly failingNumbers = new Set<string>();
   private readonly logger = new Logger('FakeWhatsApp');
-  private counter = 0;
 
   send(to: string, message: WhatsAppMessage): Promise<{ providerReference: string }> {
     if (this.failingNumbers.has(to)) {
       return Promise.reject(new Error('Numéro sans compte WhatsApp'));
     }
-    this.counter += 1;
-    const reference = `wamid.fake-${this.counter}`;
+    // Unique d'une instance à l'autre (les tests partagent la base).
+    const reference = `wamid.fake-${randomUUID()}`;
     this.outbox.push({ to, message, reference });
     if (this.outbox.length > 200) this.outbox.shift();
     this.logger.log(`→ ${to} : ${message.template}`);
@@ -77,6 +79,16 @@ export class MetaWhatsAppProvider implements WhatsAppProvider {
                 type: 'body',
                 parameters: message.parameters.map((text) => ({ type: 'text', text })),
               },
+              ...(message.copyCode
+                ? [
+                    {
+                      type: 'button',
+                      sub_type: 'url',
+                      index: '0',
+                      parameters: [{ type: 'text', text: message.copyCode }],
+                    },
+                  ]
+                : []),
             ],
           },
         }),

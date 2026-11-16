@@ -6,6 +6,7 @@ import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/api/rider_api.dart';
+import 'package:tara_test/fake_pin.dart';
 
 /// API livreur sans réseau pour les tests d'écrans : encaissement et portefeuille.
 class FakeRiderApi extends RiderApi {
@@ -128,13 +129,20 @@ class FakeRiderApi extends RiderApi {
   final withdrawals = <(int? amount, String phone, String operator, String key)>[];
   String withdrawStatus = 'PENDING';
 
+  /// Code secret contrôlé comme le serveur ; preuves reçues avec les retraits.
+  FakePinApi? pins;
+  final withdrawProofs = <PinProof?>[];
+
   @override
   Future<Payout> withdraw({
     int? amount,
     required String phone,
     required String operator,
     required String idempotencyKey,
+    PinProof? proof,
   }) async {
+    if (proof != null) pins?.check(proof);
+    withdrawProofs.add(proof);
     withdrawals.add((amount, phone, operator, idempotencyKey));
     final taken = amount ?? wallet0.available;
     final fee = wallet0.withdrawalFeeFor(taken);

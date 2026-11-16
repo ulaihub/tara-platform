@@ -133,6 +133,17 @@ const envSchema = z
     WHATSAPP_APP_SECRET: z.string().min(16).optional(),
     /** Jeton choisi par Tara, demandé par Meta à l'enregistrement du webhook. */
     WHATSAPP_VERIFY_TOKEN: z.string().min(16).optional(),
+    /**
+     * Codes de connexion par WhatsApp (SMS en secours) : à activer une fois le modèle
+     * d'authentification `tara_otp` approuvé chez Meta (docs/DEPLOIEMENT.md).
+     */
+    WHATSAPP_OTP: booleanFlag.default(false),
+    /**
+     * Empreintes des apps Android (11 caractères, séparées par des virgules) : ajoutées à la
+     * fin du SMS de code, elles permettent au téléphone de remettre le code à l'app sans rien
+     * taper. Seules celles-ci sont acceptées ; `tara apk` les règle.
+     */
+    SMS_APP_HASHES: z.string().default(''),
     /** Numéros de l'équipe prévenus par SMS en cas d'alerte de sécurité d'un livreur (SOS). */
     OPS_ALERT_PHONES: z.string().default(''),
     /** Ligne de secours Tara (24 h/24), affichée sur l'écran d'alerte de l'app livreur. */
@@ -366,6 +377,24 @@ const envSchema = z
         message: 'liste de rayons en mètres attendue',
       });
     }
+    const appHashes = env.SMS_APP_HASHES.split(',')
+      .map((hash) => hash.trim())
+      .filter(Boolean);
+    if (appHashes.some((hash) => !SMS_APP_HASH.test(hash))) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SMS_APP_HASHES'],
+        message:
+          'empreintes de 11 caractères (lettres, chiffres, + et /) séparées par des virgules',
+      });
+    }
+    if (env.WHATSAPP_OTP && env.WHATSAPP_PROVIDER === 'none') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['WHATSAPP_OTP'],
+        message: 'WhatsApp doit être configuré (WHATSAPP_PROVIDER)',
+      });
+    }
     const testNumbers = env.SMS_TEST_NUMBERS.split(',')
       .map((phone) => phone.trim())
       .filter(Boolean);
@@ -468,5 +497,17 @@ export function smsTestNumbers(env: Env): Set<string> {
     env.SMS_TEST_NUMBERS.split(',')
       .map((phone) => normalizeCameroonMobile(phone.trim()))
       .filter((phone): phone is string => phone !== null),
+  );
+}
+
+/** Empreinte d'une app Android dans un SMS (SMS Retriever) : 11 caractères base64. */
+export const SMS_APP_HASH = /^[A-Za-z0-9+/]{11}$/;
+
+/** Empreintes des apps Tara autorisées à la fin des SMS de code. */
+export function smsAppHashes(env: Pick<Env, 'SMS_APP_HASHES'>): Set<string> {
+  return new Set(
+    env.SMS_APP_HASHES.split(',')
+      .map((hash) => hash.trim())
+      .filter((hash) => SMS_APP_HASH.test(hash)),
   );
 }

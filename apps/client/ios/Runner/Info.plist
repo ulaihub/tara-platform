@@ -10,6 +10,8 @@
 	<string>Tara prend la photo de façade avec l’appareil photo et n’a pas besoin de votre galerie.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID confirme votre code secret Tara (solde, retraits) sans le taper.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Tara utilise l’appareil photo pour la photo de façade d’une adresse, si vous le souhaitez.</string>
 	<key>NSMicrophoneUsageDescription</key>

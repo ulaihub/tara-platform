@@ -22,6 +22,7 @@ import '../../core/api/models.dart';
 import '../../core/offline/action_queue.dart' show newEventId;
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pin.dart';
 import '../course/course_scaffold.dart' show CourseFieldLabel;
 
 enum _DepositState { idle, sending, waiting, done, failed }
@@ -238,7 +239,10 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
                   style: TaraText.label.copyWith(color: c.textSecondary),
                 ),
                 const SizedBox(height: 4),
-                AmountText(topUp ? widget.available + (done ? _sent : 0) : widget.amount, style: TaraText.amountL),
+                if (topUp)
+                  MaskedBalance(widget.available + (done ? _sent : 0), unit: 'FCFA', style: TaraText.amountL)
+                else
+                  AmountText(widget.amount, style: TaraText.amountL),
               ],
             ),
           ),

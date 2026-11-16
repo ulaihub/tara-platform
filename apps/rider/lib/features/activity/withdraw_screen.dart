@@ -10,6 +10,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -22,6 +23,7 @@ import '../../core/api/models.dart';
 import '../../core/offline/action_queue.dart' show newEventId;
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pin.dart';
 import '../course/course_scaffold.dart' show CourseFieldLabel;
 
 /// Plus petit retrait partiel (comme le serveur) ; tout le solde peut toujours être retiré.
@@ -33,9 +35,12 @@ enum _WithdrawState { idle, sending, processing, approval, done, failed }
 /// un autre montant, frais et montant reçu affichés avant de confirmer. Le retrait part sur
 /// le numéro du compte, le seul permis.
 class WithdrawScreen extends ConsumerStatefulWidget {
-  const WithdrawScreen({super.key, required this.wallet, required this.onBack, required this.onDone});
+  const WithdrawScreen({super.key, required this.wallet, required this.onBack, required this.onDone, this.proof});
 
   final RiderWallet wallet;
+
+  /// Code secret déjà donné pour afficher le solde : confirme le retrait sans le redemander.
+  final PinProof? proof;
   final VoidCallback onBack;
 
   /// Fermeture après une demande envoyée : le solde est relu.
@@ -113,17 +118,41 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
     });
     unawaited(_events?.cancel());
     _events = ref.read(realtimeProvider).stream.listen(_onEvent);
+    final key = _key;
     try {
-      final payout = await ref
+      Future<Payout> send(PinProof proof) => ref
           .read(riderApiProvider)
           .withdraw(
             // Tout le disponible : le serveur le recalcule (rien ne reste si le solde a bougé).
             amount: amount == _available ? null : amount,
             phone: phone,
             operator: operator,
-            idempotencyKey: _key,
+            idempotencyKey: key,
+            proof: proof,
           );
+      // Confirmé par le code secret (ou l'empreinte), comme un retrait MoMo : celui donné pour
+      // afficher le solde, sinon il est demandé maintenant.
+      Payout? payout;
+      if (widget.proof case final given?) {
+        try {
+          payout = await send(given);
+        } on ApiException catch (error) {
+          if (!error.code.startsWith('PIN_') && error.code != 'BIOMETRIC_INVALID') rethrow;
+        }
+      }
       if (!mounted) return;
+      payout ??= await withPin<Payout>(
+        context,
+        pinServices(context, ref),
+        reason: l.pinReasonWithdraw(_f(amount)),
+        action: send,
+      );
+      if (!mounted) return;
+      if (payout == null) {
+        // Code secret abandonné : rien n'est parti.
+        setState(() => _state = _WithdrawState.idle);
+        return;
+      }
       _payout = payout;
       _apply(payout.status);
     } on ApiException catch (error) {

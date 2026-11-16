@@ -16,6 +16,8 @@ import {
   riderPayable,
 } from '../finance/ledger.accounts.js';
 import { LedgerService } from '../finance/ledger.service.js';
+import type { PinProof } from '../pin/pin.schemas.js';
+import { PinService } from '../pin/pin.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OBJECT_STORAGE, type ObjectStorage } from '../storage/object-storage.js';
 import { maskOrdersWhere } from './masking.js';
@@ -31,6 +33,7 @@ export class PrivacyService {
     private readonly tokens: TokenService,
     private readonly audit: AuditService,
     private readonly ledger: LedgerService,
+    private readonly pin: PinService,
     @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
   ) {}
 
@@ -255,18 +258,22 @@ export class PrivacyService {
   }
 
   /**
-   * Effacement du compte, confirmé par un code SMS. Les données personnelles sont supprimées
-   * ou anonymisées ; les commandes et écritures financières restent (obligations comptables),
-   * rattachées à un compte anonyme. Le numéro de téléphone redevient libre.
+   * Effacement du compte, confirmé par le code secret (ou l'empreinte) une fois choisi, sinon
+   * par un code SMS. Les données personnelles sont supprimées ou anonymisées ; les commandes
+   * et écritures financières restent (obligations comptables), rattachées à un compte
+   * anonyme. Le numéro de téléphone redevient libre.
    */
   async deleteAccount(
     actor: AuthUser,
-    challengeId: string,
-    code: string,
+    confirm: { challengeId?: string; code?: string } & PinProof,
     request: Request,
   ): Promise<void> {
     await this.assertDeletable(actor.id);
-    await this.otp.confirm(actor.phone, challengeId, code, 'ACCOUNT_DELETION');
+    if (confirm.challengeId && confirm.code) {
+      await this.otp.confirm(actor.phone, confirm.challengeId, confirm.code, 'ACCOUNT_DELETION');
+    } else {
+      await this.pin.assert(actor, confirm, { required: true, request });
+    }
 
     const media = await this.prisma.$transaction(async (tx) => {
       const files = await this.anonymize(tx, actor.id);
@@ -308,10 +315,15 @@ export class PrivacyService {
         referralCode: null,
         totpSecretEnc: null,
         totpEnabledAt: null,
+        pinHash: null,
+        pinSetAt: null,
+        pinFailedAttempts: 0,
+        pinLockedAt: null,
       },
     });
     await this.tokens.revokeAll(userId, tx);
     await tx.device.deleteMany({ where: { userId } });
+    await tx.pinDeviceKey.deleteMany({ where: { userId } });
     await tx.address.updateMany({
       where: { ownerId: userId },
       data: {

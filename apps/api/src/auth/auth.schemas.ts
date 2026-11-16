@@ -1,10 +1,25 @@
 import { z } from 'zod';
 import { CameroonMobile } from '../common/phone.js';
+import { SMS_APP_HASH } from '../config/env.js';
 import { AcceptedVersions } from '../legal/legal.schemas.js';
 
 export const LocaleParam = z.enum(['fr', 'en']);
 
-export const RequestOtpBody = z.object({
+/** Envoi d'un code : canal souhaité et empreinte de l'app Android (lecture automatique). */
+export const OtpDeliveryBody = z.object({
+  /**
+   * WhatsApp d'abord quand il est activé, SMS sinon ; `SMS` force le SMS (« Recevoir par
+   * SMS » quand WhatsApp n'est pas arrivé).
+   */
+  channel: z.enum(['SMS', 'WHATSAPP']).optional(),
+  /**
+   * Empreinte de l'app Android (11 caractères) : ajoutée à la fin du SMS si elle est connue
+   * du serveur, le téléphone remet alors le code à l'app sans rien demander.
+   */
+  appHash: z.string().regex(SMS_APP_HASH).optional(),
+});
+
+export const RequestOtpBody = OtpDeliveryBody.extend({
   phone: CameroonMobile,
   /** Langue du SMS ; à défaut, celle de l'en-tête Accept-Language. */
   locale: LocaleParam.optional(),
@@ -15,6 +30,10 @@ export const OtpChallengeDto = z
     challengeId: z.uuid(),
     expiresAt: z.iso.datetime(),
     resendAfterSeconds: z.int(),
+    /** Canal du code : WhatsApp, ou SMS (choisi, ou en secours de WhatsApp). */
+    channel: z.enum(['SMS', 'WHATSAPP']),
+    /** Le SMS porte l'empreinte de l'app : Android lui remet le code sans rien demander. */
+    autoRead: z.boolean(),
   })
   .meta({ id: 'OtpChallenge' });
 

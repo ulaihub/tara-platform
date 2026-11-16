@@ -259,7 +259,31 @@ cmd_config() {
   [[ -n $(get_var "$API_ENV" PAYOUT_FEE_BPS) ]] || set_var "$API_ENV" PAYOUT_FEE_BPS 250
 
   echo
-  echo "4. Analyse automatique des photos de colis (Anthropic) : facultative."
+  echo "4. Codes de connexion par WhatsApp (moins chers que le SMS) : facultatif."
+  echo "   Compte WhatsApp Business et modèle « tara_otp » approuvé chez Meta : docs/DEPLOIEMENT.md."
+  local wa_id wa_token wa_secret
+  wa_id=$(ask "Identifiant du numéro WhatsApp (Phone number ID, vide : inchangé)")
+  if [[ -n $wa_id ]]; then
+    wa_token=$(ask_secret "Jeton d'accès permanent (System user token)")
+    wa_secret=$(ask_secret "Clé secrète de l'app Meta (App secret)")
+    set_var "$API_ENV" WHATSAPP_PROVIDER meta
+    set_var "$API_ENV" WHATSAPP_PHONE_NUMBER_ID "$wa_id"
+    [[ -z $wa_token ]] || set_var "$API_ENV" WHATSAPP_ACCESS_TOKEN "$wa_token"
+    [[ -z $wa_secret ]] || set_var "$API_ENV" WHATSAPP_APP_SECRET "$wa_secret"
+    [[ -n $(get_var "$API_ENV" WHATSAPP_API_VERSION) ]] || set_var "$API_ENV" WHATSAPP_API_VERSION v23.0
+    [[ -n $(get_var "$API_ENV" WHATSAPP_VERIFY_TOKEN) ]] || set_var "$API_ENV" WHATSAPP_VERIFY_TOKEN "$(secret 16)"
+    echo "   Webhook à déclarer chez Meta : https://api.$(get_var "$COMPOSE_ENV" TARA_DOMAIN)/v1/webhooks/whatsapp"
+    echo "   Jeton de vérification : $(get_var "$API_ENV" WHATSAPP_VERIFY_TOKEN)"
+  fi
+  if [[ $(get_var "$API_ENV" WHATSAPP_PROVIDER) == meta ]]; then
+    local otp
+    otp=$(ask "Envoyer les codes de connexion par WhatsApp (modèle tara_otp approuvé) ? oui/non" \
+      "$([[ $(get_var "$API_ENV" WHATSAPP_OTP) == true ]] && echo oui || echo non)")
+    set_var "$API_ENV" WHATSAPP_OTP "$([[ $otp == oui ]] && echo true || echo false)"
+  fi
+
+  echo
+  echo "5. Analyse automatique des photos de colis (Anthropic) : facultative."
   local claude
   claude=$(ask_secret "Clé API Anthropic (vide : analyse désactivée)")
   if [[ -n $claude ]]; then
@@ -332,11 +356,23 @@ cmd_apk() {
   say "Construction des apps Android pour https://api.$domain (20 à 60 minutes la première fois)"
   docker build -t tara-flutter "$SRC/infra/production/apk"
   docker volume create tara_flutter_cache >/dev/null
+  local hashes output
+  hashes=$(get_var "$API_ENV" SMS_APP_HASHES | tr ',' '\n')
   for app in rider client; do
-    docker run --rm -v "$SRC:/src:ro" -v tara_flutter_cache:/cache -v "$TARA_HOME/apk:/out" \
-      -e APP="$app" -e API_URL="https://api.$domain" tara-flutter
+    # Le journal s'affiche ; l'empreinte de l'app (dernière ligne) est gardée pour l'API.
+    output=$(docker run --rm -v "$SRC:/src:ro" -v tara_flutter_cache:/cache -v "$TARA_HOME/apk:/out" \
+      -e APP="$app" -e API_URL="https://api.$domain" tara-flutter | tee /dev/stderr)
+    hashes+=$'\n'$(printf '%s\n' "$output" | sed -n 's/^SMS_APP_HASH=//p' | tail -1)
   done
   ok "Apps prêtes : https://apps.$domain (identifiant : testeur, mot de passe : $password)"
+  # Lecture automatique du code SMS : l'API ajoute l'empreinte de ces apps aux SMS de code.
+  local list
+  list=$(printf '%s\n' "$hashes" | grep -E '^[A-Za-z0-9+/]{11}$' | sort -u | paste -sd, -)
+  if [[ -n $list && $list != "$(get_var "$API_ENV" SMS_APP_HASHES)" ]]; then
+    set_var "$API_ENV" SMS_APP_HASHES "$list"
+    dc up -d --no-deps --force-recreate api >/dev/null
+    ok "Lecture automatique du code SMS activée pour ces apps (API redémarrée)"
+  fi
 }
 
 # Mobile camerounais au format +2376XXXXXXXX (« 640 11 40 64 », « +237640114064 »…).

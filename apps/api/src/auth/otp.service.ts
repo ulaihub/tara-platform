@@ -2,16 +2,17 @@ import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
 import { ENV } from '../config/config.module.js';
-import type { Env } from '../config/env.js';
+import { type Env, smsAppHashes, smsTestNumbers } from '../config/env.js';
 import { AppError } from '../common/errors/app-error.js';
 import { hashCode, randomDigits, randomReadableId, sha256, verifyCode } from '../common/crypto.js';
 import type { AppLocale } from '../common/i18n/locale.js';
-import { renderSms, type SmsTemplate } from '../common/i18n/sms-templates.js';
+import { renderSms, type SmsTemplate, withAppHash } from '../common/i18n/sms-templates.js';
 import { maskPhone } from '../common/phone.js';
 import { signupConsents } from '../legal/legal-versions.js';
 import { addMinutes } from '../common/time.js';
 import type { OtpChallenge } from '../generated/prisma/client.js';
 import type { OtpPurpose } from '../generated/prisma/enums.js';
+import { NotificationService } from '../notifications/notification.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SMS_PROVIDER, type SmsProvider } from '../sms/sms.provider.js';
 import type { AuthSessionDto, OtpChallengeDto, VerifyOtpBody } from './auth.schemas.js';
@@ -36,23 +37,39 @@ const TEMPLATES: Record<OtpPurpose, SmsTemplate> = {
   PHONE_CHANGE: 'OTP',
   ACCOUNT_DELETION: 'ACCOUNT_DELETION_OTP',
   TERMS: 'TERMS_OTP',
+  PIN_RESET: 'PIN_RESET_OTP',
 };
 
+/** Canal souhaité et empreinte de l'app Android, envoyés par l'app avec la demande. */
+export interface OtpDelivery {
+  channel?: 'SMS' | 'WHATSAPP' | undefined;
+  appHash?: string | undefined;
+}
+
+/** Codes envoyés par WhatsApp quand il est activé (texte imposé par Meta : « code »). */
+const WHATSAPP_PURPOSES = new Set<OtpPurpose>(['LOGIN', 'PIN_RESET']);
+
 /**
- * Codes à usage unique envoyés par SMS : connexion (A1) et confirmation des actions
- * sensibles (suppression de compte). Aucun mot de passe.
+ * Codes à usage unique envoyés par WhatsApp ou SMS : connexion (A1), code secret oublié et
+ * confirmation des actions sensibles (suppression de compte). Aucun mot de passe.
  */
 @Injectable()
 export class OtpService {
   private readonly logger = new Logger(OtpService.name);
+  private readonly appHashes: Set<string>;
+  private readonly testNumbers: Set<string>;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokens: TokenService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationService,
     @Inject(SMS_PROVIDER) private readonly sms: SmsProvider,
     @Inject(ENV) private readonly env: Env,
-  ) {}
+  ) {
+    this.appHashes = smsAppHashes(env);
+    this.testNumbers = smsTestNumbers(env);
+  }
 
   private hash(phone: string, purpose: OtpPurpose, code: string): string {
     // Le motif fait partie du hachage : un code de connexion ne confirme pas une suppression.
@@ -72,6 +89,7 @@ export class OtpService {
     locale: AppLocale,
     ip: string | undefined,
     purpose: OtpPurpose = 'LOGIN',
+    delivery: OtpDelivery = {},
   ): Promise<z.output<typeof OtpChallengeDto>> {
     const now = new Date();
     if ((await this.failuresToday(phone, now)) >= MAX_FAILURES_PER_DAY) {
@@ -112,13 +130,31 @@ export class OtpService {
       },
     });
 
+    const minutes = Math.round(this.env.OTP_TTL_SECONDS / 60);
+    const smsHash =
+      delivery.appHash && this.appHashes.has(delivery.appHash) ? delivery.appHash : null;
+    // WhatsApp d'abord s'il est activé (moins cher) ; les téléphones de test restent au SMS
+    // (gardé sur le serveur, lu avec `tara sms`).
+    const whatsapp =
+      this.env.WHATSAPP_OTP &&
+      delivery.channel !== 'SMS' &&
+      WHATSAPP_PURPOSES.has(purpose) &&
+      !this.testNumbers.has(phone) &&
+      (await this.notifications.codeByWhatsApp({ phone, locale, code, minutes, smsHash }));
+    if (whatsapp) {
+      return {
+        challengeId: challenge.id,
+        expiresAt: expiresAt.toISOString(),
+        resendAfterSeconds: RESEND_DELAY_SECONDS,
+        channel: 'WHATSAPP',
+        autoRead: smsHash !== null,
+      };
+    }
+
     try {
       await this.sms.send(
         phone,
-        renderSms(TEMPLATES[purpose], locale, {
-          code,
-          minutes: Math.round(this.env.OTP_TTL_SECONDS / 60),
-        }),
+        withAppHash(renderSms(TEMPLATES[purpose], locale, { code, minutes }), smsHash),
       );
     } catch (error) {
       this.logger.error(`Échec d'envoi du code à ${maskPhone(phone)}`, error);
@@ -133,6 +169,8 @@ export class OtpService {
       challengeId: challenge.id,
       expiresAt: expiresAt.toISOString(),
       resendAfterSeconds: RESEND_DELAY_SECONDS,
+      channel: 'SMS',
+      autoRead: smsHash !== null,
     };
   }
 

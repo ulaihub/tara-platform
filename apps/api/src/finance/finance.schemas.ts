@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PinProofFields } from '../pin/pin.schemas.js';
 import { CameroonMobile } from '../common/phone.js';
 import { PageQuery } from '../common/pagination.js';
 
@@ -46,6 +47,8 @@ export const PayoutBody = z.object({
   amount: Fcfa.optional(),
   phone: CameroonMobile,
   operator: Operator,
+  /** Code secret ou empreinte, exigé une fois le code secret choisi. */
+  ...PinProofFields,
 });
 
 /**

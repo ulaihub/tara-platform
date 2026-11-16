@@ -132,15 +132,17 @@ class RiderApi {
   /// sur le disponible (tout le disponible si absent). Sous le seuil gratuit, une part des
   /// frais Mobile Money est retenue. [idempotencyKey] : la même demande renvoyée n'en crée pas
   /// une seconde.
+  /// Retrait des gains ; [proof] : code secret ou empreinte, exigé une fois le code choisi.
   Future<Payout> withdraw({
     int? amount,
     required String phone,
     required String operator,
     required String idempotencyKey,
+    PinProof? proof,
   }) async => Payout.fromJson(
     await _api.post(
       '/rider/withdrawals',
-      body: {'amount': ?amount, 'phone': phone, 'operator': operator},
+      body: {'amount': ?amount, 'phone': phone, 'operator': operator, ...?proof?.toJson()},
       headers: {'Idempotency-Key': idempotencyKey},
     ) as Json,
   );

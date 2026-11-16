@@ -1205,5 +1205,58 @@
   "photoDamaged": "Photo du colis abîmé · obligatoire",
   "photoDamagedHint": "Le dommage bien visible",
   "damagedNotice": "Le destinataire refuse un colis abîmé : photographiez le dommage et décrivez-le. L’équipe Tara ouvre une réclamation pour l’expéditeur ; ramenez le colis comme un retour.",
-  "damagedNoteHint": "Ex. carton écrasé, bouteille cassée"
+  "damagedNoteHint": "Ex. carton écrasé, bouteille cassée",
+  "pinCreateTitle": "Choisissez votre code secret",
+  "pinCreateBody": "4 chiffres, comme pour Orange Money ou MoMo. Il protège votre solde et vos retraits. Ne le donnez à personne, même à Tara.",
+  "pinConfirmTitle": "Confirmez votre code secret",
+  "pinMismatch": "Les deux codes sont différents. Recommencez.",
+  "pinEnterTitle": "Code secret",
+  "pinCurrentTitle": "Votre code secret actuel",
+  "pinNewTitle": "Nouveau code secret",
+  "pinForgot": "Code oublié ?",
+  "pinUseBiometrics": "Utiliser aussi mon empreinte",
+  "pinBiometricButton": "Utiliser mon empreinte",
+  "pinBiometricTitle": "Confirmez avec votre empreinte",
+  "pinDelete": "Effacer",
+  "pinDigitsEntered": "{count} chiffre(s) sur 4",
+  "@pinDigitsEntered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pinLockedTitle": "Code secret bloqué",
+  "pinLockedBody": "Après 5 erreurs, votre code secret est bloqué. Recevez un code sur votre numéro pour en choisir un nouveau.",
+  "pinResetBody": "Recevez un code sur votre numéro pour choisir un nouveau code secret.",
+  "pinSendCode": "Recevoir un code",
+  "pinCodeSentSms": "Entrez le code reçu par SMS.",
+  "pinCodeSentWhatsApp": "Entrez le code reçu sur WhatsApp.",
+  "codeBySms": "Recevoir par SMS",
+  "codeSentWhatsAppTo": "Code envoyé sur WhatsApp au {phone}",
+  "@codeSentWhatsAppTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "pinSaved": "Code secret enregistré.",
+  "balanceShow": "Afficher le solde",
+  "balanceHide": "Masquer le solde",
+  "pinReasonBalance": "Pour voir votre solde",
+  "pinReasonWithdraw": "Pour retirer {amount}",
+  "@pinReasonWithdraw": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pinRowTitle": "Code secret",
+  "pinRowSet": "Changer mon code secret",
+  "pinRowNotSet": "Choisir mon code secret",
+  "biometricRowTitle": "Empreinte digitale",
+  "biometricRowBody": "Confirmer avec l'empreinte au lieu du code",
+  "securitySection": "Sécurité"
 }

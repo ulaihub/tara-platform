@@ -1877,7 +1877,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deleteAccountRow => 'Supprimer mon compte';
 
   @override
-  String get deleteAccountRowSubtitle => 'Définitif, confirmé par un code SMS';
+  String get deleteAccountRowSubtitle => 'Définitif, confirmé par votre code secret';
 
   @override
   String get deleteAccountTitle => 'Supprimer mon compte';
@@ -1906,20 +1906,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get openWallet => 'Ouvrir mon portefeuille';
 
   @override
-  String get deleteAccountSendCode => 'Recevoir le code par SMS';
-
-  @override
-  String deleteAccountCodeSent(String phone) {
-    return 'Code envoyé au $phone. Tapez-le pour confirmer la suppression.';
-  }
-
-  @override
-  String get deleteAccountCodeLabel => 'Code reçu par SMS';
-
-  @override
-  String get deleteAccountResend => 'Renvoyer le code';
-
-  @override
   String get deleteAccountConfirm => 'Supprimer définitivement';
 
   @override
@@ -1936,6 +1922,116 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get failureReasonDamaged =>
       'Le destinataire a refusé le colis : il était abîmé. Une réclamation est ouverte, l’équipe Tara vous contacte.';
+
+  @override
+  String get pinCreateTitle => 'Choisissez votre code secret';
+
+  @override
+  String get pinCreateBody =>
+      '4 chiffres, comme pour Orange Money ou MoMo. Il protège votre solde et vos retraits. Ne le donnez à personne, même à Tara.';
+
+  @override
+  String get pinConfirmTitle => 'Confirmez votre code secret';
+
+  @override
+  String get pinMismatch => 'Les deux codes sont différents. Recommencez.';
+
+  @override
+  String get pinEnterTitle => 'Code secret';
+
+  @override
+  String get pinCurrentTitle => 'Votre code secret actuel';
+
+  @override
+  String get pinNewTitle => 'Nouveau code secret';
+
+  @override
+  String get pinForgot => 'Code oublié ?';
+
+  @override
+  String get pinUseBiometrics => 'Utiliser aussi mon empreinte';
+
+  @override
+  String get pinBiometricButton => 'Utiliser mon empreinte';
+
+  @override
+  String get pinBiometricTitle => 'Confirmez avec votre empreinte';
+
+  @override
+  String get pinDelete => 'Effacer';
+
+  @override
+  String pinDigitsEntered(int count) {
+    return '$count chiffre(s) sur 4';
+  }
+
+  @override
+  String get pinLockedTitle => 'Code secret bloqué';
+
+  @override
+  String get pinLockedBody =>
+      'Après 5 erreurs, votre code secret est bloqué. Recevez un code sur votre numéro pour en choisir un nouveau.';
+
+  @override
+  String get pinResetBody => 'Recevez un code sur votre numéro pour choisir un nouveau code secret.';
+
+  @override
+  String get pinSendCode => 'Recevoir un code';
+
+  @override
+  String get pinCodeSentSms => 'Entrez le code reçu par SMS.';
+
+  @override
+  String get pinCodeSentWhatsApp => 'Entrez le code reçu sur WhatsApp.';
+
+  @override
+  String get codeBySms => 'Recevoir par SMS';
+
+  @override
+  String codeSentWhatsAppTo(String phone) {
+    return 'Code envoyé sur WhatsApp au $phone';
+  }
+
+  @override
+  String get pinSaved => 'Code secret enregistré.';
+
+  @override
+  String get balanceShow => 'Afficher le solde';
+
+  @override
+  String get balanceHide => 'Masquer le solde';
+
+  @override
+  String get pinReasonBalance => 'Pour voir votre solde';
+
+  @override
+  String pinReasonWithdraw(String amount) {
+    return 'Pour retirer $amount';
+  }
+
+  @override
+  String get pinRowTitle => 'Code secret';
+
+  @override
+  String get pinRowSet => 'Changer mon code secret';
+
+  @override
+  String get pinRowNotSet => 'Choisir mon code secret';
+
+  @override
+  String get biometricRowTitle => 'Empreinte digitale';
+
+  @override
+  String get biometricRowBody => 'Confirmer avec l\'empreinte au lieu du code';
+
+  @override
+  String get pinReasonDelete => 'Pour supprimer votre compte';
+
+  @override
+  String get deleteAccountConfirmPin => 'Supprimer avec mon code secret';
+
+  @override
+  String get securitySection => 'Sécurité';
 
   @override
   String trackPayNow(String amount) {

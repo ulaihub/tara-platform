@@ -12,6 +12,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
@@ -25,6 +26,7 @@ import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pin.dart';
 import '../home/home_screen.dart' show walletProvider;
 
 /// Reversements et retraits récents.
@@ -121,6 +123,50 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     _notice = null;
   });
 
+  /// Code secret donné pour afficher le solde avant le retrait : il confirme aussi le retrait.
+  PinProof? _proof;
+
+  /// Retrait : le solde masqué s'affiche d'abord avec le code secret (ou l'empreinte).
+  Future<void> _openWithdraw() async {
+    if (_panel == _Panel.withdraw) return _open(_Panel.withdraw);
+    final visibility = ref.read(balanceVisibilityProvider);
+    if (!visibility.visible) {
+      final pin = ref.read(pinApiProvider);
+      try {
+        final proof = await withPin<PinProof>(
+          context,
+          pinServices(context, ref),
+          reason: AppLocalizations.of(context).pinReasonBalance,
+          action: (given) async {
+            await pin.verify(given);
+            return given;
+          },
+        );
+        if (proof == null || !mounted) return;
+        _proof = proof;
+        visibility.show();
+      } catch (error) {
+        if (mounted) setState(() => _error = errorMessage(context, error));
+        return;
+      }
+    }
+    _open(_Panel.withdraw);
+  }
+
+  /// Action d'argent confirmée par le code secret : celui déjà donné, sinon demandé ici.
+  Future<T?> _withPin<T>(String reason, Future<T> Function(PinProof proof) action) async {
+    if (_proof case final given?) {
+      try {
+        return await action(given);
+      } on ApiException catch (error) {
+        if (!error.code.startsWith('PIN_') && error.code != 'BIOMETRIC_INVALID') rethrow;
+        _proof = null;
+      }
+    }
+    if (!mounted) return null;
+    return withPin<T>(context, pinServices(context, ref), reason: reason, action: action);
+  }
+
   /// Argent arrivé ou parti : soldes, mouvements et reversements relus, son de pièce.
   void _done(String notice) {
     TaraFeedback.play(context, TaraSound.cash);
@@ -131,15 +177,19 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     unawaited(_refresh());
   }
 
-  Future<void> _payoutNow(int _) async {
+  Future<void> _payoutNow(int amount) async {
     final l = AppLocalizations.of(context);
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      await ref.read(clientApiProvider).payoutNow(key: _key());
-      if (mounted) _done(l.payoutRequested);
+      final key = _key();
+      final payout = await _withPin(
+        l.pinReasonWithdraw(balanceText(ref.read(balanceVisibilityProvider), amount)),
+        (proof) => ref.read(clientApiProvider).payoutNow(key: key, proof: proof),
+      );
+      if (payout != null && mounted) _done(l.payoutRequested);
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(context, error));
     } finally {
@@ -154,8 +204,13 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       _error = null;
     });
     try {
-      await ref.read(clientApiProvider).withdraw(phone: widget.me.phone, operator: operator, key: _key());
-      if (mounted) _done(l.withdrawDone);
+      final key = _key();
+      final payout = await _withPin(
+        l.pinReasonWithdraw(_f(amount)),
+        (proof) =>
+            ref.read(clientApiProvider).withdraw(phone: widget.me.phone, operator: operator, key: key, proof: proof),
+      );
+      if (payout != null && mounted) _done(l.withdrawDone);
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(context, error));
     } finally {
@@ -223,7 +278,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 busy: _busy,
                 phone: widget.me.phone,
                 onTopUp: () => _open(_Panel.topUp),
-                onWithdraw: () => _open(_Panel.withdraw),
+                onWithdraw: () => unawaited(_openWithdraw()),
                 onCancel: () => _open(_panel),
                 onToppedUp: (amount) => _done(l.topUpDone(_f(amount))),
                 onWithdrawConfirm: _withdraw,
@@ -266,7 +321,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
 
 /// Boutique : ventes encaissées à recevoir, quand et où elles arrivent ; reversement
 /// immédiat pour les offres payantes ; frais d'échec à régler si le solde est négatif.
-class _ShopCard extends StatelessWidget {
+class _ShopCard extends ConsumerWidget {
   const _ShopCard({required this.wallet, required this.busy, required this.onPayoutNow});
 
   final Wallet wallet;
@@ -274,7 +329,8 @@ class _ShopCard extends StatelessWidget {
   final ValueChanged<int> onPayoutNow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final visibility = ref.watch(balanceVisibilityProvider);
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final balance = wallet.merchantBalance ?? 0;
@@ -294,7 +350,11 @@ class _ShopCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          AmountText(balance, unit: 'F', style: TaraText.amountL, color: balance < 0 ? c.dangerTextStrong : null),
+          // Masqué par défaut, comme sur MoMo ; une dette reste toujours affichée.
+          if (balance < 0)
+            AmountText(balance, unit: 'F', style: TaraText.amountL, color: c.dangerTextStrong)
+          else
+            MaskedBalance(balance, style: TaraText.amountL),
           const SizedBox(height: 4),
           Text(
             wallet.payoutSchedule == 'DAILY'
@@ -330,7 +390,14 @@ class _ShopCard extends StatelessWidget {
             ),
           ] else if (wallet.canPayoutBalanceNow) ...[
             const SizedBox(height: 12),
-            PrimaryButton(label: l.payoutNow(_f(balance)), loading: busy, onPressed: () => onPayoutNow(balance)),
+            ListenableBuilder(
+              listenable: visibility,
+              builder: (context, _) => PrimaryButton(
+                label: l.payoutNow(balanceText(visibility, balance)),
+                loading: busy,
+                onPressed: () => onPayoutNow(balance),
+              ),
+            ),
           ],
         ],
       ),
@@ -489,7 +556,7 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
         children: [
           Text(l.taraBalance, style: TaraText.label.copyWith(color: c.textSecondary)),
           const SizedBox(height: 4),
-          AmountText(balance, unit: 'F', style: TaraText.amountL),
+          MaskedBalance(balance, style: TaraText.amountL),
           const SizedBox(height: 4),
           Text(l.taraBalanceBody, style: TaraText.small.copyWith(color: c.textSecondary)),
           const SizedBox(height: 14),
