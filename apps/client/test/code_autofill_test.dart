@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_client/app/providers.dart';
@@ -25,6 +26,9 @@ class _AuthApi extends AuthApi {
   final requests = <(String phone, String? appHash, OtpChannel? channel)>[];
   final verified = <String>[];
 
+  /// Refus renvoyé par le serveur à la vérification (sinon : conditions à accepter).
+  ApiException? refusal;
+
   @override
   Future<OtpChallenge> requestOtp(String phone, {required String locale, String? appHash, OtpChannel? channel}) async {
     requests.add((phone, appHash, channel));
@@ -45,7 +49,7 @@ class _AuthApi extends AuthApi {
     String? referralCode,
   }) async {
     verified.add(code);
-    throw const ApiException(code: 'TERMS_REQUIRED', message: 'Acceptez les conditions.', status: 422);
+    throw refusal ?? const ApiException(code: 'TERMS_REQUIRED', message: 'Acceptez les conditions.', status: 422);
   }
 }
 
@@ -113,5 +117,35 @@ void main() {
     expect(find.text('Recevoir par SMS'), findsNothing);
     // Nouveau code : nouvelle attente du SMS, cette fois avec l'empreinte.
     expect(sms.waits, [false, true]);
+  });
+
+  testWidgets('code refusé : les cases se vident mais le message reste, sans nouvel essai automatique', (tester) async {
+    final challenge = OtpChallenge(
+      challengeId: '00000000-0000-4000-8000-0000000000aa',
+      expiresAt: DateTime.utc(2026, 11, 16, 10),
+      resendAfterSeconds: 60,
+      autoRead: true,
+    );
+    final (auth, sms, codes) = await pump(tester, challenge);
+    auth.refusal = const ApiException(
+      code: 'OTP_LOCKED',
+      message: 'Trop de codes incorrects pour ce numéro. Réessayez demain ou contactez le support.',
+      status: 429,
+    );
+    sms.deliver('482193');
+    await settle(tester);
+    expect(auth.verified, ['482193']);
+    expect(codes, isEmpty);
+    // Avant : le message s'effaçait avec les cases, l'écran semblait repartir de zéro.
+    expect(
+      find.text('Trop de codes incorrects pour ce numéro. Réessayez demain ou contactez le support.'),
+      findsOneWidget,
+    );
+    expect(sms.waits, [true]);
+
+    // Retaper un chiffre efface le message.
+    await tester.enterText(find.byType(EditableText).first, '4');
+    await settle(tester);
+    expect(find.textContaining('Trop de codes incorrects'), findsNothing);
   });
 }
