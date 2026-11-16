@@ -8,6 +8,7 @@ import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/features/activity/activity_screen.dart';
 import 'package:tara_rider/features/activity/deposit_screen.dart';
 import 'package:tara_rider/features/activity/withdraw_screen.dart';
+import 'package:tara_rider/features/common/pin.dart';
 import 'package:tara_test/fake_pin.dart';
 import 'package:tara_ui/components/pin_flow.dart';
 
@@ -202,8 +203,36 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/13_recharger/${variant.name}.png'));
     });
 
+    goldenTest('13 code secret ${variant.name}', (tester) async {
+      // Écran rendu seul (la capture ne voit pas les pages ouvertes par-dessus) : empreinte
+      // activée sur ce téléphone, deux chiffres tapés.
+      final biometrics = FakeBiometrics(accept: false);
+      await pumpVariant(
+        tester,
+        variant,
+        Builder(
+          builder: (context) => PinScreen<bool>(
+            services: PinServices(
+              api: FakePinApi(key: 'cle-empreinte'),
+              biometrics: biometrics,
+              sms: FakeSmsCodeReader(),
+              strings: pinStrings(context),
+            ),
+            reason: 'Pour voir votre solde',
+            action: (_) async => true,
+          ),
+        ),
+      );
+      await settle(tester);
+      await enterPin(tester, '25');
+      expect(biometrics.prompts, 1);
+      expect(tester.takeException(), isNull);
+      await expectLater(capture, matchesGoldenFile('goldens/13_code_secret/${variant.name}.png'));
+    });
+
     goldenTest('13 retirer ${variant.name}', (tester) async {
-      await pumpVariant(tester, variant, activity(activityApi()));
+      // Solde déjà affiché avec le code secret : l'écran de retrait s'ouvre directement.
+      await pumpVariant(tester, variant, activity(activityApi(), shown: true));
       await settle(tester);
       await tester.ensureVisible(find.text('Retirer'));
       await settle(tester);

@@ -4,6 +4,7 @@ import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/features/activity/deposit_screen.dart';
 import 'package:tara_rider/features/activity/withdraw_screen.dart';
+import 'package:tara_test/fake_pin.dart';
 
 import 'helpers/harness.dart';
 import 'screens_activity_golden_test.dart' show activity, activityApi;
@@ -33,24 +34,24 @@ void main() {
   });
 
   testWidgets('solde prépayé : disponible et argent mis de côté, pas d’espèces à reverser', (tester) async {
-    await pumpVariant(tester, Variant.matrix.first, activity(activityApi()));
+    await pumpVariant(tester, Variant.matrix.first, activity(activityApi(), shown: true));
     await settle(tester);
     expect(find.text('Solde disponible'), findsOneWidget);
-    expect(find.text('29\u00a0500\u00a0F'), findsOneWidget);
+    expect(find.text('29\u00a0500 F', findRichText: true), findsOneWidget);
     expect(find.text('12\u00a0500\u00a0F mis de côté pour vos courses en cours'), findsOneWidget);
     expect(find.text('Espèces à reverser à Tara'), findsNothing);
 
     final idle = activityApi()
       ..wallet0 = const RiderWallet(earnings: 8000, available: 8000, cashHeld: 0, cashLimit: 50000);
     await tester.pumpWidget(const SizedBox());
-    await pumpVariant(tester, Variant.matrix.first, activity(idle));
+    await pumpVariant(tester, Variant.matrix.first, activity(idle, shown: true));
     await settle(tester);
     expect(find.text('Couvre l’argent à encaisser sur vos courses'), findsOneWidget);
   });
 
   testWidgets('recharger : montant au choix, demande Mobile Money, solde mis à jour', (tester) async {
     final api = activityApi()..paymentStatuses = ['PENDING', 'SUCCEEDED'];
-    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await pumpVariant(tester, Variant.matrix.first, activity(api, shown: true));
     await settle(tester);
     await tapText(tester, 'Recharger');
     expect(find.text('Recharger mon solde'), findsOneWidget);
@@ -144,9 +145,7 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, activity(api));
     await settle(tester);
     expect(
-      find.text(
-        'Retrait gratuit dès 20\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.',
-      ),
+      find.text('Retrait gratuit dès 20\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.'),
       findsOneWidget,
     );
   });
@@ -162,7 +161,7 @@ void main() {
         withdrawalFeeBps: 250,
         withdrawalFeeSharePercent: 50,
       );
-    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await pumpVariant(tester, Variant.matrix.first, activity(api, shown: true));
     await settle(tester);
     await tapText(tester, 'Retirer');
     expect(find.text('Retirer vers Mobile Money'), findsOneWidget);
@@ -176,7 +175,11 @@ void main() {
     );
 
     await tapText(tester, 'Recevoir 17\u00a0780\u00a0F');
+    // Confirmé par le code secret, comme un retrait MoMo.
+    expect(find.text('Pour retirer 18\u00a0000\u00a0F'), findsOneWidget);
+    await enterPin(tester, '2580');
     // Tout le disponible : le montant est laissé au serveur ; MTN deviné d'après le 677.
+    expect(api.withdrawProofs.single?.pin, '2580');
     expect(api.withdrawals.single.$1, isNull);
     expect(api.withdrawals.single.$2, '+237677123456');
     expect(api.withdrawals.single.$3, 'MTN');
@@ -201,7 +204,7 @@ void main() {
         withdrawalFeeBps: 250,
         withdrawalFeeSharePercent: 50,
       );
-    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await pumpVariant(tester, Variant.matrix.first, activity(api, shown: true));
     await settle(tester);
     await tapText(tester, 'Retirer');
     await tester.enterText(find.byType(EditableText).first, '200');
@@ -214,6 +217,7 @@ void main() {
     await tester.enterText(find.byType(EditableText).first, '5000');
     await settle(tester);
     await tapText(tester, 'Recevoir 4\u00a0939\u00a0F');
+    await enterPin(tester, '2580');
     expect(api.withdrawals.single.$1, 5000);
 
     // Petit solde (300 F, sous le minimum) : retiré en entier.
@@ -228,10 +232,11 @@ void main() {
         withdrawalFeeSharePercent: 50,
       );
     await tester.pumpWidget(const SizedBox());
-    await pumpVariant(tester, Variant.matrix.first, activity(small));
+    await pumpVariant(tester, Variant.matrix.first, activity(small, shown: true));
     await settle(tester);
     await tapText(tester, 'Retirer');
     await tapText(tester, 'Recevoir 296\u00a0F');
+    await enterPin(tester, '2580');
     expect(small.withdrawals.single.$1, isNull);
   });
 
@@ -282,5 +287,59 @@ void main() {
     expect(find.text('37 500 F reversés à Tara.'), findsOneWidget);
     await tapText(tester, 'Fermer');
     expect(find.byType(DepositScreen), findsNothing);
+  });
+
+  testWidgets('solde masqué : affiché avec le code secret, une erreur compte un essai', (tester) async {
+    final api = activityApi();
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    expect(find.text('29\u00a0500 F', findRichText: true), findsNothing);
+    expect(find.text('••••• F', findRichText: true), findsOneWidget);
+
+    await tester.tap(find.text('••••• F', findRichText: true));
+    await settle(tester);
+    expect(find.text('Pour voir votre solde'), findsOneWidget);
+    await enterPin(tester, '1111');
+    expect(find.text('Code secret incorrect. Encore 4 essai(s) avant blocage.'), findsOneWidget);
+    await enterPin(tester, '2580');
+    await settle(tester);
+    expect(find.text('29\u00a0500 F', findRichText: true), findsOneWidget);
+    expect(api.pins!.accepted.single.pin, '2580');
+  });
+
+  testWidgets('retirer avec le solde masqué : un seul code secret, qui confirme aussi le retrait', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(earnings: 18000, available: 18000, cashHeld: 0, cashLimit: 25000);
+    await pumpVariant(tester, Variant.matrix.first, activity(api));
+    await settle(tester);
+    await tapText(tester, 'Retirer');
+    expect(find.text('Pour voir votre solde'), findsOneWidget);
+    await enterPin(tester, '2580');
+    await settle(tester);
+    expect(find.text('Retirer vers Mobile Money'), findsOneWidget);
+    await tapText(tester, 'Recevoir 18\u00a0000\u00a0F');
+    // Pas de second code : celui donné pour voir le solde confirme le retrait.
+    expect(find.text('Code secret'), findsNothing);
+    expect(api.withdrawProofs.single?.pin, '2580');
+  });
+
+  testWidgets('premier retrait : le code secret se choisit deux fois, les codes trop simples refusés', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(earnings: 18000, available: 18000, cashHeld: 0, cashLimit: 25000)
+      ..pins = FakePinApi(isSet: false);
+    await pumpVariant(tester, Variant.matrix.first, activity(api, shown: true));
+    await settle(tester);
+    await tapText(tester, 'Retirer');
+    await tapText(tester, 'Recevoir 18\u00a0000\u00a0F');
+    expect(find.text('Choisissez votre code secret'), findsOneWidget);
+    await enterPin(tester, '4826');
+    expect(find.text('Confirmez votre code secret'), findsOneWidget);
+    await enterPin(tester, '4820');
+    expect(find.text('Les deux codes sont différents. Recommencez.'), findsOneWidget);
+    await enterPin(tester, '4826');
+    await enterPin(tester, '4826');
+    await settle(tester);
+    expect(api.pins!.sets.single.$1, '4826');
+    expect(api.withdrawals, hasLength(1));
   });
 }

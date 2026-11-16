@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.4 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.5 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -20,9 +20,14 @@ qui lui est confié**, de l'enlèvement à la remise (article 13).
 
 ## 2. Votre compte
 
-- Votre compte est lié à votre numéro de téléphone camerounais. Chaque connexion se confirme par
-  un code reçu par SMS. Ne communiquez jamais ce code à personne, même à quelqu'un qui dit
-  travailler pour Tara.
+- Votre compte est lié à votre numéro de téléphone camerounais. La connexion sur un téléphone se
+  confirme par un code reçu par WhatsApp ou par SMS. Ne communiquez jamais ce code à personne,
+  même à quelqu'un qui dit travailler pour Tara.
+- Votre **code secret** à 4 chiffres, que vous choisissez dans l'application comme pour Orange
+  Money ou MTN MoMo, est demandé pour voir votre solde, retirer de l'argent et supprimer votre
+  compte. Vous pouvez le remplacer par votre empreinte digitale sur votre téléphone. Ne le
+  donnez à personne : Tara ne vous le demandera jamais. Après 5 erreurs, il est bloqué ; vous en
+  choisissez un nouveau avec un code reçu sur votre numéro.
 - Vous êtes responsable de ce qui est fait avec votre compte. Si vous perdez votre téléphone,
   prévenez Tara pour bloquer l'accès.
 - Une boutique active le « mode boutique » : elle reçoit l'argent encaissé pour elle et ses
@@ -262,7 +267,7 @@ loi-cadre n° 2011/012 du 6 mai 2011 portant protection du consommateur.
 ## 14. Acceptation et modification de ces conditions
 
 - Vous acceptez ces conditions dans l'application, en cochant la case « J'ai lu et j'accepte ».
-  À la création du compte, l'acceptation est confirmée par le code reçu par SMS sur votre
+  À la création du compte, l'acceptation est confirmée par le code reçu par WhatsApp ou SMS sur votre
   numéro ; une nouvelle version s'accepte ensuite depuis votre compte, ouvert avec ce numéro
   vérifié. Tara enregistre la version acceptée, la date, l'heure, l'appareil utilisé et son
   adresse IP : cet enregistrement vaut signature électronique. Le texte accepté et son enregistrement sont conservés sous forme électronique,

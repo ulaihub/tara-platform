@@ -24,9 +24,9 @@ npx @openapitools/openapi-generator-cli generate -i apps/api/openapi.json -g dar
 | Fichiers    | `multipart/form-data`, champ `file`. Photos et notes vocales : 1 Mo au plus (compresser côté app, viser moins de 150 Ko). Pièces KYC : 5 Mo, JPEG, PNG, WebP ou PDF ; le contenu réel est vérifié.                                                                               |
 | Limitation  | 120 requêtes par minute et par compte connecté ; sur les routes publiques, par adresse IP avec des seuils larges (les opérateurs partagent une même IP entre abonnés). Au-delà : `429` avec le code `RATE_LIMITED`.                                                              |
 
-## Connexion par code SMS (A1)
+## Connexion par code WhatsApp ou SMS (A1)
 
-1. `POST /v1/auth/otp` avec `{ phone }` : un code à 6 chiffres part par SMS, valable 5 minutes. Nouvelle demande possible après 60 secondes, 5 au plus par quart d'heure.
+1. `POST /v1/auth/otp` avec `{ phone, appHash?, channel? }` : un code à 6 chiffres, valable 5 minutes, part par WhatsApp quand `WHATSAPP_OTP` est activé (modèle `tara_otp`, bouton « Copier le code »), sinon par SMS. `channel: "SMS"` force le SMS (« Recevoir par SMS »). Si WhatsApp refuse le message, ou si Meta signale plus tard un échec, le SMS part en secours tant que le code est valable. `appHash` : empreinte de l'app Android (11 caractères) ; si elle figure dans `SMS_APP_HASHES`, elle termine le SMS et Android remet le code à l'app sans rien demander. Réponse : `channel` (`WHATSAPP` ou `SMS`) et `autoRead` (empreinte ajoutée). Nouvelle demande possible après 60 secondes, 5 au plus par quart d'heure.
 2. `POST /v1/auth/otp/verify` avec `{ challengeId, code, device }`. Pour un nouveau compte, la réponse est `422 TERMS_REQUIRED` : afficher les conditions puis renvoyer **le même code** avec `terms` (et `referralCode` si l'utilisateur en a un). Après 5 codes faux, il faut en demander un nouveau.
 3. La réponse contient `accessToken` (15 minutes), `refreshToken` (90 jours, prolongés à chaque renouvellement) et `isNewUser`.
 4. `POST /v1/auth/refresh` remplace la paire de jetons. Un jeton de rafraîchissement ne sert qu'une fois : le réutiliser ferme toutes les sessions du compte. Stocker le nouveau jeton avant toute autre action.
@@ -45,6 +45,20 @@ Textes rédigés dans `docs/juridique` et copiés dans l’API par `pnpm --filte
 | Sans acceptation            | —                                                                                                                          | Expéditeur : `403 TERMS_ACCEPTANCE_REQUIRED` sur `POST /v1/orders` et `/batch`. Livreur : blocage `TERMS` dans `GET /v1/rider/presence`, passage en ligne refusé (`RIDER_NOT_ELIGIBLE`), plus aucune proposition de course, `403` sur l’acceptation d’une offre. |
 
 Preuve gardée sur chaque consentement : version (`expediteurs:2026-11`), date et heure, adresse IP, application et appareil (`user_agent`, `installation_id`), plus une ligne `terms.accepted` au journal d’audit. `POST /v1/me/consents` ne sert plus qu’aux choix `LOCATION` et `MARKETING`.
+
+## Code secret et empreinte digitale
+
+Code à 4 chiffres, comme Orange Money et MTN MoMo, demandé dans les apps pour afficher le solde, retirer de l'argent et supprimer le compte. Haché (scrypt et secret du serveur), jamais gardé en clair.
+
+| Route                                                          | Effet                                                                                                                                                                         |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/me/pin`                                               | `set`, `locked`, `remainingAttempts`.                                                                                                                                         |
+| `PUT /v1/me/pin` `{ pin, currentPin? \| challengeId + code? }` | Premier code librement ; ensuite avec le code actuel, ou avec un code `PIN_RESET` reçu (`POST /v1/me/pin/code`). Codes trop simples refusés (`PIN_TOO_SIMPLE` : 1111, 1234…). |
+| `POST /v1/me/pin/verify` `{ pin \| biometricKey }`             | Vérifie avant d'afficher le solde.                                                                                                                                            |
+| `POST /v1/me/pin/biometric` `{ pin, installationId }`          | Active l'empreinte sur ce téléphone : renvoie une clé gardée dans le stockage chiffré, libérée par le capteur, qui remplace le code.                                          |
+| `DELETE /v1/me/pin/biometric?installationId=`                  | Désactive l'empreinte de ce téléphone.                                                                                                                                        |
+
+Une fois le code choisi, `pin` ou `biometricKey` est exigé dans le corps des retraits (`/v1/rider/withdrawals`, `/v1/me/wallet/refund`, `/v1/me/merchant/payouts`) et de la suppression du compte (`/v1/me/deletion`, qui accepte encore le code SMS des anciennes apps). Erreurs : `PIN_REQUIRED`, `PIN_INVALID` (essais restants), `PIN_LOCKED` après 5 erreurs (nouveau code via `PIN_RESET` ; les clés d'empreinte sont effacées), `BIOMETRIC_INVALID`. Sans code choisi, les retraits passent comme avant (anciennes apps) ; les nouvelles apps le font choisir à la première action d'argent.
 
 ## Double authentification de l’équipe
 

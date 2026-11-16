@@ -8,6 +8,7 @@ import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/features/profile/delete_account_screen.dart';
 import 'package:tara_client/features/profile/profile_screen.dart';
 import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_test/fake_pin.dart';
 
 import 'helpers/fake_client_api.dart';
 import 'helpers/fake_legal_api.dart';
@@ -55,7 +56,7 @@ void main() {
   }
 
   for (final brightness in Brightness.values) {
-    goldenTest('supprimer mon compte : code SMS envoyé ${brightness.name}', (tester) async {
+    goldenTest('supprimer mon compte ${brightness.name}', (tester) async {
       final api = FakeClientApi()..wallet0 = _empty;
       // Écran rendu seul : la capture ne voit pas les pages ouvertes par-dessus le profil.
       await pumpVariant(
@@ -66,8 +67,6 @@ void main() {
           child: DeleteAccountScreen(me: person, onBack: () {}),
         ),
       );
-      await settle(tester);
-      await tester.tap(find.text('Recevoir le code par SMS'));
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(capture, matchesGoldenFile('goldens/06_supprimer_compte/${brightness.name}.png'));
@@ -93,14 +92,18 @@ void main() {
     await settle(tester);
     await tapText(tester, 'Supprimer mon compte');
     expect(find.byType(DeleteAccountScreen), findsOneWidget);
-    expect(find.text('Il vous reste 3 500 F chez Tara : retirez-les d’abord vers votre Mobile Money.'), findsOneWidget);
+    expect(
+      find.text('Il vous reste 3\u00a0500\u00a0F chez Tara : retirez-les d’abord vers votre Mobile Money.'),
+      findsOneWidget,
+    );
     expect(find.text('Ouvrir mon portefeuille'), findsOneWidget);
-    await tester.tap(find.text('Recevoir le code par SMS'), warnIfMissed: false);
+    await tester.tap(find.text('Supprimer avec mon code secret'), warnIfMissed: false);
     await settle(tester);
-    expect(api.deletionCodes, 0);
+    expect(find.text('Code secret'), findsNothing);
+    expect(api.deletions, isEmpty);
   });
 
-  testWidgets('supprimer mon compte : refus du serveur affiché, aucun code envoyé', (tester) async {
+  testWidgets('supprimer mon compte : refus du serveur affiché après le code secret', (tester) async {
     final api = FakeClientApi()
       ..wallet0 = _empty
       ..deletionErrors.add(
@@ -113,28 +116,30 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, _account(api));
     await settle(tester);
     await tapText(tester, 'Supprimer mon compte');
-    await tester.tap(find.text('Recevoir le code par SMS'));
+    await tester.tap(find.text('Supprimer avec mon code secret'));
     await settle(tester);
+    expect(find.text('Pour supprimer votre compte'), findsOneWidget);
+    await enterPin(tester, '2580');
+    await settle(tester);
+    // Le refus revient sur l'écran de suppression.
     expect(find.text('Des commandes sont en cours : attendez leur fin pour supprimer le compte.'), findsOneWidget);
-    expect(find.text('Code reçu par SMS'), findsNothing);
+    expect(api.deletions, isEmpty);
   });
 
-  testWidgets('supprimer mon compte : code SMS, suppression définitive, déconnexion', (tester) async {
+  testWidgets('supprimer mon compte : code secret, suppression définitive, déconnexion, sans SMS', (tester) async {
     final api = FakeClientApi()..wallet0 = _empty;
     final auth = _Auth();
     await pumpVariant(tester, Variant.matrix.first, _account(api, auth: auth));
     await settle(tester);
     await tapText(tester, 'Supprimer mon compte');
-    await tester.tap(find.text('Recevoir le code par SMS'));
+    await tester.tap(find.text('Supprimer avec mon code secret'));
     await settle(tester);
-    expect(api.deletionCodes, 1);
-    expect(find.textContaining('Code envoyé au +237 6 99 11 22 33.'), findsOneWidget);
-
-    await tester.enterText(find.byType(EditableText).first, '123456');
+    await enterPin(tester, '0000');
+    expect(find.text('Code secret incorrect. Encore 4 essai(s) avant blocage.'), findsOneWidget);
+    expect(api.deletions, isEmpty);
+    await enterPin(tester, '2580');
     await settle(tester);
-    await tester.tap(find.text('Supprimer définitivement'));
-    await settle(tester);
-    expect(api.deletions, [('del-1', '123456')]);
+    expect(api.deletions.single.pin, '2580');
     expect(auth.logouts, 1);
   });
 }

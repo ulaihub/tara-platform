@@ -29,3 +29,15 @@ cp build/app/outputs/flutter-apk/app-release.apk "$tmp"
 unzip -tq "$tmp" >/dev/null || { rm -f "$tmp"; echo "APK abîmée, non publiée" >&2; exit 1; }
 mv -f "$tmp" "/out/$name.apk"
 echo "OK : /out/$name.apk ($(du -h "/out/$name.apk" | cut -f1))"
+
+# Empreinte de l'app pour la lecture automatique du code SMS (SMS Retriever de Google) :
+# nom du paquet et certificat de signature (clé de test gardée dans le cache), SHA-256,
+# 9 premiers octets en base64. `tara apk` la donne à l'API, qui l'ajoute aux SMS de code.
+keystore="$ANDROID_USER_HOME/debug.keystore"
+if [[ -f $keystore ]]; then
+  package=$([[ $APP == rider ]] && echo cm.tara.rider || echo cm.tara.app)
+  cert=$(keytool -exportcert -alias androiddebugkey -keystore "$keystore" -storepass android 2>/dev/null |
+    od -An -v -tx1 | tr -d ' \n')
+  digest=$(printf '%s %s' "$package" "$cert" | sha256sum | cut -c1-18)
+  echo "SMS_APP_HASH=$(printf '%b' "$(printf '%s' "$digest" | sed 's/../\\x&/g')" | base64 | cut -c1-11)"
+fi

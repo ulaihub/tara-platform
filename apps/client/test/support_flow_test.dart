@@ -31,6 +31,9 @@ Finder iconButton(String label) =>
 Future<void> openFromProfile(WidgetTester tester) async {
   final row = find.text('Écrire au service client');
   await tester.scrollUntilVisible(row, 120, scrollable: find.byType(Scrollable).first);
+  // Un cran de plus : la ligne ne reste pas collée au bas de l'écran (petit téléphone).
+  await tester.drag(find.byType(Scrollable).first, const Offset(0, -160));
+  await settle(tester);
   await tester.tap(row);
   await settle(tester);
 }

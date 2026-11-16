@@ -456,52 +456,60 @@ class _PinScreenState<T> extends State<PinScreen<T>> {
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
     final body = _body;
+    // Petits téléphones et texte agrandi : l'écran défile plutôt que de déborder.
     return TaraScreen(
       blobs: _blobs,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: GlassIconButton(
-                icon: TaraIcons.close,
-                label: _s.back,
-                onPressed: _busy ? null : () => Navigator.of(context).maybePop(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TaraIcon(TaraIcons.lock, size: 30, color: c.accentText),
-            const SizedBox(height: 12),
-            Semantics(
-              header: true,
-              child: Text(
-                _title,
-                textAlign: TextAlign.center,
-                style: TaraText.titleForm.copyWith(color: c.textPrimary),
-              ),
-            ),
-            if (body != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                body,
-                textAlign: TextAlign.center,
-                style: TaraText.body.copyWith(color: c.textSecondary),
-              ),
-            ],
-            const SizedBox(height: 22),
-            if (_step == _Step.loading)
-              const Expanded(child: Center(child: CircularProgressIndicator()))
-            else if (_showsPad)
-              Expanded(child: _padArea(c))
-            else
-              Expanded(child: _otherArea(c)),
-          ],
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 24),
+            child: IntrinsicHeight(child: _layout(c, body)),
+          ),
         ),
       ),
     );
   }
+
+  Widget _layout(TaraColors c, String? body) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Align(
+        alignment: Alignment.centerLeft,
+        child: GlassIconButton(
+          icon: TaraIcons.close,
+          label: _s.back,
+          onPressed: _busy ? null : () => Navigator.of(context).maybePop(),
+        ),
+      ),
+      const SizedBox(height: 20),
+      Center(child: TaraIcon(TaraIcons.lock, size: 30, color: c.accentText)),
+      const SizedBox(height: 12),
+      Semantics(
+        header: true,
+        child: Text(
+          _title,
+          textAlign: TextAlign.center,
+          style: TaraText.titleForm.copyWith(color: c.textPrimary),
+        ),
+      ),
+      if (body != null) ...[
+        const SizedBox(height: 8),
+        Text(
+          body,
+          textAlign: TextAlign.center,
+          style: TaraText.body.copyWith(color: c.textSecondary),
+        ),
+      ],
+      const SizedBox(height: 22),
+      if (_step == _Step.loading)
+        const Expanded(child: Center(child: CircularProgressIndicator()))
+      else if (_showsPad)
+        Expanded(child: _padArea(c))
+      else
+        Expanded(child: _otherArea(c)),
+    ],
+  );
 
   Widget _padArea(TaraColors c) => Column(
     children: [
@@ -672,7 +680,7 @@ class PinKeypad extends StatelessWidget {
                 child: TaraIcon(TaraIcons.fingerprint, size: 30, color: c.accentText),
               )
             else
-              const SizedBox(width: _KeyButton.size, height: _KeyButton.size),
+              SizedBox.square(dimension: _KeyButton.sizeFor(context)),
             digit('0'),
             _KeyButton(
               label: eraseLabel,
@@ -691,6 +699,9 @@ class _KeyButton extends StatelessWidget {
 
   static const size = 72.0;
 
+  /// Touches plus petites sur les écrans de moins de 700 px de haut.
+  static double sizeFor(BuildContext context) => MediaQuery.sizeOf(context).height < 700 ? 60 : size;
+
   final String label;
   final VoidCallback onPressed;
   final Widget child;
@@ -698,8 +709,9 @@ class _KeyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
+    final dimension = sizeFor(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: dimension < size ? 3 : 5),
       child: Semantics(
         button: true,
         label: label,
@@ -786,40 +798,49 @@ class BalanceAmount extends StatelessWidget {
       builder: (context, _) {
         final visible = visibility.visible;
         final main = (style ?? TaraText.amountL).copyWith(color: color ?? c.textPrimary);
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: visible
-                  ? AmountText(amount, unit: unit, style: style, color: color)
-                  : Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(text: '•••••', style: main),
-                          TextSpan(
-                            text: ' $unit',
-                            style: TaraText.unit.copyWith(color: c.textSecondary),
+        // Toute la ligne (montant et œil) se touche pour afficher ou masquer le solde.
+        return Semantics(
+          button: true,
+          label: visible ? hideLabel : showLabel,
+          child: InkWell(
+            onTap: visible ? visibility.hide : onReveal,
+            borderRadius: BorderRadius.circular(12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: ExcludeSemantics(
+                    excluding: !visible,
+                    child: visible
+                        ? AmountText(amount, unit: unit, style: style, color: color)
+                        : Text.rich(
+                            TextSpan(
+                              children: [
+                                // Police du texte courant : celle des montants n'a pas le point « • ».
+                                TextSpan(
+                                  text: '•••••',
+                                  style: TaraText.bodyStrong.copyWith(
+                                    fontSize: main.fontSize,
+                                    color: main.color,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: ' $unit',
+                                  style: TaraText.unit.copyWith(color: c.textSecondary),
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
-                      semanticsLabel: showLabel,
-                    ),
-            ),
-            const SizedBox(width: 6),
-            Semantics(
-              button: true,
-              label: visible ? hideLabel : showLabel,
-              excludeSemantics: true,
-              child: InkResponse(
-                onTap: visible ? visibility.hide : onReveal,
-                radius: 22,
-                child: Padding(
+                  ),
+                ),
+                Padding(
                   padding: const EdgeInsets.all(8),
                   child: TaraIcon(visible ? TaraIcons.eyeOff : TaraIcons.eye, size: 22, color: c.textSecondary),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
