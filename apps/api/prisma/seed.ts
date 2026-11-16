@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
+import type { UserRole } from '../src/generated/prisma/enums.js';
 import { normalizeCameroonMobile } from '../src/common/phone.js';
 
 /**
@@ -173,10 +174,14 @@ async function seedAdmin(): Promise<void> {
   if (!raw) return;
   const phone = normalizeCameroonMobile(raw);
   if (!phone) throw new Error(`SEED_ADMIN_PHONE invalide : ${raw}`);
+  // Rejoué à chaque mise à jour : le rôle administrateur est garanti, sans retirer les autres
+  // rôles du compte (livreur, boutique, autres rôles de l'équipe).
+  const existing = await prisma.user.findUnique({ where: { phone }, select: { roles: true } });
+  const roles = [...new Set<UserRole>([...(existing?.roles ?? []), 'CUSTOMER', 'ADMIN'])];
   await prisma.user.upsert({
     where: { phone },
-    create: { phone, roles: ['CUSTOMER', 'ADMIN'] },
-    update: { roles: { set: ['CUSTOMER', 'ADMIN'] } },
+    create: { phone, roles },
+    update: { roles: { set: roles } },
   });
   console.log(`Administrateur ${phone} prêt (connexion par code SMS)`);
 }
