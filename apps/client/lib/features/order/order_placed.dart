@@ -83,14 +83,16 @@ class PaymentPending extends StatelessWidget {
 }
 
 /// Commande envoyée : confettis, code d'enlèvement (affiché une seule fois), puis la
-/// recherche d'un livreur, annoncée dès qu'il accepte.
+/// recherche d'un livreur, annoncée dès qu'il accepte. Plusieurs colis : chacun a son
+/// numéro, à écrire dessus, et son livreur annoncé dès qu'il accepte.
 class OrderPlaced extends StatelessWidget {
   const OrderPlaced({
     super.key,
     required this.placement,
     required this.recipients,
-    required this.riderFound,
+    required this.assigned,
     required this.onDone,
+    this.details = const [],
     this.onTrack,
     this.scheduled,
   });
@@ -102,7 +104,12 @@ class OrderPlaced extends StatelessWidget {
 
   /// Noms des destinataires, dans l'ordre des commandes.
   final List<String> recipients;
-  final bool riderFound;
+
+  /// Quartier et « Gros objet » de chaque colis, dans l'ordre des commandes.
+  final List<String> details;
+
+  /// Commandes dont le livreur a accepté la course.
+  final Set<String> assigned;
   final VoidCallback onDone;
 
   /// « demain à 20:00 » pour une livraison programmée.
@@ -114,6 +121,9 @@ class OrderPlaced extends StatelessWidget {
     final c = TaraColors.of(context);
     final orders = placement.orders;
     final code = placement.pickupCode;
+    final batch = orders.length > 1;
+    final found = orders.where((o) => assigned.contains(o.id)).length;
+    final riderFound = found > 0 && found == orders.length;
     return Stack(
       children: [
         ScrollWithFooter(
@@ -176,12 +186,22 @@ class OrderPlaced extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      l.pickupCodeHelp,
+                      batch ? l.pickupCodeHelpBatch : l.pickupCodeHelp,
                       textAlign: TextAlign.center,
                       style: TaraText.small.copyWith(color: c.textTertiary),
                     ),
                   ],
                 ),
+              ),
+            ],
+            if (batch) ...[
+              const SizedBox(height: 14),
+              _ParcelNumbers(
+                orders: orders,
+                recipients: recipients,
+                details: details,
+                assigned: assigned,
+                searching: scheduled == null,
               ),
             ],
             const SizedBox(height: 14),
@@ -220,6 +240,8 @@ class OrderPlaced extends StatelessWidget {
                       child: Text(
                         scheduled != null
                             ? l.scheduledPickup(scheduled!)
+                            : batch
+                            ? (riderFound ? l.allRidersFound : l.ridersFound(found, orders.length))
                             : riderFound
                             ? l.riderFound
                             : l.searchingRider,
@@ -246,6 +268,96 @@ class OrderPlaced extends StatelessWidget {
         ),
         const Positioned.fill(child: Confetti()),
       ],
+    );
+  }
+}
+
+/// « Écrivez son numéro sur chaque colis » : un grand numéro par colis, son destinataire,
+/// et son livreur annoncé dès qu'il accepte. Le livreur reçoit le même numéro.
+class _ParcelNumbers extends StatelessWidget {
+  const _ParcelNumbers({
+    required this.orders,
+    required this.recipients,
+    required this.details,
+    required this.assigned,
+    required this.searching,
+  });
+
+  final List<PlacedOrder> orders;
+  final List<String> recipients;
+  final List<String> details;
+  final Set<String> assigned;
+
+  /// Livraison immédiate : on cherche un livreur par colis (sinon, créneau programmé).
+  final bool searching;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.writeNumbersTitle, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
+          const SizedBox(height: 4),
+          Text(l.writeNumbersBody, style: TaraText.small.copyWith(color: c.textSecondary)),
+          const SizedBox(height: 8),
+          for (final (i, order) in orders.indexed)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: MergeSemantics(
+                child: Row(
+                  children: [
+                    Semantics(
+                      label: l.parcelNumberSemantics(i + 1),
+                      excludeSemantics: true,
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          gradient: TaraBrand.gradient,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Text(
+                          '${i + 1}',
+                          style: TaraText.titlePanel.copyWith(color: TaraBrand.onBrand, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            i < recipients.length ? recipients[i] : order.reference,
+                            style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                          ),
+                          Text(
+                            [if (i < details.length && details[i].isNotEmpty) details[i], order.reference].join(' · '),
+                            style: TaraText.small.copyWith(color: c.textTertiary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (searching) ...[
+                      const SizedBox(width: 8),
+                      if (assigned.contains(order.id))
+                        InfoPill(label: l.riderFoundShort, tone: TintTone.success, icon: TaraIcons.check)
+                      else
+                        InfoPill(label: l.riderSearchingShort, dot: c.accentText, blinkDot: true),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

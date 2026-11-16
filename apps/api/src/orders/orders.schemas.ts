@@ -226,6 +226,8 @@ export const OrderSummaryDto = z
     id: z.uuid(),
     reference: z.string(),
     status: OrderStatusEnum,
+    /** Numéro du colis dans son envoi (null hors envoi groupé). */
+    batchNumber: z.int().nullable(),
     recipientName: z.string(),
     dropoffLandmark: z.string(),
     /** Quartier de livraison (null hors des quartiers connus). */

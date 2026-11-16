@@ -478,7 +478,14 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                         GlassCard(
                           radius: 18,
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                          child: Text(order.reference, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
+                          child: Text(
+                            // Envoi de plusieurs colis : le numéro écrit sur ce colis.
+                            switch (order.batchNumber) {
+                              final number? => '${order.reference} · ${l.parcelNumberShort(number)}',
+                              null => order.reference,
+                            },
+                            style: TaraText.cardTitle.copyWith(color: c.textPrimary),
+                          ),
                         ),
                     ],
                   ),
@@ -640,7 +647,11 @@ class _Panel extends StatelessWidget {
         l.scheduledPickup(formatClock(o.scheduledFor!)),
       ),
       'CREATED' || 'SEARCHING_RIDER' => (l.trackSearching, l.trackSearchingBody),
-      'ASSIGNED' => (l.trackAssigned(riderName), l.trackAssignedBody),
+      'ASSIGNED' => switch (o.batchNumber) {
+        // Plusieurs colis : lequel donner à ce livreur.
+        final number? => (l.trackAssignedParcel(riderName, number), l.trackAssignedParcelBody(number)),
+        null => (l.trackAssigned(riderName), l.trackAssignedBody),
+      },
       'PICKED_UP' ||
       'IN_DELIVERY' => (l.trackOnTheWay(recipientFirst), l.trackOnTheWayBody(formatClock(pickedUpAt ?? now))),
       'DELIVERY_FAILED' when failure?.decision == 'RETRY' => (

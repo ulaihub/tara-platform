@@ -843,7 +843,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deliveryNumber(int n) {
-    return 'Delivery $n';
+    return 'Parcel no. $n';
   }
 
   @override
@@ -858,7 +858,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addDelivery => 'Add a delivery';
 
   @override
-  String get addDeliveryHint => 'Up to 10 deliveries from the same pickup: one rider visit.';
+  String get addDeliveryHint =>
+      'Up to 10 parcels from the same pickup: one code, one payment. Each parcel goes with a rider suited to its size.';
 
   @override
   String get priceBase => 'Delivery';
@@ -2041,5 +2042,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String trackPayVia(String operator) {
     return 'The payment request goes to this $operator number.';
+  }
+
+  @override
+  String cardFailureFees(String retry, String ret) {
+    return 'If delivery fails: new attempt $retry, return $ret';
+  }
+
+  @override
+  String get batchFailureFeesNote =>
+      'If a delivery fails, the fees shown on each parcel are charged to you. A returned parcel is handed back against payment of what your Tara balance does not cover.';
+
+  @override
+  String get batchRefusalFeeNote =>
+      'A parcel that differs from what you declare (too big, too heavy, prohibited) may be refused by the rider, and their trip (the price of a new attempt) is charged to you.';
+
+  @override
+  String get pickupCodeHelpBatch =>
+      'The same code for every rider who comes for a parcel. Write it down: it won\'t be shown again.';
+
+  @override
+  String get writeNumbersTitle => 'Write its number on each parcel';
+
+  @override
+  String get writeNumbersBody =>
+      'With a marker, clearly visible. Each rider comes for a specific number: you\'ll know which one to hand over.';
+
+  @override
+  String parcelNumberSemantics(int n) {
+    return 'Parcel number $n';
+  }
+
+  @override
+  String get riderFoundShort => 'Rider found';
+
+  @override
+  String get riderSearchingShort => 'Searching';
+
+  @override
+  String ridersFound(int found, int total) {
+    return 'Riders found: $found of $total';
+  }
+
+  @override
+  String get allRidersFound => 'All riders found: they\'re coming for the parcels.';
+
+  @override
+  String parcelNumberShort(int n) {
+    return 'no. $n';
+  }
+
+  @override
+  String trackAssignedParcel(String rider, int n) {
+    return '$rider is coming for parcel no. $n';
+  }
+
+  @override
+  String trackAssignedParcelBody(int n) {
+    return 'Hand over parcel no. $n and the pickup code when they arrive.';
   }
 }

@@ -45,7 +45,11 @@ class OrderRow extends StatelessWidget {
     return ListRow(
       leading: IconTile(icon: icon, size: 40, tone: tone),
       title: '${order.recipientName} · $place',
-      subtitle: '$label · ${order.reference}',
+      subtitle: [
+        label,
+        if (order.batchNumber case final number?) l.parcelNumberShort(number),
+        order.reference,
+      ].join(' · '),
       trailing: TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
       onTap: onTap,
     );

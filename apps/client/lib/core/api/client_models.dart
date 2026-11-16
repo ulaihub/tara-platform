@@ -131,12 +131,14 @@ class OrderSummary {
     required this.scheduledFor,
     required this.createdAt,
     this.failureDecision,
+    this.batchNumber,
   });
 
   factory OrderSummary.fromJson(Json json) => OrderSummary(
     id: _field(json, 'id'),
     reference: _field(json, 'reference'),
     status: _field(json, 'status'),
+    batchNumber: (json['batchNumber'] as num?)?.toInt(),
     recipientName: _field(json, 'recipientName'),
     dropoffLandmark: _field(json, 'dropoffLandmark'),
     dropoffNeighborhood: _field(json, 'dropoffNeighborhood'),
@@ -163,6 +165,9 @@ class OrderSummary {
 
   final String id;
   final String reference;
+
+  /// Numéro du colis dans son envoi, écrit dessus (null hors envoi de plusieurs colis).
+  final int? batchNumber;
 
   /// CREATED, SEARCHING_RIDER, ASSIGNED, PICKED_UP, IN_DELIVERY, DELIVERY_FAILED,
   /// DELIVERED, RETURNED ou CANCELLED.
@@ -741,6 +746,8 @@ class TrackedOrder {
     this.refusalReason,
     this.feePaymentMethod = 'CASH',
     this.feePaid = true,
+    this.batchNumber,
+    this.batchSize,
   });
 
   factory TrackedOrder.fromJson(Json json) {
@@ -784,6 +791,8 @@ class TrackedOrder {
       // Frais payés par le destinataire : rien à payer d'avance. Serveur d'avant : pas de
       // champ, on suppose les frais réglés.
       feePaid: pricing['feePayer'] == 'RECIPIENT' || (pricing['feePaid'] as bool? ?? true),
+      batchNumber: (json['batchNumber'] as num?)?.toInt(),
+      batchSize: (json['batchSize'] as num?)?.toInt(),
     );
   }
 
@@ -844,6 +853,10 @@ class TrackedOrder {
   final String feePaymentMethod;
   final bool feePaid;
 
+  /// Envoi de plusieurs colis : numéro écrit sur ce colis, et nombre de colis de l'envoi.
+  final int? batchNumber;
+  final int? batchSize;
+
   /// Commande en attente du paiement Mobile Money de ses frais (aucun livreur cherché avant).
   bool get awaitingPayment => status == 'CREATED' && feePaymentMethod.startsWith('MOMO_') && !feePaid;
 
@@ -878,6 +891,8 @@ class TrackedOrder {
     refusalReason: refusalReason,
     feePaymentMethod: feePaymentMethod,
     feePaid: feePaid,
+    batchNumber: batchNumber,
+    batchSize: batchSize,
   );
 }
 

@@ -274,6 +274,7 @@ export class OrdersService {
         id: order.id,
         reference: order.reference,
         status: order.status,
+        batchNumber: order.batchNumber,
         recipientName: order.recipientName,
         dropoffLandmark: order.dropoffAddress.landmark,
         dropoffNeighborhood: order.dropoffAddress.neighborhood?.name ?? null,

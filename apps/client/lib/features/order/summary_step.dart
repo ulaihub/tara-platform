@@ -269,8 +269,14 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
         ],
         const SizedBox(height: 18),
         _PriceCard(draft: draft),
-        // Frais d'échec (E6), annoncés avant de commander : rien ne se découvre après.
-        if (draft.deliveries.map((d) => d.quote).whereType<Quote>().firstOrNull case final quote?
+        // Frais d'échec (E6), annoncés avant de commander : rien ne se découvre après. Plusieurs
+        // colis : chacun annonce les siens sur sa carte (moto et tricycle n'ont pas les mêmes).
+        if (_batch && draft.deliveries.any((d) => (d.quote?.retryFee ?? 0) > 0 || (d.quote?.returnFee ?? 0) > 0)) ...[
+          const SizedBox(height: 8),
+          Text(l.batchFailureFeesNote, style: TaraText.small.copyWith(color: c.textTertiary)),
+          const SizedBox(height: 6),
+          Text(l.batchRefusalFeeNote, style: TaraText.small.copyWith(color: c.textTertiary)),
+        ] else if (draft.deliveries.map((d) => d.quote).whereType<Quote>().firstOrNull case final quote?
             when quote.retryFee > 0 || quote.returnFee > 0) ...[
           const SizedBox(height: 8),
           Text(
@@ -457,6 +463,17 @@ class _DeliveryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(package, style: TaraText.small.copyWith(color: c.textTertiary)),
+                    // Plusieurs colis : les frais d'échec de chacun (moto ≠ tricycle).
+                    if (d.quote case final quote? when numbered && (quote.retryFee > 0 || quote.returnFee > 0)) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        l.cardFailureFees(
+                          '${formatAmount(quote.retryFee)}\u00a0F',
+                          '${formatAmount(quote.returnFee)}\u00a0F',
+                        ),
+                        style: TaraText.small.copyWith(color: c.textTertiary),
+                      ),
+                    ],
                   ],
                 ),
               ),

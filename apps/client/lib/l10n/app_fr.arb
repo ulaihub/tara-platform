@@ -434,7 +434,7 @@
   "summaryTitle": "Vérifiez et commandez",
   "summaryBody": "Le prix est calculé pour ce trajet et cette heure.",
   "whenNowShort": "Dès que possible",
-  "deliveryNumber": "Livraison {n}",
+  "deliveryNumber": "Colis n° {n}",
   "@deliveryNumber": {
     "placeholders": {
       "n": {
@@ -452,7 +452,7 @@
   },
   "removeDelivery": "Retirer",
   "addDelivery": "Ajouter une livraison",
-  "addDeliveryHint": "Jusqu’à 10 livraisons depuis le même enlèvement : un seul passage du livreur.",
+  "addDeliveryHint": "Jusqu’à 10 colis depuis le même enlèvement : un seul code, un seul paiement. Chaque colis part avec un livreur adapté à sa taille.",
   "priceBase": "Course",
   "mobileMoneyFeeLine": "Frais Mobile Money",
   "priceBaseTricycle": "Course en tricycle",
@@ -1377,6 +1377,71 @@
     "placeholders": {
       "operator": {
         "type": "String"
+      }
+    }
+  },
+  "cardFailureFees": "Si la livraison échoue : nouvelle tentative {retry}, retour {ret}",
+  "@cardFailureFees": {
+    "placeholders": {
+      "retry": {
+        "type": "String"
+      },
+      "ret": {
+        "type": "String"
+      }
+    }
+  },
+  "batchFailureFeesNote": "En cas d’échec de livraison, les frais indiqués sur chaque colis sont à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.",
+  "batchRefusalFeeNote": "Colis différent de ce que vous déclarez (trop grand, trop lourd, interdit) : le livreur peut le refuser, et son déplacement (le prix d’une nouvelle tentative) reste à votre charge.",
+  "pickupCodeHelpBatch": "Le même code pour chaque livreur qui vient chercher un colis. Notez-le : il ne sera plus affiché.",
+  "writeNumbersTitle": "Écrivez son numéro sur chaque colis",
+  "writeNumbersBody": "Au marqueur, bien visible. Chaque livreur vient chercher un numéro précis : vous saurez lequel lui donner.",
+  "parcelNumberSemantics": "Colis numéro {n}",
+  "@parcelNumberSemantics": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "riderFoundShort": "Livreur trouvé",
+  "riderSearchingShort": "Recherche",
+  "ridersFound": "Livreurs trouvés : {found} sur {total}",
+  "@ridersFound": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "allRidersFound": "Tous les livreurs sont trouvés : ils viennent chercher les colis.",
+  "parcelNumberShort": "n° {n}",
+  "@parcelNumberShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "trackAssignedParcel": "{rider} vient chercher le colis n° {n}",
+  "@trackAssignedParcel": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "trackAssignedParcelBody": "Donnez-lui le colis n° {n} et le code d’enlèvement à son arrivée.",
+  "@trackAssignedParcelBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
       }
     }
   }

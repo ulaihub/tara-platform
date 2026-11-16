@@ -88,8 +88,8 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
   String? _payError;
   Timer? _paymentPoll;
 
-  /// Le livreur a accepté la course (temps réel).
-  bool _riderFound = false;
+  /// Commandes dont le livreur a accepté la course (temps réel), une par colis.
+  final _assigned = <String>{};
 
   @override
   void initState() {
@@ -190,11 +190,12 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
         unawaited(_checkLinks());
       case 'payment.status' when event.payload['paymentId'] == _payment?.id:
         unawaited(_refreshPayment());
-      case 'order.status' when event.payload['status'] == 'ASSIGNED' && !_riderFound:
+      case 'order.status' when event.payload['status'] == 'ASSIGNED':
         final placed = _placed;
-        if (placed == null || !placed.orders.any((o) => o.id == event.payload['orderId'])) return;
+        final id = event.payload['orderId'];
+        if (placed == null || _assigned.contains(id) || !placed.orders.any((o) => o.id == id)) return;
         TaraFeedback.play(context, TaraSound.received);
-        setState(() => _riderFound = true);
+        setState(() => _assigned.add(id! as String));
     }
   }
 
@@ -409,7 +410,15 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
     return OrderPlaced(
       placement: placed,
       recipients: [for (final d in _draft.deliveries) d.recipientName.trim()],
-      riderFound: _riderFound,
+      // Envoi de plusieurs colis : où va chaque colis numéroté, et lequel est un gros objet.
+      details: [
+        for (final d in _draft.deliveries)
+          [
+            if (d.dropoff case final address?) address.neighborhood?.name ?? address.landmark,
+            if (d.bulky) l.sizeBulky,
+          ].join(' · '),
+      ],
+      assigned: _assigned,
       scheduled: scheduled == null
           ? null
           : scheduleText(l, Localizations.localeOf(context).toLanguageTag(), scheduled, now),
