@@ -18,6 +18,7 @@ import 'helpers/fake_client_api.dart';
 import 'helpers/fake_realtime.dart';
 import 'helpers/harness.dart';
 import 'screens_home_golden_test.dart' show homeNow, shopApi, shopOwner;
+import 'screens_new_order_golden_test.dart' show storeWithMobileMoneyFee;
 
 const orderId = '00000000-0000-4000-8000-000000000501';
 
@@ -105,20 +106,21 @@ TrackedOrder tracked(
 List<Object> launched = [];
 List<(String, bool)> shared = [];
 
-Widget screen(FakeClientApi api, FakeRealtime realtime, {VoidCallback? onBack}) => ProviderScope(
-  overrides: [
-    keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
-    clientApiProvider.overrideWithValue(api),
-    realtimeProvider.overrideWithValue(realtime),
-    realMapProvider.overrideWithValue(false),
-    launcherProvider.overrideWithValue((uri) async {
-      launched.add(uri);
-      return true;
-    }),
-    shareProvider.overrideWithValue((text, png) async => shared.add((text, png != null))),
-  ],
-  child: TrackingScreen(orderId: orderId, onBack: onBack ?? () {}, now: () => DateTime(2026, 11, 4, 10, 20)),
-);
+Widget screen(FakeClientApi api, FakeRealtime realtime, {VoidCallback? onBack, MemoryKeyValueStore? store}) =>
+    ProviderScope(
+      overrides: [
+        keyValueStoreProvider.overrideWithValue(store ?? MemoryKeyValueStore()),
+        clientApiProvider.overrideWithValue(api),
+        realtimeProvider.overrideWithValue(realtime),
+        realMapProvider.overrideWithValue(false),
+        launcherProvider.overrideWithValue((uri) async {
+          launched.add(uri);
+          return true;
+        }),
+        shareProvider.overrideWithValue((text, png) async => shared.add((text, png != null))),
+      ],
+      child: TrackingScreen(orderId: orderId, onBack: onBack ?? () {}, now: () => DateTime(2026, 11, 4, 10, 20)),
+    );
 
 FakeClientApi apiAt(String status) => FakeClientApi()..tracked[orderId] = tracked(status);
 
@@ -350,7 +352,13 @@ void main() {
     final api = FakeClientApi()
       ..tracked[orderId] = tracked('CREATED', feePaymentMethod: 'MOMO_ORANGE', feePaid: false)
       ..paymentStatuses = ['PENDING', 'FAILED'];
-    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1000));
+    // Frais Mobile Money à 6 % : 1 500 F de course + 96 F de frais, comme à la commande.
+    await pumpVariant(
+      tester,
+      Variant.matrix.first,
+      screen(api, FakeRealtime(), store: storeWithMobileMoneyFee()),
+      surface: const Size(390, 1000),
+    );
     await settle(tester);
     expect(find.text('En attente du paiement'), findsOneWidget);
     expect(find.text('La demande de paiement part vers ce numéro Orange Money.'), findsOneWidget);
@@ -358,13 +366,13 @@ void main() {
 
     // Numéro incomplet : refusé avant toute demande.
     await tester.enterText(find.byType(EditableText), '655 44');
-    await tester.tap(find.text('Payer 1\u00a0500 F par Mobile Money'));
+    await tester.tap(find.text('Payer 1\u00a0596 F par Mobile Money'));
     await settle(tester);
     expect(api.paid, isEmpty);
 
     // Première demande refusée sur le téléphone : on le dit, le bouton revient.
     await tester.enterText(find.byType(EditableText), '655 44 33 22');
-    await tester.tap(find.text('Payer 1\u00a0500 F par Mobile Money'));
+    await tester.tap(find.text('Payer 1\u00a0596 F par Mobile Money'));
     await settle(tester);
     expect(api.paid, [(orderId: orderId, phone: '+237655443322', operator: 'ORANGE')]);
     expect(find.text('Validez la demande de paiement sur votre téléphone…'), findsOneWidget);
@@ -376,7 +384,7 @@ void main() {
     // Deuxième demande validée : la commande est payée et cherche un livreur.
     api.paymentStatuses = ['SUCCEEDED'];
     api.tracked[orderId] = tracked('SEARCHING_RIDER', feePaymentMethod: 'MOMO_ORANGE');
-    await tester.tap(find.text('Payer 1\u00a0500 F par Mobile Money'));
+    await tester.tap(find.text('Payer 1\u00a0596 F par Mobile Money'));
     await settle(tester);
     await tester.pump(const Duration(seconds: 3));
     await settle(tester);

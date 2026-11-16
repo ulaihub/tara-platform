@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/money/mobile_money_fees.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_map/pin_picker_map.dart';
@@ -527,6 +528,13 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                               ),
                         onCancel: () => unawaited(_cancel()),
                         pay: _PayState(
+                          // Frais Mobile Money en plus, comme à la commande (payés par l'expéditeur).
+                          amount:
+                              order.totalPrice +
+                              mobileMoneyFee(
+                                order.totalPrice,
+                                ref.watch(appConfigProvider).value?.mobileMoneyFeeBps ?? 0,
+                              ),
                           phone: _payPhone,
                           pending: _orderPayment != null,
                           failed: _orderPayFailed,
@@ -800,7 +808,7 @@ class _Panel extends StatelessWidget {
         top: 4,
         content: content,
         footer: PrimaryButton(
-          label: l.trackPayNow('${formatAmount(o.totalPrice)} F'),
+          label: l.trackPayNow('${formatAmount(state.amount)} F'),
           icon: TaraIcons.phone,
           loading: busy || state.pending,
           onPressed: busy || state.pending ? null : state.onPay,
@@ -1229,8 +1237,16 @@ class _RateCard extends StatelessWidget {
 
 /// Paiement Mobile Money des frais relancé depuis le suivi.
 class _PayState {
-  const _PayState({required this.phone, required this.pending, required this.failed, required this.onPay});
+  const _PayState({
+    required this.amount,
+    required this.phone,
+    required this.pending,
+    required this.failed,
+    required this.onPay,
+  });
 
+  /// Montant demandé : la course et les frais Mobile Money.
+  final int amount;
   final TextEditingController phone;
 
   /// Demande envoyée au téléphone, en attente de validation.
