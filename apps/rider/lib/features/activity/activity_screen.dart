@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/format.dart';
@@ -19,6 +20,7 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
+import '../common/pin.dart';
 import 'deposit_screen.dart';
 import 'withdraw_screen.dart';
 
@@ -48,6 +50,38 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
 
   /// Écran de paiement à Tara ouvert : recharge du solde ou dépôt des espèces.
   _Payment? _paying;
+
+  /// Code secret donné pour afficher le solde avant le retrait : il confirme aussi le retrait.
+  PinProof? _withdrawProof;
+
+  /// Retrait : le solde masqué s'affiche d'abord avec le code secret (ou l'empreinte), qui
+  /// sert ensuite à confirmer le retrait sans le redemander.
+  Future<void> _openWithdraw() async {
+    final visibility = ref.read(balanceVisibilityProvider);
+    PinProof? proof;
+    if (!visibility.visible) {
+      final pin = ref.read(pinApiProvider);
+      try {
+        proof = await withPin<PinProof>(
+          context,
+          pinServices(context, ref),
+          reason: AppLocalizations.of(context).pinReasonBalance,
+          action: (given) async {
+            await pin.verify(given);
+            return given;
+          },
+        );
+      } on Exception {
+        return;
+      }
+      if (proof == null || !mounted) return;
+      visibility.show();
+    }
+    setState(() {
+      _withdrawProof = proof;
+      _paying = _Payment.withdraw;
+    });
+  }
 
   @override
   void initState() {
@@ -143,7 +177,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                           _BalanceBox(
                             wallet: wallet,
                             onTopUp: () => setState(() => _paying = _Payment.topUp),
-                            onWithdraw: () => setState(() => _paying = _Payment.withdraw),
+                            onWithdraw: () => unawaited(_openWithdraw()),
                           ),
                           if (wallet.cashHeld > 0) ...[
                             const SizedBox(height: 12),
@@ -229,7 +263,12 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                     ),
                     _Payment.deposit => DepositScreen(amount: snapshot.data?.cashHeld ?? 0, onBack: back, onDone: done),
                     _Payment.withdraw => switch (snapshot.data) {
-                      final wallet? => WithdrawScreen(wallet: wallet, onBack: back, onDone: done),
+                      final wallet? => WithdrawScreen(
+                        wallet: wallet,
+                        proof: _withdrawProof,
+                        onBack: back,
+                        onDone: done,
+                      ),
                       null => const SizedBox.shrink(),
                     },
                   };
@@ -433,9 +472,11 @@ class _BalanceBox extends StatelessWidget {
       icon: TaraIcons.wallet,
       lines: [
         Text(l.balanceAvailable, style: TaraText.label.copyWith(color: c.textSecondary)),
-        Text(
-          '${formatAmount(wallet.available)}\u00a0F',
-          style: TaraText.bodyStrong.copyWith(color: c.accentStrongText, fontFeatures: TaraText.tabular),
+        // Masqué par défaut, comme sur MoMo : affiché après le code secret.
+        MaskedBalance(
+          wallet.available,
+          style: TaraText.bodyStrong.copyWith(fontFeatures: TaraText.tabular),
+          color: c.accentStrongText,
         ),
         Text(
           wallet.reserved > 0 ? l.balanceReserved('${formatAmount(wallet.reserved)}\u00a0F') : l.balanceExplain,

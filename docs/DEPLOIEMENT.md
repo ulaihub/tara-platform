@@ -70,6 +70,19 @@ Pour les iPhone, voir [`docs/IOS.md`](IOS.md) (compte Apple Developer, construct
 
 Ces apps sont signées avec une clé de test, gardée sur le serveur : après `tara update` puis `tara apk`, la nouvelle version s'installe par-dessus l'ancienne. Avant de passer à Google Play, il faudra les désinstaller (la version du Play Store est signée autrement).
 
+**Lecture automatique du code SMS** : `tara apk` calcule l'empreinte de chaque app (11 caractères, tirée de sa clé de signature) et la donne à l'API (`SMS_APP_HASHES` dans `/opt/tara/api.env`), qui l'ajoute en dernière ligne des SMS de code. Sur Android, le téléphone remet alors le code à l'app : rien à taper. Sans empreinte connue, Android affiche le SMS et demande « Autoriser » (un geste). Pour les apps de Google Play, ajouter leur empreinte (calculée depuis le certificat de signature de la Play Console) à la même ligne, séparée par une virgule.
+
+## Codes de connexion par WhatsApp (facultatif)
+
+Moins chers que le SMS. Le SMS reste en secours : numéro sans WhatsApp, échec signalé par Meta, ou « Recevoir par SMS » dans l'app.
+
+1. Dans Meta Business (compte vérifié), créer une app avec WhatsApp et un numéro d'envoi.
+2. Créer le modèle **`tara_otp`**, catégorie **Authentification**, langues **français** et **anglais**, bouton **« Copier le code »**. Attendre son approbation.
+3. Sur le serveur : `tara config`, partie 4 : identifiant du numéro, jeton d'accès permanent, clé secrète de l'app ; répondre « oui » à l'envoi des codes par WhatsApp.
+4. Chez Meta, déclarer le webhook affiché (`https://api.<domaine>/v1/webhooks/whatsapp`) avec le jeton de vérification affiché, abonnement **messages**.
+
+Les téléphones de test (`tara testeur`) restent au SMS gardé sur le serveur.
+
 ## Téléphones de test sans crédit SMS
 
 En essai, Twilio n'envoie qu'aux numéros vérifiés, et refuse de vérifier un numéro camerounais par SMS. Pour tester quand même, déclarer les téléphones de test sur le serveur : leurs SMS (code de connexion, code de livraison, lien de suivi…) ne partent pas chez l'opérateur, ils restent 24 h sur le serveur.

@@ -2052,6 +2052,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/me/pin': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Pin_status'];
+    put: operations['Pin_set'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/pin/code': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Pin_requestCode'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/pin/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Pin_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/pin/biometric': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Pin_enableBiometric'];
+    delete: operations['Pin_disableBiometric'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/me/export': {
     parameters: {
       query?: never;
@@ -3019,6 +3083,9 @@ export interface components {
       referralApplied: boolean;
       user: components['schemas']['SessionUser'];
     };
+    BiometricKey: {
+      key: string;
+    };
     Collection: {
       due: {
         fee: number;
@@ -3262,6 +3329,12 @@ export interface components {
           | 'ACCOUNT_DELETION_NOT_ALLOWED'
           | 'SMS_SEND_FAILED'
           | 'TERMS_ACCEPTANCE_REQUIRED'
+          | 'PIN_REQUIRED'
+          | 'PIN_INVALID'
+          | 'PIN_LOCKED'
+          | 'PIN_NOT_SET'
+          | 'PIN_TOO_SIMPLE'
+          | 'BIOMETRIC_INVALID'
           | 'TERMS_OUTDATED'
           | 'TERMS_REQUIRED'
           | 'ACCOUNT_SUSPENDED'
@@ -3834,6 +3907,9 @@ export interface components {
       /** Format: date-time */
       expiresAt: string;
       resendAfterSeconds: number;
+      /** @enum {string} */
+      channel: 'SMS' | 'WHATSAPP';
+      autoRead: boolean;
     };
     /** @enum {string} */
     PackageContents:
@@ -3918,6 +3994,11 @@ export interface components {
     };
     PickupCode: {
       pickupCode: string;
+    };
+    PinStatus: {
+      set: boolean;
+      locked: boolean;
+      remainingAttempts: number;
     };
     PointLocation: {
       inServiceArea: boolean;
@@ -4617,6 +4698,9 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
+          /** @enum {string} */
+          channel?: 'SMS' | 'WHATSAPP';
+          appHash?: string;
           /**
            * @description Mobile camerounais ; toutes les écritures courantes sont acceptées
            * @example +237690000000
@@ -6819,6 +6903,8 @@ export interface operations {
            */
           phone: string;
           operator: components['schemas']['MobileMoneyOperator'];
+          pin?: string;
+          biometricKey?: string;
         };
       };
     };
@@ -6844,7 +6930,14 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': {
+          pin?: string;
+          biometricKey?: string;
+        };
+      };
+    };
     responses: {
       /** @description Succès */
       201: {
@@ -7042,6 +7135,8 @@ export interface operations {
            */
           phone: string;
           operator: components['schemas']['MobileMoneyOperator'];
+          pin?: string;
+          biometricKey?: string;
         };
       };
     };
@@ -8497,6 +8592,151 @@ export interface operations {
       };
     };
   };
+  Pin_status: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PinStatus'];
+        };
+      };
+    };
+  };
+  Pin_set: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          pin: string;
+          currentPin?: string;
+          /** Format: uuid */
+          challengeId?: string;
+          code?: string;
+        };
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  Pin_requestCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          channel?: 'SMS' | 'WHATSAPP';
+          appHash?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OtpChallenge'];
+        };
+      };
+    };
+  };
+  Pin_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          pin?: string;
+          biometricKey?: string;
+        };
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  Pin_enableBiometric: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          pin: string;
+          installationId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BiometricKey'];
+        };
+      };
+    };
+  };
+  Pin_disableBiometric: {
+    parameters: {
+      query: {
+        installationId: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   Privacy_export: {
     parameters: {
       query?: never;
@@ -8548,8 +8788,10 @@ export interface operations {
       content: {
         'application/json': {
           /** Format: uuid */
-          challengeId: string;
-          code: string;
+          challengeId?: string;
+          code?: string;
+          pin?: string;
+          biometricKey?: string;
         };
       };
     };

@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/api/api_exception.dart';
-import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
-import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -20,6 +18,7 @@ import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pin.dart';
 import '../common/scoped_page.dart';
 import '../home/home_screen.dart' show walletProvider;
 import '../wallet/wallet_screen.dart';
@@ -28,8 +27,9 @@ import '../wallet/wallet_screen.dart';
 const _walletErrors = {'ACCOUNT_HAS_BALANCE', 'ACCOUNT_HAS_DEBT', 'ACCOUNT_HAS_PAYOUT_IN_PROGRESS'};
 
 /// Suppression du compte (droit à l'effacement) : ce qui est effacé, ce qui bloque (argent
-/// encore chez Tara, retrait en cours), puis code SMS et suppression définitive. Le serveur
-/// refuse de toute façon tant qu'une commande, une dette, un solde ou un retrait reste.
+/// encore chez Tara, retrait en cours), puis code secret (ou empreinte) et suppression
+/// définitive. Le serveur refuse de toute façon tant qu'une commande, une dette, un solde ou
+/// un retrait reste.
 class DeleteAccountScreen extends ConsumerStatefulWidget {
   const DeleteAccountScreen({super.key, required this.me, required this.onBack});
 
@@ -43,25 +43,11 @@ class DeleteAccountScreen extends ConsumerStatefulWidget {
 class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
   static const _blobs = [BlobSpec(alignment: Alignment(1.2, -1.05), size: 300, colors: BlobSpec.brand, blur: 70)];
 
-  final _code = TextEditingController();
-  OtpChallenge? _challenge;
   bool _busy = false;
   String? _error;
 
   /// Le refus porte sur l'argent : lien vers le portefeuille.
   bool _walletError = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _code.addListener(() => setState(() => _error = null));
-  }
-
-  @override
-  void dispose() {
-    _code.dispose();
-    super.dispose();
-  }
 
   /// Ce qui empêche la suppression, d'après le portefeuille (le serveur vérifie aussi).
   String? _blocker(AppLocalizations l, Wallet wallet) {
@@ -94,15 +80,18 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     }
   }
 
-  Future<void> _sendCode() => _run(() async {
-    final challenge = await ref.read(clientApiProvider).requestDeletionCode();
-    if (mounted) setState(() => _challenge = challenge);
-  });
-
   Future<void> _delete() => _run(() async {
-    final challenge = _challenge;
-    if (challenge == null) return;
-    await ref.read(clientApiProvider).deleteAccount(challengeId: challenge.challengeId, code: _code.text);
+    final api = ref.read(clientApiProvider);
+    final deleted = await withPin<bool>(
+      context,
+      pinServices(context, ref),
+      reason: AppLocalizations.of(context).pinReasonDelete,
+      action: (proof) async {
+        await api.deleteAccount(proof: proof);
+        return true;
+      },
+    );
+    if (deleted != true) return;
     // Compte effacé : session révoquée par le serveur, l'app revient à l'accueil.
     try {
       await ref.read(authControllerProvider.notifier).logout();
@@ -126,7 +115,6 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       final data? => _blocker(l, data),
       null => null,
     };
-    final challenge = _challenge;
 
     return TaraScreen(
       safeBottom: false,
@@ -176,23 +164,6 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             ),
             const SizedBox(height: 12),
             GlassButton(label: l.openWallet, icon: TaraIcons.wallet, height: 48, onPressed: _openWallet),
-          ] else if (challenge != null) ...[
-            Text(
-              l.deleteAccountCodeSent(displayPhone(widget.me.phone)),
-              style: TaraText.label.copyWith(color: c.textSecondary, height: 1.4),
-            ),
-            const SizedBox(height: 10),
-            TaraTextField(
-              label: l.deleteAccountCodeLabel,
-              hint: '000000',
-              controller: _code,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TaraLink(label: l.deleteAccountResend, onPressed: _busy ? null : () => unawaited(_sendCode())),
-            ),
           ],
           if (_error != null) ...[
             const SizedBox(height: 12),
@@ -203,19 +174,12 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             ],
           ],
         ],
-        footer: challenge == null
-            ? PrimaryButton(
-                label: l.deleteAccountSendCode,
-                icon: TaraIcons.message,
-                loading: _busy,
-                onPressed: wallet.value == null || blocker != null ? null : () => unawaited(_sendCode()),
-              )
-            : PrimaryButton(
-                label: l.deleteAccountConfirm,
-                icon: TaraIcons.check,
-                loading: _busy,
-                onPressed: _code.text.length == 6 ? () => unawaited(_delete()) : null,
-              ),
+        footer: PrimaryButton(
+          label: l.deleteAccountConfirmPin,
+          icon: TaraIcons.lock,
+          loading: _busy,
+          onPressed: wallet.value == null || blocker != null ? null : () => unawaited(_delete()),
+        ),
       ),
     );
   }

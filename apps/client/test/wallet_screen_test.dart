@@ -7,6 +7,8 @@ import 'package:tara_client/app/providers.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/features/wallet/wallet_screen.dart';
 import 'package:tara_core/session/session_store.dart';
+import 'package:tara_test/fake_pin.dart';
+import 'package:tara_ui/components/pin_flow.dart';
 
 import 'helpers/fake_client_api.dart';
 import 'helpers/harness.dart';
@@ -54,15 +56,30 @@ FakeClientApi walletApi({String plan = 'PRO', int shopBalance = 128500}) => Fake
     ),
   ];
 
-Widget wallet(FakeClientApi api, {Me me = shopOwner, List<(Uint8List, String)>? shared, MemoryKeyValueStore? store}) =>
-    ProviderScope(
-      overrides: [
-        keyValueStoreProvider.overrideWithValue(store ?? MemoryKeyValueStore()),
-        clientApiProvider.overrideWithValue(api),
-        shareFileProvider.overrideWithValue((bytes, name, mime, text) async => shared?.add((bytes, name))),
-      ],
-      child: WalletScreen(me: me, onBack: () {}, now: () => homeNow),
-    );
+/// Portefeuille ; [shown] : solde déjà affiché (code secret donné plus tôt), sinon masqué.
+Widget wallet(
+  FakeClientApi api, {
+  Me me = shopOwner,
+  List<(Uint8List, String)>? shared,
+  MemoryKeyValueStore? store,
+  bool shown = false,
+}) => ProviderScope(
+  overrides: [
+    keyValueStoreProvider.overrideWithValue(store ?? MemoryKeyValueStore()),
+    clientApiProvider.overrideWithValue(api),
+    shareFileProvider.overrideWithValue((bytes, name, mime, text) async => shared?.add((bytes, name))),
+    pinApiProvider.overrideWithValue(api.pins ??= FakePinApi()),
+    biometricsProvider.overrideWithValue(api.biometrics),
+    smsCodeReaderProvider.overrideWithValue(api.sms),
+    balanceVisibilityProvider.overrideWith((ref) {
+      final visibility = BalanceVisibility();
+      if (shown) visibility.show();
+      ref.onDispose(visibility.dispose);
+      return visibility;
+    }),
+  ],
+  child: WalletScreen(me: me, onBack: () {}, now: () => homeNow),
+);
 
 void main() {
   setUpAll(loadAppFonts);
@@ -190,20 +207,22 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, wallet(api));
     await settle(tester);
     expect(
-      find.text(
-        'Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.',
-      ),
+      find.text('Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.'),
       findsOneWidget,
     );
   });
 
   testWidgets('offre gratuite : un petit solde de boutique se reverse en entier', (tester) async {
     final api = walletApi(plan: 'FREE', shopBalance: 300);
-    await pumpVariant(tester, Variant.matrix.first, wallet(api));
+    await pumpVariant(tester, Variant.matrix.first, wallet(api, shown: true));
     await settle(tester);
     await tester.tap(find.text('Recevoir 300\u00a0F maintenant'));
     await settle(tester);
+    // Confirmé par le code secret.
+    await enterPin(tester, '2580');
+    await settle(tester);
     expect(api.payoutsNow, 1);
+    expect(api.proofs.single?.pin, '2580');
   });
 
   testWidgets('petit solde Tara : retiré en entier, même sous 500 F', (tester) async {
@@ -213,16 +232,24 @@ void main() {
     await settle(tester);
     await tester.tap(find.text('Retirer'));
     await settle(tester);
+    // Solde masqué : le code secret l'affiche, puis confirme le retrait sans être redemandé.
+    expect(find.text('Pour voir votre solde'), findsOneWidget);
+    await enterPin(tester, '2580');
+    await settle(tester);
     await tester.tap(find.text('Retirer 300\u00a0F'));
     await settle(tester);
+    expect(find.text('Code secret'), findsNothing);
     expect(api.withdrawals, [('+237699112233', 'MTN')]);
+    expect(api.proofs.single?.pin, '2580');
   });
 
   testWidgets('reversement immédiat avec l’offre Pro', (tester) async {
     final api = walletApi();
-    await pumpVariant(tester, Variant.matrix.first, wallet(api));
+    await pumpVariant(tester, Variant.matrix.first, wallet(api, shown: true));
     await settle(tester);
     await tester.tap(find.text('Recevoir 128\u00a0500 F maintenant'));
+    await settle(tester);
+    await enterPin(tester, '2580');
     await settle(tester);
     expect(api.payoutsNow, 1);
     expect(find.text('Reversement demandé : l’argent arrive sur votre Mobile Money.'), findsOneWidget);
@@ -246,7 +273,10 @@ void main() {
     final api = walletApi();
     await pumpVariant(tester, Variant.matrix.first, wallet(api, me: person));
     await settle(tester);
+    expect(find.text('••••• F', findRichText: true), findsOneWidget);
     await tester.tap(find.text('Retirer'));
+    await settle(tester);
+    await enterPin(tester, '2580');
     await settle(tester);
     expect(find.textContaining('Tout votre solde (3\u00a0500 F)'), findsOneWidget);
     await tester.tap(find.text('Orange Money'));
@@ -261,6 +291,9 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, wallet(api));
     await settle(tester);
     await tester.scrollUntilVisible(find.text('Voir plus'), 200, scrollable: find.byType(Scrollable).first);
+    // Un cran de plus : le bouton ne reste pas collé au bas de l'écran.
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
+    await settle(tester);
     expect(find.text('TR-48212 · 4 nov., 09h45'), findsOneWidget);
     expect(find.text('Frais d’échec'), findsNothing);
     await tester.tap(find.text('Voir plus'));

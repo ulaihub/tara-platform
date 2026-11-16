@@ -1,6 +1,6 @@
 # Politique de confidentialité de Tara
 
-Version 2026-11.4 · Rédigée au regard de la loi n° 2024/017 du 23 décembre 2024 relative à la
+Version 2026-11.5 · Rédigée au regard de la loi n° 2024/017 du 23 décembre 2024 relative à la
 protection des données à caractère personnel au Cameroun. Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -29,6 +29,12 @@ paiements et la comptabilité, sur les obligations légales de Tara. Les donnée
 sont celles que l'expéditeur fournit pour lui livrer le colis : elles servent seulement à cette
 livraison, et le destinataire est informé par la page de suivi.
 
+**Code secret et empreinte digitale** : votre code secret est gardé sous une forme chiffrée
+irréversible ; personne chez Tara ne peut le lire. Votre empreinte digitale (ou votre visage)
+reste dans votre téléphone : Tara ne la reçoit jamais, seulement le fait que vous l'avez
+confirmée. Les codes de connexion peuvent vous être envoyés par WhatsApp, le SMS restant en
+secours.
+
 Nous ne vendons aucune donnée. Les numéros ne sont montrés qu'aux personnes qui en ont besoin
 pendant la course (le livreur voit le numéro du destinataire tant que la course est en cours).
 
@@ -53,7 +59,7 @@ pendant la course (le livreur voit le numéro du destinataire tant que la course
 Depuis l'application, vous pouvez :
 
 - **télécharger toutes vos données** (fichier lisible) ;
-- **supprimer votre compte**, après confirmation par un code SMS. Vos données personnelles sont
+- **supprimer votre compte**, après confirmation par votre code secret (ou votre empreinte). Vos données personnelles sont
   effacées ou anonymisées et votre numéro redevient libre. La suppression n'est pas possible
   tant qu'une commande est en cours, qu'une somme reste due à Tara, qu'il vous reste de l'argent
   chez Tara ou qu'un retrait est en cours : retirez d'abord votre solde, même petit, pour ne

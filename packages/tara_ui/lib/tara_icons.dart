@@ -73,6 +73,28 @@ abstract final class TaraIcons {
 
   /// Avion en papier (lien envoyé au destinataire) : absent de la maquette, même trait.
   static const send = TaraIconData([_P('M21 3L3 10.5l7.5 3L14 21z'), _P('M10.5 13.5L21 3')]);
+
+  /// Code secret et solde masqué : dessinés dans le même trait.
+  static const lock = TaraIconData([_R(5, 11, 14, 10, 2.5), _P('M8 11V8a4 4 0 018 0v3'), _P('M12 15.5v2')]);
+  static const eye = TaraIconData([
+    _P('M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z'),
+    _C(12, 12, 3),
+  ]);
+  static const eyeOff = TaraIconData([
+    _P(
+      'M9.9 5.7A9.6 9.6 0 0112 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 01-2.6 3.4M6.6 6.6C3.9 8.3 2.5 12 2.5 12S6 18.5 12 18.5c1.9 0 3.5-.6 4.9-1.5',
+    ),
+    _P('M9.9 9.9a3 3 0 004.2 4.2'),
+    _P('M3 3l18 18'),
+  ]);
+  static const fingerprint = TaraIconData([
+    _P('M6.5 7.5A7 7 0 0119 12v1.5'),
+    _P('M5 11.5v1a14 14 0 001.5 6.5'),
+    _P('M9 20a11 11 0 01-1.5-5.5V12a4.5 4.5 0 019 0v1.5'),
+    _P('M12 12v2.5a8 8 0 002 5.5'),
+    _P('M16.5 17a14 14 0 01-.5-2'),
+  ]);
+  static const backspace = TaraIconData([_P('M9 5h11v14H9l-6-7z'), _P('M12.5 9.5l5 5M17.5 9.5l-5 5')]);
 }
 
 sealed class _Shape {

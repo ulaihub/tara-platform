@@ -6,6 +6,8 @@
 	<string>Tara Livreur utilise votre position pour vous proposer les courses proches et, pendant une course, pour guider l’équipe et le client jusqu’à vous.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Pendant une course, votre position reste envoyée quand l’app est en arrière-plan (indicateur bleu en haut de l’écran). L’envoi s’arrête dès que vous passez hors ligne.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID confirme votre code secret Tara (solde, retraits) sans le taper.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Tara Livreur utilise l’appareil photo pour vos pièces (permis, carte grise, selfie) et la photo de preuve de livraison.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

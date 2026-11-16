@@ -22,7 +22,7 @@ Les textes de ce dossier sont ceux que les apps affichent : après une modificat
 1. **Texte complet dans l'app**, pas seulement un lien : l'utilisateur fait défiler le texte.
 2. **Case à cocher explicite**, non cochée par défaut : « J'ai lu et j'accepte les conditions
    (version 2026-11) et la politique de confidentialité ».
-3. **Numéro vérifié** : à l'inscription, le code SMS reçu sur le numéro confirme l'acceptation ;
+3. **Numéro vérifié** : à l'inscription, le code reçu sur le numéro (WhatsApp ou SMS) confirme l'acceptation ;
    la personne qui accepte est celle qui détient le numéro. Une nouvelle version s'accepte
    ensuite depuis la session ouverte avec ce numéro (case cochée, sans nouveau code).
 4. **Preuve conservée** : version, date et heure, numéro vérifié, appareil et adresse IP, mode
@@ -97,3 +97,7 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
    cochée dans une session ouverte avec le numéro vérifié, et la preuve gardée, suffisent-elles
    comme signature électronique au sens de la loi n° 2010/021 ? Pratique courante des
    applications ; à défaut, remettre le code pour les seuls changements importants.
+7. Code secret à 4 chiffres et empreinte digitale (version 2026-11.5) : le code secret, demandé
+   pour le solde, les retraits et la suppression du compte, et la suppression sans code SMS sont
+   à faire confirmer ; la connexion sur un nouveau téléphone reste confirmée par un code reçu
+   sur le numéro (WhatsApp ou SMS).

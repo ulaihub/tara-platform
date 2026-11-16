@@ -75,6 +75,8 @@ import { OrderFinanceService } from './order-finance.service.js';
 import { ReconciliationService } from './reconciliation.service.js';
 import { StatementsService } from './statements.service.js';
 import { PayoutsService } from './payouts.service.js';
+import { OptionalPinProofBody } from '../pin/pin.schemas.js';
+import { PinService } from '../pin/pin.service.js';
 import { WalletsService } from './wallets.service.js';
 
 type Out<T extends z.ZodType> = Promise<z.output<T>>;
@@ -235,6 +237,7 @@ export class WalletController {
     private readonly finance: OrderFinanceService,
     private readonly prisma: PrismaService,
     private readonly statements: StatementsService,
+    private readonly pin: PinService,
   ) {}
 
   /** Relevé mensuel PDF du portefeuille marchand (G7), mois au format AAAA-MM. */
@@ -302,8 +305,10 @@ export class WalletController {
     @CurrentUser() user: AuthUser,
     @ValidBody(PayoutBody) body: z.output<typeof PayoutBody>,
     @Headers('idempotency-key') key: string | undefined,
+    @Req() request: Request,
   ): Out<typeof PayoutDto> {
     assertOwnPhone(user, body.phone);
+    await this.pin.assert(user, body, { request });
     const payout = await this.payouts.request({
       beneficiary: 'CUSTOMER',
       ownerId: user.id,
@@ -322,13 +327,17 @@ export class WalletController {
   @Post('me/merchant/payouts')
   @MONEY_HEADER
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiZodBody(OptionalPinProofBody)
   @ApiZodResponse(PayoutDto, HttpStatus.CREATED)
   async merchantPayout(
     @CurrentUser() user: AuthUser,
+    @ValidBody(OptionalPinProofBody) body: z.output<typeof OptionalPinProofBody>,
     @Headers('idempotency-key') key: string | undefined,
+    @Req() request: Request,
   ): Out<typeof PayoutDto> {
     const merchant = await this.prisma.merchantProfile.findUnique({ where: { userId: user.id } });
     if (!merchant) throw AppError.notFound();
+    await this.pin.assert(user, body, { request });
     if (merchant.plan === 'FREE' && !(await this.payouts.smallBalance('MERCHANT', merchant.id))) {
       throw AppError.forbidden('PAYOUT_NOT_ALLOWED');
     }
@@ -420,6 +429,7 @@ export class RiderFinanceController {
     private readonly payouts: PayoutsService,
     private readonly finance: OrderFinanceService,
     private readonly prisma: PrismaService,
+    private readonly pin: PinService,
   ) {}
 
   private async riderId(userId: string): Promise<string> {
@@ -458,6 +468,7 @@ export class RiderFinanceController {
     @CurrentUser() user: AuthUser,
     @ValidBody(PayoutBody) body: z.output<typeof PayoutBody>,
     @Headers('idempotency-key') key: string | undefined,
+    @Req() request: Request,
   ): Out<typeof PayoutDto> {
     assertOwnPhone(user, body.phone);
     const rider = await this.prisma.riderProfile.findUnique({ where: { userId: user.id } });
@@ -465,6 +476,7 @@ export class RiderFinanceController {
     // Livreur suspendu (colis disparu, fraude, espèces non versées) : son solde reste chez
     // Tara le temps de l'enquête, pour pouvoir dédommager l'expéditeur.
     if (rider.status === 'SUSPENDED') throw AppError.forbidden('PAYOUT_FROZEN');
+    await this.pin.assert(user, body, { request });
     const riderId = rider.id;
     const payout = await this.payouts.request({
       beneficiary: 'RIDER',

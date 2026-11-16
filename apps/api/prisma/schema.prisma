@@ -61,6 +61,8 @@ enum OtpPurpose {
   ACCOUNT_DELETION
   /// Acceptation d'une nouvelle version des conditions (signature par code SMS).
   TERMS
+  /// Code secret oublié ou bloqué : le code reçu permet d'en choisir un nouveau.
+  PIN_RESET
 
   @@map("otp_purpose")
 }
@@ -472,9 +474,18 @@ model User {
   totpFailedAttempts Int       @default(0) @map("totp_failed_attempts")
   totpLockedUntil    DateTime? @map("totp_locked_until") @db.Timestamptz(3)
 
+  /// Code secret à 4 chiffres (comme Orange Money et MTN MoMo), demandé pour voir le solde,
+  /// retirer de l'argent et supprimer le compte. Haché (scrypt), jamais gardé en clair.
+  pinHash           String?   @map("pin_hash")
+  pinSetAt          DateTime? @map("pin_set_at") @db.Timestamptz(3)
+  pinFailedAttempts Int       @default(0) @map("pin_failed_attempts")
+  /// Bloqué après 5 erreurs : se débloque en choisissant un nouveau code, avec un code reçu.
+  pinLockedAt       DateTime? @map("pin_locked_at") @db.Timestamptz(3)
+
   merchant                 MerchantProfile?
   rider                    RiderProfile?          @relation("RiderUser")
   devices                  Device[]
+  pinDeviceKeys            PinDeviceKey[]
   refreshTokens            RefreshToken[]
   consents                 Consent[]
   addresses                Address[]
@@ -566,6 +577,22 @@ model Device {
 
   @@unique([userId, installationId])
   @@map("devices")
+}
+
+/// Empreinte digitale ou visage : une clé aléatoire gardée sur le téléphone, libérée par le
+/// capteur, remplace le code secret sur ce téléphone. Seul son hachage (SHA-256) est ici ; les
+/// empreintes elles-mêmes ne quittent jamais le téléphone.
+model PinDeviceKey {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  installationId String   @map("installation_id")
+  keyHash        String   @unique @map("key_hash")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, installationId])
+  @@map("pin_device_keys")
 }
 
 /// Consentements horodatés et versionnés (loi n° 2024/017).

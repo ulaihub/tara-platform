@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.4 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.5 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -24,6 +24,11 @@ l'équipe Tara, gardées de façon chiffrée et ne sont jamais montrées aux cli
 expirée bloque les nouvelles courses jusqu'à son renouvellement.
 
 Vous indiquez aussi un contact d'urgence, prévenu si vous déclenchez une alerte.
+
+Votre **code secret** à 4 chiffres, choisi dans l'application comme pour Orange Money ou MTN
+MoMo, est demandé pour voir votre solde et retirer vos gains ; l'empreinte digitale peut le
+remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le demandera jamais. Après
+5 erreurs, il est bloqué ; vous en choisissez un nouveau avec un code reçu sur votre numéro.
 
 ## 3. Recevoir et faire une course
 
@@ -150,7 +155,7 @@ la comptabilité.
 ## 12. Acceptation et modification
 
 Vous acceptez ces conditions dans l'application en cochant « J'ai lu et j'accepte » : à
-l'inscription, avec le code reçu par SMS ; pour une nouvelle version, depuis votre compte ouvert
+l'inscription, avec le code reçu par WhatsApp ou SMS ; pour une nouvelle version, depuis votre compte ouvert
 avec ce numéro vérifié. La version, la date, l'heure et l'appareil sont enregistrés. Le contrat de partenariat est en plus signé sur papier au bureau de Tara lors de la
 validation de vos pièces. Si les conditions changent, la nouvelle version vous est présentée
 dans l'application et doit être acceptée pour recevoir de nouvelles courses.

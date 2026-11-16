@@ -10,11 +10,11 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/components/terms_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
-import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -26,6 +26,7 @@ import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pin.dart';
 import '../common/scoped_page.dart';
 import '../home/home_screen.dart' show walletProvider;
 import '../legal/terms_screen.dart';
@@ -168,6 +169,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SectionHeader(title: l.displaySection),
           const SizedBox(height: 8),
           _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
+          const SizedBox(height: 20),
+          SectionHeader(title: l.securitySection),
+          const SizedBox(height: 8),
+          const SecurityCard(),
           const SizedBox(height: 20),
           SectionHeader(title: l.termsSection),
           const SizedBox(height: 8),
@@ -469,19 +474,24 @@ class _WalletRow extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final wallet = ref.watch(walletProvider).value;
+    // Solde masqué (comme sur MoMo) : affiché dans le portefeuille, après le code secret.
+    final visibility = ref.watch(balanceVisibilityProvider);
     return GlassCard(
       radius: 22,
       shadow: false,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      child: ListRow(
-        leading: const IconTile(icon: TaraIcons.wallet),
-        title: l.walletTitle,
-        subtitle: wallet == null ? null : l.walletBalanceTile('${formatAmount(wallet.customerBalance)}\u00a0F'),
-        trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-        onTap: () => unawaited(
-          Navigator.of(
-            context,
-          ).push(scopedPage<void>(context, (route) => WalletScreen(me: me, onBack: () => Navigator.of(route).pop()))),
+      child: ListenableBuilder(
+        listenable: visibility,
+        builder: (context, _) => ListRow(
+          leading: const IconTile(icon: TaraIcons.wallet),
+          title: l.walletTitle,
+          subtitle: wallet == null ? null : l.walletBalanceTile(balanceText(visibility, wallet.customerBalance)),
+          trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+          onTap: () => unawaited(
+            Navigator.of(
+              context,
+            ).push(scopedPage<void>(context, (route) => WalletScreen(me: me, onBack: () => Navigator.of(route).pop()))),
+          ),
         ),
       ),
     );

@@ -25,6 +25,7 @@ import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pin.dart';
 import '../common/scoped_page.dart';
 import '../legal/terms_screen.dart';
 import '../onboarding/documents_controller.dart';
@@ -175,6 +176,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   SectionHeader(title: l.displaySection),
                   const SizedBox(height: 8),
                   _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l.securitySection),
+                  const SizedBox(height: 8),
+                  const SecurityCard(),
                   const SizedBox(height: 20),
                   SectionHeader(title: l.termsSection),
                   const SizedBox(height: 8),

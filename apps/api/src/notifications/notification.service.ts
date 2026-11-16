@@ -4,7 +4,7 @@ import { ENV } from '../config/config.module.js';
 import { type Env, storageKeys } from '../config/env.js';
 import { decryptWithAny, deriveKey, encrypt } from '../common/crypto.js';
 import type { AppLocale } from '../common/i18n/locale.js';
-import { renderSms, type SmsTemplate } from '../common/i18n/sms-templates.js';
+import { renderSms, type SmsTemplate, withAppHash } from '../common/i18n/sms-templates.js';
 import { maskPhone } from '../common/phone.js';
 import type { Notification, Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -19,6 +19,8 @@ import { WHATSAPP_PROVIDER, type WhatsAppProvider } from './whatsapp.provider.js
  * chez Meta (`tara_<modèle en minuscules>`). Les autres partent directement par SMS.
  */
 export const WHATSAPP_PARAMETERS: Partial<Record<SmsTemplate, string[]>> = {
+  // Modèle d'authentification de Meta : texte imposé, bouton « Copier le code ».
+  OTP: ['code'],
   RECIPIENT_CONFIRMATION: ['sender', 'reference', 'url'],
   DELIVERY_CODE: ['reference', 'code', 'url'],
   DELIVERY_RECEIPT: ['reference'],
@@ -46,6 +48,9 @@ export interface PushNotification {
   urgent?: boolean;
   ttlSeconds?: number;
 }
+
+/** Modèles de code de connexion : SMS de secours inutile une fois le code expiré. */
+const CODE_TEMPLATES = new Set<SmsTemplate>(['OTP']);
 
 interface StoredPayload {
   params: Record<string, string | number>;
@@ -110,6 +115,67 @@ export class NotificationService implements OnModuleInit {
       },
     });
     await this.dispatch(notification.id);
+  }
+
+  /**
+   * Code de connexion par WhatsApp (modèle d'authentification `tara_otp`, bouton « Copier le
+   * code »), envoyé tout de suite. Renvoie false si WhatsApp le refuse : l'appelant envoie
+   * alors le SMS. Un échec signalé ensuite par Meta (numéro sans WhatsApp) déclenche le SMS
+   * de secours, tant que le code est valable ; [smsHash] y est ajouté pour l'app Android.
+   */
+  async codeByWhatsApp(input: {
+    phone: string;
+    locale: AppLocale;
+    code: string;
+    minutes: number;
+    smsHash: string | null;
+  }): Promise<boolean> {
+    if (!this.whatsapp) return false;
+    const payload: StoredPayload = {
+      params: { minutes: input.minutes, ...(input.smsHash ? { smsHash: input.smsHash } : {}) },
+      sealed: this.seal({ code: input.code }),
+    };
+    const notification = await this.prisma.notification.create({
+      data: {
+        recipientPhone: input.phone,
+        channel: 'WHATSAPP',
+        template: 'OTP',
+        locale: input.locale === 'en' ? 'EN' : 'FR',
+        payload: payload as unknown as Prisma.InputJsonObject,
+      },
+    });
+    try {
+      const sent = await this.whatsapp.send(input.phone, {
+        template: 'tara_otp',
+        locale: input.locale,
+        parameters: [input.code],
+        copyCode: input.code,
+      });
+      await this.prisma.notification.update({
+        where: { id: notification.id },
+        data: {
+          status: 'SENT',
+          provider: this.whatsapp.name,
+          providerReference: sent.providerReference,
+          attempts: 1,
+          sentAt: new Date(),
+        },
+      });
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Code WhatsApp refusé pour ${maskPhone(input.phone)} : ${message}`);
+      await this.prisma.notification.update({
+        where: { id: notification.id },
+        data: {
+          status: 'FAILED',
+          attempts: 1,
+          lastError: message.slice(0, 500),
+          payload: withoutSecrets(payload) as unknown as Prisma.InputJsonObject,
+        },
+      });
+      return false;
+    }
   }
 
   /** Push sur tous les appareils de l'utilisateur. Renvoie false s'il n'en a aucun. */
@@ -226,7 +292,10 @@ export class NotificationService implements OnModuleInit {
     switch (notification.channel) {
       case 'SMS': {
         if (!notification.recipientPhone) throw new Error('Numéro effacé');
-        const text = renderSms(notification.template as SmsTemplate, locale, params);
+        const text = withAppHash(
+          renderSms(notification.template as SmsTemplate, locale, params),
+          typeof params['smsHash'] === 'string' ? params['smsHash'] : null,
+        );
         const sent = await this.sms.send(notification.recipientPhone, text);
         return {
           provider: sent.provider ?? this.sms.name,
@@ -292,6 +361,10 @@ export class NotificationService implements OnModuleInit {
   /** Repli SMS d'un message WhatsApp non remis (une seule fois). */
   async fallbackToSms(original: Notification, payload: StoredPayload): Promise<void> {
     if (!original.recipientPhone) return;
+    const codeExpired =
+      CODE_TEMPLATES.has(original.template as SmsTemplate) &&
+      Date.now() - original.createdAt.getTime() >= this.env.OTP_TTL_SECONDS * 1000;
+    if (codeExpired) return;
     const fallback = await this.prisma.notification
       .create({
         data: {

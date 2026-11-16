@@ -4,7 +4,7 @@ import '../session/session_store.dart';
 import 'api_client.dart';
 import 'models.dart';
 
-/// Connexion par code SMS (A1).
+/// Connexion par code reçu par WhatsApp ou SMS (A1).
 class AuthApi {
   AuthApi(this._api, this._store, {required this.platform});
 
@@ -14,9 +14,17 @@ class AuthApi {
   /// ANDROID ou IOS.
   final String platform;
 
-  Future<OtpChallenge> requestOtp(String phone, {required String locale}) async => OtpChallenge.fromJson(
-    await _api.post('/auth/otp', body: {'phone': phone, 'locale': locale}, auth: false) as Json,
-  );
+  /// Code par WhatsApp quand le serveur l'a activé, sinon par SMS ; [channel] SMS le force
+  /// (« Recevoir par SMS »). [appHash] : empreinte de l'app Android, ajoutée au SMS par le
+  /// serveur s'il la connaît (lecture automatique du code).
+  Future<OtpChallenge> requestOtp(String phone, {required String locale, String? appHash, OtpChannel? channel}) async =>
+      OtpChallenge.fromJson(
+        await _api.post(
+          '/auth/otp',
+          body: {'phone': phone, 'locale': locale, 'appHash': ?appHash, 'channel': ?channel?.code},
+          auth: false,
+        ) as Json,
+      );
 
   /// Vérifie le code ; la session est enregistrée dans le stockage chiffré. Nouveau compte :
   /// `TERMS_REQUIRED`, puis le même code avec [terms] (versions lues et acceptées), que le

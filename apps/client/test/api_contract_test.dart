@@ -19,6 +19,7 @@ void main() {
 
   final models = <String, List<String>>{
     'OtpChallenge': OtpChallenge.fields,
+    'PinStatus': PinStatus.fields,
     'SessionUser': SessionUser.fields,
     'AuthSession': AuthSession.fields,
     'AppConfig': AppConfig.fields,

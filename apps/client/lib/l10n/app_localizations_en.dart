@@ -1870,7 +1870,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountRow => 'Delete my account';
 
   @override
-  String get deleteAccountRowSubtitle => 'Permanent, confirmed by an SMS code';
+  String get deleteAccountRowSubtitle => 'Permanent, confirmed with your secret PIN';
 
   @override
   String get deleteAccountTitle => 'Delete my account';
@@ -1900,20 +1900,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openWallet => 'Open my wallet';
 
   @override
-  String get deleteAccountSendCode => 'Get the code by SMS';
-
-  @override
-  String deleteAccountCodeSent(String phone) {
-    return 'Code sent to $phone. Type it to confirm the deletion.';
-  }
-
-  @override
-  String get deleteAccountCodeLabel => 'Code received by SMS';
-
-  @override
-  String get deleteAccountResend => 'Send the code again';
-
-  @override
   String get deleteAccountConfirm => 'Delete permanently';
 
   @override
@@ -1930,4 +1916,114 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get failureReasonDamaged =>
       'The recipient refused the parcel: it was damaged. A claim is open; the Tara team will contact you.';
+
+  @override
+  String get pinCreateTitle => 'Choose your secret PIN';
+
+  @override
+  String get pinCreateBody =>
+      '4 digits, like for Orange Money or MoMo. It protects your balance and withdrawals. Never share it, not even with Tara.';
+
+  @override
+  String get pinConfirmTitle => 'Confirm your secret PIN';
+
+  @override
+  String get pinMismatch => 'The two PINs are different. Start again.';
+
+  @override
+  String get pinEnterTitle => 'Secret PIN';
+
+  @override
+  String get pinCurrentTitle => 'Your current secret PIN';
+
+  @override
+  String get pinNewTitle => 'New secret PIN';
+
+  @override
+  String get pinForgot => 'Forgot your PIN?';
+
+  @override
+  String get pinUseBiometrics => 'Also use my fingerprint';
+
+  @override
+  String get pinBiometricButton => 'Use my fingerprint';
+
+  @override
+  String get pinBiometricTitle => 'Confirm with your fingerprint';
+
+  @override
+  String get pinDelete => 'Delete';
+
+  @override
+  String pinDigitsEntered(int count) {
+    return '$count digit(s) out of 4';
+  }
+
+  @override
+  String get pinLockedTitle => 'Secret PIN blocked';
+
+  @override
+  String get pinLockedBody =>
+      'After 5 errors, your secret PIN is blocked. Get a code on your number to choose a new one.';
+
+  @override
+  String get pinResetBody => 'Get a code on your number to choose a new secret PIN.';
+
+  @override
+  String get pinSendCode => 'Get a code';
+
+  @override
+  String get pinCodeSentSms => 'Enter the code sent by SMS.';
+
+  @override
+  String get pinCodeSentWhatsApp => 'Enter the code sent on WhatsApp.';
+
+  @override
+  String get codeBySms => 'Get it by SMS';
+
+  @override
+  String codeSentWhatsAppTo(String phone) {
+    return 'Code sent on WhatsApp to $phone';
+  }
+
+  @override
+  String get pinSaved => 'Secret PIN saved.';
+
+  @override
+  String get balanceShow => 'Show balance';
+
+  @override
+  String get balanceHide => 'Hide balance';
+
+  @override
+  String get pinReasonBalance => 'To see your balance';
+
+  @override
+  String pinReasonWithdraw(String amount) {
+    return 'To withdraw $amount';
+  }
+
+  @override
+  String get pinRowTitle => 'Secret PIN';
+
+  @override
+  String get pinRowSet => 'Change my secret PIN';
+
+  @override
+  String get pinRowNotSet => 'Choose my secret PIN';
+
+  @override
+  String get biometricRowTitle => 'Fingerprint';
+
+  @override
+  String get biometricRowBody => 'Confirm with your fingerprint instead of the PIN';
+
+  @override
+  String get pinReasonDelete => 'To delete your account';
+
+  @override
+  String get deleteAccountConfirmPin => 'Delete with my secret PIN';
+
+  @override
+  String get securitySection => 'Security';
 }

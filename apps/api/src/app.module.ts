@@ -21,6 +21,7 @@ import { MerchantsModule } from './merchants/merchants.module.js';
 import { MetricsModule } from './metrics/metrics.module.js';
 import { TeamModule } from './team/team.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
+import { PinModule } from './pin/pin.module.js';
 import { PrivacyModule } from './privacy/privacy.module.js';
 import { PublicTrackingModule } from './public-tracking/public-tracking.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
@@ -70,6 +71,7 @@ import { UsersModule } from './users/users.module.js';
     PublicTrackingModule,
     RiderAppModule,
     FinanceModule,
+    PinModule,
     PrivacyModule,
     OpsModule,
     SupportModule,

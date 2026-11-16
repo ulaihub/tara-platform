@@ -67,6 +67,7 @@ class SessionStore {
 
   static const _sessionKey = 'tara.session';
   static const _installationKey = 'tara.installation';
+  static const _biometricKey = 'tara.pin.biometric';
 
   final KeyValueStore _store;
   StoredSession? _cached;
@@ -86,11 +87,18 @@ class SessionStore {
     await _store.write(_sessionKey, jsonEncode(session.toJson()));
   }
 
+  /// Déconnexion : la session et la clé de l'empreinte (propre à ce compte) sont effacées.
   Future<void> clear() async {
     _cached = null;
     _loaded = true;
     await _store.delete(_sessionKey);
+    await _store.delete(_biometricKey);
   }
+
+  /// Clé qui remplace le code secret sur ce téléphone, libérée par l'empreinte digitale.
+  Future<String?> biometricKey() => _store.read(_biometricKey);
+  Future<void> writeBiometricKey(String key) => _store.write(_biometricKey, key);
+  Future<void> clearBiometricKey() => _store.delete(_biometricKey);
 
   /// Identifiant de cette installation (appareils et notifications) : 128 bits aléatoires,
   /// créé au premier lancement, sans lien avec le matériel.

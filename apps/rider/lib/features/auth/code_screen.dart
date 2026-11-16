@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/phone/phone_format.dart';
+import 'package:tara_sms/tara_sms.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
@@ -20,8 +21,9 @@ import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 
-/// 02 · Code SMS : 6 chiffres, remplissage automatique proposé par le système, renvoi
-/// possible à la fin du minuteur fixé par le serveur.
+/// 02 · Code reçu par WhatsApp ou SMS : 6 chiffres. Sur Android, le SMS est lu et vérifié
+/// sans rien taper ; sur iOS, le clavier propose le code. Renvoi possible à la fin du
+/// minuteur fixé par le serveur, et « Recevoir par SMS » quand WhatsApp n'arrive pas.
 class CodeScreen extends ConsumerStatefulWidget {
   const CodeScreen({
     super.key,
@@ -50,6 +52,7 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
   late OtpChallenge _challenge = widget.challenge;
   late DateTime _resendAt = DateTime.now().add(Duration(seconds: widget.challenge.resendAfterSeconds));
   Timer? _ticker;
+  late final SmsCodeReader _reader;
   bool _verifying = false;
   bool _resending = false;
   String? _error;
@@ -71,10 +74,22 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
+    _reader = ref.read(smsCodeReaderProvider);
+    unawaited(_listen());
+  }
+
+  /// Android : le code reçu par SMS (WhatsApp en secours compris) est lu puis vérifié.
+  Future<void> _listen() async {
+    await _reader.cancel();
+    final code = await _reader.waitForCode(autoRead: _challenge.autoRead);
+    if (!mounted || code == null || _verifying) return;
+    _code.text = code;
+    unawaited(_verify());
   }
 
   @override
   void dispose() {
+    unawaited(_reader.cancel());
     _ticker?.cancel();
     _code.dispose();
     super.dispose();
@@ -106,17 +121,20 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     }
   }
 
-  Future<void> _resend() async {
+  /// Nouveau code ; [channel] SMS quand le code WhatsApp n'est pas arrivé.
+  Future<void> _resend({OtpChannel? channel}) async {
     setState(() => _resending = true);
     try {
       final challenge = await ref
           .read(authControllerProvider.notifier)
-          .requestCode(digitsOf(widget.phone).substring(3));
+          .requestCode(digitsOf(widget.phone).substring(3), channel: channel);
+      if (!mounted) return;
       setState(() {
         _challenge = challenge;
         _resendAt = DateTime.now().add(Duration(seconds: challenge.resendAfterSeconds));
         _code.clear();
       });
+      unawaited(_listen());
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(context, error));
     } finally {
@@ -151,7 +169,7 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
-                '${l.codeSentTo(displayPhone(widget.phone))} · ',
+                '${(_challenge.channel == OtpChannel.whatsapp ? l.codeSentWhatsAppTo : l.codeSentTo)(displayPhone(widget.phone))} · ',
                 style: TaraText.body.copyWith(color: c.textSecondary),
               ),
               TaraLink(label: l.change, onPressed: widget.onBack),
@@ -192,6 +210,16 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
               ],
             ),
           ),
+          if (_challenge.channel == OtpChannel.whatsapp) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TaraLink(
+                label: l.codeBySms,
+                onPressed: waiting || _resending ? null : () => unawaited(_resend(channel: OtpChannel.sms)),
+              ),
+            ),
+          ],
         ],
         footer: Column(
           mainAxisSize: MainAxisSize.min,
