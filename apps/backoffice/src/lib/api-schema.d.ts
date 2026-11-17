@@ -3903,6 +3903,7 @@ export interface components {
       id: string;
       reference: string;
       status: components['schemas']['OrderStatus'];
+      batchNumber: number | null;
       recipientName: string;
       dropoffLandmark: string;
       dropoffNeighborhood: string | null;

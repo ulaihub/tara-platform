@@ -103,6 +103,14 @@ export default async function OrderPage({
             Express
           </span>
         ) : null}
+        {order.parcel.batchNumber !== null ? (
+          // Envoi de plusieurs colis : le numéro écrit sur ce colis, pour aider l'expéditeur et
+          // le livreur à ne pas se tromper de colis.
+          <span className="rounded-full bg-accent-bg px-3 py-1 text-[13px] font-extrabold text-accent">
+            Colis n° {order.parcel.batchNumber}
+            {order.parcel.batchSize ? ` sur ${order.parcel.batchSize}` : ''}
+          </span>
+        ) : null}
         {order.parcel.size === 'BULKY' ? (
           <span className="rounded-full bg-warn-bg px-3 py-1 text-[13px] font-extrabold text-warn">
             Gros objet{order.parcel.loadingHelp ? ' · à deux' : ''}
@@ -303,6 +311,12 @@ export default async function OrderPage({
             ) : null}
             <Facts
               rows={[
+                [
+                  'Envoi groupé',
+                  order.parcel.batchNumber !== null
+                    ? `Colis n° ${order.parcel.batchNumber} sur ${order.parcel.batchSize ?? '?'} (numéro écrit sur le colis)`
+                    : null,
+                ],
                 ['Taille', SIZE_LABELS[order.parcel.size]],
                 ['Contenu', order.parcel.contents ? CONTENTS_LABELS[order.parcel.contents] : null],
                 ['Précision', order.parcel.description],

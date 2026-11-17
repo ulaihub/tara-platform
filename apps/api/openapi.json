@@ -14333,6 +14333,10 @@
           "status": {
             "$ref": "#/components/schemas/OrderStatus"
           },
+          "batchNumber": {
+            "nullable": true,
+            "type": "integer"
+          },
           "recipientName": {
             "type": "string"
           },
@@ -14371,6 +14375,7 @@
           "id",
           "reference",
           "status",
+          "batchNumber",
           "recipientName",
           "dropoffLandmark",
           "dropoffNeighborhood",
