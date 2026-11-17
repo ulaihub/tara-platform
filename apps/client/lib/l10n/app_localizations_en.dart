@@ -2491,4 +2491,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String pendingParcel(int number, String name) {
     return 'Parcel no. $number · $name';
   }
+
+  @override
+  String get taraBalanceShopBody => 'Balance from before your shop: you can withdraw it to your Mobile Money.';
+
+  @override
+  String get shopPaysDeliveries => 'Your sales also pay for your deliveries: choose “My sales” when paying.';
 }

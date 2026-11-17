@@ -2498,4 +2498,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String pendingParcel(int number, String name) {
     return 'Colis n° $number · $name';
   }
+
+  @override
+  String get taraBalanceShopBody =>
+      'Ancien solde, d’avant votre boutique : vous pouvez le retirer sur votre Mobile Money.';
+
+  @override
+  String get shopPaysDeliveries =>
+      'Vos ventes paient aussi vos livraisons : choisissez « Mes ventes » au moment de payer.';
 }

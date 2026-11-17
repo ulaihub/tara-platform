@@ -4321,6 +4321,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Colis n° {number} · {name}'**
   String pendingParcel(int number, String name);
+
+  /// No description provided for @taraBalanceShopBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ancien solde, d’avant votre boutique : vous pouvez le retirer sur votre Mobile Money.'**
+  String get taraBalanceShopBody;
+
+  /// No description provided for @shopPaysDeliveries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos ventes paient aussi vos livraisons : choisissez « Mes ventes » au moment de payer.'**
+  String get shopPaysDeliveries;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

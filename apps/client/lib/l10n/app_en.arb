@@ -786,5 +786,7 @@
   "pendingPayMomo": "Pay with Mobile Money",
   "pendingRetry": "Try again with my sales",
   "pendingResent": "New link sent to {name}.",
-  "pendingParcel": "Parcel no. {number} · {name}"
+  "pendingParcel": "Parcel no. {number} · {name}",
+  "taraBalanceShopBody": "Balance from before your shop: you can withdraw it to your Mobile Money.",
+  "shopPaysDeliveries": "Your sales also pay for your deliveries: choose “My sales” when paying."
 }
