@@ -117,9 +117,25 @@ cmd_osrm() {
 migrate() {
   say "Base de données : comptes, migrations, droits, données de départ"
   dc up -d postgres redis s3
+  # L'outil de migration n'est pas un service permanent (profil « outils ») : `dc build` ne le
+  # reconstruit pas. Sans cette ligne, il garde le code du jour de l'installation et n'applique
+  # aucune nouvelle migration.
+  dc build migrate
   dc run --rm db-roles
   dc run --rm migrate
   dc run --rm db-roles
+  check_migrations
+}
+
+# La base doit être à jour : dernière migration du code appliquée, sinon on s'arrête avant de
+# démarrer une API qui lirait des colonnes absentes.
+check_migrations() {
+  local expected applied
+  expected=$(find "$SRC/apps/api/prisma/migrations" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort | tail -1)
+  applied=$(dc exec -T postgres psql -U tara -d tara -Atc \
+    "SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name DESC LIMIT 1")
+  [[ $applied == "$expected" ]] || die "Base pas à jour : dernière migration $applied, attendue $expected"
+  ok "Base à jour (migration $applied)"
 }
 
 cmd_install() {
@@ -303,9 +319,13 @@ cmd_config() {
 
 cmd_update() {
   need_root
-  say "Récupération de la dernière version"
-  git_src fetch --quiet origin main
-  git_src reset --quiet --hard origin/main
+  if [[ ${TARA_UPDATE_FETCHED:-} != 1 ]]; then
+    say "Récupération de la dernière version"
+    git_src fetch --quiet origin main
+    git_src reset --quiet --hard origin/main
+    # La procédure de mise à jour peut elle-même avoir changé : on relance la nouvelle.
+    TARA_UPDATE_FETCHED=1 exec "$SRC/infra/production/tara" update
+  fi
   echo "Version : $(git_src log -1 --format='%h %s')"
   write_s3_config
   dc build
