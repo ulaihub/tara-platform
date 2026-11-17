@@ -3,6 +3,7 @@ import {
   createTestApp,
   randomPhone,
   type SignedIn,
+  signIn,
   staffUser,
   type TestContext,
 } from './helpers/app.js';
@@ -69,5 +70,35 @@ describe('Back-office · équipe et audit (H8)', () => {
 
     const support = await staffUser(ctx, ['SUPPORT']);
     await request(ctx.http).get('/v1/admin/audit-log').set(support.auth).expect(403);
+  });
+
+  it('un membre de l’équipe qui ouvre une boutique ou devient livreur garde son rôle', async () => {
+    // Dans les apps, la session n'a pas de second facteur : ses rôles n'incluent pas ceux de
+    // l'équipe. Ajouter « boutique » ou « livreur » ne doit pas réécrire les rôles du compte.
+    const staff = await signIn(ctx);
+    await ctx.prisma.user.update({
+      where: { id: staff.userId },
+      data: { roles: ['CUSTOMER', 'ADMIN', 'FINANCE'] },
+    });
+    const rolesOf = async () =>
+      (await ctx.prisma.user.findUniqueOrThrow({ where: { id: staff.userId } })).roles;
+
+    await request(ctx.http)
+      .put('/v1/me/merchant')
+      .set(staff.auth)
+      .send({ shopName: 'Boutique de l’équipe', payoutPhone: '677000003', payoutOperator: 'MTN' })
+      .expect(200);
+    expect(await rolesOf()).toEqual(['CUSTOMER', 'ADMIN', 'FINANCE', 'MERCHANT']);
+
+    await request(ctx.http).post('/v1/riders/apply').set(staff.auth).send({}).expect(201);
+    expect(await rolesOf()).toEqual(['CUSTOMER', 'ADMIN', 'FINANCE', 'MERCHANT', 'RIDER']);
+
+    // Modifier la boutique ne duplique pas le rôle.
+    await request(ctx.http)
+      .put('/v1/me/merchant')
+      .set(staff.auth)
+      .send({ shopName: 'Boutique de l’équipe 2', payoutPhone: '677000003', payoutOperator: 'MTN' })
+      .expect(200);
+    expect(await rolesOf()).toEqual(['CUSTOMER', 'ADMIN', 'FINANCE', 'MERCHANT', 'RIDER']);
   });
 });

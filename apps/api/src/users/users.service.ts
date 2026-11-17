@@ -3,6 +3,7 @@ import type { Request } from 'express';
 import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
 import { type AuthUser, isStaffRole } from '../auth/auth.types.js';
+import { addRole } from '../auth/roles.js';
 import { randomReadableId } from '../common/crypto.js';
 import { AppError } from '../common/errors/app-error.js';
 import { ENV } from '../config/config.module.js';
@@ -120,12 +121,9 @@ export class UsersService {
         create: { userId: actor.id, ...data },
         update: { ...data, ...(phoneChanged ? { payoutPhoneChangedAt: new Date() } : {}) },
       });
-      if (!actor.roles.includes('MERCHANT')) {
-        await tx.user.update({
-          where: { id: actor.id },
-          data: { roles: { set: [...actor.roles, 'MERCHANT'] } },
-        });
-      }
+      // Rôle ajouté aux rôles en base : ceux de la session sont filtrés (rôles de l'équipe
+      // sans second facteur) et ne doivent jamais remplacer les rôles du compte.
+      await addRole(tx, actor.id, 'MERCHANT');
       await this.audit.record(
         {
           actor,

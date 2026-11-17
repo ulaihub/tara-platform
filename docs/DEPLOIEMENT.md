@@ -113,6 +113,11 @@ Ne jamais y mettre le numéro d'un vrai client : il ne recevrait plus aucun SMS.
 | `tara connexions [numéro]` | derniers codes de connexion demandés, codes faux, numéro bloqué ou non                |
 | `tara debloquer numéro`    | débloque un numéro après trop de codes faux (10 en 24 h) ; inscrit au journal d'audit |
 
+**Mise à jour** : `tara update` reconstruit aussi l'outil de migration, applique les
+nouvelles migrations puis vérifie que la base est à jour ; sinon il s'arrête avec « Base pas à
+jour » avant de redémarrer l'API. Relancer alors `tara update` et transmettre le message si
+l'arrêt se répète.
+
 **Sauvegardes** : base et fichiers dans `/opt/tara/backups`, deux semaines gardées. Activer aussi les instantanés automatiques du VPS dans Hostinger, et copier de temps en temps une sauvegarde hors du serveur. Sans la clé `STORAGE_ENCRYPTION_KEY` (dans `/opt/tara/api.env`), les pièces d'identité sauvegardées sont illisibles : la garder en lieu sûr, hors du serveur.
 
 ## Ce qui tourne sur le serveur
