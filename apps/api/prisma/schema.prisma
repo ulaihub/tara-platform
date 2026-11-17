@@ -909,7 +909,7 @@ model Referral {
 // Commandes, attribution, preuves, notation (C1 à C5, D1 à D4, E3 à E7, F4)
 // -----------------------------------------------------------------------------
 
-/// Jusqu'à 10 livraisons saisies en une fois depuis un même point d'enlèvement (C4).
+/// Livraisons saisies en une fois depuis un même point d'enlèvement (C4), numérotées 1, 2, 3…
 model OrderBatch {
   id              String   @id @default(uuid(7)) @db.Uuid
   senderId        String   @map("sender_id") @db.Uuid
@@ -935,6 +935,9 @@ model Order {
   senderId           String           @map("sender_id") @db.Uuid
   merchantId         String?          @map("merchant_id") @db.Uuid
   batchId            String?          @map("batch_id") @db.Uuid
+  /// Numéro du colis dans son envoi (1, 2, 3… dans l'ordre de saisie) : l'expéditeur l'écrit
+  /// sur le colis, le livreur le lit à l'enlèvement. Null hors envoi groupé.
+  batchNumber        Int?             @map("batch_number")
   pickupAddressId    String           @map("pickup_address_id") @db.Uuid
   dropoffAddressId   String           @map("dropoff_address_id") @db.Uuid
   recipientName      String           @map("recipient_name")
@@ -1042,6 +1045,7 @@ model Order {
   tracks          CourseTrack[]
   courseAlerts    CourseAlert[]
 
+  @@unique([batchId, batchNumber])
   @@index([status, scheduledFor])
   @@index([riderId, status])
   @@index([senderId, createdAt])

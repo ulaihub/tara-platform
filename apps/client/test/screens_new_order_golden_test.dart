@@ -374,6 +374,37 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/05_commande_envoyee/${brightness.name}.png'));
     });
 
+    goldenTest('05 lot mixte puis colis numérotés ${brightness.name}', (tester) async {
+      final api = orderApi();
+      final realtime = FakeRealtime();
+      await pumpVariant(tester, variant, flow(api, realtime: realtime), surface: const Size(390, 1500));
+      await toSummary(tester);
+      await tapVisible(tester, 'Ajouter une livraison');
+      await tester.tap(find.text('Jean'));
+      await settle(tester);
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      await tester.tap(find.text('Cuisine, maison'));
+      await tester.enterText(find.byType(TextField).at(0), 'Réfrigérateur 2 portes');
+      await tester.tap(find.text('Gros objet'));
+      await settle(tester);
+      await tester.ensureVisible(find.text('Aide pour charger'));
+      await tester.tap(find.text('Aide pour charger'));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      expect(find.text('COLIS N° 2'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/lot_mixte_${brightness.name}.png'));
+
+      await tapVisible(tester, 'Espèces à l’enlèvement');
+      await slideToOrder(tester);
+      realtime.emit('order.status', {'orderId': '00000000-0000-4000-8000-000000000502', 'status': 'ASSIGNED'});
+      await settle(tester);
+      expect(find.text('Livreurs trouvés : 1 sur 2'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/05_commande_envoyee/lot_${brightness.name}.png'));
+    });
+
     goldenTest('05 destinataire incomplet ${brightness.name}', (tester) async {
       await pumpVariant(
         tester,
@@ -862,7 +893,8 @@ void main() {
 
     testWidgets('plusieurs livraisons : un lot, un seul code, un seul paiement Mobile Money', (tester) async {
       final api = orderApi();
-      await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1700));
+      final realtime = FakeRealtime();
+      await pumpVariant(tester, Variant.matrix.first, flow(api, realtime: realtime), surface: const Size(390, 1900));
       await toSummary(tester);
       await tapVisible(tester, 'Ajouter une livraison');
       expect(find.text('Étape 2 sur 5 · Destinataire'), findsOneWidget);
@@ -870,16 +902,29 @@ void main() {
       await settle(tester);
       await tester.tap(find.text('Continuer'));
       await settle(tester);
-      await tester.tap(find.text('Linge'));
-      await tester.tap(find.text('XL'));
+      // Un frigo : tricycle, ses propres frais d'échec.
+      await tester.tap(find.text('Cuisine, maison'));
+      await tester.enterText(find.byType(TextField).at(0), 'Réfrigérateur 2 portes');
+      await tester.tap(find.text('Gros objet'));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
       await tester.tap(find.text('Continuer'));
       await settle(tester);
 
       expect(find.text('Étape 5 sur 5 · Récapitulatif'), findsOneWidget);
-      expect(find.text('LIVRAISON 2'), findsOneWidget);
+      expect(find.text('COLIS N° 1'), findsOneWidget);
+      expect(find.text('COLIS N° 2'), findsOneWidget);
       expect(find.text('Total · 2 livraisons'), findsOneWidget);
-      expect(find.text('Commander · 2 900 F'), findsOneWidget);
+      expect(find.text('Commander · 4\u00a0200\u00a0F'), findsOneWidget);
       expect(find.text('Code promo'), findsNothing);
+      // Chaque colis annonce ses frais d'échec : moto et tricycle n'ont pas les mêmes.
+      expect(find.text('Si la livraison échoue : nouvelle tentative 500\u00a0F, retour 600\u00a0F'), findsOneWidget);
+      expect(
+        find.text('Si la livraison échoue : nouvelle tentative 1\u00a0500\u00a0F, retour 1\u00a0500\u00a0F'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('un seul passage'), findsNothing);
+      expect(find.textContaining('son déplacement (le prix d’une nouvelle tentative)'), findsOneWidget);
 
       await tapVisible(tester, 'MTN Mobile Money');
       await slideToOrder(tester);
@@ -897,13 +942,26 @@ void main() {
         phone: '+237677123456',
         operator: 'MTN',
       ));
-      expect(find.textContaining('2 900 F'), findsOneWidget);
+      expect(find.text('Validez le paiement sur votre téléphone'), findsOneWidget);
 
       api.paymentStatuses = ['SUCCEEDED'];
       await tester.pump(const Duration(seconds: 4));
       await settle(tester);
       expect(find.text('2 livraisons · TR-48301 → TR-48302'), findsOneWidget);
       expect(find.text('7 3 0 2'), findsOneWidget);
+      // Un numéro par colis, à écrire dessus ; le même code pour chaque livreur.
+      expect(find.text('Écrivez son numéro sur chaque colis'), findsOneWidget);
+      expect(find.textContaining('Le même code pour chaque livreur'), findsOneWidget);
+      expect(find.text('Livreurs trouvés : 0 sur 2'), findsOneWidget);
+
+      // Le livreur du frigo accepte : son colis le dit, le compte avance.
+      realtime.emit('order.status', {'orderId': '00000000-0000-4000-8000-000000000502', 'status': 'ASSIGNED'});
+      await settle(tester);
+      expect(find.text('Livreurs trouvés : 1 sur 2'), findsOneWidget);
+      expect(find.text('Livreur trouvé'), findsOneWidget);
+      realtime.emit('order.status', {'orderId': '00000000-0000-4000-8000-000000000501', 'status': 'ASSIGNED'});
+      await settle(tester);
+      expect(find.text('Tous les livreurs sont trouvés : ils viennent chercher les colis.'), findsOneWidget);
     });
 
     testWidgets('boutique : ses ventes couvrent la course, elles sont proposées d’office', (tester) async {

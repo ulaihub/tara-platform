@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { DispatchService } from '../src/dispatch/dispatch.service.js';
 import { type FakePushProvider, PUSH_PROVIDER } from '../src/notifications/push.provider.js';
@@ -335,6 +336,65 @@ describe('Attribution des courses (D1 à D4)', () => {
     expect(pending.body.lastFeePayment).toMatchObject({ status: expect.any(String) });
     const mine = await request(ctx.http).get(`/v1/orders/${unpaid.id}`).set(shop.auth).expect(200);
     expect(mine.body.pricing.feePaid).toBe(pending.body.price.feePaidAt !== null);
+  });
+
+  it('envoi de plusieurs colis : le livreur voit le numéro du sien, l’expéditeur sait lequel donner', async () => {
+    const rider = await activeRider(ctx);
+    // Le téléphone de la boutique reçoit les notifications.
+    await request(ctx.http)
+      .put(`/v1/me/devices/${shop.installationId}/push-token`)
+      .set(shop.auth)
+      .send({ pushToken: `push-${randomUUID()}-${randomUUID()}` })
+      .expect(204);
+    const item = (name: string, description: string) => ({
+      dropoffAddressId: shop.dropoffId,
+      recipientName: name,
+      recipientPhone: '699 00 11 22',
+      packageSize: 'S',
+      packageContents: 'CLOTHING',
+      packageDescription: description,
+    });
+    const batch = await request(ctx.http)
+      .post('/v1/orders/batch')
+      .set(shop.auth)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        pickupAddressId: shop.pickupId,
+        feePaymentMethod: 'CASH',
+        items: [item('Marie Ngo', 'Robe rouge'), item('Jean Mbarga', '2 paires de chaussures')],
+      })
+      .expect(201);
+    const second = batch.body.orders[1] as { id: string; reference: string };
+    await request(ctx.http)
+      .post(`/v1/admin/orders/${second.id}/assign`)
+      .set(ops.auth)
+      .send({ riderId: rider.riderId })
+      .expect(200);
+
+    const active = await request(ctx.http).get('/v1/rider/orders').set(rider.auth).expect(200);
+    const mine = (active.body.items as { id: string }[]).find((order) => order.id === second.id);
+    expect(mine).toMatchObject({
+      batchNumber: 2,
+      packageDescription: '2 paires de chaussures',
+      recipient: { name: 'Jean Mbarga' },
+    });
+    const admin = await request(ctx.http)
+      .get(`/v1/admin/orders/${second.id}`)
+      .set(ops.auth)
+      .expect(200);
+    expect(admin.body.parcel).toMatchObject({ batchNumber: 2, batchSize: 2 });
+
+    const push = await ctx.prisma.notification.findFirstOrThrow({
+      where: {
+        userId: shop.userId,
+        orderId: second.id,
+        template: { startsWith: 'ORDER_ASSIGNED' },
+      },
+    });
+    expect(push).toMatchObject({
+      template: 'ORDER_ASSIGNED_BATCH',
+      payload: { params: expect.objectContaining({ number: 2, recipient: 'Jean' }) },
+    });
   });
 
   it('ne repropose pas une course au livreur qui l’a rendue', async () => {

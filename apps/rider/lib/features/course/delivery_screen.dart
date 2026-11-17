@@ -219,6 +219,11 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
               : () => ref.read(callJournalProvider).call(order.id, to: 'RECIPIENT', phone: phone),
         ),
         AddressHelp(orderId: order.id, stop: 'dropoff', address: order.dropoff, name: name),
+        // Deux colis à bord : le numéro dit lequel remettre ici.
+        if (order.batchNumber != null) ...[
+          const SizedBox(height: 12),
+          ParcelCard(order: order, title: l.parcelToDeliver, showRecipient: false),
+        ],
         if (due) ...[
           const SizedBox(height: 12),
           CollectBox(amount: order.collectAtDelivery, title: l.collectAtDeliveryTitle, body: l.collectAtDeliveryBody),

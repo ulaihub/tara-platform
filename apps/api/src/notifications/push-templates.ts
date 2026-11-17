@@ -14,6 +14,17 @@ const TEMPLATES = {
     fr: { title: 'Livreur trouvé', body: '{rider} récupère votre colis {reference}.' },
     en: { title: 'Rider found', body: '{rider} is picking up your parcel {reference}.' },
   },
+  /** Envoi de plusieurs colis : quel colis donner à ce livreur. */
+  ORDER_ASSIGNED_BATCH: {
+    fr: {
+      title: 'Livreur trouvé · colis n° {number}',
+      body: '{rider} vient chercher le colis n° {number} (pour {recipient}).',
+    },
+    en: {
+      title: 'Rider found · parcel no. {number}',
+      body: '{rider} is coming for parcel no. {number} (for {recipient}).',
+    },
+  },
   ORDER_PICKED_UP: {
     fr: { title: 'Colis enlevé', body: 'Votre colis {reference} est entre les mains du livreur.' },
     en: { title: 'Parcel picked up', body: 'Your parcel {reference} is with the rider.' },

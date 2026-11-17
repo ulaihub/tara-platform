@@ -1001,7 +1001,7 @@ abstract class AppLocalizations {
   /// No description provided for @photoParcelHint.
   ///
   /// In fr, this message translates to:
-  /// **'Étiquette Tara visible'**
+  /// **'Colis entier, bien visible'**
   String get photoParcelHint;
 
   /// No description provided for @photoParcelTaken.
@@ -3493,6 +3493,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Sécurité'**
   String get securitySection;
+
+  /// No description provided for @parcelToCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis à récupérer'**
+  String get parcelToCollect;
+
+  /// No description provided for @parcelToDeliver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis à remettre'**
+  String get parcelToDeliver;
+
+  /// No description provided for @parcelNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'n° {n}'**
+  String parcelNumber(int n);
+
+  /// No description provided for @parcelFor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour {name} · {place}'**
+  String parcelFor(String name, String place);
+
+  /// No description provided for @photoParcelHintNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro {n} bien visible'**
+  String photoParcelHintNumber(int n);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -522,7 +522,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get photoParcel => 'Photograph the parcel';
 
   @override
-  String get photoParcelHint => 'Tara label visible';
+  String get photoParcelHint => 'Whole parcel, clearly visible';
 
   @override
   String photoParcelTaken(String time) {
@@ -1967,4 +1967,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get securitySection => 'Security';
+
+  @override
+  String get parcelToCollect => 'Parcel to collect';
+
+  @override
+  String get parcelToDeliver => 'Parcel to hand over';
+
+  @override
+  String parcelNumber(int n) {
+    return 'no. $n';
+  }
+
+  @override
+  String parcelFor(String name, String place) {
+    return 'For $name · $place';
+  }
+
+  @override
+  String photoParcelHintNumber(int n) {
+    return 'Number $n clearly visible';
+  }
 }

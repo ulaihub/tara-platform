@@ -44,7 +44,12 @@ class OrderRow extends StatelessWidget {
     final place = order.dropoffNeighborhood ?? order.dropoffLandmark;
     return ListRow(
       leading: IconTile(icon: icon, size: 40, tone: tone),
-      title: '${order.recipientName} · $place',
+      // Envoi de plusieurs colis : le numéro écrit sur le colis vient en premier.
+      title: [
+        if (order.batchNumber case final number?) l.parcelNumberShort(number),
+        order.recipientName,
+        place,
+      ].join(' · '),
       subtitle: '$label · ${order.reference}',
       trailing: TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
       onTap: onTap,

@@ -34,6 +34,7 @@ TrackedOrder tracked(
   String? refusalReason,
   String feePaymentMethod = 'CASH',
   bool feePaid = true,
+  int? batchNumber,
 }) {
   DateTime at(int h, int m) => DateTime(2026, 11, 4, h, m);
   const ridden = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED', 'DELIVERED'];
@@ -99,6 +100,8 @@ TrackedOrder tracked(
     refusalReason: refusalReason,
     feePaymentMethod: feePaymentMethod,
     feePaid: feePaid,
+    batchNumber: batchNumber,
+    batchSize: batchNumber == null ? null : 3,
     rating: rated == null ? null : OrderRating(score: rated, comment: null, at: at(10, 40)),
   );
 }
@@ -391,6 +394,16 @@ void main() {
     expect(api.paid, hasLength(2));
     expect(find.text('Recherche d’un livreur…'), findsOneWidget);
     expect(find.textContaining('par Mobile Money'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('envoi de plusieurs colis : le suivi dit quel colis donner au livreur', (tester) async {
+    final api = FakeClientApi()..tracked[orderId] = tracked('ASSIGNED', batchNumber: 2);
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1000));
+    await settle(tester);
+    expect(find.text('TR-48301 · n° 2'), findsOneWidget);
+    expect(find.text('Jean M. vient chercher le colis n° 2'), findsOneWidget);
+    expect(find.text('Donnez-lui le colis n° 2 et le code d’enlèvement à son arrivée.'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 

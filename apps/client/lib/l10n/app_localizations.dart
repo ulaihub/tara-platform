@@ -1643,7 +1643,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryNumber.
   ///
   /// In fr, this message translates to:
-  /// **'Livraison {n}'**
+  /// **'Colis n° {n}'**
   String deliveryNumber(int n);
 
   /// No description provided for @waitingPoint.
@@ -1667,7 +1667,7 @@ abstract class AppLocalizations {
   /// No description provided for @addDeliveryHint.
   ///
   /// In fr, this message translates to:
-  /// **'Jusqu’à 10 livraisons depuis le même enlèvement : un seul passage du livreur.'**
+  /// **'Jusqu’à 10 colis depuis le même enlèvement : un seul code, un seul paiement. Chaque colis part avec un livreur adapté à sa taille.'**
   String get addDeliveryHint;
 
   /// No description provided for @priceBase.
@@ -3685,6 +3685,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'La demande de paiement part vers ce numéro {operator}.'**
   String trackPayVia(String operator);
+
+  /// No description provided for @cardFailureFees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si la livraison échoue : nouvelle tentative {retry}, retour {ret}'**
+  String cardFailureFees(String retry, String ret);
+
+  /// No description provided for @batchFailureFeesNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cas d’échec de livraison, les frais indiqués sur chaque colis sont à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.'**
+  String get batchFailureFeesNote;
+
+  /// No description provided for @batchRefusalFeeNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis différent de ce que vous déclarez (trop grand, trop lourd, interdit) : le livreur peut le refuser, et son déplacement (le prix d’une nouvelle tentative) reste à votre charge.'**
+  String get batchRefusalFeeNote;
+
+  /// No description provided for @pickupCodeHelpBatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le même code pour chaque livreur qui vient chercher un colis. Notez-le : il ne sera plus affiché.'**
+  String get pickupCodeHelpBatch;
+
+  /// No description provided for @writeNumbersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrivez son numéro sur chaque colis'**
+  String get writeNumbersTitle;
+
+  /// No description provided for @writeNumbersBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au marqueur, bien visible. Chaque livreur vient chercher un numéro précis : vous saurez lequel lui donner.'**
+  String get writeNumbersBody;
+
+  /// No description provided for @parcelNumberSemantics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis numéro {n}'**
+  String parcelNumberSemantics(int n);
+
+  /// No description provided for @riderFoundShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur trouvé'**
+  String get riderFoundShort;
+
+  /// No description provided for @riderSearchingShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche'**
+  String get riderSearchingShort;
+
+  /// No description provided for @ridersFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreurs trouvés : {found} sur {total}'**
+  String ridersFound(int found, int total);
+
+  /// No description provided for @allRidersFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les livreurs sont trouvés : ils viennent chercher les colis.'**
+  String get allRidersFound;
+
+  /// No description provided for @parcelNumberShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'n° {n}'**
+  String parcelNumberShort(int n);
+
+  /// No description provided for @trackAssignedParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rider} vient chercher le colis n° {n}'**
+  String trackAssignedParcel(String rider, int n);
+
+  /// No description provided for @trackAssignedParcelBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez-lui le colis n° {n} et le code d’enlèvement à son arrivée.'**
+  String trackAssignedParcelBody(int n);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

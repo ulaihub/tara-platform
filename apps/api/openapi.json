@@ -9908,6 +9908,14 @@
               "instructions": {
                 "nullable": true,
                 "type": "string"
+              },
+              "batchNumber": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "batchSize": {
+                "nullable": true,
+                "type": "integer"
               }
             },
             "required": [
@@ -9919,7 +9927,9 @@
               "hasPhoto",
               "aiWarning",
               "declaredValue",
-              "instructions"
+              "instructions",
+              "batchNumber",
+              "batchSize"
             ],
             "additionalProperties": false
           },
@@ -13815,6 +13825,14 @@
             "type": "string",
             "format": "uuid"
           },
+          "batchNumber": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "batchSize": {
+            "nullable": true,
+            "type": "integer"
+          },
           "isExpress": {
             "type": "boolean"
           },
@@ -14065,6 +14083,8 @@
           "status",
           "trackingUrl",
           "batchId",
+          "batchNumber",
+          "batchSize",
           "isExpress",
           "scheduledFor",
           "packageSize",
@@ -14313,6 +14333,10 @@
           "status": {
             "$ref": "#/components/schemas/OrderStatus"
           },
+          "batchNumber": {
+            "nullable": true,
+            "type": "integer"
+          },
           "recipientName": {
             "type": "string"
           },
@@ -14351,6 +14375,7 @@
           "id",
           "reference",
           "status",
+          "batchNumber",
           "recipientName",
           "dropoffLandmark",
           "dropoffNeighborhood",
@@ -15742,6 +15767,10 @@
           "status": {
             "$ref": "#/components/schemas/OrderStatus"
           },
+          "batchNumber": {
+            "nullable": true,
+            "type": "integer"
+          },
           "packageSize": {
             "$ref": "#/components/schemas/PackageSize"
           },
@@ -15930,6 +15959,7 @@
           "id",
           "reference",
           "status",
+          "batchNumber",
           "packageSize",
           "packageContents",
           "packageDescription",

@@ -329,6 +329,22 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/08_enlevement_gros_objet/${brightness.name}.png'));
     });
 
+    goldenTest('08 enlèvement colis numéroté ${brightness.name}', (tester) async {
+      // L'expéditeur envoie plusieurs colis : celui-ci porte le numéro 2.
+      await pumpVariant(
+        tester,
+        variant,
+        scope(pickup(order(batchNumber: 2, packageDescription: '2 paires de chaussures', collectAtPickup: 0))),
+      );
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('COLIS À RÉCUPÉRER · N° 2'), findsOneWidget);
+      expect(find.text('2 paires de chaussures'), findsOneWidget);
+      expect(find.text('Pour Paul · Bonapriso'), findsOneWidget);
+      expect(find.text('Numéro 2 bien visible'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/08_enlevement_numero/${brightness.name}.png'));
+    });
+
     goldenTest('08 colis non conforme prêt ${brightness.name}', (tester) async {
       await pumpVariant(tester, variant, scope(refusal()));
       await settle(tester);
@@ -367,5 +383,28 @@ void main() {
     expect(find.text('Frais de retour réglés : vous pouvez rendre le colis.'), findsOneWidget);
     expect(tester.widget<PrimaryButton>(returned).onPressed, isNotNull);
     expect(sounds.played, contains(TaraSound.cash));
+  });
+
+  testWidgets('colis seul : ce qu’il faut récupérer et pour qui, sans numéro', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, scope(pickup(order(collectAtPickup: 0))));
+    await settle(tester);
+    expect(find.text('COLIS À RÉCUPÉRER'), findsOneWidget);
+    expect(find.text('Colis moyen'), findsOneWidget);
+    expect(find.text('Pour Paul · Bonapriso'), findsOneWidget);
+    expect(find.text('Colis entier, bien visible'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('deux colis à bord : la livraison rappelle le numéro du colis à remettre', (tester) async {
+    await pumpVariant(
+      tester,
+      Variant.matrix.first,
+      scope(delivery(order(status: 'IN_DELIVERY', batchNumber: 2, packageDescription: '2 paires de chaussures'))),
+      surface: const Size(390, 1100),
+    );
+    await settle(tester);
+    expect(find.text('COLIS À REMETTRE · N° 2'), findsOneWidget);
+    expect(find.text('2 paires de chaussures'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
   });
 }

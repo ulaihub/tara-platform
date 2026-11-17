@@ -304,7 +304,7 @@
   "pickupCodeLabel": "Code d’enlèvement",
   "pickupCodeHint": "donné par le vendeur",
   "photoParcel": "Photographier le colis",
-  "photoParcelHint": "Étiquette Tara visible",
+  "photoParcelHint": "Colis entier, bien visible",
   "photoParcelTaken": "Photo du colis · prise à {time}",
   "retakePhoto": "Reprendre",
   "parcelCollected": "Colis récupéré",
@@ -1258,5 +1258,34 @@
   "pinRowNotSet": "Choisir mon code secret",
   "biometricRowTitle": "Empreinte digitale",
   "biometricRowBody": "Confirmer avec l'empreinte au lieu du code",
-  "securitySection": "Sécurité"
+  "securitySection": "Sécurité",
+  "parcelToCollect": "Colis à récupérer",
+  "parcelToDeliver": "Colis à remettre",
+  "parcelNumber": "n° {n}",
+  "@parcelNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "parcelFor": "Pour {name} · {place}",
+  "@parcelFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "photoParcelHintNumber": "Numéro {n} bien visible",
+  "@photoParcelHintNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

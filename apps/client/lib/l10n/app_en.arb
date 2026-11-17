@@ -333,11 +333,11 @@
   "summaryTitle": "Check and order",
   "summaryBody": "The price is worked out for this route and time.",
   "whenNowShort": "As soon as possible",
-  "deliveryNumber": "Delivery {n}",
+  "deliveryNumber": "Parcel no. {n}",
   "waitingPoint": "Waiting for {name} to place their point",
   "removeDelivery": "Remove",
   "addDelivery": "Add a delivery",
-  "addDeliveryHint": "Up to 10 deliveries from the same pickup: one rider visit.",
+  "addDeliveryHint": "Up to 10 parcels from the same pickup: one code, one payment. Each parcel goes with a rider suited to its size.",
   "priceBase": "Delivery",
   "mobileMoneyFeeLine": "Mobile Money fee",
   "priceBaseTricycle": "Delivery by tricycle",
@@ -680,5 +680,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "cardFailureFees": "If delivery fails: new attempt {retry}, return {ret}",
+  "batchFailureFeesNote": "If a delivery fails, the fees shown on each parcel are charged to you. A returned parcel is handed back against payment of what your Tara balance does not cover.",
+  "batchRefusalFeeNote": "A parcel that differs from what you declare (too big, too heavy, prohibited) may be refused by the rider, and their trip (the price of a new attempt) is charged to you.",
+  "pickupCodeHelpBatch": "The same code for every rider who comes for a parcel. Write it down: it won't be shown again.",
+  "writeNumbersTitle": "Write its number on each parcel",
+  "writeNumbersBody": "With a marker, clearly visible. Each rider comes for a specific number: you'll know which one to hand over.",
+  "parcelNumberSemantics": "Parcel number {n}",
+  "riderFoundShort": "Rider found",
+  "riderSearchingShort": "Searching",
+  "ridersFound": "Riders found: {found} of {total}",
+  "allRidersFound": "All riders found: they're coming for the parcels.",
+  "parcelNumberShort": "no. {n}",
+  "trackAssignedParcel": "{rider} is coming for parcel no. {n}",
+  "trackAssignedParcelBody": "Hand over parcel no. {n} and the pickup code when they arrive."
 }

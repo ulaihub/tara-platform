@@ -153,6 +153,8 @@ export const RiderOrderDto = z
     id: z.uuid(),
     reference: z.string(),
     status: OrderStatusEnum,
+    /** Numéro écrit sur le colis quand l'expéditeur en envoie plusieurs (null sinon). */
+    batchNumber: z.int().nullable(),
     packageSize: PackageSizeEnum,
     /** Nature du contenu (C1) et précision de l'expéditeur. */
     packageContents: PackageContentsEnum.nullable(),

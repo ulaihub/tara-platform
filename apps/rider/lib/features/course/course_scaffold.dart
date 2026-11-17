@@ -553,3 +553,86 @@ class ProofPhotoTile extends StatelessWidget {
     );
   }
 }
+
+/// Quel colis : son numéro (écrit dessus par l'expéditeur qui en envoie plusieurs), ce qu'il
+/// contient et pour qui. À l'enlèvement, le livreur sait lequel prendre ; à la livraison,
+/// lequel remettre quand il en transporte deux.
+class ParcelCard extends StatelessWidget {
+  const ParcelCard({super.key, required this.order, required this.title, this.showRecipient = true});
+
+  final RiderOrder order;
+
+  /// « Colis à récupérer », « Colis à remettre ».
+  final String title;
+
+  /// Prénom et quartier du destinataire (inutile sur l'écran de livraison, qui les affiche).
+  final bool showRecipient;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final number = order.batchNumber;
+    final what =
+        order.packageDescription?.trim().nullIfEmpty ??
+        switch (order.packageSize) {
+          'S' => l.packageSmall,
+          'L' || 'XL' => l.packageLarge,
+          'BULKY' => l.packageBulky,
+          _ => l.packageMedium,
+        };
+    final first = order.recipient.name?.trim().split(RegExp(r'\s+')).first;
+    final place = order.dropoff.neighborhood ?? order.dropoff.landmark;
+    final forWhom = first == null || first.isEmpty ? place : l.parcelFor(first, place);
+    return GlassCard(
+      radius: 18,
+      shadow: false,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      child: MergeSemantics(
+        child: Row(
+          children: [
+            if (number != null)
+              Semantics(
+                label: l.parcelNumber(number),
+                excludeSemantics: true,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(gradient: TaraBrand.gradient, borderRadius: BorderRadius.circular(14)),
+                  child: Text(
+                    '$number',
+                    style: TaraText.titleCourse.copyWith(color: TaraBrand.onBrand, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              )
+            else
+              const IconTile(icon: TaraIcons.package, size: 48),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    (number == null ? title : '$title · ${l.parcelNumber(number)}').toUpperCase(),
+                    style: TaraText.overline.copyWith(color: c.accentText),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    what,
+                    style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                  ),
+                  if (showRecipient) Text(forWhom, style: TaraText.small.copyWith(color: c.textSecondary)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+extension on String {
+  String? get nullIfEmpty => isEmpty ? null : this;
+}

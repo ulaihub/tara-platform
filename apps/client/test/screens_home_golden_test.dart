@@ -39,6 +39,7 @@ OrderSummary summary(
   String? neighborhood, {
   DateTime? scheduledFor,
   String? failureDecision,
+  int? batchNumber,
 }) => OrderSummary(
   id: '00000000-0000-4000-8000-00000000000$id',
   reference: 'TR-4821$id',
@@ -51,6 +52,7 @@ OrderSummary summary(
   scheduledFor: scheduledFor?.toUtc(),
   createdAt: DateTime.utc(2026, 11, 4, 8),
   failureDecision: failureDecision,
+  batchNumber: batchNumber,
 );
 
 FakeClientApi shopApi() => FakeClientApi()
@@ -63,7 +65,8 @@ FakeClientApi shopApi() => FakeClientApi()
   )
   ..active = [
     summary('1', 'IN_DELIVERY', 'Marie Ngo', 'Bonapriso'),
-    summary('2', 'ASSIGNED', 'Jean Mbarga', 'Akwa'),
+    // Colis n° 2 d'un envoi de plusieurs colis : le numéro est rappelé.
+    summary('2', 'ASSIGNED', 'Jean Mbarga', 'Akwa', batchNumber: 2),
     summary('3', 'DELIVERY_FAILED', 'Chantal Eyike', 'Bépanda'),
     summary('4', 'CREATED', 'Samuel Etoa', 'Deïdo', scheduledFor: DateTime(2026, 11, 5, 9, 30)),
   ];

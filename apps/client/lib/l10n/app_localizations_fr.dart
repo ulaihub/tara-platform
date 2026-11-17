@@ -850,7 +850,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String deliveryNumber(int n) {
-    return 'Livraison $n';
+    return 'Colis n° $n';
   }
 
   @override
@@ -865,7 +865,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addDelivery => 'Ajouter une livraison';
 
   @override
-  String get addDeliveryHint => 'Jusqu’à 10 livraisons depuis le même enlèvement : un seul passage du livreur.';
+  String get addDeliveryHint =>
+      'Jusqu’à 10 colis depuis le même enlèvement : un seul code, un seul paiement. Chaque colis part avec un livreur adapté à sa taille.';
 
   @override
   String get priceBase => 'Course';
@@ -2047,5 +2048,63 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String trackPayVia(String operator) {
     return 'La demande de paiement part vers ce numéro $operator.';
+  }
+
+  @override
+  String cardFailureFees(String retry, String ret) {
+    return 'Si la livraison échoue : nouvelle tentative $retry, retour $ret';
+  }
+
+  @override
+  String get batchFailureFeesNote =>
+      'En cas d’échec de livraison, les frais indiqués sur chaque colis sont à votre charge. Le colis retourné vous est rendu contre paiement de ce que votre solde Tara ne couvre pas.';
+
+  @override
+  String get batchRefusalFeeNote =>
+      'Colis différent de ce que vous déclarez (trop grand, trop lourd, interdit) : le livreur peut le refuser, et son déplacement (le prix d’une nouvelle tentative) reste à votre charge.';
+
+  @override
+  String get pickupCodeHelpBatch =>
+      'Le même code pour chaque livreur qui vient chercher un colis. Notez-le : il ne sera plus affiché.';
+
+  @override
+  String get writeNumbersTitle => 'Écrivez son numéro sur chaque colis';
+
+  @override
+  String get writeNumbersBody =>
+      'Au marqueur, bien visible. Chaque livreur vient chercher un numéro précis : vous saurez lequel lui donner.';
+
+  @override
+  String parcelNumberSemantics(int n) {
+    return 'Colis numéro $n';
+  }
+
+  @override
+  String get riderFoundShort => 'Livreur trouvé';
+
+  @override
+  String get riderSearchingShort => 'Recherche';
+
+  @override
+  String ridersFound(int found, int total) {
+    return 'Livreurs trouvés : $found sur $total';
+  }
+
+  @override
+  String get allRidersFound => 'Tous les livreurs sont trouvés : ils viennent chercher les colis.';
+
+  @override
+  String parcelNumberShort(int n) {
+    return 'n° $n';
+  }
+
+  @override
+  String trackAssignedParcel(String rider, int n) {
+    return '$rider vient chercher le colis n° $n';
+  }
+
+  @override
+  String trackAssignedParcelBody(int n) {
+    return 'Donnez-lui le colis n° $n et le code d’enlèvement à son arrivée.';
   }
 }

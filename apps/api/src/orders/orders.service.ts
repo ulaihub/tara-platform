@@ -53,6 +53,7 @@ const ORDER_INCLUDE = {
     },
   },
   ratings: { select: { raterId: true, score: true, comment: true, createdAt: true } },
+  batch: { select: { _count: { select: { orders: true } } } },
 } as const satisfies Prisma.OrderInclude;
 
 /** Statuts où l'expéditeur peut joindre le livreur. */
@@ -143,6 +144,8 @@ export class OrdersService {
       status: order.status,
       trackingUrl: trackingUrl(this.env, order.trackingToken),
       batchId: order.batchId,
+      batchNumber: order.batchNumber,
+      batchSize: order.batch?._count.orders ?? null,
       isExpress: order.isExpress,
       scheduledFor: order.scheduledFor?.toISOString() ?? null,
       packageSize: order.packageSize,
@@ -271,6 +274,7 @@ export class OrdersService {
         id: order.id,
         reference: order.reference,
         status: order.status,
+        batchNumber: order.batchNumber,
         recipientName: order.recipientName,
         dropoffLandmark: order.dropoffAddress.landmark,
         dropoffNeighborhood: order.dropoffAddress.neighborhood?.name ?? null,
@@ -340,6 +344,8 @@ export class OrdersService {
       reference: string;
       pickupCode: string;
       batchId?: string;
+      /** Numéro du colis dans son envoi (1, 2, 3…). */
+      batchNumber?: number;
       idempotencyKey?: string | undefined;
       /** Objets interdits que l'analyse de chaque photo de colis a cru voir. */
       parcelWarnings: Map<string, string | null>;
@@ -355,6 +361,7 @@ export class OrdersService {
       senderId: user.id,
       merchantId: context.merchantId,
       batchId: context.batchId ?? null,
+      batchNumber: context.batchNumber ?? null,
       pickupAddressId: shared.pickupAddressId,
       dropoffAddressId: item.dropoffAddressId,
       recipientName: item.recipientName,
@@ -565,6 +572,7 @@ export class OrdersService {
               reference,
               pickupCode,
               batchId: batch.id,
+              batchNumber: index + 1,
             }),
           );
           changes.push(...inserted.changes);
@@ -590,7 +598,7 @@ export class OrdersService {
   ): Promise<z.output<typeof CreatedBatchDto>> {
     const orders = await this.prisma.order.findMany({
       where: { batchId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { batchNumber: 'asc' },
       include: ORDER_INCLUDE,
     });
     return { batchId, pickupCode, replayed, orders: await this.toDtos(orders) };
