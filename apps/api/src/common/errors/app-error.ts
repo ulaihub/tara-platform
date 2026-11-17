@@ -1,5 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
-import type { ErrorCode } from './error-codes.js';
+import { type AppLocale, interpolate } from '../i18n/locale.js';
+import { ERROR_MESSAGES, type ErrorCode } from './error-codes.js';
 
 export type ErrorParams = Record<string, string | number>;
 
@@ -39,4 +40,9 @@ export class AppError extends Error {
   static tooMany(code: ErrorCode, params?: ErrorParams): AppError {
     return new AppError(code, HttpStatus.TOO_MANY_REQUESTS, params);
   }
+}
+
+/** Message d'une erreur métier dans une langue, pour une réponse qui en contient plusieurs. */
+export function localizedMessage(error: AppError, locale: AppLocale): string {
+  return interpolate(ERROR_MESSAGES[error.code][locale], error.params);
 }

@@ -64,6 +64,7 @@ export class PrivacyService {
         consents: { orderBy: { createdAt: 'asc' } },
         addresses: true,
         locationLinks: true,
+        pendingDeliveries: { orderBy: { createdAt: 'asc' } },
         ratingsGiven: {
           orderBy: { createdAt: 'asc' },
           select: {
@@ -215,6 +216,17 @@ export class PrivacyService {
           submittedAt,
         }),
       ),
+      // Colis d'un envoi en masse qui attendaient l'adresse de leur client.
+      pendingDeliveries: user.pendingDeliveries.map(
+        ({ batchNumber, recipientName, recipientPhone, createdAt, cancelledAt, orderId }) => ({
+          batchNumber,
+          recipientName,
+          recipientPhone,
+          createdAt,
+          left: orderId !== null,
+          cancelledAt,
+        }),
+      ),
     };
   }
 
@@ -335,6 +347,8 @@ export class PrivacyService {
         voiceNoteKey: null,
       },
     });
+    // Colis qui attendaient l'adresse d'un client : retirés, avec les données de ce client.
+    await tx.pendingDelivery.deleteMany({ where: { senderId: userId } });
     await tx.locationLink.updateMany({
       where: { createdById: userId },
       data: { recipientName: null, recipientPhone: null },

@@ -491,6 +491,7 @@ model User {
   addresses                Address[]
   locationLinks            LocationLink[]
   orderBatches             OrderBatch[]
+  pendingDeliveries        PendingDelivery[]
   sentOrders               Order[]
   orderEvents              OrderEvent[]
   validatedProofs          DeliveryProof[]
@@ -792,9 +793,10 @@ model LocationLink {
   submittedAt    DateTime? @map("submitted_at") @db.Timestamptz(3)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  createdBy User             @relation(fields: [createdById], references: [id])
-  merchant  MerchantProfile? @relation(fields: [merchantId], references: [id])
-  address   Address?         @relation(fields: [addressId], references: [id])
+  createdBy       User             @relation(fields: [createdById], references: [id])
+  merchant        MerchantProfile? @relation(fields: [merchantId], references: [id])
+  address         Address?         @relation(fields: [addressId], references: [id])
+  pendingDelivery PendingDelivery?
 
   @@map("location_links")
 }
@@ -911,19 +913,54 @@ model Referral {
 
 /// Livraisons saisies en une fois depuis un même point d'enlèvement (C4), numérotées 1, 2, 3…
 model OrderBatch {
-  id              String   @id @default(uuid(7)) @db.Uuid
-  senderId        String   @map("sender_id") @db.Uuid
-  pickupAddressId String   @map("pickup_address_id") @db.Uuid
+  id               String   @id @default(uuid(7)) @db.Uuid
+  senderId         String   @map("sender_id") @db.Uuid
+  pickupAddressId  String   @map("pickup_address_id") @db.Uuid
   /// Clé envoyée par l'app : renvoyer la même requête ne crée pas un second lot.
-  idempotencyKey  String?  @unique @map("idempotency_key")
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  idempotencyKey   String?  @unique @map("idempotency_key")
+  /// Code d'enlèvement commun à tout l'envoi, chiffré (AES-GCM) : un colis qui part plus tard
+  /// (adresse arrivée après l'envoi) reçoit le même code que les autres.
+  pickupCodeSealed String?  @map("pickup_code_sealed")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  sender        User      @relation(fields: [senderId], references: [id])
-  pickupAddress Address   @relation(fields: [pickupAddressId], references: [id])
-  orders        Order[]
-  payments      Payment[]
+  sender            User              @relation(fields: [senderId], references: [id])
+  pickupAddress     Address           @relation(fields: [pickupAddressId], references: [id])
+  orders            Order[]
+  payments          Payment[]
+  pendingDeliveries PendingDelivery[]
 
   @@map("order_batches")
+}
+
+/// Colis d'un envoi dont le client n'a pas encore placé son point (C4, B3) : Tara lui envoie
+/// un lien par SMS ; la commande est créée dans le même envoi, sous le numéro réservé, dès que
+/// le point arrive. Rien n'est payé avant.
+model PendingDelivery {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  batchId        String    @map("batch_id") @db.Uuid
+  /// Numéro réservé dans l'envoi (ordre de saisie), repris par la commande.
+  batchNumber    Int       @map("batch_number")
+  senderId       String    @map("sender_id") @db.Uuid
+  locationLinkId String    @unique @map("location_link_id") @db.Uuid
+  recipientName  String    @map("recipient_name")
+  recipientPhone String    @map("recipient_phone")
+  /// Le colis (DeliveryItem sans adresse) et la partie commune de l'envoi, validés à l'envoi.
+  item           Json
+  orderId        String?   @unique @map("order_id") @db.Uuid
+  /// Départ automatique impossible (solde insuffisant…) : code d'erreur, l'expéditeur relance.
+  blockedReason  String?   @map("blocked_reason")
+  cancelledAt    DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  batch        OrderBatch   @relation(fields: [batchId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+  locationLink LocationLink @relation(fields: [locationLinkId], references: [id])
+  order        Order?       @relation(fields: [orderId], references: [id])
+
+  @@unique([batchId, batchNumber])
+  @@index([senderId, createdAt])
+  @@map("pending_deliveries")
 }
 
 model Order {
@@ -1032,6 +1069,7 @@ model Order {
   proofs          DeliveryProof[]
   offers          DispatchOffer[]
   ratings         Rating[]
+  pendingDelivery PendingDelivery?
   notes           OrderNote[]
   codCollection   CodCollection?
   payments        Payment[]

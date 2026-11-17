@@ -167,6 +167,11 @@ const envSchema = z
      */
     MERCHANT_DEBT_LIMIT: z.coerce.number().int().min(0).max(100_000).default(3_000),
     /**
+     * Liens « placez votre point » envoyés par SMS au plus par compte et par 24 h (envoi en
+     * masse, relances) : Tara ne doit pas servir à écrire en nombre à n'importe qui.
+     */
+    PENDING_LINKS_DAILY_LIMIT: z.coerce.number().int().min(1).max(5_000).default(300),
+    /**
      * Espèces encore dues d'avant le solde prépayé (G5) : délai de dépôt, puis retard au-delà
      * duquel le compte est suspendu (gains retenus).
      */

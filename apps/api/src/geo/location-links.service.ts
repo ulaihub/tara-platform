@@ -33,6 +33,7 @@ function statusOf(link: Pick<LocationLink, 'submittedAt' | 'expiresAt'>, now = n
 @Injectable()
 export class LocationLinksService {
   private readonly logger = new Logger(LocationLinksService.name);
+  private readonly submittedListeners: ((linkId: string) => Promise<void>)[] = [];
 
   constructor(
     private readonly prisma: PrismaService,
@@ -42,7 +43,8 @@ export class LocationLinksService {
     @Inject(ENV) private readonly env: Env,
   ) {}
 
-  private url(token: string): string {
+  /** Adresse de la page publique où le destinataire place son point. */
+  publicUrl(token: string): string {
     return `${this.env.PUBLIC_WEB_URL.replace(/\/$/, '')}/l/${token}`;
   }
 
@@ -57,7 +59,7 @@ export class LocationLinksService {
     }
     return {
       id: link.id,
-      url: this.url(link.token),
+      url: this.publicUrl(link.token),
       recipientName: link.recipientName,
       recipientPhone: link.recipientPhone,
       expiresAt: link.expiresAt.toISOString(),
@@ -65,6 +67,14 @@ export class LocationLinksService {
       address,
       createdAt: link.createdAt.toISOString(),
     };
+  }
+
+  /**
+   * Appelé après qu'un destinataire a placé son point, une fois l'adresse enregistrée (ex. le
+   * colis d'un envoi qui l'attendait part alors). Un échec n'annule pas l'adresse.
+   */
+  onSubmitted(listener: (linkId: string) => Promise<void>): void {
+    this.submittedListeners.push(listener);
   }
 
   async create(
@@ -158,7 +168,26 @@ export class LocationLinksService {
       if (count !== 1) throw AppError.conflict('LOCATION_LINK_ALREADY_USED');
       return address.id;
     });
-    await this.notifySubmitted(link, addressId, body.landmark, body.contactName);
+    // Colis d'un envoi en masse : l'expéditeur est prévenu du départ du colis, pas seulement
+    // de l'adresse (voir OrdersService.releasePending).
+    const pending = await this.prisma.pendingDelivery.findUnique({
+      where: { locationLinkId: link.id },
+      select: { id: true },
+    });
+    if (pending) {
+      this.realtime.toUser(link.createdById, 'location-link.submitted', {
+        type: 'location_link.submitted',
+        linkId: link.id,
+        addressId,
+      });
+    } else {
+      await this.notifySubmitted(link, addressId, body.landmark, body.contactName);
+    }
+    for (const listener of this.submittedListeners) {
+      await listener(link.id).catch((error: unknown) => {
+        this.logger.error(`Suite du lien ${link.id} en échec : ${String(error)}`);
+      });
+    }
     return this.publicView(token);
   }
 

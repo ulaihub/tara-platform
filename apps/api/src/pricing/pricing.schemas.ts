@@ -176,6 +176,39 @@ export const QuoteDto = z
   })
   .meta({ id: 'Quote' });
 
+/**
+ * Prix de toute une liste d'envoi (C4) en un appel : chaque colis a son prix, ou l'erreur qui
+ * l'empêche (hors zone…) sans bloquer les autres.
+ */
+export const BatchQuoteBody = z.object({
+  pickupAddressId: z.uuid(),
+  isExpress: z.boolean().default(false),
+  scheduledFor: z.iso.datetime().optional(),
+  items: z
+    .array(
+      z.object({
+        dropoffAddressId: z.uuid(),
+        packageSize: PackageSizeEnum,
+        loadingHelp: z.boolean().default(false),
+      }),
+    )
+    .min(1)
+    .max(100),
+});
+
+export const BatchQuoteDto = z
+  .object({
+    items: z.array(
+      z.object({
+        quote: QuoteDto.nullable(),
+        error: z.object({ code: z.string(), message: z.string() }).nullable(),
+      }),
+    ),
+    /** Somme des colis qui ont un prix. */
+    totalPrice: z.int(),
+  })
+  .meta({ id: 'BatchQuote' });
+
 // --- Modèle de prix (H4) : tarif pro, primes des livreurs, simulateur -----------------------
 
 export const VolumeDiscountTier = z.object({

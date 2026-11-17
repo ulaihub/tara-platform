@@ -660,6 +660,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/orders/quotes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Quote_quoteMany'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/admin/pricing-grids/simulate': {
     parameters: {
       query?: never;
@@ -830,6 +846,70 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['Orders_createBatch'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/orders/pending': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Orders_listPending'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/orders/pending/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Orders_cancelPending'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/orders/pending/{id}/resend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Orders_resendPending'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/orders/pending/{id}/release': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Orders_releasePending'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3093,6 +3173,16 @@ export interface components {
       referralApplied: boolean;
       user: components['schemas']['SessionUser'];
     };
+    BatchQuote: {
+      items: {
+        quote: components['schemas']['Quote'] | null;
+        error: {
+          code: string;
+          message: string;
+        } | null;
+      }[];
+      totalPrice: number;
+    };
     BiometricKey: {
       key: string;
     };
@@ -3189,6 +3279,7 @@ export interface components {
       pickupCode: string | null;
       replayed: boolean;
       orders: components['schemas']['Order'][];
+      pending: components['schemas']['PendingDelivery'][];
     };
     CreatedOrder: {
       order: components['schemas']['Order'];
@@ -3448,7 +3539,12 @@ export interface components {
           | 'PAYOUT_ON_HOLD'
           | 'PAYOUT_PHONE_NOT_ALLOWED'
           | 'SELF_APPROVAL_FORBIDDEN'
-          | 'STATEMENT_PERIOD_INVALID';
+          | 'STATEMENT_PERIOD_INVALID'
+          | 'PENDING_DELIVERY_NOT_FOUND'
+          | 'PENDING_DELIVERY_CLOSED'
+          | 'PENDING_RESEND_TOO_SOON'
+          | 'ADDRESS_REQUESTS_LIMIT'
+          | 'PENDING_NOT_BLOCKED';
         /** @description Message prêt à afficher, en français ou en anglais */
         message: string;
         details?: unknown;
@@ -4007,6 +4103,29 @@ export interface components {
       /** Format: date-time */
       completedAt: string | null;
     };
+    PendingDelivery: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      batchId: string;
+      batchNumber: number;
+      recipientName: string;
+      recipientPhone: string;
+      packageSize: components['schemas']['PackageSize'];
+      packageDescription: string | null;
+      codAmount: number;
+      status: components['schemas']['PendingDeliveryStatus'];
+      blockedReason: string | null;
+      linkUrl: string;
+      /** Format: date-time */
+      linkExpiresAt: string;
+      /** Format: uuid */
+      orderId: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    /** @enum {string} */
+    PendingDeliveryStatus: 'WAITING' | 'EXPIRED' | 'RELEASED' | 'BLOCKED' | 'CANCELLED';
     PickupCode: {
       pickupCode: string;
     };
@@ -5938,6 +6057,44 @@ export interface operations {
       };
     };
   };
+  Quote_quoteMany: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          pickupAddressId: string;
+          /** @default false */
+          isExpress?: boolean;
+          /** Format: date-time */
+          scheduledFor?: string;
+          items: {
+            /** Format: uuid */
+            dropoffAddressId: string;
+            packageSize: components['schemas']['PackageSize'];
+            /** @default false */
+            loadingHelp?: boolean;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BatchQuote'];
+        };
+      };
+    };
+  };
   AdminPricing_simulate: {
     parameters: {
       query?: never;
@@ -6418,7 +6575,7 @@ export interface operations {
           feePaymentMethod: components['schemas']['PaymentMethod'];
           items: {
             /** Format: uuid */
-            dropoffAddressId: string;
+            dropoffAddressId?: string;
             recipientName: string;
             /**
              * @description Mobile camerounais ; toutes les écritures courantes sont acceptées
@@ -6438,6 +6595,8 @@ export interface operations {
             /** @default 0 */
             codAmount?: number;
             instructions?: string;
+            /** @default false */
+            askAddress?: boolean;
           }[];
         };
       };
@@ -6450,6 +6609,100 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['CreatedBatch'];
+        };
+      };
+    };
+  };
+  Orders_listPending: {
+    parameters: {
+      query?: {
+        open?: 'true' | 'false';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PendingDelivery'][];
+        };
+      };
+    };
+  };
+  Orders_cancelPending: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PendingDelivery'];
+        };
+      };
+    };
+  };
+  Orders_resendPending: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PendingDelivery'];
+        };
+      };
+    };
+  };
+  Orders_releasePending: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          feePaymentMethod?: components['schemas']['PaymentMethod'];
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PendingDelivery'];
         };
       };
     };

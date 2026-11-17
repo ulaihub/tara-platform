@@ -17,6 +17,6 @@ import { ZonesRepository } from './zones.repository.js';
     AdminZonesController,
   ],
   providers: [ZonesRepository, AddressesService, LocationLinksService],
-  exports: [ZonesRepository, AddressesService],
+  exports: [ZonesRepository, AddressesService, LocationLinksService],
 })
 export class GeoModule {}

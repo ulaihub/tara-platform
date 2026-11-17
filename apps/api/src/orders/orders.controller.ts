@@ -34,11 +34,14 @@ import {
   OrderDto,
   OrderListQuery,
   OrderSummaryDto,
+  PendingDeliveryDto,
+  PendingDeliveryListQuery,
   PickupCodeDto,
   RateBody,
   RatingDto,
   RecipientDto,
   RecipientQuery,
+  ReleasePendingBody,
 } from './orders.schemas.js';
 import { OrdersService } from './orders.service.js';
 import { RatingsService } from './ratings.service.js';
@@ -77,7 +80,11 @@ export class OrdersController {
     return this.orders.create(user, body, idempotencyKey(key));
   }
 
-  /** Jusqu'à 10 livraisons depuis un même point d'enlèvement (C4). */
+  /**
+   * Jusqu'à 100 colis depuis un même point d'enlèvement (C4). Un colis sans adresse
+   * (`askAddress`) attend son client : Tara lui envoie un lien par SMS et le colis part
+   * dès que le point arrive (voir `pending`).
+   */
   @Post('batch')
   @IDEMPOTENCY_HEADER
   @ApiZodBody(CreateBatchBody)
@@ -89,6 +96,53 @@ export class OrdersController {
   ): Promise<z.output<typeof CreatedBatchDto>> {
     await this.legal.assertAccepted(user.id, 'client');
     return this.orders.createBatch(user, body, idempotencyKey(key));
+  }
+
+  /** Colis qui attendent l'adresse de leur client (envoi en masse), les plus récents d'abord. */
+  @Get('pending')
+  @ApiZodQuery(PendingDeliveryListQuery)
+  @ApiZodResponse(z.array(PendingDeliveryDto))
+  listPending(
+    @CurrentUser() user: AuthUser,
+    @ValidQuery(PendingDeliveryListQuery) query: z.output<typeof PendingDeliveryListQuery>,
+  ): Promise<z.output<typeof PendingDeliveryDto>[]> {
+    return this.orders.listPending(user, query.open);
+  }
+
+  /** Retire un colis en attente de l'envoi : le lien ne sert plus, rien n'est payé. */
+  @Post('pending/:id/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodResponse(PendingDeliveryDto)
+  cancelPending(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<z.output<typeof PendingDeliveryDto>> {
+    return this.orders.cancelPending(user, id);
+  }
+
+  /** Renvoie un lien neuf au client (lien expiré ou SMS perdu ; au plus une fois par heure). */
+  @Post('pending/:id/resend')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodResponse(PendingDeliveryDto)
+  resendPending(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<z.output<typeof PendingDeliveryDto>> {
+    return this.orders.resendPending(user, id);
+  }
+
+  /** Fait partir un colis bloqué (solde rechargé, ou autre moyen de paiement). */
+  @Post('pending/:id/release')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(ReleasePendingBody)
+  @ApiZodResponse(PendingDeliveryDto)
+  async releasePending(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(ReleasePendingBody) body: z.output<typeof ReleasePendingBody>,
+  ): Promise<z.output<typeof PendingDeliveryDto>> {
+    await this.legal.assertAccepted(user.id, 'client');
+    return this.orders.retryPending(user, id, body.feePaymentMethod);
   }
 
   @Get()

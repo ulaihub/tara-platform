@@ -9,12 +9,13 @@ import {
   RecipientsController,
 } from './orders.controller.js';
 import { OrdersService } from './orders.service.js';
+import { PendingDeliveriesService } from './pending-deliveries.service.js';
 import { RatingsService } from './ratings.service.js';
 
 @Module({
   imports: [GeoModule, PricingModule, LegalModule],
   controllers: [OrdersController, RecipientsController, AdminOrdersController],
-  providers: [OrdersService, OrderTransitionsService, RatingsService],
+  providers: [OrdersService, OrderTransitionsService, RatingsService, PendingDeliveriesService],
   exports: [OrdersService, OrderTransitionsService, RatingsService],
 })
 export class OrdersModule {}
