@@ -490,6 +490,26 @@ export const ERROR_MESSAGES = {
     fr: 'Mois invalide : utilisez le format AAAA-MM, mois terminé ou en cours.',
     en: 'Invalid month: use YYYY-MM, past or current month.',
   },
+  PENDING_DELIVERY_NOT_FOUND: {
+    fr: 'Colis en attente introuvable.',
+    en: 'Waiting parcel not found.',
+  },
+  PENDING_DELIVERY_CLOSED: {
+    fr: 'Ce colis est déjà parti ou a été retiré de l’envoi.',
+    en: 'This parcel has already left or was removed from the shipment.',
+  },
+  PENDING_RESEND_TOO_SOON: {
+    fr: 'Le lien vient d’être envoyé : vous pourrez le renvoyer dans {minutes} min.',
+    en: 'The link was just sent: you can send it again in {minutes} min.',
+  },
+  ADDRESS_REQUESTS_LIMIT: {
+    fr: 'Trop de demandes d’adresse aujourd’hui ({limit} par jour, encore {left}). Saisissez l’adresse vous-même ou réessayez demain.',
+    en: 'Too many address requests today ({limit} a day, {left} left). Enter the address yourself or try again tomorrow.',
+  },
+  PENDING_NOT_BLOCKED: {
+    fr: 'Ce colis attend encore l’adresse de son client : il partira dès qu’elle arrivera.',
+    en: 'This parcel is still waiting for its customer’s address: it will leave as soon as it arrives.',
+  },
 } as const satisfies Record<string, { fr: string; en: string }>;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

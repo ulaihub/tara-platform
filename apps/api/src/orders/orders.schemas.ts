@@ -88,14 +88,72 @@ export const CreateOrderBody = DeliveryItem.extend({
   promoCode: z.string().trim().max(32).optional(),
 });
 
-/** Jusqu'à 10 livraisons depuis un même point d'enlèvement (C4), numérotées dans cet ordre. */
+/** Colis au plus dans un même envoi (C4) : les grosses boutiques envoient leur journée d'un coup. */
+export const MAX_BATCH_ITEMS = 100;
+
+/**
+ * Un colis d'un envoi : adresse connue, ou demandée au client (`askAddress`) — Tara lui envoie
+ * alors un lien par SMS et le colis part dès que son point arrive, payé à ce moment-là.
+ */
+export const BatchItem = DeliveryItem.extend({
+  dropoffAddressId: z.uuid().optional(),
+  askAddress: z.boolean().default(false),
+}).refine((item) => (item.dropoffAddressId === undefined) === item.askAddress, {
+  message: 'une adresse connue, ou askAddress, pas les deux',
+  path: ['dropoffAddressId'],
+});
+
+/** Jusqu'à 100 colis depuis un même point d'enlèvement (C4), numérotés dans cet ordre. */
 export const CreateBatchBody = z.object({
   pickupAddressId: z.uuid(),
   isExpress: z.boolean().default(false),
   scheduledFor: z.iso.datetime().optional(),
   feePayer: FeePayerEnum.default('SENDER'),
   feePaymentMethod: PaymentMethodEnum,
-  items: z.array(DeliveryItem).min(1).max(10),
+  items: z.array(BatchItem).min(1).max(MAX_BATCH_ITEMS),
+});
+
+/**
+ * Où en est un colis qui attend l'adresse de son client : lien envoyé (WAITING), lien expiré
+ * sans réponse (EXPIRED), parti (RELEASED, la commande existe), départ bloqué (BLOCKED, voir
+ * `blockedReason`), ou retiré par l'expéditeur (CANCELLED).
+ */
+export const PendingDeliveryStatusEnum = z
+  .enum(['WAITING', 'EXPIRED', 'RELEASED', 'BLOCKED', 'CANCELLED'])
+  .meta({ id: 'PendingDeliveryStatus' });
+
+export const PendingDeliveryDto = z
+  .object({
+    id: z.uuid(),
+    batchId: z.uuid(),
+    batchNumber: z.int(),
+    recipientName: z.string(),
+    recipientPhone: z.string(),
+    packageSize: PackageSizeEnum,
+    packageDescription: z.string().nullable(),
+    codAmount: z.int(),
+    status: PendingDeliveryStatusEnum,
+    /** Code d'erreur quand le départ automatique a échoué (ex. INSUFFICIENT_BALANCE). */
+    blockedReason: z.string().nullable(),
+    linkUrl: z.string(),
+    linkExpiresAt: z.iso.datetime(),
+    /** Commande créée quand le point est arrivé. */
+    orderId: z.uuid().nullable(),
+    createdAt: z.iso.datetime(),
+  })
+  .meta({ id: 'PendingDelivery' });
+
+export const PendingDeliveryListQuery = z.object({
+  /** Seulement ceux qui attendent encore une action (WAITING, EXPIRED, BLOCKED). */
+  open: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((value) => value === 'true'),
+});
+
+/** Faire partir un colis bloqué (solde insuffisant) avec un autre moyen de paiement. */
+export const ReleasePendingBody = z.object({
+  feePaymentMethod: PaymentMethodEnum.optional(),
 });
 
 export const OrderEventDto = z
@@ -218,6 +276,8 @@ export const CreatedBatchDto = z
     pickupCode: z.string().nullable(),
     replayed: z.boolean(),
     orders: z.array(OrderDto),
+    /** Colis qui attendent l'adresse de leur client (lien envoyé par SMS). */
+    pending: z.array(PendingDeliveryDto),
   })
   .meta({ id: 'CreatedBatch' });
 

@@ -731,7 +731,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get codHelp =>
-      'Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, reversées sur votre Mobile Money.';
+      'Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, moins 2 % de frais d’encaissement (250 F au moins), et vous est reversé sur votre Mobile Money.';
 
   @override
   String get codTooHigh => '500 000 F au plus par livraison.';
@@ -2107,4 +2107,403 @@ class AppLocalizationsFr extends AppLocalizations {
   String trackAssignedParcelBody(int n) {
     return 'Donnez-lui le colis n° $n et le code d’enlèvement à son arrivée.';
   }
+
+  @override
+  String get bulkEntry => 'Envoyer plusieurs colis';
+
+  @override
+  String get bulkEntryBody => 'Jusqu’à 100 clients d’un coup : collez votre liste ou cochez vos contacts.';
+
+  @override
+  String bulkResume(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count clients', one: '1 client');
+    return 'Reprendre ma liste · $_temp0';
+  }
+
+  @override
+  String get bulkTitle => 'Liste d’envoi';
+
+  @override
+  String bulkCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clients',
+      one: '1 client',
+      zero: 'Aucun client',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkSettings => 'Pour tous les colis';
+
+  @override
+  String get bulkPickupMissing => 'Choisissez d’où partent les colis';
+
+  @override
+  String get bulkWhenNow => 'Dès que possible';
+
+  @override
+  String get bulkDefaultSize => 'Taille des colis';
+
+  @override
+  String get bulkAddPaste => 'Coller';
+
+  @override
+  String get bulkAddContacts => 'Contacts';
+
+  @override
+  String get bulkAddManual => 'Saisir';
+
+  @override
+  String get bulkEmptyTitle => 'Ajoutez vos clients du jour';
+
+  @override
+  String get bulkEmptyBody =>
+      'Collez votre liste WhatsApp, cochez vos clients ou vos contacts, ou saisissez-les un par un. La liste reste sur votre téléphone jusqu’à l’envoi.';
+
+  @override
+  String get bulkLineWaiting => 'Tara lui enverra un lien pour placer son point';
+
+  @override
+  String get bulkLineIncomplete => 'À compléter';
+
+  @override
+  String bulkPhoneIncomplete(Object digits) {
+    return 'numéro incomplet ($digits)';
+  }
+
+  @override
+  String get bulkPhoneMissing => 'numéro manquant';
+
+  @override
+  String get bulkNameMissing => 'nom manquant';
+
+  @override
+  String get bulkFull => '100 clients au plus par envoi : envoyez cette liste, puis commencez-en une autre.';
+
+  @override
+  String bulkReview(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count colis', one: '1 colis');
+    return 'Vérifier et envoyer · $_temp0';
+  }
+
+  @override
+  String bulkAdded(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clients ajoutés',
+      one: '1 client ajouté',
+      zero: 'Aucun client ajouté',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkClear => 'Vider la liste';
+
+  @override
+  String bulkClearConfirm(int count) {
+    return 'Retirer les $count clients de la liste ?';
+  }
+
+  @override
+  String get bulkClearAction => 'Vider';
+
+  @override
+  String bulkAddCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clients',
+      one: '1 client',
+      zero: '',
+    );
+    return 'Ajouter $_temp0';
+  }
+
+  @override
+  String get pasteTitle => 'Coller une liste';
+
+  @override
+  String get pasteBody =>
+      'Copiez vos commandes du jour depuis WhatsApp ou vos notes : une ligne par client, avec son numéro.';
+
+  @override
+  String get pasteLabel => 'Votre liste';
+
+  @override
+  String get pasteHint => 'Marie 690 11 22 33 Bonapriso 12500';
+
+  @override
+  String get pasteFromClipboard => 'Coller ce que j’ai copié';
+
+  @override
+  String get pasteUnderstood => 'Ce que Tara a compris';
+
+  @override
+  String pasteScore(int ok, int total) {
+    return '$ok sur $total';
+  }
+
+  @override
+  String get pasteNote =>
+      'Les montants sont ceux à encaisser auprès du client. Sans adresse connue, Tara envoie au client le lien pour placer son point.';
+
+  @override
+  String get pastePrivacy => 'Lu sur votre téléphone : rien ne part avant « Ajouter ».';
+
+  @override
+  String get pasteKnownAddress => 'adresse connue';
+
+  @override
+  String get contactsTitle => 'Choisir des clients';
+
+  @override
+  String get contactsSearch => 'Nom ou numéro';
+
+  @override
+  String get contactsKnown => 'Vos clients · adresse déjà connue';
+
+  @override
+  String contactsOrders(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count commandes', one: '1 commande');
+    return '$_temp0';
+  }
+
+  @override
+  String get contactsPhone => 'Contacts du téléphone';
+
+  @override
+  String get contactsAllow => 'Voir mes contacts';
+
+  @override
+  String get contactsAllowBody =>
+      'Tara lit vos contacts sur ce téléphone pour vous laisser cocher vos clients. Rien n’est envoyé tant que vous ne les ajoutez pas.';
+
+  @override
+  String get contactsDenied => 'Accès aux contacts refusé. Vous pouvez l’autoriser dans les réglages du téléphone.';
+
+  @override
+  String get contactsOpenSettings => 'Ouvrir les réglages';
+
+  @override
+  String get contactsEmpty => 'Aucun contact avec un numéro de mobile camerounais.';
+
+  @override
+  String get contactsNote =>
+      'Seuls les clients cochés quittent votre téléphone. Pour ceux sans adresse, Tara leur envoie le lien pour placer leur point.';
+
+  @override
+  String get lineNew => 'Nouveau client';
+
+  @override
+  String lineTitle(int number) {
+    return 'Client n° $number';
+  }
+
+  @override
+  String lineHintNoted(Object hint) {
+    return 'Noté dans votre liste : $hint';
+  }
+
+  @override
+  String get lineAskLink => 'Le client place son point';
+
+  @override
+  String get lineAskLinkBody =>
+      'Tara lui envoie un lien par SMS à l’envoi ; son colis part dès qu’il a placé son point.';
+
+  @override
+  String get lineLastAddress => 'Sa dernière adresse';
+
+  @override
+  String get linePlaceOnMap => 'Placer sur la carte';
+
+  @override
+  String get lineSize => 'Taille du colis';
+
+  @override
+  String lineSizeDefault(Object size) {
+    return 'Comme la liste ($size)';
+  }
+
+  @override
+  String get lineDescription => 'Contenu du colis (facultatif)';
+
+  @override
+  String get lineDescriptionHint => '2 paires de chaussures';
+
+  @override
+  String get lineSave => 'Enregistrer';
+
+  @override
+  String get lineRemove => 'Retirer de la liste';
+
+  @override
+  String get bulkSendTitle => 'Vérifier et envoyer';
+
+  @override
+  String bulkReadyLine(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count colis prêts : ils partent tout de suite.',
+      one: '1 colis prêt : il part tout de suite.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkWaitingLine(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clients n’ont pas encore placé leur point : leurs colis partiront dès qu’ils le feront.',
+      one: '1 client n’a pas encore placé son point : son colis partira dès qu’il le fera.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkIncompleteLine(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clients à compléter : ils restent dans la liste et ne partent pas.',
+      one: '1 client à compléter : il reste dans la liste et ne part pas.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkFix => 'Corriger';
+
+  @override
+  String bulkCourses(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count colis', one: '1 colis');
+    return 'Courses · $_temp0';
+  }
+
+  @override
+  String get bulkCollect => 'À encaisser pour vous';
+
+  @override
+  String get bulkPayNow => 'À payer maintenant';
+
+  @override
+  String get bulkWaitingPaidLater =>
+      'Un colis qui attend son point est payé quand il part : par vos ventes s’il y en a assez, sinon on vous demande de payer.';
+
+  @override
+  String bulkQuoteError(int number, String name, String error) {
+    return 'Client n° $number ($name) : $error';
+  }
+
+  @override
+  String bulkSend(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count colis', one: '1 colis');
+    return 'Glisser pour envoyer $_temp0';
+  }
+
+  @override
+  String get bulkSendSemantics => 'Glisser pour envoyer la liste';
+
+  @override
+  String get bulkNothingToSend => 'Ajoutez au moins un client complet.';
+
+  @override
+  String get bulkSentTitle => 'Envoi parti !';
+
+  @override
+  String bulkSentSubtitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count colis', one: '1 colis');
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkSentWaiting => 'Attend son point';
+
+  @override
+  String bulkSentWaitingNote(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Les $count clients sans adresse ont reçu un SMS. Chaque colis partira dès que son client aura placé son point : on vous préviendra.',
+      one: 'Le client sans adresse a reçu un SMS. Son colis partira dès qu’il aura placé son point : on vous préviendra.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkSentIncomplete(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clients à compléter restent dans votre liste.',
+      one: '1 client à compléter reste dans votre liste.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pendingTitle => 'En attente de l’adresse';
+
+  @override
+  String get pendingWaiting => 'Lien envoyé · son colis part dès qu’il a placé son point';
+
+  @override
+  String get pendingExpired => 'Lien expiré sans réponse';
+
+  @override
+  String get pendingBlocked => 'Point reçu, colis pas encore parti';
+
+  @override
+  String get pendingBlockedBalance => 'Point reçu, mais vos ventes ne suffisent pas pour payer la course.';
+
+  @override
+  String get pendingResend => 'Renvoyer le lien';
+
+  @override
+  String get pendingShare => 'Envoyer le lien par WhatsApp';
+
+  @override
+  String pendingShareText(String name, String url) {
+    return 'Bonjour $name, pour recevoir votre colis, indiquez où vous livrer : $url';
+  }
+
+  @override
+  String get pendingRemove => 'Retirer de l’envoi';
+
+  @override
+  String pendingRemoveConfirm(int number, String name) {
+    return 'Retirer le colis n° $number ($name) ? Rien ne vous sera facturé.';
+  }
+
+  @override
+  String get pendingPayMomo => 'Payer par Mobile Money';
+
+  @override
+  String get pendingRetry => 'Réessayer avec mes ventes';
+
+  @override
+  String pendingResent(Object name) {
+    return 'Nouveau lien envoyé à $name.';
+  }
+
+  @override
+  String pendingParcel(int number, String name) {
+    return 'Colis n° $number · $name';
+  }
+
+  @override
+  String get taraBalanceShopBody =>
+      'Ancien solde, d’avant votre boutique : vous pouvez le retirer sur votre Mobile Money.';
+
+  @override
+  String get shopPaysDeliveries =>
+      'Vos ventes paient aussi vos livraisons : choisissez « Mes ventes » au moment de payer.';
 }

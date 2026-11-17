@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { MFA_KEY_PURPOSE } from '../auth/mfa.service.js';
 import { decrypt, deriveKey, encrypt } from '../common/crypto.js';
 import { ENV } from '../config/config.module.js';
+import { BATCH_CODE_KEY_PURPOSE } from '../orders/batch-code.js';
 import { type Env, storageKeys } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OBJECT_STORAGE, type ObjectStorage } from './object-storage.js';
@@ -18,6 +19,7 @@ export interface RotationCount {
 export interface RotationReport {
   files: RotationCount;
   totpSecrets: RotationCount;
+  batchCodes: RotationCount;
 }
 
 const BATCH = 200;
@@ -53,7 +55,14 @@ export class KeyRotationService {
     log(
       `Secrets de double authentification : ${totpSecrets.rotated} rechiffrés, ${totpSecrets.current} déjà à jour, ${totpSecrets.failed.length} illisibles`,
     );
-    return { files, totpSecrets };
+    const batchCodes = await this.rotateBatchCodes(
+      deriveKey(current, BATCH_CODE_KEY_PURPOSE),
+      deriveKey(previous, BATCH_CODE_KEY_PURPOSE),
+    );
+    log(
+      `Codes d'enlèvement des envois en attente : ${batchCodes.rotated} rechiffrés, ${batchCodes.current} déjà à jour, ${batchCodes.failed.length} illisibles`,
+    );
+    return { files, totpSecrets, batchCodes };
   }
 
   private async rotateFiles(
@@ -90,6 +99,29 @@ export class KeyRotationService {
       after = batch.at(-1)?.id;
       log(`… ${count.current + count.rotated + count.failed.length} fichiers vus`);
     }
+  }
+
+  /** Code commun d'un envoi dont des colis attendent encore l'adresse de leur client. */
+  private async rotateBatchCodes(current: Buffer, previous: Buffer): Promise<RotationCount> {
+    const count: RotationCount = { current: 0, rotated: 0, failed: [] };
+    const batches = await this.prisma.orderBatch.findMany({
+      where: { pickupCodeSealed: { not: null } },
+      select: { id: true, pickupCodeSealed: true },
+    });
+    for (const batch of batches) {
+      const sealed = batch.pickupCodeSealed as string;
+      const next = reencrypt(Buffer.from(sealed, 'base64'), current, previous);
+      if (next === 'current') count.current += 1;
+      else if (next === null) count.failed.push(batch.id);
+      else {
+        const { count: updated } = await this.prisma.orderBatch.updateMany({
+          where: { id: batch.id, pickupCodeSealed: sealed },
+          data: { pickupCodeSealed: next.toString('base64') },
+        });
+        if (updated === 1) count.rotated += 1;
+      }
+    }
+    return count;
   }
 
   private async rotateTotp(current: Buffer, previous: Buffer): Promise<RotationCount> {

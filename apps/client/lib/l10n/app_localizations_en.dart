@@ -726,7 +726,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get codHelp =>
-      'The rider collects this amount on delivery; it joins your sales, paid out to your Mobile Money.';
+      'The rider collects this amount on delivery; it goes to your sales, minus a 2% collection fee (at least 250 F), and is paid out to your Mobile Money.';
 
   @override
   String get codTooHigh => '500,000 F at most per delivery.';
@@ -2101,4 +2101,400 @@ class AppLocalizationsEn extends AppLocalizations {
   String trackAssignedParcelBody(int n) {
     return 'Hand over parcel no. $n and the pickup code when they arrive.';
   }
+
+  @override
+  String get bulkEntry => 'Send many parcels';
+
+  @override
+  String get bulkEntryBody => 'Up to 100 customers at once: paste your list or tick your contacts.';
+
+  @override
+  String bulkResume(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count customers', one: '1 customer');
+    return 'Resume my list · $_temp0';
+  }
+
+  @override
+  String get bulkTitle => 'Shipping list';
+
+  @override
+  String bulkCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers',
+      one: '1 customer',
+      zero: 'No customers',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkSettings => 'For every parcel';
+
+  @override
+  String get bulkPickupMissing => 'Choose where the parcels leave from';
+
+  @override
+  String get bulkWhenNow => 'As soon as possible';
+
+  @override
+  String get bulkDefaultSize => 'Parcel size';
+
+  @override
+  String get bulkAddPaste => 'Paste';
+
+  @override
+  String get bulkAddContacts => 'Contacts';
+
+  @override
+  String get bulkAddManual => 'Type';
+
+  @override
+  String get bulkEmptyTitle => 'Add today’s customers';
+
+  @override
+  String get bulkEmptyBody =>
+      'Paste your WhatsApp list, tick your customers or contacts, or type them one by one. The list stays on your phone until you send it.';
+
+  @override
+  String get bulkLineWaiting => 'Tara will text them a link to drop their pin';
+
+  @override
+  String get bulkLineIncomplete => 'To complete';
+
+  @override
+  String bulkPhoneIncomplete(Object digits) {
+    return 'incomplete number ($digits)';
+  }
+
+  @override
+  String get bulkPhoneMissing => 'missing number';
+
+  @override
+  String get bulkNameMissing => 'missing name';
+
+  @override
+  String get bulkFull => '100 customers at most per shipment: send this list, then start another one.';
+
+  @override
+  String bulkReview(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count parcels', one: '1 parcel');
+    return 'Review and send · $_temp0';
+  }
+
+  @override
+  String bulkAdded(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers added',
+      one: '1 customer added',
+      zero: 'No customer added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkClear => 'Clear the list';
+
+  @override
+  String bulkClearConfirm(int count) {
+    return 'Remove the $count customers from the list?';
+  }
+
+  @override
+  String get bulkClearAction => 'Clear';
+
+  @override
+  String bulkAddCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers',
+      one: '1 customer',
+      zero: '',
+    );
+    return 'Add $_temp0';
+  }
+
+  @override
+  String get pasteTitle => 'Paste a list';
+
+  @override
+  String get pasteBody => 'Copy today’s orders from WhatsApp or your notes: one line per customer, with their number.';
+
+  @override
+  String get pasteLabel => 'Your list';
+
+  @override
+  String get pasteHint => 'Marie 690 11 22 33 Bonapriso 12500';
+
+  @override
+  String get pasteFromClipboard => 'Paste what I copied';
+
+  @override
+  String get pasteUnderstood => 'What Tara understood';
+
+  @override
+  String pasteScore(int ok, int total) {
+    return '$ok of $total';
+  }
+
+  @override
+  String get pasteNote =>
+      'Amounts are what to collect from the customer. Without a known address, Tara texts the customer a link to drop their pin.';
+
+  @override
+  String get pastePrivacy => 'Read on your phone: nothing leaves before “Add”.';
+
+  @override
+  String get pasteKnownAddress => 'known address';
+
+  @override
+  String get contactsTitle => 'Choose customers';
+
+  @override
+  String get contactsSearch => 'Name or number';
+
+  @override
+  String get contactsKnown => 'Your customers · address already known';
+
+  @override
+  String contactsOrders(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count orders', one: '1 order');
+    return '$_temp0';
+  }
+
+  @override
+  String get contactsPhone => 'Phone contacts';
+
+  @override
+  String get contactsAllow => 'Show my contacts';
+
+  @override
+  String get contactsAllowBody =>
+      'Tara reads your contacts on this phone so you can tick your customers. Nothing is sent until you add them.';
+
+  @override
+  String get contactsDenied => 'Access to contacts was refused. You can allow it in the phone settings.';
+
+  @override
+  String get contactsOpenSettings => 'Open settings';
+
+  @override
+  String get contactsEmpty => 'No contact with a Cameroonian mobile number.';
+
+  @override
+  String get contactsNote =>
+      'Only the customers you tick leave your phone. For those without an address, Tara texts them the link to drop their pin.';
+
+  @override
+  String get lineNew => 'New customer';
+
+  @override
+  String lineTitle(int number) {
+    return 'Customer no. $number';
+  }
+
+  @override
+  String lineHintNoted(Object hint) {
+    return 'Noted in your list: $hint';
+  }
+
+  @override
+  String get lineAskLink => 'The customer drops their pin';
+
+  @override
+  String get lineAskLinkBody =>
+      'Tara texts them a link when you send; their parcel leaves as soon as they drop their pin.';
+
+  @override
+  String get lineLastAddress => 'Their last address';
+
+  @override
+  String get linePlaceOnMap => 'Place on the map';
+
+  @override
+  String get lineSize => 'Parcel size';
+
+  @override
+  String lineSizeDefault(Object size) {
+    return 'Same as the list ($size)';
+  }
+
+  @override
+  String get lineDescription => 'What’s inside (optional)';
+
+  @override
+  String get lineDescriptionHint => '2 pairs of shoes';
+
+  @override
+  String get lineSave => 'Save';
+
+  @override
+  String get lineRemove => 'Remove from the list';
+
+  @override
+  String get bulkSendTitle => 'Review and send';
+
+  @override
+  String bulkReadyLine(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count parcels ready: they leave right away.',
+      one: '1 parcel ready: it leaves right away.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkWaitingLine(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers have not dropped their pin yet: their parcels will leave as soon as they do.',
+      one: '1 customer has not dropped their pin yet: their parcel will leave as soon as they do.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkIncompleteLine(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers to complete: they stay in the list and do not leave.',
+      one: '1 customer to complete: they stay in the list and do not leave.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkFix => 'Fix';
+
+  @override
+  String bulkCourses(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count parcels', one: '1 parcel');
+    return 'Deliveries · $_temp0';
+  }
+
+  @override
+  String get bulkCollect => 'To collect for you';
+
+  @override
+  String get bulkPayNow => 'To pay now';
+
+  @override
+  String get bulkWaitingPaidLater =>
+      'A parcel waiting for its pin is paid when it leaves: from your sales if there is enough, otherwise we ask you to pay.';
+
+  @override
+  String bulkQuoteError(int number, String name, String error) {
+    return 'Customer no. $number ($name): $error';
+  }
+
+  @override
+  String bulkSend(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count parcels', one: '1 parcel');
+    return 'Slide to send $_temp0';
+  }
+
+  @override
+  String get bulkSendSemantics => 'Slide to send the list';
+
+  @override
+  String get bulkNothingToSend => 'Add at least one complete customer.';
+
+  @override
+  String get bulkSentTitle => 'Shipment sent!';
+
+  @override
+  String bulkSentSubtitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count parcels', one: '1 parcel');
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkSentWaiting => 'Waiting for pin';
+
+  @override
+  String bulkSentWaitingNote(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'The $count customers without an address got a text. Each parcel will leave as soon as its customer drops their pin: we will let you know.',
+      one: 'The customer without an address got a text. Their parcel will leave as soon as they drop their pin: we will let you know.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bulkSentIncomplete(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers to complete stay in your list.',
+      one: '1 customer to complete stays in your list.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pendingTitle => 'Waiting for an address';
+
+  @override
+  String get pendingWaiting => 'Link sent · the parcel leaves once they drop their pin';
+
+  @override
+  String get pendingExpired => 'Link expired without an answer';
+
+  @override
+  String get pendingBlocked => 'Pin received, parcel not sent yet';
+
+  @override
+  String get pendingBlockedBalance => 'Pin received, but your sales are not enough to pay for the delivery.';
+
+  @override
+  String get pendingResend => 'Send the link again';
+
+  @override
+  String get pendingShare => 'Send the link on WhatsApp';
+
+  @override
+  String pendingShareText(String name, String url) {
+    return 'Hello $name, to receive your parcel, show us where to deliver it: $url';
+  }
+
+  @override
+  String get pendingRemove => 'Remove from the shipment';
+
+  @override
+  String pendingRemoveConfirm(int number, String name) {
+    return 'Remove parcel no. $number ($name)? You will not be charged.';
+  }
+
+  @override
+  String get pendingPayMomo => 'Pay with Mobile Money';
+
+  @override
+  String get pendingRetry => 'Try again with my sales';
+
+  @override
+  String pendingResent(Object name) {
+    return 'New link sent to $name.';
+  }
+
+  @override
+  String pendingParcel(int number, String name) {
+    return 'Parcel no. $number · $name';
+  }
+
+  @override
+  String get taraBalanceShopBody => 'Balance from before your shop: you can withdraw it to your Mobile Money.';
+
+  @override
+  String get shopPaysDeliveries => 'Your sales also pay for your deliveries: choose “My sales” when paying.';
 }

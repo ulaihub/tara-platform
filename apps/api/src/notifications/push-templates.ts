@@ -139,6 +139,39 @@ const TEMPLATES = {
     },
   },
   // Le destinataire a placé son point depuis le lien de localisation (B3).
+  /** Envoi en masse : le client a placé son point, son colis part tout seul. */
+  PENDING_DELIVERY_RELEASED: {
+    fr: {
+      title: 'Colis n° {number} : il part',
+      body: '{name} a placé son point. On cherche un livreur pour son colis.',
+    },
+    en: {
+      title: 'Parcel no. {number} is leaving',
+      body: '{name} placed their point. We are finding a rider for their parcel.',
+    },
+  },
+  /** Point arrivé, mais la course se paie par Mobile Money : l'expéditeur valide le paiement. */
+  PENDING_DELIVERY_TO_PAY: {
+    fr: {
+      title: 'Colis n° {number} : à payer',
+      body: '{name} a placé son point. Payez {amount} FCFA pour que son colis parte.',
+    },
+    en: {
+      title: 'Parcel no. {number}: payment needed',
+      body: '{name} placed their point. Pay {amount} XAF so their parcel can leave.',
+    },
+  },
+  /** Point arrivé, départ impossible (solde insuffisant…) : l'expéditeur choisit quoi faire. */
+  PENDING_DELIVERY_BLOCKED: {
+    fr: {
+      title: 'Colis n° {number} : en attente',
+      body: '{name} a placé son point, mais le colis ne peut pas partir : {reason}',
+    },
+    en: {
+      title: 'Parcel no. {number} on hold',
+      body: '{name} placed their point, but the parcel cannot leave: {reason}',
+    },
+  },
   LOCATION_LINK_SUBMITTED: {
     fr: {
       title: 'Adresse reçue',

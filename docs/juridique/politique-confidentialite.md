@@ -1,6 +1,6 @@
 # Politique de confidentialité de Tara
 
-Version 2026-11.5 · Rédigée au regard de la loi n° 2024/017 du 23 décembre 2024 relative à la
+Version 2026-11.6 · Rédigée au regard de la loi n° 2024/017 du 23 décembre 2024 relative à la
 protection des données à caractère personnel au Cameroun. Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -19,7 +19,7 @@ données à caractère personnel (APDP) et lui demande les autorisations nécess
 | ------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
 | Expéditeurs   | numéro, nom, adresses, commandes, paiements, notes données ; photo du colis s'ils en prennent une                | faire et suivre les livraisons, encaisser             |
 | Boutiques     | nom de la boutique, numéro de reversement, ventes encaissées                                                     | encaisser pour elles et leur reverser                 |
-| Destinataires | nom, numéro, adresse ou point placé, réponse « serez-vous là ? »                                                 | livrer le colis                                       |
+| Destinataires | nom, numéro, adresse ou point placé, réponse « serez-vous là ? »                                                 | livrer le colis ; s'il le faut, lui demander son point |
 | Livreurs      | pièces d'identité et du véhicule, garant, contact d'urgence, positions pendant les courses, encaissements, gains | sécurité, attribution des courses, paiement des gains |
 | Tous          | appareil, adresse IP, journaux techniques                                                                        | sécurité, prévention de la fraude                     |
 
@@ -28,6 +28,15 @@ Ces traitements reposent sur votre accord, donné en acceptant les conditions et
 paiements et la comptabilité, sur les obligations légales de Tara. Les données du destinataire
 sont celles que l'expéditeur fournit pour lui livrer le colis : elles servent seulement à cette
 livraison, et le destinataire est informé par la page de suivi.
+
+**Envoi de plusieurs colis : contacts et listes collées.** Si vous choisissez « Contacts »,
+l'application lit vos contacts sur votre téléphone, seulement après votre accord, pour que vous
+cochiez vos clients : ils ne sont pas envoyés à Tara. Une liste collée (depuis WhatsApp, par
+exemple) est lue de la même façon, sur le téléphone. Seuls les clients que vous ajoutez puis
+envoyez (nom, numéro, montant à encaisser) parviennent à Tara, pour leur livrer le colis.
+Aucune intelligence artificielle n'est utilisée pour cette lecture. Un client dont vous n'avez
+pas l'adresse reçoit de Tara, en votre nom, un SMS avec un lien pour placer son point ; ses
+nom et numéro ne servent qu'à cette livraison.
 
 **Code secret et empreinte digitale** : votre code secret est gardé sous une forme chiffrée
 irréversible ; personne chez Tara ne peut le lire. Votre empreinte digitale (ou votre visage)
@@ -42,6 +51,7 @@ pendant la course (le livreur voit le numéro du destinataire tant que la course
 
 - Coordonnées des destinataires : **masquées 30 jours** après la fin de la livraison.
 - SMS envoyés, liens de localisation : numéro et nom effacés après 30 jours.
+- Colis d'un envoi qui attendaient le point de leur client : effacés après 30 jours.
 - Trajets détaillés des livreurs : **90 jours**, sauf litige ou incident encore ouvert.
 - Photos de preuve (enlèvement, livraison) et photos du colis : **90 jours**, sauf litige ou
   incident encore ouvert.

@@ -34,6 +34,11 @@ const TEMPLATES = {
     fr: 'Tara : la double authentification de votre compte a ete reinitialisee par un administrateur. Configurez-la a nouveau.',
     en: 'Tara: your two-factor authentication was reset by an administrator. Please set it up again.',
   },
+  // Envoi en masse : le client place lui-même son point, son colis part ensuite (C4, B3).
+  LOCATION_LINK_REQUEST: {
+    fr: '{sender} vous envoie un colis avec Tara. Indiquez ou le livrer : {url}',
+    en: '{sender} is sending you a parcel with Tara. Show us where to deliver it: {url}',
+  },
   RECIPIENT_CONFIRMATION: {
     fr: '{sender} vous envoie un colis avec Tara (ref {reference}). Confirmez adresse et disponibilite : {url}',
     en: '{sender} is sending you a parcel with Tara (ref {reference}). Confirm address and availability: {url}',

@@ -1,11 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import type { Request } from 'express';
 import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthUser } from '../auth/auth.types.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
-import { AppError } from '../common/errors/app-error.js';
+import { mapLimit } from '../common/concurrency.js';
+import { AppError, localizedMessage } from '../common/errors/app-error.js';
+import { resolveLocale } from '../common/i18n/locale.js';
 import { hashCode, randomDigits, randomReadableId, randomToken } from '../common/crypto.js';
 import { pageOf } from '../common/pagination.js';
 import { Prisma, type Order, type OrderEvent } from '../generated/prisma/client.js';
@@ -13,7 +15,9 @@ import type { ActorRole } from '../generated/prisma/enums.js';
 import { OrderEventsBus, type OrderChange } from '../events/order-events.bus.js';
 import { OrderTransitionHooks } from '../events/order-transition.hooks.js';
 import { AddressesService } from '../geo/addresses.service.js';
-import { type FullQuote, PricingService } from '../pricing/pricing.service.js';
+import { LocationLinksService } from '../geo/location-links.service.js';
+import { NotificationService } from '../notifications/notification.service.js';
+import { type FullQuote, PricingService, QUOTE_CONCURRENCY } from '../pricing/pricing.service.js';
 import { PromoService } from '../pricing/promo.service.js';
 import { ratingDto } from './ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -21,6 +25,11 @@ import { prohibitedWarning } from '../parcel-analysis/parcel-analysis.schemas.js
 import { MediaService } from '../storage/media.service.js';
 import { BEFORE_PICKUP } from './order-state-machine.js';
 import { OrderTransitionsService } from './order-transitions.service.js';
+import {
+  PendingDeliveriesService,
+  type PendingWithLink,
+  StoredPending,
+} from './pending-deliveries.service.js';
 import {
   type AdminTransitionBody,
   type CreateBatchBody,
@@ -33,6 +42,8 @@ import {
   ACTIVE_ORDER_STATUSES,
   type OrderListQuery,
   type OrderSummaryDto,
+  type PaymentMethodEnum,
+  type PendingDeliveryDto,
   type RecipientDto,
   type RecipientResponseBody,
 } from './orders.schemas.js';
@@ -53,8 +64,21 @@ const ORDER_INCLUDE = {
     },
   },
   ratings: { select: { raterId: true, score: true, comment: true, createdAt: true } },
-  batch: { select: { _count: { select: { orders: true } } } },
+  batch: {
+    select: {
+      _count: {
+        select: {
+          orders: true,
+          // Colis qui attendent encore l'adresse de leur client : ils ont déjà leur numéro.
+          pendingDeliveries: { where: { orderId: null, cancelledAt: null } },
+        },
+      },
+    },
+  },
 } as const satisfies Prisma.OrderInclude;
+
+/** Un envoi de 100 colis s'écrit en une transaction : plus que les 5 s par défaut. */
+const BATCH_TRANSACTION = { timeout: 60_000, maxWait: 10_000 } as const;
 
 /** Statuts où l'expéditeur peut joindre le livreur. */
 const RIDER_REACHABLE: readonly string[] = [
@@ -106,7 +130,9 @@ export function readyForDispatch(
 }
 
 @Injectable()
-export class OrdersService {
+export class OrdersService implements OnModuleInit {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly pricing: PricingService,
@@ -117,8 +143,22 @@ export class OrdersService {
     private readonly hooks: OrderTransitionHooks,
     private readonly audit: AuditService,
     private readonly media: MediaService,
+    private readonly pending: PendingDeliveriesService,
+    private readonly links: LocationLinksService,
+    private readonly notifications: NotificationService,
     @Inject(ENV) private readonly env: Env,
   ) {}
+
+  /** Le client d'un colis en attente a placé son point : le colis part (voir releasePending). */
+  onModuleInit(): void {
+    this.links.onSubmitted(async (linkId) => {
+      const row = await this.prisma.pendingDelivery.findUnique({
+        where: { locationLinkId: linkId },
+        select: { id: true },
+      });
+      if (row) await this.releasePending(row.id);
+    });
+  }
 
   // --- Lecture ---------------------------------------------------------------------------
 
@@ -145,7 +185,9 @@ export class OrdersService {
       trackingUrl: trackingUrl(this.env, order.trackingToken),
       batchId: order.batchId,
       batchNumber: order.batchNumber,
-      batchSize: order.batch?._count.orders ?? null,
+      batchSize: order.batch
+        ? order.batch._count.orders + order.batch._count.pendingDeliveries
+        : null,
       isExpress: order.isExpress,
       scheduledFor: order.scheduledFor?.toISOString() ?? null,
       packageSize: order.packageSize,
@@ -296,7 +338,7 @@ export class OrdersService {
    */
   private async parcelWarnings(
     user: AuthUser,
-    items: z.output<typeof DeliveryItem>[],
+    items: readonly Pick<z.output<typeof DeliveryItem>, 'parcelPhotoKey'>[],
   ): Promise<Map<string, string | null>> {
     const warnings = new Map<string, string | null>();
     for (const key of new Set(items.flatMap((item) => item.parcelPhotoKey ?? []))) {
@@ -310,7 +352,7 @@ export class OrdersService {
   private async checkCommercialRules(
     user: AuthUser,
     shared: Shared,
-    items: z.output<typeof DeliveryItem>[],
+    items: readonly Pick<z.output<typeof DeliveryItem>, 'codAmount'>[],
   ): Promise<{ merchantId: string | null; senderName: string }> {
     const sender = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
@@ -522,65 +564,95 @@ export class OrdersService {
     idempotencyKey: string | undefined,
   ): Promise<z.output<typeof CreatedBatchDto>> {
     if (idempotencyKey) {
-      const existing = await this.prisma.orderBatch.findUnique({
-        where: { idempotencyKey },
-        include: { orders: true },
-      });
+      const existing = await this.prisma.orderBatch.findUnique({ where: { idempotencyKey } });
       if (existing) {
         if (existing.senderId !== user.id) throw AppError.conflict('IDEMPOTENCY_CONFLICT');
         return this.batchDto(existing.id, null, true);
       }
     }
 
+    // Chaque colis garde son numéro (ordre de saisie), qu'il parte tout de suite ou plus tard.
+    const ready = body.items.flatMap((item, index) =>
+      item.dropoffAddressId
+        ? [{ item: { ...item, dropoffAddressId: item.dropoffAddressId }, number: index + 1 }]
+        : [],
+    );
+    const waiting = body.items.flatMap((item, index) =>
+      item.askAddress ? [{ item, number: index + 1 }] : [],
+    );
     const context = {
       ...(await this.checkCommercialRules(user, body, body.items)),
       parcelWarnings: await this.parcelWarnings(user, body.items),
     };
-    const quotes = await Promise.all(
-      body.items.map((item) =>
-        this.pricing.quote(user, {
-          pickup: { addressId: body.pickupAddressId },
-          dropoff: { addressId: item.dropoffAddressId },
-          packageSize: item.packageSize,
-          isExpress: body.isExpress,
-          loadingHelp: item.loadingHelp,
-          scheduledFor: body.scheduledFor,
-        }),
-      ),
+    if (waiting.length > 0) {
+      // Rien n'est calculé pour eux maintenant : on vérifie au moins le départ et l'heure.
+      await this.addresses.usableBy(user, body.pickupAddressId);
+      this.pricing.scheduleFrom(body.scheduledFor, new Date());
+      await this.pending.assertLinkQuota(user.id, waiting.length);
+    }
+    const quotes = await mapLimit(ready, QUOTE_CONCURRENCY, ({ item }) =>
+      this.pricing.quote(user, {
+        pickup: { addressId: body.pickupAddressId },
+        dropoff: { addressId: item.dropoffAddressId },
+        packageSize: item.packageSize,
+        isExpress: body.isExpress,
+        loadingHelp: item.loadingHelp,
+        scheduledFor: body.scheduledFor,
+      }),
     );
     const pickupCode = randomDigits(4);
 
     let batchId: string;
+    let created: PendingWithLink[];
     try {
-      const { batch, changes } = await this.prisma.$transaction(async (tx) => {
+      const result = await this.prisma.$transaction(async (tx) => {
         const batch = await tx.orderBatch.create({
           data: {
             senderId: user.id,
             pickupAddressId: body.pickupAddressId,
             idempotencyKey: idempotencyKey ?? null,
+            // Gardé (chiffré) seulement si des colis partiront plus tard avec le même code.
+            pickupCodeSealed: waiting.length > 0 ? this.pending.sealCode(pickupCode) : null,
           },
         });
         const changes: OrderChange[] = [];
-        for (const [index, item] of body.items.entries()) {
-          const quote = quotes[index] as FullQuote;
-          const reference = `TR-${randomReadableId(6)}`;
+        for (const [index, { item, number }] of ready.entries()) {
           const inserted = await this.insert(
             tx,
             user,
-            this.orderData(user, body, item, quote, {
+            this.orderData(user, body, item, quotes[index] as FullQuote, {
               ...context,
-              reference,
+              reference: `TR-${randomReadableId(6)}`,
               pickupCode,
               batchId: batch.id,
-              batchNumber: index + 1,
+              batchNumber: number,
             }),
           );
           changes.push(...inserted.changes);
         }
-        return { batch, changes };
-      });
-      batchId = batch.id;
-      await this.events.publishAll(changes);
+        const pendingRows: PendingWithLink[] = [];
+        for (const { item, number } of waiting) {
+          pendingRows.push(
+            await this.pending.createIn(tx, {
+              senderId: user.id,
+              merchantId: context.merchantId,
+              batchId: batch.id,
+              batchNumber: number,
+              item,
+              shared: {
+                isExpress: body.isExpress,
+                ...(body.scheduledFor ? { scheduledFor: body.scheduledFor } : {}),
+                feePayer: body.feePayer,
+                feePaymentMethod: body.feePaymentMethod,
+              },
+            }),
+          );
+        }
+        return { batch, changes, pendingRows };
+      }, BATCH_TRANSACTION);
+      batchId = result.batch.id;
+      created = result.pendingRows;
+      await this.events.publishAll(result.changes);
     } catch (error) {
       if (idempotencyKey && isUniqueViolation(error)) {
         const existing = await this.prisma.orderBatch.findUnique({ where: { idempotencyKey } });
@@ -588,6 +660,7 @@ export class OrdersService {
       }
       throw error;
     }
+    await this.pending.sendLinks(created, context.senderName);
     return this.batchDto(batchId, pickupCode, false);
   }
 
@@ -601,7 +674,168 @@ export class OrdersService {
       orderBy: { batchNumber: 'asc' },
       include: ORDER_INCLUDE,
     });
-    return { batchId, pickupCode, replayed, orders: await this.toDtos(orders) };
+    const pending = await this.pending.forBatch(batchId);
+    return {
+      batchId,
+      pickupCode,
+      replayed,
+      orders: await this.toDtos(orders),
+      pending: pending.map((row) => this.pending.toDto(row)),
+    };
+  }
+
+  // --- Colis en attente de l'adresse de leur client (C4, B3) ----------------------------------
+
+  /**
+   * Le point du client est arrivé : la commande est créée dans l'envoi, sous le numéro réservé
+   * et avec le même code d'enlèvement. Payée par le solde, ou par le destinataire, elle part
+   * aussitôt ; par Mobile Money, elle attend que l'expéditeur valide le paiement. Si elle ne
+   * peut pas être créée (solde insuffisant…), le colis reste en attente avec la raison et
+   * l'expéditeur est prévenu. [paymentMethod] remplace celui de l'envoi (relance manuelle).
+   */
+  async releasePending(
+    pendingId: string,
+    paymentMethod?: z.output<typeof PaymentMethodEnum>,
+  ): Promise<'RELEASED' | 'BLOCKED' | 'SKIPPED'> {
+    const row = await this.prisma.pendingDelivery.findUnique({
+      where: { id: pendingId },
+      include: {
+        locationLink: true,
+        batch: true,
+        sender: { select: { id: true, phone: true, roles: true, locale: true } },
+      },
+    });
+    const addressId = row?.locationLink.addressId;
+    if (!row || row.orderId || row.cancelledAt || !addressId) return 'SKIPPED';
+    const user: AuthUser = row.sender;
+    const stored = StoredPending.parse(row.item);
+    // Une heure programmée déjà trop proche (ou passée) : le colis part tout de suite.
+    const scheduledFor =
+      stored.shared.scheduledFor &&
+      new Date(stored.shared.scheduledFor).getTime() > Date.now() + 35 * 60_000
+        ? stored.shared.scheduledFor
+        : undefined;
+    const shared: Shared = {
+      pickupAddressId: row.batch.pickupAddressId,
+      isExpress: stored.shared.isExpress,
+      scheduledFor,
+      feePayer: stored.shared.feePayer,
+      feePaymentMethod: paymentMethod ?? stored.shared.feePaymentMethod,
+    };
+    const item = { ...stored.item, dropoffAddressId: addressId };
+    const firstName = row.recipientName.trim().split(/\s+/)[0] ?? row.recipientName;
+    let order: Order;
+    try {
+      if (!row.batch.pickupCodeSealed) throw AppError.conflict('PENDING_DELIVERY_CLOSED');
+      const pickupCode = this.pending.openCode(row.batch.pickupCodeSealed);
+      const context = {
+        ...(await this.checkCommercialRules(user, shared, [item])),
+        parcelWarnings: await this.parcelWarnings(user, [item]),
+      };
+      const quote = await this.pricing.quote(user, {
+        pickup: { addressId: shared.pickupAddressId },
+        dropoff: { addressId },
+        packageSize: item.packageSize,
+        isExpress: shared.isExpress,
+        loadingHelp: item.loadingHelp,
+        scheduledFor: shared.scheduledFor,
+      });
+      const result = await this.prisma.$transaction(async (tx) => {
+        const inserted = await this.insert(
+          tx,
+          user,
+          this.orderData(user, shared, item, quote, {
+            ...context,
+            reference: `TR-${randomReadableId(6)}`,
+            pickupCode,
+            batchId: row.batchId,
+            batchNumber: row.batchNumber,
+          }),
+        );
+        // Deux arrivées du même point en même temps : une seule commande.
+        const { count } = await tx.pendingDelivery.updateMany({
+          where: { id: row.id, orderId: null, cancelledAt: null },
+          data: { orderId: inserted.order.id, blockedReason: null },
+        });
+        if (count !== 1) throw AppError.conflict('PENDING_DELIVERY_CLOSED');
+        return inserted;
+      });
+      order = result.order;
+      await this.events.publishAll(result.changes);
+    } catch (error) {
+      if (!(error instanceof AppError)) throw error;
+      if (error.code === 'PENDING_DELIVERY_CLOSED') return 'SKIPPED';
+      await this.pending.block(row.id, error);
+      await this.notifications.toUser(user.id, {
+        template: 'PENDING_DELIVERY_BLOCKED',
+        params: {
+          number: row.batchNumber,
+          name: firstName,
+          reason: localizedMessage(error, resolveLocale(undefined, user.locale)),
+        },
+        data: { type: 'pending_delivery.blocked', pendingId: row.id },
+      });
+      return 'BLOCKED';
+    }
+    await this.pending.forgetCodeIfDone(row.batchId);
+    const toPay = order.status === 'CREATED' && !readyForDispatch(order);
+    await this.notifications.toUser(user.id, {
+      template: toPay ? 'PENDING_DELIVERY_TO_PAY' : 'PENDING_DELIVERY_RELEASED',
+      params: {
+        number: row.batchNumber,
+        name: firstName,
+        amount: order.totalPrice.toLocaleString('fr-FR'),
+      },
+      data: { type: 'pending_delivery.released', pendingId: row.id, orderId: order.id },
+      orderId: order.id,
+    });
+    return 'RELEASED';
+  }
+
+  /**
+   * Colis en attente de l'expéditeur. Un point arrivé dont la suite s'est perdue (redémarrage)
+   * est rattrapé ici : le colis part avant d'être listé.
+   */
+  async listPending(user: AuthUser, open: boolean): Promise<z.output<typeof PendingDeliveryDto>[]> {
+    const stuck = await this.prisma.pendingDelivery.findMany({
+      where: {
+        senderId: user.id,
+        orderId: null,
+        cancelledAt: null,
+        blockedReason: null,
+        locationLink: { submittedAt: { not: null } },
+      },
+      select: { id: true },
+      take: 20,
+    });
+    for (const { id } of stuck) await this.releasePending(id);
+    return (await this.pending.list(user, open)).map((row) => this.pending.toDto(row));
+  }
+
+  /** Relance d'un colis bloqué (solde rechargé, ou autre moyen de paiement choisi). */
+  async retryPending(
+    user: AuthUser,
+    id: string,
+    paymentMethod: z.output<typeof PaymentMethodEnum> | undefined,
+  ): Promise<z.output<typeof PendingDeliveryDto>> {
+    const row = await this.pending.owned(user, id);
+    if (row.orderId || row.cancelledAt) throw AppError.conflict('PENDING_DELIVERY_CLOSED');
+    if (!row.locationLink.submittedAt) throw AppError.conflict('PENDING_NOT_BLOCKED');
+    await this.releasePending(id, paymentMethod);
+    return this.pending.toDto(await this.pending.owned(user, id));
+  }
+
+  async cancelPending(user: AuthUser, id: string): Promise<z.output<typeof PendingDeliveryDto>> {
+    return this.pending.toDto(await this.pending.cancel(user, id));
+  }
+
+  async resendPending(user: AuthUser, id: string): Promise<z.output<typeof PendingDeliveryDto>> {
+    const sender = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.id },
+      include: { merchant: true },
+    });
+    const senderName = sender.merchant?.shopName ?? sender.fullName ?? 'Un expéditeur';
+    return this.pending.toDto(await this.pending.resend(user, id, senderName));
   }
 
   // --- Actions sur une commande -----------------------------------------------------------
@@ -633,8 +867,19 @@ export class OrdersService {
           })
         : [order];
     const pickupCode = randomDigits(4);
-    await this.prisma.$transaction(
-      siblings.map((sibling) =>
+    // Les colis d'un envoi qui partiront plus tard recevront ce nouveau code.
+    const batchCode =
+      order.batchId && !returning
+        ? [
+            this.prisma.orderBatch.updateMany({
+              where: { id: order.batchId, pickupCodeSealed: { not: null } },
+              data: { pickupCodeSealed: this.pending.sealCode(pickupCode) },
+            }),
+          ]
+        : [];
+    await this.prisma.$transaction([
+      ...batchCode,
+      ...siblings.map((sibling) =>
         this.prisma.order.update({
           where: { id: sibling.id },
           data: {
@@ -648,7 +893,7 @@ export class OrdersService {
           },
         }),
       ),
-    );
+    ]);
     return { pickupCode };
   }
 

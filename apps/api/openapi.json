@@ -2282,6 +2282,85 @@
         ]
       }
     },
+    "/v1/orders/quotes": {
+      "post": {
+        "operationId": "Quote_quoteMany",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pickupAddressId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "isExpress": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "scheduledFor": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "items": {
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dropoffAddressId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "packageSize": {
+                          "$ref": "#/components/schemas/PackageSize"
+                        },
+                        "loadingHelp": {
+                          "default": false,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "dropoffAddressId",
+                        "packageSize"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "pickupAddressId",
+                  "items"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchQuote"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
     "/v1/admin/pricing-grids/simulate": {
       "post": {
         "operationId": "AdminPricing_simulate",
@@ -3324,7 +3403,7 @@
                   },
                   "items": {
                     "minItems": 1,
-                    "maxItems": 10,
+                    "maxItems": 100,
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -3386,10 +3465,13 @@
                         "instructions": {
                           "type": "string",
                           "maxLength": 300
+                        },
+                        "askAddress": {
+                          "default": false,
+                          "type": "boolean"
                         }
                       },
                       "required": [
-                        "dropoffAddressId",
                         "recipientName",
                         "recipientPhone",
                         "packageSize"
@@ -3413,6 +3495,173 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreatedBatch"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/pending": {
+      "get": {
+        "operationId": "Orders_listPending",
+        "parameters": [
+          {
+            "name": "open",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "true",
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PendingDelivery"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/pending/{id}/cancel": {
+      "post": {
+        "operationId": "Orders_cancelPending",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingDelivery"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/pending/{id}/resend": {
+      "post": {
+        "operationId": "Orders_resendPending",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingDelivery"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/pending/{id}/release": {
+      "post": {
+        "operationId": "Orders_releasePending",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "feePaymentMethod": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PaymentMethod"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingDelivery"
                 }
               }
             }
@@ -11673,6 +11922,57 @@
         ],
         "additionalProperties": false
       },
+      "BatchQuote": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "quote": {
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Quote"
+                    }
+                  ]
+                },
+                "error": {
+                  "nullable": true,
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "quote",
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "totalPrice": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "totalPrice"
+        ],
+        "additionalProperties": false
+      },
       "BiometricKey": {
         "type": "object",
         "properties": {
@@ -12004,13 +12304,20 @@
             "items": {
               "$ref": "#/components/schemas/Order"
             }
+          },
+          "pending": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingDelivery"
+            }
           }
         },
         "required": [
           "batchId",
           "pickupCode",
           "replayed",
-          "orders"
+          "orders",
+          "pending"
         ],
         "additionalProperties": false
       },
@@ -12587,7 +12894,12 @@
                   "PAYOUT_ON_HOLD",
                   "PAYOUT_PHONE_NOT_ALLOWED",
                   "SELF_APPROVAL_FORBIDDEN",
-                  "STATEMENT_PERIOD_INVALID"
+                  "STATEMENT_PERIOD_INVALID",
+                  "PENDING_DELIVERY_NOT_FOUND",
+                  "PENDING_DELIVERY_CLOSED",
+                  "PENDING_RESEND_TOO_SOON",
+                  "ADDRESS_REQUESTS_LIMIT",
+                  "PENDING_NOT_BLOCKED"
                 ]
               },
               "message": {
@@ -14680,6 +14992,88 @@
           "completedAt"
         ],
         "additionalProperties": false
+      },
+      "PendingDelivery": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchNumber": {
+            "type": "integer"
+          },
+          "recipientName": {
+            "type": "string"
+          },
+          "recipientPhone": {
+            "type": "string"
+          },
+          "packageSize": {
+            "$ref": "#/components/schemas/PackageSize"
+          },
+          "packageDescription": {
+            "nullable": true,
+            "type": "string"
+          },
+          "codAmount": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PendingDeliveryStatus"
+          },
+          "blockedReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "linkUrl": {
+            "type": "string"
+          },
+          "linkExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "batchId",
+          "batchNumber",
+          "recipientName",
+          "recipientPhone",
+          "packageSize",
+          "packageDescription",
+          "codAmount",
+          "status",
+          "blockedReason",
+          "linkUrl",
+          "linkExpiresAt",
+          "orderId",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "PendingDeliveryStatus": {
+        "type": "string",
+        "enum": [
+          "WAITING",
+          "EXPIRED",
+          "RELEASED",
+          "BLOCKED",
+          "CANCELLED"
+        ]
       },
       "PickupCode": {
         "type": "object",

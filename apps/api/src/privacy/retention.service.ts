@@ -30,6 +30,7 @@ export interface RetentionReport {
   notificationsMasked: number;
   notificationSecretsPurged: number;
   locationLinksMasked: number;
+  pendingDeliveriesDeleted: number;
   otpChallengesDeleted: number;
   refreshTokensDeleted: number;
   photosDeleted: number;
@@ -81,6 +82,9 @@ export class RetentionService {
     const locationLinksMasked = await this.prisma.$executeRaw`
       UPDATE location_links SET recipient_name = NULL, recipient_phone = NULL
        WHERE created_at < ${cutoff} AND (recipient_name IS NOT NULL OR recipient_phone IS NOT NULL)`;
+    // Colis d'un envoi en masse qui attendaient une adresse : partis, retirés ou oubliés.
+    const pendingDeliveriesDeleted = await this.prisma.$executeRaw`
+      DELETE FROM pending_deliveries WHERE created_at < ${cutoff}`;
     const otpChallengesDeleted = await this.prisma.$executeRaw`
       DELETE FROM otp_challenges WHERE created_at < ${cutoff}`;
     const refreshTokensDeleted = await this.prisma.$executeRaw`
@@ -91,6 +95,7 @@ export class RetentionService {
       notificationsMasked,
       notificationSecretsPurged,
       locationLinksMasked,
+      pendingDeliveriesDeleted,
       otpChallengesDeleted,
       refreshTokensDeleted,
       photosDeleted: await this.purgePhotos(longCutoff),

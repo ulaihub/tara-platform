@@ -101,3 +101,8 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
    pour le solde, les retraits et la suppression du compte, et la suppression sans code SMS sont
    à faire confirmer ; la connexion sur un nouveau téléphone reste confirmée par un code reçu
    sur le numéro (WhatsApp ou SMS).
+8. Envoi de plusieurs colis (version 2026-11.6) : SMS envoyé par Tara au destinataire, au nom
+   de l'expéditeur, pour qu'il place son point. L'expéditeur garantit que ces personnes
+   attendent un colis de lui ; nombre de SMS limité par jour, jamais de publicité. À faire
+   confirmer au regard de la loi n° 2024/017 (information du destinataire) et de la loi
+   n° 2010/021 (communications électroniques non sollicitées).

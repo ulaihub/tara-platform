@@ -3,7 +3,9 @@ import type { Request } from 'express';
 import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthUser } from '../auth/auth.types.js';
-import { AppError } from '../common/errors/app-error.js';
+import { mapLimit } from '../common/concurrency.js';
+import { AppError, localizedMessage } from '../common/errors/app-error.js';
+import { resolveLocale } from '../common/i18n/locale.js';
 import { addDays, addMinutes } from '../common/time.js';
 import type {
   PricingGrid,
@@ -19,6 +21,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { DistanceService, type RouteEstimate } from '../routing/distance.service.js';
 import { computePrice, type PriceBreakdown, vehicleForParcel } from './pricing.engine.js';
 import type {
+  BatchQuoteBody,
+  BatchQuoteDto,
   PointRef,
   PricingGridBody,
   PricingGridDto,
@@ -82,6 +86,9 @@ export function toGridDto(grid: GridWithRules): z.output<typeof PricingGridDto> 
 }
 
 /** Devis (C2) et administration des grilles tarifaires versionnées (C7). */
+/** Prix calculés en même temps pour une liste d'envoi (itinéraires demandés en parallèle). */
+export const QUOTE_CONCURRENCY = 8;
+
 @Injectable()
 export class PricingService {
   constructor(
@@ -208,6 +215,40 @@ export class PricingService {
     body: z.output<typeof QuoteBody>,
   ): Promise<z.output<typeof QuoteDto>> {
     return this.toQuoteDto(await this.quote(user, body));
+  }
+
+  /**
+   * Prix de chaque colis d'une liste d'envoi (C4). Calculés quelques-uns à la fois pour ne
+   * pas saturer l'itinéraire ; l'erreur d'un colis (hors zone…) reste attachée à ce colis.
+   */
+  async publicQuoteMany(
+    user: AuthUser,
+    body: z.output<typeof BatchQuoteBody>,
+  ): Promise<z.output<typeof BatchQuoteDto>> {
+    const locale = resolveLocale(undefined, user.locale);
+    const items = await mapLimit(body.items, QUOTE_CONCURRENCY, async (item) => {
+      try {
+        const quote = await this.quote(user, {
+          pickup: { addressId: body.pickupAddressId },
+          dropoff: { addressId: item.dropoffAddressId },
+          packageSize: item.packageSize,
+          isExpress: body.isExpress,
+          loadingHelp: item.loadingHelp,
+          scheduledFor: body.scheduledFor,
+        });
+        return { quote: this.toQuoteDto(quote), error: null };
+      } catch (error) {
+        if (!(error instanceof AppError)) throw error;
+        return {
+          quote: null,
+          error: { code: error.code, message: localizedMessage(error, locale) },
+        };
+      }
+    });
+    return {
+      items,
+      totalPrice: items.reduce((sum, item) => sum + (item.quote?.totalPrice ?? 0), 0),
+    };
   }
 
   // --- Administration (C7) ------------------------------------------------------------

@@ -272,23 +272,27 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 _ShopCard(wallet: data, busy: _busy, onPayoutNow: _payoutNow),
                 const SizedBox(height: 12),
               ],
-              _BalanceCard(
-                wallet: data,
-                panel: _panel,
-                busy: _busy,
-                phone: widget.me.phone,
-                onTopUp: () => _open(_Panel.topUp),
-                onWithdraw: () => unawaited(_openWithdraw()),
-                onCancel: () => _open(_panel),
-                onToppedUp: (amount) => _done(l.topUpDone(_f(amount))),
-                onWithdrawConfirm: _withdraw,
-              ),
+              // Boutique : un seul solde, ses ventes (elles paient aussi ses livraisons). Le
+              // solde Tara n'apparaît que s'il en reste un d'avant la boutique, à retirer.
+              if (!merchant || data.customerBalance != 0)
+                _BalanceCard(
+                  wallet: data,
+                  shop: merchant,
+                  panel: _panel,
+                  busy: _busy,
+                  phone: widget.me.phone,
+                  onTopUp: () => _open(_Panel.topUp),
+                  onWithdraw: () => unawaited(_openWithdraw()),
+                  onCancel: () => _open(_panel),
+                  onToppedUp: (amount) => _done(l.topUpDone(_f(amount))),
+                  onWithdrawConfirm: _withdraw,
+                ),
               if (_error != null) ...[const SizedBox(height: 10), ErrorLine(_error!)],
             ],
             const SizedBox(height: 24),
             SectionHeader(title: l.movements),
             const SizedBox(height: 8),
-            if (merchant) ...[
+            if (merchant && (data?.customerBalance ?? 0) != 0) ...[
               LiquidSegmented<String>(
                 compact: true,
                 segments: [('merchant', l.movementsShop), ('customer', l.movementsBalance)],
@@ -367,6 +371,8 @@ class _ShopCard extends ConsumerWidget {
             l.shopToday(_f(wallet.todaySales), wallet.todayDeliveries),
             style: TaraText.small.copyWith(color: c.textSecondary),
           ),
+          const SizedBox(height: 2),
+          Text(l.shopPaysDeliveries, style: TaraText.small.copyWith(color: c.textSecondary)),
           if (wallet.withdrawalFeeBps > 0 && wallet.withdrawalFeeSharePercent > 0) ...[
             const SizedBox(height: 2),
             Text(
@@ -409,6 +415,7 @@ class _ShopCard extends ConsumerWidget {
 class _BalanceCard extends ConsumerStatefulWidget {
   const _BalanceCard({
     required this.wallet,
+    required this.shop,
     required this.panel,
     required this.busy,
     required this.phone,
@@ -420,6 +427,10 @@ class _BalanceCard extends ConsumerStatefulWidget {
   });
 
   final Wallet wallet;
+
+  /// Boutique : ancien solde Tara, à retirer seulement (ses livraisons se paient avec ses
+  /// ventes, qui sont reversées chaque jour : une recharge repartirait le soir même).
+  final bool shop;
   final _Panel panel;
   final bool busy;
   final String phone;
@@ -558,22 +569,26 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
           const SizedBox(height: 4),
           MaskedBalance(balance, style: TaraText.amountL),
           const SizedBox(height: 4),
-          Text(l.taraBalanceBody, style: TaraText.small.copyWith(color: c.textSecondary)),
+          Text(
+            widget.shop ? l.taraBalanceShopBody : l.taraBalanceBody,
+            style: TaraText.small.copyWith(color: c.textSecondary),
+          ),
           const SizedBox(height: 14),
           if (widget.panel == _Panel.none)
             Row(
               children: [
-                Expanded(
-                  child: GlassButton(
-                    label: l.topUpAction,
-                    icon: TaraIcons.wallet,
-                    height: 48,
-                    color: c.accentText,
-                    onPressed: widget.onTopUp,
+                if (!widget.shop)
+                  Expanded(
+                    child: GlassButton(
+                      label: l.topUpAction,
+                      icon: TaraIcons.wallet,
+                      height: 48,
+                      color: c.accentText,
+                      onPressed: widget.onTopUp,
+                    ),
                   ),
-                ),
                 if (canWithdraw) ...[
-                  const SizedBox(width: 10),
+                  if (!widget.shop) const SizedBox(width: 10),
                   Expanded(
                     child: GlassButton(
                       label: l.withdrawAction,

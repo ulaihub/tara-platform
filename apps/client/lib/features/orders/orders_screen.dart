@@ -15,6 +15,7 @@ import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import 'order_row.dart';
+import 'pending_section.dart';
 
 /// Commandes de l'expéditeur par période : en cours (active) ou terminées (history).
 final ordersProvider = FutureProvider.family<List<OrderSummary>, String>(
@@ -24,9 +25,12 @@ final ordersProvider = FutureProvider.family<List<OrderSummary>, String>(
 /// Onglet Commandes (non dessiné : style Tara) : livraisons en cours ou terminées, la plus
 /// récente d'abord ; chacune s'ouvre sur son suivi.
 class OrdersScreen extends ConsumerStatefulWidget {
-  const OrdersScreen({super.key, required this.onOpenOrder, this.now});
+  const OrdersScreen({super.key, required this.onOpenOrder, this.onOpenOrderId, this.now});
 
   final ValueChanged<OrderSummary> onOpenOrder;
+
+  /// Ouvre une commande par son identifiant (colis d'un envoi parti après coup).
+  final ValueChanged<String>? onOpenOrderId;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -54,7 +58,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       safeBottom: false,
       child: RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(ordersProvider(_scope));
+          ref
+            ..invalidate(ordersProvider(_scope))
+            ..invalidate(pendingDeliveriesProvider);
           await ref.read(ordersProvider(_scope).future).catchError((_) => <OrderSummary>[]);
         },
         child: ListView(
@@ -72,6 +78,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               onChanged: (scope) => setState(() => _scope = scope),
             ),
             const SizedBox(height: 16),
+            // Envoi en masse : colis qui attendent l'adresse de leur client.
+            if (_scope == 'active' && widget.onOpenOrderId != null) PendingSection(onOpenOrder: widget.onOpenOrderId!),
             switch (orders) {
               AsyncData(:final value) when value.isEmpty => GlassCard(
                 radius: 22,

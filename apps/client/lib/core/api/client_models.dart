@@ -446,6 +446,21 @@ class Address {
 
   /// « Bonapriso · Portail bleu après la pharmacie ».
   String get summary => [?neighborhood?.name, landmark].join(' · ');
+
+  /// Même forme que la réponse de l'API, pour garder l'adresse sur le téléphone (liste
+  /// d'envoi en cours).
+  Json toJson() => {
+    'id': id,
+    'label': label,
+    'contactName': contactName,
+    'contactPhone': contactPhone,
+    'neighborhood': neighborhood == null ? null : {'id': neighborhood!.id, 'name': neighborhood!.name},
+    'landmark': landmark,
+    'latitude': latitude,
+    'longitude': longitude,
+    'verifiedAt': verified ? 'verified' : null,
+    'motorbikeRestricted': motorbikeRestricted,
+  };
 }
 
 /// Destinataire fréquent du carnet (B5), avec sa dernière adresse.
@@ -626,14 +641,24 @@ class Quote {
 /// Commande créée (C1) : de quoi la suivre et afficher son prix.
 @immutable
 class PlacedOrder {
-  const PlacedOrder({required this.id, required this.reference, required this.status, required this.totalPrice});
+  const PlacedOrder({
+    required this.id,
+    required this.reference,
+    required this.status,
+    required this.totalPrice,
+    this.batchNumber,
+  });
   factory PlacedOrder.fromJson(Json json) => PlacedOrder(
     id: _field(json, 'id'),
     reference: _field(json, 'reference'),
     status: _field(json, 'status'),
     totalPrice: _field<num>(_field<Json>(json, 'pricing'), 'totalPrice').toInt(),
+    batchNumber: (json['batchNumber'] as num?)?.toInt(),
   );
-  static const fields = ['id', 'reference', 'status', 'pricing'];
+  static const fields = ['id', 'reference', 'status', 'pricing', 'batchNumber'];
+
+  /// Numéro du colis dans son envoi (null pour une commande seule).
+  final int? batchNumber;
 
   final String id;
   final String reference;
@@ -647,7 +672,7 @@ class PlacedOrder {
 /// affiché une seule fois.
 @immutable
 class Placement {
-  const Placement({required this.orders, required this.pickupCode, this.batchId});
+  const Placement({required this.orders, required this.pickupCode, this.batchId, this.pending = const []});
 
   factory Placement.single(Json json) =>
       Placement(orders: [PlacedOrder.fromJson(_field<Json>(json, 'order'))], pickupCode: _field(json, 'pickupCode'));
@@ -656,16 +681,108 @@ class Placement {
     orders: [for (final item in _field<List<Object?>>(json, 'orders')) PlacedOrder.fromJson(item! as Json)],
     pickupCode: _field(json, 'pickupCode'),
     batchId: _field(json, 'batchId'),
+    pending: [
+      for (final item in (json['pending'] as List<Object?>?) ?? const <Object?>[])
+        PendingDelivery.fromJson(item! as Json),
+    ],
   );
 
   static const singleFields = ['order', 'pickupCode', 'replayed'];
-  static const batchFields = ['batchId', 'pickupCode', 'replayed', 'orders'];
+  static const batchFields = ['batchId', 'pickupCode', 'replayed', 'orders', 'pending'];
 
   final List<PlacedOrder> orders;
   final String? pickupCode;
   final String? batchId;
 
+  /// Colis de l'envoi qui attendent l'adresse de leur client.
+  final List<PendingDelivery> pending;
+
   int get total => orders.fold(0, (sum, order) => sum + order.totalPrice);
+}
+
+/// Colis d'un envoi qui attend l'adresse de son client (lien envoyé par SMS) : il part seul
+/// quand le point arrive.
+@immutable
+class PendingDelivery {
+  const PendingDelivery({
+    required this.id,
+    required this.batchId,
+    required this.batchNumber,
+    required this.recipientName,
+    required this.recipientPhone,
+    required this.status,
+    required this.blockedReason,
+    required this.linkUrl,
+    required this.linkExpiresAt,
+    required this.orderId,
+    required this.codAmount,
+  });
+  factory PendingDelivery.fromJson(Json json) => PendingDelivery(
+    id: _field(json, 'id'),
+    batchId: _field(json, 'batchId'),
+    batchNumber: _field<num>(json, 'batchNumber').toInt(),
+    recipientName: _field(json, 'recipientName'),
+    recipientPhone: _field(json, 'recipientPhone'),
+    status: _field(json, 'status'),
+    blockedReason: json['blockedReason'] as String?,
+    linkUrl: _field(json, 'linkUrl'),
+    linkExpiresAt: DateTime.parse(_field(json, 'linkExpiresAt')),
+    orderId: json['orderId'] as String?,
+    codAmount: _field<num>(json, 'codAmount').toInt(),
+  );
+  static const fields = [
+    'id',
+    'batchId',
+    'batchNumber',
+    'recipientName',
+    'recipientPhone',
+    'status',
+    'blockedReason',
+    'linkUrl',
+    'linkExpiresAt',
+    'orderId',
+    'codAmount',
+  ];
+
+  final String id;
+  final String batchId;
+  final int batchNumber;
+  final String recipientName;
+
+  /// Au format +237…
+  final String recipientPhone;
+
+  /// WAITING, EXPIRED, BLOCKED, RELEASED ou CANCELLED.
+  final String status;
+
+  /// Code d'erreur quand le départ automatique a échoué (INSUFFICIENT_BALANCE…).
+  final String? blockedReason;
+  final String linkUrl;
+  final DateTime linkExpiresAt;
+  final String? orderId;
+  final int codAmount;
+
+  String get firstName => recipientName.trim().split(RegExp(r'\s+')).first;
+}
+
+/// Prix de chaque colis d'une liste d'envoi : le prix, ou pourquoi il n'y en a pas.
+@immutable
+class BatchQuote {
+  const BatchQuote({required this.items, required this.totalPrice});
+  factory BatchQuote.fromJson(Json json) => BatchQuote(
+    items: [
+      for (final item in _field<List<Object?>>(json, 'items').cast<Json>())
+        (
+          quote: item['quote'] == null ? null : Quote.fromJson(item['quote']! as Json),
+          error: (item['error'] as Json?)?['message'] as String?,
+        ),
+    ],
+    totalPrice: _field<num>(json, 'totalPrice').toInt(),
+  );
+  static const fields = ['items', 'totalPrice'];
+
+  final List<({Quote? quote, String? error})> items;
+  final int totalPrice;
 }
 
 /// Paiement Mobile Money (G1) : en attente de validation sur le téléphone, réussi ou refusé.

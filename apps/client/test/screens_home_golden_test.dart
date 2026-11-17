@@ -79,6 +79,7 @@ Widget home(Me me, FakeClientApi api) => ProviderScope(
       me: me,
       onNewOrder: () {},
       onLocationLink: () {},
+      onBulk: () {},
       onOpenOrder: (_) {},
       onWallet: () {},
       now: () => homeNow,

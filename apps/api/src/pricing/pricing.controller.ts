@@ -29,6 +29,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { computePrice } from './pricing.engine.js';
 import { PricingSettingsService } from './pricing-settings.service.js';
 import {
+  BatchQuoteBody,
+  BatchQuoteDto,
   PriceSimulationBody,
   PriceSimulationDto,
   PricingGridBody,
@@ -65,6 +67,18 @@ export class QuoteController {
     @ValidBody(QuoteBody) body: z.output<typeof QuoteBody>,
   ): Promise<z.output<typeof QuoteDto>> {
     return this.pricing.publicQuote(user, body);
+  }
+
+  /** Prix de chaque colis d'une liste d'envoi (C4), jusqu'à 100, en un appel. */
+  @Post('quotes')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(BatchQuoteBody)
+  @ApiZodResponse(BatchQuoteDto)
+  quoteMany(
+    @CurrentUser() user: AuthUser,
+    @ValidBody(BatchQuoteBody) body: z.output<typeof BatchQuoteBody>,
+  ): Promise<z.output<typeof BatchQuoteDto>> {
+    return this.pricing.publicQuoteMany(user, body);
   }
 }
 
