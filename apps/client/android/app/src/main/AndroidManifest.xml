@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <!-- Note vocale facultative d'une adresse (30 s au plus, B2), enregistrée à la demande. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Envoi en masse : l’expéditeur coche ses clients parmi ses contacts (lecture seule). -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <!-- Notifications du suivi des commandes (Android 13 et plus). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 

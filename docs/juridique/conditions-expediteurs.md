@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.5 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.6 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -42,8 +42,8 @@ qui lui est confié**, de l'enlèvement à la remise (article 13).
   volumineux (XL), livraison de nuit (de 20 h à 6 h), fortes pluies. Un code promo réduit le
   prix affiché.
 - **Tarif pro des boutiques** : en mode marchand, une remise s'applique automatiquement selon
-  le nombre de vos livraisons réussies du mois en cours (par exemple 10 % à partir de 100,
-  15 % à partir de 300). Elle est affichée avant que vous commandiez et ne se cumule pas avec
+  le nombre de vos livraisons réussies du mois en cours (par exemple 10 % à partir de 100
+  livraisons). Elle est affichée avant que vous commandiez et ne se cumule pas avec
   un code promo : le prix le plus avantageux des deux est retenu.
 - **Paiement par Mobile Money** (MTN MoMo, Orange Money) : des frais Mobile Money s'ajoutent
   au montant, affichés avant que vous validiez. En espèces, vous ne payez rien de plus. Ces
@@ -52,6 +52,15 @@ qui lui est confié**, de l'enlèvement à la remise (article 13).
   La course se fait en tricycle ou en voiture, à un tarif propre affiché avant de commander.
   Si vous demandez de l'aide pour charger (deux personnes), un supplément de manutention
   s'ajoute, lui aussi affiché avant de commander.
+- **Envoi de plusieurs colis** : jusqu'à 100 colis par envoi, depuis le même point. Chaque
+  colis a un numéro, à écrire dessus ; un seul code d'enlèvement vaut pour tout l'envoi. Votre
+  liste reste sur votre téléphone jusqu'à l'envoi.
+- **Client dont vous n'avez pas l'adresse** : Tara lui envoie, en votre nom, un SMS avec un
+  lien pour placer son point. Son colis part dès qu'il l'a placé et il est alors payé comme
+  vous l'avez choisi : par votre solde (vos ventes) s'il suffit ; sinon Tara vous prévient et
+  vous demande de payer. Tant qu'il n'est pas parti, vous pouvez retirer ce colis de l'envoi
+  sans frais. Ne donnez que les numéros de personnes qui attendent un colis de vous : ces SMS
+  ne servent jamais à la publicité, et leur nombre par jour est limité.
 - Vous pouvez programmer une livraison jusqu'à plusieurs jours à l'avance.
 - Vous pouvez annuler gratuitement tant que le livreur n'a pas récupéré le colis : ce que vous
   avez payé revient sur votre solde Tara. Une fois le colis récupéré, la commande ne peut plus

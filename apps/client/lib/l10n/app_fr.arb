@@ -357,7 +357,7 @@
   "fragileBody": "Le livreur le transporte avec soin.",
   "codLabel": "À encaisser auprès du destinataire",
   "codHint": "0 si rien à encaisser",
-  "codHelp": "Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, reversées sur votre Mobile Money.",
+  "codHelp": "Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, moins 2 % de frais d’encaissement (250 F au moins), et vous est reversé sur votre Mobile Money.",
   "codTooHigh": "500 000 F au plus par livraison.",
   "valueLabel": "Valeur du contenu (facultatif)",
   "valueHint": "Ex. 25 000",
@@ -1442,6 +1442,165 @@
     "placeholders": {
       "n": {
         "type": "int"
+      }
+    }
+  },
+  "bulkEntry": "Envoyer plusieurs colis",
+  "bulkEntryBody": "Jusqu’à 100 clients d’un coup : collez votre liste ou cochez vos contacts.",
+  "bulkResume": "Reprendre ma liste · {count, plural, =1{1 client} other{{count} clients}}",
+  "bulkTitle": "Liste d’envoi",
+  "bulkCount": "{count, plural, =0{Aucun client} =1{1 client} other{{count} clients}}",
+  "bulkSettings": "Pour tous les colis",
+  "bulkPickupMissing": "Choisissez d’où partent les colis",
+  "bulkWhenNow": "Dès que possible",
+  "bulkDefaultSize": "Taille des colis",
+  "bulkAddPaste": "Coller",
+  "bulkAddContacts": "Contacts",
+  "bulkAddManual": "Saisir",
+  "bulkEmptyTitle": "Ajoutez vos clients du jour",
+  "bulkEmptyBody": "Collez votre liste WhatsApp, cochez vos clients ou vos contacts, ou saisissez-les un par un. La liste reste sur votre téléphone jusqu’à l’envoi.",
+  "bulkLineWaiting": "Tara lui enverra un lien pour placer son point",
+  "bulkLineIncomplete": "À compléter",
+  "bulkPhoneIncomplete": "numéro incomplet ({digits})",
+  "bulkPhoneMissing": "numéro manquant",
+  "bulkNameMissing": "nom manquant",
+  "bulkFull": "100 clients au plus par envoi : envoyez cette liste, puis commencez-en une autre.",
+  "bulkReview": "Vérifier et envoyer · {count, plural, =1{1 colis} other{{count} colis}}",
+  "bulkAdded": "{count, plural, =0{Aucun client ajouté} =1{1 client ajouté} other{{count} clients ajoutés}}",
+  "bulkClear": "Vider la liste",
+  "bulkClearConfirm": "Retirer les {count} clients de la liste ?",
+  "@bulkClearConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkClearAction": "Vider",
+  "bulkAddCount": "Ajouter {count, plural, =0{} =1{1 client} other{{count} clients}}",
+  "pasteTitle": "Coller une liste",
+  "pasteBody": "Copiez vos commandes du jour depuis WhatsApp ou vos notes : une ligne par client, avec son numéro.",
+  "pasteLabel": "Votre liste",
+  "pasteHint": "Marie 690 11 22 33 Bonapriso 12500",
+  "pasteFromClipboard": "Coller ce que j’ai copié",
+  "pasteUnderstood": "Ce que Tara a compris",
+  "pasteScore": "{ok} sur {total}",
+  "@pasteScore": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pasteNote": "Les montants sont ceux à encaisser auprès du client. Sans adresse connue, Tara envoie au client le lien pour placer son point.",
+  "pastePrivacy": "Lu sur votre téléphone : rien ne part avant « Ajouter ».",
+  "pasteKnownAddress": "adresse connue",
+  "contactsTitle": "Choisir des clients",
+  "contactsSearch": "Nom ou numéro",
+  "contactsKnown": "Vos clients · adresse déjà connue",
+  "contactsOrders": "{count, plural, =1{1 commande} other{{count} commandes}}",
+  "contactsPhone": "Contacts du téléphone",
+  "contactsAllow": "Voir mes contacts",
+  "contactsAllowBody": "Tara lit vos contacts sur ce téléphone pour vous laisser cocher vos clients. Rien n’est envoyé tant que vous ne les ajoutez pas.",
+  "contactsDenied": "Accès aux contacts refusé. Vous pouvez l’autoriser dans les réglages du téléphone.",
+  "contactsOpenSettings": "Ouvrir les réglages",
+  "contactsEmpty": "Aucun contact avec un numéro de mobile camerounais.",
+  "contactsNote": "Seuls les clients cochés quittent votre téléphone. Pour ceux sans adresse, Tara leur envoie le lien pour placer leur point.",
+  "lineNew": "Nouveau client",
+  "lineTitle": "Client n° {number}",
+  "@lineTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "lineHintNoted": "Noté dans votre liste : {hint}",
+  "lineAskLink": "Le client place son point",
+  "lineAskLinkBody": "Tara lui envoie un lien par SMS à l’envoi ; son colis part dès qu’il a placé son point.",
+  "lineLastAddress": "Sa dernière adresse",
+  "linePlaceOnMap": "Placer sur la carte",
+  "lineSize": "Taille du colis",
+  "lineSizeDefault": "Comme la liste ({size})",
+  "lineDescription": "Contenu du colis (facultatif)",
+  "lineDescriptionHint": "2 paires de chaussures",
+  "lineSave": "Enregistrer",
+  "lineRemove": "Retirer de la liste",
+  "bulkSendTitle": "Vérifier et envoyer",
+  "bulkReadyLine": "{count, plural, =1{1 colis prêt : il part tout de suite.} other{{count} colis prêts : ils partent tout de suite.}}",
+  "bulkWaitingLine": "{count, plural, =1{1 client n’a pas encore placé son point : son colis partira dès qu’il le fera.} other{{count} clients n’ont pas encore placé leur point : leurs colis partiront dès qu’ils le feront.}}",
+  "bulkIncompleteLine": "{count, plural, =1{1 client à compléter : il reste dans la liste et ne part pas.} other{{count} clients à compléter : ils restent dans la liste et ne partent pas.}}",
+  "bulkFix": "Corriger",
+  "bulkCourses": "Courses · {count, plural, =1{1 colis} other{{count} colis}}",
+  "bulkCollect": "À encaisser pour vous",
+  "bulkPayNow": "À payer maintenant",
+  "bulkWaitingPaidLater": "Un colis qui attend son point est payé quand il part : par vos ventes s’il y en a assez, sinon on vous demande de payer.",
+  "bulkQuoteError": "Client n° {number} ({name}) : {error}",
+  "@bulkQuoteError": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "bulkSend": "Glisser pour envoyer {count, plural, =1{1 colis} other{{count} colis}}",
+  "bulkSendSemantics": "Glisser pour envoyer la liste",
+  "bulkNothingToSend": "Ajoutez au moins un client complet.",
+  "bulkSentTitle": "Envoi parti !",
+  "bulkSentSubtitle": "{count, plural, =1{1 colis} other{{count} colis}}",
+  "bulkSentWaiting": "Attend son point",
+  "bulkSentWaitingNote": "{count, plural, =1{Le client sans adresse a reçu un SMS. Son colis partira dès qu’il aura placé son point : on vous préviendra.} other{Les {count} clients sans adresse ont reçu un SMS. Chaque colis partira dès que son client aura placé son point : on vous préviendra.}}",
+  "bulkSentIncomplete": "{count, plural, =1{1 client à compléter reste dans votre liste.} other{{count} clients à compléter restent dans votre liste.}}",
+  "pendingTitle": "En attente de l’adresse",
+  "pendingWaiting": "Lien envoyé · son colis part dès qu’il a placé son point",
+  "pendingExpired": "Lien expiré sans réponse",
+  "pendingBlocked": "Point reçu, colis pas encore parti",
+  "pendingBlockedBalance": "Point reçu, mais vos ventes ne suffisent pas pour payer la course.",
+  "pendingResend": "Renvoyer le lien",
+  "pendingShare": "Envoyer le lien par WhatsApp",
+  "pendingShareText": "Bonjour {name}, pour recevoir votre colis, indiquez où vous livrer : {url}",
+  "@pendingShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "pendingRemove": "Retirer de l’envoi",
+  "pendingRemoveConfirm": "Retirer le colis n° {number} ({name}) ? Rien ne vous sera facturé.",
+  "@pendingRemoveConfirm": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pendingPayMomo": "Payer par Mobile Money",
+  "pendingRetry": "Réessayer avec mes ventes",
+  "pendingResent": "Nouveau lien envoyé à {name}.",
+  "pendingParcel": "Colis n° {number} · {name}",
+  "@pendingParcel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
       }
     }
   }

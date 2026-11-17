@@ -226,12 +226,96 @@ class FakeClientApi extends ClientApi {
     );
   }
 
-  PlacedOrder _placed(int i, Map<String, Object?> item) => PlacedOrder(
+  PlacedOrder _placed(int i, Map<String, Object?> item, {int? batchNumber}) => PlacedOrder(
     id: '00000000-0000-4000-8000-00000000050$i',
     reference: 'TR-4830$i',
     status: 'SEARCHING_RIDER',
     totalPrice: item['packageSize'] == 'XL' ? 1700 : 1200,
+    batchNumber: batchNumber,
   );
+
+  /// Prix d'une liste d'envoi : un colis vers [unpricedAddressId] n'a pas de prix (hors zone).
+  String? unpricedAddressId;
+
+  @override
+  Future<BatchQuote> quoteMany({
+    required String pickupAddressId,
+    required List<({String dropoffAddressId, String packageSize})> items,
+    DateTime? scheduledFor,
+  }) async {
+    final quoted = [
+      for (final item in items)
+        item.dropoffAddressId == unpricedAddressId
+            ? (quote: null, error: 'Cette adresse est hors de la zone desservie.')
+            : (
+                quote: await quote(
+                  pickupAddressId: pickupAddressId,
+                  dropoffAddressId: item.dropoffAddressId,
+                  packageSize: item.packageSize,
+                ),
+                error: null,
+              ),
+    ];
+    return BatchQuote(items: quoted, totalPrice: quoted.fold(0, (sum, i) => sum + (i.quote?.totalPrice ?? 0)));
+  }
+
+  /// Colis qui attendent l'adresse de leur client, et ce que l'expéditeur en a fait.
+  List<PendingDelivery> pendingList = [];
+  final pendingActions = <String>[];
+
+  @override
+  Future<List<PendingDelivery>> pendingDeliveries() async => pendingList;
+
+  PendingDelivery _pendingWith(String id, {String? status, String? orderId}) {
+    final p = pendingList.firstWhere((p) => p.id == id);
+    return PendingDelivery(
+      id: p.id,
+      batchId: p.batchId,
+      batchNumber: p.batchNumber,
+      recipientName: p.recipientName,
+      recipientPhone: p.recipientPhone,
+      status: status ?? p.status,
+      blockedReason: status == null ? p.blockedReason : null,
+      linkUrl: p.linkUrl,
+      linkExpiresAt: p.linkExpiresAt,
+      orderId: orderId,
+      codAmount: p.codAmount,
+    );
+  }
+
+  @override
+  Future<PendingDelivery> resendPending(String id) async {
+    pendingActions.add('resend:$id');
+    return _pendingWith(id, status: 'WAITING');
+  }
+
+  @override
+  Future<PendingDelivery> cancelPending(String id) async {
+    pendingActions.add('cancel:$id');
+    pendingList = [
+      for (final p in pendingList)
+        if (p.id != id) p,
+    ];
+    return PendingDelivery(
+      id: id,
+      batchId: '',
+      batchNumber: 0,
+      recipientName: '',
+      recipientPhone: '',
+      status: 'CANCELLED',
+      blockedReason: null,
+      linkUrl: '',
+      linkExpiresAt: DateTime(2026),
+      orderId: null,
+      codAmount: 0,
+    );
+  }
+
+  @override
+  Future<PendingDelivery> releasePending(String id, {String? feePaymentMethod}) async {
+    pendingActions.add('release:$id:${feePaymentMethod ?? 'WALLET'}');
+    return _pendingWith(id, status: 'RELEASED', orderId: '00000000-0000-4000-8000-000000000777');
+  }
 
   @override
   Future<Placement> createOrder({
@@ -256,10 +340,32 @@ class FakeClientApi extends ClientApi {
     required List<Map<String, Object?>> deliveries,
   }) async {
     created.add((key: idempotencyKey, body: {...shared, 'items': deliveries}, batch: true));
+    const batchId = '00000000-0000-4000-8000-000000000600';
+    // Un colis sans adresse attend son client ; les autres partent tout de suite.
     return Placement(
-      orders: [for (final (i, d) in deliveries.indexed) _placed(i + 1, d)],
+      orders: [
+        for (final (i, d) in deliveries.indexed)
+          if (d['askAddress'] != true) _placed(i + 1, d, batchNumber: i + 1),
+      ],
+      pending: [
+        for (final (i, d) in deliveries.indexed)
+          if (d['askAddress'] == true)
+            PendingDelivery(
+              id: '00000000-0000-4000-8000-00000000070${i + 1}',
+              batchId: batchId,
+              batchNumber: i + 1,
+              recipientName: d['recipientName']! as String,
+              recipientPhone: d['recipientPhone']! as String,
+              status: 'WAITING',
+              blockedReason: null,
+              linkUrl: 'https://tara.test/l/lien${i + 1}',
+              linkExpiresAt: DateTime(2026, 11, 7, 10),
+              orderId: null,
+              codAmount: (d['codAmount'] as int?) ?? 0,
+            ),
+      ],
       pickupCode: '7302',
-      batchId: '00000000-0000-4000-8000-000000000600',
+      batchId: batchId,
     );
   }
 

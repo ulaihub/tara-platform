@@ -148,7 +148,45 @@ class ClientApi {
     ) as Json,
   );
 
-  /// Jusqu'à 10 livraisons depuis le même enlèvement (C4), un seul code d'enlèvement.
+  /// Prix de chaque colis d'une liste d'envoi (jusqu'à 100) en un appel.
+  Future<BatchQuote> quoteMany({
+    required String pickupAddressId,
+    required List<({String dropoffAddressId, String packageSize})> items,
+    DateTime? scheduledFor,
+  }) async => BatchQuote.fromJson(
+    await _api.post(
+      '/orders/quotes',
+      body: {
+        'pickupAddressId': pickupAddressId,
+        'scheduledFor': ?scheduledFor?.toUtc().toIso8601String(),
+        'items': [
+          for (final item in items) {'dropoffAddressId': item.dropoffAddressId, 'packageSize': item.packageSize},
+        ],
+      },
+    ) as Json,
+  );
+
+  /// Colis qui attendent l'adresse de leur client (envoi en masse).
+  Future<List<PendingDelivery>> pendingDeliveries() async => [
+    for (final item in (await _api.get('/orders/pending') as List<Object?>).cast<Json>())
+      PendingDelivery.fromJson(item),
+  ];
+
+  /// Renvoie au client un lien neuf (lien expiré ou SMS perdu).
+  Future<PendingDelivery> resendPending(String id) async =>
+      PendingDelivery.fromJson(await _api.post('/orders/pending/$id/resend') as Json);
+
+  /// Retire le colis de l'envoi : rien n'est payé.
+  Future<PendingDelivery> cancelPending(String id) async =>
+      PendingDelivery.fromJson(await _api.post('/orders/pending/$id/cancel') as Json);
+
+  /// Fait partir un colis bloqué, avec un autre moyen de paiement s'il le faut.
+  Future<PendingDelivery> releasePending(String id, {String? feePaymentMethod}) async => PendingDelivery.fromJson(
+    await _api.post('/orders/pending/$id/release', body: {'feePaymentMethod': ?feePaymentMethod}) as Json,
+  );
+
+  /// Jusqu'à 100 colis depuis le même enlèvement (C4), un seul code d'enlèvement ; un colis
+  /// sans adresse (`askAddress`) part quand son client a placé son point.
   Future<Placement> createBatch({
     required String idempotencyKey,
     required Json shared,

@@ -15,10 +15,12 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
+import '../bulk/bulk_screen.dart';
 import '../common/scoped_page.dart';
 import '../legal/terms_screen.dart';
 import '../order/new_order_flow.dart';
 import '../orders/orders_screen.dart';
+import '../orders/pending_section.dart';
 import '../profile/profile_screen.dart';
 import '../tracking/tracking_screen.dart';
 import '../wallet/wallet_screen.dart';
@@ -95,7 +97,13 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   void _openFromPush(Json data) {
     final orderId = data['orderId'];
-    if (orderId is String && orderId.isNotEmpty && mounted) _openOrder(orderId);
+    if (orderId is String && orderId.isNotEmpty && mounted) {
+      _openOrder(orderId);
+    } else if (data['pendingId'] is String && mounted) {
+      // Colis d'un envoi en attente (départ bloqué) : l'onglet Commandes le montre en tête.
+      ref.invalidate(pendingDeliveriesProvider);
+      setState(() => _tab = 1);
+    }
   }
 
   @override
@@ -110,6 +118,11 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
 
   void _onEvent(RealtimeEvent event) {
     switch (event.name) {
+      case 'location-link.submitted':
+        // Un client de l'envoi a placé son point : son colis part (ou attend le paiement).
+        ref
+          ..invalidate(pendingDeliveriesProvider)
+          ..invalidate(activeOrdersProvider);
       case 'order.status':
         // Livraison qui avance : listes et ventes du jour relues.
         ref
@@ -194,6 +207,48 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     ),
   );
 
+  /// Envoi en masse (C4) : la liste d'envoi en plein écran ; les conditions à jour d'abord,
+  /// comme pour une livraison.
+  void _bulk() {
+    final terms = ref.read(termsStatusProvider).value;
+    if (terms != null && !terms.upToDate) {
+      unawaited(
+        Navigator.of(context).push(
+          scopedPage<void>(
+            context,
+            (route) => TermsScreen.update(
+              onLater: () => Navigator.of(route).pop(),
+              onSigned: () {
+                Navigator.of(route).pop();
+                _openBulk();
+              },
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+    _openBulk();
+  }
+
+  void _openBulk() => unawaited(
+    Navigator.of(context).push(
+      scopedPage<void>(
+        context,
+        (flowContext) => BulkScreen(
+          me: widget.me,
+          now: widget.now,
+          onClose: () {
+            ref
+              ..invalidate(activeOrdersProvider)
+              ..invalidate(pendingDeliveriesProvider);
+            Navigator.of(flowContext).pop();
+          },
+        ),
+      ),
+    ),
+  );
+
   /// « Demander l'adresse » (B3) : lien envoyé au destinataire, puis livraison créée avec
   /// son point, l'écran du lien remplacé par la nouvelle livraison.
   void _askAddress() => unawaited(
@@ -246,11 +301,16 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             current: _tab,
             onSelected: (tab) => setState(() => _tab = tab),
             child: switch (_tab) {
-              1 => OrdersScreen(onOpenOrder: (order) => _openOrder(order.id), now: widget.now),
+              1 => OrdersScreen(
+                onOpenOrder: (order) => _openOrder(order.id),
+                onOpenOrderId: _openOrder,
+                now: widget.now,
+              ),
               2 => ProfileScreen(me: widget.me),
               _ => HomeScreen(
                 me: widget.me,
                 onNewOrder: _newOrder,
+                onBulk: _bulk,
                 onLocationLink: _askAddress,
                 onOpenOrder: (order) => _openOrder(order.id),
                 onWallet: _openWallet,

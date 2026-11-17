@@ -1451,7 +1451,7 @@ abstract class AppLocalizations {
   /// No description provided for @codHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, reversées sur votre Mobile Money.'**
+  /// **'Le livreur encaisse ce montant à la livraison ; il rejoint vos ventes, moins 2 % de frais d’encaissement (250 F au moins), et vous est reversé sur votre Mobile Money.'**
   String get codHelp;
 
   /// No description provided for @codTooHigh.
@@ -3769,6 +3769,558 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Donnez-lui le colis n° {n} et le code d’enlèvement à son arrivée.'**
   String trackAssignedParcelBody(int n);
+
+  /// No description provided for @bulkEntry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer plusieurs colis'**
+  String get bulkEntry;
+
+  /// No description provided for @bulkEntryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jusqu’à 100 clients d’un coup : collez votre liste ou cochez vos contacts.'**
+  String get bulkEntryBody;
+
+  /// No description provided for @bulkResume.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre ma liste · {count, plural, =1{1 client} other{{count} clients}}'**
+  String bulkResume(num count);
+
+  /// No description provided for @bulkTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liste d’envoi'**
+  String get bulkTitle;
+
+  /// No description provided for @bulkCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun client} =1{1 client} other{{count} clients}}'**
+  String bulkCount(num count);
+
+  /// No description provided for @bulkSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour tous les colis'**
+  String get bulkSettings;
+
+  /// No description provided for @bulkPickupMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez d’où partent les colis'**
+  String get bulkPickupMissing;
+
+  /// No description provided for @bulkWhenNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dès que possible'**
+  String get bulkWhenNow;
+
+  /// No description provided for @bulkDefaultSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille des colis'**
+  String get bulkDefaultSize;
+
+  /// No description provided for @bulkAddPaste.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coller'**
+  String get bulkAddPaste;
+
+  /// No description provided for @bulkAddContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts'**
+  String get bulkAddContacts;
+
+  /// No description provided for @bulkAddManual.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir'**
+  String get bulkAddManual;
+
+  /// No description provided for @bulkEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez vos clients du jour'**
+  String get bulkEmptyTitle;
+
+  /// No description provided for @bulkEmptyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collez votre liste WhatsApp, cochez vos clients ou vos contacts, ou saisissez-les un par un. La liste reste sur votre téléphone jusqu’à l’envoi.'**
+  String get bulkEmptyBody;
+
+  /// No description provided for @bulkLineWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tara lui enverra un lien pour placer son point'**
+  String get bulkLineWaiting;
+
+  /// No description provided for @bulkLineIncomplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'À compléter'**
+  String get bulkLineIncomplete;
+
+  /// No description provided for @bulkPhoneIncomplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'numéro incomplet ({digits})'**
+  String bulkPhoneIncomplete(Object digits);
+
+  /// No description provided for @bulkPhoneMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'numéro manquant'**
+  String get bulkPhoneMissing;
+
+  /// No description provided for @bulkNameMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'nom manquant'**
+  String get bulkNameMissing;
+
+  /// No description provided for @bulkFull.
+  ///
+  /// In fr, this message translates to:
+  /// **'100 clients au plus par envoi : envoyez cette liste, puis commencez-en une autre.'**
+  String get bulkFull;
+
+  /// No description provided for @bulkReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier et envoyer · {count, plural, =1{1 colis} other{{count} colis}}'**
+  String bulkReview(num count);
+
+  /// No description provided for @bulkAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun client ajouté} =1{1 client ajouté} other{{count} clients ajoutés}}'**
+  String bulkAdded(num count);
+
+  /// No description provided for @bulkClear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vider la liste'**
+  String get bulkClear;
+
+  /// No description provided for @bulkClearConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer les {count} clients de la liste ?'**
+  String bulkClearConfirm(int count);
+
+  /// No description provided for @bulkClearAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vider'**
+  String get bulkClearAction;
+
+  /// No description provided for @bulkAddCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter {count, plural, =0{} =1{1 client} other{{count} clients}}'**
+  String bulkAddCount(num count);
+
+  /// No description provided for @pasteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coller une liste'**
+  String get pasteTitle;
+
+  /// No description provided for @pasteBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copiez vos commandes du jour depuis WhatsApp ou vos notes : une ligne par client, avec son numéro.'**
+  String get pasteBody;
+
+  /// No description provided for @pasteLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre liste'**
+  String get pasteLabel;
+
+  /// No description provided for @pasteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marie 690 11 22 33 Bonapriso 12500'**
+  String get pasteHint;
+
+  /// No description provided for @pasteFromClipboard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coller ce que j’ai copié'**
+  String get pasteFromClipboard;
+
+  /// No description provided for @pasteUnderstood.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que Tara a compris'**
+  String get pasteUnderstood;
+
+  /// No description provided for @pasteScore.
+  ///
+  /// In fr, this message translates to:
+  /// **'{ok} sur {total}'**
+  String pasteScore(int ok, int total);
+
+  /// No description provided for @pasteNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les montants sont ceux à encaisser auprès du client. Sans adresse connue, Tara envoie au client le lien pour placer son point.'**
+  String get pasteNote;
+
+  /// No description provided for @pastePrivacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu sur votre téléphone : rien ne part avant « Ajouter ».'**
+  String get pastePrivacy;
+
+  /// No description provided for @pasteKnownAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'adresse connue'**
+  String get pasteKnownAddress;
+
+  /// No description provided for @contactsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir des clients'**
+  String get contactsTitle;
+
+  /// No description provided for @contactsSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom ou numéro'**
+  String get contactsSearch;
+
+  /// No description provided for @contactsKnown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos clients · adresse déjà connue'**
+  String get contactsKnown;
+
+  /// No description provided for @contactsOrders.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 commande} other{{count} commandes}}'**
+  String contactsOrders(num count);
+
+  /// No description provided for @contactsPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contacts du téléphone'**
+  String get contactsPhone;
+
+  /// No description provided for @contactsAllow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mes contacts'**
+  String get contactsAllow;
+
+  /// No description provided for @contactsAllowBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tara lit vos contacts sur ce téléphone pour vous laisser cocher vos clients. Rien n’est envoyé tant que vous ne les ajoutez pas.'**
+  String get contactsAllowBody;
+
+  /// No description provided for @contactsDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès aux contacts refusé. Vous pouvez l’autoriser dans les réglages du téléphone.'**
+  String get contactsDenied;
+
+  /// No description provided for @contactsOpenSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir les réglages'**
+  String get contactsOpenSettings;
+
+  /// No description provided for @contactsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contact avec un numéro de mobile camerounais.'**
+  String get contactsEmpty;
+
+  /// No description provided for @contactsNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls les clients cochés quittent votre téléphone. Pour ceux sans adresse, Tara leur envoie le lien pour placer leur point.'**
+  String get contactsNote;
+
+  /// No description provided for @lineNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau client'**
+  String get lineNew;
+
+  /// No description provided for @lineTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client n° {number}'**
+  String lineTitle(int number);
+
+  /// No description provided for @lineHintNoted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Noté dans votre liste : {hint}'**
+  String lineHintNoted(Object hint);
+
+  /// No description provided for @lineAskLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client place son point'**
+  String get lineAskLink;
+
+  /// No description provided for @lineAskLinkBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tara lui envoie un lien par SMS à l’envoi ; son colis part dès qu’il a placé son point.'**
+  String get lineAskLinkBody;
+
+  /// No description provided for @lineLastAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sa dernière adresse'**
+  String get lineLastAddress;
+
+  /// No description provided for @linePlaceOnMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placer sur la carte'**
+  String get linePlaceOnMap;
+
+  /// No description provided for @lineSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille du colis'**
+  String get lineSize;
+
+  /// No description provided for @lineSizeDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comme la liste ({size})'**
+  String lineSizeDefault(Object size);
+
+  /// No description provided for @lineDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu du colis (facultatif)'**
+  String get lineDescription;
+
+  /// No description provided for @lineDescriptionHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'2 paires de chaussures'**
+  String get lineDescriptionHint;
+
+  /// No description provided for @lineSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get lineSave;
+
+  /// No description provided for @lineRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de la liste'**
+  String get lineRemove;
+
+  /// No description provided for @bulkSendTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier et envoyer'**
+  String get bulkSendTitle;
+
+  /// No description provided for @bulkReadyLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 colis prêt : il part tout de suite.} other{{count} colis prêts : ils partent tout de suite.}}'**
+  String bulkReadyLine(num count);
+
+  /// No description provided for @bulkWaitingLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 client n’a pas encore placé son point : son colis partira dès qu’il le fera.} other{{count} clients n’ont pas encore placé leur point : leurs colis partiront dès qu’ils le feront.}}'**
+  String bulkWaitingLine(num count);
+
+  /// No description provided for @bulkIncompleteLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 client à compléter : il reste dans la liste et ne part pas.} other{{count} clients à compléter : ils restent dans la liste et ne partent pas.}}'**
+  String bulkIncompleteLine(num count);
+
+  /// No description provided for @bulkFix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Corriger'**
+  String get bulkFix;
+
+  /// No description provided for @bulkCourses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses · {count, plural, =1{1 colis} other{{count} colis}}'**
+  String bulkCourses(num count);
+
+  /// No description provided for @bulkCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser pour vous'**
+  String get bulkCollect;
+
+  /// No description provided for @bulkPayNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'À payer maintenant'**
+  String get bulkPayNow;
+
+  /// No description provided for @bulkWaitingPaidLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un colis qui attend son point est payé quand il part : par vos ventes s’il y en a assez, sinon on vous demande de payer.'**
+  String get bulkWaitingPaidLater;
+
+  /// No description provided for @bulkQuoteError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client n° {number} ({name}) : {error}'**
+  String bulkQuoteError(int number, String name, String error);
+
+  /// No description provided for @bulkSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser pour envoyer {count, plural, =1{1 colis} other{{count} colis}}'**
+  String bulkSend(num count);
+
+  /// No description provided for @bulkSendSemantics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser pour envoyer la liste'**
+  String get bulkSendSemantics;
+
+  /// No description provided for @bulkNothingToSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez au moins un client complet.'**
+  String get bulkNothingToSend;
+
+  /// No description provided for @bulkSentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi parti !'**
+  String get bulkSentTitle;
+
+  /// No description provided for @bulkSentSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 colis} other{{count} colis}}'**
+  String bulkSentSubtitle(num count);
+
+  /// No description provided for @bulkSentWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attend son point'**
+  String get bulkSentWaiting;
+
+  /// No description provided for @bulkSentWaitingNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Le client sans adresse a reçu un SMS. Son colis partira dès qu’il aura placé son point : on vous préviendra.} other{Les {count} clients sans adresse ont reçu un SMS. Chaque colis partira dès que son client aura placé son point : on vous préviendra.}}'**
+  String bulkSentWaitingNote(num count);
+
+  /// No description provided for @bulkSentIncomplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 client à compléter reste dans votre liste.} other{{count} clients à compléter restent dans votre liste.}}'**
+  String bulkSentIncomplete(num count);
+
+  /// No description provided for @pendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de l’adresse'**
+  String get pendingTitle;
+
+  /// No description provided for @pendingWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien envoyé · son colis part dès qu’il a placé son point'**
+  String get pendingWaiting;
+
+  /// No description provided for @pendingExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien expiré sans réponse'**
+  String get pendingExpired;
+
+  /// No description provided for @pendingBlocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Point reçu, colis pas encore parti'**
+  String get pendingBlocked;
+
+  /// No description provided for @pendingBlockedBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Point reçu, mais vos ventes ne suffisent pas pour payer la course.'**
+  String get pendingBlockedBalance;
+
+  /// No description provided for @pendingResend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le lien'**
+  String get pendingResend;
+
+  /// No description provided for @pendingShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le lien par WhatsApp'**
+  String get pendingShare;
+
+  /// No description provided for @pendingShareText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {name}, pour recevoir votre colis, indiquez où vous livrer : {url}'**
+  String pendingShareText(String name, String url);
+
+  /// No description provided for @pendingRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de l’envoi'**
+  String get pendingRemove;
+
+  /// No description provided for @pendingRemoveConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le colis n° {number} ({name}) ? Rien ne vous sera facturé.'**
+  String pendingRemoveConfirm(int number, String name);
+
+  /// No description provided for @pendingPayMomo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer par Mobile Money'**
+  String get pendingPayMomo;
+
+  /// No description provided for @pendingRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer avec mes ventes'**
+  String get pendingRetry;
+
+  /// No description provided for @pendingResent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau lien envoyé à {name}.'**
+  String pendingResent(Object name);
+
+  /// No description provided for @pendingParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis n° {number} · {name}'**
+  String pendingParcel(int number, String name);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

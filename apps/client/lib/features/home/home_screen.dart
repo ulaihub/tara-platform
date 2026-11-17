@@ -17,6 +17,7 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
+import '../bulk/bulk_screen.dart';
 import '../orders/order_row.dart';
 
 /// Commandes en cours de l'expéditeur (accueil), relues à chaque retour sur l'accueil.
@@ -36,6 +37,7 @@ class HomeScreen extends ConsumerWidget {
     required this.me,
     required this.onNewOrder,
     required this.onLocationLink,
+    this.onBulk,
     required this.onOpenOrder,
     required this.onWallet,
     this.now,
@@ -44,6 +46,9 @@ class HomeScreen extends ConsumerWidget {
   final Me me;
   final VoidCallback onNewOrder;
   final VoidCallback onLocationLink;
+
+  /// Envoi en masse (liste d'envoi) ; absent, le bouton n'est pas proposé.
+  final VoidCallback? onBulk;
   final ValueChanged<OrderSummary> onOpenOrder;
   final VoidCallback onWallet;
 
@@ -105,7 +110,13 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 18),
-            _SendCard(onNewOrder: onNewOrder, onLocationLink: onLocationLink),
+            _SendCard(
+              onNewOrder: onNewOrder,
+              onLocationLink: onLocationLink,
+              onBulk: onBulk,
+              // Liste d'envoi déjà commencée : « Reprendre ma liste ».
+              bulkCount: ref.watch(bulkDraftCountProvider(me.id)).value ?? 0,
+            ),
             if (wallet != null) ...[const SizedBox(height: 12), _ShopBalance(wallet: wallet.value, onTap: onWallet)],
             const SizedBox(height: 22),
             SectionHeader(
@@ -148,9 +159,11 @@ class HomeScreen extends ConsumerWidget {
 
 /// « Envoyer un colis » : nouvelle livraison, ou adresse demandée au destinataire.
 class _SendCard extends StatelessWidget {
-  const _SendCard({required this.onNewOrder, required this.onLocationLink});
+  const _SendCard({required this.onNewOrder, required this.onLocationLink, this.onBulk, this.bulkCount = 0});
   final VoidCallback onNewOrder;
   final VoidCallback onLocationLink;
+  final VoidCallback? onBulk;
+  final int bulkCount;
 
   @override
   Widget build(BuildContext context) {
@@ -184,6 +197,15 @@ class _SendCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           PrimaryButton(label: l.newDelivery, icon: TaraIcons.arrowRight, onPressed: onNewOrder),
+          if (onBulk != null) ...[
+            const SizedBox(height: 10),
+            GlassButton(
+              label: bulkCount > 0 ? l.bulkResume(bulkCount) : l.bulkEntry,
+              icon: TaraIcons.users,
+              color: c.accentText,
+              onPressed: onBulk,
+            ),
+          ],
           const SizedBox(height: 4),
           Center(
             child: Padding(

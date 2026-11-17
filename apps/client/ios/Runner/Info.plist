@@ -16,6 +16,8 @@
 	<string>Tara utilise l’appareil photo pour la photo de façade d’une adresse, si vous le souhaitez.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Tara utilise le micro pour la note vocale d’une adresse (30 secondes au plus), si vous le souhaitez.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Tara lit vos contacts sur ce téléphone pour que vous cochiez les clients à livrer. Seuls ceux que vous ajoutez quittent le téléphone.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Tara utilise votre position pour placer l’adresse d’enlèvement ou de livraison sur la carte.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

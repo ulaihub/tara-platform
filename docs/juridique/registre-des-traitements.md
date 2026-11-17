@@ -35,7 +35,7 @@ Les informations sur la société, à renseigner, sont marquées **[À COMPLÉTE
 | Finalité      | prendre, attribuer et suivre les livraisons, prouver la remise du colis                                                                                                                                                                                                    |
 | Base légale   | exécution du contrat avec l'expéditeur, au bénéfice du destinataire, informé par la page de suivi ; données limitées à la livraison et masquées après 30 jours                                                                                                             |
 | Durée         | coordonnées du destinataire **masquées 30 jours** après la fin de la commande ; commande elle-même gardée avec la comptabilité ; photos de preuve et du colis **90 jours**, sauf litige ou incident ouvert sur la commande                                                 |
-| Destinataires | livreur de la course (numéro du destinataire tant que la course est en cours), expéditeur, équipe Tara ; destinataire par SMS ou WhatsApp (lien de suivi)                                                                                                                  |
+| Destinataires | livreur de la course (numéro du destinataire tant que la course est en cours), expéditeur, équipe Tara ; destinataire par SMS ou WhatsApp (lien de suivi ; pour un envoi de plusieurs colis, lien pour placer son point, envoyé au nom de l'expéditeur, nombre limité par compte et par jour, 300 par défaut). Les contacts du téléphone et les listes collées sont lus sur le téléphone de l'expéditeur : seuls les clients qu'il envoie parviennent à Tara                                                                                                                  |
 
 ### 3. Livreurs : validation et suivi des courses
 
@@ -131,6 +131,6 @@ Procédure dans [`docs/SECURITE.md`](../SECURITE.md) (« Réponse à un incident
 2. **Référent pour la protection des données** : à désigner (le gérant au début) ; son contact figure dans la politique de confidentialité.
 3. **Hébergement** : le serveur est en France ; un hébergement au Cameroun réduirait le risque lié aux transferts (sanctions élevées en cas de transfert sans autorisation).
 4. **Purges** : 30 et 90 jours appliqués chaque nuit par le logiciel ; 5 ans (journal d'audit) et 10 ans (comptabilité) à programmer avant les échéances.
-5. **Mise à jour de la politique** : version 2026-11.5 (code secret, empreinte digitale gardée sur le téléphone, codes par WhatsApp), présentée à tous les utilisateurs, qui l'acceptent de nouveau (case cochée, sans nouveau code SMS).
+5. **Mise à jour de la politique** : version 2026-11.5 (code secret, empreinte digitale gardée sur le téléphone, codes par WhatsApp), présentée à tous les utilisateurs, qui l'acceptent de nouveau (case cochée, sans nouveau code SMS). Version 2026-11.6 : envoi de plusieurs colis (contacts et listes lus sur le téléphone, lien envoyé au destinataire pour placer son point).
 
 Le logiciel applique ces durées automatiquement chaque nuit : destinataires (30 jours) ; trajets, photos, demandes au support et pièces des livreurs refusés (90 jours).

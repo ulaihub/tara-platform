@@ -95,6 +95,18 @@ abstract final class TaraIcons {
     _P('M16.5 17a14 14 0 01-.5-2'),
   ]);
   static const backspace = TaraIconData([_P('M9 5h11v14H9l-6-7z'), _P('M12.5 9.5l5 5M17.5 9.5l-5 5')]);
+
+  /// Coller une liste (envoi en masse).
+  static const clipboard = TaraIconData([_R(5, 4, 14, 17, 2.5), _P('M9 4V3h6v1'), _P('M8.5 10h7M8.5 14h5')]);
+
+  /// Clients, contacts.
+  static const users = TaraIconData([
+    _C(9, 8, 3.5),
+    _P('M2.5 20c1-3.2 3.6-5 6.5-5s5.5 1.8 6.5 5'),
+    _P('M15.5 4.7a3.5 3.5 0 010 6.6M17.5 15.3c2 .7 3.4 2.4 4 4.7'),
+  ]);
+  static const plus = TaraIconData([_P('M12 5v14M5 12h14')]);
+  static const search = TaraIconData([_C(11, 11, 7), _P('M20 20l-3.5-3.5')]);
 }
 
 sealed class _Shape {
