@@ -3,6 +3,7 @@ import type { Request } from 'express';
 import type { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
 import type { AuthUser } from '../auth/auth.types.js';
+import { addRole } from '../auth/roles.js';
 import { AppError } from '../common/errors/app-error.js';
 import { pageOf } from '../common/pagination.js';
 import { cameroonDate } from '../common/time.js';
@@ -213,12 +214,9 @@ export class RidersService {
         },
         include: { documents: true },
       });
-      if (!actor.roles.includes('RIDER')) {
-        await tx.user.update({
-          where: { id: actor.id },
-          data: { roles: { set: [...actor.roles, 'RIDER'] } },
-        });
-      }
+      // Rôle ajouté aux rôles en base : ceux de la session sont filtrés (rôles de l'équipe
+      // sans second facteur) et ne doivent jamais remplacer les rôles du compte.
+      await addRole(tx, actor.id, 'RIDER');
       await this.audit.record(
         {
           actor,
