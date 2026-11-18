@@ -217,6 +217,11 @@ class ClientApi {
   Future<String> newPickupCode(String orderId) async =>
       (await _api.post('/orders/$orderId/pickup-code') as Json)['pickupCode']! as String;
 
+  /// Boutique : réserve gardée chaque soir de ses ventes pour ses livraisons (0 : aucune).
+  Future<void> setPayoutReserve(int amount) async {
+    await _api.send('PUT', '/me/wallet/reserve', body: {'amount': amount});
+  }
+
   /// Recharge du solde Tara par Mobile Money (G1) ; [key] : la même demande renvoyée n'en
   /// crée pas une seconde.
   Future<Payment> topUp({

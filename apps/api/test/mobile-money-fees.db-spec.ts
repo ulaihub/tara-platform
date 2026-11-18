@@ -240,6 +240,38 @@ describe('Frais Mobile Money payés par le client', () => {
     expect(free.body).toMatchObject({ amount: 10_000, withdrawalFee: 0, received: 10_000 });
   });
 
+  it('solde Tara : retrait gratuit pour un particulier, règle des reversements pour une boutique', async () => {
+    async function topUpAndWithdraw(user: SignedIn) {
+      const topUp = await request(ctx.http)
+        .post('/v1/me/wallet/topup')
+        .set(user.auth)
+        .set('Idempotency-Key', key())
+        .send({ amount: 10_000, phone: user.phone, operator: 'MTN' })
+        .expect(201);
+      await settle(topUp.body.id);
+      const out = await request(ctx.http)
+        .post('/v1/me/wallet/refund')
+        .set(user.auth)
+        .set('Idempotency-Key', key())
+        .send({ amount: 10_000, phone: user.phone, operator: 'MTN' })
+        .expect(201);
+      return out.body;
+    }
+    const customer = await signIn(ctx);
+    expect(await topUpAndWithdraw(customer)).toMatchObject({
+      amount: 10_000,
+      withdrawalFee: 0,
+      received: 10_000,
+    });
+    // Sinon la réserve, gardée des ventes, sortirait sans les frais de retrait.
+    const shop = await merchant(ctx);
+    expect(await topUpAndWithdraw(shop)).toMatchObject({
+      amount: 10_000,
+      withdrawalFee: 122,
+      received: 9878,
+    });
+  });
+
   it('retrait d’un livreur sous le seuil général : frais retenus sur ses gains retirés', async () => {
     const rider = await activeRider(ctx);
     const out = await request(ctx.http)

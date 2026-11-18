@@ -83,7 +83,8 @@ export class AdminOrdersService {
         { sender: { fullName: { contains: q, mode: 'insensitive' } } },
         { merchant: { shopName: { contains: q, mode: 'insensitive' } } },
       ];
-      if (digits.length >= 4) {
+      // Un numéro, pas une référence (« TR-AB1234 » ne doit pas trouver les numéros en 1234).
+      if (digits.length >= 4 && !/[a-z]/i.test(q)) {
         or.push(
           { recipientPhone: { contains: digits } },
           { sender: { phone: { contains: digits } } },

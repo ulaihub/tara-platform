@@ -54,7 +54,7 @@ export class WalletsService implements OnModuleInit {
     this.payments.on('RIDER_TOPUP', (tx, payment) => this.onRiderTopUp(tx, payment));
   }
 
-  /** Solde utilisé par l'utilisateur pour payer : portefeuille marchand s'il en a un. */
+  /** Compte crédité d'un avoir de l'équipe : les ventes d'une boutique, sinon son solde Tara. */
   async spendingAccount(userId: string): Promise<AccountSpec> {
     const merchant = await this.prisma.merchantProfile.findUnique({ where: { userId } });
     return merchant ? merchantPayable(merchant.id) : customerWallet(userId);
@@ -87,6 +87,7 @@ export class WalletsService implements OnModuleInit {
         ? {
             balance: await this.ledger.balance(merchantPayable(merchant.id)),
             payoutSchedule: merchant.payoutSchedule,
+            payoutReserve: merchant.payoutReserve,
             plan: merchant.plan,
             payoutPhone: merchant.payoutPhone,
             payoutHour: this.env.PAYOUT_DAILY_HOUR,
@@ -158,6 +159,15 @@ export class WalletsService implements OnModuleInit {
     return { items, nextCursor: rows.length > page.limit ? (items.at(-1)?.id ?? null) : null };
   }
 
+  /** Réserve pour les livraisons, gardée des ventes au reversement du soir. */
+  async setPayoutReserve(userId: string, amount: number): Promise<void> {
+    const { count } = await this.prisma.merchantProfile.updateMany({
+      where: { userId },
+      data: { payoutReserve: amount },
+    });
+    if (count === 0) throw AppError.notFound();
+  }
+
   // --- Recharge du solde (G1) ---------------------------------------------------------------
 
   async topUp(
@@ -178,8 +188,16 @@ export class WalletsService implements OnModuleInit {
     });
   }
 
+  /**
+   * Recharge : sur le solde Tara, boutique comprise (il paie ses livraisons avant ses ventes
+   * et n'est jamais reversé d'office). Une recharge liée à une commande (retour à payer)
+   * couvre le compte qui doit ces frais.
+   */
   private async onTopUp(tx: Prisma.TransactionClient, payment: Payment): Promise<void> {
     if (!payment.payerId) throw new Error(`Recharge sans payeur (${payment.id})`);
+    const account = payment.orderId
+      ? await this.spendingAccountIn(tx, payment.payerId)
+      : customerWallet(payment.payerId);
     await this.ledger.post(tx, {
       kind: 'PAYMENT_RECEIVED',
       description: 'Recharge du solde par Mobile Money',
@@ -187,7 +205,7 @@ export class WalletsService implements OnModuleInit {
       paymentId: payment.id,
       postings: [
         { account: PLATFORM_ACCOUNTS.mobileMoney, amount: payment.amount },
-        { account: await this.spendingAccountIn(tx, payment.payerId), amount: -payment.amount },
+        { account, amount: -payment.amount },
       ],
     });
   }

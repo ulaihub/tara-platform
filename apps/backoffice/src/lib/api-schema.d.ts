@@ -1172,6 +1172,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/me/wallet/reserve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['Wallet_setReserve'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/me/wallet/topup': {
     parameters: {
       query?: never;
@@ -4726,6 +4742,7 @@ export interface components {
         plan: 'FREE' | 'PRO' | 'BUSINESS';
         payoutPhone: string;
         payoutHour: number;
+        payoutReserve: number;
         todaySales: number;
         todayDeliveries: number;
         withdrawal: {
@@ -7114,6 +7131,29 @@ export interface operations {
             nextCursor: string | null;
           };
         };
+      };
+    };
+  };
+  Wallet_setReserve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          amount: number;
+        };
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

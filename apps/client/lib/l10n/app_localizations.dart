@@ -2705,7 +2705,7 @@ abstract class AppLocalizations {
   /// No description provided for @shopWithdrawalRule.
   ///
   /// In fr, this message translates to:
-  /// **'Reversement gratuit dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.'**
+  /// **'Reversement et retrait gratuits dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.'**
   String shopWithdrawalRule(String amount, String rate);
 
   /// No description provided for @shopDebt.
@@ -2857,6 +2857,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Recharge'**
   String get lineTopUp;
+
+  /// No description provided for @lineReserve.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réserve pour vos livraisons'**
+  String get lineReserve;
 
   /// No description provided for @linePayout.
   ///
@@ -4325,14 +4331,80 @@ abstract class AppLocalizations {
   /// No description provided for @taraBalanceShopBody.
   ///
   /// In fr, this message translates to:
-  /// **'Ancien solde, d’avant votre boutique : vous pouvez le retirer sur votre Mobile Money.'**
+  /// **'Paie vos livraisons et frais avant vos ventes. Jamais reversé tout seul : retirez-le quand vous voulez.'**
   String get taraBalanceShopBody;
 
   /// No description provided for @shopPaysDeliveries.
   ///
   /// In fr, this message translates to:
-  /// **'Vos ventes paient aussi vos livraisons : choisissez « Mes ventes » au moment de payer.'**
+  /// **'Vos livraisons se paient d’abord avec votre solde Tara, puis avec vos ventes.'**
   String get shopPaysDeliveries;
+
+  /// No description provided for @payWalletTaraAndSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara et ventes'**
+  String get payWalletTaraAndSales;
+
+  /// No description provided for @payWalletTaraBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pris sur votre solde Tara : il vous restera {amount}.'**
+  String payWalletTaraBody(Object amount);
+
+  /// No description provided for @payWalletBothBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pris sur votre solde Tara, puis vos ventes : il vous restera {amount} à recevoir.'**
+  String payWalletBothBody(Object amount);
+
+  /// No description provided for @reserveLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réserve gardée chaque soir : {amount}'**
+  String reserveLine(Object amount);
+
+  /// No description provided for @reserveNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de réserve : toutes vos ventes vous sont reversées.'**
+  String get reserveNone;
+
+  /// No description provided for @reserveChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get reserveChange;
+
+  /// No description provided for @reserveTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réserve pour vos livraisons'**
+  String get reserveTitle;
+
+  /// No description provided for @reserveBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au reversement de {hour} h, Tara garde ce montant de vos ventes sur votre solde Tara : vos livraisons du lendemain sont déjà payées. Le reste vous est reversé, comme d’habitude.'**
+  String reserveBody(Object hour);
+
+  /// No description provided for @reserveZero.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune'**
+  String get reserveZero;
+
+  /// No description provided for @reserveSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get reserveSave;
+
+  /// No description provided for @reserveSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réserve enregistrée.'**
+  String get reserveSaved;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

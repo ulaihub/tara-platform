@@ -60,6 +60,17 @@ export function senderAccount(order: Pick<Order, 'merchantId' | 'senderId'>): Ac
 }
 
 /**
+ * Comptes qui paient pour l'expéditeur, dans l'ordre où ils sont pris : une boutique paie
+ * d'abord avec son solde Tara (recharges et réserve, jamais reversé d'office), puis avec ses
+ * ventes, qui peuvent seules passer en dette (dans la limite MERCHANT_DEBT_LIMIT).
+ */
+export function payingAccounts(order: Pick<Order, 'merchantId' | 'senderId'>): AccountSpec[] {
+  return order.merchantId
+    ? [customerWallet(order.senderId), merchantPayable(order.merchantId)]
+    : [customerWallet(order.senderId)];
+}
+
+/**
  * Argent des commandes (G1, G2, G4, E5). Chaque mouvement est une écriture du grand livre,
  * passée dans la transaction du changement de statut ou du paiement qui la justifie :
  *
@@ -110,10 +121,10 @@ export class OrderFinanceService implements OnModuleInit {
   // --- Création : prépaiement par le solde ---------------------------------------------------
 
   private async onCreated(tx: Prisma.TransactionClient, order: Order): Promise<void> {
-    const wallet = senderAccount(order);
     if (order.feePayer === 'SENDER' && order.feePaymentMethod === 'WALLET') {
-      await this.ledger.lock(tx, [wallet]);
-      const balance = await this.ledger.balance(wallet, tx);
+      await this.ledger.lock(tx, payingAccounts(order));
+      // Boutique : solde Tara et ventes ensemble (le solde Tara d'abord).
+      const balance = await this.funds(order, tx);
       if (balance < order.totalPrice)
         throw AppError.unprocessable('INSUFFICIENT_BALANCE', { balance });
       await this.ledger.post(tx, {
@@ -122,7 +133,7 @@ export class OrderFinanceService implements OnModuleInit {
         idempotencyKey: `order:${order.id}:charge`,
         orderId: order.id,
         postings: [
-          { account: wallet, amount: order.totalPrice },
+          ...(await this.debitPostings(tx, order, order.totalPrice)),
           { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.totalPrice },
         ],
       });
@@ -131,7 +142,7 @@ export class OrderFinanceService implements OnModuleInit {
     }
     // Un client qui doit de l'argent à Tara (frais d'un retour) règle d'abord sa dette ; un
     // marchand peut devoir jusqu'au plafond (MERCHANT_DEBT_LIMIT), pas au-delà.
-    const balance = await this.ledger.balance(wallet, tx);
+    const balance = await this.funds(order, tx);
     if (!order.merchantId && balance < 0) throw AppError.unprocessable('WALLET_IN_DEBT');
     if (order.merchantId && balance <= -this.env.MERCHANT_DEBT_LIMIT) {
       throw AppError.unprocessable('MERCHANT_DEBT_LIMIT', {
@@ -614,7 +625,7 @@ export class OrderFinanceService implements OnModuleInit {
         idempotencyKey: `order:${order.id}:charge`,
         orderId: order.id,
         postings: [
-          { account: senderAccount(order), amount: order.totalPrice },
+          ...(await this.debitPostings(tx, order, order.totalPrice)),
           { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.totalPrice },
         ],
       });
@@ -627,7 +638,7 @@ export class OrderFinanceService implements OnModuleInit {
         idempotencyKey: `order:${order.id}:return-fee`,
         orderId: order.id,
         postings: [
-          { account: senderAccount(order), amount: order.returnFee },
+          ...(await this.debitPostings(tx, order, order.returnFee)),
           { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.returnFee },
         ],
       });
@@ -635,7 +646,7 @@ export class OrderFinanceService implements OnModuleInit {
     // Pas de paiement, pas de colis : le livreur ne rend le colis qu'une fois couvert ce que
     // le solde de l'expéditeur ne couvre pas (le support peut passer outre : colis au bureau).
     if (returned && actorRole === 'RIDER') {
-      const balance = await this.ledger.balance(senderAccount(order), tx);
+      const balance = await this.funds(order, tx);
       const missing = -balance - this.debtLimit(order);
       if (missing > 0) throw AppError.conflict('RETURN_COLLECTION_REQUIRED', { amount: missing });
     }
@@ -701,10 +712,9 @@ export class OrderFinanceService implements OnModuleInit {
    */
   async chargeRetry(tx: Prisma.TransactionClient, order: Order, checkBalance: boolean) {
     if (order.retryFee === 0) return;
-    const account = senderAccount(order);
-    await this.ledger.lock(tx, [account]);
+    await this.ledger.lock(tx, payingAccounts(order));
     if (checkBalance) {
-      const balance = await this.ledger.balance(account, tx);
+      const balance = await this.funds(order, tx);
       const missing = order.retryFee - balance - this.debtLimit(order);
       if (missing > 0) {
         throw AppError.unprocessable(
@@ -721,7 +731,7 @@ export class OrderFinanceService implements OnModuleInit {
       idempotencyKey: `order:${order.id}:retry-fee:${order.attemptCount}`,
       orderId: order.id,
       postings: [
-        { account, amount: order.retryFee },
+        ...(await this.debitPostings(tx, order, order.retryFee)),
         { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.retryFee },
       ],
     });
@@ -740,15 +750,14 @@ export class OrderFinanceService implements OnModuleInit {
   ): Promise<void> {
     const fee = order.retryFee;
     if (fee <= 0) return;
-    const account = senderAccount(order);
-    await this.ledger.lock(tx, [account]);
+    await this.ledger.lock(tx, payingAccounts(order));
     await this.ledger.post(tx, {
       kind: 'FAILURE_FEE_CHARGED',
       description: `Déplacement pour un colis non conforme ${order.reference}`,
       idempotencyKey: `order:${order.id}:refused-fee`,
       orderId: order.id,
       postings: [
-        { account, amount: fee },
+        ...(await this.debitPostings(tx, order, fee)),
         { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -fee },
       ],
     });
@@ -776,7 +785,7 @@ export class OrderFinanceService implements OnModuleInit {
     db: Prisma.TransactionClient | PrismaService = this.prisma,
   ): Promise<number> {
     const charges = order.returnFee + (order.feePaidAt ? 0 : order.totalPrice);
-    const balance = await this.ledger.balance(senderAccount(order), db);
+    const balance = await this.funds(order, db);
     return Math.max(0, charges - balance - this.debtLimit(order));
   }
 
@@ -809,16 +818,74 @@ export class OrderFinanceService implements OnModuleInit {
     // Solde de la commande sur « livraisons payées » (crédit = montant négatif).
     const held = -(await this.orderSum(tx, order.id, PLATFORM_ACCOUNTS.ordersPrepaid.code));
     if (held <= 0) return;
+    // Chaque compte retrouve ce qu'il avait payé (solde Tara d'une boutique, puis ses
+    // ventes) ; payé par Mobile Money, l'argent revient au compte habituel.
+    const refunds = await this.refundPostings(tx, order, held);
     await this.ledger.post(tx, {
       kind: 'ORDER_RELEASED',
       description: `Commande ${order.reference} annulée : frais rendus au solde`,
       idempotencyKey: `order:${order.id}:release`,
       orderId: order.id,
-      postings: [
-        { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: held },
-        { account: senderAccount(order), amount: -held },
-      ],
+      postings: [{ account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: held }, ...refunds],
     });
+  }
+
+  /** Ce que l'expéditeur peut payer : ses soldes ensemble (une dette compte en moins). */
+  private async funds(
+    order: Pick<Order, 'merchantId' | 'senderId'>,
+    db: Prisma.TransactionClient | PrismaService,
+  ): Promise<number> {
+    const accounts = payingAccounts(order);
+    const balances = await this.ledger.balances(accounts, db);
+    return accounts.reduce((sum, account) => sum + (balances.get(account.code) ?? 0), 0);
+  }
+
+  /**
+   * Lignes qui prennent [amount] à l'expéditeur : son solde Tara tant qu'il en a (boutique),
+   * le reste sur ses ventes, qui peuvent passer en dette (limite vérifiée par l'appelant).
+   */
+  private async debitPostings(
+    tx: Prisma.TransactionClient,
+    order: Pick<Order, 'merchantId' | 'senderId'>,
+    amount: number,
+  ): Promise<PostingInput[]> {
+    const accounts = payingAccounts(order);
+    const [prepaid, sales] = accounts;
+    if (!prepaid) return [];
+    if (!sales) return [{ account: prepaid, amount }];
+    const fromPrepaid = Math.min(amount, Math.max(0, await this.ledger.balance(prepaid, tx)));
+    return [
+      ...(fromPrepaid > 0 ? [{ account: prepaid, amount: fromPrepaid }] : []),
+      ...(amount > fromPrepaid ? [{ account: sales, amount: amount - fromPrepaid }] : []),
+    ];
+  }
+
+  /** Remboursement d'une commande annulée, compte par compte, comme elle a été payée. */
+  private async refundPostings(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    held: number,
+  ): Promise<PostingInput[]> {
+    const charge = await tx.journalEntry.findUnique({
+      where: { idempotencyKey: `order:${order.id}:charge` },
+      include: { postings: { include: { account: { select: { code: true } } } } },
+    });
+    const byCode = new Map(payingAccounts(order).map((account) => [account.code, account]));
+    const paid = (charge?.postings ?? []).flatMap((posting) => {
+      const account = byCode.get(posting.account.code);
+      return account && posting.amount > 0 ? [{ account, amount: posting.amount }] : [];
+    });
+    if (paid.length === 0) return [{ account: senderAccount(order), amount: -held }];
+    const postings: PostingInput[] = [];
+    let left = held;
+    for (const { account, amount } of paid) {
+      const part = Math.min(left, amount);
+      if (part > 0) postings.push({ account, amount: -part });
+      left -= part;
+    }
+    // Plus que la course (frais pris ensuite) : le reste au compte habituel.
+    if (left > 0) postings.push({ account: senderAccount(order), amount: -left });
+    return postings;
   }
 
   /** Somme signée des lignes d'une commande sur un compte. */

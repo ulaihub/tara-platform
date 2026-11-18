@@ -39,6 +39,12 @@ export const PaymentDto = z
   .meta({ id: 'Payment' });
 
 export const TopUpBody = MobileMoneyPayer.extend({ amount: Fcfa });
+
+/** Réserve la plus haute qu'une boutique peut garder chaque soir pour ses livraisons. */
+export const MAX_PAYOUT_RESERVE = 100_000;
+
+/** Réserve pour les livraisons, gardée des ventes au reversement du soir (0 : aucune). */
+export const PayoutReserveBody = z.object({ amount: z.int().min(0).max(MAX_PAYOUT_RESERVE) });
 export const DepositBody = MobileMoneyPayer.extend({ amount: Fcfa });
 /** Recharge du solde prépayé du livreur : 500 FCFA au moins (frais payés par Tara). */
 export const RiderTopUpBody = MobileMoneyPayer.extend({ amount: Fcfa.min(500).max(500_000) });
@@ -132,6 +138,8 @@ export const WalletDto = z
         payoutPhone: z.string(),
         /** Heure du reversement quotidien (heure du Cameroun), 18 par défaut. */
         payoutHour: z.int(),
+        /** Gardé chaque soir des ventes sur le solde Tara, pour les livraisons (0 : rien). */
+        payoutReserve: z.int(),
         /** Encaissé à la livraison aujourd'hui (heure du Cameroun) et livraisons du jour. */
         todaySales: z.int(),
         todayDeliveries: z.int(),
