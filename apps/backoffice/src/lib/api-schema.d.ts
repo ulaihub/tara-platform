@@ -2822,6 +2822,7 @@ export interface components {
         platformFee: number;
         retryFee: number;
         returnFee: number;
+        valueFee: number;
         feePayer: components['schemas']['FeePayer'];
         feePaymentMethod: components['schemas']['PaymentMethod'];
         /** Format: date-time */
@@ -3921,6 +3922,7 @@ export interface components {
         codAmount: number;
         retryFee: number;
         returnFee: number;
+        valueFee: number;
       };
       /** Format: uuid */
       riderId: string | null;
@@ -4306,6 +4308,7 @@ export interface components {
       promoCode: string | null;
       retryFee: number;
       returnFee: number;
+      valueFee: number;
     };
     Rating: {
       score: number;
@@ -6059,6 +6062,7 @@ export interface operations {
           /** Format: date-time */
           scheduledFor?: string;
           promoCode?: string;
+          declaredValue?: number;
         };
       };
     };
@@ -6096,6 +6100,7 @@ export interface operations {
             packageSize: components['schemas']['PackageSize'];
             /** @default false */
             loadingHelp?: boolean;
+            declaredValue?: number;
           }[];
         };
       };

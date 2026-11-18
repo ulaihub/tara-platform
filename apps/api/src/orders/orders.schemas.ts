@@ -224,6 +224,8 @@ export const OrderDto = z
       /** Frais d'échec figés à la commande (E6), à la charge de l'expéditeur. */
       retryFee: z.int(),
       returnFee: z.int(),
+      /** Garantie payée pour la valeur déclarée au-delà de 25 000 F, comprise dans le total. */
+      valueFee: z.int(),
     }),
     riderId: z.uuid().nullable(),
     /**

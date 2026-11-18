@@ -739,7 +739,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get valueHelp =>
-      'In FCFA. Never shown to the rider. Used to compensate you for loss or damage, within the limit set in the terms.';
+      'In FCFA. Never shown to the rider. Sets what Tara repays for loss or damage: free up to 25,000 F, then 1% of the value above.';
+
+  @override
+  String valueFeeHint(String amount) {
+    return 'Guarantee: +$amount on the delivery price.';
+  }
+
+  @override
+  String get valueFeeLine => 'Value guarantee';
 
   @override
   String get valueTooHigh => '500,000 F at most. For a more valuable parcel, call customer service before sending.';

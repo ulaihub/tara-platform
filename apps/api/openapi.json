@@ -2249,6 +2249,11 @@
                   "promoCode": {
                     "type": "string",
                     "maxLength": 32
+                  },
+                  "declaredValue": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 500000
                   }
                 },
                 "required": [
@@ -2322,6 +2327,11 @@
                         "loadingHelp": {
                           "default": false,
                           "type": "boolean"
+                        },
+                        "declaredValue": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 500000
                         }
                       },
                       "required": [
@@ -10438,6 +10448,9 @@
               "returnFee": {
                 "type": "integer"
               },
+              "valueFee": {
+                "type": "integer"
+              },
               "feePayer": {
                 "$ref": "#/components/schemas/FeePayer"
               },
@@ -10460,6 +10473,7 @@
               "platformFee",
               "retryFee",
               "returnFee",
+              "valueFee",
               "feePayer",
               "feePaymentMethod",
               "feePaidAt"
@@ -14300,6 +14314,9 @@
               },
               "returnFee": {
                 "type": "integer"
+              },
+              "valueFee": {
+                "type": "integer"
               }
             },
             "required": [
@@ -14314,7 +14331,8 @@
               "feePaid",
               "codAmount",
               "retryFee",
-              "returnFee"
+              "returnFee",
+              "valueFee"
             ],
             "additionalProperties": false
           },
@@ -15775,6 +15793,9 @@
           },
           "returnFee": {
             "type": "integer"
+          },
+          "valueFee": {
+            "type": "integer"
           }
         },
         "required": [
@@ -15792,7 +15813,8 @@
           "totalPrice",
           "promoCode",
           "retryFee",
-          "returnFee"
+          "returnFee",
+          "valueFee"
         ],
         "additionalProperties": false
       },

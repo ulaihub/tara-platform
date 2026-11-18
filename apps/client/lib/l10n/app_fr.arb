@@ -361,7 +361,14 @@
   "codTooHigh": "500 000 F au plus par livraison.",
   "valueLabel": "Valeur du contenu (facultatif)",
   "valueHint": "Ex. 25 000",
-  "valueHelp": "En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.",
+  "valueHelp": "En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.",
+  "valueFeeHint": "Garantie : +{amount} sur le prix de la livraison.",
+  "@valueFeeHint": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "valueFeeLine": "Garantie de la valeur",
   "valueTooHigh": "500 000 F au plus. Pour un colis de plus grande valeur, appelez le service client avant d'envoyer.",
   "instructionsLabel": "Instructions pour le livreur (facultatif)",
   "instructionsHint": "Ex. Appeler en arrivant, sonner au portail vert",

@@ -219,6 +219,7 @@ export class OrdersService implements OnModuleInit {
         codAmount: order.codAmount,
         retryFee: order.retryFee,
         returnFee: order.returnFee,
+        valueFee: order.valueFee,
       },
       riderId: order.riderId,
       rider: order.rider
@@ -428,6 +429,7 @@ export class OrdersService implements OnModuleInit {
       platformFee: quote.price.platformFee,
       retryFee: quote.price.retryFee,
       returnFee: quote.price.returnFee,
+      valueFee: quote.price.valueFee,
       feePayer: shared.feePayer,
       feePaymentMethod: shared.feePaymentMethod,
       codAmount: item.codAmount,
@@ -499,6 +501,7 @@ export class OrdersService implements OnModuleInit {
       loadingHelp: body.loadingHelp,
       scheduledFor: body.scheduledFor,
       promoCode: body.promoCode,
+      declaredValue: body.declaredValue,
     });
     const pickupCode = randomDigits(4);
 
@@ -598,6 +601,7 @@ export class OrdersService implements OnModuleInit {
         isExpress: body.isExpress,
         loadingHelp: item.loadingHelp,
         scheduledFor: body.scheduledFor,
+        declaredValue: item.declaredValue,
       }),
     );
     const pickupCode = randomDigits(4);
@@ -739,6 +743,7 @@ export class OrdersService implements OnModuleInit {
         isExpress: shared.isExpress,
         loadingHelp: item.loadingHelp,
         scheduledFor: shared.scheduledFor,
+        declaredValue: item.declaredValue,
       });
       const result = await this.prisma.$transaction(async (tx) => {
         const inserted = await this.insert(

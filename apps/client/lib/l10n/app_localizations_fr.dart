@@ -744,7 +744,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get valueHelp =>
-      'En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.';
+      'En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.';
+
+  @override
+  String valueFeeHint(String amount) {
+    return 'Garantie : +$amount sur le prix de la livraison.';
+  }
+
+  @override
+  String get valueFeeLine => 'Garantie de la valeur';
 
   @override
   String get valueTooHigh =>

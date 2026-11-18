@@ -185,6 +185,7 @@ class FakeClientApi extends ClientApi {
     bool loadingHelp = false,
     DateTime? scheduledFor,
     String? promoCode,
+    int? declaredValue,
   }) async {
     quotes.add({
       'dropoff': dropoffAddressId,
@@ -192,6 +193,7 @@ class FakeClientApi extends ClientApi {
       'promo': promoCode,
       'at': scheduledFor,
       'loadingHelp': loadingHelp,
+      'declaredValue': declaredValue,
     });
     if (promoCode != null && promoCode != 'BIENVENUE') {
       throw const ApiException(code: 'PROMO_INVALID', message: 'Code promo inconnu.', status: 422);
@@ -210,19 +212,23 @@ class FakeClientApi extends ClientApi {
     final proDiscount = (subtotal * proDiscountBps / 10000 / 50).round() * 50;
     final pro = proDiscount > promoDiscount;
     final discount = pro ? proDiscount : promoDiscount;
+    // Garantie : 1 % au-delà de 25 000 F, arrondi aux 50 F supérieurs, hors remises.
+    final above = (declaredValue ?? 0) - 25000;
+    final valueFee = above <= 0 ? 0 : (above / 100 / 50).ceil() * 50;
     return Quote(
       distanceMeters: 4200,
       estimatedMinutes: 18,
       basePrice: base,
       surcharges: surcharges,
       discountTotal: discount,
-      totalPrice: subtotal - discount,
+      totalPrice: subtotal - discount + valueFee,
       promoCode: pro ? null : promoCode,
       discountSource: pro ? 'VOLUME' : (promoDiscount > 0 ? 'PROMO' : null),
       proDiscountBps: pro ? proDiscountBps : 0,
       vehicleType: bulky ? 'TRICYCLE' : 'MOTORBIKE',
       retryFee: bulky ? 1500 : 500,
       returnFee: base ~/ 2,
+      valueFee: valueFee,
     );
   }
 

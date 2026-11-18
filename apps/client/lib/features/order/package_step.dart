@@ -247,6 +247,12 @@ class _PackageStepState extends State<PackageStep> {
         if ((d.declaredValue ?? 0) > DeliveryDraft.maxDeclaredValue) ...[
           const SizedBox(height: 6),
           ErrorLine(l.valueTooHigh),
+        ] else if (d.valueFee > 0) ...[
+          const SizedBox(height: 6),
+          Text(
+            l.valueFeeHint('${formatAmount(d.valueFee)}\u00a0F'),
+            style: TaraText.small.copyWith(color: c.textPrimary, fontWeight: FontWeight.w600),
+          ),
         ],
         help(l.valueHelp),
         const SizedBox(height: 18),

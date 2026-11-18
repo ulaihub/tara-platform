@@ -592,6 +592,7 @@ class Quote {
     this.vehicleType = 'MOTORBIKE',
     this.retryFee = 0,
     this.returnFee = 0,
+    this.valueFee = 0,
   });
   factory Quote.fromJson(Json json) => Quote(
     distanceMeters: _field<num>(json, 'distanceMeters').toInt(),
@@ -609,6 +610,7 @@ class Quote {
     vehicleType: json['vehicleType'] as String? ?? 'MOTORBIKE',
     retryFee: _field<num>(json, 'retryFee').toInt(),
     returnFee: _field<num>(json, 'returnFee').toInt(),
+    valueFee: (json['valueFee'] as num?)?.toInt() ?? 0,
   );
   static const fields = [
     'distanceMeters',
@@ -623,6 +625,7 @@ class Quote {
     'vehicleType',
     'retryFee',
     'returnFee',
+    'valueFee',
   ];
 
   final int distanceMeters;
@@ -645,6 +648,9 @@ class Quote {
   /// Seulement si la livraison échoue (E6) : nouvelle tentative, retour à l'expéditeur.
   final int retryFee;
   final int returnFee;
+
+  /// Garantie de la valeur déclarée au-delà de 25 000 F, comprise dans [totalPrice].
+  final int valueFee;
 }
 
 /// Commande créée (C1) : de quoi la suivre et afficher son prix.

@@ -1020,6 +1020,9 @@ model Order {
   /// et retour à l'expéditeur, à sa charge, partagés comme la course.
   retryFee         Int           @default(0) @map("retry_fee")
   returnFee        Int           @default(0) @map("return_fee")
+  /// Garantie : 1 % de la valeur déclarée au-delà de 25 000 F, comprise dans le total, tout
+  /// pour Tara (hors part du livreur et hors remises).
+  valueFee         Int           @default(0) @map("value_fee")
   feePayer         FeePayer      @default(SENDER) @map("fee_payer")
   feePaymentMethod PaymentMethod @map("fee_payment_method")
   /// Montant à encaisser auprès du destinataire, 0 si aucun (C1, E5).

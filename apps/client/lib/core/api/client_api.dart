@@ -119,6 +119,7 @@ class ClientApi {
     bool loadingHelp = false,
     DateTime? scheduledFor,
     String? promoCode,
+    int? declaredValue,
   }) async => Quote.fromJson(
     await _api.post(
       '/orders/quote',
@@ -129,6 +130,7 @@ class ClientApi {
         if (loadingHelp) 'loadingHelp': true,
         'scheduledFor': ?scheduledFor?.toUtc().toIso8601String(),
         'promoCode': ?promoCode,
+        'declaredValue': ?declaredValue,
       },
     ) as Json,
   );

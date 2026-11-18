@@ -1475,8 +1475,20 @@ abstract class AppLocalizations {
   /// No description provided for @valueHelp.
   ///
   /// In fr, this message translates to:
-  /// **'En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.'**
+  /// **'En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.'**
   String get valueHelp;
+
+  /// No description provided for @valueFeeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garantie : +{amount} sur le prix de la livraison.'**
+  String valueFeeHint(String amount);
+
+  /// No description provided for @valueFeeLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garantie de la valeur'**
+  String get valueFeeLine;
 
   /// No description provided for @valueTooHigh.
   ///
