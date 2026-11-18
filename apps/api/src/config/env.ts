@@ -241,6 +241,12 @@ const envSchema = z
     PARCEL_ANALYSIS_PER_HOUR: z.coerce.number().int().min(1).max(500).default(20),
     /** Une demande de paiement sans réponse est abandonnée après ce délai. */
     PAYMENT_REQUEST_TIMEOUT_MINUTES: z.coerce.number().int().min(1).max(60).default(10),
+    /**
+     * Annulation par l'expéditeur quand le livreur est déjà en route vers l'enlèvement : frais
+     * payés par l'expéditeur, dont la part du livreur pour son déplacement ; le reste à Tara.
+     */
+    CANCELLATION_FEE: z.coerce.number().int().min(0).max(5000).default(300),
+    CANCELLATION_FEE_RIDER_PART: z.coerce.number().int().min(0).max(5000).default(200),
     /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */
     PAYOUT_MIN_AMOUNT: z.coerce.number().int().min(1).default(500),
     /**

@@ -22,6 +22,8 @@ import {
   riderPayable,
 } from './ledger.accounts.js';
 import { mobileMoneySurcharge } from '../payments/mobile-money-fees.js';
+import { cancellationFee } from '../orders/cancellation-fee.js';
+import type { ActorRole } from '../generated/prisma/enums.js';
 import { LedgerService, type PostingInput } from './ledger.service.js';
 import { RiderBalanceService } from './rider-balance.service.js';
 
@@ -101,7 +103,7 @@ export class OrderFinanceService implements OnModuleInit {
     this.payments.on('COD', (tx, payment) => this.onCollectionPaid(tx, payment));
   }
 
-  private onTransition({ tx, after, to, actor }: TransitionHookContext): Promise<void> {
+  private onTransition({ tx, before, after, to, actor }: TransitionHookContext): Promise<void> {
     switch (to) {
       case 'CREATED':
         return this.onCreated(tx, after);
@@ -112,7 +114,7 @@ export class OrderFinanceService implements OnModuleInit {
       case 'RETURNED':
         return this.onCompleted(tx, after, true, actor.role);
       case 'CANCELLED':
-        return this.onCancelled(tx, after);
+        return this.onCancelled(tx, after, before, actor.role);
       default:
         return Promise.resolve();
     }
@@ -814,7 +816,42 @@ export class OrderFinanceService implements OnModuleInit {
 
   // --- Annulation ---------------------------------------------------------------------------
 
-  private async onCancelled(tx: Prisma.TransactionClient, order: Order): Promise<void> {
+  private async onCancelled(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    before: Order | null,
+    by: ActorRole,
+  ): Promise<void> {
+    await this.releasePrepaid(tx, order);
+    if (by === 'SENDER' && before) await this.chargeCancellation(tx, before);
+  }
+
+  /**
+   * Frais d'annulation (C) : l'expéditeur annule alors que le livreur est déjà en route vers
+   * l'enlèvement. Le livreur est payé pour son déplacement, Tara garde le reste.
+   */
+  private async chargeCancellation(tx: Prisma.TransactionClient, before: Order): Promise<void> {
+    const fee = await cancellationFee(before, this.env, tx);
+    if (fee <= 0 || !before.riderId) return;
+    const riderPart = Math.min(fee, this.env.CANCELLATION_FEE_RIDER_PART);
+    await this.ledger.lock(tx, payingAccounts(before));
+    await this.ledger.post(tx, {
+      kind: 'CANCELLATION_FEE_CHARGED',
+      description: `Commande ${before.reference} annulée, livreur en route : déplacement payé`,
+      idempotencyKey: `order:${before.id}:cancel-fee`,
+      orderId: before.id,
+      postings: [
+        ...(await this.debitPostings(tx, before, fee)),
+        { account: riderPayable(before.riderId), amount: -riderPart },
+        ...(fee > riderPart
+          ? [{ account: PLATFORM_ACCOUNTS.commission, amount: -(fee - riderPart) }]
+          : []),
+      ],
+    });
+  }
+
+  /** Commande annulée : ce qui avait été payé d'avance revient à l'expéditeur. */
+  private async releasePrepaid(tx: Prisma.TransactionClient, order: Order): Promise<void> {
     // Solde de la commande sur « livraisons payées » (crédit = montant négatif).
     const held = -(await this.orderSum(tx, order.id, PLATFORM_ACCOUNTS.ordersPrepaid.code));
     if (held <= 0) return;

@@ -686,6 +686,12 @@
   },
   "cancelDelivery": "Annuler la livraison",
   "cancelConfirm": "Touchez encore pour confirmer l’annulation.",
+  "cancelConfirmFee": "Le livreur est déjà en route : annuler coûte {amount}, pour son déplacement. Touchez encore pour confirmer.",
+  "@cancelConfirmFee": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
   "cancelReasonSender": "Annulée par l’expéditeur",
   "deliveredBy": "Livré par {rider}",
   "@deliveredBy": {

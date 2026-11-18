@@ -1164,6 +1164,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cancelConfirm => 'Touchez encore pour confirmer l’annulation.';
 
   @override
+  String cancelConfirmFee(String amount) {
+    return 'Le livreur est déjà en route : annuler coûte $amount, pour son déplacement. Touchez encore pour confirmer.';
+  }
+
+  @override
   String get cancelReasonSender => 'Annulée par l’expéditeur';
 
   @override

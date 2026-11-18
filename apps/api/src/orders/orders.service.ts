@@ -6,6 +6,7 @@ import type { AuthUser } from '../auth/auth.types.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { mapLimit } from '../common/concurrency.js';
+import { cancellationFee } from './cancellation-fee.js';
 import { AppError, localizedMessage } from '../common/errors/app-error.js';
 import { resolveLocale } from '../common/i18n/locale.js';
 import { hashCode, randomDigits, randomReadableId, randomToken } from '../common/crypto.js';
@@ -168,12 +169,17 @@ export class OrdersService implements OnModuleInit {
     );
     const dtos = await this.addresses.toDtos([...unique.values()]);
     const byId = new Map(dtos.map((dto) => [dto.id, dto]));
-    return orders.map((order) => this.toDto(order, byId));
+    // Frais si l'expéditeur annulait maintenant : annoncés avant qu'il confirme (C).
+    const fees = await Promise.all(
+      orders.map((order) => cancellationFee(order, this.env, this.prisma)),
+    );
+    return orders.map((order, i) => this.toDto(order, byId, fees[i] ?? 0));
   }
 
   private toDto(
     order: OrderFull,
     addresses: Map<string, z.output<typeof OrderDto>['pickup']>,
+    cancelFee: number,
   ): z.output<typeof OrderDto> {
     const pickup = addresses.get(order.pickupAddressId);
     const dropoff = addresses.get(order.dropoffAddressId);
@@ -220,6 +226,7 @@ export class OrdersService implements OnModuleInit {
         retryFee: order.retryFee,
         returnFee: order.returnFee,
         valueFee: order.valueFee,
+        cancellationFee: cancelFee,
       },
       riderId: order.riderId,
       rider: order.rider

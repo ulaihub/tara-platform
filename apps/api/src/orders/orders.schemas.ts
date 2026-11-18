@@ -226,6 +226,11 @@ export const OrderDto = z
       returnFee: z.int(),
       /** Garantie payée pour la valeur déclarée au-delà de 25 000 F, comprise dans le total. */
       valueFee: z.int(),
+      /**
+       * Frais si l'expéditeur annule maintenant (livreur déjà en route), 0 sinon : à annoncer
+       * avant qu'il confirme l'annulation.
+       */
+      cancellationFee: z.int(),
     }),
     riderId: z.uuid().nullable(),
     /**

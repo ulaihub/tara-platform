@@ -1158,6 +1158,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelConfirm => 'Tap again to confirm the cancellation.';
 
   @override
+  String cancelConfirmFee(String amount) {
+    return 'The rider is already on the way: cancelling costs $amount, for their trip. Tap again to confirm.';
+  }
+
+  @override
   String get cancelReasonSender => 'Cancelled by the sender';
 
   @override

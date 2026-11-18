@@ -3923,6 +3923,7 @@ export interface components {
         retryFee: number;
         returnFee: number;
         valueFee: number;
+        cancellationFee: number;
       };
       /** Format: uuid */
       riderId: string | null;

@@ -2180,6 +2180,12 @@ abstract class AppLocalizations {
   /// **'Touchez encore pour confirmer l’annulation.'**
   String get cancelConfirm;
 
+  /// No description provided for @cancelConfirmFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur est déjà en route : annuler coûte {amount}, pour son déplacement. Touchez encore pour confirmer.'**
+  String cancelConfirmFee(String amount);
+
   /// No description provided for @cancelReasonSender.
   ///
   /// In fr, this message translates to:

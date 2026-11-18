@@ -72,6 +72,16 @@ const TEMPLATES = {
     },
     en: { title: 'Job cancelled', body: 'Job {reference} has been cancelled. Do not go.' },
   },
+  RIDER_ORDER_CANCELLED_PAID: {
+    fr: {
+      title: 'Course annulée, déplacement payé',
+      body: 'L’expéditeur a annulé {reference}. {amount} FCFA sont ajoutés à votre solde pour votre déplacement.',
+    },
+    en: {
+      title: 'Job cancelled, trip paid',
+      body: 'The sender cancelled {reference}. {amount} FCFA have been added to your balance for your trip.',
+    },
+  },
   RIDER_ORDER_REASSIGNED: {
     fr: {
       title: 'Course retirée',

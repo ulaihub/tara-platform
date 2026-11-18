@@ -387,6 +387,8 @@ enum JournalEntryKind {
   ADJUSTMENT
   /// Réserve gardée des ventes d'une boutique sur son solde Tara, au reversement du soir.
   RESERVE_KEPT
+  /// Annulation par l'expéditeur quand le livreur était en route : déplacement payé.
+  CANCELLATION_FEE_CHARGED
 
   @@map("journal_entry_kind")
 }

@@ -14317,6 +14317,9 @@
               },
               "valueFee": {
                 "type": "integer"
+              },
+              "cancellationFee": {
+                "type": "integer"
               }
             },
             "required": [
@@ -14332,7 +14335,8 @@
               "codAmount",
               "retryFee",
               "returnFee",
-              "valueFee"
+              "valueFee",
+              "cancellationFee"
             ],
             "additionalProperties": false
           },

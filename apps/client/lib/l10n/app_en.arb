@@ -423,6 +423,7 @@
   "pickupCodeShown": "Pickup code: {code}",
   "cancelDelivery": "Cancel the delivery",
   "cancelConfirm": "Tap again to confirm the cancellation.",
+  "cancelConfirmFee": "The rider is already on the way: cancelling costs {amount}, for their trip. Tap again to confirm.",
   "cancelReasonSender": "Cancelled by the sender",
   "deliveredBy": "Delivered by {rider}",
   "deliveredIn": "in {minutes} min",

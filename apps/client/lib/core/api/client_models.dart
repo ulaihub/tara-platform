@@ -875,6 +875,7 @@ class TrackedOrder {
     this.rating,
     this.retryFee = 0,
     this.returnFee = 0,
+    this.cancellationFee = 0,
     this.refusalReason,
     this.feePaymentMethod = 'CASH',
     this.feePaid = true,
@@ -910,6 +911,7 @@ class TrackedOrder {
       codAmount: _field<num>(pricing, 'codAmount').toInt(),
       retryFee: _field<num>(pricing, 'retryFee').toInt(),
       returnFee: _field<num>(pricing, 'returnFee').toInt(),
+      cancellationFee: (pricing['cancellationFee'] as num?)?.toInt() ?? 0,
       rider: rider == null ? null : OrderRider.fromJson(rider),
       timeline: [
         for (final item in _field<List<Object?>>(json, 'timeline'))
@@ -977,6 +979,9 @@ class TrackedOrder {
   final int retryFee;
   final int returnFee;
 
+  /// Frais si l'expéditeur annule maintenant (livreur déjà en route), 0 sinon.
+  final int cancellationFee;
+
   /// Colis refusé par le livreur à l'enlèvement (non conforme) : le motif, sinon null. Le
   /// déplacement ([retryFee]) est alors à la charge de l'expéditeur.
   final String? refusalReason;
@@ -1020,6 +1025,7 @@ class TrackedOrder {
     rating: rating ?? this.rating,
     retryFee: retryFee,
     returnFee: returnFee,
+    cancellationFee: cancellationFee,
     refusalReason: refusalReason,
     feePaymentMethod: feePaymentMethod,
     feePaid: feePaid,

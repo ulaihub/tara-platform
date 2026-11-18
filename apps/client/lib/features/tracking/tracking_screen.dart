@@ -797,12 +797,17 @@ class _Panel extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TaraLink(label: l.newPickupCode, onPressed: busy ? null : onNewPickupCode),
           ),
-        if (const ['CREATED', 'SEARCHING_RIDER'].contains(o.status)) ...[
+        // Jusqu'à l'enlèvement ; livreur déjà en route : son déplacement est annoncé avant.
+        if (const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'].contains(o.status)) ...[
           Align(
             alignment: Alignment.centerLeft,
             child: TaraLink(label: l.cancelDelivery, onPressed: busy ? null : onCancel),
           ),
-          if (confirmCancel) Text(l.cancelConfirm, style: TaraText.small.copyWith(color: c.dangerText)),
+          if (confirmCancel)
+            Text(
+              o.cancellationFee > 0 ? l.cancelConfirmFee('${formatAmount(o.cancellationFee)}\u00a0F') : l.cancelConfirm,
+              style: TaraText.small.copyWith(color: c.dangerText),
+            ),
         ],
         Align(
           alignment: Alignment.centerLeft,
