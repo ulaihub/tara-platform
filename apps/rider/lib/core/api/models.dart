@@ -152,14 +152,14 @@ class WaitingRules {
     this.stepMinutes = 5,
     this.feePerStep = 100,
     this.riderPercent = 70,
-    this.maxFee = 1000,
+    this.maxFee = 400,
   });
   factory WaitingRules.fromJson(Json json) => WaitingRules(
     freeMinutes: _field<num>(json, 'freeMinutes').toInt(),
     stepMinutes: _field<num>(json, 'stepMinutes').toInt(),
     feePerStep: _field<num>(json, 'feePerStep').toInt(),
     riderPercent: _field<num>(json, 'riderPercent').toInt(),
-    maxFee: (json['maxFee'] as num?)?.toInt() ?? 1000,
+    maxFee: (json['maxFee'] as num?)?.toInt() ?? 400,
   );
 
   final int freeMinutes;
@@ -167,7 +167,7 @@ class WaitingRules {
   final int feePerStep;
   final int riderPercent;
 
-  /// Plafond des frais d'attente.
+  /// Plafond des frais d'attente (30 min d'attente comptées au plus).
   final int maxFee;
 
   /// Frais après [waited] d'attente : rien pendant les minutes gratuites, puis une tranche

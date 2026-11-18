@@ -383,7 +383,7 @@ void main() {
     expect(find.text('Jean M. vous attend'), findsOneWidget);
     expect(
       find.text(
-        'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à 10:19, puis 100\u00a0F par 5 min commencées, 1\u00a0000\u00a0F au plus.',
+        'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à 10:19, puis 100\u00a0F par 5 min commencées, 400\u00a0F au plus.',
       ),
       findsOneWidget,
     );

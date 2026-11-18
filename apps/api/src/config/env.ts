@@ -256,8 +256,8 @@ const envSchema = z
     WAITING_STEP_MINUTES: z.coerce.number().int().min(1).max(60).default(5),
     WAITING_FEE_PER_STEP: z.coerce.number().int().min(0).max(5000).default(100),
     WAITING_RIDER_PERCENT: z.coerce.number().int().min(0).max(100).default(70),
-    /** Plafond des frais d'attente : jamais plus que le prix d'une petite course (1 h d'attente). */
-    WAITING_FEE_MAX: z.coerce.number().int().min(0).max(20_000).default(1000),
+    /** Attente comptée au plus (choix du fondateur : 30 min), soit 400 F avec la règle par défaut. */
+    WAITING_MAX_MINUTES: z.coerce.number().int().min(1).max(240).default(30),
     /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */
     PAYOUT_MIN_AMOUNT: z.coerce.number().int().min(1).default(500),
     /**
