@@ -95,9 +95,11 @@ class RiderConfig {
     this.emergencyNumbers = EmergencyNumbers.cameroon,
     this.failurePolicy = const FailurePolicy(),
     this.mobileMoneyFeeBps = 0,
+    this.waiting = const WaitingRules(),
   });
   factory RiderConfig.fromJson(Json json) {
     final country = _field<Json>(json, 'country');
+    final waiting = json['waiting'] as Json?;
     return RiderConfig(
       dialCode: _field(country, 'dialCode'),
       currency: _field(country, 'currency'),
@@ -112,6 +114,7 @@ class RiderConfig {
       failurePolicy: FailurePolicy.fromJson(json['failurePolicy'] as Json?),
       // Réglages gardés par une version plus ancienne : pas de frais connus.
       mobileMoneyFeeBps: (json['mobileMoneyFeeBps'] as num?)?.toInt() ?? 0,
+      waiting: waiting == null ? const WaitingRules() : WaitingRules.fromJson(waiting),
     );
   }
   static const fields = [
@@ -136,6 +139,35 @@ class RiderConfig {
 
   /// Frais Mobile Money payés par le client en plus du montant, en points de base.
   final int mobileMoneyFeeBps;
+
+  /// Attente au point d'enlèvement : gratuite, puis payée par l'expéditeur (D).
+  final WaitingRules waiting;
+}
+
+/// Attente au point d'enlèvement (D), comptée depuis « Je suis arrivé ».
+@immutable
+class WaitingRules {
+  const WaitingRules({this.freeMinutes = 10, this.stepMinutes = 5, this.feePerStep = 100, this.riderPercent = 70});
+  factory WaitingRules.fromJson(Json json) => WaitingRules(
+    freeMinutes: _field<num>(json, 'freeMinutes').toInt(),
+    stepMinutes: _field<num>(json, 'stepMinutes').toInt(),
+    feePerStep: _field<num>(json, 'feePerStep').toInt(),
+    riderPercent: _field<num>(json, 'riderPercent').toInt(),
+  );
+
+  final int freeMinutes;
+  final int stepMinutes;
+  final int feePerStep;
+  final int riderPercent;
+
+  /// Frais après [waited] d'attente : rien pendant les minutes gratuites, puis une tranche
+  /// commencée à la fois (comme le serveur).
+  int feeAfter(Duration waited) {
+    final over = waited.inSeconds / 60 - freeMinutes;
+    return over <= 0 ? 0 : (over / stepMinutes).ceil() * feePerStep;
+  }
+
+  int riderPart(int fee) => fee * riderPercent ~/ 100;
 }
 
 @immutable
@@ -624,6 +656,13 @@ class RiderOrder {
 
   /// Réponse de l'API telle quelle (sauvegarde sur le téléphone).
   final Json raw;
+
+  /// Arrivée signalée au point d'enlèvement : l'attente payante compte depuis là (D).
+  DateTime? get arrivedPickupAt => switch (raw['arrivedPickupAt']) {
+    final String at => DateTime.parse(at).toLocal(),
+    _ => null,
+  };
+
   final String id;
   final String reference;
 

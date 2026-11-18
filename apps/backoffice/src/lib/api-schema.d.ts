@@ -1796,6 +1796,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/rider/orders/{id}/arrived': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['RiderApp_arrived'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/rider/orders/{id}/pickup': {
     parameters: {
       query?: never;
@@ -3155,6 +3171,11 @@ export interface components {
         name: string;
       }[];
       mobileMoneyFeeBps: number;
+      waiting: {
+        freeMinutes: number;
+        stepMinutes: number;
+        feePerStep: number;
+      };
     };
     AuditEntry: {
       /** Format: uuid */
@@ -3561,7 +3582,9 @@ export interface components {
           | 'PENDING_DELIVERY_CLOSED'
           | 'PENDING_RESEND_TOO_SOON'
           | 'ADDRESS_REQUESTS_LIMIT'
-          | 'PENDING_NOT_BLOCKED';
+          | 'PENDING_NOT_BLOCKED'
+          | 'NOT_AT_PICKUP'
+          | 'ARRIVAL_NOT_EXPECTED';
         /** @description Message prêt à afficher, en français ou en anglais */
         message: string;
         details?: unknown;
@@ -3924,6 +3947,9 @@ export interface components {
         returnFee: number;
         valueFee: number;
         cancellationFee: number;
+        waitingFee: number;
+        /** Format: date-time */
+        riderArrivedAt: string | null;
       };
       /** Format: uuid */
       riderId: string | null;
@@ -4386,6 +4412,12 @@ export interface components {
       }[];
       offerTimeoutSeconds: number;
       mobileMoneyFeeBps: number;
+      waiting: {
+        freeMinutes: number;
+        stepMinutes: number;
+        feePerStep: number;
+        riderPercent: number;
+      };
     };
     RiderEarnings: {
       /** @enum {string} */
@@ -4465,6 +4497,8 @@ export interface components {
       awaitingSupportValidation: boolean;
       /** Format: date-time */
       assignedAt: string | null;
+      /** Format: date-time */
+      arrivedPickupAt: string | null;
       /** Format: date-time */
       pickedUpAt: string | null;
       /** Format: date-time */
@@ -8277,6 +8311,38 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['RiderRoute'];
+        };
+      };
+    };
+  };
+  RiderApp_arrived: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          latitude: number;
+          longitude: number;
+          /** Format: date-time */
+          occurredAt?: string;
+          clientEventId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderOrder'];
         };
       };
     };

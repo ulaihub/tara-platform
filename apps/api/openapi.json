@@ -6778,6 +6778,75 @@
         ]
       }
     },
+    "/v1/rider/orders/{id}/arrived": {
+      "post": {
+        "operationId": "RiderApp_arrived",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/rider/orders/{id}/pickup": {
       "post": {
         "operationId": "RiderApp_pickup",
@@ -11829,13 +11898,34 @@
           },
           "mobileMoneyFeeBps": {
             "type": "integer"
+          },
+          "waiting": {
+            "type": "object",
+            "properties": {
+              "freeMinutes": {
+                "type": "integer"
+              },
+              "stepMinutes": {
+                "type": "integer"
+              },
+              "feePerStep": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "freeMinutes",
+              "stepMinutes",
+              "feePerStep"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
           "country",
           "supportPhone",
           "mobileMoneyOperators",
-          "mobileMoneyFeeBps"
+          "mobileMoneyFeeBps",
+          "waiting"
         ],
         "additionalProperties": false
       },
@@ -12952,7 +13042,9 @@
                   "PENDING_DELIVERY_CLOSED",
                   "PENDING_RESEND_TOO_SOON",
                   "ADDRESS_REQUESTS_LIMIT",
-                  "PENDING_NOT_BLOCKED"
+                  "PENDING_NOT_BLOCKED",
+                  "NOT_AT_PICKUP",
+                  "ARRIVAL_NOT_EXPECTED"
                 ]
               },
               "message": {
@@ -14320,6 +14412,14 @@
               },
               "cancellationFee": {
                 "type": "integer"
+              },
+              "waitingFee": {
+                "type": "integer"
+              },
+              "riderArrivedAt": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time"
               }
             },
             "required": [
@@ -14336,7 +14436,9 @@
               "retryFee",
               "returnFee",
               "valueFee",
-              "cancellationFee"
+              "cancellationFee",
+              "waitingFee",
+              "riderArrivedAt"
             ],
             "additionalProperties": false
           },
@@ -16099,6 +16201,30 @@
           },
           "mobileMoneyFeeBps": {
             "type": "integer"
+          },
+          "waiting": {
+            "type": "object",
+            "properties": {
+              "freeMinutes": {
+                "type": "integer"
+              },
+              "stepMinutes": {
+                "type": "integer"
+              },
+              "feePerStep": {
+                "type": "integer"
+              },
+              "riderPercent": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "freeMinutes",
+              "stepMinutes",
+              "feePerStep",
+              "riderPercent"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -16109,7 +16235,8 @@
           "emergencyNumbers",
           "mobileMoneyOperators",
           "offerTimeoutSeconds",
-          "mobileMoneyFeeBps"
+          "mobileMoneyFeeBps",
+          "waiting"
         ],
         "additionalProperties": false
       },
@@ -16369,6 +16496,11 @@
             "type": "string",
             "format": "date-time"
           },
+          "arrivedPickupAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
           "pickedUpAt": {
             "nullable": true,
             "type": "string",
@@ -16442,6 +16574,7 @@
           "failureDecisionDueAt",
           "awaitingSupportValidation",
           "assignedAt",
+          "arrivedPickupAt",
           "pickedUpAt",
           "deliveredAt",
           "completedAt",

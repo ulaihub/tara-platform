@@ -507,6 +507,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                     : _Panel(
                         order: order,
                         now: _now,
+                        waiting: ref.watch(appConfigProvider).value?.waiting ?? const WaitingRules(),
                         rider: _rider,
                         pickupCode: _pickupCode,
                         choice: _choice,
@@ -576,6 +577,7 @@ class _Panel extends StatelessWidget {
   const _Panel({
     required this.order,
     required this.now,
+    this.waiting = const WaitingRules(),
     required this.rider,
     required this.pickupCode,
     required this.choice,
@@ -600,6 +602,9 @@ class _Panel extends StatelessWidget {
 
   final TrackedOrder order;
   final DateTime now;
+
+  /// Attente gratuite puis payante quand le livreur est arrivé (D).
+  final WaitingRules waiting;
   final MapPoint? rider;
   final String? pickupCode;
   final String? choice;
@@ -647,6 +652,15 @@ class _Panel extends StatelessWidget {
         l.scheduledPickup(formatClock(o.scheduledFor!)),
       ),
       'CREATED' || 'SEARCHING_RIDER' => (l.trackSearching, l.trackSearchingBody),
+      // Le livreur est sur place : l'attente gratuite a une fin, annoncée (D).
+      'ASSIGNED' when o.riderArrivedAt != null => (
+        l.trackRiderWaiting(riderName),
+        l.trackRiderWaitingBody(
+          formatClock(o.riderArrivedAt!.add(Duration(minutes: waiting.freeMinutes))),
+          '${formatAmount(waiting.feePerStep)}\u00a0F',
+          waiting.stepMinutes,
+        ),
+      ),
       'ASSIGNED' => switch (o.batchNumber) {
         // Plusieurs colis : lequel donner à ce livreur.
         final number? => (l.trackAssignedParcel(riderName, number), l.trackAssignedParcelBody(number)),

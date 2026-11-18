@@ -43,6 +43,8 @@ CourseActions courseActions() {
       fetchOrder: (_) async => order(),
       hasPendingActions: (_) => false,
     ),
+    // Devant le vendeur d'Akwa : l'arrivée est signalée sur place.
+    locate: () async => GeoPoint(latitude: 4.0511, longitude: 9.6942, recordedAt: DateTime.utc(2026, 11, 3)),
   );
 }
 
@@ -383,6 +385,43 @@ void main() {
     expect(find.text('Frais de retour réglés : vous pouvez rendre le colis.'), findsOneWidget);
     expect(tester.widget<PrimaryButton>(returned).onPressed, isNotNull);
     expect(sounds.played, contains(TaraSound.cash));
+  });
+
+  testWidgets('attente : « Je suis arrivé » démarre le temps, payé au-delà de 10 min', (tester) async {
+    final api = noReturnFees()..arrivedAt = DateTime(2026, 11, 3, 14, 32).toUtc().toIso8601String();
+    await pumpVariant(tester, Variant.matrix.first, scope(pickup(order(collectAtPickup: 0)), api: api));
+    await settle(tester);
+    expect(
+      find.text(
+        'Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite 10 min, '
+        'puis 100\u00a0F par 5 min, dont 70\u00a0F pour vous.',
+      ),
+      findsOneWidget,
+    );
+    await tester.ensureVisible(find.text('Je suis arrivé'));
+    await tester.tap(find.text('Je suis arrivé'));
+    await settle(tester);
+    expect(api.arrivals, ['00000000-0000-4000-8000-000000000002']);
+    // Arrivé à 14 h 32, l'écran est à 14 h 32 : rien à payer encore.
+    expect(find.text('Vous attendez depuis 0 min · gratuit encore 10 min.'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+
+    // Arrivé 17 minutes plus tôt (14 h 15) : 2 tranches de 5 min, 70 % pour le livreur.
+    final late = PickupScreen(
+      order: RiderOrder.fromJson({...orderJson(collectAtPickup: 0), 'arrivedPickupAt': '2026-11-03T13:15:00Z'}),
+      onBack: () {},
+      onSos: () {},
+      onPickedUp: (_) {},
+      onRefuse: () {},
+      now: () => DateTime.utc(2026, 11, 3, 13, 32).toLocal(),
+    );
+    await pumpVariant(tester, Variant.matrix.first, scope(late));
+    await settle(tester);
+    expect(
+      find.text('Vous attendez depuis 17 min · 200\u00a0F d’attente pour l’expéditeur, dont 140\u00a0F pour vous.'),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('colis seul : ce qu’il faut récupérer et pour qui, sans numéro', (tester) async {

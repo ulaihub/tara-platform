@@ -231,6 +231,10 @@ export const OrderDto = z
        * avant qu'il confirme l'annulation.
        */
       cancellationFee: z.int(),
+      /** Attente du livreur au point d'enlèvement au-delà du temps gratuit (D), à l'enlèvement. */
+      waitingFee: z.int(),
+      /** Arrivée du livreur au point d'enlèvement : l'attente compte depuis là (D). */
+      riderArrivedAt: z.iso.datetime().nullable(),
     }),
     riderId: z.uuid().nullable(),
     /**

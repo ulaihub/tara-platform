@@ -1070,6 +1070,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trackAssignedBody => 'Give them the pickup code when they arrive.';
 
   @override
+  String trackRiderWaiting(String rider) {
+    return '$rider is waiting for you';
+  }
+
+  @override
+  String trackRiderWaitingBody(String until, String fee, int step) {
+    return 'Hand over the parcel and the pickup code. Waiting is free until $until, then $fee per $step min started.';
+  }
+
+  @override
   String trackOnTheWay(String recipient) {
     return 'On the way to $recipient';
   }

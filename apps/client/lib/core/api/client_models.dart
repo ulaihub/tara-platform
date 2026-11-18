@@ -25,10 +25,12 @@ class AppConfig {
     required this.supportPhone,
     required this.operators,
     this.mobileMoneyFeeBps = 0,
+    this.waiting = const WaitingRules(),
   });
 
   factory AppConfig.fromJson(Json json) {
     final country = _field<Json>(json, 'country');
+    final waiting = json['waiting'] as Json?;
     return AppConfig(
       dialCode: _field(country, 'dialCode'),
       currency: _field(country, 'currency'),
@@ -39,10 +41,17 @@ class AppConfig {
       ],
       // Réglages gardés d'une version antérieure : sans taux, pas de frais affichés.
       mobileMoneyFeeBps: (json['mobileMoneyFeeBps'] as num?)?.toInt() ?? 0,
+      waiting: waiting == null
+          ? const WaitingRules()
+          : WaitingRules(
+              freeMinutes: _field<num>(waiting, 'freeMinutes').toInt(),
+              stepMinutes: _field<num>(waiting, 'stepMinutes').toInt(),
+              feePerStep: _field<num>(waiting, 'feePerStep').toInt(),
+            ),
     );
   }
 
-  static const fields = ['country', 'supportPhone', 'mobileMoneyOperators', 'mobileMoneyFeeBps'];
+  static const fields = ['country', 'supportPhone', 'mobileMoneyOperators', 'mobileMoneyFeeBps', 'waiting'];
 
   final String dialCode;
   final String currency;
@@ -51,6 +60,19 @@ class AppConfig {
 
   /// Frais Mobile Money payés par le client, en points de base (600 = 6 %).
   final int mobileMoneyFeeBps;
+
+  /// Attente du livreur au point d'enlèvement : gratuite, puis payante (D).
+  final WaitingRules waiting;
+}
+
+/// Attente du livreur au point d'enlèvement (D), comptée depuis son arrivée.
+@immutable
+class WaitingRules {
+  const WaitingRules({this.freeMinutes = 10, this.stepMinutes = 5, this.feePerStep = 100});
+
+  final int freeMinutes;
+  final int stepMinutes;
+  final int feePerStep;
 }
 
 /// Boutique du marchand (A2) : reversements vers son numéro Mobile Money.
@@ -876,6 +898,8 @@ class TrackedOrder {
     this.retryFee = 0,
     this.returnFee = 0,
     this.cancellationFee = 0,
+    this.riderArrivedAt,
+    this.waitingFee = 0,
     this.refusalReason,
     this.feePaymentMethod = 'CASH',
     this.feePaid = true,
@@ -912,6 +936,11 @@ class TrackedOrder {
       retryFee: _field<num>(pricing, 'retryFee').toInt(),
       returnFee: _field<num>(pricing, 'returnFee').toInt(),
       cancellationFee: (pricing['cancellationFee'] as num?)?.toInt() ?? 0,
+      riderArrivedAt: switch (pricing['riderArrivedAt']) {
+        final String at => DateTime.parse(at).toLocal(),
+        _ => null,
+      },
+      waitingFee: (pricing['waitingFee'] as num?)?.toInt() ?? 0,
       rider: rider == null ? null : OrderRider.fromJson(rider),
       timeline: [
         for (final item in _field<List<Object?>>(json, 'timeline'))
@@ -982,6 +1011,10 @@ class TrackedOrder {
   /// Frais si l'expéditeur annule maintenant (livreur déjà en route), 0 sinon.
   final int cancellationFee;
 
+  /// Arrivée du livreur au point d'enlèvement (D) ; frais d'attente pris à l'enlèvement.
+  final DateTime? riderArrivedAt;
+  final int waitingFee;
+
   /// Colis refusé par le livreur à l'enlèvement (non conforme) : le motif, sinon null. Le
   /// déplacement ([retryFee]) est alors à la charge de l'expéditeur.
   final String? refusalReason;
@@ -1026,6 +1059,8 @@ class TrackedOrder {
     retryFee: retryFee,
     returnFee: returnFee,
     cancellationFee: cancellationFee,
+    riderArrivedAt: riderArrivedAt,
+    waitingFee: waitingFee,
     refusalReason: refusalReason,
     feePaymentMethod: feePaymentMethod,
     feePaid: feePaid,

@@ -22,7 +22,11 @@ import {
 import { ratingDto } from '../orders/ratings.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
-import { DistanceService, type GeoPoint } from '../routing/distance.service.js';
+import { DistanceService, type GeoPoint, haversineMeters } from '../routing/distance.service.js';
+import { NotificationService } from '../notifications/notification.service.js';
+
+/** Distance au point d'enlèvement au-delà de laquelle l'arrivée n'est pas acceptée (D). */
+const ARRIVAL_MAX_METERS = 300;
 import { CourseTrackService } from '../tracking/course-track.service.js';
 import { MediaService } from '../storage/media.service.js';
 import type {
@@ -86,6 +90,7 @@ export class RiderOrdersService {
     private readonly onlineTime: OnlineTimeService,
     private readonly distance: DistanceService,
     private readonly tracks: CourseTrackService,
+    private readonly notifications: NotificationService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -257,6 +262,7 @@ export class RiderOrdersService {
             : null,
         awaitingSupportValidation: awaiting.has(order.id),
         assignedAt: order.assignedAt?.toISOString() ?? null,
+        arrivedPickupAt: order.arrivedPickupAt?.toISOString() ?? null,
         pickedUpAt: order.pickedUpAt?.toISOString() ?? null,
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
         completedAt:
@@ -289,6 +295,44 @@ export class RiderOrdersService {
   }
 
   // --- Actions ------------------------------------------------------------------------------
+
+  /**
+   * Arrivé au point d'enlèvement (D) : sur place seulement (300 m au plus), une fois. Les
+   * colis du même envoi pris par ce livreur attendent avec lui. L'expéditeur est prévenu.
+   */
+  async arrived(
+    userId: string,
+    orderId: string,
+    body: z.output<typeof PositionActionBody>,
+  ): Promise<z.output<typeof RiderOrderDto>> {
+    const { order } = await this.load(userId, orderId);
+    if (order.status !== 'ASSIGNED') throw AppError.conflict('ARRIVAL_NOT_EXPECTED');
+    if (order.arrivedPickupAt) return this.get(userId, orderId);
+    const meters = Math.round(haversineMeters(body, order.pickupAddress));
+    if (meters > ARRIVAL_MAX_METERS) throw AppError.unprocessable('NOT_AT_PICKUP', { meters });
+    const at = new Date();
+    await this.prisma.order.updateMany({
+      where: {
+        riderId: order.riderId,
+        status: 'ASSIGNED',
+        arrivedPickupAt: null,
+        ...(order.batchId ? { batchId: order.batchId } : { id: order.id }),
+      },
+      data: { arrivedPickupAt: at },
+    });
+    await this.notifications.toUser(order.senderId, {
+      template: 'RIDER_ARRIVED_PICKUP',
+      params: {
+        reference: order.reference,
+        free: String(this.env.WAITING_FREE_MINUTES),
+        fee: String(this.env.WAITING_FEE_PER_STEP),
+        step: String(this.env.WAITING_STEP_MINUTES),
+      },
+      data: { type: 'order.arrived', orderId: order.id },
+      orderId: order.id,
+    });
+    return this.get(userId, orderId);
+  }
 
   /** Enlèvement (E3) : code donné par l'expéditeur et photo du colis. */
   async pickup(

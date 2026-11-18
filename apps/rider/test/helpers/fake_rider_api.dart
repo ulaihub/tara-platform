@@ -8,6 +8,8 @@ import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/core/api/rider_api.dart';
 import 'package:tara_test/fake_pin.dart';
 
+import 'orders.dart' show orderJson;
+
 /// API livreur sans réseau pour les tests d'écrans : encaissement et portefeuille.
 class FakeRiderApi extends RiderApi {
   FakeRiderApi() : super(ApiClient(baseUrl: 'http://test.invalid', store: SessionStore(MemoryKeyValueStore())));
@@ -22,6 +24,16 @@ class FakeRiderApi extends RiderApi {
 
   /// Photos et notes d'adresse téléchargées : (course, étape, photo|voice).
   final mediaFetched = <(String, String, String)>[];
+
+  /// Arrivées signalées au point d'enlèvement, et heure renvoyée par le serveur (D).
+  final arrivals = <String>[];
+  String arrivedAt = '2026-11-03T13:32:00Z';
+
+  @override
+  Future<RiderOrder> arrived(String orderId, {required double latitude, required double longitude}) async {
+    arrivals.add(orderId);
+    return RiderOrder.fromJson({...orderJson(id: orderId), 'arrivedPickupAt': arrivedAt});
+  }
 
   @override
   Future<Uint8List> addressMedia(String orderId, String stop, String kind) async {

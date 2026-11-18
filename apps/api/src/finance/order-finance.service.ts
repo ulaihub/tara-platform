@@ -23,6 +23,7 @@ import {
 } from './ledger.accounts.js';
 import { mobileMoneySurcharge } from '../payments/mobile-money-fees.js';
 import { cancellationFee } from '../orders/cancellation-fee.js';
+import { waitingFeeFor } from '../orders/waiting-fee.js';
 import type { ActorRole } from '../generated/prisma/enums.js';
 import { LedgerService, type PostingInput } from './ledger.service.js';
 import { RiderBalanceService } from './rider-balance.service.js';
@@ -357,6 +358,7 @@ export class OrderFinanceService implements OnModuleInit {
   // --- Enlèvement : frais en espèces ----------------------------------------------------------
 
   private async onPickedUp(tx: Prisma.TransactionClient, order: Order): Promise<void> {
+    await this.chargeWaiting(tx, order);
     if (order.feePayer !== 'SENDER' || order.feePaymentMethod !== 'CASH' || order.feePaidAt) return;
     if (!order.riderId) throw new Error(`Enlèvement sans livreur (${order.reference})`);
     await this.ledger.post(tx, {
@@ -371,6 +373,34 @@ export class OrderFinanceService implements OnModuleInit {
       ],
     });
     await tx.order.update({ where: { id: order.id }, data: { feePaidAt: new Date() } });
+  }
+
+  /**
+   * Attente au point d'enlèvement (D), comptée depuis l'arrivée signalée par le livreur :
+   * payée par l'expéditeur, partagée avec le livreur. Une seule fois pour un envoi groupé.
+   */
+  private async chargeWaiting(tx: Prisma.TransactionClient, order: Order): Promise<void> {
+    if (!order.riderId) return;
+    const fee = waitingFeeFor(order.arrivedPickupAt, order.pickedUpAt, this.env);
+    if (fee <= 0) return;
+    const key = `waiting:${order.batchId ?? order.id}:${order.riderId}`;
+    if (await tx.journalEntry.findUnique({ where: { idempotencyKey: key } })) return;
+    const riderPart = Math.floor((fee * this.env.WAITING_RIDER_PERCENT) / 100);
+    await this.ledger.lock(tx, payingAccounts(order));
+    await this.ledger.post(tx, {
+      kind: 'WAITING_FEE_CHARGED',
+      description: `Attente du livreur à l'enlèvement de ${order.reference}`,
+      idempotencyKey: key,
+      orderId: order.id,
+      postings: [
+        ...(await this.debitPostings(tx, order, fee)),
+        { account: riderPayable(order.riderId), amount: -riderPart },
+        ...(fee > riderPart
+          ? [{ account: PLATFORM_ACCOUNTS.commission, amount: -(fee - riderPart) }]
+          : []),
+      ],
+    });
+    await tx.order.update({ where: { id: order.id }, data: { waitingFee: fee } });
   }
 
   // --- Encaissement à la livraison (E5) -----------------------------------------------------

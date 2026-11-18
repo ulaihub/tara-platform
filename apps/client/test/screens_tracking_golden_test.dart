@@ -36,6 +36,7 @@ TrackedOrder tracked(
   bool feePaid = true,
   int? batchNumber,
   int cancellationFee = 0,
+  DateTime? riderArrivedAt,
 }) {
   DateTime at(int h, int m) => DateTime(2026, 11, 4, h, m);
   const ridden = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED', 'DELIVERED'];
@@ -99,6 +100,7 @@ TrackedOrder tracked(
     retryFee: 500,
     returnFee: 750,
     cancellationFee: cancellationFee,
+    riderArrivedAt: riderArrivedAt,
     refusalReason: refusalReason,
     feePaymentMethod: feePaymentMethod,
     feePaid: feePaid,
@@ -372,6 +374,19 @@ void main() {
     await tester.tap(find.text('Annuler la livraison'));
     await settle(tester);
     expect(api.cancelled, [orderId]);
+  });
+
+  testWidgets('livreur sur place : l’expéditeur sait jusqu’à quand l’attente est gratuite', (tester) async {
+    final api = FakeClientApi()..tracked[orderId] = tracked('ASSIGNED', riderArrivedAt: DateTime(2026, 11, 4, 10, 9));
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1000));
+    await settle(tester);
+    expect(find.text('Jean M. vous attend'), findsOneWidget);
+    expect(
+      find.text(
+        'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à 10:19, puis 100\u00a0F par 5 min commencées.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('frais Mobile Money pas encore payés : relancer le paiement, puis la recherche démarre', (tester) async {

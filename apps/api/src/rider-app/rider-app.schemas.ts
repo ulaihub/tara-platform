@@ -188,6 +188,8 @@ export const RiderOrderDto = z
     /** Livraison sans code déclarée, en attente de la validation du support (E4). */
     awaitingSupportValidation: z.boolean(),
     assignedAt: z.iso.datetime().nullable(),
+    /** Arrivée signalée au point d'enlèvement : l'attente payante compte depuis là (D). */
+    arrivedPickupAt: z.iso.datetime().nullable(),
     pickedUpAt: z.iso.datetime().nullable(),
     deliveredAt: z.iso.datetime().nullable(),
     /** Fin de la course : livrée, rendue à l'expéditeur ou annulée (historique, E9). */
@@ -283,5 +285,12 @@ export const RiderConfigDto = z
     offerTimeoutSeconds: z.number(),
     /** Frais Mobile Money payés par le client en plus du montant encaissé, en points de base. */
     mobileMoneyFeeBps: z.int(),
+    /** Attente au point d'enlèvement : minutes gratuites, puis montant par tranche (D). */
+    waiting: z.object({
+      freeMinutes: z.int(),
+      stepMinutes: z.int(),
+      feePerStep: z.int(),
+      riderPercent: z.int(),
+    }),
   })
   .meta({ id: 'RiderConfig' });

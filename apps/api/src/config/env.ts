@@ -247,6 +247,15 @@ const envSchema = z
      */
     CANCELLATION_FEE: z.coerce.number().int().min(0).max(5000).default(300),
     CANCELLATION_FEE_RIDER_PART: z.coerce.number().int().min(0).max(5000).default(200),
+    /**
+     * Attente au point d'enlèvement, comptée depuis « Je suis arrivé » : gratuite pendant
+     * WAITING_FREE_MINUTES, puis WAITING_FEE_PER_STEP par tranche de WAITING_STEP_MINUTES
+     * commencée, payés par l'expéditeur ; WAITING_RIDER_PERCENT pour le livreur.
+     */
+    WAITING_FREE_MINUTES: z.coerce.number().int().min(0).max(120).default(10),
+    WAITING_STEP_MINUTES: z.coerce.number().int().min(1).max(60).default(5),
+    WAITING_FEE_PER_STEP: z.coerce.number().int().min(0).max(5000).default(100),
+    WAITING_RIDER_PERCENT: z.coerce.number().int().min(0).max(100).default(70),
     /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */
     PAYOUT_MIN_AMOUNT: z.coerce.number().int().min(1).default(500),
     /**

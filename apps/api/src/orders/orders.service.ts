@@ -227,6 +227,8 @@ export class OrdersService implements OnModuleInit {
         returnFee: order.returnFee,
         valueFee: order.valueFee,
         cancellationFee: cancelFee,
+        waitingFee: order.waitingFee,
+        riderArrivedAt: order.arrivedPickupAt?.toISOString() ?? null,
       },
       riderId: order.riderId,
       rider: order.rider

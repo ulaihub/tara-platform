@@ -18,6 +18,8 @@ export const AppConfigDto = z
      * affiche frais = arrondi supérieur de montant × taux / (10 000 − taux).
      */
     mobileMoneyFeeBps: z.int(),
+    /** Attente du livreur au point d'enlèvement : minutes gratuites, puis montant par tranche. */
+    waiting: z.object({ freeMinutes: z.int(), stepMinutes: z.int(), feePerStep: z.int() }),
   })
   .meta({ id: 'AppConfig' });
 
@@ -43,6 +45,11 @@ export class PublicConfigController {
         { code: 'ORANGE', name: 'Orange Money' },
       ],
       mobileMoneyFeeBps: this.env.MOBILE_MONEY_FEE_BPS,
+      waiting: {
+        freeMinutes: this.env.WAITING_FREE_MINUTES,
+        stepMinutes: this.env.WAITING_STEP_MINUTES,
+        feePerStep: this.env.WAITING_FEE_PER_STEP,
+      },
     };
   }
 }

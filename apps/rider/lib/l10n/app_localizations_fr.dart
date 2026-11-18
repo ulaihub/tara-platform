@@ -495,6 +495,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toPickup => 'Vers l’enlèvement';
 
   @override
+  String get arrivedAction => 'Je suis arrivé';
+
+  @override
+  String get arrivedSending => 'Envoi…';
+
+  @override
+  String waitingRule(int free, String fee, int step, String share) {
+    return 'Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite $free min, puis $fee par $step min, dont $share pour vous.';
+  }
+
+  @override
+  String waitingFree(int minutes, int left) {
+    return 'Vous attendez depuis $minutes min · gratuit encore $left min.';
+  }
+
+  @override
+  String waitingPaid(int minutes, String fee, String share) {
+    return 'Vous attendez depuis $minutes min · $fee d’attente pour l’expéditeur, dont $share pour vous.';
+  }
+
+  @override
   String toPickupMinutes(int minutes) {
     return 'Vers l’enlèvement · $minutes min';
   }

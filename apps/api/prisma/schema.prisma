@@ -389,6 +389,8 @@ enum JournalEntryKind {
   RESERVE_KEPT
   /// Annulation par l'expéditeur quand le livreur était en route : déplacement payé.
   CANCELLATION_FEE_CHARGED
+  /// Attente du livreur au point d'enlèvement au-delà du temps gratuit.
+  WAITING_FEE_CHARGED
 
   @@map("journal_entry_kind")
 }
@@ -1018,6 +1020,8 @@ model Order {
   /// Primes payées par Tara au livreur, figées quand il accepte la course (H4).
   approachBonus    Int           @default(0) @map("approach_bonus")
   boostBonus       Int           @default(0) @map("boost_bonus")
+  /// Frais d'attente au point d'enlèvement (D), pris à l'enlèvement ; 0 sinon.
+  waitingFee       Int           @default(0) @map("waiting_fee")
   /// Frais d'échec figés à la commande (E6), annoncés avant de commander : nouvelle tentative
   /// et retour à l'expéditeur, à sa charge, partagés comme la course.
   retryFee         Int           @default(0) @map("retry_fee")
@@ -1062,6 +1066,8 @@ model Order {
   createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
   assignedAt           DateTime?        @map("assigned_at") @db.Timestamptz(3)
+  /// Le livreur a signalé son arrivée au point d'enlèvement : l'attente compte depuis là (D).
+  arrivedPickupAt      DateTime?        @map("arrived_pickup_at") @db.Timestamptz(3)
   pickedUpAt           DateTime?        @map("picked_up_at") @db.Timestamptz(3)
   deliveredAt          DateTime?        @map("delivered_at") @db.Timestamptz(3)
   /// Colis rendu à l'expéditeur après un échec (E6).

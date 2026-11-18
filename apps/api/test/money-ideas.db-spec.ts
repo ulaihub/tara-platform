@@ -8,8 +8,14 @@ import {
 } from '../src/finance/ledger.accounts.js';
 import { LedgerService } from '../src/finance/ledger.service.js';
 import { createTestApp, type SignedIn, staffUser, type TestContext } from './helpers/app.js';
-import { merchant, placeOrder, setupDouala, type TestMerchant } from './helpers/orders.js';
-import { activeRider } from './helpers/riders.js';
+import {
+  merchant,
+  nearAkwa,
+  placeOrder,
+  setupDouala,
+  type TestMerchant,
+} from './helpers/orders.js';
+import { activeRider, proofPhoto, type TestRider } from './helpers/riders.js';
 
 /**
  * Revenus validés par le fondateur : garantie de la valeur déclarée (A), frais d'annulation
@@ -48,14 +54,18 @@ describe('Garantie, annulation et attente payantes', () => {
     );
   }
 
-  async function assign(orderId: string): Promise<string> {
+  async function assignTo(orderId: string): Promise<TestRider> {
     const rider = await activeRider(ctx);
     await request(ctx.http)
       .post(`/v1/admin/orders/${orderId}/assign`)
       .set(ops.auth)
       .send({ riderId: rider.riderId })
       .expect(200);
-    return rider.riderId;
+    return rider;
+  }
+
+  async function assign(orderId: string): Promise<string> {
+    return (await assignTo(orderId)).riderId;
   }
 
   const cancel = (who: SignedIn, orderId: string) =>
@@ -191,6 +201,75 @@ describe('Garantie, annulation et attente payantes', () => {
         where: { idempotencyKey: `order:${byOps.id}:cancel-fee` },
       });
       expect(fee).toBeNull();
+    });
+  });
+
+  describe('D · attente au point d’enlèvement', () => {
+    it('arrivée sur place seulement ; 17 min d’attente : 200 F, 140 F au livreur', async () => {
+      const other = await merchant(ctx);
+      await sales(other, 5_000);
+      const profile = await ctx.prisma.merchantProfile.findUniqueOrThrow({
+        where: { userId: other.userId },
+      });
+      const placed = await placeOrder(ctx, other, { feePaymentMethod: 'WALLET' });
+      const rider = await assignTo(placed.id);
+
+      const far = await request(ctx.http)
+        .post(`/v1/rider/orders/${placed.id}/arrived`)
+        .set(rider.auth)
+        .send(nearAkwa(0.01))
+        .expect(422);
+      expect(far.body.error.code).toBe('NOT_AT_PICKUP');
+      const arrived = await request(ctx.http)
+        .post(`/v1/rider/orders/${placed.id}/arrived`)
+        .set(rider.auth)
+        .send(nearAkwa(0.001))
+        .expect(200);
+      expect(arrived.body.arrivedPickupAt).toEqual(expect.any(String));
+      const seen = await request(ctx.http)
+        .get(`/v1/orders/${placed.id}`)
+        .set(other.auth)
+        .expect(200);
+      expect(seen.body.pricing.riderArrivedAt).toBe(arrived.body.arrivedPickupAt);
+
+      // Le livreur attend depuis 17 minutes : 10 gratuites, puis 2 tranches de 5 min.
+      await ctx.prisma.order.update({
+        where: { id: placed.id },
+        data: { arrivedPickupAt: new Date(Date.now() - 17 * 60_000) },
+      });
+      const afterOrder = await ledger.balance(merchantPayable(profile.id));
+      const riderBefore = await ledger.balance(riderPayable(rider.riderId));
+      const commission = await ledger.balance(PLATFORM_ACCOUNTS.commission);
+      const photoKey = await proofPhoto(ctx, rider);
+      await request(ctx.http)
+        .post(`/v1/rider/orders/${placed.id}/pickup`)
+        .set(rider.auth)
+        .send({ pickupCode: placed.pickupCode, photoKey, ...nearAkwa(0.001) })
+        .expect(200);
+
+      const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: placed.id } });
+      expect(stored.waitingFee).toBe(200);
+      expect(await ledger.balance(merchantPayable(profile.id))).toBe(afterOrder - 200);
+      expect(await ledger.balance(riderPayable(rider.riderId))).toBe(riderBefore + 140);
+      expect(await ledger.balance(PLATFORM_ACCOUNTS.commission)).toBe(commission + 60);
+    });
+
+    it('enlevé dans les 10 minutes : rien à payer', async () => {
+      const placed = await placeOrder(ctx, shop);
+      const rider = await assignTo(placed.id);
+      await request(ctx.http)
+        .post(`/v1/rider/orders/${placed.id}/arrived`)
+        .set(rider.auth)
+        .send(nearAkwa(0.001))
+        .expect(200);
+      const photoKey = await proofPhoto(ctx, rider);
+      await request(ctx.http)
+        .post(`/v1/rider/orders/${placed.id}/pickup`)
+        .set(rider.auth)
+        .send({ pickupCode: placed.pickupCode, photoKey, ...nearAkwa(0.001) })
+        .expect(200);
+      const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: placed.id } });
+      expect(stored.waitingFee).toBe(0);
     });
   });
 });
