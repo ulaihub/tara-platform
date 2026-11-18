@@ -1120,6 +1120,8 @@
   "lineCredit": "Avoir de Tara",
   "lineTopUp": "Recharge",
   "lineReserve": "Réserve pour vos livraisons",
+  "lineCancellationFee": "Annulation, livreur en route",
+  "lineWaitingFee": "Attente du livreur",
   "linePayout": "Reversement",
   "lineWithdrawal": "Retrait",
   "linePayoutFailed": "Reversement échoué, montant rendu",

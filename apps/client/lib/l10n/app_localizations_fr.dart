@@ -1613,6 +1613,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get lineReserve => 'Réserve pour vos livraisons';
 
   @override
+  String get lineCancellationFee => 'Annulation, livreur en route';
+
+  @override
+  String get lineWaitingFee => 'Attente du livreur';
+
+  @override
   String get linePayout => 'Reversement';
 
   @override

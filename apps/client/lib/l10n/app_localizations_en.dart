@@ -1607,6 +1607,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lineReserve => 'Reserve for your deliveries';
 
   @override
+  String get lineCancellationFee => 'Cancellation, rider on the way';
+
+  @override
+  String get lineWaitingFee => 'Rider waiting time';
+
+  @override
   String get linePayout => 'Payout';
 
   @override

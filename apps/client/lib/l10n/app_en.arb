@@ -542,6 +542,8 @@
   "lineCredit": "Credit from Tara",
   "lineTopUp": "Top-up",
   "lineReserve": "Reserve for your deliveries",
+  "lineCancellationFee": "Cancellation, rider on the way",
+  "lineWaitingFee": "Rider waiting time",
   "linePayout": "Payout",
   "lineWithdrawal": "Withdrawal",
   "linePayoutFailed": "Payout failed, amount returned",

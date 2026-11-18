@@ -2894,6 +2894,18 @@ abstract class AppLocalizations {
   /// **'Réserve pour vos livraisons'**
   String get lineReserve;
 
+  /// No description provided for @lineCancellationFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulation, livreur en route'**
+  String get lineCancellationFee;
+
+  /// No description provided for @lineWaitingFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attente du livreur'**
+  String get lineWaitingFee;
+
   /// No description provided for @linePayout.
   ///
   /// In fr, this message translates to:

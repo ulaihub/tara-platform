@@ -776,6 +776,7 @@ describe('Actions du livreur (E2 à E9)', () => {
       ],
       offerTimeoutSeconds: 30,
       mobileMoneyFeeBps: 0,
+      waiting: { freeMinutes: 10, stepMinutes: 5, feePerStep: 100, riderPercent: 70 },
     });
     await request(ctx.app.getHttpServer()).get('/v1/rider/config').expect(401);
   });

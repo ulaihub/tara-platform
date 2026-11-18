@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.7 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.8 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -62,10 +62,19 @@ qui lui est confié**, de l'enlèvement à la remise (article 13).
   sans frais. Ne donnez que les numéros de personnes qui attendent un colis de vous : ces SMS
   ne servent jamais à la publicité, et leur nombre par jour est limité.
 - Vous pouvez programmer une livraison jusqu'à plusieurs jours à l'avance.
-- Vous pouvez annuler gratuitement tant que le livreur n'a pas récupéré le colis : ce que vous
-  avez payé revient sur votre solde Tara (pour une boutique, ce qui avait été pris sur ses
-  ventes revient sur ses ventes). Une fois le colis récupéré, la commande ne peut plus
-  être annulée.
+- **Annuler** : gratuit tant qu'aucun livreur n'a accepté la course. Une fois qu'un livreur est
+  en route vers le point d'enlèvement, l'annulation coûte **300 FCFA** pour son déplacement
+  (dont 200 FCFA pour lui), montant affiché avant que vous confirmiez ; rien n'est dû si un
+  autre colis du même envoi part quand même avec ce livreur. Ce que vous aviez payé d'avance
+  revient sur votre solde Tara (pour une boutique, ce qui avait été pris sur ses ventes
+  revient sur ses ventes), moins ces frais. Une fois le colis récupéré, la commande ne peut
+  plus être annulée.
+- **Attente du livreur** : arrivé au point d'enlèvement, le livreur le signale dans
+  l'application et vous êtes prévenu. L'attente est gratuite pendant **10 minutes** ; au-delà,
+  **100 FCFA par tranche de 5 minutes commencée**, jusqu'à la remise du colis (dont 70 % pour
+  le livreur). Un envoi de plusieurs colis pris par le même livreur ne compte qu'une attente.
+  Ces frais sont pris à l'enlèvement sur votre solde Tara (pour une boutique, puis sur ses
+  ventes) ; ce qui n'est pas couvert reste dû (article 9).
 
 ## 4. Ce que vous pouvez envoyer
 
@@ -110,6 +119,13 @@ Vous pouvez contester auprès du service client : la photo prise par le livreur 
 Indiquez la valeur du contenu à la commande (500 000 FCFA au plus ; pour un colis de plus
 grande valeur, appelez le service client avant d'envoyer). Elle n'est jamais montrée au livreur.
 Elle fixe le plafond de ce que Tara vous rembourse en cas de perte ou de dommage (article 13).
+
+**Garantie de la valeur déclarée** : gratuite jusqu'à 25 000 FCFA. Au-delà, un supplément de
+**1 % de la valeur qui dépasse 25 000 FCFA**, arrondi aux 50 FCFA supérieurs, s'ajoute au prix
+de la livraison (par exemple 1 250 FCFA pour 150 000 FCFA déclarés). Il est affiché avant que
+vous commandiez, revient entièrement à Tara et n'est réduit ni par un code promo ni par le
+tarif pro. C'est la déclaration de valeur prévue par le droit OHADA du transport, pas une
+assurance.
 Un colis de grande valeur est confié seulement à un livreur expérimenté et bien noté.
 
 ## 5. Payer la livraison
@@ -210,8 +226,8 @@ périssable peut être donné ou détruit après 48 heures.
 
 - Un **particulier** ne peut rien devoir à Tara : tant qu'une somme reste due, il ne peut pas
   passer de nouvelle commande ni supprimer son compte.
-- Une **boutique** peut devoir au plus **3 000 FCFA** (frais d'échec que ni son solde Tara ni
-  ses ventes ne couvrent). Seules ses ventes à recevoir passent alors en négatif ; au-delà, ses
+- Une **boutique** peut devoir au plus **3 000 FCFA** (frais d'échec, d'annulation ou
+  d'attente que ni son solde Tara ni ses ventes ne couvrent). Seules ses ventes à recevoir passent alors en négatif ; au-delà, ses
   nouvelles commandes attendent le règlement : recharge par Mobile Money, ou ventes encaissées
   qui viennent combler la dette. Aucun reversement n'est fait tant que ses ventes sont en
   négatif.
