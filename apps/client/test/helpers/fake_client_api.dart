@@ -237,6 +237,24 @@ class FakeClientApi extends ClientApi {
   /// Prix d'une liste d'envoi : un colis vers [unpricedAddressId] n'a pas de prix (hors zone).
   String? unpricedAddressId;
 
+  /// Réserves du soir choisies par la boutique.
+  final reserves = <int>[];
+
+  @override
+  Future<void> setPayoutReserve(int amount) async {
+    reserves.add(amount);
+    wallet0 = Wallet(
+      customerBalance: wallet0.customerBalance,
+      merchantBalance: wallet0.merchantBalance,
+      payoutSchedule: wallet0.payoutSchedule,
+      todaySales: wallet0.todaySales,
+      todayDeliveries: wallet0.todayDeliveries,
+      plan: wallet0.plan,
+      payoutPhone: wallet0.payoutPhone,
+      payoutReserve: amount,
+    );
+  }
+
   @override
   Future<BatchQuote> quoteMany({
     required String pickupAddressId,

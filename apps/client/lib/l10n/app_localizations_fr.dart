@@ -1494,7 +1494,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String shopWithdrawalRule(String amount, String rate) {
-    return 'Reversement gratuit dès $amount ; en dessous, $rate de frais Mobile Money retenus.';
+    return 'Reversement et retrait gratuits dès $amount ; en dessous, $rate de frais Mobile Money retenus.';
   }
 
   @override
@@ -1585,6 +1585,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lineTopUp => 'Recharge';
+
+  @override
+  String get lineReserve => 'Réserve pour vos livraisons';
 
   @override
   String get linePayout => 'Reversement';
@@ -2501,9 +2504,49 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get taraBalanceShopBody =>
-      'Ancien solde, d’avant votre boutique : vous pouvez le retirer sur votre Mobile Money.';
+      'Paie vos livraisons et frais avant vos ventes. Jamais reversé tout seul : retirez-le quand vous voulez.';
 
   @override
-  String get shopPaysDeliveries =>
-      'Vos ventes paient aussi vos livraisons : choisissez « Mes ventes » au moment de payer.';
+  String get shopPaysDeliveries => 'Vos livraisons se paient d’abord avec votre solde Tara, puis avec vos ventes.';
+
+  @override
+  String get payWalletTaraAndSales => 'Solde Tara et ventes';
+
+  @override
+  String payWalletTaraBody(Object amount) {
+    return 'Pris sur votre solde Tara : il vous restera $amount.';
+  }
+
+  @override
+  String payWalletBothBody(Object amount) {
+    return 'Pris sur votre solde Tara, puis vos ventes : il vous restera $amount à recevoir.';
+  }
+
+  @override
+  String reserveLine(Object amount) {
+    return 'Réserve gardée chaque soir : $amount';
+  }
+
+  @override
+  String get reserveNone => 'Pas de réserve : toutes vos ventes vous sont reversées.';
+
+  @override
+  String get reserveChange => 'Modifier';
+
+  @override
+  String get reserveTitle => 'Réserve pour vos livraisons';
+
+  @override
+  String reserveBody(Object hour) {
+    return 'Au reversement de $hour h, Tara garde ce montant de vos ventes sur votre solde Tara : vos livraisons du lendemain sont déjà payées. Le reste vous est reversé, comme d’habitude.';
+  }
+
+  @override
+  String get reserveZero => 'Aucune';
+
+  @override
+  String get reserveSave => 'Enregistrer';
+
+  @override
+  String get reserveSaved => 'Réserve enregistrée.';
 }

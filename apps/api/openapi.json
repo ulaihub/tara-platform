@@ -4458,6 +4458,45 @@
         ]
       }
     },
+    "/v1/me/wallet/reserve": {
+      "put": {
+        "operationId": "Wallet_setReserve",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000
+                  }
+                },
+                "required": [
+                  "amount"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Portefeuille"
+        ]
+      }
+    },
     "/v1/me/wallet/topup": {
       "post": {
         "operationId": "Wallet_topUp",
@@ -17486,6 +17525,9 @@
               "payoutHour": {
                 "type": "integer"
               },
+              "payoutReserve": {
+                "type": "integer"
+              },
               "todaySales": {
                 "type": "integer"
               },
@@ -17519,6 +17561,7 @@
               "plan",
               "payoutPhone",
               "payoutHour",
+              "payoutReserve",
               "todaySales",
               "todayDeliveries",
               "withdrawal"

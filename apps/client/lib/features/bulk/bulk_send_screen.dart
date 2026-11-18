@@ -24,6 +24,7 @@ import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/wallet_choice.dart';
 import '../home/home_screen.dart';
 import '../order/order_placed.dart';
 import '../order/pickup_step.dart';
@@ -159,7 +160,7 @@ class _BulkSendScreenState extends ConsumerState<BulkSendScreen> {
   void _suggestMethod() {
     if (_draft.paymentMethod != null) return;
     final wallet = ref.read(walletProvider).value;
-    final balance = widget.me.merchant != null ? wallet?.merchantBalance : wallet?.customerBalance;
+    final balance = widget.me.merchant != null ? wallet?.spendable : wallet?.customerBalance;
     _draft.paymentMethod = balance != null && balance >= _draft.total && _draft.total > 0 ? 'WALLET' : 'MOMO_MTN';
   }
 
@@ -331,7 +332,7 @@ class _BulkSendScreenState extends ConsumerState<BulkSendScreen> {
     draft.mobileMoneyFeeBps = ref.watch(appConfigProvider).value?.mobileMoneyFeeBps ?? 0;
     final shop = widget.me.merchant != null;
     final wallet = ref.watch(walletProvider).value;
-    final balance = shop ? wallet?.merchantBalance : wallet?.customerBalance;
+    final walletOption = walletChoice(l, shop: shop, wallet: wallet, total: draft.total);
     final ready = draft.ready.length;
     final waiting = draft.waiting.length;
     final incomplete = draft.incomplete.length;
@@ -476,18 +477,7 @@ class _BulkSendScreenState extends ConsumerState<BulkSendScreen> {
                   const SizedBox(height: 12),
                   label(l.paymentLabel),
                   for (final (method, icon, title, body) in [
-                    (
-                      'WALLET',
-                      TaraIcons.wallet,
-                      shop ? l.payWalletShop : l.payWallet,
-                      balance == null
-                          ? ''
-                          : total > 0 && balance < total
-                          ? l.walletTooLow('${formatAmount(balance)} F')
-                          : shop && total > 0
-                          ? l.payWalletShopBody('${formatAmount(balance - total)} F')
-                          : l.payWalletBody('${formatAmount(balance)} F'),
-                    ),
+                    ('WALLET', TaraIcons.wallet, walletOption.title, walletOption.body),
                     ('MOMO_MTN', TaraIcons.phone, l.payMtn, l.payMomoBody),
                     ('MOMO_ORANGE', TaraIcons.phone, l.payOrange, l.payMomoBody),
                   ]) ...[

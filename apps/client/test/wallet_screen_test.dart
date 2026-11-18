@@ -187,7 +187,9 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, wallet(api));
     await settle(tester);
     expect(
-      find.text('Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, 2,5\u00a0% de frais Mobile Money retenus.'),
+      find.text(
+        'Reversement et retrait gratuits dès 50\u00a0000\u00a0F ; en dessous, 2,5\u00a0% de frais Mobile Money retenus.',
+      ),
       findsOneWidget,
     );
   });
@@ -207,7 +209,9 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, wallet(api));
     await settle(tester);
     expect(
-      find.text('Reversement gratuit dès 50\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.'),
+      find.text(
+        'Reversement et retrait gratuits dès 50\u00a0000\u00a0F ; en dessous, 1,25\u00a0% de frais Mobile Money retenus.',
+      ),
       findsOneWidget,
     );
   });

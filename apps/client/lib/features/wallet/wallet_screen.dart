@@ -272,27 +272,30 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 _ShopCard(wallet: data, busy: _busy, onPayoutNow: _payoutNow),
                 const SizedBox(height: 12),
               ],
-              // Boutique : un seul solde, ses ventes (elles paient aussi ses livraisons). Le
-              // solde Tara n'apparaît que s'il en reste un d'avant la boutique, à retirer.
-              if (!merchant || data.customerBalance != 0)
-                _BalanceCard(
-                  wallet: data,
-                  shop: merchant,
-                  panel: _panel,
-                  busy: _busy,
-                  phone: widget.me.phone,
-                  onTopUp: () => _open(_Panel.topUp),
-                  onWithdraw: () => unawaited(_openWithdraw()),
-                  onCancel: () => _open(_panel),
-                  onToppedUp: (amount) => _done(l.topUpDone(_f(amount))),
-                  onWithdrawConfirm: _withdraw,
-                ),
+              // Boutique : son solde Tara (recharges, réserve) paie ses livraisons avant ses
+              // ventes, et n'est jamais reversé tout seul.
+              _BalanceCard(
+                wallet: data,
+                shop: merchant,
+                onReserveSaved: () {
+                  ref.invalidate(walletProvider);
+                  _done(l.reserveSaved);
+                },
+                panel: _panel,
+                busy: _busy,
+                phone: widget.me.phone,
+                onTopUp: () => _open(_Panel.topUp),
+                onWithdraw: () => unawaited(_openWithdraw()),
+                onCancel: () => _open(_panel),
+                onToppedUp: (amount) => _done(l.topUpDone(_f(amount))),
+                onWithdrawConfirm: _withdraw,
+              ),
               if (_error != null) ...[const SizedBox(height: 10), ErrorLine(_error!)],
             ],
             const SizedBox(height: 24),
             SectionHeader(title: l.movements),
             const SizedBox(height: 8),
-            if (merchant && (data?.customerBalance ?? 0) != 0) ...[
+            if (merchant) ...[
               LiquidSegmented<String>(
                 compact: true,
                 segments: [('merchant', l.movementsShop), ('customer', l.movementsBalance)],
@@ -416,6 +419,7 @@ class _BalanceCard extends ConsumerStatefulWidget {
   const _BalanceCard({
     required this.wallet,
     required this.shop,
+    required this.onReserveSaved,
     required this.panel,
     required this.busy,
     required this.phone,
@@ -428,9 +432,11 @@ class _BalanceCard extends ConsumerStatefulWidget {
 
   final Wallet wallet;
 
-  /// Boutique : ancien solde Tara, à retirer seulement (ses livraisons se paient avec ses
-  /// ventes, qui sont reversées chaque jour : une recharge repartirait le soir même).
+  /// Boutique : son solde Tara paie ses livraisons avant ses ventes ; réserve du soir.
   final bool shop;
+
+  /// Réserve du soir enregistrée (le portefeuille est relu).
+  final VoidCallback onReserveSaved;
   final _Panel panel;
   final bool busy;
   final String phone;
@@ -573,22 +579,25 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
             widget.shop ? l.taraBalanceShopBody : l.taraBalanceBody,
             style: TaraText.small.copyWith(color: c.textSecondary),
           ),
+          if (widget.shop) ...[
+            const SizedBox(height: 10),
+            _ReserveRow(wallet: widget.wallet, onChanged: widget.onReserveSaved),
+          ],
           const SizedBox(height: 14),
           if (widget.panel == _Panel.none)
             Row(
               children: [
-                if (!widget.shop)
-                  Expanded(
-                    child: GlassButton(
-                      label: l.topUpAction,
-                      icon: TaraIcons.wallet,
-                      height: 48,
-                      color: c.accentText,
-                      onPressed: widget.onTopUp,
-                    ),
+                Expanded(
+                  child: GlassButton(
+                    label: l.topUpAction,
+                    icon: TaraIcons.wallet,
+                    height: 48,
+                    color: c.accentText,
+                    onPressed: widget.onTopUp,
                   ),
+                ),
                 if (canWithdraw) ...[
-                  if (!widget.shop) const SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: GlassButton(
                       label: l.withdrawAction,
@@ -729,6 +738,7 @@ class _Lines extends StatelessWidget {
     'FAILURE_FEE_CHARGED' => l.lineFailureFee,
     'CREDIT_GRANTED' => l.lineCredit,
     'PAYMENT_RECEIVED' => l.lineTopUp,
+    'RESERVE_KEPT' => l.lineReserve,
     'PAYOUT_REQUESTED' || 'PAYOUT_SENT' => account == 'merchant' ? l.linePayout : l.lineWithdrawal,
     'PAYOUT_FAILED' => l.linePayoutFailed,
     'REFUND' => l.lineRefund,
@@ -988,6 +998,104 @@ class _Retry extends StatelessWidget {
         const SizedBox(height: 8),
         GlassButton(label: l.retry, height: 44, onPressed: onRetry),
       ],
+    );
+  }
+}
+
+/// Boutique : réserve gardée chaque soir de ses ventes sur son solde Tara, pour ses
+/// livraisons du lendemain ; modifiable en un geste.
+class _ReserveRow extends ConsumerWidget {
+  const _ReserveRow({required this.wallet, required this.onChanged});
+
+  final Wallet wallet;
+  final VoidCallback onChanged;
+
+  static const amounts = [0, 5000, 10000, 20000, 50000, 100000];
+
+  Future<void> _change(BuildContext context, WidgetRef ref) async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final chosen = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => UncontrolledProviderScope(
+        container: container,
+        child: _ReserveSheet(current: wallet.payoutReserve, hour: wallet.payoutHour),
+      ),
+    );
+    if (chosen == null || chosen == wallet.payoutReserve) return;
+    await container.read(clientApiProvider).setPayoutReserve(chosen);
+    onChanged();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final reserve = wallet.payoutReserve;
+    return Row(
+      children: [
+        TaraIcon(TaraIcons.clock, size: 18, color: c.accentText),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            reserve > 0 ? l.reserveLine(_f(reserve)) : l.reserveNone,
+            style: TaraText.small.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+          ),
+        ),
+        const SizedBox(width: 8),
+        TaraLink(label: l.reserveChange, onPressed: () => unawaited(_change(context, ref))),
+      ],
+    );
+  }
+}
+
+class _ReserveSheet extends StatefulWidget {
+  const _ReserveSheet({required this.current, required this.hour});
+
+  final int current;
+  final int hour;
+
+  @override
+  State<_ReserveSheet> createState() => _ReserveSheetState();
+}
+
+class _ReserveSheetState extends State<_ReserveSheet> {
+  late int _amount = widget.current;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return SafeArea(
+      child: GlassPanel(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l.reserveTitle, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
+            const SizedBox(height: 6),
+            Text(l.reserveBody('${widget.hour}'), style: TaraText.small.copyWith(color: c.textSecondary, height: 1.45)),
+            const SizedBox(height: 14),
+            ChoiceChips<int>(
+              columns: 3,
+              height: 44,
+              options: [
+                for (final amount in _ReserveRow.amounts)
+                  ChoiceOption(amount, amount == 0 ? l.reserveZero : formatAmount(amount)),
+              ],
+              selected: _amount,
+              onSelected: (amount) => setState(() => _amount = amount),
+            ),
+            const SizedBox(height: 14),
+            PrimaryButton(
+              label: l.reserveSave,
+              icon: TaraIcons.check,
+              onPressed: () => Navigator.of(context).pop(_amount),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -106,3 +106,10 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
    attendent un colis de lui ; nombre de SMS limité par jour, jamais de publicité. À faire
    confirmer au regard de la loi n° 2024/017 (information du destinataire) et de la loi
    n° 2010/021 (communications électroniques non sollicitées).
+9. Solde Tara des boutiques et réserve (version 2026-11.7) : les recharges d'une boutique et la
+   réserve qu'elle choisit (0 à 100 000 FCFA, gardée sur ses ventes au reversement du soir)
+   restent sur son solde Tara, qui ne sert qu'à payer les services de Tara et se retire à tout
+   moment. À faire confirmer : qu'un tel crédit prépayé, limité aux services de Tara, n'est pas
+   de la monnaie électronique au sens du règlement n° 04/18/CEMAC/UMAC/COBAC (exclusion des
+   moyens de paiement à usage limité), et que garder la réserve sur les ventes, à la demande
+   de la boutique, reste compatible avec le mandat d'encaissement.

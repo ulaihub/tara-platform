@@ -1488,7 +1488,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String shopWithdrawalRule(String amount, String rate) {
-    return 'Free payout from $amount; below that, a $rate Mobile Money fee is deducted.';
+    return 'Payouts and withdrawals free from $amount; below that, a $rate Mobile Money fee is deducted.';
   }
 
   @override
@@ -1579,6 +1579,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lineTopUp => 'Top-up';
+
+  @override
+  String get lineReserve => 'Reserve for your deliveries';
 
   @override
   String get linePayout => 'Payout';
@@ -2493,8 +2496,50 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get taraBalanceShopBody => 'Balance from before your shop: you can withdraw it to your Mobile Money.';
+  String get taraBalanceShopBody =>
+      'Pays your deliveries and fees before your sales. Never paid out on its own: withdraw it whenever you like.';
 
   @override
-  String get shopPaysDeliveries => 'Your sales also pay for your deliveries: choose “My sales” when paying.';
+  String get shopPaysDeliveries => 'Your deliveries are paid first from your Tara balance, then from your sales.';
+
+  @override
+  String get payWalletTaraAndSales => 'Tara balance and sales';
+
+  @override
+  String payWalletTaraBody(Object amount) {
+    return 'Taken from your Tara balance: $amount will be left.';
+  }
+
+  @override
+  String payWalletBothBody(Object amount) {
+    return 'Taken from your Tara balance, then your sales: $amount will be left to receive.';
+  }
+
+  @override
+  String reserveLine(Object amount) {
+    return 'Reserve kept each evening: $amount';
+  }
+
+  @override
+  String get reserveNone => 'No reserve: all your sales are paid out to you.';
+
+  @override
+  String get reserveChange => 'Change';
+
+  @override
+  String get reserveTitle => 'Reserve for your deliveries';
+
+  @override
+  String reserveBody(Object hour) {
+    return 'At the $hour:00 payout, Tara keeps this amount of your sales on your Tara balance: tomorrow\'s deliveries are already paid. The rest is paid out to you as usual.';
+  }
+
+  @override
+  String get reserveZero => 'None';
+
+  @override
+  String get reserveSave => 'Save';
+
+  @override
+  String get reserveSaved => 'Reserve saved.';
 }

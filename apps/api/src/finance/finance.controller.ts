@@ -57,6 +57,7 @@ import {
   RiderHistoryQuery,
   RiderTopUpBody,
   RiderWalletDto,
+  PayoutReserveBody,
   TopUpBody,
   WalletDto,
   WalletHistoryQuery,
@@ -272,6 +273,20 @@ export class WalletController {
     const merchant = await this.prisma.merchantProfile.findUnique({ where: { userId: user.id } });
     if (!merchant) throw AppError.notFound();
     return this.wallets.history(merchantPayable(merchant.id), query);
+  }
+
+  /**
+   * Boutique : réserve pour ses livraisons, gardée chaque soir de ses ventes sur son solde
+   * Tara au lieu d'être reversée (0 : tout est reversé).
+   */
+  @Put('me/wallet/reserve')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiZodBody(PayoutReserveBody)
+  async setReserve(
+    @CurrentUser() user: AuthUser,
+    @ValidBody(PayoutReserveBody) body: z.output<typeof PayoutReserveBody>,
+  ): Promise<void> {
+    await this.wallets.setPayoutReserve(user.id, body.amount);
   }
 
   /** Recharge du solde par Mobile Money : demande envoyée au téléphone du payeur. */

@@ -7,7 +7,7 @@ import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { AppError } from '../common/errors/app-error.js';
 import { CAMEROON_TIME_ZONE, cameroonDate, cameroonHour } from '../common/time.js';
-import { Prisma, type Payout } from '../generated/prisma/client.js';
+import { type MerchantProfile, Prisma, type Payout } from '../generated/prisma/client.js';
 import type { MobileMoneyOperator, PayoutBeneficiary } from '../generated/prisma/enums.js';
 import { NotificationService } from '../notifications/notification.service.js';
 import {
@@ -122,7 +122,8 @@ export class PayoutsService implements OnModuleInit {
 
   /**
    * Seuil de retrait gratuit : celui fixé par l'équipe pour la boutique ou le livreur, sinon
-   * le seuil général. Les remboursements des clients sont toujours gratuits.
+   * le seuil général. Le retrait du solde Tara d'un particulier est toujours gratuit ; celui
+   * d'une boutique suit la règle de ses reversements (sa réserve vient de ses ventes).
    */
   async freePayoutFrom(
     beneficiary: PayoutBeneficiary,
@@ -138,8 +139,10 @@ export class PayoutsService implements OnModuleInit {
         const rider = await db.riderProfile.findUnique({ where: { id: ownerId } });
         return rider?.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM;
       }
-      case 'CUSTOMER':
-        return null;
+      case 'CUSTOMER': {
+        const merchant = await db.merchantProfile.findUnique({ where: { userId: ownerId } });
+        return merchant ? (merchant.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM) : null;
+      }
     }
   }
 
@@ -519,6 +522,8 @@ export class PayoutsService implements OnModuleInit {
     let requested = 0;
     let skipped = 0;
     for (const merchant of merchants) {
+      // Réserve choisie par la boutique : gardée de ses ventes pour ses livraisons de demain.
+      await this.keepReserve(merchant, day);
       const available = await this.available('MERCHANT', merchant.id);
       if (available < this.env.PAYOUT_MIN_AMOUNT) {
         skipped += 1;
@@ -540,6 +545,37 @@ export class PayoutsService implements OnModuleInit {
       }
     }
     return { requested, skipped };
+  }
+
+  /**
+   * Garde la réserve d'une boutique : ce qui manque à son solde Tara pour atteindre la
+   * réserve choisie passe de ses ventes à son solde Tara, avant le reversement du soir. Une
+   * fois par jour ; rien si la réserve est atteinte ou s'il n'y a pas de ventes.
+   */
+  async keepReserve(
+    merchant: Pick<MerchantProfile, 'id' | 'userId' | 'payoutReserve'>,
+    day: string,
+  ): Promise<number> {
+    if (merchant.payoutReserve <= 0) return 0;
+    const prepaid = customerWallet(merchant.userId);
+    const sales = merchantPayable(merchant.id);
+    return this.prisma.$transaction(async (tx) => {
+      await this.ledger.lock(tx, [prepaid, sales]);
+      const balances = await this.ledger.balances([prepaid, sales], tx);
+      const missing = merchant.payoutReserve - Math.max(0, balances.get(prepaid.code) ?? 0);
+      const kept = Math.min(missing, await this.available('MERCHANT', merchant.id, tx));
+      if (kept <= 0) return 0;
+      await this.ledger.post(tx, {
+        kind: 'RESERVE_KEPT',
+        description: 'Réserve pour vos livraisons, gardée de vos ventes',
+        idempotencyKey: `merchant:${merchant.id}:reserve:${day}`,
+        postings: [
+          { account: sales, amount: kept },
+          { account: prepaid, amount: -kept },
+        ],
+      });
+      return kept;
+    });
   }
 
   // --- Validation par la finance ------------------------------------------------------------

@@ -1004,7 +1004,7 @@
       }
     }
   },
-  "shopWithdrawalRule": "Reversement gratuit dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.",
+  "shopWithdrawalRule": "Reversement et retrait gratuits dès {amount} ; en dessous, {rate} de frais Mobile Money retenus.",
   "@shopWithdrawalRule": {
     "placeholders": {
       "amount": {
@@ -1092,6 +1092,7 @@
   "lineFailureFee": "Frais d’échec",
   "lineCredit": "Avoir de Tara",
   "lineTopUp": "Recharge",
+  "lineReserve": "Réserve pour vos livraisons",
   "linePayout": "Reversement",
   "lineWithdrawal": "Retrait",
   "linePayoutFailed": "Reversement échoué, montant rendu",
@@ -1604,6 +1605,17 @@
       }
     }
   },
-  "taraBalanceShopBody": "Ancien solde, d’avant votre boutique : vous pouvez le retirer sur votre Mobile Money.",
-  "shopPaysDeliveries": "Vos ventes paient aussi vos livraisons : choisissez « Mes ventes » au moment de payer."
+  "taraBalanceShopBody": "Paie vos livraisons et frais avant vos ventes. Jamais reversé tout seul : retirez-le quand vous voulez.",
+  "shopPaysDeliveries": "Vos livraisons se paient d’abord avec votre solde Tara, puis avec vos ventes.",
+  "payWalletTaraAndSales": "Solde Tara et ventes",
+  "payWalletTaraBody": "Pris sur votre solde Tara : il vous restera {amount}.",
+  "payWalletBothBody": "Pris sur votre solde Tara, puis vos ventes : il vous restera {amount} à recevoir.",
+  "reserveLine": "Réserve gardée chaque soir : {amount}",
+  "reserveNone": "Pas de réserve : toutes vos ventes vous sont reversées.",
+  "reserveChange": "Modifier",
+  "reserveTitle": "Réserve pour vos livraisons",
+  "reserveBody": "Au reversement de {hour} h, Tara garde ce montant de vos ventes sur votre solde Tara : vos livraisons du lendemain sont déjà payées. Le reste vous est reversé, comme d’habitude.",
+  "reserveZero": "Aucune",
+  "reserveSave": "Enregistrer",
+  "reserveSaved": "Réserve enregistrée."
 }

@@ -385,6 +385,8 @@ enum JournalEntryKind {
   REFUND
   SUBSCRIPTION
   ADJUSTMENT
+  /// Réserve gardée des ventes d'une boutique sur son solde Tara, au reversement du soir.
+  RESERVE_KEPT
 
   @@map("journal_entry_kind")
 }
@@ -628,6 +630,9 @@ model MerchantProfile {
   payoutPhone          String              @map("payout_phone")
   payoutOperator       MobileMoneyOperator @map("payout_operator")
   payoutSchedule       PayoutSchedule      @default(DAILY) @map("payout_schedule")
+  /// Réserve pour les livraisons : au reversement du soir, ce montant est gardé de ses
+  /// ventes sur son solde Tara (0 : tout est reversé). 100 000 F au plus.
+  payoutReserve        Int                 @default(0) @map("payout_reserve")
   /// Retrait gratuit à partir de ce montant (fixé par l'équipe d'après la moyenne des
   /// transactions de la boutique) ; null : seuil général FREE_PAYOUT_FROM.
   freePayoutFrom       Int?                @map("free_payout_from")

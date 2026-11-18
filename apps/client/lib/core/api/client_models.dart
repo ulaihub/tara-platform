@@ -198,6 +198,7 @@ class Wallet {
     this.plan,
     this.payoutPhone,
     this.payoutHour = 18,
+    this.payoutReserve = 0,
     this.withdrawalFreeFrom = 0,
     this.withdrawalFeeBps = 0,
     this.withdrawalFeeSharePercent = 100,
@@ -216,6 +217,7 @@ class Wallet {
       plan: merchant == null ? null : _field<String>(merchant, 'plan'),
       payoutPhone: merchant == null ? null : _field<String>(merchant, 'payoutPhone'),
       payoutHour: merchant == null ? 18 : _field<num>(merchant, 'payoutHour').toInt(),
+      payoutReserve: merchant == null ? 0 : (merchant['payoutReserve'] as num? ?? 0).toInt(),
       withdrawalFreeFrom: merchant == null ? 0 : _field<num>(_field<Json>(merchant, 'withdrawal'), 'freeFrom').toInt(),
       withdrawalFeeBps: merchant == null ? 0 : _field<num>(_field<Json>(merchant, 'withdrawal'), 'feeBps').toInt(),
       withdrawalFeeSharePercent: merchant == null
@@ -236,6 +238,7 @@ class Wallet {
     'plan',
     'payoutPhone',
     'payoutHour',
+    'payoutReserve',
     'todaySales',
     'todayDeliveries',
     'withdrawal',
@@ -268,6 +271,12 @@ class Wallet {
 
   /// Heure du reversement quotidien (heure du Cameroun).
   final int payoutHour;
+
+  /// Boutique : gardé chaque soir de ses ventes sur son solde Tara, pour ses livraisons.
+  final int payoutReserve;
+
+  /// Ce qui peut payer une livraison : le solde Tara, puis les ventes d'une boutique.
+  int get spendable => customerBalance + (merchantBalance ?? 0);
 
   /// Reversement ou retrait en cours.
   final ({int amount, String status})? openPayout;

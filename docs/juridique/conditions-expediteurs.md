@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.6 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.7 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -57,13 +57,14 @@ qui lui est confié**, de l'enlèvement à la remise (article 13).
   liste reste sur votre téléphone jusqu'à l'envoi.
 - **Client dont vous n'avez pas l'adresse** : Tara lui envoie, en votre nom, un SMS avec un
   lien pour placer son point. Son colis part dès qu'il l'a placé et il est alors payé comme
-  vous l'avez choisi : par votre solde (vos ventes) s'il suffit ; sinon Tara vous prévient et
-  vous demande de payer. Tant qu'il n'est pas parti, vous pouvez retirer ce colis de l'envoi
+  vous l'avez choisi : par votre solde Tara puis vos ventes s'ils suffisent (article 7) ; sinon
+  Tara vous prévient et vous demande de payer. Tant qu'il n'est pas parti, vous pouvez retirer ce colis de l'envoi
   sans frais. Ne donnez que les numéros de personnes qui attendent un colis de vous : ces SMS
   ne servent jamais à la publicité, et leur nombre par jour est limité.
 - Vous pouvez programmer une livraison jusqu'à plusieurs jours à l'avance.
 - Vous pouvez annuler gratuitement tant que le livreur n'a pas récupéré le colis : ce que vous
-  avez payé revient sur votre solde Tara. Une fois le colis récupéré, la commande ne peut plus
+  avez payé revient sur votre solde Tara (pour une boutique, ce qui avait été pris sur ses
+  ventes revient sur ses ventes). Une fois le colis récupéré, la commande ne peut plus
   être annulée.
 
 ## 4. Ce que vous pouvez envoyer
@@ -116,9 +117,10 @@ Un colis de grande valeur est confié seulement à un livreur expérimenté et b
 Vous choisissez, avant de commander :
 
 - **Mobile Money** (MTN ou Orange) : vous validez le paiement sur votre téléphone ;
-- **votre solde Tara** (rechargé par Mobile Money, ou vos ventes pour une boutique). Vous
-  pouvez à tout moment retirer gratuitement tout votre solde sur votre numéro Mobile Money,
-  quel que soit le montant ;
+- **votre solde Tara**, rechargé par Mobile Money ; une boutique paie d'abord avec son solde
+  Tara, puis avec ses ventes (article 7). Vous pouvez à tout moment retirer tout votre solde
+  Tara sur votre numéro Mobile Money, quel que soit le montant : gratuitement pour un
+  particulier ; pour une boutique, aux conditions de ses reversements (article 7) ;
 - **en espèces au livreur**, au moment de l'enlèvement ;
 - **« le destinataire paie »** : le destinataire paie la livraison à la porte, en espèces ou par
   Mobile Money.
@@ -133,20 +135,32 @@ Vous choisissez, avant de commander :
 ## 7. Boutiques : argent encaissé pour vous et reversements
 
 - Le livreur peut encaisser auprès du destinataire le prix de votre article (« paiement à la
-  livraison »). Cette somme est créditée sur votre portefeuille Tara dès l'encaissement, moins
+  livraison »). Cette somme est créditée sur vos ventes à recevoir dès l'encaissement, moins
   des frais de 2 % (250 FCFA au moins).
-- Votre portefeuille vous est reversé chaque jour (par défaut à 18 h) sur votre numéro Mobile
-  Money, à partir de 500 FCFA disponibles. Un solde plus petit peut vous être reversé en entier
-  à votre demande, même avec l'offre gratuite : rien ne reste bloqué chez Tara.
-- **Frais de retrait** : un reversement est gratuit à partir d'un montant fixé pour votre
-  boutique selon vos transactions avec Tara (affiché dans l'application). En dessous, des frais
-  de retrait (1,25 % aujourd'hui) sont retenus sur le montant reçu.
+- **Deux soldes** : vos recharges Mobile Money vont sur votre **solde Tara** ; l'argent encaissé
+  pour vous va sur vos **ventes à recevoir**. Une livraison et ses frais se paient d'abord avec
+  votre solde Tara, puis avec vos ventes. Si une commande est annulée, chacun des deux soldes
+  récupère ce qu'il avait payé.
+- Vos ventes vous sont reversées chaque jour (par défaut à 18 h) sur votre numéro Mobile Money,
+  à partir de 500 FCFA disponibles. Un solde plus petit peut vous être reversé en entier à votre
+  demande, même avec l'offre gratuite : rien ne reste bloqué chez Tara.
+- **Réserve pour vos livraisons** (facultative) : vous choisissez dans l'application un montant
+  de 0 à 100 000 FCFA (0 au départ). Au moment du reversement du soir, Tara garde sur vos ventes
+  ce qui manque à votre solde Tara pour atteindre ce montant et le met sur votre solde Tara ; le
+  reste vous est reversé. Cet argent sert seulement à payer vos livraisons et frais Tara. Vous
+  pouvez changer le montant ou retirer votre solde Tara à tout moment.
+- **Frais de retrait** : un reversement de vos ventes, comme un retrait de votre solde Tara, est
+  gratuit à partir d'un montant fixé pour votre boutique selon vos transactions avec Tara
+  (affiché dans l'application). En dessous, des frais de retrait (1,25 % aujourd'hui) sont
+  retenus sur le montant reçu.
 - Votre relevé mensuel est disponible dans l'application.
 
 Pour ces encaissements, Tara agit **en votre nom, comme votre mandataire**. Les paiements Mobile
-Money passent par un prestataire de paiement agréé ; Tara ne reçoit pas de dépôts et votre
-portefeuille ne produit pas d'intérêts. Les sommes vous sont reversées au plus tard au
-reversement automatique qui suit (chaque jour par défaut).
+Money passent par un prestataire de paiement agréé ; Tara ne reçoit pas de dépôts et vos soldes
+ne produisent pas d'intérêts. Votre solde Tara est une avance sur les services de Tara : il ne
+sert qu'à les payer et vous pouvez le retirer quand vous voulez. Vos ventes vous sont reversées
+au plus tard au reversement automatique qui suit (chaque jour par défaut), moins la réserve que
+vous avez choisie.
 
 ## 8. Si la livraison échoue
 
@@ -196,10 +210,11 @@ périssable peut être donné ou détruit après 48 heures.
 
 - Un **particulier** ne peut rien devoir à Tara : tant qu'une somme reste due, il ne peut pas
   passer de nouvelle commande ni supprimer son compte.
-- Une **boutique** peut devoir au plus **3 000 FCFA** (frais d'échec non couverts par son
-  portefeuille). Au-delà, ses nouvelles commandes attendent le règlement : recharge par Mobile
-  Money, ou ventes encaissées qui viennent combler la dette. Aucun reversement n'est fait tant
-  que le portefeuille est négatif.
+- Une **boutique** peut devoir au plus **3 000 FCFA** (frais d'échec que ni son solde Tara ni
+  ses ventes ne couvrent). Seules ses ventes à recevoir passent alors en négatif ; au-delà, ses
+  nouvelles commandes attendent le règlement : recharge par Mobile Money, ou ventes encaissées
+  qui viennent combler la dette. Aucun reversement n'est fait tant que ses ventes sont en
+  négatif.
 - Un compte qui doit de l'argent à Tara ne peut pas être supprimé.
 
 ## 10. Noter le livreur

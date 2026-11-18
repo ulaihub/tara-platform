@@ -139,7 +139,7 @@ void main() {
       );
       expect(find.text('1 client à compléter : il reste dans la liste et ne part pas.'), findsOneWidget);
       // Ventes de la boutique (128 500 F) : elles paient d'office.
-      expect(find.text('Pris sur vos ventes : il vous restera 126\u00a0100 F à recevoir.'), findsOneWidget);
+      expect(find.text('Pris sur vos ventes : il vous restera 126\u00a0100\u00a0F à recevoir.'), findsOneWidget);
       await expectLater(find.byType(BulkSendScreen), matchesGoldenFile('goldens/07_envoi/$theme.png'));
 
       await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
