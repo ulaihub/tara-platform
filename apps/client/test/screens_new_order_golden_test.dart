@@ -683,6 +683,28 @@ void main() {
     expect(find.text('Valeur du contenu (facultatif)'), findsOneWidget);
   });
 
+  testWidgets('garantie : annoncée dès la saisie de la valeur, ajoutée au prix', (tester) async {
+    final api = orderApi();
+    await pumpVariant(tester, Variant.matrix.first, flow(api, me: person), surface: const Size(390, 1600));
+    await toPackage(tester);
+    await tester.ensureVisible(find.text('Documents'));
+    await tester.tap(find.text('Documents'));
+    final value = find.widgetWithText(TextField, 'Ex. 25 000');
+    await tester.ensureVisible(value);
+    await tester.enterText(value, '25000');
+    await settle(tester);
+    expect(find.textContaining('Garantie :'), findsNothing);
+    await tester.enterText(value, '150000');
+    await settle(tester);
+    expect(find.text('Garantie : +1\u00a0250\u00a0F sur le prix de la livraison.'), findsOneWidget);
+    await tapVisible(tester, 'Continuer');
+    await tester.tap(find.text('Continuer'));
+    await settle(tester);
+    expect(api.quotes.last['declaredValue'], 150000);
+    expect(find.text('Garantie de la valeur'), findsOneWidget);
+    expect(find.text('+1\u00a0250\u00a0F'), findsOneWidget);
+  });
+
   group('créneaux (C3)', () {
     test('30 min d’avance au moins, 7 jours au plus, de 6 h à 21 h 30', () {
       final now = DateTime(2026, 11, 4, 10, 20);
@@ -747,6 +769,7 @@ void main() {
         'promo': null,
         'at': null,
         'loadingHelp': false,
+        'declaredValue': null,
       });
       await slideToOrder(tester);
 

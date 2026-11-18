@@ -72,6 +72,26 @@ const TEMPLATES = {
     },
     en: { title: 'Job cancelled', body: 'Job {reference} has been cancelled. Do not go.' },
   },
+  RIDER_ARRIVED_PICKUP: {
+    fr: {
+      title: 'Votre livreur est arrivé',
+      body: '{reference} · Il vous attend. Attente gratuite {free} min, puis {fee} FCFA par {step} min.',
+    },
+    en: {
+      title: 'Your rider has arrived',
+      body: '{reference} · They are waiting. Free for {free} min, then {fee} FCFA per {step} min.',
+    },
+  },
+  RIDER_ORDER_CANCELLED_PAID: {
+    fr: {
+      title: 'Course annulée, déplacement payé',
+      body: 'L’expéditeur a annulé {reference}. {amount} FCFA sont ajoutés à votre solde pour votre déplacement.',
+    },
+    en: {
+      title: 'Job cancelled, trip paid',
+      body: 'The sender cancelled {reference}. {amount} FCFA have been added to your balance for your trip.',
+    },
+  },
   RIDER_ORDER_REASSIGNED: {
     fr: {
       title: 'Course retirée',

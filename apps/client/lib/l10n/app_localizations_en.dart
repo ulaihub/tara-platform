@@ -739,7 +739,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get valueHelp =>
-      'In FCFA. Never shown to the rider. Used to compensate you for loss or damage, within the limit set in the terms.';
+      'In FCFA. Never shown to the rider. Sets what Tara repays for loss or damage: free up to 25,000 F, then 1% of the value above.';
+
+  @override
+  String valueFeeHint(String amount) {
+    return 'Guarantee: +$amount on the delivery price.';
+  }
+
+  @override
+  String get valueFeeLine => 'Value guarantee';
 
   @override
   String get valueTooHigh => '500,000 F at most. For a more valuable parcel, call customer service before sending.';
@@ -1062,6 +1070,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trackAssignedBody => 'Give them the pickup code when they arrive.';
 
   @override
+  String trackRiderWaiting(String rider) {
+    return '$rider is waiting for you';
+  }
+
+  @override
+  String trackRiderWaitingBody(String until, String fee, int step) {
+    return 'Hand over the parcel and the pickup code. Waiting is free until $until, then $fee per $step min started.';
+  }
+
+  @override
   String trackOnTheWay(String recipient) {
     return 'On the way to $recipient';
   }
@@ -1148,6 +1166,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelConfirm => 'Tap again to confirm the cancellation.';
+
+  @override
+  String cancelConfirmFee(String amount) {
+    return 'The rider is already on the way: cancelling costs $amount, for their trip. Tap again to confirm.';
+  }
 
   @override
   String get cancelReasonSender => 'Cancelled by the sender';
@@ -1582,6 +1605,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lineReserve => 'Reserve for your deliveries';
+
+  @override
+  String get lineCancellationFee => 'Cancellation, rider on the way';
+
+  @override
+  String get lineWaitingFee => 'Rider waiting time';
 
   @override
   String get linePayout => 'Payout';

@@ -361,7 +361,14 @@
   "codTooHigh": "500 000 F au plus par livraison.",
   "valueLabel": "Valeur du contenu (facultatif)",
   "valueHint": "Ex. 25 000",
-  "valueHelp": "En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.",
+  "valueHelp": "En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.",
+  "valueFeeHint": "Garantie : +{amount} sur le prix de la livraison.",
+  "@valueFeeHint": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "valueFeeLine": "Garantie de la valeur",
   "valueTooHigh": "500 000 F au plus. Pour un colis de plus grande valeur, appelez le service client avant d'envoyer.",
   "instructionsLabel": "Instructions pour le livreur (facultatif)",
   "instructionsHint": "Ex. Appeler en arrivant, sonner au portail vert",
@@ -593,6 +600,20 @@
     }
   },
   "trackAssignedBody": "Donnez-lui le code d’enlèvement à son arrivée.",
+  "trackRiderWaiting": "{rider} vous attend",
+  "@trackRiderWaiting": {
+    "placeholders": {
+      "rider": {"type": "String"}
+    }
+  },
+  "trackRiderWaitingBody": "Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à {until}, puis {fee} par {step} min commencées.",
+  "@trackRiderWaitingBody": {
+    "placeholders": {
+      "until": {"type": "String"},
+      "fee": {"type": "String"},
+      "step": {"type": "int"}
+    }
+  },
   "trackOnTheWay": "En route vers {recipient}",
   "@trackOnTheWay": {
     "placeholders": {
@@ -679,6 +700,12 @@
   },
   "cancelDelivery": "Annuler la livraison",
   "cancelConfirm": "Touchez encore pour confirmer l’annulation.",
+  "cancelConfirmFee": "Le livreur est déjà en route : annuler coûte {amount}, pour son déplacement. Touchez encore pour confirmer.",
+  "@cancelConfirmFee": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
   "cancelReasonSender": "Annulée par l’expéditeur",
   "deliveredBy": "Livré par {rider}",
   "@deliveredBy": {
@@ -1093,6 +1120,8 @@
   "lineCredit": "Avoir de Tara",
   "lineTopUp": "Recharge",
   "lineReserve": "Réserve pour vos livraisons",
+  "lineCancellationFee": "Annulation, livreur en route",
+  "lineWaitingFee": "Attente du livreur",
   "linePayout": "Reversement",
   "lineWithdrawal": "Retrait",
   "linePayoutFailed": "Reversement échoué, montant rendu",

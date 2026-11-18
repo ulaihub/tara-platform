@@ -130,6 +130,7 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
         loadingHelp: delivery.bulky && delivery.loadingHelp,
         scheduledFor: _draft.later ? _draft.scheduledFor : null,
         promoCode: promoCode,
+        declaredValue: delivery.declaredValue,
       );
 
   /// Prix de chaque livraison dont l'adresse est connue.
@@ -543,6 +544,7 @@ class _PriceCard extends StatelessWidget {
                 '−${amount(single.discountTotal)}',
                 color: c.success,
               ),
+            if (single.valueFee > 0) line(l.valueFeeLine, '+${amount(single.valueFee)}'),
           ] else if (deliveries.length > 1)
             for (final (i, d) in deliveries.indexed)
               line('${i + 1}. ${d.recipientName.trim()}', d.quote == null ? '…' : amount(d.quote!.totalPrice)),

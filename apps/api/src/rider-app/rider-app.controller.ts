@@ -130,6 +130,12 @@ export class RiderAppController {
       ],
       offerTimeoutSeconds: this.env.DISPATCH_OFFER_TIMEOUT_SECONDS,
       mobileMoneyFeeBps: this.env.MOBILE_MONEY_FEE_BPS,
+      waiting: {
+        freeMinutes: this.env.WAITING_FREE_MINUTES,
+        stepMinutes: this.env.WAITING_STEP_MINUTES,
+        feePerStep: this.env.WAITING_FEE_PER_STEP,
+        riderPercent: this.env.WAITING_RIDER_PERCENT,
+      },
     };
   }
 
@@ -270,6 +276,19 @@ export class RiderAppController {
     @ValidQuery(RouteQuery) query: z.output<typeof RouteQuery>,
   ): Out<typeof RiderRouteDto> {
     return this.orders.route(user.id, id, query);
+  }
+
+  /** Arrivé au point d'enlèvement : l'attente compte depuis là ; l'expéditeur est prévenu (D). */
+  @Post('orders/:id/arrived')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(PositionActionBody)
+  @ApiZodResponse(RiderOrderDto)
+  arrived(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(PositionActionBody) body: z.output<typeof PositionActionBody>,
+  ): Out<typeof RiderOrderDto> {
+    return this.orders.arrived(user.id, id, body);
   }
 
   /** Enlèvement : code de l'expéditeur et photo du colis (E3). */

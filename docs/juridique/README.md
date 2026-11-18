@@ -113,3 +113,10 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
    de la monnaie électronique au sens du règlement n° 04/18/CEMAC/UMAC/COBAC (exclusion des
    moyens de paiement à usage limité), et que garder la réserve sur les ventes, à la demande
    de la boutique, reste compatible avec le mandat d'encaissement.
+10. Garantie, annulation et attente payantes (version 2026-11.8) : le supplément de 1 % au-delà
+    de 25 000 FCFA est présenté comme une déclaration de valeur du transporteur (Acte uniforme
+    relatif aux contrats de transport de marchandises par route), et non comme une assurance,
+    que Tara ne peut pas vendre sans agrément (Code CIMA) ; à faire confirmer, avec l'article
+    exact. Frais d'annulation (300 FCFA) et d'attente (100 FCFA par 5 minutes après 10 minutes) :
+    annoncés avant d'être dus, proportionnés au déplacement et au temps du livreur ; à vérifier
+    au regard de la loi-cadre n° 2011/012 sur la protection du consommateur (clauses abusives).

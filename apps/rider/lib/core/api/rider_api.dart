@@ -107,6 +107,12 @@ class RiderApi {
 
   Future<RiderOrder> riderOrder(String id) async => RiderOrder.fromJson(await order(id));
 
+  /// Arrivé au point d'enlèvement (D) : l'expéditeur est prévenu, l'attente compte.
+  Future<RiderOrder> arrived(String orderId, {required double latitude, required double longitude}) async =>
+      RiderOrder.fromJson(
+        await _api.post('/rider/orders/$orderId/arrived', body: {'latitude': latitude, 'longitude': longitude}) as Json,
+      );
+
   /// Courses terminées (livrées, rendues, annulées), la plus récente d'abord (E9).
   Future<List<RiderOrder>> history() async => [
     for (final json in await orders(scope: 'history')) RiderOrder.fromJson(json),

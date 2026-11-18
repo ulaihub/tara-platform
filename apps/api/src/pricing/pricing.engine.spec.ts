@@ -6,6 +6,7 @@ import {
   type GridRules,
   vehicleCarries,
   vehicleForParcel,
+  valueFeeFor,
   volumeDiscountFor,
 } from './pricing.engine.js';
 
@@ -69,6 +70,7 @@ describe('prix complet', () => {
       platformFee: 300,
       retryFee: 750,
       returnFee: 750,
+      valueFee: 0,
     });
   });
 
@@ -298,5 +300,39 @@ describe('tarif pro et primes des livreurs (H4)', () => {
     expect(approachBonusFor(settings, 2_900)).toBe(0);
     expect(approachBonusFor(settings, 3_400)).toBe(200);
     expect(approachBonusFor(settings, null)).toBe(0);
+  });
+});
+
+describe('garantie de la valeur déclarée', () => {
+  it.each([
+    [undefined, 0],
+    [null, 0],
+    [25_000, 0],
+    [26_000, 50],
+    [30_000, 50],
+    [100_000, 750],
+    [150_000, 1250],
+    [500_000, 4750],
+  ])('%s F déclarés → %i F de garantie', (value, fee) => {
+    expect(valueFeeFor(value)).toBe(fee);
+  });
+
+  it('s’ajoute au total, tout pour Tara, sans remise possible', () => {
+    const price = computePrice(DOUALA, {
+      distanceMeters: 7_000,
+      packageSize: 'M',
+      isExpress: false,
+      at: DAY,
+      promo: { kind: 'FIXED_PRICE', value: 500 },
+      declaredValue: 150_000,
+    });
+    expect(price).toMatchObject({
+      subtotal: 1500,
+      discountTotal: 1000,
+      valueFee: 1250,
+      totalPrice: 1750,
+      riderEarning: 1200,
+      platformFee: 550,
+    });
   });
 });

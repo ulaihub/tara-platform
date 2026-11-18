@@ -744,7 +744,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get valueHelp =>
-      'En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.';
+      'En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.';
+
+  @override
+  String valueFeeHint(String amount) {
+    return 'Garantie : +$amount sur le prix de la livraison.';
+  }
+
+  @override
+  String get valueFeeLine => 'Garantie de la valeur';
 
   @override
   String get valueTooHigh =>
@@ -1068,6 +1076,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get trackAssignedBody => 'Donnez-lui le code d’enlèvement à son arrivée.';
 
   @override
+  String trackRiderWaiting(String rider) {
+    return '$rider vous attend';
+  }
+
+  @override
+  String trackRiderWaitingBody(String until, String fee, int step) {
+    return 'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à $until, puis $fee par $step min commencées.';
+  }
+
+  @override
   String trackOnTheWay(String recipient) {
     return 'En route vers $recipient';
   }
@@ -1154,6 +1172,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cancelConfirm => 'Touchez encore pour confirmer l’annulation.';
+
+  @override
+  String cancelConfirmFee(String amount) {
+    return 'Le livreur est déjà en route : annuler coûte $amount, pour son déplacement. Touchez encore pour confirmer.';
+  }
 
   @override
   String get cancelReasonSender => 'Annulée par l’expéditeur';
@@ -1588,6 +1611,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lineReserve => 'Réserve pour vos livraisons';
+
+  @override
+  String get lineCancellationFee => 'Annulation, livreur en route';
+
+  @override
+  String get lineWaitingFee => 'Attente du livreur';
 
   @override
   String get linePayout => 'Reversement';

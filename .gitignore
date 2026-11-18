@@ -37,3 +37,6 @@ next-env.d.ts
 .vscode/*
 !.vscode/extensions.json
 var/
+
+# Instantané Redis écrit par les tests locaux
+dump.rdb

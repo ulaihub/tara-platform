@@ -150,6 +150,8 @@ export const QuoteBody = z.object({
   loadingHelp: z.boolean().default(false),
   scheduledFor: z.iso.datetime().optional(),
   promoCode: z.string().trim().max(32).optional(),
+  /** Valeur du contenu (500 000 F au plus) : au-delà de 25 000 F, supplément de garantie. */
+  declaredValue: z.int().min(0).max(500_000).optional(),
 });
 
 export const QuoteDto = z
@@ -173,6 +175,8 @@ export const QuoteDto = z
     /** Seulement si la livraison échoue (E6) : nouvelle tentative, retour à l'expéditeur. */
     retryFee: z.int(),
     returnFee: z.int(),
+    /** Garantie : 1 % de la valeur déclarée au-delà de 25 000 F, compris dans `totalPrice`. */
+    valueFee: z.int(),
   })
   .meta({ id: 'Quote' });
 
@@ -190,6 +194,7 @@ export const BatchQuoteBody = z.object({
         dropoffAddressId: z.uuid(),
         packageSize: PackageSizeEnum,
         loadingHelp: z.boolean().default(false),
+        declaredValue: z.int().min(0).max(500_000).optional(),
       }),
     )
     .min(1)

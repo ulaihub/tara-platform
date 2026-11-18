@@ -299,6 +299,7 @@ export class AdminOrdersService {
         platformFee: order.platformFee,
         retryFee: order.retryFee,
         returnFee: order.returnFee,
+        valueFee: order.valueFee,
         feePayer: order.feePayer,
         feePaymentMethod: order.feePaymentMethod,
         feePaidAt: iso(order.feePaidAt),

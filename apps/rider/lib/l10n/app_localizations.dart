@@ -944,6 +944,36 @@ abstract class AppLocalizations {
   /// **'Vers l’enlèvement'**
   String get toPickup;
 
+  /// No description provided for @arrivedAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je suis arrivé'**
+  String get arrivedAction;
+
+  /// No description provided for @arrivedSending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi…'**
+  String get arrivedSending;
+
+  /// No description provided for @waitingRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite {free} min, puis {fee} par {step} min, dont {share} pour vous.'**
+  String waitingRule(int free, String fee, int step, String share);
+
+  /// No description provided for @waitingFree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous attendez depuis {minutes} min · gratuit encore {left} min.'**
+  String waitingFree(int minutes, int left);
+
+  /// No description provided for @waitingPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous attendez depuis {minutes} min · {fee} d’attente pour l’expéditeur, dont {share} pour vous.'**
+  String waitingPaid(int minutes, String fee, String share);
+
   /// No description provided for @toPickupMinutes.
   ///
   /// In fr, this message translates to:

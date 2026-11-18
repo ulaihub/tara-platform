@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.5 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.8 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -34,6 +34,9 @@ remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le dema
 
 - En ligne, vous recevez des propositions de course. Vous avez **30 secondes** pour accepter ;
   sans réponse, la course est proposée à un autre livreur.
+- **Arrivé au point d'enlèvement**, touchez « Je suis arrivé » : l'expéditeur est prévenu et
+  l'attente compte depuis là. Ce bouton ne marche que sur place ; le toucher ailleurs ou faire
+  traîner la remise exprès est une fraude (article 9).
 - Vous récupérez le colis avec le **code d'enlèvement** que vous donne l'expéditeur, et vous le
   photographiez.
 - **Gros objets** : ils sont proposés seulement aux tricycles et aux voitures. Si l'expéditeur
@@ -63,7 +66,13 @@ remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le dema
 
 - **Gain par course** : 70 % du prix de la course, plus 70 % des frais de nouvelle tentative et
   de retour quand il y en a, et 70 % du déplacement facturé à l'expéditeur quand vous refusez
-  un colis non conforme. Le pourcentage exact est celui affiché dans l'application. Une remise
+  un colis non conforme.
+- **Annulation pendant que vous êtes en route** vers l'enlèvement : l'expéditeur paie 300 FCFA,
+  dont **200 FCFA pour vous**, ajoutés à votre solde. Rien si c'est l'équipe Tara qui annule,
+  ou si un autre colis du même envoi part quand même avec vous.
+- **Attente au point d'enlèvement** : gratuite pour l'expéditeur pendant 10 minutes après
+  « Je suis arrivé » ; au-delà, il paie 100 FCFA par tranche de 5 minutes commencée, dont
+  **70 % pour vous**, versés à l'enlèvement. Le pourcentage exact est celui affiché dans l'application. Une remise
   accordée à l'expéditeur (code promo, tarif pro) ne réduit jamais votre gain : Tara la prend
   sur sa part.
 - **Primes payées par Tara**, en plus de votre gain :

@@ -66,8 +66,15 @@ class DeliveryDraft {
   /// Montant à encaisser au plus par livraison (G5) ; valeur déclarée au plus.
   static const maxCod = 500000;
 
-  /// Valeur déclarée la plus haute : plafond du remboursement en cas de perte (conditions, art. 15).
+  /// Valeur déclarée la plus haute : plafond du remboursement en cas de perte (conditions, art. 13).
   static const maxDeclaredValue = 500000;
+
+  /// Garantie annoncée dès la saisie, comme le serveur la calcule : 1 % de la valeur au-delà
+  /// de 25 000 F, arrondi aux 50 F supérieurs. Le récapitulatif donne le prix exact.
+  int get valueFee {
+    final above = (declaredValue ?? 0) - 25000;
+    return above <= 0 ? 0 : (above / 100 / 50).ceil() * 50;
+  }
 
   /// Nature choisie, précisée si « Autre », montants dans les plafonds.
   bool get hasPackage =>

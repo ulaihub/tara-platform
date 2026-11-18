@@ -141,6 +141,7 @@ export const AdminOrderDto = z
       platformFee: z.int(),
       retryFee: z.int(),
       returnFee: z.int(),
+      valueFee: z.int(),
       feePayer: FeePayerEnum,
       feePaymentMethod: PaymentMethodEnum,
       feePaidAt: z.iso.datetime().nullable(),

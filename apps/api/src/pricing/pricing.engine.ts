@@ -40,6 +40,8 @@ export interface PriceInput {
   promo?: { kind: PromoKind; value: number } | null;
   /** Tarif pro de la boutique selon ses livraisons du mois, en points de base (H4). */
   volumeDiscountBps?: number;
+  /** Valeur déclarée du contenu : au-delà de la part gratuite, supplément de garantie. */
+  declaredValue?: number | null;
 }
 
 export interface PriceBreakdown {
@@ -58,12 +60,30 @@ export interface PriceBreakdown {
   /** Frais d'échec, figés avec le prix et annoncés avant de commander (E6). */
   retryFee: number;
   returnFee: number;
+  /** Supplément de garantie (valeur déclarée au-delà de la part gratuite), tout pour Tara. */
+  valueFee: number;
 }
 
 export const NIGHT_START_HOUR = 20;
 /** Pas d'arrondi du tarif pro : la monnaie se rend en pièces de 50 F. */
 export const CASH_STEP = 50;
 export const NIGHT_END_HOUR = 6;
+
+/** Valeur déclarée couverte sans supplément (le plafond légal sans déclaration, AUCTMR). */
+export const VALUE_FREE_UP_TO = 25_000;
+/** Supplément de garantie : 1 % de la valeur déclarée au-delà de la part gratuite. */
+export const VALUE_FEE_BPS = 100;
+
+/**
+ * Supplément de garantie d'une valeur déclarée (déclaration de valeur du droit OHADA du
+ * transport) : 1 % de ce qui dépasse 25 000 F, arrondi aux 50 F supérieurs pour la monnaie.
+ * Ex. 150 000 F déclarés : 1 250 F.
+ */
+export function valueFeeFor(declaredValue: number | null | undefined): number {
+  const above = (declaredValue ?? 0) - VALUE_FREE_UP_TO;
+  if (above <= 0) return 0;
+  return Math.ceil((above * VALUE_FEE_BPS) / 10_000 / CASH_STEP) * CASH_STEP;
+}
 
 /** Suppléments appliqués à l'échec ou au retour, jamais au moment du devis. */
 const AFTER_THE_FACT: SurchargeCode[] = ['FAILED_ATTEMPT', 'RETURN'];
@@ -134,7 +154,9 @@ export function computePrice(rules: GridRules, input: PriceInput): PriceBreakdow
   const volumeWins = volumeDiscount > 0 && volumeDiscount > promoDiscount;
   const discountTotal = volumeWins ? volumeDiscount : promoDiscount;
   const discountSource = volumeWins ? 'VOLUME' : promoDiscount > 0 ? 'PROMO' : null;
-  const totalPrice = subtotal - discountTotal;
+  // La garantie s'ajoute après les remises : ni promo ni tarif pro ne la réduisent.
+  const valueFee = valueFeeFor(input.declaredValue);
+  const totalPrice = subtotal - discountTotal + valueFee;
   const failureFee = (code: SurchargeCode) => {
     const rule = rules.surcharges.find((s) => s.code === code && s.active);
     if (!rule) return 0;
@@ -153,6 +175,7 @@ export function computePrice(rules: GridRules, input: PriceInput): PriceBreakdow
     platformFee: totalPrice - riderEarning,
     retryFee: failureFee('FAILED_ATTEMPT'),
     returnFee: failureFee('RETURN'),
+    valueFee,
   };
 }
 

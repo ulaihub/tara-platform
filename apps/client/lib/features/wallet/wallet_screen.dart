@@ -739,6 +739,8 @@ class _Lines extends StatelessWidget {
     'CREDIT_GRANTED' => l.lineCredit,
     'PAYMENT_RECEIVED' => l.lineTopUp,
     'RESERVE_KEPT' => l.lineReserve,
+    'CANCELLATION_FEE_CHARGED' => l.lineCancellationFee,
+    'WAITING_FEE_CHARGED' => l.lineWaitingFee,
     'PAYOUT_REQUESTED' || 'PAYOUT_SENT' => account == 'merchant' ? l.linePayout : l.lineWithdrawal,
     'PAYOUT_FAILED' => l.linePayoutFailed,
     'REFUND' => l.lineRefund,

@@ -116,9 +116,19 @@ export class OrderNotificationsListener implements OnModuleInit {
         // Le livreur déjà en route vers le point d'enlèvement est prévenu, sauf si c'est lui
         // qui a refusé le colis.
         if (from === 'ASSIGNED' && full.rider && actor.id !== full.rider.userId) {
+          // Annulé par l'expéditeur alors qu'il était en route : son déplacement est payé (C).
+          const paid = await this.prisma.journalEntry.findUnique({
+            where: { idempotencyKey: `order:${order.id}:cancel-fee` },
+            select: { id: true },
+          });
           await this.notifications.toUser(full.rider.userId, {
-            template: 'RIDER_ORDER_CANCELLED',
-            params: { reference: order.reference },
+            template: paid ? 'RIDER_ORDER_CANCELLED_PAID' : 'RIDER_ORDER_CANCELLED',
+            params: paid
+              ? {
+                  reference: order.reference,
+                  amount: String(this.env.CANCELLATION_FEE_RIDER_PART),
+                }
+              : { reference: order.reference },
             data: { type: 'order.cancelled', orderId: order.id },
             orderId: order.id,
           });

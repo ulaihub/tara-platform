@@ -1475,8 +1475,20 @@ abstract class AppLocalizations {
   /// No description provided for @valueHelp.
   ///
   /// In fr, this message translates to:
-  /// **'En FCFA. Jamais montrée au livreur. Sert à vous rembourser en cas de perte ou de dommage, dans la limite prévue par les conditions.'**
+  /// **'En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.'**
   String get valueHelp;
+
+  /// No description provided for @valueFeeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garantie : +{amount} sur le prix de la livraison.'**
+  String valueFeeHint(String amount);
+
+  /// No description provided for @valueFeeLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garantie de la valeur'**
+  String get valueFeeLine;
 
   /// No description provided for @valueTooHigh.
   ///
@@ -2024,6 +2036,18 @@ abstract class AppLocalizations {
   /// **'Donnez-lui le code d’enlèvement à son arrivée.'**
   String get trackAssignedBody;
 
+  /// No description provided for @trackRiderWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rider} vous attend'**
+  String trackRiderWaiting(String rider);
+
+  /// No description provided for @trackRiderWaitingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à {until}, puis {fee} par {step} min commencées.'**
+  String trackRiderWaitingBody(String until, String fee, int step);
+
   /// No description provided for @trackOnTheWay.
   ///
   /// In fr, this message translates to:
@@ -2167,6 +2191,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Touchez encore pour confirmer l’annulation.'**
   String get cancelConfirm;
+
+  /// No description provided for @cancelConfirmFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur est déjà en route : annuler coûte {amount}, pour son déplacement. Touchez encore pour confirmer.'**
+  String cancelConfirmFee(String amount);
 
   /// No description provided for @cancelReasonSender.
   ///
@@ -2863,6 +2893,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réserve pour vos livraisons'**
   String get lineReserve;
+
+  /// No description provided for @lineCancellationFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulation, livreur en route'**
+  String get lineCancellationFee;
+
+  /// No description provided for @lineWaitingFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attente du livreur'**
+  String get lineWaitingFee;
 
   /// No description provided for @linePayout.
   ///

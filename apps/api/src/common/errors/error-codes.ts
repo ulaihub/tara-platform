@@ -510,6 +510,14 @@ export const ERROR_MESSAGES = {
     fr: 'Ce colis attend encore l’adresse de son client : il partira dès qu’elle arrivera.',
     en: 'This parcel is still waiting for its customer’s address: it will leave as soon as it arrives.',
   },
+  NOT_AT_PICKUP: {
+    fr: 'Vous êtes à {meters} m du point d’enlèvement : signalez votre arrivée une fois sur place.',
+    en: 'You are {meters} m from the pickup point: report your arrival once you are there.',
+  },
+  ARRIVAL_NOT_EXPECTED: {
+    fr: 'Le colis est déjà récupéré ou la course n’est plus la vôtre.',
+    en: 'The parcel has already been picked up or the job is no longer yours.',
+  },
 } as const satisfies Record<string, { fr: string; en: string }>;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

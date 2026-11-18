@@ -387,6 +387,10 @@ enum JournalEntryKind {
   ADJUSTMENT
   /// Réserve gardée des ventes d'une boutique sur son solde Tara, au reversement du soir.
   RESERVE_KEPT
+  /// Annulation par l'expéditeur quand le livreur était en route : déplacement payé.
+  CANCELLATION_FEE_CHARGED
+  /// Attente du livreur au point d'enlèvement au-delà du temps gratuit.
+  WAITING_FEE_CHARGED
 
   @@map("journal_entry_kind")
 }
@@ -1016,10 +1020,15 @@ model Order {
   /// Primes payées par Tara au livreur, figées quand il accepte la course (H4).
   approachBonus    Int           @default(0) @map("approach_bonus")
   boostBonus       Int           @default(0) @map("boost_bonus")
+  /// Frais d'attente au point d'enlèvement (D), pris à l'enlèvement ; 0 sinon.
+  waitingFee       Int           @default(0) @map("waiting_fee")
   /// Frais d'échec figés à la commande (E6), annoncés avant de commander : nouvelle tentative
   /// et retour à l'expéditeur, à sa charge, partagés comme la course.
   retryFee         Int           @default(0) @map("retry_fee")
   returnFee        Int           @default(0) @map("return_fee")
+  /// Garantie : 1 % de la valeur déclarée au-delà de 25 000 F, comprise dans le total, tout
+  /// pour Tara (hors part du livreur et hors remises).
+  valueFee         Int           @default(0) @map("value_fee")
   feePayer         FeePayer      @default(SENDER) @map("fee_payer")
   feePaymentMethod PaymentMethod @map("fee_payment_method")
   /// Montant à encaisser auprès du destinataire, 0 si aucun (C1, E5).
@@ -1057,6 +1066,8 @@ model Order {
   createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
   assignedAt           DateTime?        @map("assigned_at") @db.Timestamptz(3)
+  /// Le livreur a signalé son arrivée au point d'enlèvement : l'attente compte depuis là (D).
+  arrivedPickupAt      DateTime?        @map("arrived_pickup_at") @db.Timestamptz(3)
   pickedUpAt           DateTime?        @map("picked_up_at") @db.Timestamptz(3)
   deliveredAt          DateTime?        @map("delivered_at") @db.Timestamptz(3)
   /// Colis rendu à l'expéditeur après un échec (E6).

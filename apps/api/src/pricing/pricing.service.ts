@@ -49,6 +49,7 @@ export interface QuoteInput {
   loadingHelp?: boolean | undefined;
   scheduledFor?: string | undefined;
   promoCode?: string | undefined;
+  declaredValue?: number | null | undefined;
 }
 
 export interface FullQuote {
@@ -184,6 +185,7 @@ export class PricingService {
       at,
       promo,
       volumeDiscountBps,
+      declaredValue: input.declaredValue ?? null,
     });
     // Le tarif pro l'emporte : le code promo n'est pas consommé.
     const usedPromo = price.discountSource === 'PROMO' ? promo : null;
@@ -207,6 +209,7 @@ export class PricingService {
       promoCode: quote.promo?.code ?? null,
       retryFee: quote.price.retryFee,
       returnFee: quote.price.returnFee,
+      valueFee: quote.price.valueFee,
     };
   }
 
@@ -235,6 +238,7 @@ export class PricingService {
           isExpress: body.isExpress,
           loadingHelp: item.loadingHelp,
           scheduledFor: body.scheduledFor,
+          declaredValue: item.declaredValue,
         });
         return { quote: this.toQuoteDto(quote), error: null };
       } catch (error) {
