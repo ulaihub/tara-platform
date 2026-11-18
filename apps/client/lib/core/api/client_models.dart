@@ -47,6 +47,7 @@ class AppConfig {
               freeMinutes: _field<num>(waiting, 'freeMinutes').toInt(),
               stepMinutes: _field<num>(waiting, 'stepMinutes').toInt(),
               feePerStep: _field<num>(waiting, 'feePerStep').toInt(),
+              maxFee: (waiting['maxFee'] as num?)?.toInt() ?? 1000,
             ),
     );
   }
@@ -68,11 +69,14 @@ class AppConfig {
 /// Attente du livreur au point d'enlèvement (D), comptée depuis son arrivée.
 @immutable
 class WaitingRules {
-  const WaitingRules({this.freeMinutes = 10, this.stepMinutes = 5, this.feePerStep = 100});
+  const WaitingRules({this.freeMinutes = 10, this.stepMinutes = 5, this.feePerStep = 100, this.maxFee = 1000});
 
   final int freeMinutes;
   final int stepMinutes;
   final int feePerStep;
+
+  /// Plafond des frais d'attente.
+  final int maxFee;
 }
 
 /// Boutique du marchand (A2) : reversements vers son numéro Mobile Money.

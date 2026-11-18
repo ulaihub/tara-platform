@@ -297,13 +297,14 @@
   "toPickup": "Vers l’enlèvement",
   "arrivedAction": "Je suis arrivé",
   "arrivedSending": "Envoi…",
-  "waitingRule": "Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite {free} min, puis {fee} par {step} min, dont {share} pour vous.",
+  "waitingRule": "Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite {free} min, puis {fee} par {step} min ({max} au plus), dont {share} pour vous.",
   "@waitingRule": {
     "placeholders": {
       "free": {"type": "int"},
       "fee": {"type": "String"},
       "step": {"type": "int"},
-      "share": {"type": "String"}
+      "share": {"type": "String"},
+      "max": {"type": "String"}
     }
   },
   "waitingFree": "Vous attendez depuis {minutes} min · gratuit encore {left} min.",

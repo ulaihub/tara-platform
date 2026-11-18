@@ -394,7 +394,7 @@ void main() {
     expect(
       find.text(
         'Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite 10 min, '
-        'puis 100\u00a0F par 5 min, dont 70\u00a0F pour vous.',
+        'puis 100\u00a0F par 5 min (1\u00a0000\u00a0F au plus), dont 70\u00a0F pour vous.',
       ),
       findsOneWidget,
     );

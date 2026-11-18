@@ -135,6 +135,7 @@ export class RiderAppController {
         stepMinutes: this.env.WAITING_STEP_MINUTES,
         feePerStep: this.env.WAITING_FEE_PER_STEP,
         riderPercent: this.env.WAITING_RIDER_PERCENT,
+        maxFee: this.env.WAITING_FEE_MAX,
       },
     };
   }

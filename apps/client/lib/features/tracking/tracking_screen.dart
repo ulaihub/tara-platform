@@ -659,6 +659,7 @@ class _Panel extends StatelessWidget {
           formatClock(o.riderArrivedAt!.add(Duration(minutes: waiting.freeMinutes))),
           '${formatAmount(waiting.feePerStep)}\u00a0F',
           waiting.stepMinutes,
+          '${formatAmount(waiting.maxFee)}\u00a0F',
         ),
       ),
       'ASSIGNED' => switch (o.batchNumber) {

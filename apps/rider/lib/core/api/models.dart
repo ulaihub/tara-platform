@@ -147,12 +147,19 @@ class RiderConfig {
 /// Attente au point d'enlèvement (D), comptée depuis « Je suis arrivé ».
 @immutable
 class WaitingRules {
-  const WaitingRules({this.freeMinutes = 10, this.stepMinutes = 5, this.feePerStep = 100, this.riderPercent = 70});
+  const WaitingRules({
+    this.freeMinutes = 10,
+    this.stepMinutes = 5,
+    this.feePerStep = 100,
+    this.riderPercent = 70,
+    this.maxFee = 1000,
+  });
   factory WaitingRules.fromJson(Json json) => WaitingRules(
     freeMinutes: _field<num>(json, 'freeMinutes').toInt(),
     stepMinutes: _field<num>(json, 'stepMinutes').toInt(),
     feePerStep: _field<num>(json, 'feePerStep').toInt(),
     riderPercent: _field<num>(json, 'riderPercent').toInt(),
+    maxFee: (json['maxFee'] as num?)?.toInt() ?? 1000,
   );
 
   final int freeMinutes;
@@ -160,11 +167,16 @@ class WaitingRules {
   final int feePerStep;
   final int riderPercent;
 
+  /// Plafond des frais d'attente.
+  final int maxFee;
+
   /// Frais après [waited] d'attente : rien pendant les minutes gratuites, puis une tranche
   /// commencée à la fois (comme le serveur).
   int feeAfter(Duration waited) {
     final over = waited.inSeconds / 60 - freeMinutes;
-    return over <= 0 ? 0 : (over / stepMinutes).ceil() * feePerStep;
+    if (over <= 0) return 0;
+    final fee = (over / stepMinutes).ceil() * feePerStep;
+    return fee > maxFee ? maxFee : fee;
   }
 
   int riderPart(int fee) => fee * riderPercent ~/ 100;

@@ -144,7 +144,7 @@
   "toPickup": "To pickup",
   "arrivedAction": "I've arrived",
   "arrivedSending": "Sending…",
-  "waitingRule": "Once there, tap “I've arrived”: the sender is told. Waiting is free for {free} min, then {fee} per {step} min, {share} of it for you.",
+  "waitingRule": "Once there, tap “I've arrived”: the sender is told. Waiting is free for {free} min, then {fee} per {step} min ({max} at most), {share} of it for you.",
   "waitingFree": "You have been waiting {minutes} min · free for {left} more min.",
   "waitingPaid": "You have been waiting {minutes} min · {fee} waiting fee for the sender, {share} of it for you.",
   "toPickupMinutes": "To pickup · {minutes} min",

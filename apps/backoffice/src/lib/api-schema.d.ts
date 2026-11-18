@@ -3175,6 +3175,7 @@ export interface components {
         freeMinutes: number;
         stepMinutes: number;
         feePerStep: number;
+        maxFee: number;
       };
     };
     AuditEntry: {
@@ -4417,6 +4418,7 @@ export interface components {
         stepMinutes: number;
         feePerStep: number;
         riderPercent: number;
+        maxFee: number;
       };
     };
     RiderEarnings: {

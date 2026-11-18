@@ -327,6 +327,7 @@ export class RiderOrdersService {
         free: String(this.env.WAITING_FREE_MINUTES),
         fee: String(this.env.WAITING_FEE_PER_STEP),
         step: String(this.env.WAITING_STEP_MINUTES),
+        max: String(this.env.WAITING_FEE_MAX),
       },
       data: { type: 'order.arrived', orderId: order.id },
       orderId: order.id,

@@ -307,6 +307,7 @@ class _WaitingBox extends StatelessWidget {
                 f(rules.feePerStep),
                 rules.stepMinutes,
                 f(rules.riderPart(rules.feePerStep)),
+                f(rules.maxFee),
               ),
               style: TaraText.label.copyWith(color: c.textSecondary, height: 1.4),
             ),

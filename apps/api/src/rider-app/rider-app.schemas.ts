@@ -291,6 +291,8 @@ export const RiderConfigDto = z
       stepMinutes: z.int(),
       feePerStep: z.int(),
       riderPercent: z.int(),
+      /** Plafond des frais d'attente. */
+      maxFee: z.int(),
     }),
   })
   .meta({ id: 'RiderConfig' });

@@ -1075,8 +1075,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String trackRiderWaitingBody(String until, String fee, int step) {
-    return 'Hand over the parcel and the pickup code. Waiting is free until $until, then $fee per $step min started.';
+  String trackRiderWaitingBody(String until, String fee, int step, String max) {
+    return 'Hand over the parcel and the pickup code. Waiting is free until $until, then $fee per $step min started, $max at most.';
   }
 
   @override

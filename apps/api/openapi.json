@@ -11910,12 +11910,16 @@
               },
               "feePerStep": {
                 "type": "integer"
+              },
+              "maxFee": {
+                "type": "integer"
               }
             },
             "required": [
               "freeMinutes",
               "stepMinutes",
-              "feePerStep"
+              "feePerStep",
+              "maxFee"
             ],
             "additionalProperties": false
           }
@@ -16216,13 +16220,17 @@
               },
               "riderPercent": {
                 "type": "integer"
+              },
+              "maxFee": {
+                "type": "integer"
               }
             },
             "required": [
               "freeMinutes",
               "stepMinutes",
               "feePerStep",
-              "riderPercent"
+              "riderPercent",
+              "maxFee"
             ],
             "additionalProperties": false
           }

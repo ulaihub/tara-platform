@@ -2,13 +2,13 @@ import type { Env } from '../config/env.js';
 
 export type WaitingRules = Pick<
   Env,
-  'WAITING_FREE_MINUTES' | 'WAITING_STEP_MINUTES' | 'WAITING_FEE_PER_STEP'
+  'WAITING_FREE_MINUTES' | 'WAITING_STEP_MINUTES' | 'WAITING_FEE_PER_STEP' | 'WAITING_FEE_MAX'
 >;
 
 /**
  * Frais d'attente au point d'enlèvement (D) : gratuits pendant les premières minutes, puis un
- * montant par tranche commencée. Ex. avec 10 min gratuites et 100 F par 5 min : 12 min, 100 F ;
- * 16 min, 200 F.
+ * montant par tranche commencée, jusqu'au plafond. Ex. avec 10 min gratuites, 100 F par 5 min
+ * et 1 000 F au plus : 12 min, 100 F ; 16 min, 200 F ; 2 h, 1 000 F.
  */
 export function waitingFeeFor(
   arrivedAt: Date | null,
@@ -19,5 +19,6 @@ export function waitingFeeFor(
   const minutes = (pickedUpAt.getTime() - arrivedAt.getTime()) / 60_000;
   const over = minutes - rules.WAITING_FREE_MINUTES;
   if (over <= 0) return 0;
-  return Math.ceil(over / rules.WAITING_STEP_MINUTES) * rules.WAITING_FEE_PER_STEP;
+  const fee = Math.ceil(over / rules.WAITING_STEP_MINUTES) * rules.WAITING_FEE_PER_STEP;
+  return Math.min(fee, rules.WAITING_FEE_MAX);
 }
