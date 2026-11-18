@@ -2045,8 +2045,8 @@ abstract class AppLocalizations {
   /// No description provided for @trackRiderWaitingBody.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à {until}, puis {fee} par {step} min commencées.'**
-  String trackRiderWaitingBody(String until, String fee, int step);
+  /// **'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à {until}, puis {fee} par {step} min commencées, {max} au plus.'**
+  String trackRiderWaitingBody(String until, String fee, int step, String max);
 
   /// No description provided for @trackOnTheWay.
   ///

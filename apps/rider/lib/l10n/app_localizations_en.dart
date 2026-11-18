@@ -499,8 +499,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get arrivedSending => 'Sending…';
 
   @override
-  String waitingRule(int free, String fee, int step, String share) {
-    return 'Once there, tap “I\'ve arrived”: the sender is told. Waiting is free for $free min, then $fee per $step min, $share of it for you.';
+  String waitingRule(int free, String fee, int step, String share, String max) {
+    return 'Once there, tap “I\'ve arrived”: the sender is told. Waiting is free for $free min, then $fee per $step min ($max at most), $share of it for you.';
   }
 
   @override

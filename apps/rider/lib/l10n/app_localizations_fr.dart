@@ -501,8 +501,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get arrivedSending => 'Envoi…';
 
   @override
-  String waitingRule(int free, String fee, int step, String share) {
-    return 'Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite $free min, puis $fee par $step min, dont $share pour vous.';
+  String waitingRule(int free, String fee, int step, String share, String max) {
+    return 'Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite $free min, puis $fee par $step min ($max au plus), dont $share pour vous.';
   }
 
   @override

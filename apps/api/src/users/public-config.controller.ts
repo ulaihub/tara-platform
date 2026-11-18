@@ -6,6 +6,7 @@ import { Public } from '../auth/decorators.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { ApiZodResponse } from '../common/validation/zod.js';
+import { waitingFeeMax } from '../orders/waiting-fee.js';
 
 export const AppConfigDto = z
   .object({
@@ -19,7 +20,13 @@ export const AppConfigDto = z
      */
     mobileMoneyFeeBps: z.int(),
     /** Attente du livreur au point d'enlèvement : minutes gratuites, puis montant par tranche. */
-    waiting: z.object({ freeMinutes: z.int(), stepMinutes: z.int(), feePerStep: z.int() }),
+    waiting: z.object({
+      freeMinutes: z.int(),
+      stepMinutes: z.int(),
+      feePerStep: z.int(),
+      maxFee: z.int(),
+      maxMinutes: z.int(),
+    }),
   })
   .meta({ id: 'AppConfig' });
 
@@ -49,6 +56,8 @@ export class PublicConfigController {
         freeMinutes: this.env.WAITING_FREE_MINUTES,
         stepMinutes: this.env.WAITING_STEP_MINUTES,
         feePerStep: this.env.WAITING_FEE_PER_STEP,
+        maxFee: waitingFeeMax(this.env),
+        maxMinutes: this.env.WAITING_MAX_MINUTES,
       },
     };
   }

@@ -1081,8 +1081,8 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String trackRiderWaitingBody(String until, String fee, int step) {
-    return 'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à $until, puis $fee par $step min commencées.';
+  String trackRiderWaitingBody(String until, String fee, int step, String max) {
+    return 'Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à $until, puis $fee par $step min commencées, $max au plus.';
   }
 
   @override

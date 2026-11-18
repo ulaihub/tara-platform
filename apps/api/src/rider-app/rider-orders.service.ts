@@ -24,6 +24,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { RealtimeService } from '../realtime/realtime.service.js';
 import { DistanceService, type GeoPoint, haversineMeters } from '../routing/distance.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
+import { waitingFeeMax } from '../orders/waiting-fee.js';
 
 /** Distance au point d'enlèvement au-delà de laquelle l'arrivée n'est pas acceptée (D). */
 const ARRIVAL_MAX_METERS = 300;
@@ -327,6 +328,7 @@ export class RiderOrdersService {
         free: String(this.env.WAITING_FREE_MINUTES),
         fee: String(this.env.WAITING_FEE_PER_STEP),
         step: String(this.env.WAITING_STEP_MINUTES),
+        max: String(waitingFeeMax(this.env)),
       },
       data: { type: 'order.arrived', orderId: order.id },
       orderId: order.id,

@@ -959,8 +959,8 @@ abstract class AppLocalizations {
   /// No description provided for @waitingRule.
   ///
   /// In fr, this message translates to:
-  /// **'Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite {free} min, puis {fee} par {step} min, dont {share} pour vous.'**
-  String waitingRule(int free, String fee, int step, String share);
+  /// **'Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite {free} min, puis {fee} par {step} min ({max} au plus), dont {share} pour vous.'**
+  String waitingRule(int free, String fee, int step, String share, String max);
 
   /// No description provided for @waitingFree.
   ///

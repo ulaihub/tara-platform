@@ -75,11 +75,11 @@ const TEMPLATES = {
   RIDER_ARRIVED_PICKUP: {
     fr: {
       title: 'Votre livreur est arrivé',
-      body: '{reference} · Il vous attend. Attente gratuite {free} min, puis {fee} FCFA par {step} min.',
+      body: '{reference} · Il vous attend. Attente gratuite {free} min, puis {fee} FCFA par {step} min ({max} FCFA au plus).',
     },
     en: {
       title: 'Your rider has arrived',
-      body: '{reference} · They are waiting. Free for {free} min, then {fee} FCFA per {step} min.',
+      body: '{reference} · They are waiting. Free for {free} min, then {fee} FCFA per {step} min ({max} FCFA at most).',
     },
   },
   RIDER_ORDER_CANCELLED_PAID: {

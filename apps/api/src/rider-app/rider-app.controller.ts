@@ -72,6 +72,7 @@ import {
 } from './rider-app.schemas.js';
 import { RiderOrdersService } from './rider-orders.service.js';
 import { SafetyAlertsService } from './safety-alerts.service.js';
+import { waitingFeeMax } from '../orders/waiting-fee.js';
 
 type Out<T extends z.ZodType> = Promise<z.output<T>>;
 
@@ -135,6 +136,8 @@ export class RiderAppController {
         stepMinutes: this.env.WAITING_STEP_MINUTES,
         feePerStep: this.env.WAITING_FEE_PER_STEP,
         riderPercent: this.env.WAITING_RIDER_PERCENT,
+        maxFee: waitingFeeMax(this.env),
+        maxMinutes: this.env.WAITING_MAX_MINUTES,
       },
     };
   }

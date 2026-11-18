@@ -1,6 +1,11 @@
-import { waitingFeeFor } from './waiting-fee.js';
+import { waitingFeeFor, waitingFeeMax } from './waiting-fee.js';
 
-const RULES = { WAITING_FREE_MINUTES: 10, WAITING_STEP_MINUTES: 5, WAITING_FEE_PER_STEP: 100 };
+const RULES = {
+  WAITING_FREE_MINUTES: 10,
+  WAITING_STEP_MINUTES: 5,
+  WAITING_FEE_PER_STEP: 100,
+  WAITING_MAX_MINUTES: 30,
+};
 const at = (minutes: number) => new Date(Date.UTC(2026, 10, 18, 9, 0) + minutes * 60_000);
 
 describe('frais d’attente au point d’enlèvement', () => {
@@ -10,9 +15,16 @@ describe('frais d’attente au point d’enlèvement', () => {
     [10.5, 100],
     [15, 100],
     [15.2, 200],
-    [32, 500],
+    [25, 300],
+    [30, 400],
+    [32, 400],
+    [120, 400],
   ])('%s min d’attente → %i F', (minutes, fee) => {
     expect(waitingFeeFor(at(0), at(minutes), RULES)).toBe(fee);
+  });
+
+  it('plafond : 30 min d’attente comptées au plus, soit 400 F', () => {
+    expect(waitingFeeMax(RULES)).toBe(400);
   });
 
   it('rien sans arrivée signalée', () => {

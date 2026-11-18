@@ -606,12 +606,13 @@
       "rider": {"type": "String"}
     }
   },
-  "trackRiderWaitingBody": "Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à {until}, puis {fee} par {step} min commencées.",
+  "trackRiderWaitingBody": "Donnez-lui le colis et le code d’enlèvement. Attente gratuite jusqu’à {until}, puis {fee} par {step} min commencées, {max} au plus.",
   "@trackRiderWaitingBody": {
     "placeholders": {
       "until": {"type": "String"},
       "fee": {"type": "String"},
-      "step": {"type": "int"}
+      "step": {"type": "int"},
+      "max": {"type": "String"}
     }
   },
   "trackOnTheWay": "En route vers {recipient}",
