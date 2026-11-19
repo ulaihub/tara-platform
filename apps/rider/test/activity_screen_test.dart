@@ -75,6 +75,27 @@ void main() {
     expect(find.byType(DepositScreen), findsNothing);
   });
 
+  testWidgets('recharger : la règle de retrait est dite avant de payer', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 8000,
+        available: 8000,
+        cashHeld: 0,
+        cashLimit: 25000,
+        withdrawalMinimum: 30000,
+      );
+    await pumpVariant(tester, Variant.matrix.first, activity(api, shown: true), surface: const Size(390, 1200));
+    await settle(tester);
+    await tapText(tester, 'Recharger');
+    expect(
+      find.text(
+        'Ce solde couvre l’argent à encaisser de vos courses. Il se retire vers Mobile Money à partir de 30\u00a0000\u00a0F.',
+      ),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('recharger : autre montant, bornes, même demande renvoyée sans doublon', (tester) async {
     const offline = ApiException(code: ApiException.network, message: '');
     final api = activityApi()..topUpErrors.addAll([offline, offline]);

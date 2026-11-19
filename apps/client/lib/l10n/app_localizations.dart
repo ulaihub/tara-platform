@@ -2966,6 +2966,12 @@ abstract class AppLocalizations {
   /// **'Retirer'**
   String get withdrawAction;
 
+  /// No description provided for @topUpWithdrawRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce solde paie vos livraisons. Il se retire vers Mobile Money à partir de {min}.'**
+  String topUpWithdrawRule(String min);
+
   /// No description provided for @topUpHowMuch.
   ///
   /// In fr, this message translates to:
