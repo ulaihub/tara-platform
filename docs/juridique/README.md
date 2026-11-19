@@ -120,3 +120,7 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
     exact. Frais d'annulation (300 FCFA) et d'attente (100 FCFA par 5 minutes après 10 minutes) :
     annoncés avant d'être dus, proportionnés au déplacement et au temps du livreur ; à vérifier
     au regard de la loi-cadre n° 2011/012 sur la protection du consommateur (clauses abusives).
+11. Expéditeur absent (version 2026-11.9) : après 30 minutes d'attente, prévenu à 25 minutes,
+    appelé deux fois, l'expéditeur paie 700 FCFA (annulation et attente plafonnée). Preuve :
+    position du livreur sur place et journal d'appels gardés avec la course. À faire confirmer
+    comme indemnité de déplacement proportionnée, contestable auprès du service client.

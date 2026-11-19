@@ -273,6 +273,8 @@ enum ProofKind {
   RETURN
   /// Colis refusé à l'enlèvement : il ne correspond pas à ce qui a été déclaré.
   PICKUP_REFUSED
+  /// Expéditeur absent après l'attente maximale : position et appels du livreur.
+  SENDER_ABSENT
 
   @@map("proof_kind")
 }
@@ -1068,6 +1070,8 @@ model Order {
   assignedAt           DateTime?        @map("assigned_at") @db.Timestamptz(3)
   /// Le livreur a signalé son arrivée au point d'enlèvement : l'attente compte depuis là (D).
   arrivedPickupAt      DateTime?        @map("arrived_pickup_at") @db.Timestamptz(3)
+  /// Expéditeur prévenu que le livreur partira bientôt s'il ne vient pas.
+  waitingWarnedAt      DateTime?        @map("waiting_warned_at") @db.Timestamptz(3)
   pickedUpAt           DateTime?        @map("picked_up_at") @db.Timestamptz(3)
   deliveredAt          DateTime?        @map("delivered_at") @db.Timestamptz(3)
   /// Colis rendu à l'expéditeur après un échec (E6).

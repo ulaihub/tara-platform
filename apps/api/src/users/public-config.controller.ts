@@ -26,6 +26,8 @@ export const AppConfigDto = z
       feePerStep: z.int(),
       maxFee: z.int(),
       maxMinutes: z.int(),
+      /** Expéditeur absent après `maxMinutes` : annulation et attente facturées. */
+      absentFee: z.int(),
     }),
   })
   .meta({ id: 'AppConfig' });
@@ -58,6 +60,7 @@ export class PublicConfigController {
         feePerStep: this.env.WAITING_FEE_PER_STEP,
         maxFee: waitingFeeMax(this.env),
         maxMinutes: this.env.WAITING_MAX_MINUTES,
+        absentFee: this.env.CANCELLATION_FEE + waitingFeeMax(this.env),
       },
     };
   }

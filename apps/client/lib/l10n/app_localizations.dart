@@ -2036,6 +2036,18 @@ abstract class AppLocalizations {
   /// **'Donnez-lui le code d’enlèvement à son arrivée.'**
   String get trackAssignedBody;
 
+  /// No description provided for @trackSenderAbsent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur est reparti'**
+  String get trackSenderAbsent;
+
+  /// No description provided for @trackSenderAbsentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il vous a attendu {minutes} min et vous a appelé. La course est annulée ; annulation et attente vous sont facturées : {fee}.'**
+  String trackSenderAbsentBody(int minutes, String fee);
+
   /// No description provided for @trackRiderWaiting.
   ///
   /// In fr, this message translates to:

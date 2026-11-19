@@ -296,6 +296,28 @@
   },
   "toPickup": "Vers l’enlèvement",
   "arrivedAction": "Je suis arrivé",
+  "senderAbsentAction": "L’expéditeur ne vient pas",
+  "senderAbsentLater": "Il ne vient pas ? Dans {minutes} min, vous pourrez partir : {share} pour vous.",
+  "@senderAbsentLater": {
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "share": {"type": "String"}
+    }
+  },
+  "senderAbsentCallFirst": "Appelez d’abord l’expéditeur (encore {count} appel(s)) avec le bouton d’appel.",
+  "@senderAbsentCallFirst": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "senderAbsentConfirm": "La course sera annulée. L’expéditeur paiera {fee}, dont {share} pour vous. Touchez encore pour confirmer.",
+  "@senderAbsentConfirm": {
+    "placeholders": {
+      "fee": {"type": "String"},
+      "share": {"type": "String"}
+    }
+  },
+  "senderAbsentNotice": "Course annulée : votre attente vous est payée.",
   "arrivedSending": "Envoi…",
   "waitingRule": "Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite {free} min, puis {fee} par {step} min ({max} au plus), dont {share} pour vous.",
   "@waitingRule": {

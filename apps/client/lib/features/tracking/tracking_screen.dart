@@ -681,6 +681,11 @@ class _Panel extends StatelessWidget {
       'DELIVERY_FAILED' => (l.trackFailed, l.trackFailedBody),
       'DELIVERED' => (l.trackDelivered, l.trackDeliveredBody(recipientFirst, formatClock(deliveredAt ?? now))),
       'RETURNED' => (l.trackReturned, l.trackReturnedBody(formatClock(o.reachedAt('RETURNED') ?? now))),
+      // Livreur parti après l'attente maximale (D) : annulation et attente facturées.
+      'CANCELLED' when o.senderAbsent => (
+        l.trackSenderAbsent,
+        l.trackSenderAbsentBody(waiting.maxMinutes, '${formatAmount(waiting.absentFee)}\u00a0F'),
+      ),
       // Colis non conforme refusé à l'enlèvement : le motif et le déplacement facturé.
       'CANCELLED' when o.refusalReason != null => (
         l.trackRefused,

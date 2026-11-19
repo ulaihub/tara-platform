@@ -82,6 +82,26 @@ const TEMPLATES = {
       body: '{reference} · They are waiting. Free for {free} min, then {fee} FCFA per {step} min ({max} FCFA at most).',
     },
   },
+  SENDER_WAITING_WARNING: {
+    fr: {
+      title: 'Votre livreur va partir',
+      body: '{reference} · Sans vous dans {minutes} min, il partira : la course sera annulée et {fee} FCFA vous seront facturés.',
+    },
+    en: {
+      title: 'Your rider is about to leave',
+      body: '{reference} · If you are not there within {minutes} min, they will leave: the order will be cancelled and {fee} FCFA charged to you.',
+    },
+  },
+  ORDER_SENDER_ABSENT: {
+    fr: {
+      title: 'Course annulée : livreur parti',
+      body: '{reference} · Le livreur vous a attendu {minutes} min et vous a appelé. {fee} FCFA vous sont facturés (annulation et attente).',
+    },
+    en: {
+      title: 'Order cancelled: rider left',
+      body: '{reference} · The rider waited {minutes} min and called you. {fee} FCFA are charged to you (cancellation and waiting).',
+    },
+  },
   RIDER_ORDER_CANCELLED_PAID: {
     fr: {
       title: 'Course annulée, déplacement payé',

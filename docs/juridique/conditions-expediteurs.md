@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.8 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.9 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -72,9 +72,17 @@ qui lui est confié**, de l'enlèvement à la remise (article 13).
 - **Attente du livreur** : arrivé au point d'enlèvement, le livreur le signale dans
   l'application et vous êtes prévenu. L'attente est gratuite pendant **10 minutes** ; au-delà,
   **100 FCFA par tranche de 5 minutes commencée**, jusqu'à la remise du colis (dont 70 % pour
-  le livreur). Un envoi de plusieurs colis pris par le même livreur ne compte qu'une attente.
-  Ces frais sont pris à l'enlèvement sur votre solde Tara (pour une boutique, puis sur ses
-  ventes) ; ce qui n'est pas couvert reste dû (article 9).
+  le livreur). L'attente n'est comptée que pendant **30 minutes**, soit **400 FCFA au plus**.
+  Un envoi de plusieurs colis pris par le même livreur ne compte qu'une attente. Ces frais
+  sont pris à l'enlèvement sur votre solde Tara (pour une boutique, puis sur ses ventes) ; ce
+  qui n'est pas couvert reste dû (article 9).
+- **Si vous ne venez pas** : 25 minutes après l'arrivée du livreur, vous êtes prévenu qu'il va
+  partir. Après 30 minutes, s'il est toujours sur place et vous a appelé deux fois depuis
+  l'application, il peut repartir sans le colis. La course est annulée et vous payez
+  l'annulation (300 FCFA) et l'attente (400 FCFA), soit **700 FCFA**, une seule fois pour un
+  envoi de plusieurs colis ; ce que vous aviez payé d'avance vous est rendu, moins ces frais.
+  Vous pouvez contester auprès du service client : la position du livreur et ses appels sont
+  enregistrés.
 
 ## 4. Ce que vous pouvez envoyer
 

@@ -6,6 +6,7 @@ import { trackingUrl } from '../orders/tracking-url.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationService } from './notification.service.js';
 import type { PushTemplate } from './push-templates.js';
+import { waitingFeeMax } from '../orders/waiting-fee.js';
 
 /** Prénom du destinataire, pour dire à l'expéditeur quel colis donner. */
 function firstName(name: string): string {
@@ -136,6 +137,33 @@ export class OrderNotificationsListener implements OnModuleInit {
         break;
       default:
         break;
+    }
+
+    // Expéditeur absent après l'attente (D) : prévenu une fois, sur la commande facturée.
+    if (to === 'CANCELLED' && actor.role === 'RIDER') {
+      const absent = await this.prisma.deliveryProof.findFirst({
+        where: { orderId: order.id, kind: 'SENDER_ABSENT' },
+        select: { id: true },
+      });
+      if (absent) {
+        const charged = await this.prisma.journalEntry.findUnique({
+          where: { idempotencyKey: `order:${order.id}:cancel-fee` },
+          select: { id: true },
+        });
+        if (charged) {
+          await this.notifications.toUser(order.senderId, {
+            template: 'ORDER_SENDER_ABSENT',
+            params: {
+              reference: order.reference,
+              minutes: String(this.env.WAITING_MAX_MINUTES),
+              fee: String(this.env.CANCELLATION_FEE + waitingFeeMax(this.env)),
+            },
+            data: { type: 'order.status', orderId: order.id, status: to },
+            orderId: order.id,
+          });
+        }
+        return;
+      }
     }
 
     // L'expéditeur est prévenu, sauf de ses propres actions. Colis refusé par le livreur :

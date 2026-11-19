@@ -424,6 +424,66 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('expéditeur absent : après 30 min et 2 appels, le livreur part, payé', (tester) async {
+    // Arrivé à 14 h 00, l'écran est à 14 h 31 ; deux appels à l'expéditeur depuis l'arrivée.
+    var clock = DateTime(2026, 11, 3, 14, 5);
+    final journal = CallJournal(store: MemoryKeyValueStore(), dial: (_) async {}, now: () => clock);
+    final id = order().id;
+    await journal.call(id, to: 'SENDER', phone: '+237690000101');
+    clock = DateTime(2026, 11, 3, 14, 20);
+    await journal.call(id, to: 'SENDER', phone: '+237690000101');
+    final api = noReturnFees();
+    var left = false;
+    final screen = PickupScreen(
+      order: RiderOrder.fromJson({
+        ...orderJson(collectAtPickup: 0),
+        'arrivedPickupAt': DateTime(2026, 11, 3, 14).toUtc().toIso8601String(),
+      }),
+      onBack: () {},
+      onSos: () {},
+      onPickedUp: (_) {},
+      onRefuse: () {},
+      onSenderAbsent: () => left = true,
+      now: () => DateTime(2026, 11, 3, 14, 31),
+    );
+    await pumpVariant(tester, Variant.matrix.first, scope(screen, api: api, calls: journal));
+    await settle(tester);
+    await tester.ensureVisible(find.text('L’expéditeur ne vient pas'));
+    await tester.tap(find.text('L’expéditeur ne vient pas'));
+    await settle(tester);
+    expect(api.absences, isEmpty);
+    expect(
+      find.text(
+        'La course sera annulée. L’expéditeur paiera 700\u00a0F, dont 480\u00a0F pour vous. Touchez encore pour confirmer.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('L’expéditeur ne vient pas'));
+    await settle(tester);
+    expect(api.absences, [(id, 2)]);
+    expect(left, isTrue);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('expéditeur absent : avant 30 min, l’app dit quand le livreur pourra partir', (tester) async {
+    final screen = PickupScreen(
+      order: RiderOrder.fromJson({
+        ...orderJson(collectAtPickup: 0),
+        'arrivedPickupAt': DateTime(2026, 11, 3, 14).toUtc().toIso8601String(),
+      }),
+      onBack: () {},
+      onSos: () {},
+      onPickedUp: (_) {},
+      onRefuse: () {},
+      now: () => DateTime(2026, 11, 3, 14, 12),
+    );
+    await pumpVariant(tester, Variant.matrix.first, scope(screen));
+    await settle(tester);
+    expect(find.text('Il ne vient pas ? Dans 18 min, vous pourrez partir : 480\u00a0F pour vous.'), findsOneWidget);
+    expect(find.text('L’expéditeur ne vient pas'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('colis seul : ce qu’il faut récupérer et pour qui, sans numéro', (tester) async {
     await pumpVariant(tester, Variant.matrix.first, scope(pickup(order(collectAtPickup: 0))));
     await settle(tester);

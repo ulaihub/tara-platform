@@ -399,6 +399,8 @@
   "trackSearchingBody": "Riders near the pickup are receiving the job.",
   "trackAssigned": "{rider} is coming for the parcel",
   "trackAssignedBody": "Give them the pickup code when they arrive.",
+  "trackSenderAbsent": "The rider has left",
+  "trackSenderAbsentBody": "They waited {minutes} min and called you. The order is cancelled; cancellation and waiting are charged to you: {fee}.",
   "trackRiderWaiting": "{rider} is waiting for you",
   "trackRiderWaitingBody": "Hand over the parcel and the pickup code. Waiting is free until {until}, then {fee} per {step} min started, {max} at most.",
   "trackOnTheWay": "On the way to {recipient}",

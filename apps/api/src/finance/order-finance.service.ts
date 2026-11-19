@@ -23,7 +23,7 @@ import {
 } from './ledger.accounts.js';
 import { mobileMoneySurcharge } from '../payments/mobile-money-fees.js';
 import { cancellationFee } from '../orders/cancellation-fee.js';
-import { waitingFeeFor } from '../orders/waiting-fee.js';
+import { waitingFeeFor, waitingFeeMax } from '../orders/waiting-fee.js';
 import type { ActorRole } from '../generated/prisma/enums.js';
 import { LedgerService, type PostingInput } from './ledger.service.js';
 import { RiderBalanceService } from './rider-balance.service.js';
@@ -385,20 +385,12 @@ export class OrderFinanceService implements OnModuleInit {
     if (fee <= 0) return;
     const key = `waiting:${order.batchId ?? order.id}:${order.riderId}`;
     if (await tx.journalEntry.findUnique({ where: { idempotencyKey: key } })) return;
-    const riderPart = Math.floor((fee * this.env.WAITING_RIDER_PERCENT) / 100);
-    await this.ledger.lock(tx, payingAccounts(order));
-    await this.ledger.post(tx, {
+    await this.chargeSplit(tx, order, order.riderId, {
       kind: 'WAITING_FEE_CHARGED',
       description: `Attente du livreur à l'enlèvement de ${order.reference}`,
-      idempotencyKey: key,
-      orderId: order.id,
-      postings: [
-        ...(await this.debitPostings(tx, order, fee)),
-        { account: riderPayable(order.riderId), amount: -riderPart },
-        ...(fee > riderPart
-          ? [{ account: PLATFORM_ACCOUNTS.commission, amount: -(fee - riderPart) }]
-          : []),
-      ],
+      key,
+      fee,
+      riderPart: Math.floor((fee * this.env.WAITING_RIDER_PERCENT) / 100),
     });
     await tx.order.update({ where: { id: order.id }, data: { waitingFee: fee } });
   }
@@ -863,18 +855,73 @@ export class OrderFinanceService implements OnModuleInit {
   private async chargeCancellation(tx: Prisma.TransactionClient, before: Order): Promise<void> {
     const fee = await cancellationFee(before, this.env, tx);
     if (fee <= 0 || !before.riderId) return;
-    const riderPart = Math.min(fee, this.env.CANCELLATION_FEE_RIDER_PART);
-    await this.ledger.lock(tx, payingAccounts(before));
-    await this.ledger.post(tx, {
+    await this.chargeSplit(tx, before, before.riderId, {
       kind: 'CANCELLATION_FEE_CHARGED',
       description: `Commande ${before.reference} annulée, livreur en route : déplacement payé`,
-      idempotencyKey: `order:${before.id}:cancel-fee`,
-      orderId: before.id,
+      key: `order:${before.id}:cancel-fee`,
+      fee,
+      riderPart: Math.min(fee, this.env.CANCELLATION_FEE_RIDER_PART),
+    });
+  }
+
+  /**
+   * Expéditeur absent (D) : le livreur a attendu le temps maximal, sur place, et l'a appelé.
+   * L'expéditeur paie l'annulation et l'attente maximale ; le livreur reçoit sa part des deux.
+   * Une seule fois pour un envoi groupé (la commande sur laquelle le livreur a agi).
+   */
+  async chargeSenderAbsent(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    riderId: string,
+  ): Promise<void> {
+    const cancel = this.env.CANCELLATION_FEE;
+    if (cancel > 0) {
+      await this.chargeSplit(tx, order, riderId, {
+        kind: 'CANCELLATION_FEE_CHARGED',
+        description: `Commande ${order.reference} annulée : expéditeur absent après l'attente`,
+        key: `order:${order.id}:cancel-fee`,
+        fee: cancel,
+        riderPart: Math.min(cancel, this.env.CANCELLATION_FEE_RIDER_PART),
+      });
+    }
+    const waiting = waitingFeeMax(this.env);
+    const key = `waiting:${order.batchId ?? order.id}:${riderId}`;
+    if (waiting <= 0 || (await tx.journalEntry.findUnique({ where: { idempotencyKey: key } })))
+      return;
+    await this.chargeSplit(tx, order, riderId, {
+      kind: 'WAITING_FEE_CHARGED',
+      description: `Attente du livreur à l'enlèvement de ${order.reference}`,
+      key,
+      fee: waiting,
+      riderPart: Math.floor((waiting * this.env.WAITING_RIDER_PERCENT) / 100),
+    });
+    await tx.order.update({ where: { id: order.id }, data: { waitingFee: waiting } });
+  }
+
+  /** Frais pris à l'expéditeur, partagés entre le livreur et Tara. */
+  private async chargeSplit(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    riderId: string,
+    charge: {
+      kind: 'CANCELLATION_FEE_CHARGED' | 'WAITING_FEE_CHARGED';
+      description: string;
+      key: string;
+      fee: number;
+      riderPart: number;
+    },
+  ): Promise<void> {
+    await this.ledger.lock(tx, payingAccounts(order));
+    await this.ledger.post(tx, {
+      kind: charge.kind,
+      description: charge.description,
+      idempotencyKey: charge.key,
+      orderId: order.id,
       postings: [
-        ...(await this.debitPostings(tx, before, fee)),
-        { account: riderPayable(before.riderId), amount: -riderPart },
-        ...(fee > riderPart
-          ? [{ account: PLATFORM_ACCOUNTS.commission, amount: -(fee - riderPart) }]
+        ...(await this.debitPostings(tx, order, charge.fee)),
+        { account: riderPayable(riderId), amount: -charge.riderPart },
+        ...(charge.fee > charge.riderPart
+          ? [{ account: PLATFORM_ACCOUNTS.commission, amount: -(charge.fee - charge.riderPart) }]
           : []),
       ],
     });

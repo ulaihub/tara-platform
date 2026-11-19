@@ -1812,6 +1812,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/rider/orders/{id}/sender-absent': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['RiderApp_senderAbsent'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/rider/orders/{id}/pickup': {
     parameters: {
       query?: never;
@@ -3177,6 +3193,7 @@ export interface components {
         feePerStep: number;
         maxFee: number;
         maxMinutes: number;
+        absentFee: number;
       };
     };
     AuditEntry: {
@@ -3586,6 +3603,8 @@ export interface components {
           | 'ADDRESS_REQUESTS_LIMIT'
           | 'PENDING_NOT_BLOCKED'
           | 'NOT_AT_PICKUP'
+          | 'SENDER_ABSENT_TOO_EARLY'
+          | 'SENDER_CALLS_REQUIRED'
           | 'ARRIVAL_NOT_EXPECTED';
         /** @description Message prêt à afficher, en français ou en anglais */
         message: string;
@@ -4421,6 +4440,8 @@ export interface components {
         riderPercent: number;
         maxFee: number;
         maxMinutes: number;
+        absentFee: number;
+        absentRiderPart: number;
       };
     };
     RiderEarnings: {
@@ -8331,6 +8352,46 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
+          latitude: number;
+          longitude: number;
+          /** Format: date-time */
+          occurredAt?: string;
+          clientEventId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderOrder'];
+        };
+      };
+    };
+  };
+  RiderApp_senderAbsent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @default [] */
+          callLog?: {
+            /** @enum {string} */
+            to: 'RECIPIENT' | 'SENDER';
+            /** Format: date-time */
+            at: string;
+            durationSeconds: number;
+          }[];
           latitude: number;
           longitude: number;
           /** Format: date-time */

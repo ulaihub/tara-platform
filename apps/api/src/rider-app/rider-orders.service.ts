@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import type { z } from 'zod';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
@@ -26,8 +27,6 @@ import { DistanceService, type GeoPoint, haversineMeters } from '../routing/dist
 import { NotificationService } from '../notifications/notification.service.js';
 import { waitingFeeMax } from '../orders/waiting-fee.js';
 
-/** Distance au point d'enlèvement au-delà de laquelle l'arrivée n'est pas acceptée (D). */
-const ARRIVAL_MAX_METERS = 300;
 import { CourseTrackService } from '../tracking/course-track.service.js';
 import { MediaService } from '../storage/media.service.js';
 import type {
@@ -37,11 +36,19 @@ import type {
   RefuseParcelBody,
   PickupBody,
   PositionActionBody,
+  SenderAbsentBody,
   ReturnBody,
   RiderOrderDto,
   RiderOrdersQuery,
   RiderRouteDto,
 } from './rider-app.schemas.js';
+
+/** Distance au point d'enlèvement au-delà de laquelle l'arrivée n'est pas acceptée (D). */
+const ARRIVAL_MAX_METERS = 300;
+/** Appels à l'expéditeur exigés avant de partir sans le colis (D). */
+const SENDER_ABSENT_MIN_CALLS = 2;
+/** L'expéditeur est prévenu ce nombre de minutes avant que le livreur puisse partir. */
+const WAITING_WARNING_MINUTES = 5;
 
 /** Codes à 4 chiffres : au-delà de ce nombre d'erreurs, le code est bloqué (E3, E4). */
 export const MAX_CODE_FAILURES = 5;
@@ -334,6 +341,118 @@ export class RiderOrdersService {
       orderId: order.id,
     });
     return this.get(userId, orderId);
+  }
+
+  /**
+   * Expéditeur absent (D) : après l'attente maximale comptée par le serveur, le livreur encore
+   * sur place et qui a appelé l'expéditeur deux fois peut partir. La course est annulée (et les
+   * autres colis du même envoi qui l'attendaient) ; l'expéditeur paie l'annulation et l'attente.
+   */
+  async senderAbsent(
+    userId: string,
+    orderId: string,
+    body: z.output<typeof SenderAbsentBody>,
+  ): Promise<z.output<typeof RiderOrderDto>> {
+    if (await this.replayed(orderId, body.clientEventId)) return this.get(userId, orderId);
+    const { order, rider } = await this.load(userId, orderId);
+    const arrivedAt = order.arrivedPickupAt;
+    if (order.status !== 'ASSIGNED' || !arrivedAt) throw AppError.conflict('ARRIVAL_NOT_EXPECTED');
+    const waited = (Date.now() - arrivedAt.getTime()) / 60_000;
+    if (waited < this.env.WAITING_MAX_MINUTES) {
+      throw AppError.unprocessable('SENDER_ABSENT_TOO_EARLY', {
+        minutes: Math.ceil(this.env.WAITING_MAX_MINUTES - waited),
+      });
+    }
+    const meters = Math.round(haversineMeters(body, order.pickupAddress));
+    if (meters > ARRIVAL_MAX_METERS) throw AppError.unprocessable('NOT_AT_PICKUP', { meters });
+    const calls = body.callLog.filter(
+      (call) => call.to === 'SENDER' && new Date(call.at).getTime() >= arrivedAt.getTime(),
+    );
+    if (calls.length < SENDER_ABSENT_MIN_CALLS) {
+      throw AppError.unprocessable('SENDER_CALLS_REQUIRED', { count: SENDER_ABSENT_MIN_CALLS });
+    }
+    const siblings = order.batchId
+      ? await this.prisma.order.findMany({
+          where: {
+            batchId: order.batchId,
+            riderId: rider.id,
+            status: 'ASSIGNED',
+            id: { not: order.id },
+          },
+        })
+      : [];
+    // Début du motif reconnu par l'app expéditeur : ne pas le changer.
+    const note = `Expéditeur absent après ${this.env.WAITING_MAX_MINUTES} min d'attente`;
+    const now = new Date();
+    const changes = await this.prisma.$transaction(async (tx) => {
+      const done: OrderChange[] = [];
+      for (const target of [order, ...siblings]) {
+        await tx.deliveryProof.create({
+          data: {
+            orderId: target.id,
+            kind: 'SENDER_ABSENT',
+            codeVerified: false,
+            callLog: calls,
+            latitude: body.latitude,
+            longitude: body.longitude,
+            occurredAt: now,
+            clientEventId: null,
+          },
+        });
+        const result = await this.transitions.applyIn(
+          tx,
+          target,
+          'CANCELLED',
+          { id: userId, role: 'RIDER' },
+          {
+            note,
+            latitude: body.latitude,
+            longitude: body.longitude,
+            ...(target.id === order.id ? { clientEventId: body.clientEventId } : {}),
+          },
+        );
+        done.push(result.change);
+      }
+      await this.finance.chargeSenderAbsent(tx, order, rider.id);
+      return done;
+    });
+    for (const change of changes) await this.bus.publish(change);
+    return this.get(userId, orderId);
+  }
+
+  /**
+   * Prévient l'expéditeur 5 minutes avant que le livreur puisse partir sans le colis (D). Une
+   * fois par envoi groupé.
+   */
+  @Cron('*/30 * * * * *', { name: 'waiting-warning' })
+  async warnLongWaits(now = new Date()): Promise<number> {
+    const threshold = new Date(
+      now.getTime() - (this.env.WAITING_MAX_MINUTES - WAITING_WARNING_MINUTES) * 60_000,
+    );
+    const due = await this.prisma.order.findMany({
+      where: { status: 'ASSIGNED', arrivedPickupAt: { lte: threshold }, waitingWarnedAt: null },
+      select: { id: true, batchId: true, senderId: true, reference: true },
+      take: 100,
+    });
+    const fee = String(this.env.CANCELLATION_FEE + waitingFeeMax(this.env));
+    let warned = 0;
+    for (const row of due) {
+      const { count } = await this.prisma.order.updateMany({
+        where: row.batchId
+          ? { batchId: row.batchId, status: 'ASSIGNED', waitingWarnedAt: null }
+          : { id: row.id, waitingWarnedAt: null },
+        data: { waitingWarnedAt: now },
+      });
+      if (count === 0) continue;
+      warned += 1;
+      await this.notifications.toUser(row.senderId, {
+        template: 'SENDER_WAITING_WARNING',
+        params: { reference: row.reference, minutes: String(WAITING_WARNING_MINUTES), fee },
+        data: { type: 'order.waiting', orderId: row.id },
+        orderId: row.id,
+      });
+    }
+    return warned;
   }
 
   /** Enlèvement (E3) : code donné par l'expéditeur et photo du colis. */

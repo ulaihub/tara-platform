@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.8 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.9 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -72,7 +72,12 @@ remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le dema
   ou si un autre colis du même envoi part quand même avec vous.
 - **Attente au point d'enlèvement** : gratuite pour l'expéditeur pendant 10 minutes après
   « Je suis arrivé » ; au-delà, il paie 100 FCFA par tranche de 5 minutes commencée, dont
-  **70 % pour vous**, versés à l'enlèvement. Le pourcentage exact est celui affiché dans l'application. Une remise
+  **70 % pour vous**, versés à l'enlèvement. L'attente n'est comptée que pendant 30 minutes
+  (280 FCFA au plus pour vous).
+- **Expéditeur absent** : après 30 minutes d'attente, si vous êtes toujours sur place et
+  l'avez appelé deux fois depuis l'application, vous pouvez partir avec « L'expéditeur ne
+  vient pas ». La course est annulée et vous recevez **480 FCFA** (déplacement et attente).
+  Partir sans avoir vraiment attendu ou appelé est une fraude (article 9). Le pourcentage exact est celui affiché dans l'application. Une remise
   accordée à l'expéditeur (code promo, tarif pro) ne réduit jamais votre gain : Tara la prend
   sur sa part.
 - **Primes payées par Tara**, en plus de votre gain :

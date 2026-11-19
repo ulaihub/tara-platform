@@ -29,6 +29,20 @@ class FakeRiderApi extends RiderApi {
   final arrivals = <String>[];
   String arrivedAt = '2026-11-03T13:32:00Z';
 
+  /// Départs sans le colis (expéditeur absent) : course et nombre d'appels joints.
+  final absences = <(String, int)>[];
+
+  @override
+  Future<RiderOrder> senderAbsent(
+    String orderId, {
+    required double latitude,
+    required double longitude,
+    required List<Json> callLog,
+  }) async {
+    absences.add((orderId, callLog.length));
+    return RiderOrder.fromJson({...orderJson(id: orderId), 'status': 'CANCELLED'});
+  }
+
   @override
   Future<RiderOrder> arrived(String orderId, {required double latitude, required double longitude}) async {
     arrivals.add(orderId);
