@@ -128,3 +128,9 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
     colis garde son prix, son code de livraison et sa preuve de remise, et la prime d'approche
     n'est payée qu'une fois. Un seul code et une seule photo à l'enlèvement valent remise de
     tous les colis cochés : à faire confirmer comme preuve de prise en charge de chacun.
+13. Minimum d'envoi du prestataire (version 2026-11.11) : Sebpay refuse les envois de moins de
+    30 000 FCFA. Les ventes encaissées pour une boutique (en mandataire) et les soldes des
+    livreurs restent alors chez Tara jusqu'à ce minimum. À faire vérifier : délai de reversement
+    acceptable pour un mandataire, et absence de requalification en réception de fonds du public
+    (réglementation COBAC / BEAC des services de paiement). Restitution à la fermeture d'un compte
+    par le service client.

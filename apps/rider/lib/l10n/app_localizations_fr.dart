@@ -1852,6 +1852,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String withdrawBelowMinimum(String min, String missing) {
+    return 'Le retrait vers Mobile Money est possible à partir de $min. Il vous manque encore $missing : votre solde reste en sécurité chez Tara en attendant.';
+  }
+
+  @override
   String withdrawRange(String min, String max) {
     return 'Entre $min et $max, ou tout le solde.';
   }
@@ -1907,6 +1912,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get closeAccountErased =>
       'Vos pièces d’identité, votre garant et votre contact d’urgence sont alors effacés. Vos courses passées restent, sans votre nom, pour la comptabilité.';
+
+  @override
+  String closeAccountSmallBalance(String amount, String min) {
+    return 'Il vous reste $amount, moins que le plus petit retrait Mobile Money ($min) : appelez le service client de Tara pour les récupérer avant de fermer votre compte.';
+  }
 
   @override
   String closeAccountBalance(String amount) {

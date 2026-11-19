@@ -3242,6 +3242,12 @@ abstract class AppLocalizations {
   /// **'Recevoir {amount}'**
   String withdrawConfirm(String amount);
 
+  /// No description provided for @withdrawBelowMinimum.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le retrait vers Mobile Money est possible à partir de {min}. Il vous manque encore {missing} : votre solde reste en sécurité chez Tara en attendant.'**
+  String withdrawBelowMinimum(String min, String missing);
+
   /// No description provided for @withdrawRange.
   ///
   /// In fr, this message translates to:
@@ -3331,6 +3337,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vos pièces d’identité, votre garant et votre contact d’urgence sont alors effacés. Vos courses passées restent, sans votre nom, pour la comptabilité.'**
   String get closeAccountErased;
+
+  /// No description provided for @closeAccountSmallBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il vous reste {amount}, moins que le plus petit retrait Mobile Money ({min}) : appelez le service client de Tara pour les récupérer avant de fermer votre compte.'**
+  String closeAccountSmallBalance(String amount, String min);
 
   /// No description provided for @closeAccountBalance.
   ///

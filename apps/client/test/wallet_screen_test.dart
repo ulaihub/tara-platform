@@ -247,6 +247,27 @@ void main() {
     expect(api.proofs.single?.pin, '2580');
   });
 
+  testWidgets('minimum de Mobile Money : les ventes attendent, le solde Tara ne se retire pas encore', (tester) async {
+    final api = walletApi(plan: 'FREE', shopBalance: 1100);
+    api.wallet0 = const Wallet(
+      customerBalance: 3500,
+      merchantBalance: 1100,
+      payoutSchedule: 'DAILY',
+      plan: 'FREE',
+      payoutPhone: '+237677123456',
+      withdrawalMinimum: 30000,
+      customerWithdrawalMinimum: 30000,
+    );
+    await pumpVariant(tester, Variant.matrix.first, wallet(api, shown: true), surface: const Size(390, 1400));
+    await settle(tester);
+    // 1 100 F : rien n'échoue le soir, les ventes attendent d'atteindre 30 000 F.
+    expect(find.textContaining('Mobile Money n’envoie pas moins de 30\u00a0000'), findsOneWidget);
+    expect(find.textContaining('maintenant'), findsNothing);
+    // Solde Tara de 3 500 F : pas de bouton Retirer, il sert aux livraisons.
+    expect(find.text('Retirer'), findsNothing);
+    expect(find.textContaining('Retrait vers Mobile Money possible à partir de 30\u00a0000'), findsOneWidget);
+  });
+
   testWidgets('reversement immédiat avec l’offre Pro', (tester) async {
     final api = walletApi();
     await pumpVariant(tester, Variant.matrix.first, wallet(api, shown: true));

@@ -56,7 +56,22 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     if (shop < 0) return l.deleteAccountDebt(f(-shop));
     if (wallet.openPayout != null) return l.deleteAccountPayout;
     final left = wallet.customerBalance + (shop > 0 ? shop : 0);
-    if (left > 0) return l.deleteAccountBalance(f(left));
+    if (left > 0) {
+      // Sous le minimum d'un envoi Mobile Money, il ne peut pas être retiré : il sert aux livraisons.
+      final small =
+          (wallet.customerBalance > 0 && wallet.customerBalance < wallet.customerWithdrawalMinimum) ||
+          (shop > 0 && shop < wallet.withdrawalMinimum);
+      return small
+          ? l.deleteAccountSmallBalance(
+              f(left),
+              f(
+                wallet.withdrawalMinimum > wallet.customerWithdrawalMinimum
+                    ? wallet.withdrawalMinimum
+                    : wallet.customerWithdrawalMinimum,
+              ),
+            )
+          : l.deleteAccountBalance(f(left));
+    }
     return null;
   }
 

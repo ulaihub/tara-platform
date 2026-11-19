@@ -17438,12 +17438,16 @@
               },
               "feeSharePercent": {
                 "type": "integer"
+              },
+              "minimum": {
+                "type": "integer"
               }
             },
             "required": [
               "freeFrom",
               "feeBps",
-              "feeSharePercent"
+              "feeSharePercent",
+              "minimum"
             ],
             "additionalProperties": false
           },
@@ -17938,10 +17942,14 @@
             "properties": {
               "balance": {
                 "type": "integer"
+              },
+              "withdrawalMinimum": {
+                "type": "integer"
               }
             },
             "required": [
-              "balance"
+              "balance",
+              "withdrawalMinimum"
             ],
             "additionalProperties": false
           },
@@ -17993,12 +18001,16 @@
                   },
                   "feeSharePercent": {
                     "type": "integer"
+                  },
+                  "minimum": {
+                    "type": "integer"
                   }
                 },
                 "required": [
                   "freeFrom",
                   "feeBps",
-                  "feeSharePercent"
+                  "feeSharePercent",
+                  "minimum"
                 ],
                 "additionalProperties": false
               }

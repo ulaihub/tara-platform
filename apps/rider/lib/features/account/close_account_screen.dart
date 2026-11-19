@@ -45,7 +45,12 @@ class _CloseAccountScreenState extends ConsumerState<CloseAccountScreen> {
     final debt = (wallet.earnings < 0 ? -wallet.earnings : 0) + wallet.cashHeld;
     if (debt > 0) return l.closeAccountDebt(f(debt));
     if (wallet.openPayout != null) return l.closeAccountPayout;
-    if (wallet.earnings > 0) return l.closeAccountBalance(f(wallet.earnings));
+    if (wallet.earnings > 0) {
+      // Sous le minimum du prestataire, le retrait est impossible : le service client règle.
+      return wallet.earnings < wallet.withdrawalMinimum
+          ? l.closeAccountSmallBalance(f(wallet.earnings), f(wallet.withdrawalMinimum))
+          : l.closeAccountBalance(f(wallet.earnings));
+    }
     return null;
   }
 

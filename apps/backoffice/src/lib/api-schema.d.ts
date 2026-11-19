@@ -4695,6 +4695,7 @@ export interface components {
         freeFrom: number;
         feeBps: number;
         feeSharePercent: number;
+        minimum: number;
       };
       openPayout: {
         /** Format: uuid */
@@ -4826,6 +4827,7 @@ export interface components {
       currency: 'XAF';
       customer: {
         balance: number;
+        withdrawalMinimum: number;
       };
       merchant: {
         balance: number;
@@ -4842,6 +4844,7 @@ export interface components {
           freeFrom: number;
           feeBps: number;
           feeSharePercent: number;
+          minimum: number;
         };
       } | null;
       openPayout: {

@@ -82,7 +82,10 @@ export class WalletsService implements OnModuleInit {
     });
     return {
       currency: 'XAF' as const,
-      customer: { balance: customer },
+      customer: {
+        balance: customer,
+        withdrawalMinimum: await this.payouts.minimumFor('CUSTOMER', userId),
+      },
       merchant: merchant
         ? {
             balance: await this.ledger.balance(merchantPayable(merchant.id)),
@@ -97,6 +100,7 @@ export class WalletsService implements OnModuleInit {
               freeFrom: merchant.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM,
               feeBps: this.env.PAYOUT_FEE_BPS,
               feeSharePercent: this.env.PAYOUT_FEE_SHARE_PERCENT,
+              minimum: await this.payouts.minimumFor('MERCHANT', merchant.id),
             },
           }
         : null,
@@ -128,6 +132,7 @@ export class WalletsService implements OnModuleInit {
         freeFrom: rider.freePayoutFrom ?? this.env.FREE_PAYOUT_FROM,
         feeBps: this.env.PAYOUT_FEE_BPS,
         feeSharePercent: this.env.PAYOUT_FEE_SHARE_PERCENT,
+        minimum: await this.payouts.minimumFor('RIDER', rider.id),
       },
       openPayout: openPayout
         ? { id: openPayout.id, amount: openPayout.amount, status: openPayout.status }

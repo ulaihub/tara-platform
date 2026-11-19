@@ -1844,6 +1844,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String withdrawBelowMinimum(String min, String missing) {
+    return 'Withdrawals to Mobile Money start at $min. You need $missing more: your balance stays safe with Tara until then.';
+  }
+
+  @override
   String withdrawRange(String min, String max) {
     return 'Between $min and $max, or the whole balance.';
   }
@@ -1899,6 +1904,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get closeAccountErased =>
       'Your ID documents, guarantor and emergency contact are then erased. Your past jobs remain, without your name, for the accounts.';
+
+  @override
+  String closeAccountSmallBalance(String amount, String min) {
+    return 'You still have $amount, less than the smallest Mobile Money withdrawal ($min): call Tara customer service to get it back before closing your account.';
+  }
 
   @override
   String closeAccountBalance(String amount) {

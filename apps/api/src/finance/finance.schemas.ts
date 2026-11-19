@@ -100,9 +100,15 @@ const OpenPayout = z.object({ id: z.uuid(), amount: z.int(), status: z.string() 
 
 /**
  * Retrait gratuit à partir de `freeFrom` ; en dessous, frais Mobile Money de `feeBps`, dont le
- * bénéficiaire paie `feeSharePercent` % (Tara le reste).
+ * bénéficiaire paie `feeSharePercent` % (Tara le reste). Rien ne part sous `minimum`, le plus
+ * petit envoi que le prestataire accepte (0 : pas de minimum).
  */
-const Withdrawal = z.object({ freeFrom: z.int(), feeBps: z.int(), feeSharePercent: z.int() });
+const Withdrawal = z.object({
+  freeFrom: z.int(),
+  feeBps: z.int(),
+  feeSharePercent: z.int(),
+  minimum: z.int(),
+});
 
 /** Retrait gratuit d'une boutique ou d'un livreur : seuil propre, seuil général, repère. */
 export const FreePayoutDto = z
@@ -129,7 +135,8 @@ export const FreePayoutBody = z.object({
 export const WalletDto = z
   .object({
     currency: z.literal('XAF'),
-    customer: z.object({ balance: z.int() }),
+    /** Solde Tara ; retrait possible à partir de `withdrawalMinimum` (minimum du prestataire). */
+    customer: z.object({ balance: z.int(), withdrawalMinimum: z.int() }),
     merchant: z
       .object({
         balance: z.int(),

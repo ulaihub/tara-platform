@@ -1222,6 +1222,17 @@
       }
     }
   },
+  "withdrawBelowMinimum": "Le retrait vers Mobile Money est possible à partir de {min}. Il vous manque encore {missing} : votre solde reste en sécurité chez Tara en attendant.",
+  "@withdrawBelowMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "missing": {
+        "type": "String"
+      }
+    }
+  },
   "withdrawRange": "Entre {min} et {max}, ou tout le solde.",
   "@withdrawRange": {
     "placeholders": {
@@ -1275,6 +1286,17 @@
   "closeAccountTitle": "Fermer mon compte",
   "closeAccountBody": "L’équipe Tara ferme le compte après vérification : aucune course en cours, rien à reverser à Tara et plus d’argent sur votre solde.",
   "closeAccountErased": "Vos pièces d’identité, votre garant et votre contact d’urgence sont alors effacés. Vos courses passées restent, sans votre nom, pour la comptabilité.",
+  "closeAccountSmallBalance": "Il vous reste {amount}, moins que le plus petit retrait Mobile Money ({min}) : appelez le service client de Tara pour les récupérer avant de fermer votre compte.",
+  "@closeAccountSmallBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      }
+    }
+  },
   "closeAccountBalance": "Il vous reste {amount} : retirez-les d’abord vers votre Mobile Money (onglet Activité).",
   "@closeAccountBalance": {
     "placeholders": {

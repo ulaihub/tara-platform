@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.10 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.11 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -145,8 +145,10 @@ Vous choisissez, avant de commander :
 - **Mobile Money** (MTN ou Orange) : vous validez le paiement sur votre téléphone ;
 - **votre solde Tara**, rechargé par Mobile Money ; une boutique paie d'abord avec son solde
   Tara, puis avec ses ventes (article 7). Vous pouvez à tout moment retirer tout votre solde
-  Tara sur votre numéro Mobile Money, quel que soit le montant : gratuitement pour un
-  particulier ; pour une boutique, aux conditions de ses reversements (article 7) ;
+  Tara sur votre numéro Mobile Money, à partir du **minimum d'envoi** de notre prestataire de
+  paiement (affiché dans l'application ; 30 000 FCFA aujourd'hui) : gratuitement pour un
+  particulier ; pour une boutique, aux conditions de ses reversements (article 7). En dessous,
+  votre solde reste à vous et paie vos livraisons ;
 - **en espèces au livreur**, au moment de l'enlèvement ;
 - **« le destinataire paie »** : le destinataire paie la livraison à la porte, en espèces ou par
   Mobile Money.
@@ -168,8 +170,10 @@ Vous choisissez, avant de commander :
   votre solde Tara, puis avec vos ventes. Si une commande est annulée, chacun des deux soldes
   récupère ce qu'il avait payé.
 - Vos ventes vous sont reversées chaque jour (par défaut à 18 h) sur votre numéro Mobile Money,
-  à partir de 500 FCFA disponibles. Un solde plus petit peut vous être reversé en entier à votre
-  demande, même avec l'offre gratuite : rien ne reste bloqué chez Tara.
+  dès qu'elles atteignent le **minimum d'envoi** de notre prestataire de paiement (affiché dans
+  l'application ; 30 000 FCFA aujourd'hui). En dessous, elles restent sur votre solde, à vous,
+  paient vos livraisons, et partent le soir où elles atteignent ce montant. Si le prestataire
+  baisse ce minimum, l'application l'affiche aussitôt.
 - **Réserve pour vos livraisons** (facultative) : vous choisissez dans l'application un montant
   de 0 à 100 000 FCFA (0 au départ). Au moment du reversement du soir, Tara garde sur vos ventes
   ce qui manque à votre solde Tara pour atteindre ce montant et le met sur votre solde Tara ; le
@@ -184,9 +188,9 @@ Vous choisissez, avant de commander :
 Pour ces encaissements, Tara agit **en votre nom, comme votre mandataire**. Les paiements Mobile
 Money passent par un prestataire de paiement agréé ; Tara ne reçoit pas de dépôts et vos soldes
 ne produisent pas d'intérêts. Votre solde Tara est une avance sur les services de Tara : il ne
-sert qu'à les payer et vous pouvez le retirer quand vous voulez. Vos ventes vous sont reversées
-au plus tard au reversement automatique qui suit (chaque jour par défaut), moins la réserve que
-vous avez choisie.
+sert qu'à les payer et vous pouvez le retirer à partir du minimum d'envoi. Vos ventes vous sont
+reversées au plus tard au reversement automatique qui suit le jour où elles atteignent ce minimum
+(chaque jour par défaut), moins la réserve que vous avez choisie.
 
 ## 8. Si la livraison échoue
 
@@ -260,8 +264,10 @@ Le détail figure dans la politique de confidentialité, que vous acceptez en m�
 conditions. Vous pouvez télécharger vos données ou supprimer votre compte depuis l'application.
 
 La suppression est refusée tant qu'il vous reste de l'argent chez Tara (solde, ventes à recevoir)
-ou qu'un retrait est en cours : retirez d'abord tout votre solde vers votre Mobile Money, même
-s'il fait moins de 500 FCFA. Ainsi, aucune somme ne se perd à la fermeture d'un compte.
+ou qu'un retrait est en cours : retirez d'abord tout votre solde vers votre Mobile Money. S'il
+est plus petit que le minimum d'envoi, utilisez-le pour vos livraisons ou appelez le service
+client, qui vous le rend avant la suppression. Ainsi, aucune somme ne se perd à la fermeture d'un
+compte.
 
 ## 13. Perte, vol, dommage et réclamations
 
