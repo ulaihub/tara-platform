@@ -283,7 +283,13 @@ describe('Frais Mobile Money payés par le client', () => {
     // Frais de 98 F partagés : 49 F pour le livreur (arrondi en sa faveur), le reste pour Tara.
     expect(out.body).toMatchObject({ amount: 4000, withdrawalFee: 49, received: 3951 });
     const wallet = await request(ctx.http).get('/v1/rider/wallet').set(rider.auth).expect(200);
-    expect(wallet.body.withdrawal).toEqual({ freeFrom: 20_000, feeBps: 250, feeSharePercent: 50 });
+    // Prestataire factice : pas de minimum d'envoi.
+    expect(wallet.body.withdrawal).toEqual({
+      freeFrom: 20_000,
+      feeBps: 250,
+      feeSharePercent: 50,
+      minimum: 0,
+    });
     expect(await ledger.balance(riderPayable(rider.riderId))).toBe(RIDER_START_BALANCE - 4000);
   });
 

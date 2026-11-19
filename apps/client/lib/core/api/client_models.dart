@@ -241,6 +241,8 @@ class Wallet {
     this.withdrawalFreeFrom = 0,
     this.withdrawalFeeBps = 0,
     this.withdrawalFeeSharePercent = 100,
+    this.withdrawalMinimum = 0,
+    this.customerWithdrawalMinimum = 0,
     this.openPayout,
   });
 
@@ -262,6 +264,9 @@ class Wallet {
       withdrawalFeeSharePercent: merchant == null
           ? 100
           : (_field<Json>(merchant, 'withdrawal')['feeSharePercent'] as num? ?? 100).toInt(),
+      // Serveur d'avant : pas de minimum du prestataire.
+      withdrawalMinimum: merchant == null ? 0 : (_field<Json>(merchant, 'withdrawal')['minimum'] as num? ?? 0).toInt(),
+      customerWithdrawalMinimum: (_field<Json>(json, 'customer')['withdrawalMinimum'] as num? ?? 0).toInt(),
       openPayout: open == null
           ? null
           : (amount: _field<num>(open, 'amount').toInt(), status: _field<String>(open, 'status')),
@@ -317,16 +322,31 @@ class Wallet {
   /// Ce qui peut payer une livraison : le solde Tara, puis les ventes d'une boutique.
   int get spendable => customerBalance + (merchantBalance ?? 0);
 
+  /// Plus petit envoi que le prestataire Mobile Money accepte (0 : aucun), pour les ventes de la
+  /// boutique et pour le solde Tara : en dessous, rien ne peut partir.
+  final int withdrawalMinimum;
+  final int customerWithdrawalMinimum;
+
   /// Reversement ou retrait en cours.
   final ({int amount, String status})? openPayout;
 
   bool get canPayoutNow => plan != null && plan != 'FREE';
 
   /// Reversement possible tout de suite : offre payante, ou petit solde (sous 500 F) que le
-  /// reversement de 18 h ne prendrait jamais, versé en entier.
+  /// reversement de 18 h ne prendrait jamais, versé en entier ; jamais sous le minimum du
+  /// prestataire.
   bool get canPayoutBalanceNow {
     final balance = merchantBalance ?? 0;
-    return openPayout == null && balance > 0 && (canPayoutNow || balance < payoutMinimum);
+    return openPayout == null &&
+        balance > 0 &&
+        balance >= withdrawalMinimum &&
+        (canPayoutNow || balance < payoutMinimum);
+  }
+
+  /// Ventes qui attendent d'atteindre le minimum du prestataire avant de partir.
+  bool get salesBelowMinimum {
+    final balance = merchantBalance ?? 0;
+    return balance >= 0 && withdrawalMinimum > payoutMinimum && balance < withdrawalMinimum;
   }
 
   /// Plus petit reversement automatique (comme le serveur).

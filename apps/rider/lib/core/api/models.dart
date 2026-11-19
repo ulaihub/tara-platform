@@ -891,6 +891,7 @@ class RiderWallet {
     this.withdrawalFreeFrom = 0,
     this.withdrawalFeeBps = 0,
     this.withdrawalFeeSharePercent = 100,
+    this.withdrawalMinimum = 0,
     this.openPayout,
   });
 
@@ -905,6 +906,8 @@ class RiderWallet {
     withdrawalFreeFrom: _field<num>(_field<Json>(json, 'withdrawal'), 'freeFrom').toInt(),
     withdrawalFeeBps: _field<num>(_field<Json>(json, 'withdrawal'), 'feeBps').toInt(),
     withdrawalFeeSharePercent: (_field<Json>(json, 'withdrawal')['feeSharePercent'] as num? ?? 100).toInt(),
+    // Serveur d'avant : pas de minimum du prestataire.
+    withdrawalMinimum: (_field<Json>(json, 'withdrawal')['minimum'] as num? ?? 0).toInt(),
     openPayout: switch (json['openPayout']) {
       final Json payout => OpenPayout.fromJson(payout),
       _ => null,
@@ -949,6 +952,10 @@ class RiderWallet {
 
   /// Part des frais payée par le livreur, en % ; Tara paie le reste.
   final int withdrawalFeeSharePercent;
+
+  /// Plus petit retrait que le prestataire Mobile Money accepte (0 : aucun) ; en dessous, rien
+  /// ne peut partir, pas même tout le solde.
+  final int withdrawalMinimum;
 
   /// Retrait vers Mobile Money pas encore arrivé (un seul à la fois).
   final OpenPayout? openPayout;

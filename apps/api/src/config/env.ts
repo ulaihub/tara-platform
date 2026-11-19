@@ -266,6 +266,12 @@ const envSchema = z
     /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */
     PAYOUT_MIN_AMOUNT: z.coerce.number().int().min(1).default(500),
     /**
+     * Plus petit envoi accepté par le prestataire (montant reçu par le bénéficiaire). Sans
+     * valeur : 30 000 F avec Sebpay (refus AMOUNT_TOO_LOW constaté le 17/11/2026), aucun sinon.
+     * À baisser ici si Sebpay baisse le minimum du compte.
+     */
+    PAYOUT_PROVIDER_MIN_AMOUNT: z.coerce.number().int().min(0).optional(),
+    /**
      * Frais Mobile Money du prestataire à l'encaissement, en points de base (600 = 6 % pour un
      * compte Sebpay particulier) : ajoutés au montant payé par le client.
      */

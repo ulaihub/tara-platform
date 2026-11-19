@@ -45,6 +45,8 @@ export interface PayoutRequest {
 const isUniqueViolation = (error: unknown): boolean =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
 
+/** Minimum des envois Sebpay (refus AMOUNT_TOO_LOW : « Le montant minimum est de 30 000 XAF »). */
+export const SEBPAY_PAYOUT_MIN_AMOUNT = 30_000;
 /** Une réponse perdue n'est réexaminée qu'après ce délai (le prestataire peut être lent). */
 const RECHECK_AFTER_MS = 60_000;
 
@@ -117,7 +119,39 @@ export class PayoutsService implements OnModuleInit {
    */
   async smallBalance(beneficiary: PayoutBeneficiary, ownerId: string): Promise<boolean> {
     const available = await this.available(beneficiary, ownerId);
-    return available > 0 && available < this.env.PAYOUT_MIN_AMOUNT;
+    return (
+      available > 0 &&
+      available < this.env.PAYOUT_MIN_AMOUNT &&
+      available >= (await this.minimumFor(beneficiary, ownerId))
+    );
+  }
+
+  /** Plus petit envoi que le prestataire accepte, en montant reçu (0 : pas de minimum). */
+  get providerMinimum(): number {
+    return (
+      this.env.PAYOUT_PROVIDER_MIN_AMOUNT ??
+      (this.provider.name === 'sebpay' ? SEBPAY_PAYOUT_MIN_AMOUNT : 0)
+    );
+  }
+
+  /**
+   * Plus petit retrait possible pour ce bénéficiaire : ce qu'il reçoit, frais de retrait
+   * déduits, doit atteindre le minimum du prestataire. En dessous, rien n'est envoyé : un
+   * envoi refusé ne ferait qu'aller et revenir.
+   */
+  async minimumFor(
+    beneficiary: PayoutBeneficiary,
+    ownerId: string,
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<number> {
+    const floor = this.providerMinimum;
+    let amount = floor;
+    for (let step = 0; floor > 0 && step < 20; step += 1) {
+      const shortfall = floor - (amount - (await this.chargeFor(beneficiary, ownerId, amount, db)));
+      if (shortfall <= 0) break;
+      amount += shortfall;
+    }
+    return amount;
   }
 
   /**
@@ -233,6 +267,12 @@ export class PayoutsService implements OnModuleInit {
         if (amount > available)
           throw AppError.unprocessable('INSUFFICIENT_BALANCE', { balance: available });
         const charge = await this.chargeFor(input.beneficiary, input.ownerId, amount, tx);
+        // Sous le minimum du prestataire, l'envoi serait refusé : rien ne part.
+        if (amount - charge < this.providerMinimum) {
+          throw AppError.unprocessable('PAYOUT_TOO_SMALL', {
+            min: await this.minimumFor(input.beneficiary, input.ownerId, tx),
+          });
+        }
         const created = await tx.payout.create({
           data: {
             beneficiary: input.beneficiary,
@@ -325,7 +365,8 @@ export class PayoutsService implements OnModuleInit {
         this.logger.warn(`Reversement ${payout.id} : réponse du prestataire perdue`);
         return;
       }
-      await this.settle(payout.id, 'FAILED', { failureReason: String(error).slice(0, 300) });
+      const reason = error instanceof Error ? error.message : String(error);
+      await this.settle(payout.id, 'FAILED', { failureReason: reason.slice(0, 300) });
     }
   }
 
@@ -525,7 +566,13 @@ export class PayoutsService implements OnModuleInit {
       // Réserve choisie par la boutique : gardée de ses ventes pour ses livraisons de demain.
       await this.keepReserve(merchant, day);
       const available = await this.available('MERCHANT', merchant.id);
-      if (available < this.env.PAYOUT_MIN_AMOUNT) {
+      // Sous le minimum du prestataire, les ventes attendent sur le solde : envoyées le soir
+      // où elles l'atteignent.
+      const minimum = Math.max(
+        this.env.PAYOUT_MIN_AMOUNT,
+        await this.minimumFor('MERCHANT', merchant.id),
+      );
+      if (available < minimum) {
         skipped += 1;
         continue;
       }

@@ -1502,6 +1502,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shopToReceive => 'Ventes à recevoir';
 
   @override
+  String shopPayoutWaitsMinimum(String min) {
+    return 'Mobile Money n’envoie pas moins de $min : vos ventes restent sur votre solde et partent le soir où elles atteignent ce montant.';
+  }
+
+  @override
+  String shopPayoutFromMinimum(String min) {
+    return 'Reversement possible à partir de $min (minimum de Mobile Money).';
+  }
+
+  @override
+  String taraWithdrawFromMinimum(String min) {
+    return 'Retrait vers Mobile Money possible à partir de $min. En attendant, ce solde paie vos livraisons.';
+  }
+
+  @override
+  String deleteAccountSmallBalance(String amount, String min) {
+    return 'Il vous reste $amount chez Tara, moins que le plus petit envoi Mobile Money ($min). Utilisez-les pour vos livraisons, ou appelez le service client de Tara.';
+  }
+
+  @override
   String shopPayoutDaily(String hour, String phone) {
     return 'Reversées chaque jour à $hour h sur le $phone.';
   }

@@ -1496,6 +1496,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shopToReceive => 'Sales to receive';
 
   @override
+  String shopPayoutWaitsMinimum(String min) {
+    return 'Mobile Money does not send less than $min: your sales stay on your balance and go out the evening they reach that amount.';
+  }
+
+  @override
+  String shopPayoutFromMinimum(String min) {
+    return 'Payout possible from $min (Mobile Money minimum).';
+  }
+
+  @override
+  String taraWithdrawFromMinimum(String min) {
+    return 'Withdrawal to Mobile Money possible from $min. Until then, this balance pays for your deliveries.';
+  }
+
+  @override
+  String deleteAccountSmallBalance(String amount, String min) {
+    return 'You still have $amount with Tara, less than the smallest Mobile Money transfer ($min). Use it for your deliveries, or call Tara customer service.';
+  }
+
+  @override
   String shopPayoutDaily(String hour, String phone) {
     return 'Paid out every day at $hour:00 to $phone.';
   }

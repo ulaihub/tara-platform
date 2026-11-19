@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.10 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.11 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -102,8 +102,9 @@ remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le dema
   L'argent à encaisser pour une course est mis de côté sur votre solde dès que vous
   l'acceptez : votre solde ne peut jamais devenir négatif, et vous ne devez jamais rien à Tara.
 - Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money
-  (bouton « Retirer », écran Activité), à partir de 500 FCFA, ou tout le disponible quel que
-  soit le montant. Le retrait est gratuit à partir d'un montant fixé pour vous selon votre
+  (bouton « Retirer », écran Activité), à partir du **minimum d'envoi** de notre prestataire de
+  paiement (affiché dans l'application ; 30 000 FCFA aujourd'hui). En dessous, votre solde reste
+  à vous, chez Tara, et couvre l'argent mis de côté pour vos courses. Le retrait est gratuit à partir d'un montant fixé pour vous selon votre
   activité (affiché dans l'application) ; en dessous, des frais de retrait (1,25 %
   aujourd'hui) sont retenus sur le montant reçu. Les frais et le montant reçu sont affichés
   avant que vous confirmiez.
@@ -169,7 +170,8 @@ politique de confidentialité. Vous pouvez télécharger vos données depuis l'a
 
 Pour arrêter, demandez la fermeture de votre compte depuis l'application (Profil). L'équipe Tara
 la fait après avoir vérifié qu'aucune course n'est en cours, que vous ne devez rien à Tara et
-que votre solde a été retiré : aucune somme ne se perd. Vos pièces d'identité, votre garant et
+que votre solde a été retiré ; un solde plus petit que le minimum d'envoi vous est rendu par
+le service client : aucune somme ne se perd. Vos pièces d'identité, votre garant et
 votre contact d'urgence sont alors effacés ; vos courses passées restent, sans votre nom, pour
 la comptabilité.
 

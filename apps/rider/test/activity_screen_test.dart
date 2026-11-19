@@ -5,6 +5,7 @@ import 'package:tara_rider/core/api/models.dart';
 import 'package:tara_rider/features/activity/deposit_screen.dart';
 import 'package:tara_rider/features/activity/withdraw_screen.dart';
 import 'package:tara_test/fake_pin.dart';
+import 'package:tara_ui/components/buttons.dart';
 
 import 'helpers/harness.dart';
 import 'screens_activity_golden_test.dart' show activity, activityApi;
@@ -191,6 +192,56 @@ void main() {
     );
     await tapText(tester, 'Fermer');
     expect(find.byType(WithdrawScreen), findsNothing);
+  });
+
+  testWidgets('retirer : sous le minimum du prestataire, rien ne part et il manque tant', (tester) async {
+    final api = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 18000,
+        available: 18000,
+        cashHeld: 0,
+        cashLimit: 25000,
+        withdrawalFreeFrom: 50000,
+        withdrawalMinimum: 30000,
+      );
+    await pumpVariant(tester, Variant.matrix.first, activity(api, shown: true));
+    await settle(tester);
+    await tapText(tester, 'Retirer');
+    expect(
+      find.text(
+        'Le retrait vers Mobile Money est possible à partir de 30\u00a0000\u00a0F. Il vous manque encore '
+        '12\u00a0000\u00a0F : votre solde reste en sécurité chez Tara en attendant.',
+      ),
+      findsOneWidget,
+    );
+    expect(tester.widget<PrimaryButton>(find.byType(PrimaryButton)).onPressed, isNull);
+    expect(api.withdrawals, isEmpty);
+
+    // Au-dessus du minimum : un montant partiel plus petit est refusé, tout le solde part.
+    final enough = activityApi()
+      ..wallet0 = const RiderWallet(
+        earnings: 45000,
+        available: 45000,
+        cashHeld: 0,
+        cashLimit: 25000,
+        withdrawalFreeFrom: 20000,
+        withdrawalMinimum: 30000,
+      );
+    await tester.pumpWidget(const SizedBox());
+    await pumpVariant(tester, Variant.matrix.first, activity(enough, shown: true));
+    await settle(tester);
+    await tapText(tester, 'Retirer');
+    await tester.enterText(find.byType(EditableText).first, '20000');
+    await settle(tester);
+    await tapText(tester, 'Recevoir 0\u00a0F');
+    expect(find.text('Entre 30\u00a0000\u00a0F et 45\u00a0000\u00a0F, ou tout le solde.'), findsOneWidget);
+    expect(enough.withdrawals, isEmpty);
+    await tester.enterText(find.byType(EditableText).first, '');
+    await settle(tester);
+    await tapText(tester, 'Recevoir 45\u00a0000\u00a0F');
+    await enterPin(tester, '2580');
+    expect(enough.withdrawals.single.$1, isNull);
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('retirer : un montant partiel sous 500 F refusé, un petit solde retiré en entier', (tester) async {

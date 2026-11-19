@@ -369,6 +369,16 @@ class _ShopCard extends ConsumerWidget {
                 : l.shopPayoutOnDemand(phone),
             style: TaraText.small.copyWith(color: c.textSecondary),
           ),
+          if (wallet.salesBelowMinimum) ...[
+            const SizedBox(height: 2),
+            Text(
+              // Sous le minimum du prestataire : les ventes attendent sur le solde, rien n'échoue.
+              wallet.payoutSchedule == 'DAILY'
+                  ? l.shopPayoutWaitsMinimum(_f(wallet.withdrawalMinimum))
+                  : l.shopPayoutFromMinimum(_f(wallet.withdrawalMinimum)),
+              style: TaraText.small.copyWith(color: c.textSecondary),
+            ),
+          ],
           const SizedBox(height: 2),
           Text(
             l.shopToday(_f(wallet.todaySales), wallet.todayDeliveries),
@@ -562,8 +572,9 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final balance = widget.wallet.customerBalance;
-    // Retrait gratuit de tout le solde, même petit : rien ne reste chez Tara.
-    final canWithdraw = balance > 0 && widget.wallet.openPayout == null;
+    // Retrait de tout le solde, à partir du minimum du prestataire Mobile Money.
+    final minimum = widget.wallet.customerWithdrawalMinimum;
+    final canWithdraw = balance > 0 && balance >= minimum && widget.wallet.openPayout == null;
     final pending = _paymentId != null;
     return GlassCard(
       radius: 22,
@@ -579,6 +590,10 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
             widget.shop ? l.taraBalanceShopBody : l.taraBalanceBody,
             style: TaraText.small.copyWith(color: c.textSecondary),
           ),
+          if (balance > 0 && balance < minimum) ...[
+            const SizedBox(height: 4),
+            Text(l.taraWithdrawFromMinimum(_f(minimum)), style: TaraText.small.copyWith(color: c.textSecondary)),
+          ],
           if (widget.shop) ...[
             const SizedBox(height: 10),
             _ReserveRow(wallet: widget.wallet, onChanged: widget.onReserveSaved),

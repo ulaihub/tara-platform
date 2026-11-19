@@ -2726,6 +2726,30 @@ abstract class AppLocalizations {
   /// **'Ventes à recevoir'**
   String get shopToReceive;
 
+  /// No description provided for @shopPayoutWaitsMinimum.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money n’envoie pas moins de {min} : vos ventes restent sur votre solde et partent le soir où elles atteignent ce montant.'**
+  String shopPayoutWaitsMinimum(String min);
+
+  /// No description provided for @shopPayoutFromMinimum.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversement possible à partir de {min} (minimum de Mobile Money).'**
+  String shopPayoutFromMinimum(String min);
+
+  /// No description provided for @taraWithdrawFromMinimum.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait vers Mobile Money possible à partir de {min}. En attendant, ce solde paie vos livraisons.'**
+  String taraWithdrawFromMinimum(String min);
+
+  /// No description provided for @deleteAccountSmallBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il vous reste {amount} chez Tara, moins que le plus petit envoi Mobile Money ({min}). Utilisez-les pour vos livraisons, ou appelez le service client de Tara.'**
+  String deleteAccountSmallBalance(String amount, String min);
+
   /// No description provided for @shopPayoutDaily.
   ///
   /// In fr, this message translates to:

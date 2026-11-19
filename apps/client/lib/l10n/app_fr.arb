@@ -1010,6 +1010,41 @@
   "termsPrivacyTitle": "Politique de confidentialité",
   "walletTitle": "Portefeuille",
   "shopToReceive": "Ventes à recevoir",
+  "shopPayoutWaitsMinimum": "Mobile Money n’envoie pas moins de {min} : vos ventes restent sur votre solde et partent le soir où elles atteignent ce montant.",
+  "@shopPayoutWaitsMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "shopPayoutFromMinimum": "Reversement possible à partir de {min} (minimum de Mobile Money).",
+  "@shopPayoutFromMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "taraWithdrawFromMinimum": "Retrait vers Mobile Money possible à partir de {min}. En attendant, ce solde paie vos livraisons.",
+  "@taraWithdrawFromMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountSmallBalance": "Il vous reste {amount} chez Tara, moins que le plus petit envoi Mobile Money ({min}). Utilisez-les pour vos livraisons, ou appelez le service client de Tara.",
+  "@deleteAccountSmallBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      }
+    }
+  },
   "shopPayoutDaily": "Reversées chaque jour à {hour} h sur le {phone}.",
   "@shopPayoutDaily": {
     "placeholders": {

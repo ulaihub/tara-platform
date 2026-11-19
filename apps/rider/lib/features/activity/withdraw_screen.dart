@@ -84,7 +84,12 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
 
   /// Autre montant tapé, sinon tout le disponible.
   int get _amount => int.tryParse(_other.text) ?? _available;
-  bool get _amountValid => _amount == _available || (_amount >= withdrawMin && _amount <= _available);
+
+  /// Minimum du prestataire Mobile Money : en dessous, l'envoi serait refusé.
+  int get _floor => widget.wallet.withdrawalMinimum;
+  bool get _belowFloor => _available < _floor;
+  bool get _amountValid =>
+      _amount >= _floor && (_amount == _available || (_amount >= withdrawMin && _amount <= _available));
 
   Future<void> _loadPhone() async {
     try {
@@ -105,7 +110,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
     final operator = _operator;
     if (phone == null || operator == null) return;
     if (!_amountValid) {
-      setState(() => _error = l.withdrawRange(_f(withdrawMin), _f(_available)));
+      setState(() => _error = l.withdrawRange(_f(_floor > withdrawMin ? _floor : withdrawMin), _f(_available)));
       return;
     }
     final amount = _amount;
@@ -251,6 +256,14 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
                 }, style: TaraText.text.copyWith(color: c.textPrimary)),
               ),
             )
+          else if (_belowFloor)
+            // Rien ne peut partir avant le minimum du prestataire : on dit combien il manque.
+            TintBox(
+              child: Text(
+                l.withdrawBelowMinimum(_f(_floor), _f(_floor - _available)),
+                style: TaraText.text.copyWith(color: c.textPrimary),
+              ),
+            )
           else ...[
             CourseFieldLabel(l.topUpAmount),
             const SizedBox(height: 8),
@@ -323,7 +336,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
                 label: l.withdrawConfirm(_f(_amountValid ? received : 0)),
                 icon: TaraIcons.arrowRight,
                 loading: busy,
-                onPressed: _phone == null || _operator == null || _available <= 0 ? null : _send,
+                onPressed: _phone == null || _operator == null || _available <= 0 || _belowFloor ? null : _send,
               ),
       ),
     );
