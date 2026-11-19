@@ -55,6 +55,7 @@ import {
   PoliceCalledBody,
   PositionActionBody,
   SenderAbsentBody,
+  TourPickupBody,
   PositionBody,
   PresenceBody,
   PresenceDto,
@@ -310,6 +311,19 @@ export class RiderAppController {
     @ValidBody(SenderAbsentBody) body: z.output<typeof SenderAbsentBody>,
   ): Out<typeof RiderOrderDto> {
     return this.orders.senderAbsent(user.id, id, body);
+  }
+
+  /** Enlèvement d'une tournée : colis cochés, un code et une photo pour tous (2c). */
+  @Post('tours/:id/pickup')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(TourPickupBody)
+  @ApiZodResponse(z.array(RiderOrderDto))
+  pickupTour(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(TourPickupBody) body: z.output<typeof TourPickupBody>,
+  ): Promise<z.output<typeof RiderOrderDto>[]> {
+    return this.orders.pickupTour(user.id, id, body);
   }
 
   /** Enlèvement : code de l'expéditeur et photo du colis (E3). */

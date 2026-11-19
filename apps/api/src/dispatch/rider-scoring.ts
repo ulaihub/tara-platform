@@ -55,6 +55,8 @@ export interface CourseNeeds {
   packageSize: 'S' | 'M' | 'L' | 'XL' | 'BULKY';
   /** Valeur déclarée par l'expéditeur (jamais montrée au livreur) ; null si non déclarée. */
   declaredValue?: number | null;
+  /** Tournée : nombre de colis proposés ensemble ; seul un livreur libre la reçoit. */
+  tourSize?: number;
 }
 
 /**
@@ -114,6 +116,7 @@ export function ineligibilities(
   if (orderCash > 0 && rider.availableBalance < orderCash) reasons.push('BALANCE_TOO_LOW');
   if (rider.cashOverdue) reasons.push('CASH_OVERDUE');
   if (rider.activeOrders >= MAX_ACTIVE_ORDERS) reasons.push('TOO_MANY_ORDERS');
+  else if ((needs.tourSize ?? 1) > 1 && rider.activeOrders > 0) reasons.push('TOO_MANY_ORDERS');
   if (rider.hasPendingOffer) reasons.push('PENDING_OFFER');
   if (!trustedForValue(rider, needs.declaredValue, rules)) reasons.push('PARCEL_VALUE');
   return reasons;

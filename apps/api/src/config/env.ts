@@ -256,6 +256,11 @@ const envSchema = z
     WAITING_STEP_MINUTES: z.coerce.number().int().min(1).max(60).default(5),
     WAITING_FEE_PER_STEP: z.coerce.number().int().min(0).max(5000).default(100),
     WAITING_RIDER_PERCENT: z.coerce.number().int().min(0).max(100).default(70),
+    /**
+     * Tournée (2c) : petits et moyens colis d'un même envoi proposés ensemble au plus (moto) ;
+     * un tricycle y ajoute un gros objet. 1 : chaque colis part seul.
+     */
+    TOUR_MAX_SMALL_PARCELS: z.coerce.number().int().min(1).max(20).default(5),
     /** Attente comptée au plus (choix du fondateur : 30 min), soit 400 F avec la règle par défaut. */
     WAITING_MAX_MINUTES: z.coerce.number().int().min(1).max(240).default(30),
     /** Reversement minimal, et seuil au-delà duquel la finance valide avant l'envoi. */

@@ -1068,6 +1068,10 @@ model Order {
   createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
   assignedAt           DateTime?        @map("assigned_at") @db.Timestamptz(3)
+  /// Tournée (2c) : la proposition acceptée qui a confié ces colis au livreur, et l'ordre
+  /// des arrêts (1 = le premier client).
+  tourId               String?          @map("tour_id") @db.Uuid
+  stopSeq              Int?             @map("stop_seq")
   /// Le livreur a signalé son arrivée au point d'enlèvement : l'attente compte depuis là (D).
   arrivedPickupAt      DateTime?        @map("arrived_pickup_at") @db.Timestamptz(3)
   /// Expéditeur prévenu que le livreur partira bientôt s'il ne vient pas.
@@ -1109,6 +1113,7 @@ model Order {
   @@index([senderId, createdAt])
   @@index([merchantId, createdAt])
   @@index([recipientPhone])
+  @@index([tourId])
   @@map("orders")
 }
 
@@ -1170,6 +1175,8 @@ model DispatchOffer {
   riderId        String               @map("rider_id") @db.Uuid
   round          Int
   approachMeters Int?                 @map("approach_meters")
+  /// Tournée (2c) : autres colis du même envoi proposés avec `orderId`, au même livreur.
+  bundleOrderIds String[]             @default([]) @map("bundle_order_ids") @db.Uuid
   /// Primes annoncées dans la proposition, reprises sur la commande si elle est acceptée.
   approachBonus  Int                  @default(0) @map("approach_bonus")
   boostBonus     Int                  @default(0) @map("boost_bonus")

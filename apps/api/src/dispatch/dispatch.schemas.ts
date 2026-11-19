@@ -51,6 +51,22 @@ export const OfferDto = z
     /** Gros objet : venir à deux, aide au chargement demandée. */
     loadingHelp: z.boolean(),
     isExpress: z.boolean(),
+    /**
+     * Tournée (2c) : tous les colis, dans l'ordre des arrêts, avec la part du livreur sur
+     * chacun ; vide pour une course seule. Distance, gain et montants couvrent alors toute la
+     * tournée (primes comptées une fois).
+     */
+    tourParcels: z.array(
+      z.object({
+        orderId: z.uuid(),
+        batchNumber: z.int().nullable(),
+        packageSize: PackageSizeEnum,
+        packageContents: PackageContentsEnum.nullable(),
+        neighborhood: z.string().nullable(),
+        riderEarning: z.int(),
+        codAmount: z.int(),
+      }),
+    ),
   })
   .meta({ id: 'DispatchOffer' });
 

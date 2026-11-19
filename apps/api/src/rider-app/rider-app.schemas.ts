@@ -87,6 +87,17 @@ export const RefuseParcelBody = z.object({
   ...ActionContext,
 });
 
+/**
+ * Enlèvement d'une tournée (2c) : les colis cochés, un seul code d'enlèvement (celui de
+ * l'envoi) et une seule photo pour tous.
+ */
+export const TourPickupBody = z.object({
+  orderIds: z.array(z.uuid()).min(1).max(20),
+  pickupCode: Code4,
+  photoKey: MediaKey,
+  ...ActionContext,
+});
+
 /** Expéditeur absent (D) : après l'attente maximale, sur place, avec les appels passés. */
 export const SenderAbsentBody = z.object({
   callLog: z.array(CallLogEntry).max(20).default([]),
@@ -196,6 +207,9 @@ export const RiderOrderDto = z
     assignedAt: z.iso.datetime().nullable(),
     /** Arrivée signalée au point d'enlèvement : l'attente payante compte depuis là (D). */
     arrivedPickupAt: z.iso.datetime().nullable(),
+    /** Tournée (2c) : colis confiés ensemble, et rang de ce client parmi les arrêts. */
+    tourId: z.uuid().nullable(),
+    stopSeq: z.int().nullable(),
     pickedUpAt: z.iso.datetime().nullable(),
     deliveredAt: z.iso.datetime().nullable(),
     /** Fin de la course : livrée, rendue à l'expéditeur ou annulée (historique, E9). */
