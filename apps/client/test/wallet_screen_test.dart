@@ -148,6 +148,32 @@ void main() {
     expect(api.topUps, [(5000, '699112233', 'MTN')]);
   });
 
+  testWidgets('recharge : la règle de retrait est dite avant de payer', (tester) async {
+    final api = walletApi();
+    api.wallet0 = const Wallet(
+      customerBalance: 0,
+      merchantBalance: null,
+      payoutSchedule: null,
+      customerWithdrawalMinimum: 30000,
+    );
+    await pumpVariant(tester, Variant.matrix.first, wallet(api, me: person));
+    await settle(tester);
+    await tester.tap(find.text('Recharger'));
+    await settle(tester);
+    expect(
+      find.textContaining('Ce solde paie vos livraisons. Il se retire vers Mobile Money à partir de 30\u00a0000'),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox());
+
+    // Sans minimum chez le prestataire : rien à dire.
+    await pumpVariant(tester, Variant.matrix.first, wallet(walletApi(), me: person));
+    await settle(tester);
+    await tester.tap(find.text('Recharger'));
+    await settle(tester);
+    expect(find.textContaining('Il se retire vers Mobile Money'), findsNothing);
+  });
+
   testWidgets('recharge : autre montant tapé, bornes vérifiées', (tester) async {
     final api = walletApi()..paymentStatuses = ['PENDING'];
     await pumpVariant(tester, Variant.matrix.first, wallet(api, me: person));

@@ -39,12 +39,18 @@ class DepositScreen extends ConsumerStatefulWidget {
   /// Dépôt des espèces détenues, en une fois.
   const DepositScreen({super.key, required this.amount, required this.onBack, required this.onDone})
     : topUp = false,
-      available = 0;
+      available = 0,
+      withdrawalMinimum = 0;
 
   /// Recharge du solde prépayé : montant au choix (frais de l'opérateur pour Tara).
-  const DepositScreen.topUp({super.key, required this.available, required this.onBack, required this.onDone})
-    : topUp = true,
-      amount = 0;
+  const DepositScreen.topUp({
+    super.key,
+    required this.available,
+    required this.onBack,
+    required this.onDone,
+    this.withdrawalMinimum = 0,
+  }) : topUp = true,
+       amount = 0;
 
   /// Espèces à déposer (dépôt).
   final int amount;
@@ -54,6 +60,9 @@ class DepositScreen extends ConsumerStatefulWidget {
 
   /// Solde disponible avant la recharge.
   final int available;
+
+  /// Plus petit retrait Mobile Money (minimum du prestataire), dit avant de recharger.
+  final int withdrawalMinimum;
   final VoidCallback onBack;
   final VoidCallback onDone;
 
@@ -326,6 +335,13 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
             ),
             const SizedBox(height: 10),
             Text(topUp ? l.topUpOffice : l.depositOffice, style: TaraText.small.copyWith(color: c.textTertiary)),
+            if (topUp && widget.withdrawalMinimum > 0) ...[
+              const SizedBox(height: 6),
+              Text(
+                l.topUpWithdrawRule('${formatAmount(widget.withdrawalMinimum)}\u00a0F'),
+                style: TaraText.small.copyWith(color: c.textTertiary),
+              ),
+            ],
             if (_state == _DepositState.failed) ...[
               const SizedBox(height: 12),
               ErrorLine(topUp ? l.topUpFailed : l.depositFailed),

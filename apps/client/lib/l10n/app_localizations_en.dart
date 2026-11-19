@@ -1573,6 +1573,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get withdrawAction => 'Withdraw';
 
   @override
+  String topUpWithdrawRule(String min) {
+    return 'This balance pays for your deliveries. It can be withdrawn to Mobile Money from $min.';
+  }
+
+  @override
   String get topUpHowMuch => 'How much do you want to add?';
 
   @override

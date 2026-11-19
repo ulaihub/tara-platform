@@ -530,6 +530,7 @@
   "taraBalanceBody": "Pays for your deliveries and any failure fees.",
   "topUpAction": "Top up",
   "withdrawAction": "Withdraw",
+  "topUpWithdrawRule": "This balance pays for your deliveries. It can be withdrawn to Mobile Money from {min}.",
   "topUpHowMuch": "How much do you want to add?",
   "topUpFeeNote": "+ {fee} Mobile Money fee (operator fee).",
   "topUpDone": "Balance topped up by {amount}.",

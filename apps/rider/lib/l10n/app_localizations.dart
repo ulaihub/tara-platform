@@ -2468,6 +2468,12 @@ abstract class AppLocalizations {
   /// **'Une demande de paiement de {amount} part sur votre téléphone. Les frais Mobile Money sont pour Tara : votre solde reçoit {amount}.'**
   String topUpBody(String amount);
 
+  /// No description provided for @topUpWithdrawRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce solde couvre l’argent à encaisser de vos courses. Il se retire vers Mobile Money à partir de {min}.'**
+  String topUpWithdrawRule(String min);
+
   /// No description provided for @topUpOffice.
   ///
   /// In fr, this message translates to:

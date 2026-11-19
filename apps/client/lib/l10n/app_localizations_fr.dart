@@ -1579,6 +1579,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get withdrawAction => 'Retirer';
 
   @override
+  String topUpWithdrawRule(String min) {
+    return 'Ce solde paie vos livraisons. Il se retire vers Mobile Money à partir de $min.';
+  }
+
+  @override
   String get topUpHowMuch => 'Combien voulez-vous ajouter ?';
 
   @override
