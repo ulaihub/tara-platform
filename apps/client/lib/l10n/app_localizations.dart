@@ -3830,6 +3830,24 @@ abstract class AppLocalizations {
   /// **'Donnez-lui le colis n° {n} et le code d’enlèvement à son arrivée.'**
   String trackAssignedParcelBody(int n);
 
+  /// No description provided for @trackAssignedTour.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rider} vient chercher les colis n° {numbers}'**
+  String trackAssignedTour(String rider, String numbers);
+
+  /// No description provided for @trackAssignedTourBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous partent en une seule tournée. Donnez-lui ces {count} colis et le code d’enlèvement à son arrivée.'**
+  String trackAssignedTourBody(int count);
+
+  /// No description provided for @listAnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'{head} et {last}'**
+  String listAnd(String head, String last);
+
   /// No description provided for @bulkEntry.
   ///
   /// In fr, this message translates to:

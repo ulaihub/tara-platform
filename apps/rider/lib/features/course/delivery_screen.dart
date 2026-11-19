@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
@@ -40,10 +42,14 @@ class DeliveryScreen extends ConsumerStatefulWidget {
     required this.onDelivered,
     required this.onCollect,
     required this.onFailure,
+    this.tourProgress,
     this.now,
   });
 
   final RiderOrder order;
+
+  /// Tournée (2c) : arrêt en cours, nombre d'arrêts et ce qui est déjà gagné.
+  final ({int stop, int total, int earned})? tourProgress;
   final VoidCallback onBack;
   final VoidCallback onSos;
 
@@ -208,6 +214,14 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       children: [
         // Enlèvement fait ; étape en cours : l'encaissement s'il y en a, sinon la livraison.
         CourseStepper(labels: steps, activeIndex: 1, stateLabels: stepStateLabels(l)),
+        if (widget.tourProgress case final tour?) ...[
+          const SizedBox(height: 10),
+          InfoPill(
+            label: l.tourProgress(tour.stop, tour.total, '${formatAmount(tour.earned)}\u00a0F'),
+            icon: TaraIcons.package,
+            tone: TintTone.accent,
+          ),
+        ],
         const SizedBox(height: 14),
         PartyRow(
           name: name,

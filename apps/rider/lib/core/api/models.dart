@@ -405,6 +405,36 @@ class RiderProfile {
   bool get isActive => status == 'ACTIVE';
 }
 
+/// Un colis d'une tournée proposée (2c), dans l'ordre des arrêts.
+@immutable
+class TourParcel {
+  const TourParcel({
+    required this.orderId,
+    required this.batchNumber,
+    required this.packageSize,
+    required this.neighborhood,
+    required this.riderEarning,
+    required this.codAmount,
+  });
+  factory TourParcel.fromJson(Json json) => TourParcel(
+    orderId: _field(json, 'orderId'),
+    batchNumber: (json['batchNumber'] as num?)?.toInt(),
+    packageSize: _field(json, 'packageSize'),
+    neighborhood: json['neighborhood'] as String?,
+    riderEarning: _field<num>(json, 'riderEarning').toInt(),
+    codAmount: (json['codAmount'] as num?)?.toInt() ?? 0,
+  );
+
+  final String orderId;
+  final int? batchNumber;
+  final String packageSize;
+  final String? neighborhood;
+
+  /// Part du livreur sur ce colis (sans les primes, comptées une fois pour la tournée).
+  final int riderEarning;
+  final int codAmount;
+}
+
 /// Proposition de course (D1, E1) : zone de livraison approximative seulement.
 @immutable
 class Offer {
@@ -428,6 +458,7 @@ class Offer {
     this.loadingHelp = false,
     this.approachBonus = 0,
     this.boostBonus = 0,
+    this.tourParcels = const [],
   });
 
   factory Offer.fromJson(Json json) {
@@ -453,11 +484,16 @@ class Offer {
       loadingHelp: json['loadingHelp'] == true,
       approachBonus: (json['approachBonus'] as num?)?.toInt() ?? 0,
       boostBonus: (json['boostBonus'] as num?)?.toInt() ?? 0,
+      tourParcels: [
+        for (final item in (json['tourParcels'] as List<Object?>?) ?? const <Object?>[])
+          TourParcel.fromJson(item! as Json),
+      ],
     );
   }
   static const fields = [
     'id',
     'orderId',
+    'tourParcels',
     'expiresAt',
     'approachMeters',
     'approachBonus',
@@ -479,6 +515,12 @@ class Offer {
   final String orderId;
   final DateTime expiresAt;
   final int? approachMeters;
+
+  /// Tournée (2c) : les colis dans l'ordre des arrêts ; vide pour une course seule. Distance,
+  /// gain et montants couvrent alors toute la tournée.
+  final List<TourParcel> tourParcels;
+
+  bool get isTour => tourParcels.length > 1;
 
   /// Nom de la boutique (commerçant) ou repère du lieu d'enlèvement.
   final String pickupName;
@@ -689,6 +731,10 @@ class RiderOrder {
     final String at => DateTime.parse(at).toLocal(),
     _ => null,
   };
+
+  /// Tournée (2c) : colis confiés ensemble, et rang de ce client parmi les arrêts.
+  String? get tourId => raw['tourId'] as String?;
+  int? get stopSeq => (raw['stopSeq'] as num?)?.toInt();
 
   final String id;
   final String reference;

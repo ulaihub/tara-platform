@@ -34,6 +34,11 @@ describe('choix du livreur (D1, D4)', () => {
     expect(ineligibilities(base, need(20_001))).toEqual(['BALANCE_TOO_LOW']);
     expect(ineligibilities({ ...base, availableBalance: 0 }, need(0))).toEqual([]);
     expect(ineligibilities({ ...base, activeOrders: 2 }, need(0))).toEqual(['TOO_MANY_ORDERS']);
+    // Tournée (2c) : seul un livreur sans course en cours la reçoit.
+    expect(ineligibilities({ ...base, activeOrders: 1 }, { ...need(0), tourSize: 3 })).toEqual([
+      'TOO_MANY_ORDERS',
+    ]);
+    expect(ineligibilities({ ...base, activeOrders: 0 }, { ...need(0), tourSize: 3 })).toEqual([]);
     expect(ineligibilities({ ...base, hasPendingOffer: true }, need(0))).toEqual(['PENDING_OFFER']);
     // Espèces non déposées dans le délai (G5) : plus de courses jusqu'au dépôt.
     expect(ineligibilities({ ...base, cashOverdue: true }, need(0))).toEqual(['CASH_OVERDUE']);

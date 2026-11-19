@@ -1828,6 +1828,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/rider/tours/{id}/pickup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['RiderApp_pickupTour'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/rider/orders/{id}/pickup': {
     parameters: {
       query?: never;
@@ -3422,6 +3438,16 @@ export interface components {
       isFragile: boolean;
       loadingHelp: boolean;
       isExpress: boolean;
+      tourParcels: {
+        /** Format: uuid */
+        orderId: string;
+        batchNumber: number | null;
+        packageSize: components['schemas']['PackageSize'];
+        packageContents: components['schemas']['PackageContents'] | null;
+        neighborhood: string | null;
+        riderEarning: number;
+        codAmount: number;
+      }[];
     };
     DispatchState: {
       /** Format: uuid */
@@ -3932,6 +3958,7 @@ export interface components {
       batchId: string | null;
       batchNumber: number | null;
       batchSize: number | null;
+      tourNumbers: number[];
       isExpress: boolean;
       /** Format: date-time */
       scheduledFor: string | null;
@@ -4524,6 +4551,9 @@ export interface components {
       assignedAt: string | null;
       /** Format: date-time */
       arrivedPickupAt: string | null;
+      /** Format: uuid */
+      tourId: string | null;
+      stopSeq: number | null;
       /** Format: date-time */
       pickedUpAt: string | null;
       /** Format: date-time */
@@ -8408,6 +8438,41 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['RiderOrder'];
+        };
+      };
+    };
+  };
+  RiderApp_pickupTour: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          orderIds: string[];
+          pickupCode: string;
+          photoKey: string;
+          latitude: number;
+          longitude: number;
+          /** Format: date-time */
+          occurredAt?: string;
+          clientEventId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderOrder'][];
         };
       };
     };

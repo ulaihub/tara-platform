@@ -168,7 +168,9 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
         content: [
           Center(
             child: InfoPill(
-              label: '${l.newJob} · ${offer.bulky ? l.packageBulky : l.vehicleShort}',
+              label: offer.isTour
+                  ? '${l.newTour(offer.tourParcels.length)} · ${offer.bulky ? l.packageBulky : l.vehicleShort}'
+                  : '${l.newJob} · ${offer.bulky ? l.packageBulky : l.vehicleShort}',
               dot: TaraBrand.orange,
               blinkDot: true,
             ),
@@ -204,6 +206,15 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
             padding: EdgeInsets.all(tight ? 14 : 16),
             child: _Trip(offer: offer, tight: tight),
           ),
+          // Tournée : chaque arrêt, dans l'ordre, avec ce qu'il rapporte.
+          if (offer.isTour) ...[
+            const SizedBox(height: 12),
+            GlassCard(
+              radius: 24,
+              padding: EdgeInsets.all(tight ? 14 : 16),
+              child: _TourStops(offer: offer),
+            ),
+          ],
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -342,4 +353,50 @@ class _Dashes extends CustomPainter {
 
   @override
   bool shouldRepaint(_Dashes old) => old.color != color;
+}
+
+/// Arrêts d'une tournée proposée (2c) : numéro du colis, quartier, gain du livreur.
+class _TourStops extends StatelessWidget {
+  const _TourStops({required this.offer});
+
+  final Offer offer;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l.tourStops(offer.tourParcels.length), style: TaraText.label.copyWith(color: c.textSecondary)),
+        const SizedBox(height: 6),
+        for (final (index, parcel) in offer.tourParcels.indexed)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 22,
+                  child: Text('${index + 1}', style: TaraText.label.copyWith(color: c.accentText)),
+                ),
+                Expanded(
+                  child: Text(
+                    [
+                      if (parcel.batchNumber != null) l.parcelNumberShort(parcel.batchNumber!),
+                      parcel.neighborhood ?? offer.dropoffCity,
+                    ].join(' · '),
+                    style: TaraText.text.copyWith(color: c.textPrimary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  '${formatAmount(parcel.riderEarning)}\u00a0F',
+                  style: TaraText.label.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
 }

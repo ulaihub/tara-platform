@@ -35,6 +35,7 @@ TrackedOrder tracked(
   String feePaymentMethod = 'CASH',
   bool feePaid = true,
   int? batchNumber,
+  List<int> tourNumbers = const [],
   int cancellationFee = 0,
   DateTime? riderArrivedAt,
   bool senderAbsent = false,
@@ -108,6 +109,7 @@ TrackedOrder tracked(
     feePaid: feePaid,
     batchNumber: batchNumber,
     batchSize: batchNumber == null ? null : 3,
+    tourNumbers: tourNumbers,
     rating: rated == null ? null : OrderRating(score: rated, comment: null, at: at(10, 40)),
   );
 }
@@ -460,6 +462,19 @@ void main() {
     expect(find.text('TR-48301 · n° 2'), findsOneWidget);
     expect(find.text('Jean M. vient chercher le colis n° 2'), findsOneWidget);
     expect(find.text('Donnez-lui le colis n° 2 et le code d’enlèvement à son arrivée.'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('tournée : le suivi dit tous les colis à donner au même livreur', (tester) async {
+    final api = FakeClientApi()..tracked[orderId] = tracked('ASSIGNED', batchNumber: 9, tourNumbers: [4, 9, 12]);
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1000));
+    await settle(tester);
+    expect(find.text('TR-48301 · n° 9'), findsOneWidget);
+    expect(find.text('Jean M. vient chercher les colis n° 4, 9 et 12'), findsOneWidget);
+    expect(
+      find.text('Tous partent en une seule tournée. Donnez-lui ces 3 colis et le code d’enlèvement à son arrivée.'),
+      findsOneWidget,
+    );
     await tester.pumpWidget(const SizedBox());
   });
 

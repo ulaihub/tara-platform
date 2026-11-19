@@ -944,6 +944,54 @@ abstract class AppLocalizations {
   /// **'Vers l’enlèvement'**
   String get toPickup;
 
+  /// No description provided for @newTour.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tournée · {count} colis'**
+  String newTour(int count);
+
+  /// No description provided for @nextStopTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêt {stop} sur {total}'**
+  String nextStopTitle(int stop, int total);
+
+  /// No description provided for @nextStopGo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partir vers ce client'**
+  String get nextStopGo;
+
+  /// No description provided for @tourProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tournée · arrêt {stop} sur {total} · {earned} gagnés'**
+  String tourProgress(int stop, int total, String earned);
+
+  /// No description provided for @tourToCollect.
+  ///
+  /// In fr, this message translates to:
+  /// **'COLIS À RÉCUPÉRER · {checked} SUR {total} COCHÉS'**
+  String tourToCollect(int checked, int total);
+
+  /// No description provided for @photoTourHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les {count} colis ensemble, numéros visibles'**
+  String photoTourHint(int count);
+
+  /// No description provided for @tourStops.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} arrêts, dans l’ordre'**
+  String tourStops(int count);
+
+  /// No description provided for @parcelNumberShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'N° {number}'**
+  String parcelNumberShort(int number);
+
   /// No description provided for @arrivedAction.
   ///
   /// In fr, this message translates to:

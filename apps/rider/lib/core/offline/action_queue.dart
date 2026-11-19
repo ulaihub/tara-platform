@@ -140,6 +140,7 @@ class ActionQueue extends ChangeNotifier {
     required Json body,
     String? photoPath,
     DateTime? now,
+    String? path,
   }) async {
     await load();
     final id = _uuidV4();
@@ -147,7 +148,7 @@ class ActionQueue extends ChangeNotifier {
       id: id,
       orderId: orderId,
       kind: kind,
-      path: '/rider/orders/$orderId/$kind',
+      path: path ?? '/rider/orders/$orderId/$kind',
       body: {...body, 'clientEventId': id, 'occurredAt': isoUtc(now ?? DateTime.now())},
       createdAt: now ?? DateTime.now(),
       photoPath: photoPath,

@@ -554,6 +554,23 @@ class ProofPhotoTile extends StatelessWidget {
   }
 }
 
+/// Ce qu'est le colis : la précision de l'expéditeur, sinon sa taille.
+String parcelWhat(AppLocalizations l, RiderOrder order) =>
+    order.packageDescription?.trim().nullIfEmpty ??
+    switch (order.packageSize) {
+      'S' => l.packageSmall,
+      'L' || 'XL' => l.packageLarge,
+      'BULKY' => l.packageBulky,
+      _ => l.packageMedium,
+    };
+
+/// Pour qui : prénom du client et quartier (le quartier seul sans prénom).
+String parcelForWhom(AppLocalizations l, RiderOrder order) {
+  final first = order.recipient.name?.trim().split(RegExp(r'\s+')).first;
+  final place = order.dropoff.neighborhood ?? order.dropoff.landmark;
+  return first == null || first.isEmpty ? place : l.parcelFor(first, place);
+}
+
 /// Quel colis : son numéro (écrit dessus par l'expéditeur qui en envoie plusieurs), ce qu'il
 /// contient et pour qui. À l'enlèvement, le livreur sait lequel prendre ; à la livraison,
 /// lequel remettre quand il en transporte deux.
@@ -573,17 +590,8 @@ class ParcelCard extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final number = order.batchNumber;
-    final what =
-        order.packageDescription?.trim().nullIfEmpty ??
-        switch (order.packageSize) {
-          'S' => l.packageSmall,
-          'L' || 'XL' => l.packageLarge,
-          'BULKY' => l.packageBulky,
-          _ => l.packageMedium,
-        };
-    final first = order.recipient.name?.trim().split(RegExp(r'\s+')).first;
-    final place = order.dropoff.neighborhood ?? order.dropoff.landmark;
-    final forWhom = first == null || first.isEmpty ? place : l.parcelFor(first, place);
+    final what = parcelWhat(l, order);
+    final forWhom = parcelForWhom(l, order);
     return GlassCard(
       radius: 18,
       shadow: false,

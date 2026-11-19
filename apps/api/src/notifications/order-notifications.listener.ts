@@ -169,13 +169,27 @@ export class OrderNotificationsListener implements OnModuleInit {
     // L'expéditeur est prévenu, sauf de ses propres actions. Colis refusé par le livreur :
     // il apprend pourquoi et ce que coûte le déplacement.
     const refused = to === 'CANCELLED' && actor.role === 'RIDER';
+    // Tournée (2c) : un seul message pour tous les colis de l'envoi que ce livreur emporte,
+    // envoyé avec le plus petit numéro ; les autres colis de la tournée n'en envoient pas.
+    const tour =
+      to === 'ASSIGNED' && full.tourId
+        ? await this.prisma.order.findMany({
+            where: { tourId: full.tourId, senderId: order.senderId, batchNumber: { not: null } },
+            select: { id: true, batchNumber: true },
+            orderBy: { batchNumber: 'asc' },
+          })
+        : [];
+    if (tour.length > 1 && tour[0]?.id !== order.id) return;
+    const numbers = tour.map((mate) => String(mate.batchNumber));
     // Envoi de plusieurs colis : le numéro dit lequel donner au livreur qui arrive.
     const numbered = to === 'ASSIGNED' && order.batchNumber !== null;
     const template = refused
       ? 'ORDER_PARCEL_REFUSED'
-      : numbered
-        ? 'ORDER_ASSIGNED_BATCH'
-        : SENDER_PUSH[to];
+      : numbers.length > 1
+        ? 'ORDER_ASSIGNED_TOUR'
+        : numbered
+          ? 'ORDER_ASSIGNED_BATCH'
+          : SENDER_PUSH[to];
     if (template && actor.id !== order.senderId) {
       await this.notifications.toUser(order.senderId, {
         template,
@@ -186,6 +200,9 @@ export class OrderNotificationsListener implements OnModuleInit {
           fee: order.retryFee,
           number: order.batchNumber ?? '',
           recipient: firstName(order.recipientName),
+          count: numbers.length,
+          numbers: numbers.slice(0, -1).join(', '),
+          last: numbers.at(-1) ?? '',
         },
         data: { type: 'order.status', orderId: order.id, status: to },
         orderId: order.id,

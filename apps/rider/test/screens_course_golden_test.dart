@@ -21,6 +21,7 @@ import 'package:tara_rider/features/course/refuse_parcel_screen.dart';
 import 'package:tara_rider/features/course/return_screen.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_rider_api.dart';
@@ -133,6 +134,32 @@ DeliveryScreen delivery(RiderOrder order) => DeliveryScreen(
 
 PickupScreen pickup(RiderOrder order) => PickupScreen(
   order: order,
+  onBack: () {},
+  onSos: () {},
+  onPickedUp: (_) {},
+  onRefuse: () {},
+  now: () => DateTime(2026, 11, 3, 14, 32),
+);
+
+/// Tournée de 3 colis d'une même boutique (numéros 4, 9 et 12).
+List<RiderOrder> tourStops() => [
+  for (final (seq, number, size, who) in [(1, 4, 'S', 'Paul'), (2, 9, 'M', 'Brice'), (3, 12, 'S', 'Carine')])
+    RiderOrder.fromJson({
+      ...orderJson(
+        id: '00000000-0000-4000-8000-00000000003$seq',
+        collectAtPickup: 0,
+        packageSize: size,
+        batchNumber: number,
+      ),
+      'recipient': {'name': '$who Ekwalla', 'phone': '+237690000202'},
+      'tourId': '00000000-0000-4000-8000-0000000000aa',
+      'stopSeq': seq,
+    }),
+];
+
+PickupScreen tourPickup() => PickupScreen(
+  order: tourStops().first,
+  tour: tourStops(),
   onBack: () {},
   onSos: () {},
   onPickedUp: (_) {},
@@ -504,6 +531,51 @@ void main() {
     await settle(tester);
     expect(find.text('COLIS À REMETTRE · N° 2'), findsOneWidget);
     expect(find.text('2 paires de chaussures'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  for (final brightness in Brightness.values) {
+    goldenTest('08 enlèvement d’une tournée ${brightness.name}', (tester) async {
+      await pumpVariant(tester, Variant(brightness, ScreenSize.regular, 1), scope(tourPickup()));
+      await settle(tester);
+      await tester.ensureVisible(find.text('COLIS À RÉCUPÉRER · 0 SUR 3 COCHÉS'));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      await expectLater(capture, matchesGoldenFile('goldens/08_enlevement_tournee/${brightness.name}.png'));
+    });
+  }
+
+  testWidgets('tournée : le bouton attend que chaque colis soit coché', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, scope(tourPickup()), surface: const Size(390, 1400));
+    await settle(tester);
+    final context = tester.element(find.byType(PickupScreen));
+    await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
+    // Photo à prendre : les 3 colis ensemble.
+    expect(find.text('Les 3 colis ensemble, numéros visibles'), findsOneWidget);
+    await tester.enterText(find.byType(EditableText).first, '7302');
+    await tester.ensureVisible(find.text('Photographier le colis'));
+    await tester.tap(find.text('Photographier le colis'));
+    await tester.pump();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await settle(tester);
+    expect(find.text('N° 9 · Colis moyen'), findsOneWidget);
+    expect(find.text('Pour Brice · Bonapriso'), findsOneWidget);
+
+    SwipeButton swipe() => tester.widget<SwipeButton>(find.byType(SwipeButton));
+    // Code et photo prêts, mais seulement 2 colis sur 3 cochés : rien ne part.
+    for (final number in ['N° 4 · Petit colis', 'N° 9 · Colis moyen']) {
+      await tester.ensureVisible(find.text(number));
+      await tester.tap(find.text(number));
+      await settle(tester);
+    }
+    expect(find.text('COLIS À RÉCUPÉRER · 2 SUR 3 COCHÉS'), findsOneWidget);
+    expect(swipe().onConfirmed, isNull);
+
+    await tester.ensureVisible(find.text('N° 12 · Petit colis'));
+    await tester.tap(find.text('N° 12 · Petit colis'));
+    await settle(tester);
+    expect(find.text('COLIS À RÉCUPÉRER · 3 SUR 3 COCHÉS'), findsOneWidget);
+    expect(swipe().onConfirmed, isNotNull);
     await tester.pumpWidget(const SizedBox());
   });
 }

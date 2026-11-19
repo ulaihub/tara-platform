@@ -375,4 +375,35 @@ void main() {
       expect(queue.items.single.kind, 'return');
     });
   });
+
+  test('tournée : un seul enlèvement pour tous les colis, puis départ vers chaque client', () async {
+    RiderOrder stop(String id, int seq) =>
+        RiderOrder.fromJson({...orderJson(id: id), 'tourId': '00000000-0000-4000-8000-0000000000aa', 'stopSeq': seq});
+    final tour = [stop('00000000-0000-4000-8000-000000000011', 1), stop('00000000-0000-4000-8000-000000000012', 2)];
+    final store = MemoryKeyValueStore();
+    final round = ActiveOrderController(
+      store: store,
+      fetchActive: () async => tour,
+      fetchOrder: (_) async => throw offline,
+      hasPendingActions: (id) => queue.forOrder(id).any((a) => !a.failed),
+    );
+    await round.start(tour.first);
+    final tourActions = CourseActions(queue: queue, activeOrder: round, settleTimeout: const Duration(seconds: 2));
+
+    final result = await tourActions.pickUpTour(tour, code: '7302', photoPath: 'colis.jpg', at: here);
+    expect(result.outcome, ActionOutcome.sent);
+    expect(uploads, ['colis.jpg']);
+    expect(sent.single.$1, '/rider/tours/00000000-0000-4000-8000-0000000000aa/pickup');
+    expect(sent.single.$2['orderIds'], [tour[0].id, tour[1].id]);
+    expect(sent.single.$2, containsPair('pickupCode', '7302'));
+    expect(sent.single.$2, containsPair('photoKey', 'proofs/colis.jpg'));
+    expect(round.tour.map((o) => o.status), ['PICKED_UP', 'PICKED_UP']);
+    expect(round.order?.id, tour[0].id);
+
+    // Premier client : départ annoncé, le colis passe en livraison.
+    await tourActions.departTo(round.order!, at: here);
+    await queue.flush();
+    expect(sent.last.$1, '/rider/orders/${tour[0].id}/depart');
+    expect(round.order?.status, 'IN_DELIVERY');
+  });
 }

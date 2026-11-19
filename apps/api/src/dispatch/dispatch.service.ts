@@ -23,8 +23,10 @@ import { haversineMeters } from '../routing/distance.service.js';
 import { uncoveredDocuments } from '../riders/riders.service.js';
 import type { CandidateDto, OfferDto } from './dispatch.schemas.js';
 import { PresenceService } from './presence.service.js';
+import { stopOrder, tourMembers, tourMeters } from './tour.js';
 import {
   cashCarried,
+  type CourseNeeds,
   type Ineligibility,
   type ValueRules,
   ineligibilities,
@@ -48,13 +50,25 @@ export const SCHEDULED_LEAD_MINUTES = 20;
 /** Livreurs examinés autour du point d'enlèvement à chaque rayon. */
 const NEARBY_LIMIT = 30;
 
-type OrderWithPlaces = Prisma.OrderGetPayload<{
-  include: {
-    pickupAddress: { include: { neighborhood: true } };
-    dropoffAddress: { include: { neighborhood: true } };
-    merchant: { select: { shopName: true } };
-  };
-}>;
+const OFFER_PLACES = {
+  pickupAddress: { include: { neighborhood: true } },
+  dropoffAddress: { include: { neighborhood: true } },
+  merchant: { select: { shopName: true } },
+} as const;
+
+type OrderWithPlaces = Prisma.OrderGetPayload<{ include: typeof OFFER_PLACES }>;
+
+const SIZE_RANK: Record<CourseNeeds['packageSize'], number> = { S: 0, M: 1, L: 2, XL: 3, BULKY: 4 };
+
+/** Plus grand colis de la tournée : le véhicule doit pouvoir le porter. */
+function largest(
+  parcels: { packageSize: CourseNeeds['packageSize'] }[],
+): CourseNeeds['packageSize'] {
+  return parcels.reduce<CourseNeeds['packageSize']>(
+    (big, parcel) => (SIZE_RANK[parcel.packageSize] > SIZE_RANK[big] ? parcel.packageSize : big),
+    'S',
+  );
+}
 
 interface Candidate extends RiderSnapshot {
   userId: string;
@@ -69,6 +83,7 @@ type RoundResult =
       kind: 'offered';
       closed: DispatchOffer[];
       order: OrderWithPlaces;
+      members: OrderWithPlaces[];
       offers: { offer: DispatchOffer; userId: string }[];
     };
 
@@ -151,6 +166,16 @@ export class DispatchService implements OnModuleInit {
       });
       if (order?.status !== 'SEARCHING_RIDER') return { kind: 'inactive' } as const;
 
+      // Déjà proposé dans la tournée d'un autre colis de l'envoi : on attend sa réponse.
+      const covering = await tx.dispatchOffer.findFirst({
+        where: { outcome: 'PENDING', bundleOrderIds: { has: orderId } },
+        orderBy: { expiresAt: 'asc' },
+      });
+      if (covering) {
+        const none: DispatchOffer[] = [];
+        return { kind: 'waiting', nextExpiry: covering.expiresAt, closed: none, order } as const;
+      }
+
       const closed = await tx.dispatchOffer.updateManyAndReturn({
         where: { orderId, outcome: 'PENDING', expiresAt: { lte: now } },
         data: { outcome: 'EXPIRED' },
@@ -187,7 +212,16 @@ export class DispatchService implements OnModuleInit {
         this.env.DISPATCH_BROADCAST_SIZE,
       );
 
-      const candidates = await this.findCandidates(order, excluded, silent, size);
+      // Tournée (2c) : d'autres colis du même envoi, libres, partent avec celui-ci.
+      const members = order.batchId ? await this.tourMatesOf(tx, order) : [];
+      const tour = [order, ...members];
+      const needs: CourseNeeds = {
+        cash: tour.reduce((sum, parcel) => sum + cashCarried(parcel), 0),
+        packageSize: order.packageSize === 'BULKY' ? 'BULKY' : largest(tour),
+        declaredValue: Math.max(0, ...tour.map((parcel) => parcel.declaredValue ?? 0)) || null,
+        tourSize: tour.length,
+      };
+      const candidates = await this.findCandidates(order, needs, excluded, silent, size);
       if (candidates.length === 0) return { kind: 'none', closed, order } as const;
 
       const expiresAt = new Date(now.getTime() + this.env.DISPATCH_OFFER_TIMEOUT_SECONDS * 1000);
@@ -199,6 +233,7 @@ export class DispatchService implements OnModuleInit {
       const offers = await tx.dispatchOffer.createManyAndReturn({
         data: candidates.map((candidate) => ({
           orderId,
+          bundleOrderIds: members.map((member) => member.id),
           riderId: candidate.riderId,
           round,
           approachMeters: candidate.distanceMeters,
@@ -215,6 +250,7 @@ export class DispatchService implements OnModuleInit {
         kind: 'offered',
         closed,
         order,
+        members,
         offers: offers.map((offer) => ({ offer, userId: userOf.get(offer.riderId) ?? '' })),
       } as const;
     });
@@ -236,7 +272,9 @@ export class DispatchService implements OnModuleInit {
           'expiry',
         );
         await Promise.all(
-          result.offers.map(({ offer, userId }) => this.announceOffer(result.order, offer, userId)),
+          result.offers.map(({ offer, userId }) =>
+            this.announceOffer(result.order, offer, userId, result.members),
+          ),
         );
         break;
     }
@@ -244,17 +282,52 @@ export class DispatchService implements OnModuleInit {
     return result.kind;
   }
 
+  /**
+   * Colis du même envoi qui partent avec [order] (2c) : même point d'enlèvement, encore en
+   * recherche, proposés à personne d'autre, dans la limite de charge. Le verrou de l'envoi
+   * empêche deux tournées de prendre le même colis.
+   */
+  private async tourMatesOf(
+    tx: Prisma.TransactionClient,
+    order: OrderWithPlaces,
+  ): Promise<OrderWithPlaces[]> {
+    if (!order.batchId || this.env.TOUR_MAX_SMALL_PARCELS <= 1) return [];
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`dispatch-batch:${order.batchId}`}, 0))`;
+    const siblings = await tx.order.findMany({
+      where: {
+        batchId: order.batchId,
+        id: { not: order.id },
+        status: 'SEARCHING_RIDER',
+        pickupAddressId: order.pickupAddressId,
+        packageSize: { in: ['S', 'M'] },
+      },
+      include: OFFER_PLACES,
+      orderBy: { batchNumber: 'asc' },
+    });
+    if (siblings.length === 0) return [];
+    const ids = siblings.map((sibling) => sibling.id);
+    const busy = await tx.dispatchOffer.findMany({
+      where: {
+        outcome: 'PENDING',
+        OR: [{ orderId: { in: ids } }, { bundleOrderIds: { hasSome: ids } }],
+      },
+      select: { orderId: true, bundleOrderIds: true },
+    });
+    const taken = new Set(busy.flatMap((offer) => [offer.orderId, ...offer.bundleOrderIds]));
+    return tourMembers(
+      order,
+      siblings.filter((sibling) => !taken.has(sibling.id)),
+      this.env.TOUR_MAX_SMALL_PARCELS,
+    );
+  }
+
   private async findCandidates(
     order: OrderWithPlaces,
+    needs: CourseNeeds,
     excluded: Set<string>,
     silent: Set<string>,
     size: number,
   ): Promise<Candidate[]> {
-    const needs = {
-      cash: cashCarried(order),
-      packageSize: order.packageSize,
-      declaredValue: order.declaredValue,
-    };
     const seen = new Set<string>();
     let eligible: Candidate[] = [];
     for (const radius of this.radii) {
@@ -369,25 +442,28 @@ export class DispatchService implements OnModuleInit {
     if (!rider) throw AppError.forbidden();
     const offers = await this.prisma.dispatchOffer.findMany({
       where: { riderId: rider.id, outcome: 'PENDING', expiresAt: { gt: new Date() } },
-      include: {
-        order: {
-          include: {
-            pickupAddress: { include: { neighborhood: true } },
-            merchant: { select: { shopName: true } },
-            dropoffAddress: { include: { neighborhood: true } },
-          },
-        },
-      },
+      include: { order: { include: OFFER_PLACES } },
       orderBy: { offeredAt: 'asc' },
     });
-    return offers.map((offer) => toOfferDto(offer.order, offer));
+    const bundled = await this.prisma.order.findMany({
+      where: { id: { in: offers.flatMap((offer) => offer.bundleOrderIds) } },
+      include: OFFER_PLACES,
+    });
+    const byId = new Map(bundled.map((order) => [order.id, order]));
+    return offers.map((offer) =>
+      toOfferDto(
+        offer.order,
+        offer,
+        offer.bundleOrderIds.flatMap((id) => byId.get(id) ?? []),
+      ),
+    );
   }
 
   /** Le livreur accepte : la course lui est attribuée si l'offre tient toujours. */
   async accept(offerId: string, userId: string, now = new Date()): Promise<Order> {
     const rider = await this.prisma.riderProfile.findUnique({ where: { userId } });
     if (!rider) throw AppError.forbidden();
-    const { change, withdrawn } = await this.prisma.$transaction(async (tx) => {
+    const { changes, withdrawn, leadId } = await this.prisma.$transaction(async (tx) => {
       const found = await tx.dispatchOffer.findUnique({ where: { id: offerId } });
       if (found?.riderId !== rider.id) throw AppError.notFound('OFFER_NOT_FOUND');
       await lockOrder(tx, found.orderId);
@@ -397,8 +473,28 @@ export class DispatchService implements OnModuleInit {
         throw AppError.conflict('OFFER_EXPIRED');
       }
       if (rider.status !== 'ACTIVE') throw AppError.forbidden('RIDER_NOT_ACTIVE');
-      const order = await tx.order.findUniqueOrThrow({ where: { id: offer.orderId } });
+      const order = await tx.order.findUniqueOrThrow({
+        where: { id: offer.orderId },
+        include: OFFER_PLACES,
+      });
       if (order.status !== 'SEARCHING_RIDER') throw AppError.conflict('OFFER_NO_LONGER_AVAILABLE');
+      // Tournée (2c) : les autres colis encore en recherche partent avec celui-ci.
+      for (const id of [...offer.bundleOrderIds].sort()) await lockOrder(tx, id);
+      const members = await tx.order.findMany({
+        where: { id: { in: offer.bundleOrderIds }, status: 'SEARCHING_RIDER' },
+        include: OFFER_PLACES,
+      });
+      const stops =
+        members.length > 0
+          ? stopOrder(order.pickupAddress, [
+              { id: order.id, dropoff: order.dropoffAddress, order },
+              ...members.map((member) => ({
+                id: member.id,
+                dropoff: member.dropoffAddress,
+                order: member,
+              })),
+            ])
+          : [{ id: order.id, dropoff: order.dropoffAddress, order }];
 
       await tx.dispatchOffer.update({
         where: { id: offer.id },
@@ -408,23 +504,38 @@ export class DispatchService implements OnModuleInit {
         where: { orderId: order.id, outcome: 'PENDING' },
         data: { outcome: 'WITHDRAWN', respondedAt: now },
       });
-      const { change } = await this.transitions.applyIn(
-        tx,
-        order,
-        'ASSIGNED',
-        { id: userId, role: 'RIDER' },
-        {
-          riderId: rider.id,
-          note: 'Proposition acceptée',
-          // Les primes annoncées dans la proposition sont celles payées.
-          bonuses: { approachBonus: offer.approachBonus, boostBonus: offer.boostBonus },
-        },
-      );
-      return { change, withdrawn };
+      const changes: OrderChange[] = [];
+      for (const [index, stop] of stops.entries()) {
+        const lead = stop.id === order.id;
+        const { change } = await this.transitions.applyIn(
+          tx,
+          stop.order,
+          'ASSIGNED',
+          { id: userId, role: 'RIDER' },
+          {
+            riderId: rider.id,
+            note: stops.length > 1 ? 'Tournée acceptée' : 'Proposition acceptée',
+            // Les primes annoncées sont celles payées, une seule fois par tournée.
+            bonuses: lead
+              ? { approachBonus: offer.approachBonus, boostBonus: offer.boostBonus }
+              : { approachBonus: 0, boostBonus: 0 },
+          },
+        );
+        if (stops.length > 1) {
+          await tx.order.update({
+            where: { id: stop.id },
+            data: { tourId: offer.id, stopSeq: index + 1 },
+          });
+        }
+        changes.push(change);
+      }
+      return { changes, withdrawn, leadId: order.id };
     });
     await this.announceClosed(withdrawn);
-    await this.bus.publish(change);
-    return change.order;
+    for (const change of changes) await this.bus.publish(change);
+    const lead = changes.find((change) => change.order.id === leadId) ?? changes[0];
+    if (!lead) throw AppError.conflict('OFFER_NO_LONGER_AVAILABLE');
+    return lead.order;
   }
 
   /** Le livreur refuse : la course part aussitôt au suivant s'il n'y a plus d'offre en cours. */
@@ -714,8 +825,9 @@ export class DispatchService implements OnModuleInit {
     order: OrderWithPlaces,
     offer: DispatchOffer,
     userId: string,
+    members: OrderWithPlaces[] = [],
   ): Promise<void> {
-    const dto = toOfferDto(order, offer);
+    const dto = toOfferDto(order, offer, members);
     this.realtime.toUser(userId, 'offer.new', dto);
     await this.notifications
       .toUser(userId, {
@@ -782,6 +894,7 @@ export function estimatedMinutes(distanceMeters: number): number {
 export function toOfferDto(
   order: OrderWithPlaces,
   offer: DispatchOffer,
+  members: OrderWithPlaces[] = [],
 ): z.output<typeof OfferDto> {
   const place = (address: OrderWithPlaces['pickupAddress']) => ({
     landmark: address.landmark,
@@ -791,6 +904,13 @@ export function toOfferDto(
   });
   // Deux décimales : environ 1,1 km, assez pour juger la course, pas pour trouver la porte.
   const approximate = (value: number): number => Math.round(value * 100) / 100;
+  const parcels = [order, ...members];
+  const stops = stopOrder(
+    order.pickupAddress,
+    parcels.map((parcel) => ({ id: parcel.id, dropoff: parcel.dropoffAddress, parcel })),
+  );
+  const tourDistance =
+    members.length === 0 ? order.distanceMeters : tourMeters(order.pickupAddress, stops);
   return {
     id: offer.id,
     orderId: order.id,
@@ -805,14 +925,34 @@ export function toOfferDto(
       latitude: approximate(order.dropoffAddress.latitude),
       longitude: approximate(order.dropoffAddress.longitude),
     },
-    distanceMeters: order.distanceMeters,
-    estimatedMinutes: estimatedMinutes(order.distanceMeters),
-    // Gain annoncé : la part du livreur plus les primes payées par Tara (H4).
-    riderEarning: order.riderEarning + offer.approachBonus + offer.boostBonus,
+    distanceMeters: tourDistance,
+    estimatedMinutes: estimatedMinutes(tourDistance),
+    // Gain annoncé : la part du livreur sur chaque colis, plus les primes payées par Tara (H4),
+    // une seule fois pour une tournée.
+    riderEarning:
+      parcels.reduce((sum, parcel) => sum + parcel.riderEarning, 0) +
+      offer.approachBonus +
+      offer.boostBonus,
     approachBonus: offer.approachBonus,
     boostBonus: offer.boostBonus,
-    codAmount: order.codAmount,
-    cashFee: order.feePaymentMethod === 'CASH' ? order.totalPrice : 0,
+    codAmount: parcels.reduce((sum, parcel) => sum + parcel.codAmount, 0),
+    cashFee: parcels.reduce(
+      (sum, parcel) => sum + (parcel.feePaymentMethod === 'CASH' ? parcel.totalPrice : 0),
+      0,
+    ),
+    // Tournée (2c) : chaque colis dans l'ordre des arrêts ; vide pour une course seule.
+    tourParcels:
+      members.length === 0
+        ? []
+        : stops.map(({ parcel }) => ({
+            orderId: parcel.id,
+            batchNumber: parcel.batchNumber,
+            packageSize: parcel.packageSize,
+            packageContents: parcel.packageContents,
+            neighborhood: parcel.dropoffAddress.neighborhood?.name ?? null,
+            riderEarning: parcel.riderEarning,
+            codAmount: parcel.codAmount,
+          })),
     packageSize: order.packageSize,
     packageContents: order.packageContents,
     isFragile: order.isFragile,

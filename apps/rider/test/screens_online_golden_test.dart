@@ -35,6 +35,46 @@ final offer = Offer(
   isExpress: false,
 );
 
+/// Tournée (2c) : 3 colis d'une boutique, dans l'ordre des arrêts.
+final tourOffer = Offer(
+  id: '00000000-0000-4000-8000-000000000003',
+  orderId: '00000000-0000-4000-8000-000000000004',
+  expiresAt: expiresAt,
+  approachMeters: 900,
+  pickupName: 'Boutique Mama Ngo',
+  pickupNeighborhood: 'Akwa',
+  dropoffNeighborhood: 'Bonapriso',
+  dropoffCity: 'Douala',
+  distanceMeters: 9800,
+  estimatedMinutes: 29,
+  riderEarning: 3220,
+  codAmount: 27500,
+  cashFee: 0,
+  packageSize: 'M',
+  isFragile: false,
+  isExpress: false,
+  approachBonus: 200,
+  tourParcels: const [
+    TourParcel(
+      orderId: 'a',
+      batchNumber: 4,
+      packageSize: 'S',
+      neighborhood: 'Bonapriso',
+      riderEarning: 840,
+      codAmount: 12500,
+    ),
+    TourParcel(orderId: 'b', batchNumber: 9, packageSize: 'M', neighborhood: 'Deïdo', riderEarning: 1050, codAmount: 0),
+    TourParcel(
+      orderId: 'c',
+      batchNumber: 12,
+      packageSize: 'S',
+      neighborhood: 'Bonamoussadi',
+      riderEarning: 1130,
+      codAmount: 15000,
+    ),
+  ],
+);
+
 /// Gros objet avec aide au chargement payée par l'expéditeur.
 final bulkyOffer = Offer(
   id: '00000000-0000-4000-8000-000000000003',
@@ -168,6 +208,30 @@ void main() {
       // Le gain annoncé comprend les primes, détaillées juste dessous.
       expect(find.text('dont prime d’approche 200\u00a0F · prime de renfort 300\u00a0F'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/07_proposition_primes/${brightness.name}.png'));
+    });
+  }
+
+  for (final brightness in Brightness.values) {
+    goldenTest('07 proposition de tournée ${brightness.name}', (tester) async {
+      await pumpVariant(
+        tester,
+        Variant(brightness, ScreenSize.regular, 1),
+        scope(
+          OfferScreen(
+            offer: tourOffer,
+            onAccepted: (_) {},
+            onClosed: (_) {},
+            now: () => expiresAt.subtract(const Duration(seconds: 18)),
+          ),
+        ),
+      );
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('Tournée · 3 colis'), findsOneWidget);
+      expect(find.text('3 arrêts, dans l’ordre'), findsOneWidget);
+      expect(find.text('N° 9 · Deïdo'), findsOneWidget);
+      expect(find.text('1\u00a0050\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/07_proposition_tournee/${brightness.name}.png'));
     });
   }
 }

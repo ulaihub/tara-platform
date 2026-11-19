@@ -295,6 +295,53 @@
     }
   },
   "toPickup": "Vers l’enlèvement",
+  "newTour": "Tournée · {count} colis",
+  "nextStopTitle": "Arrêt {stop} sur {total}",
+  "@nextStopTitle": {
+    "placeholders": {
+      "stop": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "nextStopGo": "Partir vers ce client",
+  "tourProgress": "Tournée · arrêt {stop} sur {total} · {earned} gagnés",
+  "@tourProgress": {
+    "placeholders": {
+      "stop": {"type": "int"},
+      "total": {"type": "int"},
+      "earned": {"type": "String"}
+    }
+  },
+  "tourToCollect": "COLIS À RÉCUPÉRER · {checked} SUR {total} COCHÉS",
+  "@tourToCollect": {
+    "placeholders": {
+      "checked": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "photoTourHint": "Les {count} colis ensemble, numéros visibles",
+  "@photoTourHint": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "@newTour": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "tourStops": "{count} arrêts, dans l’ordre",
+  "@tourStops": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "parcelNumberShort": "N° {number}",
+  "@parcelNumberShort": {
+    "placeholders": {
+      "number": {"type": "int"}
+    }
+  },
   "arrivedAction": "Je suis arrivé",
   "senderAbsentAction": "L’expéditeur ne vient pas",
   "senderAbsentLater": "Il ne vient pas ? Dans {minutes} min, vous pourrez partir : {share} pour vous.",

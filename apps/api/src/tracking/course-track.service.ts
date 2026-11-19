@@ -203,8 +203,19 @@ export class CourseTrackService implements OnModuleInit {
       where: { status: { in: [...ACTIVE] }, riderId: { not: null } },
       include: { pickupAddress: true, dropoffAddress: true },
     });
+    // Tournée (2c) : seul l'arrêt en cours est surveillé ; les autres colis attendent leur tour
+    // (pas de trajet propre, et le livreur va d'abord ailleurs).
+    const watched = new Map<string, (typeof orders)[number]>();
+    const rank = (order: (typeof orders)[number]) =>
+      (order.status === 'IN_DELIVERY' ? 0 : 1000) + (order.stopSeq ?? 999);
+    for (const order of orders) {
+      if (!order.tourId) continue;
+      const best = watched.get(order.tourId);
+      if (!best || rank(order) < rank(best)) watched.set(order.tourId, order);
+    }
     let raised = 0;
     for (const order of orders) {
+      if (order.tourId && watched.get(order.tourId)?.id !== order.id) continue;
       const riderId = order.riderId as string;
       const since = new Date(now.getTime() - (LONG_STOP_SECONDS + 10 * 60) * 1000);
       const recent = await this.prisma.courseTrackPoint.findMany({

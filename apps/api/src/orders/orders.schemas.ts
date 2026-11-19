@@ -191,6 +191,11 @@ export const OrderDto = z
     /** Numéro du colis dans son envoi (à écrire sur le colis) et nombre de colis de l'envoi. */
     batchNumber: z.int().nullable(),
     batchSize: z.int().nullable(),
+    /**
+     * Tournée (2c) : numéros des colis de cet envoi que le même livreur emporte ensemble, celui-ci
+     * compris, dans l'ordre ; vide hors tournée. L'expéditeur sait quels colis lui donner.
+     */
+    tourNumbers: z.array(z.int()),
     isExpress: z.boolean(),
     scheduledFor: z.iso.datetime().nullable(),
     packageSize: PackageSizeEnum,

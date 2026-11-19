@@ -36,6 +36,7 @@ class PickupScreen extends ConsumerStatefulWidget {
     required this.onPickedUp,
     required this.onRefuse,
     this.onSenderAbsent,
+    this.tour = const [],
     this.now,
   });
 
@@ -54,6 +55,11 @@ class PickupScreen extends ConsumerStatefulWidget {
   /// Parti sans le colis : l'expéditeur n'est pas venu après l'attente maximale (D).
   final VoidCallback? onSenderAbsent;
 
+  /// Tournée (2c) : tous les colis à récupérer ici, dans l'ordre des arrêts ; vide sinon.
+  final List<RiderOrder> tour;
+
+  bool get isTour => tour.length > 1;
+
   /// Horloge (tests).
   final DateTime Function()? now;
 
@@ -68,6 +74,11 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
   bool _busy = false;
   String? _error;
   String? _refusedActionId;
+
+  /// Tournée : colis cochés un à un par le livreur, en les prenant.
+  final Set<String> _checked = {};
+
+  String get _pickupKind => widget.isTour ? CourseActions.tourPickupKind : 'pickup';
 
   /// Arrivée signalée au point d'enlèvement : l'attente compte depuis là (D).
   late DateTime? _arrivedAt = widget.order.arrivedPickupAt;
@@ -84,7 +95,7 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
     _code.addListener(() => setState(() => _error = null));
     if (_arrivedAt != null) _startTick();
     // Enlèvement refusé resté dans la file (écran rouvert) : on reprend où il en était.
-    final refused = ref.read(courseActionsProvider).refused(widget.order.id, 'pickup');
+    final refused = ref.read(courseActionsProvider).refused(widget.order.id, _pickupKind);
     if (refused != null) {
       _refusedActionId = refused.id;
       _error = refused.failureMessage;
@@ -203,9 +214,22 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
       });
       return;
     }
-    final result = await ref
-        .read(courseActionsProvider)
-        .pickUp(widget.order, code: _code.text, photoPath: photo, at: at, retryActionId: _refusedActionId);
+    final actions = ref.read(courseActionsProvider);
+    final result = widget.isTour
+        ? await actions.pickUpTour(
+            widget.tour,
+            code: _code.text,
+            photoPath: photo,
+            at: at,
+            retryActionId: _refusedActionId,
+          )
+        : await actions.pickUp(
+            widget.order,
+            code: _code.text,
+            photoPath: photo,
+            at: at,
+            retryActionId: _refusedActionId,
+          );
     if (!mounted) return;
     if (result.outcome == ActionOutcome.refused) {
       setState(() {
@@ -228,7 +252,8 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
     final steps = [l.stepPickup, if (order.collectAtDelivery > 0) l.stepCollect, l.stepDelivery];
     final senderName = order.sender.name ?? order.pickup.contactName ?? order.reference;
     final phone = order.sender.phone ?? order.pickup.contactPhone;
-    final ready = _photoPath != null && _code.text.length == 4;
+    final ready =
+        _photoPath != null && _code.text.length == 4 && (!widget.isTour || _checked.length == widget.tour.length);
 
     return CourseScaffold(
       order: order,
@@ -284,7 +309,16 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
         ),
         // Quel colis prendre : l'expéditeur peut en avoir plusieurs, pour d'autres livreurs.
         const SizedBox(height: 12),
-        ParcelCard(order: order, title: l.parcelToCollect),
+        if (widget.isTour)
+          _TourChecklist(
+            tour: widget.tour,
+            checked: _checked,
+            onToggle: _busy
+                ? null
+                : (id) => setState(() => _checked.contains(id) ? _checked.remove(id) : _checked.add(id)),
+          )
+        else
+          ParcelCard(order: order, title: l.parcelToCollect),
         if (order.collectAtPickup > 0) ...[
           const SizedBox(height: 12),
           CollectBox(amount: order.collectAtPickup, title: l.collectAtPickupTitle, body: l.collectAtPickupBody),
@@ -318,10 +352,12 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           takenAt: _photoAt,
           onTake: _busy ? null : _takePhoto,
           title: l.photoParcel,
-          hint: switch (order.batchNumber) {
-            final number? => l.photoParcelHintNumber(number),
-            null => l.photoParcelHint,
-          },
+          hint: widget.isTour
+              ? l.photoTourHint(widget.tour.length)
+              : switch (order.batchNumber) {
+                  final number? => l.photoParcelHintNumber(number),
+                  null => l.photoParcelHint,
+                },
           takenLabel: l.photoParcelTaken,
         ),
         if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
@@ -436,6 +472,58 @@ class _WaitingBox extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Tournée (2c) : chaque colis à récupérer, coché par le livreur en le prenant.
+class _TourChecklist extends StatelessWidget {
+  const _TourChecklist({required this.tour, required this.checked, required this.onToggle});
+
+  final List<RiderOrder> tour;
+  final Set<String> checked;
+  final void Function(String orderId)? onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return GlassCard(
+      radius: 18,
+      shadow: false,
+      padding: const EdgeInsets.fromLTRB(8, 10, 12, 10),
+      // Les cases dessinent leur effet au toucher sur un Material, transparent ici pour garder le verre.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 4),
+              child: Text(
+                l.tourToCollect(checked.length, tour.length),
+                style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w700),
+              ),
+            ),
+            for (final order in tour)
+              CheckboxListTile(
+                value: checked.contains(order.id),
+                onChanged: onToggle == null ? null : (_) => onToggle!(order.id),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text(
+                  [
+                    if (order.batchNumber != null) l.parcelNumberShort(order.batchNumber!),
+                    parcelWhat(l, order),
+                  ].join(' · '),
+                  style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(parcelForWhom(l, order), style: TaraText.small.copyWith(color: c.textSecondary)),
+              ),
+          ],
+        ),
       ),
     );
   }

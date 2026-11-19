@@ -1484,6 +1484,36 @@
       }
     }
   },
+  "trackAssignedTour": "{rider} vient chercher les colis n° {numbers}",
+  "@trackAssignedTour": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "numbers": {
+        "type": "String"
+      }
+    }
+  },
+  "trackAssignedTourBody": "Tous partent en une seule tournée. Donnez-lui ces {count} colis et le code d’enlèvement à son arrivée.",
+  "@trackAssignedTourBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "listAnd": "{head} et {last}",
+  "@listAnd": {
+    "placeholders": {
+      "head": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
   "bulkEntry": "Envoyer plusieurs colis",
   "bulkEntryBody": "Jusqu’à 100 clients d’un coup : collez votre liste ou cochez vos contacts.",
   "bulkResume": "Reprendre ma liste · {count, plural, =1{1 client} other{{count} clients}}",

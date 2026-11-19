@@ -37,6 +37,7 @@ import type {
   PickupBody,
   PositionActionBody,
   SenderAbsentBody,
+  TourPickupBody,
   ReturnBody,
   RiderOrderDto,
   RiderOrdersQuery,
@@ -271,6 +272,8 @@ export class RiderOrdersService {
         awaitingSupportValidation: awaiting.has(order.id),
         assignedAt: order.assignedAt?.toISOString() ?? null,
         arrivedPickupAt: order.arrivedPickupAt?.toISOString() ?? null,
+        tourId: order.tourId,
+        stopSeq: order.stopSeq,
         pickedUpAt: order.pickedUpAt?.toISOString() ?? null,
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
         completedAt:
@@ -453,6 +456,45 @@ export class RiderOrdersService {
       });
     }
     return warned;
+  }
+
+  /**
+   * Enlèvement d'une tournée (2c) : les colis cochés par le livreur, avec le code de l'envoi
+   * (le même pour tous) et une seule photo. Les colis non cochés restent à récupérer.
+   */
+  async pickupTour(
+    userId: string,
+    tourId: string,
+    body: z.output<typeof TourPickupBody>,
+  ): Promise<z.output<typeof RiderOrderDto>[]> {
+    const rider = await this.riderOf(userId);
+    const orders = await this.prisma.order.findMany({
+      where: { tourId, riderId: rider.id, id: { in: body.orderIds } },
+      include: ORDER_INCLUDE,
+      orderBy: { stopSeq: 'asc' },
+    });
+    if (orders.length !== new Set(body.orderIds).size) throw AppError.notFound('ORDER_NOT_FOUND');
+    const first = orders[0];
+    if (!first) throw AppError.notFound('ORDER_NOT_FOUND');
+    for (const order of orders) assertTransition(order, 'PICKED_UP');
+    await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
+    await this.checkCode(first, 'pickup', body.pickupCode);
+    for (const [index, order] of orders.entries()) {
+      await this.act(
+        userId,
+        order,
+        'PICKED_UP',
+        index === 0 ? body : { ...body, clientEventId: undefined },
+        { kind: 'PICKUP', photoKey: body.photoKey, codeVerified: true },
+      );
+    }
+    await this.tracks.checkAction(first, 'PICKUP', body, first.pickupAddress);
+    const fresh = await this.prisma.order.findMany({
+      where: { id: { in: orders.map((order) => order.id) } },
+      include: ORDER_INCLUDE,
+      orderBy: { stopSeq: 'asc' },
+    });
+    return this.toDtos(fresh);
   }
 
   /** Enlèvement (E3) : code donné par l'expéditeur et photo du colis. */
