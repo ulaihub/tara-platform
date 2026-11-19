@@ -950,6 +950,36 @@ abstract class AppLocalizations {
   /// **'Je suis arrivé'**
   String get arrivedAction;
 
+  /// No description provided for @senderAbsentAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’expéditeur ne vient pas'**
+  String get senderAbsentAction;
+
+  /// No description provided for @senderAbsentLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il ne vient pas ? Dans {minutes} min, vous pourrez partir : {share} pour vous.'**
+  String senderAbsentLater(int minutes, String share);
+
+  /// No description provided for @senderAbsentCallFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appelez d’abord l’expéditeur (encore {count} appel(s)) avec le bouton d’appel.'**
+  String senderAbsentCallFirst(int count);
+
+  /// No description provided for @senderAbsentConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'La course sera annulée. L’expéditeur paiera {fee}, dont {share} pour vous. Touchez encore pour confirmer.'**
+  String senderAbsentConfirm(String fee, String share);
+
+  /// No description provided for @senderAbsentNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course annulée : votre attente vous est payée.'**
+  String get senderAbsentNotice;
+
   /// No description provided for @arrivedSending.
   ///
   /// In fr, this message translates to:

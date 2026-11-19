@@ -223,6 +223,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                 if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
               },
               onRefuse: () => setState(() => _refusing = order.id),
+              onSenderAbsent: () => _showNotice(l.senderAbsentNotice),
             ),
           ),
           if (_refusing == order.id || refusalRejected)

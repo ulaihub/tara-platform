@@ -48,6 +48,8 @@ class AppConfig {
               stepMinutes: _field<num>(waiting, 'stepMinutes').toInt(),
               feePerStep: _field<num>(waiting, 'feePerStep').toInt(),
               maxFee: (waiting['maxFee'] as num?)?.toInt() ?? 400,
+              maxMinutes: (waiting['maxMinutes'] as num?)?.toInt() ?? 30,
+              absentFee: (waiting['absentFee'] as num?)?.toInt() ?? 700,
             ),
     );
   }
@@ -69,7 +71,14 @@ class AppConfig {
 /// Attente du livreur au point d'enlèvement (D), comptée depuis son arrivée.
 @immutable
 class WaitingRules {
-  const WaitingRules({this.freeMinutes = 10, this.stepMinutes = 5, this.feePerStep = 100, this.maxFee = 400});
+  const WaitingRules({
+    this.freeMinutes = 10,
+    this.stepMinutes = 5,
+    this.feePerStep = 100,
+    this.maxFee = 400,
+    this.maxMinutes = 30,
+    this.absentFee = 700,
+  });
 
   final int freeMinutes;
   final int stepMinutes;
@@ -77,6 +86,10 @@ class WaitingRules {
 
   /// Plafond des frais d'attente (30 min d'attente comptées au plus).
   final int maxFee;
+
+  /// Après [maxMinutes] d'attente, le livreur peut partir : [absentFee] facturés à l'expéditeur.
+  final int maxMinutes;
+  final int absentFee;
 }
 
 /// Boutique du marchand (A2) : reversements vers son numéro Mobile Money.
@@ -904,6 +917,7 @@ class TrackedOrder {
     this.cancellationFee = 0,
     this.riderArrivedAt,
     this.waitingFee = 0,
+    this.senderAbsent = false,
     this.refusalReason,
     this.feePaymentMethod = 'CASH',
     this.feePaid = true,
@@ -923,6 +937,7 @@ class TrackedOrder {
       json,
       'timeline',
     ).cast<Json>().any((step) => step['status'] == 'CANCELLED' && step['actorRole'] == 'RIDER');
+    final absent = refused && TrackedOrder.isSenderAbsentReason(json['cancelReason'] as String?);
     return TrackedOrder(
       id: _field(json, 'id'),
       reference: _field(json, 'reference'),
@@ -953,7 +968,8 @@ class TrackedOrder {
       createdAt: DateTime.parse(_field(json, 'createdAt')),
       failure: failure == null ? null : OrderFailure.fromJson(failure),
       rating: rating == null ? null : OrderRating.fromJson(rating),
-      refusalReason: refused ? (json['cancelReason'] as String? ?? '') : null,
+      refusalReason: refused && !absent ? (json['cancelReason'] as String? ?? '') : null,
+      senderAbsent: absent,
       feePaymentMethod: pricing['feePaymentMethod'] as String? ?? 'CASH',
       // Frais payés par le destinataire : rien à payer d'avance. Serveur d'avant : pas de
       // champ, on suppose les frais réglés.
@@ -1019,6 +1035,12 @@ class TrackedOrder {
   final DateTime? riderArrivedAt;
   final int waitingFee;
 
+  /// Annulée par le livreur parti après l'attente maximale : l'expéditeur n'est pas venu.
+  final bool senderAbsent;
+
+  /// Motif d'annulation donné par le serveur quand le livreur part après l'attente maximale.
+  static bool isSenderAbsentReason(String? reason) => (reason ?? '').startsWith('Expéditeur absent');
+
   /// Colis refusé par le livreur à l'enlèvement (non conforme) : le motif, sinon null. Le
   /// déplacement ([retryFee]) est alors à la charge de l'expéditeur.
   final String? refusalReason;
@@ -1065,6 +1087,7 @@ class TrackedOrder {
     cancellationFee: cancellationFee,
     riderArrivedAt: riderArrivedAt,
     waitingFee: waitingFee,
+    senderAbsent: senderAbsent,
     refusalReason: refusalReason,
     feePaymentMethod: feePaymentMethod,
     feePaid: feePaid,

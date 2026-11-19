@@ -600,6 +600,14 @@
     }
   },
   "trackAssignedBody": "Donnez-lui le code d’enlèvement à son arrivée.",
+  "trackSenderAbsent": "Le livreur est reparti",
+  "trackSenderAbsentBody": "Il vous a attendu {minutes} min et vous a appelé. La course est annulée ; annulation et attente vous sont facturées : {fee}.",
+  "@trackSenderAbsentBody": {
+    "placeholders": {
+      "minutes": {"type": "int"},
+      "fee": {"type": "String"}
+    }
+  },
   "trackRiderWaiting": "{rider} vous attend",
   "@trackRiderWaiting": {
     "placeholders": {

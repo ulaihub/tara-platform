@@ -54,6 +54,7 @@ import {
   PickupBody,
   PoliceCalledBody,
   PositionActionBody,
+  SenderAbsentBody,
   PositionBody,
   PresenceBody,
   PresenceDto,
@@ -138,6 +139,10 @@ export class RiderAppController {
         riderPercent: this.env.WAITING_RIDER_PERCENT,
         maxFee: waitingFeeMax(this.env),
         maxMinutes: this.env.WAITING_MAX_MINUTES,
+        absentFee: this.env.CANCELLATION_FEE + waitingFeeMax(this.env),
+        absentRiderPart:
+          Math.min(this.env.CANCELLATION_FEE, this.env.CANCELLATION_FEE_RIDER_PART) +
+          Math.floor((waitingFeeMax(this.env) * this.env.WAITING_RIDER_PERCENT) / 100),
       },
     };
   }
@@ -292,6 +297,19 @@ export class RiderAppController {
     @ValidBody(PositionActionBody) body: z.output<typeof PositionActionBody>,
   ): Out<typeof RiderOrderDto> {
     return this.orders.arrived(user.id, id, body);
+  }
+
+  /** Expéditeur absent après l'attente maximale : course annulée, attente payée (D). */
+  @Post('orders/:id/sender-absent')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(SenderAbsentBody)
+  @ApiZodResponse(RiderOrderDto)
+  senderAbsent(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(SenderAbsentBody) body: z.output<typeof SenderAbsentBody>,
+  ): Out<typeof RiderOrderDto> {
+    return this.orders.senderAbsent(user.id, id, body);
   }
 
   /** Enlèvement : code de l'expéditeur et photo du colis (E3). */

@@ -496,6 +496,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get arrivedAction => 'I\'ve arrived';
 
   @override
+  String get senderAbsentAction => 'The sender is not coming';
+
+  @override
+  String senderAbsentLater(int minutes, String share) {
+    return 'Not coming? In $minutes min you can leave: $share for you.';
+  }
+
+  @override
+  String senderAbsentCallFirst(int count) {
+    return 'First call the sender ($count more call(s)) with the call button.';
+  }
+
+  @override
+  String senderAbsentConfirm(String fee, String share) {
+    return 'The job will be cancelled. The sender will pay $fee, $share of it for you. Tap again to confirm.';
+  }
+
+  @override
+  String get senderAbsentNotice => 'Job cancelled: your waiting time is paid.';
+
+  @override
   String get arrivedSending => 'Sending…';
 
   @override

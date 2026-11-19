@@ -498,6 +498,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get arrivedAction => 'Je suis arrivé';
 
   @override
+  String get senderAbsentAction => 'L’expéditeur ne vient pas';
+
+  @override
+  String senderAbsentLater(int minutes, String share) {
+    return 'Il ne vient pas ? Dans $minutes min, vous pourrez partir : $share pour vous.';
+  }
+
+  @override
+  String senderAbsentCallFirst(int count) {
+    return 'Appelez d’abord l’expéditeur (encore $count appel(s)) avec le bouton d’appel.';
+  }
+
+  @override
+  String senderAbsentConfirm(String fee, String share) {
+    return 'La course sera annulée. L’expéditeur paiera $fee, dont $share pour vous. Touchez encore pour confirmer.';
+  }
+
+  @override
+  String get senderAbsentNotice => 'Course annulée : votre attente vous est payée.';
+
+  @override
   String get arrivedSending => 'Envoi…';
 
   @override

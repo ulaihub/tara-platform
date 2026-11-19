@@ -153,6 +153,9 @@ class WaitingRules {
     this.feePerStep = 100,
     this.riderPercent = 70,
     this.maxFee = 400,
+    this.maxMinutes = 30,
+    this.absentFee = 700,
+    this.absentRiderPart = 480,
   });
   factory WaitingRules.fromJson(Json json) => WaitingRules(
     freeMinutes: _field<num>(json, 'freeMinutes').toInt(),
@@ -160,6 +163,9 @@ class WaitingRules {
     feePerStep: _field<num>(json, 'feePerStep').toInt(),
     riderPercent: _field<num>(json, 'riderPercent').toInt(),
     maxFee: (json['maxFee'] as num?)?.toInt() ?? 400,
+    maxMinutes: (json['maxMinutes'] as num?)?.toInt() ?? 30,
+    absentFee: (json['absentFee'] as num?)?.toInt() ?? 700,
+    absentRiderPart: (json['absentRiderPart'] as num?)?.toInt() ?? 480,
   );
 
   final int freeMinutes;
@@ -169,6 +175,15 @@ class WaitingRules {
 
   /// Plafond des frais d'attente (30 min d'attente comptées au plus).
   final int maxFee;
+
+  /// Après [maxMinutes] d'attente, le livreur peut partir : l'expéditeur paie [absentFee]
+  /// (annulation et attente), dont [absentRiderPart] pour le livreur.
+  final int maxMinutes;
+  final int absentFee;
+  final int absentRiderPart;
+
+  /// Appels à l'expéditeur exigés avant de partir sans le colis (comme le serveur).
+  static const absentMinCalls = 2;
 
   /// Frais après [waited] d'attente : rien pendant les minutes gratuites, puis une tranche
   /// commencée à la fois (comme le serveur).

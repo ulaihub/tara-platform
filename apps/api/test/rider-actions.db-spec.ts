@@ -783,6 +783,8 @@ describe('Actions du livreur (E2 à E9)', () => {
         riderPercent: 70,
         maxFee: 400,
         maxMinutes: 30,
+        absentFee: 700,
+        absentRiderPart: 480,
       },
     });
     await request(ctx.app.getHttpServer()).get('/v1/rider/config').expect(401);

@@ -37,6 +37,7 @@ TrackedOrder tracked(
   int? batchNumber,
   int cancellationFee = 0,
   DateTime? riderArrivedAt,
+  bool senderAbsent = false,
 }) {
   DateTime at(int h, int m) => DateTime(2026, 11, 4, h, m);
   const ridden = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED', 'DELIVERED'];
@@ -101,6 +102,7 @@ TrackedOrder tracked(
     returnFee: 750,
     cancellationFee: cancellationFee,
     riderArrivedAt: riderArrivedAt,
+    senderAbsent: senderAbsent,
     refusalReason: refusalReason,
     feePaymentMethod: feePaymentMethod,
     feePaid: feePaid,
@@ -387,6 +389,22 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('expéditeur absent : le livreur est reparti, annulation et attente annoncées', (tester) async {
+    final api = FakeClientApi()..tracked[orderId] = tracked('CANCELLED', senderAbsent: true);
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1000));
+    await settle(tester);
+    expect(find.text('Le livreur est reparti'), findsOneWidget);
+    expect(
+      find.text(
+        'Il vous a attendu 30 min et vous a appelé. La course est annulée ; annulation et attente vous sont '
+        'facturées : 700\u00a0F.',
+      ),
+      findsOneWidget,
+    );
+    expect(TrackedOrder.isSenderAbsentReason('Expéditeur absent après 30 min d’attente'), isTrue);
+    expect(TrackedOrder.isSenderAbsentReason('Colis non conforme : trop lourd'), isFalse);
   });
 
   testWidgets('frais Mobile Money pas encore payés : relancer le paiement, puis la recherche démarre', (tester) async {

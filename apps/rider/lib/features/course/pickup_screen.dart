@@ -35,6 +35,7 @@ class PickupScreen extends ConsumerStatefulWidget {
     required this.onSos,
     required this.onPickedUp,
     required this.onRefuse,
+    this.onSenderAbsent,
     this.now,
   });
 
@@ -49,6 +50,9 @@ class PickupScreen extends ConsumerStatefulWidget {
 
   /// « Colis non conforme ? » : écran de refus du colis.
   final VoidCallback onRefuse;
+
+  /// Parti sans le colis : l'expéditeur n'est pas venu après l'attente maximale (D).
+  final VoidCallback? onSenderAbsent;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -68,6 +72,8 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
   /// Arrivée signalée au point d'enlèvement : l'attente compte depuis là (D).
   late DateTime? _arrivedAt = widget.order.arrivedPickupAt;
   bool _arriving = false;
+  bool _confirmLeave = false;
+  bool _leaving = false;
   Timer? _tick;
 
   DateTime _now() => widget.now?.call() ?? DateTime.now();
@@ -100,6 +106,47 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
     _tick = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) setState(() {});
     });
+  }
+
+  /// L'expéditeur ne vient pas (D) : après l'attente maximale, sur place, après 2 appels. Le
+  /// premier toucher annonce ce qu'il paiera ; le second annule la course.
+  Future<void> _leave() async {
+    final l = AppLocalizations.of(context);
+    if (!_confirmLeave) {
+      setState(() => _confirmLeave = true);
+      return;
+    }
+    setState(() {
+      _leaving = true;
+      _error = null;
+    });
+    try {
+      final at = await ref.read(courseActionsProvider).position();
+      if (!mounted) return;
+      if (at == null) {
+        setState(() => _error = l.noPositionYet);
+        return;
+      }
+      await ref
+          .read(riderApiProvider)
+          .senderAbsent(
+            widget.order.id,
+            latitude: at.latitude,
+            longitude: at.longitude,
+            callLog: [for (final call in ref.read(callJournalProvider).forOrder(widget.order.id)) call.toApi()],
+          );
+      await ref.read(courseActionsProvider).activeOrder.update(widget.order.withStatus('CANCELLED'));
+      widget.onSenderAbsent?.call();
+    } catch (error) {
+      if (mounted) setState(() => _error = errorMessage(context, error));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _leaving = false;
+          _confirmLeave = false;
+        });
+      }
+    }
   }
 
   /// « Je suis arrivé » : sur place seulement (le serveur vérifie la position).
@@ -213,7 +260,8 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           line: order.pickup.line,
           note: order.instructions,
           callLabel: l.callPerson(senderName),
-          onCall: phone == null ? null : () => callPhone(phone),
+          // Appels gardés dans le journal : ils prouvent l'attente si l'expéditeur ne vient pas.
+          onCall: phone == null ? null : () => ref.read(callJournalProvider).call(order.id, to: 'SENDER', phone: phone),
         ),
         AddressHelp(orderId: order.id, stop: 'pickup', address: order.pickup, name: senderName),
         const SizedBox(height: 12),
@@ -223,6 +271,16 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           now: _now(),
           busy: _arriving,
           onArrive: _busy ? null : _arrive,
+          senderCalls: _arrivedAt == null
+              ? 0
+              : ref
+                    .watch(callJournalProvider)
+                    .forOrder(order.id)
+                    .where((call) => call.to == 'SENDER' && !call.at.isBefore(_arrivedAt!))
+                    .length,
+          confirmLeave: _confirmLeave,
+          leaving: _leaving,
+          onLeave: _busy ? null : _leave,
         ),
         // Quel colis prendre : l'expéditeur peut en avoir plusieurs, pour d'autres livreurs.
         const SizedBox(height: 12),
@@ -282,6 +340,10 @@ class _WaitingBox extends StatelessWidget {
     required this.now,
     required this.busy,
     required this.onArrive,
+    this.senderCalls = 0,
+    this.confirmLeave = false,
+    this.leaving = false,
+    this.onLeave,
   });
 
   final DateTime? arrivedAt;
@@ -289,6 +351,12 @@ class _WaitingBox extends StatelessWidget {
   final DateTime now;
   final bool busy;
   final VoidCallback? onArrive;
+
+  /// Appels à l'expéditeur depuis l'arrivée, et le départ sans le colis (D).
+  final int senderCalls;
+  final bool confirmLeave;
+  final bool leaving;
+  final VoidCallback? onLeave;
 
   @override
   Widget build(BuildContext context) {
@@ -324,20 +392,49 @@ class _WaitingBox extends StatelessWidget {
     final waited = now.difference(since);
     final minutes = waited.inMinutes;
     final fee = rules.feeAfter(waited);
+    final canLeave = minutes >= rules.maxMinutes;
+    final callsLeft = WaitingRules.absentMinCalls - senderCalls;
     return TintBox(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TaraIcon(TaraIcons.clock, size: 18, color: c.accentText),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              fee == 0
-                  ? l.waitingFree(minutes, rules.freeMinutes - minutes < 0 ? 0 : rules.freeMinutes - minutes)
-                  : l.waitingPaid(minutes, f(fee), f(rules.riderPart(fee))),
-              style: TaraText.label.copyWith(color: c.textPrimary, height: 1.4),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TaraIcon(TaraIcons.clock, size: 18, color: c.accentText),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  fee == 0
+                      ? l.waitingFree(minutes, rules.freeMinutes - minutes < 0 ? 0 : rules.freeMinutes - minutes)
+                      : l.waitingPaid(minutes, f(fee), f(rules.riderPart(fee))),
+                  style: TaraText.label.copyWith(color: c.textPrimary, height: 1.4),
+                ),
+              ),
+            ],
           ),
+          if (!canLeave) ...[
+            const SizedBox(height: 6),
+            Text(
+              l.senderAbsentLater(rules.maxMinutes - minutes, f(rules.absentRiderPart)),
+              style: TaraText.small.copyWith(color: c.textSecondary, height: 1.4),
+            ),
+          ] else ...[
+            const SizedBox(height: 10),
+            if (callsLeft > 0)
+              Text(l.senderAbsentCallFirst(callsLeft), style: TaraText.small.copyWith(color: c.textSecondary))
+            else if (confirmLeave)
+              Text(
+                l.senderAbsentConfirm(f(rules.absentFee), f(rules.absentRiderPart)),
+                style: TaraText.small.copyWith(color: c.dangerText, height: 1.4),
+              ),
+            const SizedBox(height: 6),
+            GlassButton(
+              label: leaving ? l.arrivedSending : l.senderAbsentAction,
+              icon: TaraIcons.close,
+              onPressed: callsLeft > 0 || leaving ? null : onLeave,
+            ),
+          ],
         ],
       ),
     );

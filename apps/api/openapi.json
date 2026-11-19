@@ -6847,6 +6847,106 @@
         ]
       }
     },
+    "/v1/rider/orders/{id}/sender-absent": {
+      "post": {
+        "operationId": "RiderApp_senderAbsent",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "callLog": {
+                    "default": [],
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "to": {
+                          "type": "string",
+                          "enum": [
+                            "RECIPIENT",
+                            "SENDER"
+                          ]
+                        },
+                        "at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "durationSeconds": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 3600
+                        }
+                      },
+                      "required": [
+                        "to",
+                        "at",
+                        "durationSeconds"
+                      ]
+                    }
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/rider/orders/{id}/pickup": {
       "post": {
         "operationId": "RiderApp_pickup",
@@ -11916,6 +12016,9 @@
               },
               "maxMinutes": {
                 "type": "integer"
+              },
+              "absentFee": {
+                "type": "integer"
               }
             },
             "required": [
@@ -11923,7 +12026,8 @@
               "stepMinutes",
               "feePerStep",
               "maxFee",
-              "maxMinutes"
+              "maxMinutes",
+              "absentFee"
             ],
             "additionalProperties": false
           }
@@ -13052,6 +13156,8 @@
                   "ADDRESS_REQUESTS_LIMIT",
                   "PENDING_NOT_BLOCKED",
                   "NOT_AT_PICKUP",
+                  "SENDER_ABSENT_TOO_EARLY",
+                  "SENDER_CALLS_REQUIRED",
                   "ARRIVAL_NOT_EXPECTED"
                 ]
               },
@@ -16230,6 +16336,12 @@
               },
               "maxMinutes": {
                 "type": "integer"
+              },
+              "absentFee": {
+                "type": "integer"
+              },
+              "absentRiderPart": {
+                "type": "integer"
               }
             },
             "required": [
@@ -16238,7 +16350,9 @@
               "feePerStep",
               "riderPercent",
               "maxFee",
-              "maxMinutes"
+              "maxMinutes",
+              "absentFee",
+              "absentRiderPart"
             ],
             "additionalProperties": false
           }

@@ -107,6 +107,19 @@ class RiderApi {
 
   Future<RiderOrder> riderOrder(String id) async => RiderOrder.fromJson(await order(id));
 
+  /// Expéditeur absent après l'attente maximale (D) : la course est annulée, l'attente payée.
+  Future<RiderOrder> senderAbsent(
+    String orderId, {
+    required double latitude,
+    required double longitude,
+    required List<Json> callLog,
+  }) async => RiderOrder.fromJson(
+    await _api.post(
+      '/rider/orders/$orderId/sender-absent',
+      body: {'latitude': latitude, 'longitude': longitude, 'callLog': callLog},
+    ) as Json,
+  );
+
   /// Arrivé au point d'enlèvement (D) : l'expéditeur est prévenu, l'attente compte.
   Future<RiderOrder> arrived(String orderId, {required double latitude, required double longitude}) async =>
       RiderOrder.fromJson(

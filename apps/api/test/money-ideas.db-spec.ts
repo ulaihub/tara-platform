@@ -7,6 +7,7 @@ import {
   riderPayable,
 } from '../src/finance/ledger.accounts.js';
 import { LedgerService } from '../src/finance/ledger.service.js';
+import { RiderOrdersService } from '../src/rider-app/rider-orders.service.js';
 import { createTestApp, type SignedIn, staffUser, type TestContext } from './helpers/app.js';
 import {
   merchant,
@@ -270,6 +271,85 @@ describe('Garantie, annulation et attente payantes', () => {
         .expect(200);
       const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: placed.id } });
       expect(stored.waitingFee).toBe(0);
+    });
+  });
+
+  describe('D · expéditeur absent après 30 minutes', () => {
+    it('prévenu à 25 min ; départ du livreur sur place après 2 appels : 700 F, 480 F pour lui', async () => {
+      const other = await merchant(ctx);
+      await sales(other, 5_000);
+      const profile = await ctx.prisma.merchantProfile.findUniqueOrThrow({
+        where: { userId: other.userId },
+      });
+      const placed = await placeOrder(ctx, other, { feePaymentMethod: 'WALLET' });
+      const rider = await assignTo(placed.id);
+      await request(ctx.http)
+        .post(`/v1/rider/orders/${placed.id}/arrived`)
+        .set(rider.auth)
+        .send(nearAkwa(0.001))
+        .expect(200);
+      const absent = (body: object) =>
+        request(ctx.http)
+          .post(`/v1/rider/orders/${placed.id}/sender-absent`)
+          .set(rider.auth)
+          .send({ ...nearAkwa(0.001), ...body });
+
+      const early = await absent({}).expect(422);
+      expect(early.body.error.code).toBe('SENDER_ABSENT_TOO_EARLY');
+
+      // 26 minutes d'attente : l'expéditeur est prévenu, une seule fois.
+      const riders = ctx.app.get(RiderOrdersService);
+      await ctx.prisma.order.update({
+        where: { id: placed.id },
+        data: { arrivedPickupAt: new Date(Date.now() - 26 * 60_000) },
+      });
+      await riders.warnLongWaits();
+      const warned = await ctx.prisma.order.findUniqueOrThrow({ where: { id: placed.id } });
+      expect(warned.waitingWarnedAt).not.toBeNull();
+      // Second passage : pas de nouvel avertissement, l'heure reste la même.
+      expect(await riders.warnLongWaits()).toBe(0);
+      const still = await ctx.prisma.order.findUniqueOrThrow({ where: { id: placed.id } });
+      expect(still.waitingWarnedAt).toEqual(warned.waitingWarnedAt);
+
+      // 31 minutes : il faut encore les 2 appels, et être sur place.
+      const arrivedAt = new Date(Date.now() - 31 * 60_000);
+      await ctx.prisma.order.update({
+        where: { id: placed.id },
+        data: { arrivedPickupAt: arrivedAt },
+      });
+      const call = (minutes: number) => ({
+        to: 'SENDER',
+        at: new Date(arrivedAt.getTime() + minutes * 60_000).toISOString(),
+        durationSeconds: 20,
+      });
+      const oneCall = await absent({ callLog: [call(5)] }).expect(422);
+      expect(oneCall.body.error.code).toBe('SENDER_CALLS_REQUIRED');
+      const far = await request(ctx.http)
+        .post(`/v1/rider/orders/${placed.id}/sender-absent`)
+        .set(rider.auth)
+        .send({ ...nearAkwa(0.01), callLog: [call(5), call(15)] })
+        .expect(422);
+      expect(far.body.error.code).toBe('NOT_AT_PICKUP');
+
+      const riderBefore = await ledger.balance(riderPayable(rider.riderId));
+      const commission = await ledger.balance(PLATFORM_ACCOUNTS.commission);
+      const salesBefore = await ledger.balance(merchantPayable(profile.id));
+      const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: placed.id } });
+      const left = await absent({ callLog: [call(5), call(15)] }).expect(200);
+      expect(left.body.status).toBe('CANCELLED');
+
+      // La course payée revient, puis 300 F d'annulation et 400 F d'attente sont pris.
+      expect(await ledger.balance(merchantPayable(profile.id))).toBe(
+        salesBefore + stored.totalPrice - 700,
+      );
+      expect(await ledger.balance(riderPayable(rider.riderId))).toBe(riderBefore + 480);
+      expect(await ledger.balance(PLATFORM_ACCOUNTS.commission)).toBe(commission + 220);
+      const proof = await ctx.prisma.deliveryProof.findFirstOrThrow({
+        where: { orderId: placed.id, kind: 'SENDER_ABSENT' },
+      });
+      expect(proof.callLog).toHaveLength(2);
+      const after = await ctx.prisma.order.findUniqueOrThrow({ where: { id: placed.id } });
+      expect(after.waitingFee).toBe(400);
     });
   });
 });

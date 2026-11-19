@@ -87,6 +87,12 @@ export const RefuseParcelBody = z.object({
   ...ActionContext,
 });
 
+/** Expéditeur absent (D) : après l'attente maximale, sur place, avec les appels passés. */
+export const SenderAbsentBody = z.object({
+  callLog: z.array(CallLogEntry).max(20).default([]),
+  ...ActionContext,
+});
+
 export const FailBody = z.object({
   reason: FailureReasonEnum,
   note: z.string().trim().max(300).optional(),
@@ -294,6 +300,9 @@ export const RiderConfigDto = z
       /** Plafond des frais d'attente : l'attente n'est comptée que jusqu'à `maxMinutes`. */
       maxFee: z.int(),
       maxMinutes: z.int(),
+      /** Expéditeur absent après `maxMinutes` : ce qu'il paie, et la part du livreur. */
+      absentFee: z.int(),
+      absentRiderPart: z.int(),
     }),
   })
   .meta({ id: 'RiderConfig' });

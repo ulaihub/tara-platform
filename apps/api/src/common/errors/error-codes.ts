@@ -514,6 +514,14 @@ export const ERROR_MESSAGES = {
     fr: 'Vous êtes à {meters} m du point d’enlèvement : signalez votre arrivée une fois sur place.',
     en: 'You are {meters} m from the pickup point: report your arrival once you are there.',
   },
+  SENDER_ABSENT_TOO_EARLY: {
+    fr: 'Encore {minutes} min d’attente avant de pouvoir partir : l’expéditeur est prévenu.',
+    en: '{minutes} more min of waiting before you can leave: the sender has been told.',
+  },
+  SENDER_CALLS_REQUIRED: {
+    fr: 'Appelez d’abord l’expéditeur {count} fois depuis l’application.',
+    en: 'First call the sender {count} times from the app.',
+  },
   ARRIVAL_NOT_EXPECTED: {
     fr: 'Le colis est déjà récupéré ou la course n’est plus la vôtre.',
     en: 'The parcel has already been picked up or the job is no longer yours.',
