@@ -173,13 +173,30 @@ export class OrdersService implements OnModuleInit {
     const fees = await Promise.all(
       orders.map((order) => cancellationFee(order, this.env, this.prisma)),
     );
-    return orders.map((order, i) => this.toDto(order, byId, fees[i] ?? 0));
+    // Tournée (2c) : les numéros des colis du même envoi que ce livreur emporte ensemble.
+    const tourIds = [...new Set(orders.flatMap((o) => (o.tourId ? [o.tourId] : [])))];
+    const mates =
+      tourIds.length === 0
+        ? []
+        : await this.prisma.order.findMany({
+            where: { tourId: { in: tourIds } },
+            select: { tourId: true, senderId: true, batchNumber: true },
+          });
+    const tourNumbers = (order: OrderFull): number[] =>
+      order.tourId
+        ? mates
+            .filter((m) => m.tourId === order.tourId && m.senderId === order.senderId)
+            .flatMap((m) => (m.batchNumber === null ? [] : [m.batchNumber]))
+            .sort((a, b) => a - b)
+        : [];
+    return orders.map((order, i) => this.toDto(order, byId, fees[i] ?? 0, tourNumbers(order)));
   }
 
   private toDto(
     order: OrderFull,
     addresses: Map<string, z.output<typeof OrderDto>['pickup']>,
     cancelFee: number,
+    tourNumbers: number[],
   ): z.output<typeof OrderDto> {
     const pickup = addresses.get(order.pickupAddressId);
     const dropoff = addresses.get(order.dropoffAddressId);
@@ -194,6 +211,7 @@ export class OrdersService implements OnModuleInit {
       batchSize: order.batch
         ? order.batch._count.orders + order.batch._count.pendingDeliveries
         : null,
+      tourNumbers: tourNumbers.length > 1 ? tourNumbers : [],
       isExpress: order.isExpress,
       scheduledFor: order.scheduledFor?.toISOString() ?? null,
       packageSize: order.packageSize,

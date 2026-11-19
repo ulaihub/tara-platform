@@ -2143,6 +2143,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String trackAssignedTour(String rider, String numbers) {
+    return '$rider is coming for parcels no. $numbers';
+  }
+
+  @override
+  String trackAssignedTourBody(int count) {
+    return 'All leave in a single round. Hand over these $count parcels and the pickup code when they arrive.';
+  }
+
+  @override
+  String listAnd(String head, String last) {
+    return '$head and $last';
+  }
+
+  @override
   String get bulkEntry => 'Send many parcels';
 
   @override

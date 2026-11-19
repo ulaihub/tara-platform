@@ -3958,6 +3958,7 @@ export interface components {
       batchId: string | null;
       batchNumber: number | null;
       batchSize: number | null;
+      tourNumbers: number[];
       isExpress: boolean;
       /** Format: date-time */
       scheduledFor: string | null;

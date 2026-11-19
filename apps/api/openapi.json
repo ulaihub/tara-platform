@@ -14545,6 +14545,12 @@
             "nullable": true,
             "type": "integer"
           },
+          "tourNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
           "isExpress": {
             "type": "boolean"
           },
@@ -14815,6 +14821,7 @@
           "batchId",
           "batchNumber",
           "batchSize",
+          "tourNumbers",
           "isExpress",
           "scheduledFor",
           "packageSize",

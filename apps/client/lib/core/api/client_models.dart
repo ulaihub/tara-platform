@@ -923,6 +923,7 @@ class TrackedOrder {
     this.feePaid = true,
     this.batchNumber,
     this.batchSize,
+    this.tourNumbers = const [],
   });
 
   factory TrackedOrder.fromJson(Json json) {
@@ -976,6 +977,8 @@ class TrackedOrder {
       feePaid: pricing['feePayer'] == 'RECIPIENT' || (pricing['feePaid'] as bool? ?? true),
       batchNumber: (json['batchNumber'] as num?)?.toInt(),
       batchSize: (json['batchSize'] as num?)?.toInt(),
+      // Serveur d'avant la tournée (2c) : pas de champ, colis seul.
+      tourNumbers: [for (final n in json['tourNumbers'] as List? ?? const []) (n as num).toInt()],
     );
   }
 
@@ -1053,6 +1056,10 @@ class TrackedOrder {
   final int? batchNumber;
   final int? batchSize;
 
+  /// Tournée (2c) : numéros des colis de l'envoi que le même livreur emporte, celui-ci compris ;
+  /// vide hors tournée.
+  final List<int> tourNumbers;
+
   /// Commande en attente du paiement Mobile Money de ses frais (aucun livreur cherché avant).
   bool get awaitingPayment => status == 'CREATED' && feePaymentMethod.startsWith('MOMO_') && !feePaid;
 
@@ -1093,6 +1100,7 @@ class TrackedOrder {
     feePaid: feePaid,
     batchNumber: batchNumber,
     batchSize: batchSize,
+    tourNumbers: tourNumbers,
   );
 }
 

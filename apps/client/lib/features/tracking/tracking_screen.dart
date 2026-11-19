@@ -662,6 +662,11 @@ class _Panel extends StatelessWidget {
           '${formatAmount(waiting.maxFee)}\u00a0F',
         ),
       ),
+      // Tournée (2c) : le même livreur emporte plusieurs colis de l'envoi, tous à lui donner.
+      'ASSIGNED' when o.tourNumbers.length > 1 => (
+        l.trackAssignedTour(riderName, _numbers(l, o.tourNumbers)),
+        l.trackAssignedTourBody(o.tourNumbers.length),
+      ),
       'ASSIGNED' => switch (o.batchNumber) {
         // Plusieurs colis : lequel donner à ce livreur.
         final number? => (l.trackAssignedParcel(riderName, number), l.trackAssignedParcelBody(number)),
@@ -933,6 +938,11 @@ class _Panel extends StatelessWidget {
       ],
     );
   }
+
+  /// « 4, 9 et 12 » : numéros des colis d'une tournée.
+  static String _numbers(AppLocalizations l, List<int> numbers) => numbers.length == 1
+      ? '${numbers.single}'
+      : l.listAnd(numbers.take(numbers.length - 1).join(', '), '${numbers.last}');
 
   static String _reason(AppLocalizations l, String? reason) => switch (reason) {
     'RECIPIENT_ABSENT' => l.failureReasonRecipientAbsent,

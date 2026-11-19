@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.9 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.10 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -54,7 +54,9 @@ qui lui est confié**, de l'enlèvement à la remise (article 13).
   s'ajoute, lui aussi affiché avant de commander.
 - **Envoi de plusieurs colis** : jusqu'à 100 colis par envoi, depuis le même point. Chaque
   colis a un numéro, à écrire dessus ; un seul code d'enlèvement vaut pour tout l'envoi. Votre
-  liste reste sur votre téléphone jusqu'à l'envoi.
+  liste reste sur votre téléphone jusqu'à l'envoi. Un même livreur peut emporter plusieurs
+  colis de l'envoi en une **tournée** : l'application vous dit lesquels lui donner (par
+  exemple « les n° 4, 9 et 12 »). Chaque colis garde son prix et son suivi.
 - **Client dont vous n'avez pas l'adresse** : Tara lui envoie, en votre nom, un SMS avec un
   lien pour placer son point. Son colis part dès qu'il l'a placé et il est alors payé comme
   vous l'avez choisi : par votre solde Tara puis vos ventes s'ils suffisent (article 7) ; sinon

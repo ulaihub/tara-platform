@@ -25,6 +25,17 @@ const TEMPLATES = {
       body: '{rider} is coming for parcel no. {number} (for {recipient}).',
     },
   },
+  /** Tournée (2c) : un seul message pour tous les colis que ce livreur emporte. */
+  ORDER_ASSIGNED_TOUR: {
+    fr: {
+      title: 'Livreur trouvé · {count} colis',
+      body: '{rider} vient chercher les colis n° {numbers} et {last} : donnez-les-lui avec le code d’enlèvement.',
+    },
+    en: {
+      title: 'Rider found · {count} parcels',
+      body: '{rider} is coming for parcels no. {numbers} and {last}: hand them over with the pickup code.',
+    },
+  },
   ORDER_PICKED_UP: {
     fr: { title: 'Colis enlevé', body: 'Votre colis {reference} est entre les mains du livreur.' },
     en: { title: 'Parcel picked up', body: 'Your parcel {reference} is with the rider.' },

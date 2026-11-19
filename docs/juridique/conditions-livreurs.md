@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.9 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.10 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -39,6 +39,12 @@ remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le dema
   traîner la remise exprès est une fraude (article 9).
 - Vous récupérez le colis avec le **code d'enlèvement** que vous donne l'expéditeur, et vous le
   photographiez.
+- **Tournée** : plusieurs colis d'un même envoi peuvent vous être proposés ensemble, dans la
+  limite de votre véhicule (à moto, jusqu'à 5 petits ou moyens colis, ou un grand colis seul).
+  La proposition montre chaque colis, son numéro et votre gain pour chacun, et l'ordre des
+  arrêts. À l'enlèvement, cochez chaque colis par son numéro : un seul code et une seule
+  photo valent pour tous. Livrez ensuite dans l'ordre indiqué ; chaque colis se remet contre
+  son propre code de livraison.
 - **Gros objets** : ils sont proposés seulement aux tricycles et aux voitures. Si l'expéditeur
   a demandé de l'aide pour charger, venez à deux.
 - **Colis non conforme** : si le colis est trop grand ou trop lourd pour votre véhicule, n'est
@@ -87,7 +93,8 @@ remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le dema
     (heures de pointe, forte pluie), pour les courses acceptées pendant la période annoncée.
 
   Le montant de chaque prime est affiché dans la proposition, avant que vous acceptiez, et
-  reste acquis pour cette course.
+  reste acquis pour cette course. Pour une **tournée**, chaque colis vous rapporte son gain
+  normal (70 % de son prix) et les primes sont payées une seule fois pour toute la tournée.
 
 - **Solde prépayé** : vous rechargez votre solde par Mobile Money (frais payés par Tara) ou au
   bureau. Quand vous encaissez de l'argent en espèces (frais de livraison, prix d'un article,

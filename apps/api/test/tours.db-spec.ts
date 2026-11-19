@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { createTestApp, staffUser, type TestContext } from './helpers/app.js';
 import { createAddress, PLACES } from './helpers/geo.js';
@@ -41,6 +42,12 @@ describe('Tournée : plusieurs colis, un livreur', () => {
   it('une moto reçoit les petits colis ensemble ; le grand part seul', async () => {
     const rider = await activeRider(ctx);
     await goOnline(ctx, rider, nearAkwa(0.002));
+    // Le téléphone de la boutique reçoit les notifications.
+    await request(ctx.http)
+      .put(`/v1/me/devices/${shop.installationId}/push-token`)
+      .set(shop.auth)
+      .send({ pushToken: `push-${randomUUID()}-${randomUUID()}` })
+      .expect(204);
     const batch = await request(ctx.http)
       .post('/v1/orders/batch')
       .set(shop.auth)
@@ -81,6 +88,25 @@ describe('Tournée : plusieurs colis, un livreur', () => {
     expect(bonuses.length).toBeLessThanOrEqual(1);
     // Le grand colis attend un autre livreur : celui-ci est occupé.
     expect(assigned[3]?.status).toBe('SEARCHING_RIDER');
+    // L'expéditeur sait quels colis donner à ce livreur : les n° 1, 2 et 3, pas le grand n° 4.
+    const followed = await request(ctx.http).get(`/v1/orders/${ids[1]}`).set(shop.auth).expect(200);
+    expect(followed.body.tourNumbers).toEqual([1, 2, 3]);
+    const alone = await request(ctx.http).get(`/v1/orders/${ids[3]}`).set(shop.auth).expect(200);
+    expect(alone.body.tourNumbers).toEqual([]);
+    // Un seul message pour la tournée, pas un par colis.
+    const pushes = await ctx.prisma.notification.findMany({
+      where: {
+        userId: shop.userId,
+        orderId: { in: ids },
+        template: { startsWith: 'ORDER_ASSIGNED' },
+      },
+    });
+    expect(pushes).toHaveLength(1);
+    expect(pushes[0]).toMatchObject({
+      orderId: ids[0],
+      template: 'ORDER_ASSIGNED_TOUR',
+      payload: { params: expect.objectContaining({ count: 3, numbers: '1, 2', last: '3' }) },
+    });
 
     // Enlèvement : les 3 colis cochés, un code et une photo.
     const photoKey = await proofPhoto(ctx, rider);

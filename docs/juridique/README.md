@@ -124,3 +124,7 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
     appelé deux fois, l'expéditeur paie 700 FCFA (annulation et attente plafonnée). Preuve :
     position du livreur sur place et journal d'appels gardés avec la course. À faire confirmer
     comme indemnité de déplacement proportionnée, contestable auprès du service client.
+12. Tournée (version 2026-11.10) : un livreur emporte plusieurs colis d'un même envoi ; chaque
+    colis garde son prix, son code de livraison et sa preuve de remise, et la prime d'approche
+    n'est payée qu'une fois. Un seul code et une seule photo à l'enlèvement valent remise de
+    tous les colis cochés : à faire confirmer comme preuve de prise en charge de chacun.
