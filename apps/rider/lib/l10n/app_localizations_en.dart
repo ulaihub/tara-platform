@@ -493,6 +493,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toPickup => 'To pickup';
 
   @override
+  String newTour(int count) {
+    return 'Round · $count parcels';
+  }
+
+  @override
+  String nextStopTitle(int stop, int total) {
+    return 'Stop $stop of $total';
+  }
+
+  @override
+  String get nextStopGo => 'Head to this customer';
+
+  @override
+  String tourProgress(int stop, int total, String earned) {
+    return 'Round · stop $stop of $total · $earned earned';
+  }
+
+  @override
+  String tourToCollect(int checked, int total) {
+    return 'PARCELS TO COLLECT · $checked OF $total CHECKED';
+  }
+
+  @override
+  String photoTourHint(int count) {
+    return 'All $count parcels together, numbers visible';
+  }
+
+  @override
+  String tourStops(int count) {
+    return '$count stops, in order';
+  }
+
+  @override
+  String parcelNumberShort(int number) {
+    return 'No. $number';
+  }
+
+  @override
   String get arrivedAction => 'I\'ve arrived';
 
   @override

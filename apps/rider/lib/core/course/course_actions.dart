@@ -87,6 +87,45 @@ class CourseActions {
     return ActionResult(action == null ? ActionOutcome.sent : ActionOutcome.queued);
   }
 
+  /// Enlèvement d'une tournée (2c) : les colis cochés, le code de l'envoi et une seule photo.
+  /// Ensuite, chaque client est un arrêt ([departTo]).
+  Future<ActionResult> pickUpTour(
+    List<RiderOrder> orders, {
+    required String code,
+    required String photoPath,
+    required GeoPoint at,
+    String? retryActionId,
+  }) async {
+    final lead = orders.first;
+    final action = await _send(
+      lead,
+      kind: tourPickupKind,
+      path: '/rider/tours/${lead.tourId}/pickup',
+      body: {
+        'orderIds': [for (final order in orders) order.id],
+        'pickupCode': code,
+        'latitude': at.latitude,
+        'longitude': at.longitude,
+      },
+      photoPath: photoPath,
+      retryActionId: retryActionId,
+    );
+    if (action != null && action.failed) return _refusal(action);
+    for (final order in orders) {
+      await activeOrder.update(order.withStatus('PICKED_UP'));
+    }
+    return ActionResult(action == null ? ActionOutcome.sent : ActionOutcome.queued);
+  }
+
+  /// Sorte de l'enlèvement d'une tournée dans la file.
+  static const tourPickupKind = 'pickup-tour';
+
+  /// Tournée : départ vers le client de cet arrêt (le colis est déjà à bord).
+  Future<void> departTo(RiderOrder order, {required GeoPoint at}) async {
+    await queue.enqueue(orderId: order.id, kind: 'depart', body: {'latitude': at.latitude, 'longitude': at.longitude});
+    await activeOrder.update(order.withStatus('IN_DELIVERY'));
+  }
+
   /// Colis non conforme refusé à l'enlèvement (trop grand, trop lourd, pas ce qui a été
   /// déclaré, objet interdit) : motif, photo du colis, note facultative. La course est annulée
   /// et le déplacement payé au livreur par l'expéditeur.
@@ -269,6 +308,7 @@ class CourseActions {
     required String photoPath,
     String? retryActionId,
     bool Function(QueuedAction previous)? sameMode,
+    String? path,
   }) async {
     final previous = queue.items.where((action) => action.id == retryActionId).firstOrNull;
     String id;
@@ -287,6 +327,7 @@ class CourseActions {
         kind: kind,
         body: {...body, 'photoKey': ?uploaded},
         photoPath: photoPath,
+        path: path,
       )).id;
     }
     return _settle(id);

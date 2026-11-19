@@ -21,6 +21,7 @@ import '../activity/activity_screen.dart';
 import '../common/status_screen.dart';
 import '../course/collection_screen.dart';
 import '../course/course_banner.dart';
+import '../course/course_scaffold.dart' show parcelForWhom, parcelWhat;
 import '../course/delivery_screen.dart';
 import '../course/failure_screen.dart';
 import '../course/pickup_screen.dart';
@@ -147,6 +148,16 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   void _openSos() => setState(() => _sos = true);
 
   /// Nouvelle tentative demandée par l'expéditeur : retour vers le destinataire (09).
+  /// Tournée (2c) : départ vers le client de l'arrêt en cours.
+  Future<void> _departTo(RiderOrder order) async {
+    final l = AppLocalizations.of(context);
+    final actions = ref.read(courseActionsProvider);
+    final at = await actions.position();
+    if (!mounted) return;
+    if (at == null) return _showNotice(l.noPositionYet);
+    await actions.departTo(order, at: at);
+  }
+
   Future<void> _retry(RiderOrder order) async {
     final l = AppLocalizations.of(context);
     final actions = ref.read(courseActionsProvider);
@@ -203,8 +214,11 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
         onAction: minimize,
       );
     }
+    final tour = _activeOrder.tour;
     // Une action refusée (code faux saisi hors réseau) ramène à son écran pour la corriger.
-    if (order.status == 'ASSIGNED' || actions.refused(order.id, 'pickup') != null) {
+    final pickupRefused =
+        actions.refused(order.id, 'pickup') != null || actions.refused(order.id, CourseActions.tourPickupKind) != null;
+    if (order.status == 'ASSIGNED' || pickupRefused) {
       void onRefused(ActionOutcome outcome) {
         setState(() => _refusing = null);
         _showNotice(outcome == ActionOutcome.queued ? l.actionSavedOffline : l.parcelRefusedNotice);
@@ -224,6 +238,11 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
               },
               onRefuse: () => setState(() => _refusing = order.id),
               onSenderAbsent: () => _showNotice(l.senderAbsentNotice),
+              // Tournée : tous les colis encore à récupérer ici.
+              tour: [
+                for (final stop in tour)
+                  if (stop.status == 'ASSIGNED' || stop.id == order.id) stop,
+              ],
             ),
           ),
           if (_refusing == order.id || refusalRejected)
@@ -236,6 +255,21 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
               ),
             ),
         ],
+      );
+    }
+    // Tournée : colis à bord, prochain client ; le livreur part quand il est prêt.
+    if (order.status == 'PICKED_UP' && order.tourId != null) {
+      final index = tour.indexWhere((stop) => stop.id == order.id);
+      return StatusScreen(
+        key: ValueKey('next-stop-${order.id}'),
+        title: l.nextStopTitle(index + 1, tour.length),
+        body: [
+          if (order.batchNumber != null) l.parcelNumberShort(order.batchNumber!),
+          parcelWhat(l, order),
+          parcelForWhom(l, order),
+        ].join(' · '),
+        actionLabel: l.nextStopGo,
+        onAction: () => unawaited(_departTo(order)),
       );
     }
     final refusedDelivery = actions.refused(order.id, 'deliver') != null;
@@ -327,6 +361,15 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             onCollect: (draft) => setState(() => _collecting = (orderId: order.id, draft: draft)),
             onFailure: () => setState(() => _failing = order.id),
             onDelivered: onDone,
+            tourProgress: tour.length > 1
+                ? (
+                    stop: tour.indexWhere((stop) => stop.id == order.id) + 1,
+                    total: tour.length,
+                    earned: tour
+                        .where((stop) => stop.status == 'DELIVERED')
+                        .fold(0, (sum, stop) => sum + stop.riderEarning),
+                  )
+                : null,
           ),
         ),
         if (_failing == order.id)

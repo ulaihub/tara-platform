@@ -152,4 +152,58 @@ void main() {
     expect(active.order, isNull);
     expect(active.takeEnded(), OrderEnded.delivered);
   });
+
+  group('tournée (2c)', () {
+    RiderOrder stop(String id, int seq, String status) => RiderOrder.fromJson({
+      ...orderJson(id: id, status: status),
+      'tourId': '00000000-0000-4000-8000-0000000000aa',
+      'stopSeq': seq,
+    });
+
+    test('tous les colis sont gardés ; l’enlèvement d’abord, puis les arrêts dans l’ordre', () async {
+      final a = stop('00000000-0000-4000-8000-000000000011', 1, 'ASSIGNED');
+      final b = stop('00000000-0000-4000-8000-000000000012', 2, 'ASSIGNED');
+      final c = stop('00000000-0000-4000-8000-000000000013', 3, 'ASSIGNED');
+      server.active = [c, b, a];
+      final active = controller();
+      await active.start(b);
+      expect(active.tour, hasLength(3));
+      expect(active.order?.id, a.id);
+
+      // Colis récupérés : le premier client est l'arrêt en cours.
+      for (final picked in [a, b, c]) {
+        await active.update(picked.withStatus('PICKED_UP'));
+      }
+      expect(active.order?.id, a.id);
+      await active.update(a.withStatus('IN_DELIVERY'));
+      await active.update(a.withStatus('DELIVERED'));
+      // Arrêt livré : la tournée continue avec le suivant, sans finir la course.
+      expect(active.takeEnded(), OrderEnded.delivered);
+      expect(active.order?.id, b.id);
+      expect(active.tourLeft.map((o) => o.id), [b.id, c.id]);
+
+      // Livraison impossible chez b : il passe après c.
+      await active.update(b.withStatus('DELIVERY_FAILED'));
+      expect(active.order?.id, c.id);
+
+      // Reprise sur le téléphone : la tournée revient telle quelle.
+      final again = controller();
+      server.error = offline;
+      await again.restore();
+      expect(again.tour, hasLength(3));
+      expect(again.order?.id, c.id);
+    });
+
+    test('dernier arrêt livré : la course se termine', () async {
+      final a = stop('00000000-0000-4000-8000-000000000021', 1, 'IN_DELIVERY');
+      final b = stop('00000000-0000-4000-8000-000000000022', 2, 'DELIVERED');
+      server.active = [a];
+      final active = controller();
+      await active.start(a);
+      await active.update(a.withStatus('DELIVERED'));
+      expect(active.order, isNull);
+      expect(active.takeEnded(), OrderEnded.delivered);
+      expect(b.inProgress, isFalse);
+    });
+  });
 }
