@@ -75,7 +75,7 @@ describe('Tournée : plusieurs colis, un livreur', () => {
     const tour = assigned.slice(0, 3);
     expect(tour.map((order) => order.status)).toEqual(['ASSIGNED', 'ASSIGNED', 'ASSIGNED']);
     expect(new Set(tour.map((order) => order.tourId))).toEqual(new Set([offer.id]));
-    expect(tour.map((order) => order.stopSeq).sort()).toEqual([1, 2, 3]);
+    expect(tour.map((order) => order.stopSeq ?? 0).sort((a, b) => a - b)).toEqual([1, 2, 3]);
     // Primes une seule fois par tournée.
     const bonuses = tour.filter((order) => order.approachBonus + order.boostBonus > 0);
     expect(bonuses.length).toBeLessThanOrEqual(1);
