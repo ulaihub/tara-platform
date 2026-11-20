@@ -20,13 +20,6 @@ export function formatAmount(amount: number): string {
   return `${digits} F`;
 }
 
-/** « 1,2 km » ou « 350 m ». */
-export function formatDistance(meters: number, locale: 'fr' | 'en'): string {
-  if (meters < 1000) return `${Math.max(50, Math.round(meters / 50) * 50)} m`;
-  const km = (meters / 1000).toFixed(1);
-  return `${locale === 'fr' ? km.replace('.', ',') : km} km`;
-}
-
 /**
  * Jour d'une livraison programmée, relatif à aujourd'hui (heure de Douala) : `today`,
  * `tomorrow` ou la date « 05/11 ».

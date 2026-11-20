@@ -25,25 +25,26 @@ async function page(
 const text = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/[ \n]+/g, ' ');
 
 describe('page de suivi du destinataire (F2)', () => {
-  it('colis en route : heure estimée, livreur à appeler, somme à payer, code à donner', async () => {
+  it('colis en route : minutes restantes, livreur à appeler, somme à payer, code à donner', async () => {
     const { app } = setup();
     const { res, html } = await page(app);
     expect(res.status).toBe(200);
     const visible = text(html);
-    expect(visible).toContain('Awa Fashion vous envoie un colis');
-    expect(visible).toContain('Votre colis arrive');
-    // 10:20 + 8 min, heure de Douala.
-    expect(visible).toContain(`Arrivée vers 10:28 · à 2,4${NBSP}km`);
+    expect(visible).toContain('Colis d’Awa Fashion');
+    expect(visible).toContain('Jean M. arrive chez vous');
+    expect(visible).toContain('8 min');
     expect(html).toContain('href="tel:+237677445566"');
-    expect(visible).toContain('Jean M.');
+    expect(visible).toContain('Appeler Jean');
+    expect(html).toContain('href="#point"');
     expect(visible).toContain(`Moto · LT 482 KQ`);
     expect(visible).toContain(`14${NBSP}000${NBSP}F`);
     expect(visible).toContain(`12${NBSP}500${NBSP}F`);
     expect(visible).toContain('code à 4 chiffres reçu par SMS');
     expect(visible).toContain('Bonapriso · Face pharmacie du Rond-point');
-    // Étapes avec leur heure locale.
-    expect(visible).toMatch(/Commande 10:02/);
-    expect(visible).toMatch(/Récupéré 10:12/);
+    // Barre des étapes : la moto en est à « Récupéré », le code de livraison n'est jamais affiché.
+    expect(visible).toMatch(/Commande Livreur Récupéré Livré/);
+    expect(html).toContain('aria-current="step">Récupéré');
+    expect(html).toContain('class="rider s');
   });
 
   it('protège la page : CSP à nonce, pas de référent, pas d’indexation, pas de cache', async () => {
@@ -227,10 +228,10 @@ describe('page de suivi du destinataire (F2)', () => {
   it('en anglais selon le téléphone, ou au choix', async () => {
     const { app } = setup();
     const en = await page(app, `/t/${TOKEN}`, { 'accept-language': 'en-GB,en;q=0.9' });
-    expect(text(en.html)).toContain('Your parcel is arriving');
+    expect(text(en.html)).toContain('Jean M. is on the way to you');
     expect(en.html).toContain('lang="en"');
     const fr = await page(app, `/t/${TOKEN}?lang=fr`, { 'accept-language': 'en' });
-    expect(text(fr.html)).toContain('Votre colis arrive');
+    expect(text(fr.html)).toContain('Jean M. arrive chez vous');
   });
 
   it('sert les polices et le pictogramme, mis en cache', async () => {
