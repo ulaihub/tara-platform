@@ -28,6 +28,8 @@ flutter:
   # Sons de la marque (tool/make_sounds.py) : « packages/tara_ui/assets/sounds/… ».
   assets:
     - assets/sounds/
+    # Logos officiels Orange Money et MTN MoMo (choix de l'opérateur).
+    - assets/brands/
   # Polices embarquées (licence OFL) : les apps fonctionnent sans connexion. Déclarées ici,
   # elles s'appellent « packages/tara_ui/Sora » et « packages/tara_ui/PlusJakartaSans ».
   fonts:

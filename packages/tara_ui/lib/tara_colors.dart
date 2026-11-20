@@ -101,8 +101,8 @@ class TaraColors extends ThemeExtension<TaraColors> {
   final Color glassStrong;
   final Color glassBar;
 
-  /// Barre d'onglets : verre très clair, le contenu reste visible dessous (flou et couleurs
-  /// avivées).
+  /// Teinte du verre des barres (barre d'onglets, bouton du bas). Son opacité vient du
+  /// réglage de transparence ([GlassLevel]) ; le contenu reste deviné dessous, flouté.
   final Color tabBarGlass;
 
   /// Surface opaque utilisée sans flou (mode effets réduits).
@@ -180,8 +180,9 @@ class TaraColors extends ThemeExtension<TaraColors> {
     successTintBorder: Color.fromRGBO(74, 222, 155, 0.40),
     online: Color(0xFF4ADE9B),
     offline: Color(0xFF8A8B93),
-    dangerText: Color(0xFFFF7A85),
-    dangerTextStrong: Color(0xFFFF9AA2),
+    // Rouge vif : lisible sur le fond noir (contraste 6:1).
+    dangerText: Color(0xFFFF4D5A),
+    dangerTextStrong: Color(0xFFFF6B75),
     dangerTint: Color.fromRGBO(229, 37, 53, 0.17),
     warningText: Color(0xFFFFC24D),
     warningBannerBg: Color.fromRGBO(40, 28, 12, 0.72),
@@ -232,8 +233,9 @@ class TaraColors extends ThemeExtension<TaraColors> {
     successTintBorder: Color.fromRGBO(16, 160, 110, 0.35),
     online: Color(0xFF10A06E),
     offline: Color(0xFF8A8580),
-    dangerText: Color(0xFFC81E2C),
-    dangerTextStrong: Color(0xFFB3121F),
+    // Rouge vif, encore lisible sur le fond crème (contraste 4,8:1 et 5,1:1).
+    dangerText: Color(0xFFD21C2B),
+    dangerTextStrong: Color(0xFFC81E2C),
     dangerTint: Color.fromRGBO(229, 37, 53, 0.10),
     warningText: Color(0xFFB45309),
     warningBannerBg: Color.fromRGBO(255, 247, 230, 0.9),

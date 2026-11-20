@@ -6,7 +6,7 @@ import 'package:tara_core/session/session_store.dart';
 
 import 'tara_effects.dart';
 
-/// Réglages d'affichage choisis par le livreur (profil) : thème, langue, effets. Par
+/// Réglages d'affichage choisis dans le profil : thème, langue, effets, transparence des barres. Par
 /// défaut le thème et la langue suivent le téléphone. Gardés sur le téléphone ([store]).
 class AppSettings extends ChangeNotifier {
   AppSettings({EffectsController? effects, this.store}) : effects = effects ?? EffectsController() {
@@ -32,6 +32,7 @@ class AppSettings extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   Locale? _locale;
   EffectsPreference _effectsPreference = EffectsPreference.automatic;
+  GlassLevel _glassLevel = GlassLevel.balanced;
   bool _sounds = true;
 
   ThemeMode get themeMode => _themeMode;
@@ -70,13 +71,19 @@ class AppSettings extends ChangeNotifier {
       _effectsPreference = preference;
       effects.preference = preference;
     }
+    final glass = GlassLevel.values.where((value) => value.name == json['glass']).firstOrNull;
+    if (glass != null) {
+      _glassLevel = glass;
+      effects.glassLevel = glass;
+    }
   }
 
-  /// Préférence d'effets changée (profil) : gardée avec le reste. La détection d'un
-  /// téléphone modeste notifie aussi, sans rien à garder.
+  /// Préférence d'effets ou transparence changée (profil) : gardée avec le reste. La
+  /// détection d'un téléphone modeste notifie aussi, sans rien à garder.
   void _onEffects() {
-    if (effects.preference == _effectsPreference) return;
+    if (effects.preference == _effectsPreference && effects.glassLevel == _glassLevel) return;
     _effectsPreference = effects.preference;
+    _glassLevel = effects.glassLevel;
     _changed();
   }
 
@@ -88,6 +95,7 @@ class AppSettings extends ChangeNotifier {
       'theme': _themeMode.name,
       'locale': _locale?.languageCode,
       'effects': _effectsPreference.name,
+      'glass': _glassLevel.name,
       'sounds': _sounds,
     });
     unawaited(target.write(_key, json).catchError((Object _) {}));

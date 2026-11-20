@@ -362,10 +362,13 @@ class _CodeCellsState extends State<CodeCells> {
 /// Une option d'un groupe de choix.
 @immutable
 class ChoiceOption<T> {
-  const ChoiceOption(this.value, this.label, {this.icon});
+  const ChoiceOption(this.value, this.label, {this.icon, this.leading});
   final T value;
   final String label;
   final TaraIconData? icon;
+
+  /// Image posée avant le libellé à la place de l'icône (logo d'opérateur).
+  final Widget? leading;
 }
 
 /// Puces radio (véhicule, motif d'échec, montant reçu, opérateur) : un seul choix, état
@@ -419,7 +422,10 @@ class ChoiceChips<T> extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (option.icon != null) ...[
+                  if (option.leading != null) ...[
+                    option.leading!,
+                    const SizedBox(width: 8),
+                  ] else if (option.icon != null) ...[
                     TaraIcon(option.icon!, size: 18, color: isSelected ? c.accentText : c.textSecondary),
                     const SizedBox(width: 8),
                   ],

@@ -16,6 +16,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/star_rating.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
@@ -1394,7 +1395,7 @@ class _TopUpCard extends StatelessWidget {
           Text(l.topUpBody, style: TaraText.small.copyWith(color: c.textSecondary)),
           const SizedBox(height: 12),
           ChoiceChips<String>(
-            options: [ChoiceOption('MTN', l.payMtn), ChoiceOption('ORANGE', l.payOrange)],
+            options: [operatorChoice('MTN', l.payMtn), operatorChoice('ORANGE', l.payOrange)],
             selected: state.operator,
             onSelected: state.pending ? (_) {} : state.onOperator,
           ),

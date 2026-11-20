@@ -10,6 +10,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
@@ -290,7 +291,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
             CourseFieldLabel(l.depositOperator),
             const SizedBox(height: 8),
             ChoiceChips<String>(
-              options: [for (final operator in operators) ChoiceOption(operator.code, operator.name)],
+              options: [for (final operator in operators) operatorChoice(operator.code, operator.name)],
               selected: _operator,
               onSelected: (value) {
                 if (!busy) setState(() => _operator = value);

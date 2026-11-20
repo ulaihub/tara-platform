@@ -2642,6 +2642,36 @@ abstract class AppLocalizations {
   /// **'Réduites : moins d’effets, plus fluide sur un téléphone modeste.'**
   String get effectsHint;
 
+  /// No description provided for @glassLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transparence des barres'**
+  String get glassLabel;
+
+  /// No description provided for @glassClear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Verre'**
+  String get glassClear;
+
+  /// No description provided for @glassBalanced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Équilibré'**
+  String get glassBalanced;
+
+  /// No description provided for @glassOpaque.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opaque'**
+  String get glassOpaque;
+
+  /// No description provided for @glassHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Change la transparence de la barre du bas et des boutons posés en bas de l’écran.'**
+  String get glassHint;
+
   /// No description provided for @effectsAutoReduced.
   ///
   /// In fr, this message translates to:

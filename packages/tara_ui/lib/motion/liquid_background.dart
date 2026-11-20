@@ -38,7 +38,7 @@ class BlobSpec {
   static const brand = [TaraBrand.amber, TaraBrand.orange, TaraBrand.red];
   static const warm = [Color(0xFFFF8A00), TaraBrand.red];
   static const soft = [Color(0xFFFFD27A), Color(0xFFFF8A00)];
-  static const alarm = [Color(0xFFFF4D5A), TaraBrand.sos, Color(0xFFB3121F)];
+  static const alarm = [Color(0xFFFF4D5A), TaraBrand.sos, Color(0xFFE5101F)];
 }
 
 /// Rayons CSS « horizontaux / verticaux » des 3 états du morphing (A1).

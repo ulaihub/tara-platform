@@ -277,17 +277,10 @@ class CountdownRing extends StatelessWidget {
                       child: LiquidFill(
                         level: ratio,
                         levelDuration: const Duration(seconds: 1),
-                        front: const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red],
-                          stops: [0, .18, .5],
-                        ),
-                        back: c.isDark
-                            ? const Color.fromRGBO(255, 61, 0, 0.5)
-                            : const Color.fromRGBO(255, 106, 0, 0.35),
-                        frontPeriod: const Duration(seconds: 5),
-                        backPeriod: const Duration(seconds: 8),
+                        front: TaraLiquid.front,
+                        back: TaraLiquid.back(dark: c.isDark),
+                        frontPeriod: TaraLiquid.frontPeriod,
+                        backPeriod: TaraLiquid.backPeriod,
                       ),
                     ),
                     Column(
@@ -459,7 +452,7 @@ class _SosHoldButtonState extends State<SosHoldButton> {
                   : const LinearGradient(
                       begin: Alignment(-0.34, -0.94),
                       end: Alignment(0.34, 0.94),
-                      colors: [Color(0xFFFF5A66), TaraBrand.sos, Color(0xFFC81E2C)],
+                      colors: [Color(0xFFFF5A66), TaraBrand.sos, Color(0xFFE5101F)],
                       stops: [0, .55, 1],
                     ),
               color: dark ? const Color.fromRGBO(229, 37, 53, 0.16) : null,
@@ -487,7 +480,7 @@ class _SosHoldButtonState extends State<SosHoldButton> {
                           ? const LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [Color(0xFFFF4D5A), TaraBrand.sos, Color(0xFFB3121F)],
+                              colors: [Color(0xFFFF4D5A), TaraBrand.sos, Color(0xFFE5101F)],
                               stops: [0, .3, 1],
                             )
                           : const LinearGradient(

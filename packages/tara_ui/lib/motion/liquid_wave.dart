@@ -2,7 +2,27 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import '../tara_colors.dart';
 import 'motion_clock.dart';
+
+/// Liquide de la marque, le même partout (maquettes de la refonte) : deux vagues qui
+/// ondulent ensemble en sens inverse, l'avant en dégradé vif ambre → orange → rouge,
+/// l'arrière en orange vif translucide, plus haut.
+abstract final class TaraLiquid {
+  static const front = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red],
+    stops: [0, .18, .5],
+  );
+
+  /// Vague arrière : plus soutenue sur le fond noir, plus légère sur le fond crème.
+  static Color back({required bool dark}) =>
+      dark ? const Color.fromRGBO(255, 61, 0, 0.5) : const Color.fromRGBO(255, 106, 0, 0.35);
+
+  static const frontPeriod = Duration(seconds: 5);
+  static const backPeriod = Duration(seconds: 8);
+}
 
 /// Vague liquide (A2) : deux sinusoïdes (avant en dégradé, arrière plus sombre, sens
 /// inverse) dont le niveau porte l'information (temps restant, progression, maintien SOS).

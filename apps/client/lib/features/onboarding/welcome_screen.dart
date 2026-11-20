@@ -5,6 +5,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -209,7 +210,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   Text(l.payoutHelp, style: TaraText.small.copyWith(color: c.textTertiary)),
                   const SizedBox(height: 14),
                   ChoiceChips<String>(
-                    options: [for (final operator in operators) ChoiceOption(operator.code, operator.name)],
+                    options: [for (final operator in operators) operatorChoice(operator.code, operator.name)],
                     selected: _operator,
                     onSelected: (value) => setState(() => _operator = value),
                   ),

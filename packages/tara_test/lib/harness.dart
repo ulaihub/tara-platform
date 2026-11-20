@@ -115,4 +115,21 @@ Future<void> settle(WidgetTester tester) async {
   for (var i = 0; i < 12; i++) {
     await tester.pump(const Duration(milliseconds: 250));
   }
+  await loadBrandImages(tester);
+}
+
+/// Logos des opérateurs (images du paquet tara_ui) : décodés hors du temps simulé du
+/// test, sinon la capture les montrerait vides.
+Future<void> loadBrandImages(WidgetTester tester) async {
+  final images = find.byWidgetPredicate((widget) {
+    final provider = widget is Image ? widget.image : null;
+    return provider is AssetImage && provider.package == 'tara_ui';
+  });
+  if (images.evaluate().isEmpty) return;
+  await tester.runAsync(() async {
+    for (final element in images.evaluate().toList()) {
+      await precacheImage((element.widget as Image).image, element);
+    }
+  });
+  await tester.pump();
 }

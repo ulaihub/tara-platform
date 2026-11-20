@@ -33,6 +33,7 @@ Future<void> settle(WidgetTester tester) async {
   for (var i = 0; i < 12; i++) {
     await tester.pump(const Duration(milliseconds: 250));
   }
+  await loadBrandImages(tester);
 }
 
 final challenge = OtpChallenge(

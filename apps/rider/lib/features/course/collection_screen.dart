@@ -10,6 +10,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
@@ -364,7 +365,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             CourseFieldLabel(l.customerOperator),
             const SizedBox(height: 8),
             ChoiceChips<String>(
-              options: [for (final operator in operators) ChoiceOption(operator.code, operator.name)],
+              options: [for (final operator in operators) operatorChoice(operator.code, operator.name)],
               selected: _operator,
               onSelected: (value) {
                 if (!waiting) setState(() => _operator = value);
@@ -472,12 +473,10 @@ class _AmountCard extends StatelessWidget {
             Positioned.fill(
               child: LiquidFill(
                 level: .32,
-                front: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [TaraBrand.amber.withValues(alpha: .75), TaraBrand.orange.withValues(alpha: .55)],
-                ),
-                back: TaraBrand.red.withValues(alpha: .35),
+                front: TaraLiquid.front,
+                back: TaraLiquid.back(dark: c.isDark),
+                frontPeriod: TaraLiquid.frontPeriod,
+                backPeriod: TaraLiquid.backPeriod,
               ),
             ),
             Padding(

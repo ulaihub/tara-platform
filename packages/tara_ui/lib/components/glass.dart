@@ -147,10 +147,11 @@ class TintBox extends StatelessWidget {
   }
 }
 
-/// Socle flottant en verre clair (barre d'onglets, bouton du bas) : le contenu qui passe
-/// dessous est flouté et ses couleurs avivées (saturation × 1,6), reflet en haut, bord
-/// clair. L'enfant est posé hors du découpage pour garder son ombre (bouton orange).
-/// Effets réduits : surface opaque sans flou.
+/// Socle flottant en verre dépoli (barre d'onglets, bouton du bas) : le contenu qui passe
+/// dessous est fortement flouté et ses couleurs avivées (saturation × 1,8), reflet en haut,
+/// liseré lumineux sur le bord haut. Le remplissage suit le réglage de transparence
+/// ([GlassLevel]). L'enfant est posé hors du découpage pour garder son ombre (bouton
+/// orange). Effets réduits : surface opaque sans flou.
 class GlassDock extends StatelessWidget {
   const GlassDock({super.key, required this.child, this.radius = 28, this.padding = EdgeInsets.zero});
 
@@ -158,7 +159,7 @@ class GlassDock extends StatelessWidget {
   final double radius;
   final EdgeInsets padding;
 
-  static final _vibrancy = ColorFilter.matrix(_saturation(1.6));
+  static final _vibrancy = ColorFilter.matrix(_saturation(1.8));
 
   static List<double> _saturation(double s) {
     const r = 0.2126, g = 0.7152, b = 0.0722;
@@ -175,23 +176,44 @@ class GlassDock extends StatelessWidget {
     final c = TaraColors.of(context);
     final effects = TaraEffects.of(context);
     final shape = BorderRadius.circular(radius);
+    final fill = c.tabBarGlass.withValues(alpha: effects.glassLevel.fill);
     final surface = DecoratedBox(
       decoration: BoxDecoration(
-        color: effects.blur ? c.tabBarGlass : c.glassFallback,
+        color: effects.blur ? fill : c.glassFallback,
         borderRadius: shape,
         border: Border.all(color: c.glassBorder.withValues(alpha: c.isDark ? .22 : .85)),
-        // Reflet du verre : plus clair en haut, transparent en bas.
-        gradient: effects.blur
-            ? LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  c.glassHighlight.withValues(alpha: c.isDark ? .10 : .45),
-                  c.glassHighlight.withValues(alpha: 0),
-                ],
-              )
-            : null,
       ),
+      // Reflet du verre : plus clair en haut, transparent aux deux tiers ; liseré lumineux
+      // sur le bord haut, entre les arrondis.
+      child: effects.blur
+          ? Stack(
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: shape,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0, .7],
+                        colors: [
+                          c.glassHighlight.withValues(alpha: c.isDark ? .10 : .55),
+                          c.glassHighlight.withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: radius * .6,
+                  right: radius * .6,
+                  top: 0,
+                  height: 1,
+                  child: ColoredBox(color: c.glassHighlight.withValues(alpha: c.isDark ? .14 : .9)),
+                ),
+              ],
+            )
+          : null,
     );
     return DecoratedBox(
       decoration: BoxDecoration(
