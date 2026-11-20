@@ -54,7 +54,7 @@ void main() {
     });
 
     goldenTest('06 profil ${variant.name}', (tester) async {
-      await pumpVariant(tester, variant, scoped(tabs(2, const ProfileScreen(me: shopOwner)), shopApi()));
+      await pumpVariant(tester, variant, scoped(tabs(3, const ProfileScreen(me: shopOwner)), shopApi()));
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(capture, matchesGoldenFile('goldens/06_profil/${variant.name}.png'));
@@ -119,7 +119,8 @@ void main() {
     realtime.emit('order.status', {'orderId': 'o1', 'status': 'DELIVERED'});
     await settle(tester);
     expect(find.text('50\u00a0000\u00a0F'), findsOneWidget);
-    expect(find.text('4 livraisons · 141\u00a0000\u00a0F à recevoir cette nuit'), findsOneWidget);
+    expect(find.text('Encaissé aujourd’hui · 4 livraisons'), findsOneWidget);
+    expect(find.text('141\u00a0000\u00a0F à recevoir cette nuit'), findsOneWidget);
     expect(sounds.played, [TaraSound.cash]);
   });
 

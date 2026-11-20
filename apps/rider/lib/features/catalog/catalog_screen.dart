@@ -7,6 +7,7 @@ import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/status.dart';
+import 'package:tara_ui/components/three_d.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -483,6 +484,71 @@ class _CatalogScreenState extends State<CatalogScreen> {
               colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red, TaraBrand.orange, TaraBrand.amber],
               period: Duration(seconds: 3),
             ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: GlassCard(
+                radius: 20,
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                child: Center(
+                  child: Column(
+                    children: [
+                      const Parcel3D(size: 58, label: 'n° 4', semanticLabel: 'Colis Tara en 3D'),
+                      Text('Colis 3D', style: TaraText.small.copyWith(color: c.textTertiary)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: GlassCard(
+                radius: 20,
+                padding: const EdgeInsets.fromLTRB(14, 22, 14, 10),
+                child: Column(
+                  children: [
+                    TiltCard(
+                      radius: 18,
+                      child: Container(
+                        height: 92,
+                        padding: const EdgeInsets.all(12),
+                        alignment: Alignment.bottomLeft,
+                        decoration: BoxDecoration(gradient: TaraBrand.gradient, borderRadius: BorderRadius.circular(18)),
+                        child: Text(
+                          '${formatAmount(42500)}\u00A0F',
+                          style: TaraText.cardTitle.copyWith(color: TaraBrand.onBrand, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text('Carte en relief', style: TaraText.small.copyWith(color: c.textTertiary)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        GlassCard(
+          radius: 20,
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+          child: Column(
+            children: [
+              Column3DChart(
+                height: 96,
+                selected: 3,
+                columns: [
+                  for (final (day, rides) in [('Lun', 4), ('Mar', 6), ('Mer', 3), ('Jeu', 7), ('Ven', 5), ('Sam', 9), ('Dim', 2)])
+                    Column3D(label: day, value: rides.toDouble(), detail: '$rides courses'),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text('Colonnes en relief', style: TaraText.small.copyWith(color: c.textTertiary)),
+            ],
           ),
         ),
       ],

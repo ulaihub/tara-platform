@@ -234,6 +234,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inProgress => 'In progress';
 
   @override
+  String get whereToDeliver => 'Where to deliver?';
+
+  @override
+  String get whereToDeliverHint => 'Customer’s name, number or area';
+
+  @override
+  String get quickBulk => 'Several parcels';
+
+  @override
+  String get quickAskAddress => 'Ask for the address';
+
+  @override
+  String get quickReceipts => 'My receipts';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get chipDecide => 'Decide';
+
+  @override
+  String get chipPay => 'Pay';
+
+  @override
   String get noOrdersInProgress => 'No delivery in progress. Your parcels show up here as soon as they are sent.';
 
   @override

@@ -558,7 +558,7 @@ void main() {
     expect(closed, 1);
   });
 
-  testWidgets('« Nouvelle livraison » ouvre le parcours au-dessus des onglets', (tester) async {
+  testWidgets('« Où livrer ? » et le « + » de la barre ouvrent le parcours au-dessus des onglets', (tester) async {
     await pumpVariant(
       tester,
       Variant.matrix.first,
@@ -568,13 +568,19 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.text('Nouvelle livraison'));
+    // « Où livrer ? » sur l'accueil…
+    await tester.tap(find.text('Où livrer ?'));
     await settle(tester);
     expect(find.byType(NewOrderFlow), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Fermer'));
     await settle(tester);
     expect(find.byType(NewOrderFlow), findsNothing);
-    expect(find.text('Nouvelle livraison'), findsOneWidget);
+    // … et le « + » au centre de la barre, depuis n'importe quel onglet.
+    await tester.tap(find.text('Commandes'));
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel('Nouvelle livraison'));
+    await settle(tester);
+    expect(find.byType(NewOrderFlow), findsOneWidget);
   });
 
   testWidgets('la nature du contenu suggère taille et fragilité, sans écraser un choix', (tester) async {

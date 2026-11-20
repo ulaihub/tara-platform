@@ -18,16 +18,37 @@ class TabItem {
   final String label;
 }
 
+/// Bouton d'action posé au centre de la barre, en relief au-dessus d'elle (« + » :
+/// nouvelle livraison). Ce n'est pas un onglet : il ouvre un écran.
+@immutable
+class TabAction {
+  const TabAction({required this.icon, required this.label, required this.onPressed});
+  final TaraIconData icon;
+
+  /// Lu par le lecteur d'écran (« Nouvelle livraison »).
+  final String label;
+  final VoidCallback onPressed;
+}
+
 /// Barre d'onglets flottante en verre clair (glassmorphisme) : le contenu passe dessous,
 /// flouté et aux couleurs avivées ; une lentille de verre teintée glisse vers l'onglet
 /// choisi avec un léger rebond. Effets réduits : surface opaque sans flou ; animations
 /// réduites : la lentille se déplace sans transition.
 class FloatingTabBar extends StatelessWidget {
-  const FloatingTabBar({super.key, required this.items, required this.current, required this.onSelected});
+  const FloatingTabBar({
+    super.key,
+    required this.items,
+    required this.current,
+    required this.onSelected,
+    this.action,
+  });
 
   final List<TabItem> items;
   final int current;
   final ValueChanged<int> onSelected;
+
+  /// Bouton central en relief, entre la première et la seconde moitié des onglets.
+  final TabAction? action;
 
   /// Hauteur de la barre et marge sous elle (hors zone système).
   static const barHeight = 64.0;
@@ -53,13 +74,17 @@ class FloatingTabBar extends StatelessWidget {
             height: barHeight - 12,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final width = constraints.maxWidth / items.length;
+                final center = action == null ? null : items.length ~/ 2;
+                final slots = items.length + (center == null ? 0 : 1);
+                final width = constraints.maxWidth / slots;
+                int slotOf(int tab) => center != null && tab >= center ? tab + 1 : tab;
                 return Stack(
+                  clipBehavior: Clip.none,
                   children: [
                     AnimatedPositioned(
                       duration: effects.decorativeMotion ? const Duration(milliseconds: 520) : Duration.zero,
                       curve: _elastic,
-                      left: width * current,
+                      left: width * slotOf(current),
                       top: 0,
                       bottom: 0,
                       width: width,
@@ -67,15 +92,74 @@ class FloatingTabBar extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        for (var i = 0; i < items.length; i++)
+                        for (var i = 0; i < items.length; i++) ...[
+                          if (i == center) Expanded(child: _CenterAction(action: action!)),
                           Expanded(
                             child: _TabButton(item: items[i], selected: i == current, onTap: () => onSelected(i)),
                           ),
+                        ],
                       ],
                     ),
                   ],
                 );
               },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bouton « + » en relief au centre de la barre : disque au dégradé de la marque qui
+/// dépasse au-dessus du verre, ombre orange, léger enfoncement au toucher.
+class _CenterAction extends StatefulWidget {
+  const _CenterAction({required this.action});
+  final TabAction action;
+
+  @override
+  State<_CenterAction> createState() => _CenterActionState();
+}
+
+class _CenterActionState extends State<_CenterAction> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const size = 54.0;
+    return Semantics(
+      button: true,
+      label: widget.action.label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => setState(() => _down = true),
+        onTapCancel: () => setState(() => _down = false),
+        onTapUp: (_) => setState(() => _down = false),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          widget.action.onPressed();
+        },
+        child: OverflowBox(
+          maxHeight: size + 20,
+          child: Transform.translate(
+            offset: const Offset(0, -12),
+            child: AnimatedScale(
+              scale: _down ? .92 : 1,
+              duration: const Duration(milliseconds: 120),
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: TaraBrand.gradient,
+                  border: Border.all(color: const Color.fromRGBO(255, 255, 255, .35)),
+                  boxShadow: const [
+                    BoxShadow(color: Color.fromRGBO(255, 106, 0, .45), blurRadius: 22, offset: Offset(0, 8)),
+                  ],
+                ),
+                child: Center(child: TaraIcon(widget.action.icon, size: 26, strokeWidth: 2.4, color: TaraBrand.onBrand)),
+              ),
             ),
           ),
         ),
@@ -167,11 +251,15 @@ class TaraTabShell extends StatefulWidget {
     required this.onSelected,
     required this.child,
     this.showBar = true,
+    this.action,
   });
 
   final List<TabItem> items;
   final int current;
   final ValueChanged<int> onSelected;
+
+  /// Bouton central en relief (« + » : nouvelle livraison).
+  final TabAction? action;
 
   /// Écran de l'onglet courant (changé à chaque onglet).
   final Widget child;
@@ -230,7 +318,12 @@ class _TaraTabShellState extends State<TaraTabShell> {
                   duration: duration,
                   child: SafeArea(
                     top: false,
-                    child: FloatingTabBar(items: widget.items, current: widget.current, onSelected: widget.onSelected),
+                    child: FloatingTabBar(
+                      items: widget.items,
+                      current: widget.current,
+                      onSelected: widget.onSelected,
+                      action: widget.action,
+                    ),
                   ),
                 ),
               ),

@@ -597,7 +597,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.text('Marie Ngo · Bonapriso'));
+    await tester.tap(find.textContaining('Marie Ngo', findRichText: true));
     await settle(tester);
     expect(find.byType(TrackingScreen), findsOneWidget);
     expect(find.text('TR-48301'), findsOneWidget);
@@ -636,7 +636,7 @@ void main() {
     realtime.connected.value = true;
     await settle(tester);
     expect(find.text('Impossible de charger vos livraisons.'), findsNothing);
-    expect(find.text('Marie Ngo · Bonapriso'), findsOneWidget);
+    expect(find.textContaining('Marie Ngo', findRichText: true), findsOneWidget);
   });
 
   testWidgets('une notification touchée ouvre le suivi de sa commande', (tester) async {

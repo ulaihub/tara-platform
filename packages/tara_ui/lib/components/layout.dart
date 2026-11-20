@@ -155,10 +155,22 @@ class IconTile extends StatelessWidget {
 
 /// Ligne de liste : tuile d'icône, titre, sous-titre, élément à droite.
 class ListRow extends StatelessWidget {
-  const ListRow({super.key, required this.leading, required this.title, this.subtitle, this.trailing, this.onTap});
+  const ListRow({
+    super.key,
+    required this.leading,
+    required this.title,
+    this.detail,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+  });
 
   final Widget leading;
   final String title;
+
+  /// Précision posée juste après le titre, en plus discret, sur la même ligne (lieu d'une
+  /// livraison) ; coupée par « … » si la ligne est trop courte, le titre restant entier.
+  final String? detail;
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
@@ -186,10 +198,28 @@ class ListRow extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            title,
-                            style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
-                          ),
+                          if (detail == null)
+                            Text(
+                              title,
+                              style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                            )
+                          else
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: title,
+                                    style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                                  ),
+                                  TextSpan(
+                                    text: '  ${detail!}',
+                                    style: TaraText.label.copyWith(color: c.textTertiary, fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           if (subtitle != null) ...[
                             const SizedBox(height: 2),
                             Text(subtitle!, style: TaraText.small.copyWith(color: c.textTertiary)),
