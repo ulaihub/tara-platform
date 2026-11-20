@@ -685,5 +685,18 @@
   "tripSummary": "{distance} · ~{minutes} min",
   "tourSummary": "{distance} · {count} stops",
   "pinPickup": "A · {name}",
-  "pinDropoff": "B · {place}"
+  "pinDropoff": "B · {place}",
+  "missingPhoto": "the photo",
+  "missingCode": "the code",
+  "missingParcels": "the parcels to tick",
+  "missingItems": "Missing: {items}.",
+  "slideParcelCollected": "Slide · Parcel collected",
+  "parcelNonConforming": "Parcel not as described",
+  "waitingSince": "You have been waiting {minutes} min · ",
+  "waitingFreeLeft": "free for {left} more min",
+  "waitingThen": ". Then {fee} per {step} min for the sender.",
+  "slideConfirmDelivery": "Slide · Confirm delivery",
+  "cantDeliverShort": "Can’t deliver",
+  "distanceAway": "{distance} away",
+  "towards": "Towards {place}"
 }

@@ -3895,6 +3895,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'B · {place}'**
   String pinDropoff(String place);
+
+  /// No description provided for @missingPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'la photo'**
+  String get missingPhoto;
+
+  /// No description provided for @missingCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'le code'**
+  String get missingCode;
+
+  /// No description provided for @missingParcels.
+  ///
+  /// In fr, this message translates to:
+  /// **'les colis à cocher'**
+  String get missingParcels;
+
+  /// No description provided for @missingItems.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il manque {items}.'**
+  String missingItems(String items);
+
+  /// No description provided for @slideParcelCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser · Colis récupéré'**
+  String get slideParcelCollected;
+
+  /// No description provided for @parcelNonConforming.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis non conforme'**
+  String get parcelNonConforming;
+
+  /// No description provided for @waitingSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous attendez depuis {minutes} min · '**
+  String waitingSince(int minutes);
+
+  /// No description provided for @waitingFreeLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'gratuit encore {left} min'**
+  String waitingFreeLeft(int left);
+
+  /// No description provided for @waitingThen.
+  ///
+  /// In fr, this message translates to:
+  /// **'. Ensuite {fee} par {step} min pour l’expéditeur.'**
+  String waitingThen(String fee, int step);
+
+  /// No description provided for @slideConfirmDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser · Confirmer la livraison'**
+  String get slideConfirmDelivery;
+
+  /// No description provided for @cantDeliverShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison impossible'**
+  String get cantDeliverShort;
+
+  /// No description provided for @distanceAway.
+  ///
+  /// In fr, this message translates to:
+  /// **'À {distance}'**
+  String distanceAway(String distance);
+
+  /// No description provided for @towards.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vers {place}'**
+  String towards(String place);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

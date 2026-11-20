@@ -1623,5 +1623,63 @@
         "type": "String"
       }
     }
+  },
+  "missingPhoto": "la photo",
+  "missingCode": "le code",
+  "missingParcels": "les colis à cocher",
+  "missingItems": "Il manque {items}.",
+  "@missingItems": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "slideParcelCollected": "Glisser · Colis récupéré",
+  "parcelNonConforming": "Colis non conforme",
+  "waitingSince": "Vous attendez depuis {minutes} min · ",
+  "@waitingSince": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "waitingFreeLeft": "gratuit encore {left} min",
+  "@waitingFreeLeft": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "waitingThen": ". Ensuite {fee} par {step} min pour l’expéditeur.",
+  "@waitingThen": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "slideConfirmDelivery": "Glisser · Confirmer la livraison",
+  "cantDeliverShort": "Livraison impossible",
+  "distanceAway": "À {distance}",
+  "@distanceAway": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "towards": "Vers {place}",
+  "@towards": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
   }
 }

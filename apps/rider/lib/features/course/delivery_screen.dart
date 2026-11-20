@@ -4,7 +4,6 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
-import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
@@ -18,9 +17,9 @@ import '../../core/course/course_actions.dart';
 import '../../core/course/proof_photo.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/step_labels.dart';
 import '../map/tara_map.dart';
 import 'address_help.dart';
+import 'course_page.dart';
 import 'course_scaffold.dart';
 
 /// Au-delà, le livreur est prévenu que sa livraison sera signalée au support.
@@ -78,6 +77,9 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
   bool _busy = false;
   String? _error;
   String? _refusedActionId;
+
+  /// « Je suis arrivé » touché : code et photo s'affichent (sinon, dès 150 m de l'adresse).
+  bool _arrived = false;
 
   @override
   void initState() {
@@ -179,123 +181,424 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     final c = TaraColors.of(context);
     final order = widget.order;
     final due = order.collectAtDelivery > 0;
-    final steps = [l.stepPickup, if (due) l.stepCollect, l.stepDelivery];
     final name = order.recipient.name ?? order.dropoff.contactName ?? order.reference;
     final phone = order.recipient.phone ?? order.dropoff.contactPhone;
     final online = ref.watch(onlineControllerProvider);
+    final here = online.lastPosition;
+    final meters = here == null
+        ? null
+        : courseDistance(here.latitude, here.longitude, order.dropoff.latitude, order.dropoff.longitude);
+    final stop = MapStop(
+      latitude: order.dropoff.latitude,
+      longitude: order.dropoff.longitude,
+      dropoff: true,
+      label: name,
+    );
+    // Noté dans le journal d'appels : preuve d'appel en cas d'échec (10).
+    final VoidCallback? call = phone == null
+        ? null
+        : () => ref.read(callJournalProvider).call(order.id, to: 'RECIPIENT', phone: phone);
+    final kicker = '${l.stepDelivery} · ${order.reference}';
+    final collect = due
+        ? CollectBox(amount: order.collectAtDelivery, title: l.collectAtDeliveryTitle, body: l.collectAtDeliveryBody)
+        : null;
 
-    return CourseScaffold(
-      order: order,
-      stop: MapStop(latitude: order.dropoff.latitude, longitude: order.dropoff.longitude, dropoff: true, label: name),
-      title: (route, distance) {
-        if (distance != null && distance <= arrivedMeters) return l.arrivedAtDestination;
-        final minutes = route?.minutes;
-        return minutes == null ? l.toDropoff : l.toDropoffMinutes(minutes);
-      },
-      onBack: widget.onBack,
-      onSos: widget.onSos,
-      panelRatio: .70,
+    // En route (maquette Livreur-En-Route) : tant qu'il est loin et n'a pas dit être arrivé.
+    if (!_arrived && meters != null && meters > arrivedMeters) {
+      return _EnRoute(
+        order: order,
+        name: name,
+        kicker: kicker,
+        stop: stop,
+        meters: meters,
+        tourProgress: widget.tourProgress,
+        onSos: widget.onSos,
+        onBack: widget.onBack,
+        onCall: call,
+        collect: collect,
+        onArrived: () => setState(() => _arrived = true),
+        onFailure: _busy ? null : widget.onFailure,
+      );
+    }
+
+    return CoursePage(
+      stop: stop,
+      header: CourseHeader(
+        kicker: kicker,
+        title: name,
+        subtitle: order.dropoff.line,
+        onBack: widget.onBack,
+        onSos: widget.onSos,
+        callLabel: l.callPerson(name),
+        onCall: call,
+      ),
       footer: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Livraison définitive : on glisse plutôt que toucher, pour éviter l'erreur.
           SwipeButton(
-            label: l.confirmDelivery,
-            icon: TaraIcons.check,
+            plain: true,
+            height: 62,
+            label: l.slideConfirmDelivery,
+            semanticLabel: l.confirmDelivery,
             loading: _busy,
             onConfirmed: _ready ? _submit : null,
           ),
           Center(
-            child: TaraLink(label: l.cantDeliver, onPressed: _busy ? null : widget.onFailure),
+            child: TextButton(
+              onPressed: _busy ? null : widget.onFailure,
+              child: Text(
+                l.cantDeliverShort,
+                style: TaraText.label.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: c.textPrimary.withValues(alpha: .72),
+                ),
+              ),
+            ),
           ),
         ],
       ),
       children: [
-        // Enlèvement fait ; étape en cours : l'encaissement s'il y en a, sinon la livraison.
-        CourseStepper(labels: steps, activeIndex: 1, stateLabels: stepStateLabels(l)),
-        if (widget.tourProgress case final tour?) ...[
-          const SizedBox(height: 10),
-          InfoPill(
-            label: l.tourProgress(tour.stop, tour.total, '${formatAmount(tour.earned)}\u00a0F'),
-            icon: TaraIcons.package,
-            tone: TintTone.accent,
+        if (widget.tourProgress case final tour?)
+          Center(
+            child: InfoPill(
+              label: l.tourProgress(tour.stop, tour.total, '${formatAmount(tour.earned)} F'),
+              icon: TaraIcons.package,
+              tone: TintTone.accent,
+            ),
           ),
-        ],
-        const SizedBox(height: 14),
-        PartyRow(
-          name: name,
-          line: order.dropoff.line,
-          callLabel: l.callPerson(name),
-          // Noté dans le journal d'appels : preuve d'appel en cas d'échec (10).
-          onCall: phone == null
-              ? null
-              : () => ref.read(callJournalProvider).call(order.id, to: 'RECIPIENT', phone: phone),
+        CourseCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  TaraIcon(TaraIcons.mapPin, size: 20, color: c.accentText),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      order.dropoff.line,
+                      style: TaraText.text.copyWith(fontSize: 13, height: 1.4, color: c.textPrimary),
+                    ),
+                  ),
+                ],
+              ),
+              AddressHelp(orderId: order.id, stop: 'dropoff', address: order.dropoff, name: name),
+            ],
+          ),
         ),
-        AddressHelp(orderId: order.id, stop: 'dropoff', address: order.dropoff, name: name),
         // Deux colis à bord : le numéro dit lequel remettre ici.
-        if (order.batchNumber != null) ...[
-          const SizedBox(height: 12),
-          ParcelCard(order: order, title: l.parcelToDeliver, showRecipient: false),
-        ],
-        if (due) ...[
-          const SizedBox(height: 12),
-          CollectBox(amount: order.collectAtDelivery, title: l.collectAtDeliveryTitle, body: l.collectAtDeliveryBody),
-        ],
+        if (order.batchNumber != null) ParcelCard(order: order, title: l.parcelToDeliver, showRecipient: false),
+        ?collect,
         // Loin de l'adresse : la livraison confirmée d'ici sera signalée au support.
-        ListenableBuilder(
-          listenable: online,
-          builder: (context, _) {
-            final here = online.lastPosition;
-            final meters = here == null
-                ? null
-                : courseDistance(here.latitude, here.longitude, order.dropoff.latitude, order.dropoff.longitude);
-            if (meters == null || meters <= farFromAddressMeters) return const SizedBox.shrink();
-            return Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: CourseWarning(l.farFromAddress(formatDistance(meters.round()))),
-            );
-          },
+        if (meters != null && meters > farFromAddressMeters)
+          CourseWarning(l.farFromAddress(formatDistance(meters.round()))),
+        if (order.dropoff.motorbikeRestricted) CourseWarning(l.noMotoAddress),
+        CourseCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_withCode) ...[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l.deliveryCodeLabel,
+                        style: TaraText.bodyStrong.copyWith(fontSize: 14, color: c.textPrimary),
+                      ),
+                    ),
+                    Text(
+                      l.deliveryCodeHint,
+                      style: TaraText.small.copyWith(fontSize: 12, color: c.textPrimary.withValues(alpha: .66)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                CodeCells(length: 4, controller: _code, cellHeight: 52, autofocus: false, digitLabel: l.digitLabel),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TaraLink(label: l.noCodeLink, onPressed: _busy ? null : _toggleMode),
+                ),
+              ] else ...[
+                Text(l.noCodeTitle, style: TaraText.bodyStrong.copyWith(fontSize: 14, color: c.textPrimary)),
+                const SizedBox(height: 4),
+                Text(
+                  l.noCodeBody,
+                  style: TaraText.small.copyWith(fontSize: 12, color: c.textPrimary.withValues(alpha: .72)),
+                ),
+                const SizedBox(height: 10),
+                TaraTextField(
+                  label: l.receivedByLabel,
+                  hint: l.receivedByHint,
+                  controller: _receivedBy,
+                  textInputAction: TextInputAction.done,
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TaraLink(label: l.hasCodeLink, onPressed: _busy ? null : _toggleMode),
+                ),
+              ],
+            ],
+          ),
         ),
-        if (order.dropoff.motorbikeRestricted) ...[const SizedBox(height: 12), CourseWarning(l.noMotoAddress)],
-        const SizedBox(height: 14),
-        if (_withCode) ...[
-          CourseFieldLabel(l.deliveryCodeLabel, hint: l.deliveryCodeHint),
-          const SizedBox(height: 8),
-          CodeCells(length: 4, controller: _code, cellHeight: 56, autofocus: false, digitLabel: l.digitLabel),
-          TaraLink(label: l.noCodeLink, onPressed: _busy ? null : _toggleMode),
-        ] else ...[
-          Text(
-            l.noCodeTitle,
-            style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l.noCodeBody,
-            style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 10),
-          TaraTextField(
-            label: l.receivedByLabel,
-            hint: l.receivedByHint,
-            controller: _receivedBy,
-            textInputAction: TextInputAction.done,
-            textCapitalization: TextCapitalization.sentences,
-          ),
-          TaraLink(label: l.hasCodeLink, onPressed: _busy ? null : _toggleMode),
-        ],
-        const SizedBox(height: 4),
-        ProofPhotoTile(
-          path: _photoPath,
+        PhotoCard(
+          taken: _photoPath != null,
           takenAt: _photoAt,
-          onTake: _busy ? null : _takePhoto,
           title: l.photoHandover,
+          takenTitle: l.photoHandoverTaken,
           hint: l.photoHandoverHint,
-          takenLabel: l.photoHandoverTaken,
+          onTake: _busy ? null : _takePhoto,
         ),
-        if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
-        const SizedBox(height: 12),
+        if (_error != null) ErrorLine(_error!),
       ],
+    );
+  }
+}
+
+/// En route vers le client (maquette Livreur-En-Route) : carte plein écran, bandeau de
+/// distance en haut avec le SOS, panneau du bas (client, adresse, aide, montant à
+/// encaisser), « Je suis arrivé » et « Livraison impossible ».
+class _EnRoute extends ConsumerWidget {
+  const _EnRoute({
+    required this.order,
+    required this.name,
+    required this.kicker,
+    required this.stop,
+    required this.meters,
+    required this.tourProgress,
+    required this.onSos,
+    required this.onBack,
+    required this.onCall,
+    required this.collect,
+    required this.onArrived,
+    required this.onFailure,
+  });
+
+  final RiderOrder order;
+  final String name;
+  final String kicker;
+  final MapStop stop;
+  final double meters;
+  final ({int stop, int total, int earned})? tourProgress;
+  final VoidCallback onSos;
+  final VoidCallback onBack;
+  final VoidCallback? onCall;
+  final Widget? collect;
+  final VoidCallback onArrived;
+  final VoidCallback? onFailure;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final online = ref.watch(onlineControllerProvider);
+    final insets = MediaQuery.paddingOf(context);
+    final ok = c.isDark ? const Color(0xFF4ADE9B) : const Color(0xFF0E7F57);
+    final sheet = c.isDark ? const Color(0xFF16161E) : const Color(0xFFFFFFFF);
+    return Material(
+      color: c.bg,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ListenableBuilder(
+              listenable: online,
+              builder: (context, _) => TaraMap(
+                rider: online.lastPosition,
+                stop: stop,
+                framePadding: EdgeInsets.fromLTRB(50, 110 + insets.top, 50, 360),
+              ),
+            ),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      label: l.back,
+                      child: GestureDetector(
+                        onTap: onBack,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: sheet.withValues(alpha: .94),
+                            border: Border.all(color: c.textPrimary.withValues(alpha: .10)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  gradient: TaraBrand.gradient,
+                                ),
+                                alignment: Alignment.center,
+                                child: const TaraIcon(
+                                  TaraIcons.navigation,
+                                  size: 22,
+                                  strokeWidth: 2.2,
+                                  color: Color(0xFF140800),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l.distanceAway(formatDistance(meters.round())),
+                                      style: TextStyle(
+                                        fontFamily: TaraText.sora,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: c.textPrimary,
+                                      ),
+                                    ),
+                                    Text(
+                                      l.towards(order.dropoff.neighborhood ?? order.dropoff.city),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TaraText.small.copyWith(
+                                        fontSize: 12,
+                                        color: c.textPrimary.withValues(alpha: .72),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SosButton(label: l.safetyAlert, onPressed: onSos, size: 48, round: true),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 16 + insets.bottom,
+            child: Container(
+              constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .66),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                color: sheet,
+                border: Border.all(color: c.textPrimary.withValues(alpha: .10)),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (tourProgress case final tour?) ...[
+                      InfoPill(
+                        label: l.tourProgress(tour.stop, tour.total, '${formatAmount(tour.earned)} F'),
+                        icon: TaraIcons.package,
+                        tone: TintTone.accent,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                kicker.toUpperCase(),
+                                style: TaraText.small.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.1,
+                                  color: c.accentText,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                name,
+                                style: TextStyle(
+                                  fontFamily: TaraText.sora,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: c.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                order.dropoff.line,
+                                style: TaraText.text.copyWith(
+                                  fontSize: 13,
+                                  color: c.textPrimary.withValues(alpha: .78),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (onCall != null) ...[
+                          const SizedBox(width: 12),
+                          Semantics(
+                            button: true,
+                            label: l.callPerson(name),
+                            excludeSemantics: true,
+                            child: GestureDetector(
+                              onTap: onCall,
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: c.textPrimary.withValues(alpha: .08),
+                                  border: Border.all(color: c.textPrimary.withValues(alpha: .14)),
+                                ),
+                                alignment: Alignment.center,
+                                child: TaraIcon(TaraIcons.phone, size: 20, color: ok),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    AddressHelp(orderId: order.id, stop: 'dropoff', address: order.dropoff, name: name),
+                    if (collect != null) ...[const SizedBox(height: 12), collect!],
+                    const SizedBox(height: 12),
+                    PrimaryButton(label: l.arrivedAction, height: 56, strong: true, onPressed: onArrived),
+                    Center(
+                      child: TextButton(
+                        onPressed: onFailure,
+                        child: Text(
+                          l.cantDeliverShort,
+                          style: TaraText.label.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: c.textPrimary.withValues(alpha: .72),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
