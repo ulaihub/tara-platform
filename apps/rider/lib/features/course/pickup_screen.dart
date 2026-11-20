@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
-import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
-import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/liquid_wave.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -19,9 +18,9 @@ import '../../core/course/course_actions.dart';
 import '../../core/course/proof_photo.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
-import '../common/step_labels.dart';
 import '../map/tara_map.dart';
 import 'address_help.dart';
+import 'course_page.dart';
 import 'course_scaffold.dart';
 
 /// 08 · Enlèvement : itinéraire jusqu'au vendeur, montant à encaisser sur place, code de
@@ -248,48 +247,90 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
     final order = widget.order;
-    final steps = [l.stepPickup, if (order.collectAtDelivery > 0) l.stepCollect, l.stepDelivery];
     final senderName = order.sender.name ?? order.pickup.contactName ?? order.reference;
     final phone = order.sender.phone ?? order.pickup.contactPhone;
-    final ready =
-        _photoPath != null && _code.text.length == 4 && (!widget.isTour || _checked.length == widget.tour.length);
+    final hasCode = _code.text.length == 4;
+    final allChecked = !widget.isTour || _checked.length == widget.tour.length;
+    final ready = _photoPath != null && hasCode && allChecked;
+    final here = ref.watch(onlineControllerProvider).lastPosition;
+    final distance = here == null
+        ? null
+        : courseDistance(here.latitude, here.longitude, order.pickup.latitude, order.pickup.longitude);
+    final missing = [
+      if (_photoPath == null) l.missingPhoto,
+      if (!hasCode) l.missingCode,
+      if (!allChecked) l.missingParcels,
+    ];
+    final accent2 = c.isDark ? const Color(0xFFFFC283) : const Color(0xFF9A3412);
 
-    return CourseScaffold(
-      order: order,
+    return CoursePage(
       stop: MapStop(latitude: order.pickup.latitude, longitude: order.pickup.longitude, label: senderName),
-      title: (route, _) => route?.minutes == null ? l.toPickup : l.toPickupMinutes(route!.minutes!),
-      onBack: widget.onBack,
-      onSos: widget.onSos,
+      header: CourseHeader(
+        kicker: distance == null ? l.stepPickup : '${l.stepPickup} · ${formatDistance(distance.round())}',
+        title: senderName,
+        subtitle: [
+          if (order.pickup.contactName case final contact? when contact != senderName) contact,
+          order.reference,
+        ].join(' · '),
+        onBack: widget.onBack,
+        onSos: widget.onSos,
+        callLabel: l.callPerson(senderName),
+        // Appels gardés dans le journal : ils prouvent l'attente si l'expéditeur ne vient pas.
+        onCall: phone == null ? null : () => ref.read(callJournalProvider).call(order.id, to: 'SENDER', phone: phone),
+      ),
       footer: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Enlèvement définitif : on glisse plutôt que toucher, pour éviter l'erreur.
           SwipeButton(
-            label: l.parcelCollected,
-            icon: TaraIcons.package,
+            plain: true,
+            height: 62,
+            label: l.slideParcelCollected,
+            semanticLabel: l.parcelCollected,
             loading: _busy,
             onConfirmed: ready ? _submit : null,
           ),
-          Center(
-            child: TaraLink(label: l.parcelNotConforming, onPressed: _busy ? null : widget.onRefuse),
-          ),
+          if (missing.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              l.missingItems(missing.join(', ')),
+              textAlign: TextAlign.center,
+              style: TaraText.small.copyWith(fontSize: 12, color: c.textPrimary.withValues(alpha: .62)),
+            ),
+          ],
         ],
       ),
       children: [
-        CourseStepper(labels: steps, activeIndex: 0, stateLabels: stepStateLabels(l)),
-        const SizedBox(height: 14),
-        PartyRow(
-          name: senderName,
-          line: order.pickup.line,
-          note: order.instructions,
-          callLabel: l.callPerson(senderName),
-          // Appels gardés dans le journal : ils prouvent l'attente si l'expéditeur ne vient pas.
-          onCall: phone == null ? null : () => ref.read(callJournalProvider).call(order.id, to: 'SENDER', phone: phone),
+        CourseCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  TaraIcon(TaraIcons.mapPin, size: 20, color: c.accentText),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      order.pickup.line,
+                      style: TaraText.text.copyWith(fontSize: 13, height: 1.4, color: c.textPrimary),
+                    ),
+                  ),
+                ],
+              ),
+              if (order.instructions case final note? when note.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  '« $note »',
+                  style: TaraText.small.copyWith(fontSize: 12, color: c.textPrimary.withValues(alpha: .70)),
+                ),
+              ],
+              AddressHelp(orderId: order.id, stop: 'pickup', address: order.pickup, name: senderName),
+            ],
+          ),
         ),
-        AddressHelp(orderId: order.id, stop: 'pickup', address: order.pickup, name: senderName),
-        const SizedBox(height: 12),
         _WaitingBox(
           arrivedAt: _arrivedAt,
           rules: ref.watch(riderConfigProvider).value?.waiting ?? const WaitingRules(),
@@ -307,8 +348,20 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           leaving: _leaving,
           onLeave: _busy ? null : _leave,
         ),
+        PhotoCard(
+          taken: _photoPath != null,
+          takenAt: _photoAt,
+          title: l.photoParcel,
+          takenTitle: l.photoParcelTaken,
+          hint: widget.isTour
+              ? l.photoTourHint(widget.tour.length)
+              : switch (order.batchNumber) {
+                  final number? => l.photoParcelHintNumber(number),
+                  null => l.photoParcelHint,
+                },
+          onTake: _busy ? null : _takePhoto,
+        ),
         // Quel colis prendre : l'expéditeur peut en avoir plusieurs, pour d'autres livreurs.
-        const SizedBox(height: 12),
         if (widget.isTour)
           _TourChecklist(
             tour: widget.tour,
@@ -319,49 +372,70 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
           )
         else
           ParcelCard(order: order, title: l.parcelToCollect),
-        if (order.collectAtPickup > 0) ...[
-          const SizedBox(height: 12),
+        if (order.collectAtPickup > 0)
           CollectBox(amount: order.collectAtPickup, title: l.collectAtPickupTitle, body: l.collectAtPickupBody),
-        ],
-        if (order.bulky) ...[
-          const SizedBox(height: 12),
-          TintBox(
+        if (order.bulky)
+          CourseCard(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TaraIcon(TaraIcons.package, size: 18, color: TaraColors.of(context).accentText),
+                TaraIcon(TaraIcons.package, size: 18, color: c.accentText),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     order.loadingHelp ? l.bulkyWithHelpNotice : l.bulkyNotice,
-                    style: TaraText.label.copyWith(color: TaraColors.of(context).textPrimary, height: 1.4),
+                    style: TaraText.label.copyWith(color: c.textPrimary, height: 1.4),
                   ),
                 ),
               ],
             ),
           ),
-        ],
-        if (order.pickup.motorbikeRestricted) ...[const SizedBox(height: 12), CourseWarning(l.noMotoAddress)],
-        const SizedBox(height: 14),
-        CourseFieldLabel(l.pickupCodeLabel, hint: l.pickupCodeHint),
-        const SizedBox(height: 8),
-        CodeCells(length: 4, controller: _code, cellHeight: 56, autofocus: false, digitLabel: l.digitLabel),
-        const SizedBox(height: 12),
-        ProofPhotoTile(
-          path: _photoPath,
-          takenAt: _photoAt,
-          onTake: _busy ? null : _takePhoto,
-          title: l.photoParcel,
-          hint: widget.isTour
-              ? l.photoTourHint(widget.tour.length)
-              : switch (order.batchNumber) {
-                  final number? => l.photoParcelHintNumber(number),
-                  null => l.photoParcelHint,
-                },
-          takenLabel: l.photoParcelTaken,
+        if (order.pickup.motorbikeRestricted) CourseWarning(l.noMotoAddress),
+        CourseCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Expanded(
+                    child: Text(
+                      l.pickupCodeLabel,
+                      style: TaraText.bodyStrong.copyWith(fontSize: 14, color: c.textPrimary),
+                    ),
+                  ),
+                  Text(
+                    l.pickupCodeHint,
+                    style: TaraText.small.copyWith(fontSize: 12, color: c.textPrimary.withValues(alpha: .66)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              CodeCells(length: 4, controller: _code, cellHeight: 52, autofocus: false, digitLabel: l.digitLabel),
+            ],
+          ),
         ),
-        if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
-        const SizedBox(height: 12),
+        if (_error != null) ErrorLine(_error!),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 18,
+          children: [
+            TextButton(
+              onPressed: _busy ? null : widget.onRefuse,
+              child: Text(
+                l.parcelNonConforming,
+                style: TaraText.label.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: accent2,
+                  decoration: TextDecoration.underline,
+                  decorationColor: accent2,
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -401,7 +475,7 @@ class _WaitingBox extends StatelessWidget {
     String f(int amount) => '${formatAmount(amount)}\u00a0F';
     final since = arrivedAt;
     if (since == null) {
-      return TintBox(
+      return CourseCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -416,9 +490,11 @@ class _WaitingBox extends StatelessWidget {
               style: TaraText.label.copyWith(color: c.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 10),
-            GlassButton(
+            PrimaryButton(
               label: busy ? l.arrivedSending : l.arrivedAction,
               icon: TaraIcons.mapPin,
+              height: 48,
+              strong: true,
               onPressed: busy ? null : onArrive,
             ),
           ],
@@ -430,22 +506,69 @@ class _WaitingBox extends StatelessWidget {
     final fee = rules.feeAfter(waited);
     final canLeave = minutes >= rules.maxMinutes;
     final callsLeft = WaitingRules.absentMinCalls - senderCalls;
-    return TintBox(
+    final ok = c.isDark ? const Color(0xFF4ADE9B) : const Color(0xFF0E7F57);
+    final free = rules.freeMinutes - minutes < 0 ? 0 : rules.freeMinutes - minutes;
+    return CourseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TaraIcon(TaraIcons.clock, size: 18, color: c.accentText),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  fee == 0
-                      ? l.waitingFree(minutes, rules.freeMinutes - minutes < 0 ? 0 : rules.freeMinutes - minutes)
-                      : l.waitingPaid(minutes, f(fee), f(rules.riderPart(fee))),
-                  style: TaraText.label.copyWith(color: c.textPrimary, height: 1.4),
+              // Minutes d'attente dans un rond où le liquide monte avec le temps.
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color.fromRGBO(255, 177, 92, .45), width: 2),
                 ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipOval(
+                      child: LiquidFill(
+                        level: (minutes / rules.maxMinutes).clamp(.15, 1.0),
+                        amplitude: 3,
+                        front: TaraLiquid.front,
+                        back: TaraLiquid.back(dark: c.isDark),
+                        frontPeriod: TaraLiquid.frontPeriod,
+                        backPeriod: TaraLiquid.backPeriod,
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        '$minutes′',
+                        style: TaraText.label.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFFFFFFFF),
+                          shadows: const [Shadow(color: Color.fromRGBO(0, 0, 0, .6), blurRadius: 4)],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: fee == 0
+                    ? Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(text: l.waitingSince(minutes)),
+                            TextSpan(
+                              text: l.waitingFreeLeft(free),
+                              style: TextStyle(color: ok, fontWeight: FontWeight.w800),
+                            ),
+                            TextSpan(text: l.waitingThen(f(rules.feePerStep), rules.stepMinutes)),
+                          ],
+                        ),
+                        style: TaraText.text.copyWith(fontSize: 13, color: c.textPrimary, height: 1.4),
+                      )
+                    : Text(
+                        l.waitingPaid(minutes, f(fee), f(rules.riderPart(fee))),
+                        style: TaraText.text.copyWith(fontSize: 13, color: c.textPrimary, height: 1.4),
+                      ),
               ),
             ],
           ),
@@ -489,41 +612,75 @@ class _TourChecklist extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    return GlassCard(
-      radius: 18,
-      shadow: false,
-      padding: const EdgeInsets.fromLTRB(8, 10, 12, 10),
-      // Les cases dessinent leur effet au toucher sur un Material, transparent ici pour garder le verre.
-      child: Material(
-        type: MaterialType.transparency,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 4),
-              child: Text(
-                l.tourToCollect(checked.length, tour.length),
-                style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w700),
+    return CourseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l.tourToCollect(checked.length, tour.length).toUpperCase(),
+            style: TaraText.small.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.1,
+              color: c.accentText,
+            ),
+          ),
+          const SizedBox(height: 4),
+          for (final order in tour)
+            Semantics(
+              button: true,
+              toggled: checked.contains(order.id),
+              child: InkWell(
+                onTap: onToggle == null ? null : () => onToggle!(order.id),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 44),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          gradient: checked.contains(order.id) ? TaraBrand.gradient : null,
+                          border: Border.all(
+                            color: checked.contains(order.id)
+                                ? const Color(0xFFFF8A00)
+                                : c.textPrimary.withValues(alpha: .35),
+                            width: 2,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: checked.contains(order.id)
+                            ? const TaraIcon(TaraIcons.check, size: 15, strokeWidth: 3, color: Color(0xFF140800))
+                            : null,
+                      ),
+                      const SizedBox(width: 10),
+                      if (order.batchNumber != null)
+                        SizedBox(
+                          width: 44,
+                          child: Text(
+                            l.parcelNumberShort(order.batchNumber!),
+                            style: TaraText.label.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: c.textPrimary,
+                            ),
+                          ),
+                        ),
+                      Expanded(
+                        child: Text(
+                          '${parcelForWhom(l, order)} · ${parcelWhat(l, order)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TaraText.text.copyWith(fontSize: 13, color: c.textPrimary.withValues(alpha: .8)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            for (final order in tour)
-              CheckboxListTile(
-                value: checked.contains(order.id),
-                onChanged: onToggle == null ? null : (_) => onToggle!(order.id),
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text(
-                  [
-                    if (order.batchNumber != null) l.parcelNumberShort(order.batchNumber!),
-                    parcelWhat(l, order),
-                  ].join(' · '),
-                  style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(parcelForWhom(l, order), style: TaraText.small.copyWith(color: c.textSecondary)),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }

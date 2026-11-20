@@ -2237,4 +2237,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String pinDropoff(String place) {
     return 'B · $place';
   }
+
+  @override
+  String get missingPhoto => 'the photo';
+
+  @override
+  String get missingCode => 'the code';
+
+  @override
+  String get missingParcels => 'the parcels to tick';
+
+  @override
+  String missingItems(String items) {
+    return 'Missing: $items.';
+  }
+
+  @override
+  String get slideParcelCollected => 'Slide · Parcel collected';
+
+  @override
+  String get parcelNonConforming => 'Parcel not as described';
+
+  @override
+  String waitingSince(int minutes) {
+    return 'You have been waiting $minutes min · ';
+  }
+
+  @override
+  String waitingFreeLeft(int left) {
+    return 'free for $left more min';
+  }
+
+  @override
+  String waitingThen(String fee, int step) {
+    return '. Then $fee per $step min for the sender.';
+  }
+
+  @override
+  String get slideConfirmDelivery => 'Slide · Confirm delivery';
+
+  @override
+  String get cantDeliverShort => 'Can’t deliver';
+
+  @override
+  String distanceAway(String distance) {
+    return '$distance away';
+  }
+
+  @override
+  String towards(String place) {
+    return 'Towards $place';
+  }
 }

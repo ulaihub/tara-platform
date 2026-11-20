@@ -229,6 +229,12 @@ void main() {
         scope(delivery(order(status: 'IN_DELIVERY', collectAtDelivery: 0)), online: online),
       );
       await settle(tester);
+      // À 2,5 km : d'abord « en route », avec la distance ; « Je suis arrivé » ouvre la remise.
+      expect(find.text('À 2,5\u00a0km'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/09_en_route/${variant.name}.png'));
+      await tester.ensureVisible(find.text('Je suis arrivé'));
+      await tester.tap(find.text('Je suis arrivé'));
+      await settle(tester);
       final context = tester.element(find.byType(DeliveryScreen));
       await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
       await tester.ensureVisible(find.text('Le client n’a pas de code'));
@@ -249,8 +255,9 @@ void main() {
       await pumpVariant(tester, variant, scope(pickup(order())));
       await settle(tester);
       expect(tester.takeException(), isNull);
-      // Le bouton reste inactif tant que code et photo manquent.
-      expect(find.text('Colis récupéré'), findsOneWidget);
+      // Le bouton reste inactif tant que code et photo manquent ; ce qui manque est dit.
+      expect(find.text('Glisser · Colis récupéré'), findsOneWidget);
+      expect(find.text('Il manque la photo, le code.'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/08_enlevement/${variant.name}.png'));
     });
 
@@ -354,7 +361,7 @@ void main() {
       await settle(tester);
       expect(tester.takeException(), isNull);
       expect(find.text('Gros objet, aide au chargement payée par l’expéditeur : venez à deux.'), findsOneWidget);
-      expect(find.text('Colis non conforme\u00a0?'), findsOneWidget);
+      expect(find.text('Colis non conforme'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/08_enlevement_gros_objet/${brightness.name}.png'));
     });
 
@@ -430,7 +437,10 @@ void main() {
     await settle(tester);
     expect(api.arrivals, ['00000000-0000-4000-8000-000000000002']);
     // Arrivé à 14 h 32, l'écran est à 14 h 32 : rien à payer encore.
-    expect(find.text('Vous attendez depuis 0 min · gratuit encore 10 min.'), findsOneWidget);
+    expect(
+      find.text('Vous attendez depuis 0 min · gratuit encore 10 min. Ensuite 100\u00a0F par 5 min pour l’expéditeur.', findRichText: true),
+      findsOneWidget,
+    );
     await tester.pumpWidget(const SizedBox());
 
     // Arrivé 17 minutes plus tôt (14 h 15) : 2 tranches de 5 min, 70 % pour le livreur.
@@ -558,12 +568,12 @@ void main() {
     await tester.pump();
     FocusManager.instance.primaryFocus?.unfocus();
     await settle(tester);
-    expect(find.text('N° 9 · Colis moyen'), findsOneWidget);
-    expect(find.text('Pour Brice · Bonapriso'), findsOneWidget);
+    expect(find.text('N° 9'), findsOneWidget);
+    expect(find.text('Pour Brice · Bonapriso · Colis moyen'), findsOneWidget);
 
     SwipeButton swipe() => tester.widget<SwipeButton>(find.byType(SwipeButton));
     // Code et photo prêts, mais seulement 2 colis sur 3 cochés : rien ne part.
-    for (final number in ['N° 4 · Petit colis', 'N° 9 · Colis moyen']) {
+    for (final number in ['N° 4', 'N° 9']) {
       await tester.ensureVisible(find.text(number));
       await tester.tap(find.text(number));
       await settle(tester);
@@ -571,8 +581,8 @@ void main() {
     expect(find.text('COLIS À RÉCUPÉRER · 2 SUR 3 COCHÉS'), findsOneWidget);
     expect(swipe().onConfirmed, isNull);
 
-    await tester.ensureVisible(find.text('N° 12 · Petit colis'));
-    await tester.tap(find.text('N° 12 · Petit colis'));
+    await tester.ensureVisible(find.text('N° 12'));
+    await tester.tap(find.text('N° 12'));
     await settle(tester);
     expect(find.text('COLIS À RÉCUPÉRER · 3 SUR 3 COCHÉS'), findsOneWidget);
     expect(swipe().onConfirmed, isNotNull);

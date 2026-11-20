@@ -139,6 +139,9 @@ void main() {
 
   testWidgets('argent à encaisser : « Confirmer la livraison » ouvre d’abord l’encaissement', (tester) async {
     await pumpHome(tester, order(status: 'IN_DELIVERY'));
+    // Loin de l'adresse : d'abord « en route », puis « Je suis arrivé » ouvre la remise.
+    await tester.tap(find.text('Je suis arrivé'));
+    await settle(tester);
     await tester.enterText(find.byType(EditableText).first, '4821');
     await tester.ensureVisible(find.text('Photographier la remise'));
     await tester.tap(find.text('Photographier la remise'));
@@ -187,8 +190,8 @@ void main() {
         return null;
       },
     );
-    await tester.ensureVisible(find.text('Colis non conforme\u00a0?'));
-    await tester.tap(find.text('Colis non conforme\u00a0?'));
+    await tester.ensureVisible(find.text('Colis non conforme'));
+    await tester.tap(find.text('Colis non conforme'));
     await settle(tester);
     expect(find.byType(RefuseParcelScreen), findsOneWidget);
     // Retour : l'enlèvement est toujours là.
@@ -197,7 +200,7 @@ void main() {
     expect(find.byType(RefuseParcelScreen), findsNothing);
     expect(find.byType(PickupScreen), findsOneWidget);
 
-    await tester.tap(find.text('Colis non conforme\u00a0?'));
+    await tester.tap(find.text('Colis non conforme'));
     await settle(tester);
     await tester.tap(find.text('Trop lourd'));
     // L'enlèvement, dessous, a aussi sa photo : celle du refus est au-dessus.
@@ -225,8 +228,8 @@ void main() {
 
   testWidgets('« Livraison impossible ? » ouvre l’écran d’échec ; retour à la livraison', (tester) async {
     await pumpHome(tester, order(status: 'IN_DELIVERY'));
-    await tester.ensureVisible(find.text('Livraison impossible\u00a0?'));
-    await tester.tap(find.text('Livraison impossible\u00a0?'));
+    await tester.ensureVisible(find.text('Livraison impossible'));
+    await tester.tap(find.text('Livraison impossible'));
     await settle(tester);
     expect(find.byType(FailureScreen), findsOneWidget);
     expect(find.text('Encore 2 appels à passer.'), findsOneWidget);
@@ -238,8 +241,8 @@ void main() {
 
   testWidgets('colis abîmé : aucun appel exigé, photo du dommage, réclamation annoncée', (tester) async {
     await pumpHome(tester, order(status: 'IN_DELIVERY'));
-    await tester.ensureVisible(find.text('Livraison impossible\u00a0?'));
-    await tester.tap(find.text('Livraison impossible\u00a0?'));
+    await tester.ensureVisible(find.text('Livraison impossible'));
+    await tester.tap(find.text('Livraison impossible'));
     await settle(tester);
     await tester.ensureVisible(find.text('Colis abîmé, refusé'));
     await tester.tap(find.text('Colis abîmé, refusé'));

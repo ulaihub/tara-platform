@@ -2245,4 +2245,55 @@ class AppLocalizationsFr extends AppLocalizations {
   String pinDropoff(String place) {
     return 'B · $place';
   }
+
+  @override
+  String get missingPhoto => 'la photo';
+
+  @override
+  String get missingCode => 'le code';
+
+  @override
+  String get missingParcels => 'les colis à cocher';
+
+  @override
+  String missingItems(String items) {
+    return 'Il manque $items.';
+  }
+
+  @override
+  String get slideParcelCollected => 'Glisser · Colis récupéré';
+
+  @override
+  String get parcelNonConforming => 'Colis non conforme';
+
+  @override
+  String waitingSince(int minutes) {
+    return 'Vous attendez depuis $minutes min · ';
+  }
+
+  @override
+  String waitingFreeLeft(int left) {
+    return 'gratuit encore $left min';
+  }
+
+  @override
+  String waitingThen(String fee, int step) {
+    return '. Ensuite $fee par $step min pour l’expéditeur.';
+  }
+
+  @override
+  String get slideConfirmDelivery => 'Glisser · Confirmer la livraison';
+
+  @override
+  String get cantDeliverShort => 'Livraison impossible';
+
+  @override
+  String distanceAway(String distance) {
+    return 'À $distance';
+  }
+
+  @override
+  String towards(String place) {
+    return 'Vers $place';
+  }
 }
