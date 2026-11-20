@@ -3727,6 +3727,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{amount} · {count} {count, plural, =0{course} =1{course} other{courses}}'**
   String todayTotal(String amount, int count);
+
+  /// No description provided for @myEarnings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes gains'**
+  String get myEarnings;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette semaine'**
+  String get thisWeek;
+
+  /// No description provided for @todaySuffix.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui'**
+  String get todaySuffix;
+
+  /// No description provided for @dayNotYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'à venir'**
+  String get dayNotYet;
+
+  /// No description provided for @dayNotYetLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'pas encore roulé'**
+  String get dayNotYetLabel;
+
+  /// No description provided for @weekOnline.
+  ///
+  /// In fr, this message translates to:
+  /// **'En ligne'**
+  String get weekOnline;
+
+  /// No description provided for @weekRides.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses'**
+  String get weekRides;
+
+  /// No description provided for @hoursShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours} h'**
+  String hoursShort(int hours);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

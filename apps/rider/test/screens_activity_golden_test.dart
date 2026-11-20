@@ -176,24 +176,28 @@ void main() {
       await pumpVariant(tester, variant, activity(activityApi()));
       await settle(tester);
       expect(tester.takeException(), isNull);
-      expect(find.text('Gains d’aujourd’hui'), findsOneWidget);
+      expect(find.text('Mes gains'), findsOneWidget);
+      // Semaine du lundi 2 au dimanche 8 novembre : mercredi 4 allumé, jours à venir en pointillés.
+      expect(find.text('Mercredi 4 nov. · aujourd’hui'), findsOneWidget);
+      expect(find.text('25\u00a0800\u00a0F'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/13_activite/${variant.name}.png'));
     });
 
-    goldenTest('13 activité semaine ${variant.name}', (tester) async {
+    goldenTest('13 activité jour touché ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, activity(activityApi()));
       await settle(tester);
-      await tester.tap(find.text('Semaine'));
+      await tester.tap(find.text('Mar'));
       await settle(tester);
       expect(tester.takeException(), isNull);
-      expect(find.text('Auj.'), findsOneWidget);
+      expect(find.text('Mardi 3 nov.'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/13_activite_semaine/${variant.name}.png'));
     });
 
     goldenTest('13 recharger ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, activity(activityApi()));
       await settle(tester);
-      await tester.ensureVisible(find.text('Recharger'));
+      await Scrollable.ensureVisible(tester.element(find.text('Recharger')), alignment: .3);
+      await tester.pump();
       await settle(tester);
       await tester.tap(find.text('Recharger'));
       await settle(tester);
@@ -234,7 +238,8 @@ void main() {
       // Solde déjà affiché avec le code secret : l'écran de retrait s'ouvre directement.
       await pumpVariant(tester, variant, activity(activityApi(), shown: true));
       await settle(tester);
-      await tester.ensureVisible(find.text('Retirer'));
+      await Scrollable.ensureVisible(tester.element(find.text('Retirer')), alignment: .3);
+      await tester.pump();
       await settle(tester);
       await tester.tap(find.text('Retirer'));
       await settle(tester);
@@ -248,7 +253,8 @@ void main() {
     goldenTest('13 reverser ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, activity(activityApi(legacyCash: true)));
       await settle(tester);
-      await tester.ensureVisible(find.text('Reverser'));
+      await Scrollable.ensureVisible(tester.element(find.text('Reverser')), alignment: .3);
+      await tester.pump();
       await settle(tester);
       await tester.tap(find.text('Reverser'));
       await settle(tester);

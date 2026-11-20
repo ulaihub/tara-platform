@@ -2127,4 +2127,30 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'rides', one: 'ride');
     return '$amount · $count $_temp0';
   }
+
+  @override
+  String get myEarnings => 'My earnings';
+
+  @override
+  String get thisWeek => 'This week';
+
+  @override
+  String get todaySuffix => 'today';
+
+  @override
+  String get dayNotYet => 'to come';
+
+  @override
+  String get dayNotYetLabel => 'not ridden yet';
+
+  @override
+  String get weekOnline => 'Online';
+
+  @override
+  String get weekRides => 'Rides';
+
+  @override
+  String hoursShort(int hours) {
+    return '$hours h';
+  }
 }

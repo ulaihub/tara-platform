@@ -8,8 +8,8 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/pin_flow.dart';
-import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/components/three_d.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
@@ -18,13 +18,16 @@ import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
+import '../../app/root.dart' show riderProfileProvider;
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/pin.dart';
+import '../home/home_summary.dart';
+import '../home/home_widgets.dart';
 import 'deposit_screen.dart';
 import 'withdraw_screen.dart';
 
-/// 13 · Activité (E9) : gains du jour, de la semaine ou du mois avec leur histogramme,
+/// 13 · Mes gains (E9) : semaine en cours en colonnes 3D, jour par jour,
 /// solde prépayé et sa recharge (G5), anciennes espèces à reverser, dernières courses.
 class ActivityScreen extends ConsumerStatefulWidget {
   const ActivityScreen({super.key, this.now});
@@ -37,12 +40,13 @@ class ActivityScreen extends ConsumerStatefulWidget {
 }
 
 class _ActivityScreenState extends ConsumerState<ActivityScreen> {
+  // Une seule forme orange en haut à droite, comme dans la maquette.
   static const _blobs = [
-    BlobSpec(alignment: Alignment(1.2, -1.05), size: 300, colors: BlobSpec.brand, blur: 70),
-    BlobSpec(alignment: Alignment(-1.3, 0.6), size: 240, colors: BlobSpec.warm, blur: 64, delay: Duration(seconds: 5)),
+    BlobSpec(alignment: Alignment(.69, -.81), size: 360, colors: [TaraBrand.orange, Color(0x00FF6A00)], opacity: .4, center: Alignment.center),
   ];
 
-  String _period = 'day';
+  /// Semaine en cours, jour par jour (maquette Tableau-Livreur).
+  static const _period = 'week';
   late Future<Earnings> _earnings;
   late Future<List<RiderOrder>> _history;
   late Future<RiderWallet> _wallet;
@@ -117,53 +121,17 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                 await Future.wait<Object?>([_earnings, _history, _wallet]).catchError((_) => <Object?>[]);
               },
               child: ListView(
-                padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + TaraTabShell.bottomInset(context)),
+                padding: EdgeInsets.fromLTRB(20, 22, 20, 24 + TaraTabShell.bottomInset(context)),
                 children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final title = Semantics(
-                        header: true,
-                        child: Text(l.tabActivity, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-                      );
-                      final selector = LiquidSegmented<String>(
-                        compact: true,
-                        segments: [('day', l.periodDay), ('week', l.periodWeek), ('month', l.periodMonth)],
-                        selected: _period,
-                        onChanged: (period) {
-                          if (period == _period) return;
-                          setState(() {
-                            _period = period;
-                            _earnings = ref.read(riderApiProvider).earnings(period);
-                          });
-                        },
-                      );
-                      // Sélecteur à droite du titre (maquette) ; dessous si la place manque.
-                      final wide = constraints.maxWidth >= 340 && MediaQuery.textScalerOf(context).scale(10) <= 11;
-                      if (!wide) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [title, const SizedBox(height: 10), selector],
-                        );
-                      }
-                      return Row(
-                        children: [
-                          title,
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 230), child: selector),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                  const _GainsHeader(),
+                  const SizedBox(height: 18),
                   FutureBuilder<Earnings>(
                     future: _earnings,
-                    builder: (context, snapshot) =>
-                        _EarningsCard(earnings: snapshot.data, failed: snapshot.hasError, onRetry: _reload, now: now),
+                    builder: (context, snapshot) => snapshot.hasError
+                        ? _Failed(onRetry: _reload)
+                        : snapshot.data == null
+                        ? const SizedBox(height: 300, child: Center(child: GooLoader(compact: true)))
+                        : _WeekBlock(earnings: snapshot.data!, now: now),
                   ),
                   FutureBuilder<RiderWallet>(
                     future: _wallet,
@@ -282,169 +250,255 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
   }
 }
 
-/// Total de la période, nombre de courses et histogramme (barre courante en dégradé).
-class _EarningsCard extends StatelessWidget {
-  const _EarningsCard({required this.earnings, required this.failed, required this.onRetry, required this.now});
-  final Earnings? earnings;
-  final bool failed;
-  final VoidCallback onRetry;
-  final DateTime now;
+/// En-tête de la maquette : « Mes gains », nom et véhicule, état en ligne ou hors ligne.
+class _GainsHeader extends ConsumerWidget {
+  const _GainsHeader();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    final data = earnings;
-    final caption = switch (data?.period) {
-      'week' => l.earningsWeek,
-      'month' => l.earningsMonth,
-      _ => l.earningsToday,
+    final name = ref.watch(riderNameProvider).value ?? '';
+    final vehicle = switch (ref.watch(riderProfileProvider).value?.vehicleType) {
+      'MOTORBIKE' => l.vehicleMotorbike,
+      'CAR' => l.vehicleCar,
+      'TRICYCLE' => l.vehicleTricycle,
+      _ => null,
     };
-    return GlassCard(
-      radius: 26,
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-      child: failed
-          ? _Failed(onRetry: onRetry)
-          : data == null
-          ? const SizedBox(height: 210, child: Center(child: GooLoader(compact: true)))
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(caption, style: TaraText.label.copyWith(color: c.textSecondary)),
-                const SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: AmountText(data.earnings, style: TaraText.amountL.copyWith(fontSize: 34)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(l.coursesCount(data.delivered), style: TaraText.label.copyWith(color: c.textSecondary)),
-                  ],
+    final online = ref.watch(onlineControllerProvider);
+    final seconds = ref.watch(homeSummaryProvider).value?.onlineSeconds ?? 0;
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  l.myEarnings,
+                  style: TextStyle(
+                    fontFamily: TaraText.sora,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -.52,
+                    color: c.textPrimary,
+                  ),
                 ),
-                const SizedBox(height: 16),
-                _Histogram(earnings: data, caption: caption, now: now),
-              ],
-            ),
+              ),
+              if (name.isNotEmpty)
+                Text(
+                  [name, ?vehicle?.toLowerCase()].join(' · '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TaraText.label.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: c.textPrimary.withValues(alpha: .72),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        ListenableBuilder(
+          listenable: online,
+          builder: (context, _) => online.online
+              ? StatusPill(online: true, label: l.onlineSince(formatOnline(seconds)))
+              : StatusPill(label: l.offline),
+        ),
+      ],
     );
   }
 }
 
-/// Barres de la période ; seule la barre en cours est en dégradé, avec sa valeur au-dessus.
-class _Histogram extends StatelessWidget {
-  const _Histogram({required this.earnings, required this.caption, required this.now});
+/// Semaine en cours : total, colonnes en relief jour par jour (aujourd'hui allumé, jours à
+/// venir en pointillés), détail du jour touché, puis courses et temps en ligne.
+class _WeekBlock extends StatefulWidget {
+  const _WeekBlock({required this.earnings, required this.now});
   final Earnings earnings;
-  final String caption;
   final DateTime now;
 
-  static const _maxHeight = 104.0;
+  @override
+  State<_WeekBlock> createState() => _WeekBlockState();
+}
+
+class _WeekBlockState extends State<_WeekBlock> {
+  int? _picked;
+
+  static bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    final series = earnings.series;
-    if (series.isEmpty) return const SizedBox.shrink();
-    final labels = _labels(l, series);
-    final current = _current(series);
-    final max = series.map((bucket) => bucket.earnings).fold<int>(0, math.max);
-    final values = [for (var i = 0; i < series.length; i++) '${labels[i]} ${formatAmount(series[i].earnings)} F']
-        .join(', ');
-
-    return Semantics(
-      label: l.chartSemantics(caption, values),
-      excludeSemantics: true,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          for (var i = 0; i < series.length; i++)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (i == current)
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          formatAmount(series[i].earnings),
-                          style: TaraText.smallStrong.copyWith(color: c.textPrimary, fontFeatures: TaraText.tabular),
-                        ),
-                      ),
-                    const SizedBox(height: 4),
-                    Container(
-                      constraints: const BoxConstraints(maxWidth: 34),
-                      height: max == 0 ? 6 : math.max(6, series[i].earnings / max * _maxHeight),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        gradient: i == current
-                            ? const LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red],
-                                stops: [0, .55, 1],
-                              )
-                            : null,
-                        color: i == current ? null : c.neutralBar,
-                        boxShadow: i == current
-                            ? const [
-                                BoxShadow(color: Color.fromRGBO(255, 90, 0, .4), blurRadius: 20, offset: Offset(0, 8)),
-                              ]
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        labels[i],
-                        maxLines: 1,
-                        style: TaraText.small.copyWith(
-                          color: i == current ? c.textPrimary : c.textTertiary,
-                          fontWeight: i == current ? FontWeight.w700 : FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
+    final data = widget.earnings;
+    final now = widget.now;
+    final series = data.series;
+    final days = [for (final bucket in series) bucket.start.toLocal()];
+    final today = days.indexWhere((day) => _sameDay(day, now));
+    final picked = _picked ?? (today >= 0 ? today : series.length - 1);
+    final short = DateFormat.E(l.localeName);
+    final full = DateFormat('EEEE d MMM', l.localeName);
+    bool future(int i) => days[i].isAfter(now) && !_sameDay(days[i], now);
+    String amount(int value) => '${formatAmount(value)} F';
+    String capitalized(String text) => text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
+    String label(int i) => capitalized(short.format(days[i]).replaceAll('.', ''));
+    String fullLabel(int i) => capitalized(full.format(days[i])) + (i == today ? ' · ${l.todaySuffix}' : '');
+    final best = series.fold<int>(0, (m, b) => math.max(m, b.earnings));
+    final muted = c.textPrimary.withValues(alpha: .72);
+    final picked2 = c.isDark ? const Color(0xFFFFC283) : const Color(0xFF9A3412);
+    final ok = c.isDark ? const Color(0xFF4ADE9B) : const Color(0xFF0E7F57);
+    Widget card({required Widget child, EdgeInsets padding = const EdgeInsets.all(10), double radius = 18}) =>
+        Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            color: c.textPrimary.withValues(alpha: .06),
+            border: Border.all(color: c.textPrimary.withValues(alpha: .10)),
+          ),
+          child: child,
+        );
+    Widget tile(String caption, String value) => Expanded(
+      child: card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              caption,
+              style: TaraText.small.copyWith(fontSize: 11, fontWeight: FontWeight.w700, color: muted),
+            ),
+            const SizedBox(height: 2),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: TextStyle(
+                  fontFamily: TaraText.sora,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                  color: c.textPrimary,
+                  fontFeatures: TaraText.tabular,
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
+    final pickedBucket = series.isEmpty ? null : series[picked];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l.thisWeek,
+          style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: muted),
+        ),
+        const SizedBox(height: 2),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            amount(data.earnings),
+            style: TextStyle(
+              fontFamily: TaraText.sora,
+              fontSize: 40,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -.8,
+              color: c.textPrimary,
+              fontFeatures: TaraText.tabular,
+            ),
+          ),
+        ),
+        Text(
+          l.jobsCount(data.delivered),
+          style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: ok),
+        ),
+        const SizedBox(height: 14),
+        card(
+          radius: 24,
+          padding: const EdgeInsets.fromLTRB(12, 14, 12, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Column3DChart(
+                showDetail: false,
+                height: 112,
+                // Les plus hautes colonnes gardent de l'air au-dessus (échelle de la maquette).
+                maxValue: best <= 0 ? 1 : best * 1.25,
+                selected: picked,
+                onSelected: (i) => setState(() => _picked = i),
+                columns: [
+                  for (var i = 0; i < series.length; i++)
+                    Column3D(
+                      label: label(i),
+                      value: series[i].earnings.toDouble(),
+                      future: future(i),
+                      detail: future(i)
+                          ? '${fullLabel(i)} : ${l.dayNotYetLabel}'
+                          : '${fullLabel(i)} : ${amount(series[i].earnings)} · ${l.jobsCount(series[i].delivered)}',
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (pickedBucket != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: c.textPrimary.withValues(alpha: .06),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          fullLabel(picked),
+                          style: TaraText.label.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: c.textPrimary.withValues(alpha: .80),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text.rich(
+                        TextSpan(
+                          children: future(picked)
+                              ? [TextSpan(text: l.dayNotYet)]
+                              : [
+                                  TextSpan(text: amount(pickedBucket.earnings)),
+                                  TextSpan(
+                                    text: ' · ${l.jobsCount(pickedBucket.delivered)}',
+                                    style: TextStyle(color: picked2),
+                                  ),
+                                ],
+                        ),
+                        style: TaraText.label.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: c.textPrimary,
+                          fontFeatures: TaraText.tabular,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            tile(l.weekRides, '${data.delivered}'),
+            const SizedBox(width: 8),
+            tile(l.weekOnline, formatOnline(data.onlineSeconds)),
+          ],
+        ),
+      ],
+    );
   }
-
-  List<String> _labels(AppLocalizations l, List<EarningsBucket> series) {
-    final weekdays = l.weekdaysShort.split(',');
-    return [
-      for (var i = 0; i < series.length; i++)
-        switch (earnings.bucket) {
-          'two_hours' => l.hourShort(series[i].start.toLocal().hour),
-          'day' =>
-            _sameDay(series[i].start.toLocal(), now) ? l.todayShort : weekdays[series[i].start.toLocal().weekday - 1],
-          _ => l.weekShort(i + 1),
-        },
-    ];
-  }
-
-  /// Tranche qui contient l'heure actuelle (aucune la nuit, hors des tranches du jour).
-  int _current(List<EarningsBucket> series) {
-    for (var i = series.length - 1; i >= 0; i--) {
-      final start = series[i].start;
-      final end = i + 1 < series.length
-          ? series[i + 1].start
-          : start.add(earnings.bucket == 'two_hours' ? const Duration(hours: 2) : const Duration(days: 7));
-      if (!now.isBefore(start) && now.isBefore(end)) return i;
-    }
-    return -1;
-  }
-
-  static bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 /// Écran ouvert par-dessus l'activité : recharge, dépôt des espèces ou retrait des gains.
