@@ -68,7 +68,7 @@ export const SECTIONS: readonly Section[] = [
   },
   {
     href: '/marchands',
-    label: 'Marchands et tarifs',
+    label: 'Boutiques et tarifs',
     icon: 'store',
     requirement: 'H4',
     description: 'Boutiques, grille tarifaire et primes des livreurs, codes promo, zones.',
