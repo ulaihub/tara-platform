@@ -208,9 +208,9 @@ export function LiveMap({
   }, [focusOrder, choose]);
 
   return (
-    <div className="-mx-4 -my-5 flex flex-col sm:-mx-6 lg:-mx-10 lg:-my-8 lg:h-screen lg:flex-row">
+    <div className="flex flex-col gap-4 lg:h-[calc(100vh-128px)] lg:flex-row">
       <section
-        className="relative h-[58vh] min-h-[320px] lg:h-auto lg:min-w-0 lg:flex-1"
+        className="bo-glass relative h-[58vh] min-h-[320px] overflow-hidden rounded-[22px] lg:h-auto lg:min-w-0 lg:flex-1"
         aria-label="Carte de Douala"
       >
         <MapView
@@ -235,10 +235,8 @@ export function LiveMap({
           <p
             role="status"
             className={cx(
-              'pointer-events-auto shrink-0 rounded-2xl border px-3 py-2 text-[13px] font-bold whitespace-nowrap shadow-card backdrop-blur',
-              failing
-                ? 'border-danger/30 bg-danger-bg text-danger'
-                : 'border-line bg-panel/90 text-muted',
+              'pointer-events-auto shrink-0 rounded-xl px-3 py-2 text-[12px] font-extrabold whitespace-nowrap',
+              failing ? 'bg-danger-bg text-danger' : 'bo-glass text-muted',
             )}
           >
             {failing
@@ -246,15 +244,15 @@ export function LiveMap({
               : `À jour · ${ago(new Date(receivedAt).toISOString(), now)}`}
           </p>
         </div>
-        <Legend className="absolute bottom-4 left-4 hidden space-y-1 rounded-2xl border border-line bg-panel/90 px-3 py-2.5 shadow-card backdrop-blur lg:block" />
+        <Legend className="bo-glass absolute bottom-4 left-4 hidden space-y-1 rounded-2xl px-3 py-2.5 lg:block" />
       </section>
 
-      <aside className="flex w-full flex-col border-t border-line bg-panel-soft lg:w-[400px] lg:shrink-0 lg:border-t-0 lg:border-l">
+      <aside className="bo-glass flex w-full flex-col overflow-hidden rounded-[22px] lg:w-[360px] lg:shrink-0">
         <Legend className="flex flex-wrap gap-x-4 gap-y-1 border-b border-line px-4 py-2.5 lg:hidden" />
         <div
           role="tablist"
           aria-label="Contenu du panneau"
-          className="flex gap-1 border-b border-line p-3"
+          className="m-3 mb-0 flex gap-1 rounded-[14px] bg-track p-1"
         >
           <TabButton
             current={tab}
@@ -326,13 +324,13 @@ function Counter({
   return (
     <p
       className={cx(
-        'pointer-events-auto flex shrink-0 items-center gap-2 rounded-2xl border border-line bg-panel/90 px-3 py-2 whitespace-nowrap shadow-card backdrop-blur',
-        tone === 'late' && 'border-danger/30 text-danger',
+        'bo-glass pointer-events-auto flex shrink-0 items-center gap-2 rounded-xl px-3 py-1.5 whitespace-nowrap',
+        tone === 'late' && 'text-danger',
       )}
     >
       <span aria-hidden="true" className={cx('size-2.5 rounded-full', COUNTER_DOT[tone])} />
-      <span className="font-display text-[17px] font-bold tabular-nums">{value}</span>
-      <span className="text-[13px] font-bold text-muted">{label}</span>
+      <span className="text-[13px] font-extrabold tabular-nums">{value}</span>
+      <span className="text-[12px] font-extrabold">{label}</span>
     </p>
   );
 }
@@ -381,8 +379,10 @@ function TabButton({
       aria-selected={active}
       onClick={() => onSelect(value)}
       className={cx(
-        'flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl text-[14px] font-bold transition',
-        active ? 'bg-panel text-text shadow-card' : 'text-muted hover:text-text',
+        'flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-[11px] text-[13px] font-extrabold transition',
+        active
+          ? 'bg-brand text-on-brand shadow-[0_6px_14px_rgba(255,90,0,.25)]'
+          : 'text-muted hover:text-text',
       )}
     >
       {children}
@@ -398,10 +398,11 @@ function TabButton({
   );
 }
 
+/** Cartes d'alerte teintées (maquette BO-Carte) : rouge pour un SOS, orange sinon. */
 const LEVEL_STYLE = {
-  critical: 'border-danger/40 bg-danger-bg',
-  high: 'border-warn/30 bg-panel',
-  normal: 'border-line bg-panel',
+  critical: 'border-transparent bg-[rgba(255,107,117,.14)]',
+  high: 'border-transparent bg-[rgba(255,177,92,.16)]',
+  normal: 'border-transparent bg-track',
 } as const;
 
 const LEVEL_ICON: Record<AlertItem['level'], IconName> = {
@@ -448,7 +449,7 @@ function AlertList({
           <li
             key={alert.key}
             className={cx(
-              'rounded-2xl border p-3',
+              'rounded-[16px] border p-3',
               LEVEL_STYLE[alert.level],
               active && 'ring-2 ring-accent-line',
             )}

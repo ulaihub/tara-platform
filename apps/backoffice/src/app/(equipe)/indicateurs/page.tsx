@@ -93,7 +93,7 @@ export default async function MetricsPage({
         />
       </div>
 
-      <section className="mb-5 rounded-3xl border border-line bg-panel p-5 shadow-card">
+      <section className="mb-5 bo-glass rounded-[22px] p-5 shadow-card">
         <div className="mb-3 flex flex-wrap items-baseline gap-3">
           <h2 className="flex-1 font-display text-[17px] font-bold">
             Livraisons réussies par jour
@@ -231,7 +231,7 @@ export default async function MetricsPage({
 
 function Tile({ label, value, detail }: { label: string; value: string; detail: ReactNode }) {
   return (
-    <div className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+    <div className="bo-glass rounded-[22px] p-5 shadow-card">
       <p className="text-[13px] font-bold text-muted">{label}</p>
       <p className="mt-2 font-display text-[30px] font-bold tabular-nums">{value}</p>
       <p className="mt-1 text-[13px] text-muted">{detail}</p>
@@ -241,7 +241,7 @@ function Tile({ label, value, detail }: { label: string; value: string; detail: 
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+    <section className="bo-glass rounded-[22px] p-5 shadow-card">
       <h2 className="mb-2 font-display text-[17px] font-bold">{title}</h2>
       <div className="divide-y divide-line">{children}</div>
     </section>

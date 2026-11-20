@@ -56,11 +56,11 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         ))}
       </nav>
       {page.items.length === 0 ? (
-        <div className="rounded-3xl border border-line bg-panel px-6 py-16 text-center">
+        <div className="bo-glass rounded-[22px] px-6 py-16 text-center">
           <p className="font-display text-[18px] font-bold">Rien dans le journal</p>
         </div>
       ) : (
-        <ul className="divide-y divide-line overflow-hidden rounded-3xl border border-line bg-panel shadow-card">
+        <ul className="divide-y divide-line overflow-hidden bo-glass rounded-[22px] shadow-card">
           {page.items.map((entry) => (
             <li key={entry.id} className="px-5 py-3">
               <details>

@@ -29,7 +29,7 @@ export default async function ZonesPage() {
         current="/marchands/zones"
         aside="Couper une zone l’enlève tout de suite des apps ; la rétablir la remet."
       />
-      <section className="mb-5 rounded-3xl border border-line bg-panel p-5 shadow-card">
+      <section className="mb-5 bo-glass rounded-[22px] p-5 shadow-card">
         <h2 className="mb-3 font-display text-[17px] font-bold">Carte des zones</h2>
         <ZoneMap zones={map} />
       </section>
@@ -38,7 +38,7 @@ export default async function ZonesPage() {
           const items = zones.filter((zone) => zone.kind === kind);
           if (items.length === 0) return null;
           return (
-            <section key={kind} className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+            <section key={kind} className="bo-glass rounded-[22px] p-5 shadow-card">
               <h2 className="font-display text-[17px] font-bold">
                 {ZONE_KIND_LABELS[kind]}{' '}
                 <span className="text-[14px] font-semibold text-muted">({items.length})</span>

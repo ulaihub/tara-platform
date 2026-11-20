@@ -117,7 +117,7 @@ export default async function RidersPage({ searchParams }: { searchParams: Promi
       </nav>
 
       {page.items.length === 0 ? (
-        <div className="rounded-3xl border border-line bg-panel px-6 py-16 text-center">
+        <div className="bo-glass rounded-[22px] px-6 py-16 text-center">
           <p className="font-display text-[18px] font-bold">
             {view === 'TO_REVIEW' && !q ? 'Rien à examiner' : 'Aucun livreur'}
           </p>
@@ -128,7 +128,7 @@ export default async function RidersPage({ searchParams }: { searchParams: Promi
           </p>
         </div>
       ) : (
-        <div className="relative overflow-x-auto rounded-3xl border border-line bg-panel shadow-card">
+        <div className="relative overflow-x-auto bo-glass rounded-[22px] shadow-card">
           <table className="w-full min-w-[720px] text-left text-[14px]">
             <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
               <tr>

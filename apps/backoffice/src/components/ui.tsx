@@ -52,7 +52,7 @@ export function Spinner() {
 /** Carte blanche aux bords arrondis, comme dans les apps. */
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <section className={cx('rounded-3xl border border-line bg-panel p-6 shadow-card', className)}>
+    <section className={cx('bo-glass rounded-[22px] p-6 shadow-card', className)}>
       {children}
     </section>
   );
