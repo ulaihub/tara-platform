@@ -80,6 +80,28 @@ const fr: Strings = {
   unavailableTitle: 'Suivi momentanément indisponible',
   unavailableBody: 'Nous n’arrivons pas à joindre Tara. Réessayez dans un instant.',
   retry: 'Réessayer',
+  receipt: {
+    title: 'Vérification d’un reçu',
+    validTitle: 'Reçu authentique',
+    validBody:
+      'Ce reçu a bien été émis par Tara. Vérifiez que les informations correspondent au papier.',
+    invalidTitle: 'Reçu introuvable',
+    invalidBody:
+      'Aucun reçu Tara ne porte ce numéro. Le document a peut-être été modifié : contactez l’expéditeur ou le service client.',
+    number: 'Reçu',
+    numberValue: (reference) => `N° ${reference}`,
+    issued: 'Émis le',
+    sender: 'Expéditeur',
+    recipient: 'Destinataire',
+    fee: 'Course',
+    paid: 'payée',
+    unpaid: 'à payer',
+    delivered: 'Livré le',
+    cancelled: 'Commande annulée',
+    collected: 'Encaissé pour l’expéditeur',
+    at: (day, time) => `${day} à ${time}`,
+    note: 'Ce code sert seulement à vérifier le reçu ; il ne permet jamais de retirer un colis.',
+  },
   place: {
     title: 'Votre point de livraison',
     from: (sender) => `${sender} vous envoie un colis`,
@@ -197,6 +219,27 @@ const en: Strings = {
   unavailableTitle: 'Tracking temporarily unavailable',
   unavailableBody: 'We can’t reach Tara right now. Try again in a moment.',
   retry: 'Try again',
+  receipt: {
+    title: 'Receipt check',
+    validTitle: 'Genuine receipt',
+    validBody: 'This receipt was issued by Tara. Check that the details match the paper.',
+    invalidTitle: 'Receipt not found',
+    invalidBody:
+      'No Tara receipt has this number. The document may have been altered: contact the sender or customer service.',
+    number: 'Receipt',
+    numberValue: (reference) => `No. ${reference}`,
+    issued: 'Issued on',
+    sender: 'Sender',
+    recipient: 'Recipient',
+    fee: 'Delivery',
+    paid: 'paid',
+    unpaid: 'to pay',
+    delivered: 'Delivered on',
+    cancelled: 'Order cancelled',
+    collected: 'Collected for the sender',
+    at: (day, time) => `${day} at ${time}`,
+    note: 'This code only checks the receipt; it can never be used to collect a parcel.',
+  },
   place: {
     title: 'Your delivery point',
     from: (sender) => `${sender} is sending you a parcel`,
@@ -308,9 +351,32 @@ export interface Strings {
   unavailableBody: Text;
   retry: Text;
   place: PlaceStrings;
+  receipt: ReceiptStrings;
 }
 
 type Sender = (sender: string | null) => string;
+
+/** Textes de la page « Vérifier un reçu ». */
+export interface ReceiptStrings {
+  title: Text;
+  validTitle: Text;
+  validBody: Text;
+  invalidTitle: Text;
+  invalidBody: Text;
+  number: Text;
+  numberValue: Template;
+  issued: Text;
+  sender: Text;
+  recipient: Text;
+  fee: Text;
+  paid: Text;
+  unpaid: Text;
+  delivered: Text;
+  cancelled: Text;
+  collected: Text;
+  at: Template;
+  note: Text;
+}
 
 /** Textes de la page du lien de localisation (B3). */
 export interface PlaceStrings {

@@ -4,7 +4,9 @@ import { NONCE, secureHeaders } from 'hono/secure-headers';
 import {
   ApiUnavailableError,
   type PublicLocationLink,
+  type PublicReceipt,
   type PublicTracking,
+  RECEIPT_CODE_PATTERN,
   TOKEN_PATTERN,
   type TrackingApi,
 } from './api.js';
@@ -224,6 +226,25 @@ export function createApp(options: AppOptions): Hono {
     }
     if (!link) return notFound(c);
     return place(c, token, link, EMPTY_PLACE, null, c.req.query('r') === 'ok');
+  });
+
+  /**
+   * « Vérifier un reçu » : le QR du reçu imprimé ouvre /r/<code signé>. Un code mal formé
+   * n'est pas transmis à l'API ; faux ou inconnu, la page dit « Reçu introuvable » (404).
+   */
+  app.get('/r/:code', async (c) => {
+    const code = c.req.param('code');
+    const t = strings(locale(c));
+    let receipt: PublicReceipt | null = null;
+    if (RECEIPT_CODE_PATTERN.test(code)) {
+      try {
+        receipt = await api.receipt(code, clientIp(c));
+      } catch (error) {
+        if (error instanceof ApiUnavailableError) return unavailable(c);
+        throw error;
+      }
+    }
+    return c.html(renderPage.receipt(c, t, nonce(c), receipt), receipt ? 200 : 404);
   });
 
   /** Point envoyé par le destinataire : vérifié ici, puis transmis à l'API. */

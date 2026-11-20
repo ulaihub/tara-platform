@@ -4107,6 +4107,36 @@
         ]
       }
     },
+    "/v1/public/receipts/{code}": {
+      "get": {
+        "operationId": "PublicReceipt_verify",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicReceipt"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Public"
+        ]
+      }
+    },
     "/v1/rider/orders/{id}/track": {
       "post": {
         "operationId": "RiderTrack_batch",
@@ -14532,6 +14562,10 @@
             "type": "string",
             "format": "uri"
           },
+          "receiptUrl": {
+            "type": "string",
+            "format": "uri"
+          },
           "batchId": {
             "nullable": true,
             "type": "string",
@@ -14818,6 +14852,7 @@
           "reference",
           "status",
           "trackingUrl",
+          "receiptUrl",
           "batchId",
           "batchNumber",
           "batchSize",
@@ -15886,6 +15921,60 @@
           "recipientName",
           "expiresAt",
           "status"
+        ],
+        "additionalProperties": false
+      },
+      "PublicReceipt": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "senderName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recipientName": {
+            "type": "string"
+          },
+          "dropoffNeighborhood": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fee": {
+            "type": "integer"
+          },
+          "feePaid": {
+            "type": "boolean"
+          },
+          "deliveredAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "collectedForSender": {
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reference",
+          "status",
+          "issuedAt",
+          "senderName",
+          "recipientName",
+          "dropoffNeighborhood",
+          "fee",
+          "feePaid",
+          "deliveredAt",
+          "collectedForSender"
         ],
         "additionalProperties": false
       },

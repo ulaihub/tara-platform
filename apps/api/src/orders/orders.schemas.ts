@@ -187,6 +187,8 @@ export const OrderDto = z
     reference: z.string(),
     status: OrderStatusEnum,
     trackingUrl: z.url(),
+    /** Lien de vérification imprimé en QR sur le reçu (page publique « Vérifier un reçu »). */
+    receiptUrl: z.url(),
     batchId: z.uuid().nullable(),
     /** Numéro du colis dans son envoi (à écrire sur le colis) et nombre de colis de l'envoi. */
     batchNumber: z.int().nullable(),

@@ -66,3 +66,13 @@ export function formatShortDay(iso: string): string {
     month: '2-digit',
   }).format(new Date(iso));
 }
+
+/** « 19/11/2026 » (heure de Douala) : dates du reçu. */
+export function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat('fr-FR', {
+    timeZone: TIME_ZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(iso));
+}

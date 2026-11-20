@@ -1,10 +1,11 @@
 import type { Context } from 'hono';
-import type { PublicLocationLink, PublicTracking } from './api.js';
+import type { PublicLocationLink, PublicReceipt, PublicTracking } from './api.js';
 import { formatDayTime, formatShortDay } from './format.js';
 import type { Locale, Strings } from './i18n.js';
 import { City } from './views/city.js';
 import { Layout } from './views/layout.js';
 import { Message } from './views/message.js';
+import { ReceiptPage } from './views/receipt.js';
 import { PLACE_SCRIPT, PlaceMap, PlacePage, type PlaceValues } from './views/place.js';
 import type { IconName } from './views/icons.js';
 import { type Flash, riderStep, TrackingPage } from './views/tracking.js';
@@ -119,6 +120,21 @@ export const renderPage = {
           values={p.values}
           error={p.error}
         />
+      </Layout>
+    );
+  },
+
+  receipt(c: Context, t: Strings, nonce: string, receipt: PublicReceipt | null) {
+    return (
+      <Layout
+        t={t}
+        nonce={nonce}
+        langHref={langHref(c, t)}
+        title={t.receipt.title}
+        brandSub={t.receipt.title}
+        blobs
+      >
+        <ReceiptPage receipt={receipt} t={t.receipt} />
       </Layout>
     );
   },
