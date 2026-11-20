@@ -31,9 +31,9 @@ class TabAction {
 }
 
 /// Barre d'onglets flottante en verre clair (glassmorphisme) : le contenu passe dessous,
-/// flouté et aux couleurs avivées ; une lentille de verre teintée glisse vers l'onglet
+/// flouté et aux couleurs avivées ; un trait au dégradé de la marque glisse au-dessus de l'onglet
 /// choisi avec un léger rebond. Effets réduits : surface opaque sans flou ; animations
-/// réduites : la lentille se déplace sans transition.
+/// réduites : le trait se déplace sans transition.
 class FloatingTabBar extends StatelessWidget {
   const FloatingTabBar({
     super.key,
@@ -51,11 +51,11 @@ class FloatingTabBar extends StatelessWidget {
   final TabAction? action;
 
   /// Hauteur de la barre et marge sous elle (hors zone système).
-  static const barHeight = 64.0;
-  static const bottomMargin = 12.0;
+  static const barHeight = 74.0;
+  static const bottomMargin = 14.0;
   static const height = barHeight + bottomMargin;
 
-  static const _radius = 28.0;
+  static const _radius = 26.0;
   static const _elastic = Cubic(0.6, -0.35, 0.3, 1.45);
 
   @override
@@ -66,12 +66,12 @@ class FloatingTabBar extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, bottomMargin),
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, bottomMargin),
         child: GlassDock(
           radius: _radius,
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
           child: SizedBox(
-            height: barHeight - 12,
+            height: barHeight - 16,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final center = action == null ? null : items.length ~/ 2;
@@ -81,14 +81,20 @@ class FloatingTabBar extends StatelessWidget {
                 return Stack(
                   clipBehavior: Clip.none,
                   children: [
+                    // Trait au dégradé de la marque au-dessus de l'onglet choisi (maquette).
                     AnimatedPositioned(
                       duration: effects.decorativeMotion ? const Duration(milliseconds: 520) : Duration.zero,
                       curve: _elastic,
-                      left: width * slotOf(current),
-                      top: 0,
-                      bottom: 0,
-                      width: width,
-                      child: const _Lens(),
+                      left: width * slotOf(current) + (width - 20) / 2,
+                      top: -8,
+                      width: 20,
+                      height: 4,
+                      child: const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: TaraBrand.gradient,
+                          borderRadius: BorderRadius.all(Radius.circular(2)),
+                        ),
+                      ),
                     ),
                     Row(
                       children: [
@@ -126,7 +132,7 @@ class _CenterActionState extends State<_CenterAction> {
 
   @override
   Widget build(BuildContext context) {
-    const size = 54.0;
+    const size = 58.0;
     return Semantics(
       button: true,
       label: widget.action.label,
@@ -143,7 +149,7 @@ class _CenterActionState extends State<_CenterAction> {
         child: OverflowBox(
           maxHeight: size + 20,
           child: Transform.translate(
-            offset: const Offset(0, -12),
+            offset: const Offset(0, -14),
             child: AnimatedScale(
               scale: _down ? .92 : 1,
               duration: const Duration(milliseconds: 120),
@@ -151,11 +157,10 @@ class _CenterActionState extends State<_CenterAction> {
                 width: size,
                 height: size,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(20),
                   gradient: TaraBrand.gradient,
-                  border: Border.all(color: const Color.fromRGBO(255, 255, 255, .35)),
                   boxShadow: const [
-                    BoxShadow(color: Color.fromRGBO(255, 106, 0, .45), blurRadius: 22, offset: Offset(0, 8)),
+                    BoxShadow(color: Color.fromRGBO(255, 90, 0, .38), blurRadius: 26, offset: Offset(0, 12)),
                   ],
                 ),
                 child: Center(child: TaraIcon(widget.action.icon, size: 26, strokeWidth: 2.4, color: TaraBrand.onBrand)),
@@ -163,31 +168,6 @@ class _CenterActionState extends State<_CenterAction> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Lentille de verre teintée sous l'onglet choisi : dégradé orange léger, bord clair.
-class _Lens extends StatelessWidget {
-  const _Lens();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = TaraColors.of(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color.fromRGBO(255, 176, 0, c.isDark ? .24 : .26),
-            Color.fromRGBO(255, 106, 0, c.isDark ? .14 : .14),
-          ],
-        ),
-        border: Border.all(color: c.glassHighlight.withValues(alpha: c.isDark ? .22 : .9)),
-        boxShadow: [BoxShadow(color: Color.fromRGBO(255, 106, 0, c.isDark ? .22 : .16), blurRadius: 18)],
       ),
     );
   }
@@ -217,8 +197,21 @@ class _TabButton extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TaraIcon(item.icon, size: 22, color: color),
-            const SizedBox(height: 3),
+            // Onglet choisi : icône en dégradé de la marque, trait plus épais (maquette).
+            if (selected)
+              ShaderMask(
+                blendMode: BlendMode.srcIn,
+                shaderCallback: (bounds) => const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red],
+                  stops: [0, .55, 1],
+                ).createShader(bounds),
+                child: TaraIcon(item.icon, size: 24, strokeWidth: 2, color: const Color(0xFFFFFFFF)),
+              )
+            else
+              TaraIcon(item.icon, size: 24, strokeWidth: 1.8, color: c.textPrimary.withValues(alpha: .66)),
+            const SizedBox(height: 4),
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
@@ -226,8 +219,9 @@ class _TabButton extends StatelessWidget {
                 maxLines: 1,
                 style: TaraText.overline.copyWith(
                   letterSpacing: 0,
-                  color: color,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  fontSize: 11,
+                  color: selected ? color : c.textPrimary.withValues(alpha: .66),
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
                 ),
               ),
             ),
