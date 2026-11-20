@@ -2296,4 +2296,79 @@ class AppLocalizationsFr extends AppLocalizations {
   String towards(String place) {
     return 'Vers $place';
   }
+
+  @override
+  String courseReference(String reference) {
+    return 'Course $reference';
+  }
+
+  @override
+  String toCollectFrom(String name) {
+    return 'À encaisser auprès de $name';
+  }
+
+  @override
+  String get exactShort => 'Exact';
+
+  @override
+  String cashKeptFromBalance(String amount) {
+    return 'Vous gardez les espèces : $amount sont pris sur votre solde prépayé, où ils étaient déjà mis de côté.';
+  }
+
+  @override
+  String get slideConfirmCollection => 'Glisser · Confirmer l’encaissement';
+
+  @override
+  String deliveredAtLabel(String reference, String time) {
+    return '$reference · livrée à $time';
+  }
+
+  @override
+  String todayEarningsPill(String amount) {
+    return 'Gains du jour · $amount';
+  }
+
+  @override
+  String rideOfDay(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '${count}e course du jour',
+      one: '1re course du jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rideOfDayBravo(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '${count}e course du jour · bravo $name',
+      one: '1re course du jour · bravo $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addedToEarnings => 'Ajoutés à vos gains du jour';
+
+  @override
+  String dailyGoal(int count) {
+    return 'Objectif du jour : $count courses';
+  }
+
+  @override
+  String ridesToNextCelebration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Encore $count courses pour la prochaine célébration.',
+      one: 'Encore 1 course pour la prochaine célébration.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get continueOnline => 'Continuer · rester en ligne';
 }

@@ -101,7 +101,7 @@ class CourseHeader extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onBack,
-    required this.onSos,
+    this.onSos,
     this.onCall,
     this.callLabel,
   });
@@ -110,7 +110,9 @@ class CourseHeader extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onBack;
-  final VoidCallback onSos;
+
+  /// null : pas de SOS (écrans ouverts par-dessus une course qui l'affiche déjà).
+  final VoidCallback? onSos;
   final VoidCallback? onCall;
   final String? callLabel;
 
@@ -201,9 +203,11 @@ class CourseHeader extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(width: 8),
         // L'alerte reste à portée pendant toute la course.
-        SosButton(label: l.safetyAlert, onPressed: onSos, size: 44, round: true),
+        if (onSos != null) ...[
+          const SizedBox(width: 8),
+          SosButton(label: l.safetyAlert, onPressed: onSos, size: 44, round: true),
+        ],
       ],
     );
   }

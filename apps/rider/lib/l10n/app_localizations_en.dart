@@ -2288,4 +2288,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String towards(String place) {
     return 'Towards $place';
   }
+
+  @override
+  String courseReference(String reference) {
+    return 'Ride $reference';
+  }
+
+  @override
+  String toCollectFrom(String name) {
+    return 'To collect from $name';
+  }
+
+  @override
+  String get exactShort => 'Exact';
+
+  @override
+  String cashKeptFromBalance(String amount) {
+    return 'You keep the cash: $amount is taken from your prepaid balance, where it was already set aside.';
+  }
+
+  @override
+  String get slideConfirmCollection => 'Slide · Confirm collection';
+
+  @override
+  String deliveredAtLabel(String reference, String time) {
+    return '$reference · delivered at $time';
+  }
+
+  @override
+  String todayEarningsPill(String amount) {
+    return 'Today · $amount';
+  }
+
+  @override
+  String rideOfDay(int count) {
+    return 'Ride no. $count today';
+  }
+
+  @override
+  String rideOfDayBravo(int count, String name) {
+    return 'Ride no. $count today · well done $name';
+  }
+
+  @override
+  String get addedToEarnings => 'Added to today’s earnings';
+
+  @override
+  String dailyGoal(int count) {
+    return 'Today’s goal: $count rides';
+  }
+
+  @override
+  String ridesToNextCelebration(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more rides to the next celebration.',
+      one: '1 more ride to the next celebration.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get continueOnline => 'Continue · stay online';
 }

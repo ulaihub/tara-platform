@@ -149,7 +149,7 @@ void main() {
     await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
     await settle(tester);
     expect(find.byType(CollectionScreen), findsOneWidget);
-    expect(find.text('À encaisser auprès du client'), findsOneWidget);
+    expect(find.text('À encaisser auprès de Paul Ekwalla'), findsOneWidget);
     // Retour : la livraison préparée (code, photo) est toujours là.
     await tester.tap(find.bySemanticsLabel('Retour').last);
     await settle(tester);
