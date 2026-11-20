@@ -36,8 +36,13 @@ const ROUTE = 'M138 20 L 138 128 L 276 128 L 276 256 L 330 256';
 /** Part du trajet arrondie au dixième : une classe par cran (pas de style en ligne). */
 export const routeStep = (progress: number) => Math.min(10, Math.max(0, Math.round(progress * 10)));
 
-export const City: FC<{ rider: number | null; youLabel: string }> = ({ rider, youLabel }) => (
-  <div class="city" aria-hidden="true">
+/** `point` : plateau immobile et plus haut (maquette Web-Point), sans trajet ni épingle. */
+export const City: FC<{ rider: number | null; youLabel?: string; point?: boolean }> = ({
+  rider,
+  youLabel,
+  point,
+}) => (
+  <div class={point ? 'city point' : 'city'} aria-hidden="true">
     <div class="persp">
       <div class="ground">
         <i class="road r1 h" />
@@ -51,12 +56,14 @@ export const City: FC<{ rider: number | null; youLabel: string }> = ({ rider, yo
             <path d={ROUTE} class="line" />
           </svg>
         )}
-        <span class="you">
-          <span class="bill">
-            <span class="tag">{youLabel}</span>
-            <span class="stem" />
+        {youLabel ? (
+          <span class="you">
+            <span class="bill">
+              <span class="tag">{youLabel}</span>
+              <span class="stem" />
+            </span>
           </span>
-        </span>
+        ) : null}
         {rider === null ? null : (
           <span class={`rider s${rider}`}>
             <span class="glow" />
@@ -128,5 +135,12 @@ ${BUILDINGS.map(([l, t, w, d, h], i) => `.b${i}{left:${l}px;top:${t}px;width:${w
 .vignette,.fade{position:absolute;pointer-events:none}
 .vignette{inset:0;background:radial-gradient(ellipse at 50% 35%,rgba(var(--map-rgb),0) 50%,rgba(var(--map-rgb),.85) 100%)}
 .fade{left:0;right:0;bottom:0;height:140px;background:linear-gradient(180deg,rgba(var(--bg-rgb),0) 0%,var(--bg) 100%)}
-@media (prefers-reduced-motion:reduce){.ground,.glow{animation:none}}
+.city.point{height:470px}
+.city.point .ground{top:70px;animation:none}
+@keyframes bob{0%,100%{transform:translate(-50%,-100%)}50%{transform:translate(-50%,calc(-100% - 8px))}}
+.drop{position:absolute;left:50%;top:250px;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;animation:bob 2s ease-in-out infinite}
+.drop .head{width:40px;height:40px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:var(--grad);box-shadow:0 10px 24px rgba(255,90,0,.45);display:flex;align-items:center;justify-content:center}
+.drop .head i{width:14px;height:14px;border-radius:50%;background:#FFF}
+.drop .pole{width:3px;height:16px;background:#FF6A00}
+@media (prefers-reduced-motion:reduce){.ground,.glow,.drop{animation:none}}
 `;

@@ -57,3 +57,12 @@ export function formatDayTime(iso: string, locale: 'fr' | 'en'): string {
   }).format(new Date(iso));
   return `${day} ${locale === 'fr' ? 'à' : 'at'} ${formatClock(iso)}`;
 }
+
+/** « 06/11 » (heure de Douala) : en-tête de la page du lien de localisation. */
+export function formatShortDay(iso: string): string {
+  return new Intl.DateTimeFormat('fr-FR', {
+    timeZone: TIME_ZONE,
+    day: '2-digit',
+    month: '2-digit',
+  }).format(new Date(iso));
+}

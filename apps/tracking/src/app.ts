@@ -329,6 +329,7 @@ export function createApp(options: AppOptions): Hono {
               }
             : { icon: 'pin', title: t.place.usedTitle, body: t.place.usedBody(link.senderName) },
           t.place.title,
+          true,
         ),
       );
     }
@@ -344,6 +345,7 @@ export function createApp(options: AppOptions): Hono {
             body: t.place.expiredBody(link.senderName),
           },
           t.place.title,
+          true,
         ),
         410,
       );

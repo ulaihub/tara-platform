@@ -18,6 +18,8 @@ export const Layout: FC<{
   script?: string;
   /** Carte du haut (maquette Web-Suivi) : l'en-tête passe par-dessus, le contenu dans la feuille. */
   map?: Child;
+  /** Sous-titre de l'en-tête sur la carte (par défaut : lien envoyé par SMS). */
+  brandSub?: string;
   children: Child;
 }> = ({
   t,
@@ -29,6 +31,7 @@ export const Layout: FC<{
   title,
   script,
   map,
+  brandSub,
   children,
 }) => (
   <>
@@ -55,7 +58,7 @@ export const Layout: FC<{
                 </span>
                 <span class="grow brandline">
                   <b>{t.brandLine}</b>
-                  <span>{t.brandSub}</span>
+                  <span>{brandSub ?? t.brandSub}</span>
                 </span>
                 <span class="secure">
                   <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">

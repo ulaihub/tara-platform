@@ -1,11 +1,11 @@
 import type { Context } from 'hono';
 import type { PublicLocationLink, PublicTracking } from './api.js';
-import { formatDayTime } from './format.js';
+import { formatDayTime, formatShortDay } from './format.js';
 import type { Locale, Strings } from './i18n.js';
 import { City } from './views/city.js';
 import { Layout } from './views/layout.js';
 import { Message } from './views/message.js';
-import { PLACE_SCRIPT, PlacePage, type PlaceValues } from './views/place.js';
+import { PLACE_SCRIPT, PlaceMap, PlacePage, type PlaceValues } from './views/place.js';
 import type { IconName } from './views/icons.js';
 import { type Flash, riderStep, TrackingPage } from './views/tracking.js';
 
@@ -64,10 +64,19 @@ export const renderPage = {
       tone?: 'ok' | 'muted';
     },
     pageTitle?: string,
+    /** Issue du lien de localisation : même ville que la page « Mon point », message dans la feuille. */
+    onMap = false,
   ) {
     return (
-      <Layout t={t} nonce={nonce} langHref={langHref(c, t)} title={pageTitle}>
-        <Message {...m} />
+      <Layout
+        t={t}
+        nonce={nonce}
+        langHref={langHref(c, t)}
+        title={pageTitle}
+        map={onMap ? <City rider={null} point /> : undefined}
+        brandSub={onMap ? t.place.title : undefined}
+      >
+        <Message {...m} sheet={onMap} />
       </Layout>
     );
   },
@@ -85,6 +94,7 @@ export const renderPage = {
       error: string | null;
     },
   ) {
+    const validUntil = formatDayTime(p.link.expiresAt, p.locale);
     return (
       <Layout
         t={p.t}
@@ -92,12 +102,20 @@ export const renderPage = {
         langHref={langHref(c, p.t)}
         title={p.t.place.title}
         script={PLACE_SCRIPT}
+        brandSub={p.t.place.validUntil(formatShortDay(p.link.expiresAt))}
+        map={
+          <PlaceMap
+            link={p.link}
+            t={p.t.place}
+            located={p.values.latitude !== '' && p.values.longitude !== ''}
+          />
+        }
       >
         <PlacePage
           link={p.link}
           t={p.t.place}
           actionHref={`/l/${p.token}${p.langQuery}`}
-          validUntil={formatDayTime(p.link.expiresAt, p.locale)}
+          validUntil={validUntil}
           values={p.values}
           error={p.error}
         />
