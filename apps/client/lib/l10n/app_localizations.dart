@@ -2942,11 +2942,53 @@ abstract class AppLocalizations {
   /// **'Mouvements'**
   String get movements;
 
-  /// No description provided for @walletShowCard.
+  /// No description provided for @walletSalesFront.
   ///
   /// In fr, this message translates to:
-  /// **'Afficher la carte {card}'**
-  String walletShowCard(String card);
+  /// **'Ventes à recevoir, au premier plan'**
+  String get walletSalesFront;
+
+  /// No description provided for @walletSalesShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre les ventes à recevoir au premier plan'**
+  String get walletSalesShow;
+
+  /// No description provided for @walletTaraFront.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara, au premier plan'**
+  String get walletTaraFront;
+
+  /// No description provided for @walletTaraShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre le Solde Tara au premier plan'**
+  String get walletTaraShow;
+
+  /// No description provided for @walletReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir'**
+  String get walletReceive;
+
+  /// No description provided for @walletReserve.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réserve'**
+  String get walletReserve;
+
+  /// No description provided for @walletStatement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevé'**
+  String get walletStatement;
+
+  /// No description provided for @walletStatements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevés du mois'**
+  String get walletStatements;
 
   /// No description provided for @shopTodayChip.
   ///

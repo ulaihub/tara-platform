@@ -106,6 +106,12 @@ abstract final class TaraIcons {
     _P('M15.5 4.7a3.5 3.5 0 010 6.6M17.5 15.3c2 .7 3.4 2.4 4 4.7'),
   ]);
   static const plus = TaraIconData([_P('M12 5v14M5 12h14')]);
+
+  /// Flèche qui sort en haut à droite (retrait).
+  static const arrowUpRight = TaraIconData([_P('M7 17L17 7M9 7h8v8')]);
+
+  /// Document plié au coin (relevé).
+  static const document = TaraIconData([_P('M7 3h7l4 4v14H7z'), _P('M14 3v4h4M10 12h5M10 16h5')]);
   static const search = TaraIconData([_C(11, 11, 7), _P('M20 20l-3.5-3.5')]);
 }
 

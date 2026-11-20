@@ -1641,9 +1641,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get movements => 'Activity';
 
   @override
-  String walletShowCard(String card) {
-    return 'Show the $card card';
-  }
+  String get walletSalesFront => 'Sales to receive, in front';
+
+  @override
+  String get walletSalesShow => 'Bring sales to receive to the front';
+
+  @override
+  String get walletTaraFront => 'Tara balance, in front';
+
+  @override
+  String get walletTaraShow => 'Bring the Tara balance to the front';
+
+  @override
+  String get walletReceive => 'Receive';
+
+  @override
+  String get walletReserve => 'Reserve';
+
+  @override
+  String get walletStatement => 'Statement';
+
+  @override
+  String get walletStatements => 'Monthly statements';
 
   @override
   String shopTodayChip(String amount) {

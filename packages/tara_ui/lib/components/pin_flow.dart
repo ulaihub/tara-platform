@@ -779,9 +779,13 @@ class BalanceAmount extends StatelessWidget {
     this.style,
     this.unit = 'F',
     this.color,
+    this.showEye = true,
   });
 
   final int amount;
+
+  /// Œil à côté du montant ; absent quand un bouton œil est posé ailleurs (en-tête).
+  final bool showEye;
   final BalanceVisibility visibility;
   final VoidCallback onReveal;
   final String showLabel;
@@ -827,17 +831,22 @@ class BalanceAmount extends StatelessWidget {
                                 ),
                                 TextSpan(
                                   text: ' $unit',
-                                  style: TaraText.unit.copyWith(color: c.textSecondary),
+                                  style: TaraText.unit.copyWith(color: color?.withValues(alpha: .72) ?? c.textSecondary),
                                 ),
                               ],
                             ),
                           ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: TaraIcon(visible ? TaraIcons.eyeOff : TaraIcons.eye, size: 22, color: c.textSecondary),
-                ),
+                if (showEye)
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: TaraIcon(
+                      visible ? TaraIcons.eyeOff : TaraIcons.eye,
+                      size: 22,
+                      color: color?.withValues(alpha: .72) ?? c.textSecondary,
+                    ),
+                  ),
               ],
             ),
           ),

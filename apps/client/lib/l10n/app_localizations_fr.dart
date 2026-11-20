@@ -1647,9 +1647,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get movements => 'Mouvements';
 
   @override
-  String walletShowCard(String card) {
-    return 'Afficher la carte $card';
-  }
+  String get walletSalesFront => 'Ventes à recevoir, au premier plan';
+
+  @override
+  String get walletSalesShow => 'Mettre les ventes à recevoir au premier plan';
+
+  @override
+  String get walletTaraFront => 'Solde Tara, au premier plan';
+
+  @override
+  String get walletTaraShow => 'Mettre le Solde Tara au premier plan';
+
+  @override
+  String get walletReceive => 'Recevoir';
+
+  @override
+  String get walletReserve => 'Réserve';
+
+  @override
+  String get walletStatement => 'Relevé';
+
+  @override
+  String get walletStatements => 'Relevés du mois';
 
   @override
   String shopTodayChip(String amount) {
