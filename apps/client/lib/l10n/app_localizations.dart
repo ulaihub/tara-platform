@@ -740,6 +740,60 @@ abstract class AppLocalizations {
   /// **'Parrainage'**
   String get referralTitle;
 
+  /// No description provided for @profileSecurityValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code secret, empreinte'**
+  String get profileSecurityValue;
+
+  /// No description provided for @profileDisplayRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affichage et sons'**
+  String get profileDisplayRow;
+
+  /// No description provided for @profileTermsRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions et mes données'**
+  String get profileTermsRow;
+
+  /// No description provided for @profilePlanChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Offre Pro'**
+  String get profilePlanChip;
+
+  /// No description provided for @profileReferShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parrainez une boutique'**
+  String get profileReferShop;
+
+  /// No description provided for @profileReferBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Elle profite d’une réduction sur ses premières livraisons.'**
+  String get profileReferBody;
+
+  /// No description provided for @profileShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager'**
+  String get profileShare;
+
+  /// No description provided for @profileSupportRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service client'**
+  String get profileSupportRow;
+
+  /// No description provided for @profileReferralShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livrez avec Tara à Douala : à l’inscription, entrez mon code {code} pour une réduction sur vos premières livraisons.'**
+  String profileReferralShare(String code);
+
   /// No description provided for @referralBody.
   ///
   /// In fr, this message translates to:

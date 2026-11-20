@@ -49,6 +49,16 @@ void main() {
   setUpAll(loadAppFonts);
 
   Future<void> tapText(WidgetTester tester, String text) async {
+    // Données du compte : dans la page « Conditions et mes données » du profil.
+    if (find.text(text).evaluate().isEmpty && find.text('Conditions et mes données').evaluate().isNotEmpty) {
+      await tester.scrollUntilVisible(
+        find.text('Conditions et mes données'),
+        120,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Conditions et mes données'));
+      await settle(tester);
+    }
     await tester.scrollUntilVisible(find.text(text), 120, scrollable: find.byType(Scrollable).first);
     await settle(tester);
     await tester.tap(find.text(text).last);

@@ -379,6 +379,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get referralTitle => 'Referral';
 
   @override
+  String get profileSecurityValue => 'PIN, fingerprint';
+
+  @override
+  String get profileDisplayRow => 'Display and sounds';
+
+  @override
+  String get profileTermsRow => 'Terms and my data';
+
+  @override
+  String get profilePlanChip => 'Pro plan';
+
+  @override
+  String get profileReferShop => 'Refer a shop';
+
+  @override
+  String get profileReferBody => 'They get a discount on their first deliveries.';
+
+  @override
+  String get profileShare => 'Share';
+
+  @override
+  String get profileSupportRow => 'Customer service';
+
+  @override
+  String profileReferralShare(String code) {
+    return 'Deliver with Tara in Douala: when you sign up, enter my code $code for a discount on your first deliveries.';
+  }
+
+  @override
   String get referralBody => 'Share your code: your friends enter it when signing up and get a discount.';
 
   @override

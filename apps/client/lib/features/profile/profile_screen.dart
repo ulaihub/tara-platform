@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,13 +11,13 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
-import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/components/terms_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/motion/motion_clock.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_effects.dart';
 import 'package:tara_ui/tara_icons.dart';
@@ -33,7 +34,6 @@ import '../legal/terms_screen.dart';
 import '../order/address_editor.dart';
 import '../order/pickup_step.dart' show pickupAddressesProvider;
 import '../support/support.dart';
-import '../wallet/wallet_screen.dart';
 import 'delete_account_screen.dart';
 
 /// Onglet Profil de l'expéditeur (non dessiné : style Tara) : identité et boutique, code de
@@ -55,29 +55,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   bool _confirmLogout = false;
   bool _loggingOut = false;
-  bool _exporting = false;
-  String? _exportError;
-
-  /// Copie de toutes ses données (droit d'accès), en fichier JSON partagé ou enregistré
-  /// depuis la feuille de partage du téléphone.
-  Future<void> _exportData() async {
-    final l = AppLocalizations.of(context);
-    setState(() {
-      _exporting = true;
-      _exportError = null;
-    });
-    try {
-      final data = await ref.read(clientApiProvider).exportData();
-      final bytes = utf8.encode(const JsonEncoder.withIndent('  ').convert(data));
-      final date = DateTime.now().toIso8601String().substring(0, 10);
-      await ref.read(shareFileProvider)(bytes, 'tara-donnees-$date.json', 'application/json', l.exportDataShare);
-    } catch (error) {
-      if (mounted) setState(() => _exportError = errorMessage(context, error));
-    } finally {
-      if (mounted) setState(() => _exporting = false);
-    }
-  }
-
   void _setLanguage(AppSettings settings, String? code) {
     settings.locale = code == null ? null : Locale(code);
     // Les SMS et notifications suivent la langue choisie ; sans réseau, à la prochaine fois.
@@ -94,6 +71,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     await ref.read(authControllerProvider.notifier).logout();
   }
 
+  /// Page d'une ligne du menu : retour, titre, puis le bloc de réglages existant.
+  void _open(String title, Widget Function(BuildContext context) body) => unawaited(
+    Navigator.of(context).push(
+      scopedPage<void>(
+        context,
+        (route) => _ProfilePage(title: title, onBack: () => Navigator.of(route).pop(), child: Builder(builder: body)),
+      ),
+    ),
+  );
+
+  @override
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -102,151 +90,105 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final me = widget.me;
     final support = ref.watch(appConfigProvider).value?.supportPhone;
     final version = ref.watch(appVersionProvider).value;
+    final addresses = ref.watch(pickupAddressesProvider).value;
+    final plan = ref.watch(walletProvider).value?.plan;
+    final themeName = switch (settings.themeMode) {
+      ThemeMode.light => l.themeLight,
+      ThemeMode.dark => l.themeDark,
+      ThemeMode.system => l.optionAuto,
+    };
+    final language = switch (settings.locale?.languageCode) {
+      'fr' => 'Français',
+      'en' => 'English',
+      _ => l.optionAuto,
+    };
+    final rows = <_MenuRow>[
+      _MenuRow(TaraIcons.mapPin, l.myAddresses, addresses == null ? '' : '${addresses.length}', () {
+        _open(l.myAddresses, (_) => const _AddressesCard());
+      }),
+      _MenuRow(TaraIcons.shield, l.securitySection, l.profileSecurityValue, () {
+        _open(l.securitySection, (_) => const SecurityCard());
+      }),
+      _MenuRow(TaraIcons.sun, l.profileDisplayRow, themeName, () {
+        _open(l.profileDisplayRow, (context) => _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)));
+      }),
+      _MenuRow(TaraIcons.globe, l.languageLabel, language, () {
+        _open(l.profileDisplayRow, (context) => _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)));
+      }),
+      _MenuRow(TaraIcons.headset, l.profileSupportRow, '', () {
+        _open(l.helpSection, (context) => _HelpCard(support: support));
+      }),
+      _MenuRow(TaraIcons.document, l.profileTermsRow, '', () {
+        _open(l.profileTermsRow, (context) => _DataCard(me: me));
+      }),
+      _MenuRow(TaraIcons.logout, l.logout, '', () => setState(() => _confirmLogout = true), danger: true),
+    ];
     return TaraScreen(
       blobs: _blobs,
       safeBottom: false,
       child: ListView(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + TaraTabShell.bottomInset(context)),
+        padding: EdgeInsets.fromLTRB(20, 24, 20, 24 + TaraTabShell.bottomInset(context)),
         children: [
+          // En-tête de la maquette : avatar dans un anneau qui tourne, nom, numéro, pastilles.
+          Center(child: _RingAvatar(name: me.fullName ?? '')),
+          const SizedBox(height: 12),
           Semantics(
             header: true,
-            child: Text(l.tabProfile, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-          ),
-          const SizedBox(height: 16),
-          GlassCard(
-            radius: 24,
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                InitialsAvatar(name: me.fullName ?? '', size: 56),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: MergeSemantics(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(me.fullName ?? '', style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
-                        Text(displayPhone(me.phone), style: TaraText.label.copyWith(color: c.textSecondary)),
-                        if (me.merchant case final shop?) ...[
-                          const SizedBox(height: 8),
-                          InfoPill(label: shop.shopName, tone: TintTone.accent, icon: TaraIcons.package),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            child: Text(
+              me.fullName ?? '',
+              textAlign: TextAlign.center,
+              style: TaraText.titleCourse.copyWith(color: c.textPrimary),
             ),
           ),
-          const SizedBox(height: 12),
-          _WalletRow(me: me),
-          if (me.referralCode case final code?) ...[
-            const SizedBox(height: 20),
-            SectionHeader(title: l.referralTitle),
+          const SizedBox(height: 4),
+          Text(
+            displayPhone(me.phone),
+            textAlign: TextAlign.center,
+            style: TaraText.label.copyWith(color: c.textSecondary),
+          ),
+          if (me.merchant case final shop?) ...[
             const SizedBox(height: 8),
-            TintBox(
-              tone: TintTone.accent,
-              child: MergeSemantics(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l.referralBody, style: TaraText.label.copyWith(color: c.textSecondary, height: 1.4)),
-                    const SizedBox(height: 8),
-                    SelectableText(
-                      code,
-                      style: TaraText.titlePanel.copyWith(color: c.accentStrongText, letterSpacing: 1.5),
-                    ),
-                  ],
-                ),
-              ),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _Chip(label: shop.shopName),
+                if (plan != null && plan != 'FREE') _Chip(label: l.profilePlanChip, brand: true),
+              ],
             ),
           ],
-          const SizedBox(height: 20),
-          SectionHeader(title: l.myAddresses),
-          const SizedBox(height: 8),
-          const _AddressesCard(),
-          const SizedBox(height: 20),
-          SectionHeader(title: l.displaySection),
-          const SizedBox(height: 8),
-          _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
-          const SizedBox(height: 20),
-          SectionHeader(title: l.securitySection),
-          const SizedBox(height: 8),
-          const SecurityCard(),
-          const SizedBox(height: 20),
-          SectionHeader(title: l.termsSection),
-          const SizedBox(height: 8),
-          const _TermsCard(),
-          const SizedBox(height: 20),
-          SectionHeader(title: l.helpSection),
-          const SizedBox(height: 8),
+          if (me.referralCode case final code?) ...[
+            const SizedBox(height: 16),
+            _ReferralTicket(
+              code: code,
+              shop: me.merchant != null,
+              onShare: () => unawaited(ref.read(shareProvider)(l.profileReferralShare(code), null)),
+            ),
+          ],
+          const SizedBox(height: 14),
           GlassCard(
             radius: 22,
             shadow: false,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            padding: EdgeInsets.zero,
             child: Column(
               children: [
-                ListRow(
-                  leading: const IconTile(icon: TaraIcons.message),
-                  title: l.supportMenuRow,
-                  subtitle: l.supportMenuRowSubtitle,
-                  trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-                  onTap: () => unawaited(openSupport(context, ref)),
-                ),
-                if (support != null)
-                  ListRow(
-                    leading: const IconTile(icon: TaraIcons.headset),
-                    title: l.supportTara,
-                    subtitle: displayPhone(support),
-                    trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
-                    onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
-                  ),
+                for (var i = 0; i < rows.length; i++) ...[
+                  if (i > 0) Divider(height: 1, color: c.glassBorder),
+                  _MenuTile(row: rows[i]),
+                ],
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          SectionHeader(title: l.accountDataSection),
-          const SizedBox(height: 8),
-          GlassCard(
-            radius: 22,
-            shadow: false,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            child: Column(
-              children: [
-                ListRow(
-                  leading: const IconTile(icon: TaraIcons.download),
-                  title: l.exportDataRow,
-                  subtitle: l.exportDataRowSubtitle,
-                  trailing: _exporting
-                      ? const SizedBox(width: 44, child: GooLoader(compact: true))
-                      : TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-                  onTap: _exporting ? null : () => unawaited(_exportData()),
-                ),
-                ListRow(
-                  leading: const IconTile(icon: TaraIcons.close),
-                  title: l.deleteAccountRow,
-                  subtitle: l.deleteAccountRowSubtitle,
-                  trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-                  onTap: () => unawaited(
-                    Navigator.of(context).push(
-                      scopedPage<void>(
-                        context,
-                        (route) => DeleteAccountScreen(me: me, onBack: () => Navigator.of(route).pop()),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          if (_confirmLogout || _loggingOut) ...[
+            const SizedBox(height: 14),
+            _LogoutBlock(
+              confirming: _confirmLogout,
+              busy: _loggingOut,
+              onLogout: _logout,
+              onCancel: () => setState(() => _confirmLogout = false),
             ),
-          ),
-          if (_exportError case final error?) ...[const SizedBox(height: 8), ErrorLine(error)],
-          const SizedBox(height: 24),
-          _LogoutBlock(
-            confirming: _confirmLogout,
-            busy: _loggingOut,
-            onLogout: _logout,
-            onCancel: () => setState(() => _confirmLogout = false),
-          ),
+          ],
           if (version != null) ...[
             const SizedBox(height: 18),
             Center(
@@ -259,7 +201,415 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 }
 
-/// Thème, langue et effets : appliqués tout de suite, gardés sur le téléphone.
+@immutable
+class _MenuRow {
+  const _MenuRow(this.icon, this.label, this.value, this.onTap, {this.danger = false});
+  final TaraIconData icon;
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+  final bool danger;
+}
+
+/// Ligne du menu (maquette) : icône, libellé, valeur discrète, chevron ; en rouge pour
+/// la déconnexion.
+class _MenuTile extends StatelessWidget {
+  const _MenuTile({required this.row});
+  final _MenuRow row;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final ink = row.danger ? c.dangerText : c.textPrimary;
+    return MergeSemantics(
+      child: Semantics(
+        button: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: row.onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 50),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  TaraIcon(row.icon, size: 22, strokeWidth: 1.8, color: ink),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(row.label, style: TaraText.text.copyWith(color: ink, fontWeight: FontWeight.w700)),
+                  ),
+                  if (row.value.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        row.value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TaraText.label.copyWith(color: c.textTertiary),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: 6),
+                  TaraIcon(TaraIcons.chevronRight, size: 16, color: c.textPrimary.withValues(alpha: .40)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Avatar de la maquette : initiales sur le dégradé, dans un anneau dégradé qui tourne.
+class _RingAvatar extends StatelessWidget {
+  const _RingAvatar({required this.name});
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final initials = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).take(2).map((w) => w[0]).join().toUpperCase();
+    return ExcludeSemantics(
+      child: SizedBox(
+        width: 92,
+        height: 92,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: MotionBuilder(
+                period: const Duration(seconds: 6),
+                builder: (context, t, child) => Transform.rotate(angle: t * 2 * math.pi, child: child),
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: SweepGradient(
+                      colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red, Color(0x00FF3D00), TaraBrand.amber],
+                      stops: [0, .25, .45, .7, 1],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: DecoratedBox(decoration: BoxDecoration(shape: BoxShape.circle, color: c.bg)),
+              ),
+            ),
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.all(9),
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(shape: BoxShape.circle, gradient: TaraBrand.gradient),
+                  child: Center(
+                    child: Text(
+                      initials,
+                      style: TaraText.titleCourse.copyWith(color: TaraBrand.onBrand, fontWeight: FontWeight.w800, fontSize: 26),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({required this.label, this.brand = false});
+  final String label;
+  final bool brand;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: brand ? null : c.glassFallback,
+        gradient: brand ? TaraBrand.gradient : null,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TaraText.smallStrong.copyWith(color: brand ? TaraBrand.onBrand : c.textPrimary, fontWeight: FontWeight.w800),
+      ),
+    );
+  }
+}
+
+/// Bon de parrainage (maquette) : ticket clair à deux parties, séparées par un pointillé et
+/// deux encoches ; le code et « Partager » à droite.
+class _ReferralTicket extends StatelessWidget {
+  const _ReferralTicket({required this.code, required this.shop, required this.onShare});
+  final String code;
+  final bool shop;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    const ink = Color(0xFF16120E);
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [BoxShadow(color: Color.fromRGBO(140, 70, 10, .10), blurRadius: 28, offset: Offset(0, 12))],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(-.35, -1),
+              end: Alignment(.35, 1),
+              colors: [Color(0xFFFFFFFF), Color(0xFFFFF1E2)],
+            ),
+          ),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          shop ? l.profileReferShop : l.referralTitle,
+                          style: TaraText.text.copyWith(color: ink, fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          l.profileReferBody,
+                          style: TaraText.small.copyWith(color: const Color.fromRGBO(22, 18, 14, .70), height: 1.4),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 132,
+                  child: CustomPaint(
+                    painter: _TicketEdge(notch: c.bg),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SelectableText(
+                          code,
+                          style: TaraText.text.copyWith(
+                            fontFamily: TaraText.sora,
+                            color: const Color(0xFF9A3412),
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: .6,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Semantics(
+                          button: true,
+                          label: l.profileShare,
+                          excludeSemantics: true,
+                          child: GestureDetector(
+                            onTap: onShare,
+                            child: Container(
+                              height: 30,
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(color: ink, borderRadius: BorderRadius.circular(999)),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const TaraIcon(TaraIcons.send, size: 14, strokeWidth: 2.2, color: Colors.white),
+                                  const SizedBox(width: 6),
+                                  Text(l.profileShare, style: TaraText.smallStrong.copyWith(color: Colors.white)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pointillé vertical et encoches du ticket, de la couleur du fond de l'écran.
+class _TicketEdge extends CustomPainter {
+  _TicketEdge({required this.notch});
+  final Color notch;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final dash = Paint()
+      ..color = const Color.fromRGBO(194, 65, 12, .30)
+      ..strokeWidth = 2;
+    for (double y = 12; y < size.height - 12; y += 8) {
+      canvas.drawLine(Offset(1, y), Offset(1, y + 4), dash);
+    }
+    final hole = Paint()..color = notch;
+    canvas
+      ..drawCircle(const Offset(1, -1), 10, hole)
+      ..drawCircle(Offset(1, size.height + 1), 10, hole);
+  }
+
+  @override
+  bool shouldRepaint(_TicketEdge old) => old.notch != notch;
+}
+
+/// Page ouverte depuis une ligne du menu : retour, titre, contenu qui défile.
+class _ProfilePage extends StatelessWidget {
+  const _ProfilePage({required this.title, required this.onBack, required this.child});
+  final String title;
+  final VoidCallback onBack;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return TaraScreen(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: onBack),
+          ),
+          const SizedBox(height: 16),
+          Semantics(header: true, child: Text(title, style: TaraText.titleForm.copyWith(color: c.textPrimary))),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Service client : demande liée à une commande, ou appel au numéro de Tara.
+class _HelpCard extends ConsumerWidget {
+  const _HelpCard({required this.support});
+  final String? support;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final phone = support;
+    return GlassCard(
+      radius: 22,
+      shadow: false,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      child: Column(
+        children: [
+          ListRow(
+            leading: const IconTile(icon: TaraIcons.message),
+            title: l.supportMenuRow,
+            subtitle: l.supportMenuRowSubtitle,
+            trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+            onTap: () => unawaited(openSupport(context, ref)),
+          ),
+          if (phone != null)
+            ListRow(
+              leading: const IconTile(icon: TaraIcons.headset),
+              title: l.supportTara,
+              subtitle: displayPhone(phone),
+              trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
+              onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Conditions et mes données : textes acceptés, copie de mes données, suppression du compte.
+class _DataCard extends ConsumerStatefulWidget {
+  const _DataCard({required this.me});
+  final Me me;
+
+  @override
+  ConsumerState<_DataCard> createState() => _DataCardState();
+}
+
+class _DataCardState extends ConsumerState<_DataCard> {
+  bool _exporting = false;
+  String? _exportError;
+
+  Future<void> _exportData() async {
+    setState(() {
+      _exporting = true;
+      _exportError = null;
+    });
+    try {
+      await exportMyData(ref, AppLocalizations.of(context).exportDataShare);
+    } catch (error) {
+      if (mounted) setState(() => _exportError = errorMessage(context, error));
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const _TermsCard(),
+        const SizedBox(height: 20),
+        SectionHeader(title: l.accountDataSection),
+        const SizedBox(height: 8),
+        GlassCard(
+          radius: 22,
+          shadow: false,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          child: Column(
+            children: [
+              ListRow(
+                leading: const IconTile(icon: TaraIcons.download),
+                title: l.exportDataRow,
+                subtitle: l.exportDataRowSubtitle,
+                trailing: _exporting
+                    ? const SizedBox(width: 44, child: GooLoader(compact: true))
+                    : TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+                onTap: _exporting ? null : () => unawaited(_exportData()),
+              ),
+              ListRow(
+                leading: const IconTile(icon: TaraIcons.close),
+                title: l.deleteAccountRow,
+                subtitle: l.deleteAccountRowSubtitle,
+                trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
+                onTap: () => unawaited(
+                  Navigator.of(context).push(
+                    scopedPage<void>(
+                      context,
+                      (route) => DeleteAccountScreen(me: widget.me, onBack: () => Navigator.of(route).pop()),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_exportError case final error?) ...[const SizedBox(height: 8), ErrorLine(error)],
+      ],
+    );
+  }
+}
+
 class _DisplayCard extends StatelessWidget {
   const _DisplayCard({required this.settings, required this.onLanguage});
   final AppSettings settings;
@@ -478,43 +828,6 @@ class _TermsCard extends ConsumerWidget {
   }
 }
 
-/// Accès au portefeuille : solde Tara (et ventes à recevoir d'une boutique).
-class _WalletRow extends ConsumerWidget {
-  const _WalletRow({required this.me});
-
-  final Me me;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final c = TaraColors.of(context);
-    final wallet = ref.watch(walletProvider).value;
-    // Solde masqué (comme sur MoMo) : affiché dans le portefeuille, après le code secret.
-    final visibility = ref.watch(balanceVisibilityProvider);
-    return GlassCard(
-      radius: 22,
-      shadow: false,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      child: ListenableBuilder(
-        listenable: visibility,
-        builder: (context, _) => ListRow(
-          leading: const IconTile(icon: TaraIcons.wallet),
-          title: l.walletTitle,
-          subtitle: wallet == null ? null : l.walletBalanceTile(balanceText(visibility, wallet.customerBalance)),
-          trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-          onTap: () => unawaited(
-            Navigator.of(
-              context,
-            ).push(scopedPage<void>(context, (route) => WalletScreen(me: me, onBack: () => Navigator.of(route).pop()))),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Adresses favorites (A2) : celles qui portent un libellé (Boutique, Maison, Bureau),
-/// proposées à l'enlèvement. Ajout sur la carte, retrait après confirmation.
 class _AddressesCard extends ConsumerStatefulWidget {
   const _AddressesCard();
 
@@ -640,4 +953,13 @@ class _AddressesCardState extends ConsumerState<_AddressesCard> {
       ),
     );
   }
+}
+
+/// Copie de toutes ses données (droit d'accès), en fichier JSON partagé ou enregistré
+/// depuis la feuille de partage du téléphone.
+Future<void> exportMyData(WidgetRef ref, String shareText) async {
+  final data = await ref.read(clientApiProvider).exportData();
+  final bytes = utf8.encode(const JsonEncoder.withIndent('  ').convert(data));
+  final date = DateTime.now().toIso8601String().substring(0, 10);
+  await ref.read(shareFileProvider)(bytes, 'tara-donnees-$date.json', 'application/json', shareText);
 }
