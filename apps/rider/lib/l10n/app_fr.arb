@@ -74,7 +74,7 @@
   "stepDone": "terminée",
   "stepActive": "en cours",
   "stepUpcoming": "à venir",
-  "riderSpace": "ESPACE LIVREUR",
+  "riderSpace": "TARA LIVREUR · DOUALA",
   "signInTitle": "Prêt à prendre la route ?",
   "signInBody": "Connectez-vous avec votre numéro. Nous vous envoyons un code par SMS.",
   "phoneLabel": "Numéro de téléphone",
@@ -1768,5 +1768,8 @@
   "prepaidCoversMoney": "Il couvre l’argent que vous encaissez",
   "depositSubtitle": "Espèces encaissées avant le solde prépayé",
   "withdrawSubtitle": "Vers votre numéro enregistré",
-  "sosSubtitle": "Votre contact d’urgence est prévenu aussi"
+  "sosSubtitle": "Votre contact d’urgence est prévenu aussi",
+  "onboardingProfileSubtitle": "Quelques informations sur vous",
+  "myAccount": "Mon compte",
+  "emergencyContactSubtitle": "Une personne proche, à prévenir si besoin"
 }

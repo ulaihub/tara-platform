@@ -21,6 +21,7 @@ import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../map/tara_map.dart';
 import 'address_help.dart';
+import 'course_page.dart';
 import 'course_scaffold.dart';
 import 'failure_screen.dart' show failureReasonLabel;
 
@@ -262,12 +263,17 @@ class _ReturnScreenState extends ConsumerState<ReturnScreen> {
     final ready = _photoPath != null && _code.text.length == 4 && feesOk;
     final step = !_arrived ? 0 : (_code.text.length == 4 ? 2 : 1);
 
-    return CourseScaffold(
-      order: order,
+    return CoursePage(
       stop: MapStop(latitude: order.pickup.latitude, longitude: order.pickup.longitude, label: senderName),
-      title: (route, _) => route?.minutes == null ? l.returnTitle : l.returnMinutes(route!.minutes!),
-      onBack: widget.onBack,
-      onSos: widget.onSos,
+      header: CourseHeader(
+        kicker: '${l.returnTitle} · ${order.reference}',
+        title: senderName,
+        subtitle: order.pickup.line,
+        onBack: widget.onBack,
+        onSos: widget.onSos,
+        callLabel: l.callPerson(senderName),
+        onCall: phone == null ? null : () => callPhone(phone),
+      ),
       footer: _arrived
           ? PrimaryButton(
               label: l.parcelReturned,
@@ -278,15 +284,6 @@ class _ReturnScreenState extends ConsumerState<ReturnScreen> {
           : PrimaryButton(label: l.atSender, icon: TaraIcons.mapPin, onPressed: _arrive),
       children: [
         if (reason != null) Align(alignment: Alignment.centerLeft, child: _FailureChip(failureReasonLabel(l, reason))),
-        const SizedBox(height: 12),
-        CourseFieldLabel(l.returnTo),
-        const SizedBox(height: 8),
-        PartyRow(
-          name: senderName,
-          line: order.pickup.line,
-          callLabel: l.callPerson(senderName),
-          onCall: phone == null ? null : () => callPhone(phone),
-        ),
         AddressHelp(orderId: order.id, stop: 'pickup', address: order.pickup, name: senderName),
         const SizedBox(height: 14),
         _ReturnSteps(

@@ -39,7 +39,7 @@
   "stepDone": "done",
   "stepActive": "in progress",
   "stepUpcoming": "upcoming",
-  "riderSpace": "RIDER SPACE",
+  "riderSpace": "TARA RIDER · DOUALA",
   "signInTitle": "Ready to hit the road?",
   "signInBody": "Sign in with your number. We will text you a code.",
   "phoneLabel": "Phone number",
@@ -716,5 +716,8 @@
   "prepaidCoversMoney": "It covers the money you collect",
   "depositSubtitle": "Cash collected before the prepaid balance",
   "withdrawSubtitle": "To your registered number",
-  "sosSubtitle": "Your emergency contact is told too"
+  "sosSubtitle": "Your emergency contact is told too",
+  "onboardingProfileSubtitle": "A few details about you",
+  "myAccount": "My account",
+  "emergencyContactSubtitle": "Someone close, to be told if needed"
 }

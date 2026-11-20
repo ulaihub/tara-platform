@@ -144,7 +144,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stepUpcoming => 'upcoming';
 
   @override
-  String get riderSpace => 'RIDER SPACE';
+  String get riderSpace => 'TARA RIDER · DOUALA';
 
   @override
   String get signInTitle => 'Ready to hit the road?';
@@ -2366,4 +2366,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sosSubtitle => 'Your emergency contact is told too';
+
+  @override
+  String get onboardingProfileSubtitle => 'A few details about you';
+
+  @override
+  String get myAccount => 'My account';
+
+  @override
+  String get emergencyContactSubtitle => 'Someone close, to be told if needed';
 }
