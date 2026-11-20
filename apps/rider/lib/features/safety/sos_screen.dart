@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/status.dart';
@@ -16,6 +15,7 @@ import '../../core/api/models.dart';
 import '../../core/safety/safety_alert.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../course/course_page.dart';
 
 /// 14 · Bouton d'alerte (SOS), en deux volets. Équipe Tara : maintien de 3 s, l'alerte part
 /// avec la position (agents et contact d'urgence prévenus), un agent rappelle ; sans réseau,
@@ -131,27 +131,13 @@ class _SosScreenState extends ConsumerState<SosScreen> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Row(
-                                    children: [
-                                      _Badge(l.sosBadge),
-                                      const Spacer(),
-                                      GlassIconButton(
-                                        icon: TaraIcons.close,
-                                        label: l.close,
-                                        onPressed: widget.onClose,
-                                        size: 46,
-                                      ),
-                                    ],
+                                  CourseHeader(
+                                    kicker: l.sosBadge,
+                                    title: title,
+                                    subtitle: [?alert?.plate, l.sosSubtitle].join(' · '),
+                                    onBack: widget.onClose,
                                   ),
-                                  const SizedBox(height: 22),
-                                  Semantics(
-                                    header: true,
-                                    child: Text(
-                                      title,
-                                      style: TaraText.titleForm.copyWith(fontSize: 28, color: c.textPrimary),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 4),
                                   Semantics(
                                     liveRegion: true,
                                     child: Text(
@@ -201,33 +187,37 @@ class _SosScreenState extends ConsumerState<SosScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Les quatre appels de la maquette, en grille.
                       Row(
                         children: [
                           Expanded(
-                            child: GlassButton(
-                              label: l.sosCallTara,
-                              icon: TaraIcons.headset,
-                              onPressed: () => unawaited(_call(hotline)),
-                            ),
+                            child: _CallTile(label: l.sosCallTara, onTap: () => unawaited(_call(hotline))),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Expanded(
-                            child: _EmergencyButton(
+                            child: _CallTile(
                               label: l.sosCallPolice(numbers.police),
-                              onPressed: () => unawaited(_call(numbers.police)),
+                              onTap: () => unawaited(_call(numbers.police)),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
+                      const SizedBox(height: 8),
+                      Row(
                         children: [
-                          Text(l.sosAccident, style: TaraText.label.copyWith(color: c.textSecondary)),
-                          _Link(label: l.sosFire(numbers.fire), onTap: () => unawaited(_call(numbers.fire))),
-                          Text('·', style: TaraText.label.copyWith(color: c.textTertiary)),
-                          _Link(label: l.sosMedical(numbers.medical), onTap: () => unawaited(_call(numbers.medical))),
+                          Expanded(
+                            child: _CallTile(
+                              label: l.sosFire(numbers.fire),
+                              onTap: () => unawaited(_call(numbers.fire)),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _CallTile(
+                              label: l.sosMedical(numbers.medical),
+                              onTap: () => unawaited(_call(numbers.medical)),
+                            ),
+                          ),
                         ],
                       ),
                       if (status == SafetyStatus.pending || status == SafetyStatus.failed) ...[
@@ -273,37 +263,6 @@ class _SosScreenState extends ConsumerState<SosScreen> {
     final shared = status == SafetyStatus.sent;
     if (meters == null) return shared ? l.sosPositionSharedPlain : l.sosPositionCurrentPlain;
     return shared ? l.sosPositionShared(meters) : l.sosPositionCurrent(meters);
-  }
-}
-
-/// Pastille « Sécurité » en haut de l'écran.
-class _Badge extends StatelessWidget {
-  const _Badge(this.label);
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = TaraColors.of(context);
-    return Container(
-      height: 34,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: c.dangerTint,
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: c.dangerText.withValues(alpha: c.isDark ? .45 : .3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TaraIcon(TaraIcons.shield, size: 16, color: c.dangerTextStrong),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: TaraText.label.copyWith(fontWeight: FontWeight.w700, color: c.dangerTextStrong),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -446,6 +405,48 @@ class _Link extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Appel d'urgence (maquette) : bouton sombre, téléphone rouge, libellé centré.
+class _CallTile extends StatelessWidget {
+  const _CallTile({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 52),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: c.textPrimary.withValues(alpha: .06),
+            border: Border.all(color: c.textPrimary.withValues(alpha: .12)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TaraIcon(TaraIcons.phone, size: 16, color: c.dangerText),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w800, color: c.textPrimary),
+                ),
+              ),
+            ],
           ),
         ),
       ),

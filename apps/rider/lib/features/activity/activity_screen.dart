@@ -42,7 +42,13 @@ class ActivityScreen extends ConsumerStatefulWidget {
 class _ActivityScreenState extends ConsumerState<ActivityScreen> {
   // Une seule forme orange en haut à droite, comme dans la maquette.
   static const _blobs = [
-    BlobSpec(alignment: Alignment(.69, -.81), size: 360, colors: [TaraBrand.orange, Color(0x00FF6A00)], opacity: .4, center: Alignment.center),
+    BlobSpec(
+      alignment: Alignment(.69, -.81),
+      size: 360,
+      colors: [TaraBrand.orange, Color(0x00FF6A00)],
+      opacity: .4,
+      center: Alignment.center,
+    ),
   ];
 
   /// Semaine en cours, jour par jour (maquette Tableau-Livreur).
