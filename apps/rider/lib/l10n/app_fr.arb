@@ -1510,5 +1510,23 @@
         "type": "int"
       }
     }
-  }
+  },
+  "themeAuto": "Automatique",
+  "effectsAll": "Toutes",
+  "myDocumentsRowSubtitle": "Une pièce refusée ou expirée se renvoie ici",
+  "termsRowAccepted": "Version {version} acceptée le {date}",
+  "@termsRowAccepted": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "termsRowToSign": "Nouvelle version à accepter",
+  "securityRow": "Code secret et empreinte",
+  "securityRowSubtitle": "Pour voir le solde et retirer",
+  "displayMoreRow": "Langue et sons"
 }

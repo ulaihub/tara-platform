@@ -12,6 +12,14 @@ abstract final class TaraIcons {
 
   /// Onglet « Gains » du livreur : barres et courbe qui monte (maquette).
   static const earnings = TaraIconData([_P('M4.5 20v-6M10 20V10M15.5 20v-4M21 20V6'), _P('M3 9.5L9 5l5 3.5L20.5 3')]);
+  /// Contact d'urgence : deux personnes (maquette Livreur-Profil).
+  static const contacts = TaraIconData([
+    _C(9, 8, 3.2),
+    _P('M3 19c.8-3 3.2-4.6 6-4.6s5.2 1.6 6 4.6M16 4.5a3 3 0 010 6M21 19c-.4-1.8-1.4-3.1-2.8-3.8'),
+  ]);
+
+  /// Fermer mon compte : croix dans un cercle (maquette Livreur-Profil).
+  static const closeCircle = TaraIconData([_C(12, 12, 8.5), _P('M9 9l6 6M15 9l-6 6')]);
   static const user = TaraIconData([_C(12, 8, 4), _P('M4.5 20c1.4-3.2 4.2-5 7.5-5s6.1 1.8 7.5 5')]);
   static const bell = TaraIconData([_P('M6 9a6 6 0 1112 0c0 5 2 6.5 2 6.5H4S6 14 6 9zM10 19.5a2 2 0 004 0')]);
   static const power = TaraIconData([_P('M12 3v8'), _P('M6.3 6.8a8 8 0 1011.4 0')]);
