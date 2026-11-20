@@ -2106,4 +2106,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String photoParcelHintNumber(int n) {
     return 'Numéro $n bien visible';
   }
+
+  @override
+  String get tabCourse => 'Course';
+
+  @override
+  String get tabEarnings => 'Gains';
+
+  @override
+  String get onlineTodayWord => 'aujourd’hui';
+
+  @override
+  String get prepaidTitle => 'Solde prépayé';
+
+  @override
+  String get prepaidCovers => 'Couvre les espèces que vous encaissez';
+
+  @override
+  String onlineSince(String time) {
+    return 'En ligne · $time';
+  }
+
+  @override
+  String get zoneForbiddenLegend => 'Zone interdite : pas de course';
+
+  @override
+  String todayTotal(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'courses', one: 'course', zero: 'course');
+    return '$amount · $count $_temp0';
+  }
 }

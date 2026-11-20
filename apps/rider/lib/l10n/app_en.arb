@@ -325,7 +325,7 @@
   "returnQueuedTitle": "Return recorded",
   "returnQueuedBody": "It will be sent as soon as the network is back.",
   "orderReturnedNotice": "Parcel returned to the seller: job done.",
-  "earningsToday": "Today's earnings",
+  "earningsToday": "Today’s earnings",
   "earningsWeek": "This week's earnings",
   "earningsMonth": "This month's earnings",
   "coursesCount": "{count, plural, =0{No job} =1{1 job} other{{count} jobs}}",
@@ -649,5 +649,13 @@
   "parcelToDeliver": "Parcel to hand over",
   "parcelNumber": "no. {n}",
   "parcelFor": "For {name} · {place}",
-  "photoParcelHintNumber": "Number {n} clearly visible"
+  "photoParcelHintNumber": "Number {n} clearly visible",
+  "tabCourse": "Ride",
+  "tabEarnings": "Earnings",
+  "onlineTodayWord": "today",
+  "prepaidTitle": "Prepaid balance",
+  "prepaidCovers": "Covers the cash you collect",
+  "onlineSince": "Online · {time}",
+  "zoneForbiddenLegend": "No-go zone: no rides",
+  "todayTotal": "{amount} · {count} {count, plural, =1{ride} other{rides}}"
 }

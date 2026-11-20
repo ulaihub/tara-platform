@@ -283,14 +283,14 @@ void main() {
     expect(sent.single, endsWith('/retry'));
     expect(find.byType(DeliveryScreen), findsOneWidget);
   });
-  testWidgets('onglet Activité depuis l’accueil, puis retour à l’accueil', (tester) async {
+  testWidgets('onglet Gains depuis l’onglet Course, puis retour à l’accueil', (tester) async {
     await pumpHome(tester, order());
     await tester.tap(find.bySemanticsLabel('Retour'));
     await settle(tester);
-    await tester.tap(find.bySemanticsLabel('Activité'));
+    await tester.tap(find.bySemanticsLabel('Gains'));
     await settle(tester);
     expect(find.byType(ActivityScreen), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('Accueil'));
+    await tester.tap(find.bySemanticsLabel('Course'));
     await settle(tester);
     expect(find.byType(ActivityScreen), findsNothing);
     expect(find.text('Course TR-48213 en cours'), findsOneWidget);

@@ -285,11 +285,14 @@ class CallButton extends StatelessWidget {
 
 /// Petit bouton SOS (accueil en ligne, écrans de course) : mène à l'écran d'alerte.
 class SosButton extends StatelessWidget {
-  const SosButton({super.key, required this.label, required this.onPressed, this.size = 50});
+  const SosButton({super.key, required this.label, required this.onPressed, this.size = 50, this.round = false});
 
   final String label;
   final VoidCallback? onPressed;
   final double size;
+
+  /// Rond avec un halo rouge (accueil en ligne de la maquette) plutôt que carré arrondi.
+  final bool round;
 
   @override
   Widget build(BuildContext context) {
@@ -299,11 +302,22 @@ class SosButton extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          color: TaraBrand.sos,
-          borderRadius: BorderRadius.circular(17),
-          boxShadow: const [BoxShadow(color: Color.fromRGBO(229, 37, 53, 0.45), blurRadius: 18, offset: Offset(0, 8))],
-        ),
+        decoration: round
+            ? const BoxDecoration(
+                color: Color(0xFFF01E2C),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: Color.fromRGBO(240, 30, 44, .25), spreadRadius: 4),
+                  BoxShadow(color: Color.fromRGBO(240, 30, 44, .4), blurRadius: 22, offset: Offset(0, 10)),
+                ],
+              )
+            : BoxDecoration(
+                color: TaraBrand.sos,
+                borderRadius: BorderRadius.circular(17),
+                boxShadow: const [
+                  BoxShadow(color: Color.fromRGBO(229, 37, 53, 0.45), blurRadius: 18, offset: Offset(0, 8)),
+                ],
+              ),
         child: Center(
           child: Text(
             'SOS',

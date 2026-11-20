@@ -416,8 +416,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                   // Onglets : contenu sous la barre en verre, transition vitrée entre onglets.
                   : TaraTabShell(
                       items: [
-                        TabItem(TaraIcons.home, l.tabHome),
-                        TabItem(TaraIcons.activity, l.tabActivity),
+                        TabItem(TaraIcons.route, l.tabCourse),
+                        TabItem(TaraIcons.earnings, l.tabEarnings),
                         TabItem(TaraIcons.user, l.tabProfile),
                       ],
                       current: _tab,

@@ -7,6 +7,11 @@ abstract final class TaraIcons {
   static const navigation = TaraIconData([_P('M3 11l18-8-8 18-2-8z')]);
   static const home = TaraIconData([_P('M4 11l8-7 8 7v9h-5v-6H9v6H4z')]);
   static const activity = TaraIconData([_P('M4 20V10M10 20V4M16 20v-7M22 20H2')]);
+  /// Onglet « Course » du livreur : itinéraire entre deux points (maquette).
+  static const route = TaraIconData([_C(6, 18, 2.2), _C(18, 6, 2.2), _P('M8.2 18H15a3 3 0 000-6H9a3 3 0 010-6h6.8')]);
+
+  /// Onglet « Gains » du livreur : barres et courbe qui monte (maquette).
+  static const earnings = TaraIconData([_P('M4.5 20v-6M10 20V10M15.5 20v-4M21 20V6'), _P('M3 9.5L9 5l5 3.5L20.5 3')]);
   static const user = TaraIconData([_C(12, 8, 4), _P('M4.5 20c1.4-3.2 4.2-5 7.5-5s6.1 1.8 7.5 5')]);
   static const bell = TaraIconData([_P('M6 9a6 6 0 1112 0c0 5 2 6.5 2 6.5H4S6 14 6 9zM10 19.5a2 2 0 004 0')]);
   static const power = TaraIconData([_P('M12 3v8'), _P('M6.3 6.8a8 8 0 1011.4 0')]);

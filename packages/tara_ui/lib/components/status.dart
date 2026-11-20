@@ -114,14 +114,16 @@ class _OnlineToggleState extends State<OnlineToggle> {
   }
 }
 
-/// Bouton rond « Passer en ligne » (210 px) : verre, vague liquide basse (A2), deux ondes (A6).
+/// Bouton rond « Passer en ligne » de la maquette (150 px) : anneau dégradé lumineux,
+/// disque sombre où ondule un liquide bas, icône et libellé blancs ; trois ondes radar
+/// s'en éloignent (3,6 s, décalées d'1,2 s).
 class PowerButton extends StatelessWidget {
   const PowerButton({
     super.key,
     required this.label,
     required this.semanticLabel,
     required this.onPressed,
-    this.size = 210,
+    this.size = 150,
   });
 
   final String label;
@@ -132,6 +134,7 @@ class PowerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
+    final k = size / 150;
     return Semantics(
       button: true,
       label: semanticLabel,
@@ -143,71 +146,112 @@ class PowerButton extends StatelessWidget {
                 HapticFeedback.mediumImpact();
                 onPressed!();
               },
-        child: PulseRings(
-          size: size,
-          color: c.isDark ? const Color.fromRGBO(255, 138, 0, 0.55) : const Color.fromRGBO(255, 106, 0, 0.6),
-          strokeWidth: 1.5,
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: c.isDark ? const Color.fromRGBO(0, 0, 0, 0.5) : const Color.fromRGBO(140, 70, 10, 0.18),
-                  blurRadius: 60,
-                  offset: const Offset(0, 30),
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Positioned.fill(
-                    child: GlassCard(
-                      radius: size / 2,
-                      shadow: false,
-                      padding: EdgeInsets.zero,
-                      fill: c.isDark
-                          ? const Color.fromRGBO(255, 255, 255, 0.07)
-                          : const Color.fromRGBO(255, 255, 255, 0.62),
-                      border: c.isDark
-                          ? const Color.fromRGBO(255, 255, 255, 0.18)
-                          : const Color.fromRGBO(255, 255, 255, 0.95),
-                      child: const SizedBox.expand(),
-                    ),
-                  ),
-                  // Surface à 138 px sur 210 dans la maquette.
-                  Positioned.fill(
-                    child: LiquidFill(
-                      level: .35,
-                      front: TaraBrand.verticalGradient,
-                      back: c.isDark ? const Color.fromRGBO(255, 61, 0, 0.45) : const Color.fromRGBO(255, 106, 0, 0.35),
-                      frontPeriod: const Duration(seconds: 6),
-                      backPeriod: const Duration(seconds: 9),
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
+        child: SizedBox.square(
+          dimension: size,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              // Ondes radar : de 0,3 à 3,2 fois la taille, en s'effaçant.
+              IgnorePointer(
+                child: MotionBuilder(
+                  period: const Duration(milliseconds: 3600),
+                  stillPhase: .25,
+                  builder: (context, t, _) => Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
                     children: [
-                      // Icône et libellé suivent la taille du bouton (réduit sur petit écran).
-                      TaraIcon(TaraIcons.power, size: 40 * size / 210, strokeWidth: 2.2, color: c.textPrimary),
-                      SizedBox(height: 8 * size / 210),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24 * size / 210),
-                        child: Text(
-                          label,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          style: TaraText.cardTitle.copyWith(fontSize: 18 * size / 210, color: c.textPrimary),
+                      for (final offset in const [0.0, 1 / 3, 2 / 3])
+                        Builder(
+                          builder: (context) {
+                            final eased = Curves.easeOut.transform((t + offset) % 1);
+                            return Transform.scale(
+                              scale: .3 + 2.9 * eased,
+                              child: Opacity(
+                                opacity: (.75 * (1 - eased)).clamp(0, 1),
+                                child: Container(
+                                  width: size,
+                                  height: size,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: const Color.fromRGBO(255, 138, 0, .6), width: 2),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                width: size,
+                height: size,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: TaraBrand.gradient,
+                  boxShadow: [BoxShadow(color: Color.fromRGBO(255, 90, 0, .45), blurRadius: 40)],
+                ),
+              ),
+              Positioned.fill(
+                left: 7 * k,
+                top: 7 * k,
+                right: 7 * k,
+                bottom: 7 * k,
+                child: ClipOval(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: Alignment(-.2, -.4),
+                              radius: .7,
+                              colors: [Color(0xFF2A2018), Color(0xFF0F0D0C)],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Surface du liquide à 64 % de la hauteur (36 % de plein).
+                      Positioned.fill(
+                        child: LiquidFill(
+                          level: .36,
+                          front: TaraLiquid.front,
+                          back: TaraLiquid.back(dark: c.isDark),
+                          frontPeriod: TaraLiquid.frontPeriod,
+                          backPeriod: TaraLiquid.backPeriod,
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TaraIcon(TaraIcons.power, size: 34 * k, strokeWidth: 2.4, color: c.accentText),
+                          SizedBox(height: 6 * k),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12 * k),
+                            child: Text(
+                              label,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              style: TaraText.bodyStrong.copyWith(
+                                fontSize: 14 * k,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFFFFFFFF),
+                                shadows: const [
+                                  Shadow(color: Color.fromRGBO(0, 0, 0, .5), blurRadius: 6, offset: Offset(0, 1)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
