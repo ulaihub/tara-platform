@@ -1395,6 +1395,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String topUpWithdrawRule(String min) {
+    return 'This balance covers the cash you collect on your jobs. It can be withdrawn to Mobile Money from $min.';
+  }
+
+  @override
   String get topUpOffice => 'You can also top up with cash at the Tara office.';
 
   @override

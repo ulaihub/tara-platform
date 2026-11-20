@@ -410,6 +410,7 @@
       }
     }
   },
+  "topUpWithdrawRule": "This balance covers the cash you collect on your jobs. It can be withdrawn to Mobile Money from {min}.",
   "topUpOffice": "You can also top up with cash at the Tara office.",
   "topUpDone": "{amount} added to your balance.",
   "@topUpDone": {

@@ -1146,6 +1146,14 @@
   "taraBalanceBody": "Sert à payer vos livraisons et, s’il y en a, les frais d’échec.",
   "topUpAction": "Recharger",
   "withdrawAction": "Retirer",
+  "topUpWithdrawRule": "Ce solde paie vos livraisons. Il se retire vers Mobile Money à partir de {min}.",
+  "@topUpWithdrawRule": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
   "topUpHowMuch": "Combien voulez-vous ajouter ?",
   "topUpFeeNote": "+ {fee} de frais Mobile Money (frais de l’opérateur).",
   "@topUpFeeNote": {

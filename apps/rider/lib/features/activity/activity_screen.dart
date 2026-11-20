@@ -258,6 +258,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                   return switch (paying) {
                     _Payment.topUp => DepositScreen.topUp(
                       available: snapshot.data?.available ?? 0,
+                      withdrawalMinimum: snapshot.data?.withdrawalMinimum ?? 0,
                       onBack: back,
                       onDone: done,
                     ),

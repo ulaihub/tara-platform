@@ -1401,6 +1401,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String topUpWithdrawRule(String min) {
+    return 'Ce solde couvre l’argent à encaisser de vos courses. Il se retire vers Mobile Money à partir de $min.';
+  }
+
+  @override
   String get topUpOffice => 'Vous pouvez aussi recharger en espèces au bureau Tara.';
 
   @override

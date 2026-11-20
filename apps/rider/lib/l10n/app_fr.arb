@@ -917,6 +917,14 @@
       }
     }
   },
+  "topUpWithdrawRule": "Ce solde couvre l’argent à encaisser de vos courses. Il se retire vers Mobile Money à partir de {min}.",
+  "@topUpWithdrawRule": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
   "topUpOffice": "Vous pouvez aussi recharger en espèces au bureau Tara.",
   "topUpDone": "{amount} ajoutés à votre solde.",
   "@topUpDone": {

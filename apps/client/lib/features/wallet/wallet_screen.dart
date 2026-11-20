@@ -786,6 +786,12 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
             ),
           if (widget.panel == _Panel.topUp) ...[
             Text(l.topUpHowMuch, style: TaraText.text.copyWith(color: c.textPrimary)),
+            if (minimum > 0) ...[
+              const SizedBox(height: 4),
+              // Dit avant de payer : ce solde sert aux livraisons, il ne se retire qu'à partir du
+              // minimum du prestataire Mobile Money.
+              Text(l.topUpWithdrawRule(_f(minimum)), style: TaraText.small.copyWith(color: c.textSecondary)),
+            ],
             const SizedBox(height: 8),
             ChoiceChips<int>(
               columns: 4,
