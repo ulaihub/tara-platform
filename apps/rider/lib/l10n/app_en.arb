@@ -698,5 +698,18 @@
   "slideConfirmDelivery": "Slide · Confirm delivery",
   "cantDeliverShort": "Can’t deliver",
   "distanceAway": "{distance} away",
-  "towards": "Towards {place}"
+  "towards": "Towards {place}",
+  "courseReference": "Ride {reference}",
+  "toCollectFrom": "To collect from {name}",
+  "exactShort": "Exact",
+  "cashKeptFromBalance": "You keep the cash: {amount} is taken from your prepaid balance, where it was already set aside.",
+  "slideConfirmCollection": "Slide · Confirm collection",
+  "deliveredAtLabel": "{reference} · delivered at {time}",
+  "todayEarningsPill": "Today · {amount}",
+  "rideOfDay": "Ride no. {count} today",
+  "rideOfDayBravo": "Ride no. {count} today · well done {name}",
+  "addedToEarnings": "Added to today’s earnings",
+  "dailyGoal": "Today’s goal: {count} rides",
+  "ridesToNextCelebration": "{count, plural, =1{1 more ride to the next celebration.} other{{count} more rides to the next celebration.}}",
+  "continueOnline": "Continue · stay online"
 }

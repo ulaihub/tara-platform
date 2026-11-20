@@ -12,11 +12,11 @@ import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
-import 'package:tara_ui/motion/liquid_wave.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -26,6 +26,7 @@ import '../../core/api/models.dart';
 import '../../core/course/course_actions.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import 'course_page.dart';
 import 'course_scaffold.dart';
 
 /// Montants proposés (maquette 12) : le montant exact, puis les trois multiples de 5 000 FCFA
@@ -277,42 +278,25 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
     // Par Mobile Money, le client paie aussi les frais de l'opérateur (même calcul que le serveur).
     final momoFee = mobileMoneyFee(_due, ref.watch(riderConfigProvider).value?.mobileMoneyFeeBps ?? 0);
 
+    final ok = c.isDark ? const Color(0xFF4ADE9B) : const Color(0xFF0E7F57);
+    final amounts = receivedAmounts(_due);
     return TaraScreen(
       safeBottom: false,
       blobs: _blobs,
       child: ScrollWithFooter(
         horizontal: 20,
-        top: 8,
+        top: 18,
         content: [
-          Row(
-            children: [
-              GlassIconButton(
-                icon: TaraIcons.chevronLeft,
-                label: l.back,
-                onPressed: _busy || waiting ? null : widget.onBack,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.collectionSubtitle(order.reference, name),
-                      style: TaraText.small.copyWith(color: c.textSecondary),
-                    ),
-                    Semantics(
-                      header: true,
-                      child: Text(l.collectionTitle, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          CourseHeader(
+            kicker: l.collectionTitle,
+            title: l.courseReference(order.reference),
+            subtitle: [name, ?order.dropoff.neighborhood].join(' · '),
+            onBack: _busy || waiting ? () {} : widget.onBack,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
           _AmountCard(
             amount: cash ? _due : _due + momoFee,
-            label: cash || momoFee == 0 ? l.toCollectFromCustomer : l.toCollectByMomo,
+            label: cash || momoFee == 0 ? l.toCollectFrom(name) : l.toCollectByMomo,
           ),
           const SizedBox(height: 16),
           LiquidSegmented<_Method>(
@@ -326,38 +310,108 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
               });
             },
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           if (cash) ...[
-            CourseFieldLabel(l.amountReceived),
-            const SizedBox(height: 8),
-            ChoiceChips<int>(
-              options: [
-                for (final amount in receivedAmounts(_due))
-                  ChoiceOption(
-                    amount,
-                    amount == _due ? l.exactAmount('${formatAmount(amount)} F') : '${formatAmount(amount)} F',
-                  ),
-              ],
-              selected: _received,
-              onSelected: (value) => setState(() => _received = value),
-              height: 50,
+            Text(
+              l.amountReceived,
+              style: TaraText.label.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: c.textPrimary.withValues(alpha: .8),
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
+            // Montants reçus en grille (maquette) : le montant exact puis les billets ronds.
             Row(
               children: [
-                Expanded(
-                  child: Text(l.changeToGive, style: TaraText.text.copyWith(color: c.textSecondary)),
-                ),
-                Text(
-                  '${formatAmount(change < 0 ? 0 : change)} F',
-                  style: TaraText.titlePanel.copyWith(color: c.success, fontFeatures: TaraText.tabular),
-                ),
+                for (final (i, amount) in amounts.indexed) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      selected: amount == _received,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _received = amount),
+                        child: Container(
+                          constraints: const BoxConstraints(minHeight: 46),
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color: amount == _received
+                                ? const Color.fromRGBO(255, 138, 0, .16)
+                                : c.textPrimary.withValues(alpha: .06),
+                            border: Border.all(
+                              color: amount == _received
+                                  ? const Color(0xFFFF8A00)
+                                  : c.textPrimary.withValues(alpha: .14),
+                            ),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              amount == _due ? l.exactShort : formatAmount(amount),
+                              maxLines: 1,
+                              style: TaraText.label.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: c.textPrimary,
+                                fontFeatures: TaraText.tabular,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
+            ),
+            const SizedBox(height: 12),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: change > 0 ? ok.withValues(alpha: .12) : c.textPrimary.withValues(alpha: .06),
+                border: Border.all(
+                  color: change > 0 ? ok.withValues(alpha: .35) : c.textPrimary.withValues(alpha: .12),
+                ),
+              ),
+              child: MergeSemantics(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l.changeToGive,
+                        style: TaraText.bodyStrong.copyWith(fontSize: 14, color: c.textPrimary),
+                      ),
+                    ),
+                    Text(
+                      '${formatAmount(change < 0 ? 0 : change)} F',
+                      style: TextStyle(
+                        fontFamily: TaraText.sora,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: change > 0 ? ok : c.textPrimary,
+                        fontFeatures: TaraText.tabular,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Solde prépayé (G5) : l'argent encaissé en espèces est pris sur le solde, où il
+            // est mis de côté depuis l'acceptation.
+            Text(
+              l.cashKeptFromBalance('${formatAmount(_due)} F'),
+              style: TaraText.small.copyWith(fontSize: 12, height: 1.5, color: c.textPrimary.withValues(alpha: .72)),
             ),
           ] else ...[
             if (momoFee > 0) ...[
               Text(
-                l.momoFeeIncluded('${formatAmount(_due)}\u00a0F', '${formatAmount(momoFee)}\u00a0F'),
+                l.momoFeeIncluded('${formatAmount(_due)} F', '${formatAmount(momoFee)} F'),
                 style: TaraText.small.copyWith(color: c.textSecondary),
               ),
               const SizedBox(height: 14),
@@ -370,7 +424,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
               onSelected: (value) {
                 if (!waiting) setState(() => _operator = value);
               },
-              height: 50,
+              height: 52,
             ),
             const SizedBox(height: 14),
             TaraTextField(
@@ -399,37 +453,14 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 16),
-            if (cash) ...[
-              // Solde prépayé (G5) : l'argent encaissé en espèces est pris sur le solde, où
-              // il est mis de côté depuis l'acceptation. Libellé à gauche, montant à droite.
-              MergeSemantics(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Expanded(
-                      child: Text(l.takenFromBalance, style: TaraText.label.copyWith(color: c.textSecondary)),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${formatAmount(-_due)} F',
-                      style: TaraText.label.copyWith(
-                        color: c.accentStrongText,
-                        fontWeight: FontWeight.w800,
-                        fontFeatures: TaraText.tabular,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
             if (cash)
-              PrimaryButton(
-                label: l.confirmCollection,
-                icon: TaraIcons.check,
+              SwipeButton(
+                plain: true,
+                height: 62,
+                label: l.slideConfirmCollection,
+                semanticLabel: l.confirmCollection,
                 loading: _busy,
-                onPressed: _change >= 0 ? _confirmCash : null,
+                onConfirmed: _change >= 0 ? _confirmCash : null,
               )
             else
               PrimaryButton(
@@ -440,6 +471,8 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   _ => l.sendPaymentRequest,
                 },
                 icon: TaraIcons.arrowRight,
+                strong: true,
+                height: 54,
                 loading: _busy || _momo == _MomoState.sending || _momo == _MomoState.waiting,
                 onPressed: _operator == null ? null : _sendRequest,
               ),
@@ -452,7 +485,8 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   int get _change => _received - _due;
 }
 
-/// Montant à encaisser, sur une carte en verre que remplit une vague (A2).
+/// Montant à encaisser (maquette) : carte sombre et chaude, légèrement inclinée vers
+/// l'arrière, qu'un reflet traverse.
 class _AmountCard extends StatelessWidget {
   const _AmountCard({required this.amount, required this.label});
   final int amount;
@@ -460,45 +494,62 @@ class _AmountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = TaraColors.of(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: SizedBox(
-        height: 136,
-        child: Stack(
-          children: [
-            const Positioned.fill(
-              child: GlassCard(radius: 28, shadow: false, padding: EdgeInsets.zero, child: SizedBox.expand()),
-            ),
-            Positioned.fill(
-              child: LiquidFill(
-                level: .32,
-                front: TaraLiquid.front,
-                back: TaraLiquid.back(dark: c.isDark),
-                frontPeriod: TaraLiquid.frontPeriod,
-                backPeriod: TaraLiquid.backPeriod,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(22, 20, 22, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: TaraText.label.copyWith(color: c.textSecondary)),
-                  const SizedBox(height: 4),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: AmountText(
-                      amount,
-                      style: TaraText.amountXL,
-                      unitStyle: TaraText.unit.copyWith(fontSize: 18),
+    return Transform(
+      alignment: Alignment.bottomCenter,
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 1 / 900)
+        ..rotateX(8 * 3.1415926 / 180),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26),
+          gradient: const LinearGradient(
+            begin: Alignment(-.6, -1),
+            end: Alignment(.6, 1),
+            colors: [Color(0xFF2A170A), Color(0xFF16120E)],
+            stops: [0, .62],
+          ),
+          border: Border.all(color: const Color.fromRGBO(255, 177, 92, .3)),
+          boxShadow: const [BoxShadow(color: Color.fromRGBO(0, 0, 0, .45), blurRadius: 44, offset: Offset(0, 24))],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
+          child: Stack(
+            children: [
+              const Sheen(opacity: .5),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TaraText.label.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: const Color.fromRGBO(255, 255, 255, .74),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${formatAmount(amount)} F',
+                        style: const TextStyle(
+                          fontFamily: TaraText.sora,
+                          fontSize: 40,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -.8,
+                          color: Color(0xFFFFFFFF),
+                          fontFeatures: TaraText.tabular,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

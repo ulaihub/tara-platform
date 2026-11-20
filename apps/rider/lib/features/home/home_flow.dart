@@ -31,11 +31,10 @@ import '../offer/offer_screen.dart';
 import '../offline/pending_actions_screen.dart';
 import '../onboarding/documents_controller.dart';
 import '../safety/sos_screen.dart';
-import 'course_reward.dart';
+import 'course_done_screen.dart';
 import 'home_offline_screen.dart';
 import 'home_online_screen.dart';
 import 'home_summary.dart';
-import 'rate_sender_card.dart';
 
 /// Accueil du livreur validé : hors ligne (05) ⇄ en ligne (06), propositions (07) reçues
 /// par le temps réel, les notifications ou au retour dans l'app, puis la course acceptée
@@ -74,7 +73,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   bool _pending = false;
 
   /// Livraison qui vient d'aboutir : gain qui s'envole, palier du jour éventuel.
-  ({String id, int earning, int deliveredToday})? _reward;
+  ({String id, String reference, DateTime at, int earning, int deliveredToday})? _reward;
 
   /// Course à noter après la récompense (F4) : l'expéditeur, d'un geste.
   ({String id, String name})? _rate;
@@ -342,7 +341,13 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
       final before = ref.read(homeSummaryProvider).value?.delivered ?? 0;
       setState(() {
         _collecting = null;
-        _reward = (id: order.id, earning: order.riderEarning, deliveredToday: before + 1);
+        _reward = (
+          id: order.id,
+          reference: order.reference,
+          at: DateTime.now(),
+          earning: order.riderEarning,
+          deliveredToday: before + 1,
+        );
         _rate = (id: order.id, name: order.sender.name ?? l.senderFallback);
       });
       ref.invalidate(homeSummaryProvider);
@@ -471,25 +476,24 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
               ),
             if (_notice != null)
               Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top + 64, child: _Notice(_notice!)),
-            if (_rate case final rate? when _reward == null)
-              Positioned(
-                left: 16,
-                right: 16,
-                top: MediaQuery.paddingOf(context).top + 76,
-                child: RateSenderCard(
-                  key: ValueKey('rate-${rate.id}'),
-                  name: rate.name,
-                  onRate: (stars) => unawaited(_rateSender(rate.id, stars)),
-                  onClose: () => setState(() => _rate = null),
-                ),
-              ),
+            // Course livrée (maquette Livreur-Gain) : gain, objectif du jour et note à
+            // l'expéditeur sur le même écran, jusqu'à « Continuer ».
             if (_reward case final reward?)
               Positioned.fill(
-                child: CourseReward(
-                  key: ValueKey('reward-${reward.id}'),
-                  earning: reward.earning,
-                  deliveredToday: reward.deliveredToday,
-                  onDone: () => setState(() => _reward = null),
+                child: HideTabBar(
+                  child: CourseDoneScreen(
+                    key: ValueKey('reward-${reward.id}'),
+                    reference: reward.reference,
+                    deliveredAt: reward.at,
+                    earning: reward.earning,
+                    deliveredToday: reward.deliveredToday,
+                    senderName: _rate?.name ?? l.senderFallback,
+                    onRate: (stars) => unawaited(_rateSender(reward.id, stars)),
+                    onDone: () => setState(() {
+                      _reward = null;
+                      _rate = null;
+                    }),
+                  ),
                 ),
               ),
             if (_pending)

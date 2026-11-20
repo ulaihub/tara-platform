@@ -181,8 +181,8 @@ void main() {
     goldenTest('12 encaissement espèces ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, collection());
       await settle(tester);
-      await tester.ensureVisible(find.text('15\u00A0000\u00A0F'));
-      await tester.tap(find.text('15\u00A0000\u00A0F'));
+      await tester.ensureVisible(find.text('15\u00A0000'));
+      await tester.tap(find.text('15\u00A0000'));
       await settle(tester);
       // Bas du contenu : sur petit écran, la monnaie à rendre reste visible au-dessus du bouton.
       await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));

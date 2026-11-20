@@ -19,6 +19,7 @@ import '../../core/course/course_actions.dart';
 import '../../core/course/proof_photo.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import 'course_page.dart';
 import 'course_scaffold.dart';
 
 /// Motifs d'échec, dans l'ordre de la maquette (10).
@@ -193,26 +194,14 @@ class _FailureScreenState extends ConsumerState<FailureScreen> {
             horizontal: 20,
             top: 8,
             content: [
-              Row(
-                children: [
-                  GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: _busy ? null : widget.onBack),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l.collectionSubtitle(order.reference, name),
-                          style: TaraText.small.copyWith(color: c.textSecondary),
-                        ),
-                        Semantics(
-                          header: true,
-                          child: Text(l.failureTitle, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              CourseHeader(
+                kicker: l.failureTitle,
+
+                title: name,
+
+                subtitle: [?order.dropoff.neighborhood, order.reference].join(' · '),
+
+                onBack: _busy ? () {} : widget.onBack,
               ),
               const SizedBox(height: 18),
               CourseFieldLabel(l.failureReasonLabel),

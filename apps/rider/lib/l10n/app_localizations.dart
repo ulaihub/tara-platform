@@ -3973,6 +3973,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vers {place}'**
   String towards(String place);
+
+  /// No description provided for @courseReference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course {reference}'**
+  String courseReference(String reference);
+
+  /// No description provided for @toCollectFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser auprès de {name}'**
+  String toCollectFrom(String name);
+
+  /// No description provided for @exactShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exact'**
+  String get exactShort;
+
+  /// No description provided for @cashKeptFromBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous gardez les espèces : {amount} sont pris sur votre solde prépayé, où ils étaient déjà mis de côté.'**
+  String cashKeptFromBalance(String amount);
+
+  /// No description provided for @slideConfirmCollection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser · Confirmer l’encaissement'**
+  String get slideConfirmCollection;
+
+  /// No description provided for @deliveredAtLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{reference} · livrée à {time}'**
+  String deliveredAtLabel(String reference, String time);
+
+  /// No description provided for @todayEarningsPill.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains du jour · {amount}'**
+  String todayEarningsPill(String amount);
+
+  /// No description provided for @rideOfDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1re course du jour} other{{count}e course du jour}}'**
+  String rideOfDay(int count);
+
+  /// No description provided for @rideOfDayBravo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1re course du jour · bravo {name}} other{{count}e course du jour · bravo {name}}}'**
+  String rideOfDayBravo(int count, String name);
+
+  /// No description provided for @addedToEarnings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutés à vos gains du jour'**
+  String get addedToEarnings;
+
+  /// No description provided for @dailyGoal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif du jour : {count} courses'**
+  String dailyGoal(int count);
+
+  /// No description provided for @ridesToNextCelebration.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Encore 1 course pour la prochaine célébration.} other{Encore {count} courses pour la prochaine célébration.}}'**
+  String ridesToNextCelebration(int count);
+
+  /// No description provided for @continueOnline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer · rester en ligne'**
+  String get continueOnline;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

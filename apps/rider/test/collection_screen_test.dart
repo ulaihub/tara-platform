@@ -9,6 +9,7 @@ import 'package:tara_rider/core/course/active_order.dart';
 import 'package:tara_rider/core/course/course_actions.dart';
 import 'package:tara_rider/core/offline/action_queue.dart';
 import 'package:tara_rider/features/course/collection_screen.dart';
+import 'package:tara_ui/components/swipe_button.dart';
 
 import 'helpers/fake_rider_api.dart';
 import 'helpers/harness.dart';
@@ -87,13 +88,17 @@ void main() {
 
   testWidgets('espèces : monnaie à rendre, puis encaissement et livraison', (tester) async {
     await pumpCollection(tester);
-    expect(find.text('12\u00A0500\u00A0F (exact)'), findsOneWidget);
+    expect(find.text('Exact'), findsOneWidget);
     // Solde prépayé : l'argent encaissé est pris sur le solde, déjà mis de côté.
-    expect(find.text('Pris sur votre solde (déjà mis de côté)'), findsOneWidget);
-    expect(find.text('−12\u00A0500\u00A0F'), findsOneWidget);
-    await tapText(tester, '15\u00A0000\u00A0F');
+    expect(
+      find.text(
+        'Vous gardez les espèces : 12\u00A0500\u00A0F sont pris sur votre solde prépayé, où ils étaient déjà mis de côté.',
+      ),
+      findsOneWidget,
+    );
+    await tapText(tester, '15\u00A0000');
     expect(find.text('2\u00A0500\u00A0F'), findsOneWidget);
-    await tapText(tester, 'Confirmer l’encaissement');
+    await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
     await wait(tester, const Duration(seconds: 1));
     expect(sent, ['collect', 'deliver']);
     expect(done, ActionOutcome.sent);
@@ -118,7 +123,7 @@ void main() {
 
   testWidgets('Mobile Money : frais de l’opérateur ajoutés, payés par le client', (tester) async {
     await pumpCollection(tester, mobileMoneyFeeBps: 600);
-    expect(find.text('À encaisser auprès du client'), findsOneWidget);
+    expect(find.text('À encaisser auprès de Paul Ekwalla'), findsOneWidget);
     await tapText(tester, 'Mobile Money');
     // 12 500 F à encaisser, 798 F de frais (6 %) demandés en plus au client.
     expect(find.text('À demander par Mobile Money'), findsOneWidget);
@@ -129,7 +134,7 @@ void main() {
     expect(find.textContaining('13\u00A0298'), findsOneWidget);
     // En espèces : le montant de la course, sans frais.
     await tapText(tester, 'Espèces');
-    expect(find.text('À encaisser auprès du client'), findsOneWidget);
+    expect(find.text('À encaisser auprès de Paul Ekwalla'), findsOneWidget);
     expect(find.textContaining('13\u00A0298'), findsNothing);
   });
 

@@ -1681,5 +1681,87 @@
         "type": "String"
       }
     }
-  }
+  },
+  "courseReference": "Course {reference}",
+  "@courseReference": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "toCollectFrom": "À encaisser auprès de {name}",
+  "@toCollectFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exactShort": "Exact",
+  "cashKeptFromBalance": "Vous gardez les espèces : {amount} sont pris sur votre solde prépayé, où ils étaient déjà mis de côté.",
+  "@cashKeptFromBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "slideConfirmCollection": "Glisser · Confirmer l’encaissement",
+  "deliveredAtLabel": "{reference} · livrée à {time}",
+  "@deliveredAtLabel": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "todayEarningsPill": "Gains du jour · {amount}",
+  "@todayEarningsPill": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "rideOfDay": "{count, plural, =1{1re course du jour} other{{count}e course du jour}}",
+  "@rideOfDay": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rideOfDayBravo": "{count, plural, =1{1re course du jour · bravo {name}} other{{count}e course du jour · bravo {name}}}",
+  "@rideOfDayBravo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToEarnings": "Ajoutés à vos gains du jour",
+  "dailyGoal": "Objectif du jour : {count} courses",
+  "@dailyGoal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ridesToNextCelebration": "{count, plural, =1{Encore 1 course pour la prochaine célébration.} other{Encore {count} courses pour la prochaine célébration.}}",
+  "@ridesToNextCelebration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "continueOnline": "Continuer · rester en ligne"
 }
