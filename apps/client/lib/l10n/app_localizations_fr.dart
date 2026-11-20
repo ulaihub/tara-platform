@@ -380,6 +380,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get referralTitle => 'Parrainage';
 
   @override
+  String get profileSecurityValue => 'Code secret, empreinte';
+
+  @override
+  String get profileDisplayRow => 'Affichage et sons';
+
+  @override
+  String get profileTermsRow => 'Conditions et mes données';
+
+  @override
+  String get profilePlanChip => 'Offre Pro';
+
+  @override
+  String get profileReferShop => 'Parrainez une boutique';
+
+  @override
+  String get profileReferBody => 'Elle profite d’une réduction sur ses premières livraisons.';
+
+  @override
+  String get profileShare => 'Partager';
+
+  @override
+  String get profileSupportRow => 'Service client';
+
+  @override
+  String profileReferralShare(String code) {
+    return 'Livrez avec Tara à Douala : à l’inscription, entrez mon code $code pour une réduction sur vos premières livraisons.';
+  }
+
+  @override
   String get referralBody =>
       'Partagez votre code : vos amis l’entrent à leur inscription et profitent d’une réduction.';
 

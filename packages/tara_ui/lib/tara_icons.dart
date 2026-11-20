@@ -124,6 +124,17 @@ abstract final class TaraIcons {
     _P('M9 8h6M9 11.5h6M9 15h3'),
   ]);
 
+  /// Soleil (affichage).
+  static const sun = TaraIconData([_P('M12 3v2M12 19v2M5 12H3M21 12h-2M17 12a5 5 0 1 1-10 0 5 5 0 0 1 10 0z')]);
+
+  /// Globe (langue).
+  static const globe = TaraIconData([
+    _P('M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z'),
+  ]);
+
+  /// Porte de sortie (se déconnecter).
+  static const logout = TaraIconData([_P('M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11')]);
+
   /// Document plié au coin (relevé).
   static const document = TaraIconData([_P('M7 3h7l4 4v14H7z'), _P('M14 3v4h4M10 12h5M10 16h5')]);
   static const search = TaraIconData([_C(11, 11, 7), _P('M20 20l-3.5-3.5')]);

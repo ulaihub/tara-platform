@@ -23,9 +23,10 @@ Widget profile(FakeClientApi api) => ProviderScope(
 Finder removeButton(String label) =>
     find.byWidgetPredicate((widget) => widget is GlassIconButton && widget.label == 'Retirer $label');
 
+/// Ligne « Mes adresses » du menu du profil : sa page s'ouvre.
 Future<void> showAddresses(WidgetTester tester) async {
   await tester.scrollUntilVisible(find.text('Mes adresses'), 100, scrollable: find.byType(Scrollable).first);
-  await tester.ensureVisible(find.text('Mes adresses'));
+  await tester.tap(find.text('Mes adresses'));
   await settle(tester);
 }
 
@@ -37,7 +38,8 @@ void main() {
     await pumpVariant(tester, variant, profile(orderApi()));
     await settle(tester);
     await showAddresses(tester);
-    await expectLater(capture, matchesGoldenFile('goldens/06_profil/adresses_${variant.name}.png'));
+    // Page ouverte depuis le menu du profil : par-dessus l'écran capturé d'habitude.
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/06_profil/adresses_${variant.name}.png'));
   });
 
   testWidgets('retire une adresse après confirmation', (tester) async {
