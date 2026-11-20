@@ -234,6 +234,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inProgress => 'In progress';
 
   @override
+  String heroTonight(String hour) {
+    return 'Tonight at $hour:00';
+  }
+
+  @override
+  String heroPaidOut(String amount) {
+    return '$amount paid out';
+  }
+
+  @override
+  String get heroOnDemand => 'When you ask';
+
+  @override
+  String heroToReceive(String amount) {
+    return '$amount to receive';
+  }
+
+  @override
   String get whereToDeliver => 'Where to deliver?';
 
   @override

@@ -524,6 +524,30 @@ abstract class AppLocalizations {
   /// **'En cours'**
   String get inProgress;
 
+  /// No description provided for @heroTonight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce soir à {hour} h'**
+  String heroTonight(String hour);
+
+  /// No description provided for @heroPaidOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} reversés'**
+  String heroPaidOut(String amount);
+
+  /// No description provided for @heroOnDemand.
+  ///
+  /// In fr, this message translates to:
+  /// **'À votre demande'**
+  String get heroOnDemand;
+
+  /// No description provided for @heroToReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} à recevoir'**
+  String heroToReceive(String amount);
+
   /// No description provided for @whereToDeliver.
   ///
   /// In fr, this message translates to:

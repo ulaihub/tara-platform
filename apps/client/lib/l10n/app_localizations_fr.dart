@@ -235,6 +235,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get inProgress => 'En cours';
 
   @override
+  String heroTonight(String hour) {
+    return 'Ce soir à $hour h';
+  }
+
+  @override
+  String heroPaidOut(String amount) {
+    return '$amount reversés';
+  }
+
+  @override
+  String get heroOnDemand => 'À votre demande';
+
+  @override
+  String heroToReceive(String amount) {
+    return '$amount à recevoir';
+  }
+
+  @override
   String get whereToDeliver => 'Où livrer ?';
 
   @override

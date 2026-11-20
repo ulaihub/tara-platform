@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,11 +7,12 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/tab_shell.dart';
+import 'package:tara_ui/components/three_d.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
-import 'package:tara_ui/motion/liquid_wave.dart';
+import 'package:tara_ui/motion/motion_clock.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -19,6 +21,7 @@ import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../bulk/bulk_screen.dart';
+import '../common/card_decor.dart';
 import '../orders/order_row.dart';
 
 /// Commandes en cours de l'expéditeur (accueil), relues à chaque retour sur l'accueil.
@@ -105,14 +108,18 @@ class HomeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          clock.hour < 18 ? l.goodMorning : l.goodEvening,
-                          style: TaraText.label.copyWith(color: c.textTertiary),
+                          // « Bonsoir, Awa » : la salutation avec le prénom.
+                          [
+                            clock.hour < 18 ? l.goodMorning : l.goodEvening,
+                            ?(me.fullName ?? '').trim().split(' ').where((part) => part.isNotEmpty).firstOrNull,
+                          ].join(' '),
+                          style: TaraText.label.copyWith(color: c.textSecondary),
                         ),
                         Text(
                           me.merchant?.shopName ?? me.fullName ?? '',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TaraText.cardTitle.copyWith(color: c.textPrimary),
+                          style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 18),
                         ),
                       ],
                     ),
@@ -120,15 +127,15 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 18),
-            if (wallet != null) ...[_SalesHero(wallet: wallet.value, onTap: onWallet), const SizedBox(height: 14)],
+            const SizedBox(height: 14),
+            if (wallet != null) ...[_SalesHero(wallet: wallet.value, onTap: onWallet), const SizedBox(height: 18)],
             _WhereTo(onTap: onNewOrder),
             const SizedBox(height: 18),
             _QuickActions(
               actions: [
-                if (onBulk != null) (TaraIcons.users, l.quickBulk, onBulk!, bulkCount),
-                (TaraIcons.mapPin, l.quickAskAddress, onLocationLink, 0),
-                if (onReceipts != null) (TaraIcons.clipboard, l.quickReceipts, onReceipts!, 0),
+                if (onBulk != null) (TaraIcons.parcelsFast, l.quickBulk, onBulk!, bulkCount),
+                (TaraIcons.askBubble, l.quickAskAddress, onLocationLink, 0),
+                if (onReceipts != null) (TaraIcons.receipt, l.quickReceipts, onReceipts!, 0),
               ],
             ),
             const SizedBox(height: 22),
@@ -176,8 +183,10 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-/// Boutique : encaissé aujourd'hui sur le liquide de la marque. Le montant s'additionne en
-/// direct à chaque livraison (il monte, la pièce tinte) ; dessous, ce qui part ce soir.
+/// Boutique : encaissé aujourd'hui sur la carte sombre de la maquette, légèrement inclinée
+/// et qui oscille ; un trajet en pointillé où voyage un point lumineux, un reflet qui
+/// passe. Le montant s'additionne en direct à chaque livraison (il monte, la pièce
+/// tinte) ; à droite, ce qui part ce soir.
 class _SalesHero extends StatefulWidget {
   const _SalesHero({required this.wallet, required this.onTap});
   final Wallet? wallet;
@@ -210,10 +219,11 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = TaraColors.of(context);
     final data = widget.wallet;
-    final pending = data?.merchantBalance ?? 0;
-    final pendingText = '${formatAmount(pending)} F';
+    final pending = '${formatAmount(data?.merchantBalance ?? 0)} F';
+    final daily = data?.payoutSchedule == 'DAILY';
+    const soft = Color.fromRGBO(255, 255, 255, .72);
+    final scale = MediaQuery.textScalerOf(context).scale(100) / 100;
     return Semantics(
       button: true,
       child: GestureDetector(
@@ -226,73 +236,116 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
             final t = Curves.easeOut.transform(_pulse.value);
             return Transform.scale(scale: 1 + .03 * (t < .5 ? t * 2 : (1 - t) * 2), child: child);
           },
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(28),
-            child: SizedBox(
-              height: 158,
-              child: Stack(
-                children: [
-                  const Positioned.fill(
-                    child: GlassCard(radius: 28, shadow: false, padding: EdgeInsets.zero, child: SizedBox.expand()),
-                  ),
-                  Positioned.fill(
-                    child: LiquidFill(
-                      level: .27,
-                      front: TaraLiquid.front,
-                      back: TaraLiquid.back(dark: c.isDark),
-                      frontPeriod: TaraLiquid.frontPeriod,
-                      backPeriod: TaraLiquid.backPeriod,
+          // Inclinaison qui oscille lentement (9 s), comme sur la maquette.
+          child: MotionBuilder(
+            period: const Duration(seconds: 9),
+            builder: (context, t, child) {
+              final wave = (1 - math.cos(t * 2 * math.pi)) / 2;
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 1 / 900)
+                  ..rotateX((5 - 2 * wave) * math.pi / 180)
+                  ..rotateY((-6 + 11 * wave) * math.pi / 180),
+                child: child,
+              );
+            },
+            child: Container(
+              height: 122 + (scale - 1).clamp(0, 1) * 70,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(26),
+                boxShadow: const [BoxShadow(color: Color.fromRGBO(60, 25, 0, .24), blurRadius: 40, offset: Offset(0, 20))],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(26),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(26),
+                    border: Border.all(color: const Color.fromRGBO(255, 177, 92, .28)),
+                    gradient: const LinearGradient(
+                      begin: Alignment(-.5, -1),
+                      end: Alignment(.5, 1),
+                      colors: [Color(0xFF2A170A), Color(0xFF16120E)],
+                      stops: [0, .62],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 16, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  child: Stack(
+                    children: [
+                      const Positioned.fill(child: RouteTrail(route: RouteTrail.homeHero, base: Size(352, 122))),
+                      const SheenSweep(
+                        color: Color.fromRGBO(255, 255, 255, .10),
+                        delay: Duration(seconds: 1),
+                        width: .30,
+                        height: 2,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(
-                              child: Text(
-                                data == null
-                                    ? l.salesToday
-                                    : '${l.salesToday} · ${l.salesDeliveries(data.todayDeliveries)}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TaraText.label.copyWith(color: c.textSecondary),
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    data == null
+                                        ? l.salesToday
+                                        : '${l.salesToday} · ${l.salesDeliveries(data.todayDeliveries)}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TaraText.small.copyWith(
+                                      color: const Color.fromRGBO(255, 255, 255, .74),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                const TaraIcon(TaraIcons.chevronRight, size: 18, color: soft),
+                              ],
                             ),
-                            TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
+                            const Spacer(),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: TweenAnimationBuilder<double>(
+                                      tween: Tween(end: (data?.todaySales ?? 0).toDouble()),
+                                      duration: const Duration(milliseconds: 900),
+                                      curve: Curves.easeOutCubic,
+                                      builder: (context, value, _) => Text(
+                                        '${formatAmount(value.round())} F',
+                                        maxLines: 1,
+                                        style: TaraText.amountL.copyWith(color: Colors.white, fontSize: 32),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                if (data != null) ...[
+                                  const SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        daily ? l.heroTonight('${data.payoutHour}') : l.heroOnDemand,
+                                        style: TaraText.small.copyWith(color: soft, fontWeight: FontWeight.w700, fontSize: 11),
+                                      ),
+                                      Text(
+                                        daily ? l.heroPaidOut(pending) : l.heroToReceive(pending),
+                                        style: TaraText.smallStrong.copyWith(color: const Color(0xFFFFC283), fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 4),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: TweenAnimationBuilder<double>(
-                            tween: Tween(end: (data?.todaySales ?? 0).toDouble()),
-                            duration: const Duration(milliseconds: 900),
-                            curve: Curves.easeOutCubic,
-                            builder: (context, value, _) => Text(
-                              '${formatAmount(value.round())} F',
-                              maxLines: 1,
-                              style: TaraText.amountL.copyWith(color: c.textPrimary),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        if (data != null)
-                          Text(
-                            data.payoutSchedule == 'DAILY'
-                                ? l.toReceiveDaily(pendingText)
-                                : l.toReceiveOnDemand(pendingText),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TaraText.small.copyWith(color: c.textSecondary, fontWeight: FontWeight.w600),
-                          ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -302,7 +355,8 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
   }
 }
 
-/// « Où livrer ? » : la porte d'entrée d'une nouvelle livraison, comme un champ de recherche.
+/// « Où livrer ? » : la porte d'entrée d'une nouvelle livraison (maquette) : petit colis
+/// 3D qui tourne, question et aide, flèche dans un carré au dégradé de la marque.
 class _WhereTo extends StatelessWidget {
   const _WhereTo({required this.onTap});
   final VoidCallback onTap;
@@ -318,17 +372,29 @@ class _WhereTo extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: GlassCard(
-          radius: 24,
-          shadow: false,
-          padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 60),
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+          decoration: BoxDecoration(
+            color: c.glassFallback,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              if (!c.isDark)
+                const BoxShadow(color: Color.fromRGBO(140, 70, 10, .10), blurRadius: 30, offset: Offset(0, 14)),
+            ],
+          ),
           child: Row(
             children: [
-              const IconTile(icon: TaraIcons.search, size: 44, radius: 15),
+              const SizedBox(
+                width: 30,
+                height: 30,
+                child: FittedBox(child: Parcel3D(size: 28, floating: false, period: Duration(seconds: 7))),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(l.whereToDeliver, style: TaraText.bodyStrong.copyWith(color: c.textPrimary)),
                     Text(
@@ -341,9 +407,9 @@ class _WhereTo extends StatelessWidget {
                 ),
               ),
               Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(shape: BoxShape.circle, gradient: TaraBrand.gradient),
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(gradient: TaraBrand.gradient, borderRadius: BorderRadius.circular(15)),
                 child: const Center(child: TaraIcon(TaraIcons.arrowRight, size: 20, color: TaraBrand.onBrand)),
               ),
             ],
@@ -380,14 +446,18 @@ class _QuickActions extends StatelessWidget {
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        GlassCard(
-                          radius: 26,
-                          padding: EdgeInsets.zero,
-                          child: SizedBox(
-                            width: 52,
-                            height: 52,
-                            child: Center(child: TaraIcon(icon, size: 22, color: c.textPrimary)),
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: c.glassFallback,
+                            boxShadow: [
+                              if (!c.isDark)
+                                const BoxShadow(color: Color.fromRGBO(140, 70, 10, .10), blurRadius: 20, offset: Offset(0, 8)),
+                            ],
                           ),
+                          child: Center(child: TaraIcon(icon, size: 22, color: c.textPrimary)),
                         ),
                         if (badge > 0)
                           Positioned(

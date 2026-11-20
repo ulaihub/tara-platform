@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +14,7 @@ import 'package:tara_ui/tara_typography.dart';
 
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
+import '../common/card_decor.dart';
 import '../common/pin.dart';
 
 /// Cartes du portefeuille (maquette Portefeuille) : la carte sombre « Ventes à recevoir »
@@ -329,53 +329,6 @@ Widget _glow(Offset light, Color color) => Positioned.fill(
   ),
 );
 
-/// Bande de lumière qui traverse la carte, puis attend (cycle de 6 s).
-class _Sheen extends StatelessWidget {
-  const _Sheen({required this.color, required this.delay});
-  final Color color;
-  final Duration delay;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: LayoutBuilder(
-          builder: (context, box) => MotionBuilder(
-            period: const Duration(seconds: 6),
-            delay: Duration(microseconds: 6000000 - delay.inMicroseconds),
-            stillPhase: .9,
-            builder: (context, t, _) {
-              if (t >= .45) return const SizedBox.shrink();
-              final p = Curves.easeInOut.transform(t / .45);
-              final band = box.maxWidth * .34;
-              final x = -1.6 * band + p * 5.8 * band;
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    left: x,
-                    top: -box.maxHeight * .4,
-                    width: band,
-                    height: box.maxHeight * 1.8,
-                    child: Transform.rotate(
-                      angle: 18 * math.pi / 180,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [color.withValues(alpha: 0), color, color.withValues(alpha: 0)]),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Carte sombre des ventes à recevoir.
 class _SalesCard extends StatelessWidget {
   const _SalesCard({required this.wallet, required this.light});
@@ -426,15 +379,7 @@ class _SalesCard extends StatelessWidget {
           ),
         ),
         // Trajet en pointillé et point lumineux qui le parcourt.
-        Positioned.fill(
-          child: IgnorePointer(
-            child: MotionBuilder(
-              period: const Duration(milliseconds: 4600),
-              stillPhase: .55,
-              builder: (context, t, _) => CustomPaint(painter: _RoutePainter(Curves.easeInOut.transform(t))),
-            ),
-          ),
-        ),
+        const Positioned.fill(child: RouteTrail(route: RouteTrail.walletCard, base: Size(352, 196))),
         // Traits de vitesse.
         Positioned(
           right: 18,
@@ -467,7 +412,7 @@ class _SalesCard extends StatelessWidget {
             ),
           ),
         ),
-        const _Sheen(color: Color.fromRGBO(255, 255, 255, .11), delay: Duration(milliseconds: 1200)),
+        const SheenSweep(color: Color.fromRGBO(255, 255, 255, .11), delay: Duration(milliseconds: 1200)),
       ],
       header: Row(
         children: [
@@ -536,57 +481,6 @@ class _SalesCard extends StatelessWidget {
   }
 }
 
-/// Trajet de livraison en pointillé (courbe de la maquette, à l'échelle de la carte) et
-/// point lumineux qui le parcourt, en apparaissant puis en s'effaçant.
-class _RoutePainter extends CustomPainter {
-  _RoutePainter(this.t);
-  final double t;
-
-  static Path _route(Size size) {
-    final sx = size.width / 352, sy = size.height / 196;
-    return Path()
-      ..moveTo(-10 * sx, 172 * sy)
-      ..cubicTo(70 * sx, 160 * sy, 110 * sx, 104 * sy, 186 * sx, 104 * sy)
-      // « S » de la maquette : premier point de contrôle symétrique du précédent.
-      ..cubicTo(262 * sx, 104 * sy, 296 * sx, 48 * sy, 362 * sx, 22 * sy);
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = _route(size);
-    final dash = Paint()
-      ..color = const Color.fromRGBO(255, 177, 92, .34)
-      ..strokeWidth = 1.6
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    PathMetric? first;
-    for (final metric in path.computeMetrics()) {
-      first ??= metric;
-      for (double d = 0; d < metric.length; d += 9) {
-        canvas.drawPath(metric.extractPath(d, math.min(d + 2, metric.length)), dash);
-      }
-    }
-    final metric = first;
-    if (metric == null) return;
-    final at = metric.getTangentForOffset(metric.length * t)?.position;
-    if (at == null) return;
-    final fade = t < .1 ? t / .1 : (t > .85 ? (1 - t) / .15 : 1.0);
-    canvas
-      ..drawCircle(
-        at,
-        9,
-        Paint()
-          ..color = Color.fromRGBO(255, 106, 0, .65 * fade)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
-      )
-      ..drawCircle(at, 9, Paint()..color = Color.fromRGBO(255, 176, 0, .18 * fade))
-      ..drawCircle(at, 5, Paint()..color = Color.fromRGBO(255, 176, 0, fade));
-  }
-
-  @override
-  bool shouldRepaint(_RoutePainter old) => old.t != t;
-}
-
 /// Carte claire du solde Tara.
 class _TaraCard extends StatelessWidget {
   const _TaraCard({required this.wallet, required this.shop, required this.light});
@@ -644,7 +538,7 @@ class _TaraCard extends StatelessWidget {
             ),
           ),
         ),
-        const _Sheen(color: Color.fromRGBO(255, 255, 255, .75), delay: Duration(seconds: 3)),
+        const SheenSweep(color: Color.fromRGBO(255, 255, 255, .75), delay: Duration(seconds: 3)),
       ],
       header: Row(
         children: [
