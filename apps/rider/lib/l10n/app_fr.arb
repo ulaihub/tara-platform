@@ -1495,5 +1495,20 @@
         "type": "int"
       }
     }
+  },
+  "myEarnings": "Mes gains",
+  "thisWeek": "Cette semaine",
+  "todaySuffix": "aujourd’hui",
+  "dayNotYet": "à venir",
+  "dayNotYetLabel": "pas encore roulé",
+  "weekOnline": "En ligne",
+  "weekRides": "Courses",
+  "hoursShort": "{hours} h",
+  "@hoursShort": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
   }
 }

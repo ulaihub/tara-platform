@@ -13,25 +13,33 @@ import 'screens_auth_golden_test.dart' show settle;
 
 void main() {
   Future<void> tapText(WidgetTester tester, String text) async {
-    await tester.ensureVisible(find.text(text).last);
+    await Scrollable.ensureVisible(tester.element(find.text(text).last), alignment: .3);
+    await tester.pump();
     await tester.tap(find.text(text).last);
     await settle(tester);
   }
 
-  testWidgets('jour, semaine, mois : gains de la période et barre en cours', (tester) async {
+  testWidgets('semaine en colonnes : aujourd’hui allumé, jour touché détaillé, jours à venir', (tester) async {
     final api = activityApi();
     await pumpVariant(tester, Variant.matrix.first, activity(api));
     await settle(tester);
-    expect(find.text('5 courses'), findsNothing);
-    expect(find.text('4 courses'), findsOneWidget);
-    // Tranche de 14 h à 16 h en cours : sa valeur s'affiche au-dessus.
-    expect(find.text('3 000'), findsOneWidget);
+    expect(api.periods.first, 'week');
+    expect(find.text('25\u00a0800\u00a0F'), findsOneWidget);
+    expect(find.text('17 courses'), findsWidgets);
+    // Mercredi 4 en cours : son détail est affiché sous les colonnes.
+    expect(find.text('Mercredi 4 nov. · aujourd’hui'), findsOneWidget);
+    expect(find.bySemanticsLabel('Mer : Mercredi 4 nov. · aujourd’hui : 6\u00a0750\u00a0F · 4 courses'), findsOneWidget);
 
-    await tapText(tester, 'Semaine');
-    await tapText(tester, 'Mois');
-    expect(api.periods, ['day', 'week', 'month']);
-    expect(find.text('Gains du mois'), findsOneWidget);
-    expect(find.text('S1'), findsOneWidget);
+    await tester.tap(find.text('Mar'));
+    await settle(tester);
+    expect(find.text('Mardi 3 nov.'), findsOneWidget);
+    expect(find.text('11\u00a0250\u00a0F · 8 courses', findRichText: true), findsOneWidget);
+
+    // Vendredi n'est pas encore roulé.
+    await tester.tap(find.text('Ven'));
+    await settle(tester);
+    expect(find.text('à venir'), findsOneWidget);
+    expect(find.bySemanticsLabel('Ven : Vendredi 6 nov. : pas encore roulé'), findsOneWidget);
   });
 
   testWidgets('solde prépayé : disponible et argent mis de côté, pas d’espèces à reverser', (tester) async {
@@ -330,6 +338,9 @@ void main() {
   testWidgets('dernières courses : trois, puis toutes ; statut, encaissement et gain', (tester) async {
     await pumpVariant(tester, Variant.matrix.first, activity(activityApi()));
     await settle(tester);
+    // Les dernières courses sont sous la semaine et le solde : l'écran défile jusqu'à elles.
+    await tester.scrollUntilVisible(find.text('Dernières courses'), 200);
+    await settle(tester);
     expect(find.text('14:52 · Livrée · 12 500 F encaissés'), findsOneWidget);
     expect(find.text('13:20 · Livrée · Mobile Money'), findsOneWidget);
     expect(find.text('11:05 · Retour au vendeur'), findsOneWidget);
@@ -368,6 +379,8 @@ void main() {
     expect(find.text('29\u00a0500 F', findRichText: true), findsNothing);
     expect(find.text('••••• F', findRichText: true), findsOneWidget);
 
+    await Scrollable.ensureVisible(tester.element(find.text('••••• F', findRichText: true)), alignment: .3);
+    await tester.pump();
     await tester.tap(find.text('••••• F', findRichText: true));
     await settle(tester);
     expect(find.text('Pour voir votre solde'), findsOneWidget);

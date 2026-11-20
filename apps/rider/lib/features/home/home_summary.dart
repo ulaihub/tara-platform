@@ -39,3 +39,9 @@ final homeSummaryProvider = FutureProvider<HomeSummary>((ref) async {
     withdrawalMinimum: (((wallet['withdrawal'] as Map?)?['minimum'] as num?) ?? 0).toInt(),
   );
 });
+
+/// Nom complet du livreur seul (en-tête de « Mes gains »).
+final riderNameProvider = FutureProvider<String>((ref) async {
+  final me = await ref.read(riderApiProvider).me();
+  return (me['fullName'] as String?) ?? '';
+});

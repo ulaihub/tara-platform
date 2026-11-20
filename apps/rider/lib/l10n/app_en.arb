@@ -657,5 +657,13 @@
   "prepaidCovers": "Covers the cash you collect",
   "onlineSince": "Online · {time}",
   "zoneForbiddenLegend": "No-go zone: no rides",
-  "todayTotal": "{amount} · {count} {count, plural, =1{ride} other{rides}}"
+  "todayTotal": "{amount} · {count} {count, plural, =1{ride} other{rides}}",
+  "myEarnings": "My earnings",
+  "thisWeek": "This week",
+  "todaySuffix": "today",
+  "dayNotYet": "to come",
+  "dayNotYetLabel": "not ridden yet",
+  "weekOnline": "Online",
+  "weekRides": "Rides",
+  "hoursShort": "{hours} h"
 }

@@ -250,7 +250,7 @@ class _ParcelPainter extends CustomPainter {
 /// Une colonne du tableau de bord : valeur (hauteur), libellé dessous, détail annoncé.
 @immutable
 class Column3D {
-  const Column3D({required this.label, required this.value, required this.detail});
+  const Column3D({required this.label, required this.value, required this.detail, this.future = false});
 
   /// Libellé court sous la colonne (« Jeu »).
   final String label;
@@ -259,11 +259,14 @@ class Column3D {
   /// Détail montré au-dessus de la colonne choisie et lu par le lecteur d'écran
   /// (« 7 courses · 4 900 F »).
   final String detail;
+
+  /// Jour à venir : simple contour en pointillés, sans relief.
+  final bool future;
 }
 
-/// Graphique en colonnes en relief (livraisons, ventes, gains) : chaque colonne a sa face
-/// avant, son côté et son dessus. On touche une colonne : elle s'allume en orange et donne
-/// le détail du jour. Les colonnes montent à l'affichage.
+/// Graphique en colonnes en relief de la maquette (gains de la semaine, ventes) : chaque
+/// colonne a sa face avant pleine, son côté et son dessus. On touche une colonne : elle
+/// s'allume en dégradé orange et donne le détail du jour. Les colonnes montent à l'affichage.
 class Column3DChart extends StatefulWidget {
   const Column3DChart({
     super.key,
@@ -271,6 +274,8 @@ class Column3DChart extends StatefulWidget {
     this.selected,
     this.onSelected,
     this.height = 150,
+    this.maxValue,
+    this.showDetail = true,
   });
 
   final List<Column3D> columns;
@@ -281,6 +286,12 @@ class Column3DChart extends StatefulWidget {
 
   /// Hauteur de la plus haute colonne.
   final double height;
+
+  /// Valeur qui remplit toute la hauteur (par défaut, la plus grande colonne).
+  final double? maxValue;
+
+  /// Détail du jour choisi au-dessus de sa colonne (sinon l'écran l'affiche ailleurs).
+  final bool showDetail;
 
   @override
   State<Column3DChart> createState() => _Column3DChartState();
@@ -306,16 +317,18 @@ class _Column3DChartState extends State<Column3DChart> {
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
     final effects = TaraEffects.of(context);
-    final max = widget.columns.fold<double>(0, (m, col) => math.max(m, col.value));
+    final max = widget.maxValue ?? widget.columns.fold<double>(0, (m, col) => math.max(m, col.value));
+    final picked = c.isDark ? const Color(0xFFFFC283) : const Color(0xFF9A3412);
     const bubble = 30.0;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: effects.decorativeMotion ? 0 : 1, end: 1),
-      duration: const Duration(milliseconds: 900),
-      curve: Curves.easeOutBack,
+      duration: const Duration(milliseconds: 800),
+      curve: const Cubic(.2, .8, .2, 1),
       builder: (context, grow, _) => Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          for (var i = 0; i < widget.columns.length; i++)
+          for (var i = 0; i < widget.columns.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
             Expanded(
               child: Semantics(
                 button: true,
@@ -328,31 +341,35 @@ class _Column3DChartState extends State<Column3DChart> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                        height: bubble,
-                        child: i == _selected
-                            ? FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  widget.columns[i].detail.split(' · ').first,
-                                  maxLines: 1,
-                                  style: TaraText.small.copyWith(
-                                    color: c.accentText,
-                                    fontWeight: FontWeight.w800,
-                                    fontFeatures: TaraText.tabular,
+                      if (widget.showDetail)
+                        SizedBox(
+                          height: bubble,
+                          child: i == _selected
+                              ? FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    widget.columns[i].detail.split(' · ').first,
+                                    maxLines: 1,
+                                    style: TaraText.small.copyWith(
+                                      color: c.accentText,
+                                      fontWeight: FontWeight.w800,
+                                      fontFeatures: TaraText.tabular,
+                                    ),
                                   ),
-                                ),
-                              )
-                            : null,
-                      ),
+                                )
+                              : null,
+                        ),
                       SizedBox(
-                        height: widget.height + 10,
+                        height: widget.height,
                         child: CustomPaint(
                           size: Size.infinite,
                           painter: _ColumnPainter(
                             ratio: max <= 0 ? 0 : (widget.columns[i].value / max) * grow,
                             selected: i == _selected,
+                            future: widget.columns[i].future,
                             dark: c.isDark,
+                            ink: c.textPrimary,
+                            cap: picked,
                           ),
                         ),
                       ),
@@ -361,8 +378,9 @@ class _Column3DChartState extends State<Column3DChart> {
                         widget.columns[i].label,
                         maxLines: 1,
                         style: TaraText.small.copyWith(
-                          color: i == _selected ? c.accentText : c.textTertiary,
-                          fontWeight: i == _selected ? FontWeight.w800 : FontWeight.w600,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: i == _selected ? picked : c.textPrimary.withValues(alpha: .66),
                         ),
                       ),
                     ],
@@ -370,6 +388,7 @@ class _Column3DChartState extends State<Column3DChart> {
                 ),
               ),
             ),
+          ],
         ],
       ),
     );
@@ -377,73 +396,87 @@ class _Column3DChartState extends State<Column3DChart> {
 }
 
 class _ColumnPainter extends CustomPainter {
-  _ColumnPainter({required this.ratio, required this.selected, required this.dark});
+  _ColumnPainter({
+    required this.ratio,
+    required this.selected,
+    required this.future,
+    required this.dark,
+    required this.ink,
+    required this.cap,
+  });
 
   final double ratio;
   final bool selected;
+  final bool future;
   final bool dark;
+  final Color ink;
+  final Color cap;
+
+  // Côté de 7 px incliné de 40°, dessus de 6 px incliné de 50° (maquette).
+  static const _depth = 7.0;
+  static const _rise = 6.0;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Profondeur oblique : le côté et le dessus fuient vers la droite et vers le haut.
-    final depth = math.min(10.0, size.width * .22);
-    final rise = depth * .7;
-    final width = math.min(26.0, size.width - depth - 6);
-    final left = (size.width - width - depth) / 2;
+    final width = size.width - _depth;
     final bottom = size.height;
-    final columnHeight = math.max(4.0, (size.height - rise) * ratio.clamp(0.0, 1.06));
-    final top = bottom - columnHeight;
-    final front = Rect.fromLTRB(left, top, left + width, bottom);
-
-    final (Paint frontPaint, Color side, Color cap) = selected
-        ? (
-            Paint()..shader = TaraBrand.verticalGradient.createShader(front),
-            const Color(0xFFC2410C),
-            const Color(0xFFFFC56B),
-          )
-        : dark
-        ? (
-            Paint()..color = const Color.fromRGBO(255, 255, 255, .16),
-            const Color.fromRGBO(255, 255, 255, .08),
-            const Color.fromRGBO(255, 255, 255, .26),
-          )
-        : (
-            Paint()..color = const Color(0xFFE4D6C6),
-            const Color(0xFFCDBBA6),
-            const Color(0xFFF3EADF),
-          );
-
-    // Côté, dessus, puis face avant : la face avant est toujours pleine.
-    canvas.drawPath(
-      Path()..addPolygon([
-        Offset(front.right, top),
-        Offset(front.right + depth, top - rise),
-        Offset(front.right + depth, bottom - rise),
-        Offset(front.right, bottom),
-      ], true),
-      Paint()..color = side,
-    );
-    canvas.drawPath(
-      Path()..addPolygon([
-        Offset(front.left, top),
-        Offset(front.left + depth, top - rise),
-        Offset(front.right + depth, top - rise),
-        Offset(front.right, top),
-      ], true),
-      Paint()..color = cap,
-    );
-    canvas.drawRect(front, frontPaint);
-    if (selected) {
-      // Reflet clair sur l'arête gauche de la colonne allumée.
-      canvas.drawRect(
-        Rect.fromLTWH(front.left, top, 2, columnHeight),
-        Paint()..color = const Color.fromRGBO(255, 255, 255, .35),
-      );
+    if (future) {
+      // Jour à venir : 22 px en pointillés.
+      final rect = Rect.fromLTWH(0, bottom - 22, width, 22);
+      final paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = ink.withValues(alpha: .22);
+      final path = Path()..addRRect(RRect.fromRectAndCorners(rect.deflate(.75), topLeft: const Radius.circular(3)));
+      for (final metric in path.computeMetrics()) {
+        for (var d = 0.0; d < metric.length; d += 6) {
+          canvas.drawPath(metric.extractPath(d, math.min(d + 3.5, metric.length)), paint);
+        }
+      }
+      return;
     }
+    final columnHeight = math.max(4.0, (size.height - _rise) * ratio.clamp(0.0, 1.0));
+    final top = bottom - columnHeight;
+    final front = Rect.fromLTRB(0, top, width, bottom);
+    final Paint frontPaint;
+    final Color side, lid;
+    if (selected) {
+      frontPaint = Paint()..shader = TaraBrand.verticalGradient.createShader(front);
+      side = const Color(0xFFB83A08);
+      lid = cap;
+    } else {
+      frontPaint = Paint()..color = ink.withValues(alpha: .16);
+      side = ink.withValues(alpha: .08);
+      lid = ink.withValues(alpha: .28);
+    }
+    final sideRise = _depth * math.tan(40 * math.pi / 180);
+    final lidShift = _rise * math.tan(50 * math.pi / 180);
+    // Côté, dessus, puis face avant : la face avant est toujours pleine.
+    canvas
+      ..drawPath(
+        Path()..addPolygon([
+          Offset(front.right, top),
+          Offset(front.right + _depth, top - sideRise),
+          Offset(front.right + _depth, bottom - sideRise),
+          Offset(front.right, bottom),
+        ], true),
+        Paint()..color = side,
+      )
+      ..drawPath(
+        Path()..addPolygon([
+          Offset(front.left, top),
+          Offset(front.left + lidShift, top - _rise),
+          Offset(front.right + lidShift, top - _rise),
+          Offset(front.right, top),
+        ], true),
+        Paint()..color = lid,
+      )
+      ..drawRRect(RRect.fromRectAndCorners(front, topLeft: const Radius.circular(3)), frontPaint);
   }
 
   @override
-  bool shouldRepaint(_ColumnPainter old) => old.ratio != ratio || old.selected != selected || old.dark != dark;
+  bool shouldRepaint(_ColumnPainter old) =>
+      old.ratio != ratio || old.selected != selected || old.future != future || old.dark != dark || old.ink != ink;
 }
 
 /// Carte en relief (solde, carte boutique) : elle s'incline doucement d'un côté puis de
