@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { Pills } from '@/components/pills';
+import { TopBar } from '@/components/top-bar';
 import { cx } from '@/components/ui';
 import { requireStaff, staffApi } from '@/lib/dal';
 import { longDate } from '@/lib/douala';
@@ -37,30 +39,19 @@ export default async function MetricsPage({
   const success = pointsChange(m.deliveries.successRate, m.deliveries.previousSuccessRate);
 
   return (
-    <div className="mx-auto max-w-[1280px]">
-      <header className="mb-6 flex flex-wrap items-end gap-3">
-        <div className="flex-1">
-          <h1 className="font-display text-[28px] font-bold tracking-tight">Indicateurs</h1>
-          <p className="text-muted">
-            Du {day(m.period.from)} au {day(m.period.to)}, comparé aux {days} jours d’avant.
-          </p>
-        </div>
-        <nav aria-label="Période" className="flex gap-2">
-          {PERIODS.map((value) => (
-            <Link
-              key={value}
-              href={value === 30 ? '/indicateurs' : `/indicateurs?jours=${value}`}
-              aria-current={value === days ? 'page' : undefined}
-              className={cx(
-                'min-h-10 rounded-xl px-4 py-2.5 text-[14px] font-bold transition',
-                value === days ? 'bg-accent-bg text-accent' : 'bg-panel text-muted hover:text-text',
-              )}
-            >
-              {value} jours
-            </Link>
-          ))}
-        </nav>
-      </header>
+    <div className="mx-auto max-w-[1280px] pb-8">
+      <TopBar
+        title="Indicateurs"
+        subtitle={`Du ${day(m.period.from)} au ${day(m.period.to)}, comparé aux ${days} jours d’avant`}
+      />
+      <Pills
+        label="Période"
+        items={PERIODS.map((value) => ({
+          href: value === 30 ? '/indicateurs' : `/indicateurs?jours=${value}`,
+          label: `${value} jours`,
+          active: value === days,
+        }))}
+      />
 
       <div className="mb-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Tile

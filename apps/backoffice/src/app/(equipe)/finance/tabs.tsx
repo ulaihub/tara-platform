@@ -1,13 +1,27 @@
-import Link from 'next/link';
-import { cx } from '@/components/ui';
+import { SectionHeader } from '@/components/section-header';
 
 const TABS = [
-  { href: '/finance', label: 'Vue d’ensemble' },
-  { href: '/finance/reversements', label: 'Reversements' },
-  { href: '/finance/controle', label: 'Contrôle des comptes' },
+  {
+    href: '/finance',
+    label: 'Vue d’ensemble',
+    title: 'Finance',
+    subtitle: 'Vue d’ensemble et reversements',
+  },
+  {
+    href: '/finance/reversements',
+    label: 'Reversements',
+    title: 'Reversements',
+    subtitle: 'À valider, envoyés, en échec',
+  },
+  {
+    href: '/finance/controle',
+    label: 'Contrôle des comptes',
+    title: 'Contrôle des comptes',
+    subtitle: 'Grand livre, prestataire, espèces, écarts',
+  },
 ] as const;
 
-/** En-tête commun des pages de la finance (H5). */
+/** En-tête commun des pages de la finance (H5, maquettes BO-Finance et BO-Controle). */
 export function FinanceHeader({
   current,
   aside,
@@ -15,27 +29,5 @@ export function FinanceHeader({
   current: (typeof TABS)[number]['href'];
   aside?: string;
 }) {
-  return (
-    <header className="mb-6">
-      <h1 className="font-display text-[28px] font-bold tracking-tight">Finance</h1>
-      {aside ? <p className="text-muted">{aside}</p> : null}
-      <nav aria-label="Finance" className="mt-4 flex flex-wrap gap-2">
-        {TABS.map((tab) => (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            aria-current={tab.href === current ? 'page' : undefined}
-            className={cx(
-              'min-h-10 rounded-xl px-4 py-2.5 text-[14px] font-bold transition',
-              tab.href === current
-                ? 'bg-accent-bg text-accent'
-                : 'bg-panel text-muted hover:text-text',
-            )}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </nav>
-    </header>
-  );
+  return <SectionHeader tabs={TABS} current={current} label="Finance" aside={aside} />;
 }

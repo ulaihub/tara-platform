@@ -63,8 +63,10 @@ export default async function PayoutsPage({ searchParams }: { searchParams: Prom
               })}
               aria-current={active ? 'page' : undefined}
               className={cx(
-                'inline-flex min-h-9 items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-bold transition',
-                active ? 'bg-text text-bg' : 'bg-panel text-muted hover:text-text',
+                'inline-flex min-h-[34px] items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-extrabold transition',
+                active
+                  ? 'bg-brand text-on-brand shadow-[0_8px_18px_rgba(255,90,0,.22)]'
+                  : 'bo-glass text-text hover:brightness-105',
               )}
             >
               {item.label}
@@ -99,17 +101,17 @@ export default async function PayoutsPage({ searchParams }: { searchParams: Prom
           </p>
         </div>
       ) : (
-        <div className="relative overflow-x-auto bo-glass rounded-[22px] shadow-card">
-          <table className="w-full min-w-[720px] text-left text-[14px]">
-            <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
+        <div className="relative overflow-x-auto bo-glass rounded-[22px] px-2 pb-1 sm:px-3">
+          <table className="w-full min-w-[720px] border-separate border-spacing-y-1.5 text-left text-[13px]">
+            <thead className="text-[11px] font-extrabold tracking-[.06em] text-faint uppercase">
               <tr>
-                <th className="px-4 py-3">Bénéficiaire</th>
-                <th className="px-4 py-3">Envoyé au</th>
-                <th className="px-4 py-3 text-right">Montant</th>
-                <th className="px-4 py-3 text-right">Reçu</th>
-                <th className="px-4 py-3">Demandé</th>
-                <th className="px-4 py-3">Statut</th>
-                <th className="px-4 py-3 text-right">
+                <th className="px-3 pb-1">Bénéficiaire</th>
+                <th className="px-3 pb-1">Envoyé au</th>
+                <th className="px-3 pb-1 text-right">Montant</th>
+                <th className="px-3 pb-1 text-right">Reçu</th>
+                <th className="px-3 pb-1">Demandé</th>
+                <th className="px-3 pb-1">Statut</th>
+                <th className="px-3 pb-1 text-right">
                   <span className="sr-only">Actions</span>
                 </th>
               </tr>
@@ -155,7 +157,7 @@ function PayoutRow({ payout }: { payout: AdminPayout }) {
   const name = owner ? (owner.shopName ?? owner.name ?? displayPhone(owner.phone)) : '—';
   return (
     <tr className="border-b border-line align-top last:border-0">
-      <td className="px-4 py-3">
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
         {href ? (
           <Link href={href} className="font-bold text-accent hover:underline">
             {name}
@@ -168,18 +170,22 @@ function PayoutRow({ payout }: { payout: AdminPayout }) {
           {owner?.shopName && owner.name ? ` · ${owner.name}` : ''}
         </span>
       </td>
-      <td className="px-4 py-3 whitespace-nowrap text-muted">{displayPhone(payout.phone)}</td>
-      <td className="px-4 py-3 text-right font-bold whitespace-nowrap tabular-nums">
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] whitespace-nowrap text-muted">
+        {displayPhone(payout.phone)}
+      </td>
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] text-right font-bold whitespace-nowrap tabular-nums">
         {money(payout.amount)}
       </td>
-      <td className="px-4 py-3 text-right whitespace-nowrap tabular-nums">
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] text-right whitespace-nowrap tabular-nums">
         {money(payout.received)}
         {payout.withdrawalFee > 0 ? (
           <span className="block text-[12px] text-faint">frais {money(payout.withdrawalFee)}</span>
         ) : null}
       </td>
-      <td className="px-4 py-3 whitespace-nowrap text-muted">{dateTime(payout.requestedAt)}</td>
-      <td className="px-4 py-3">
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] whitespace-nowrap text-muted">
+        {dateTime(payout.requestedAt)}
+      </td>
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
         <span
           className={cx(
             'rounded-full px-2 py-0.5 text-[12px] font-bold whitespace-nowrap',
@@ -197,7 +203,7 @@ function PayoutRow({ payout }: { payout: AdminPayout }) {
           </span>
         ) : null}
       </td>
-      <td className="px-4 py-3">
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
         {payout.status === 'AWAITING_APPROVAL' ? (
           <PayoutDecision payoutId={payout.id} amount={money(payout.received)} />
         ) : null}
