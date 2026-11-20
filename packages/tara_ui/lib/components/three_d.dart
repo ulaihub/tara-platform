@@ -95,7 +95,9 @@ class Parcel3D extends StatelessWidget {
                   right: 0,
                   bottom: 0,
                   height: size * .3,
-                  child: CustomPaint(painter: _ShadowPainter(width: size * (1.05 - .18 * lift), opacity: .4 - .18 * lift)),
+                  child: CustomPaint(
+                    painter: _ShadowPainter(width: size * (1.05 - .18 * lift), opacity: .4 - .18 * lift),
+                  ),
                 ),
                 Transform.translate(offset: Offset(0, -8 * lift), child: child),
               ],
@@ -150,14 +152,31 @@ class _ParcelPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final h = edge / 2;
     final faces = [
-      _Face(_V3(-h, -h, h), const _V3(1, 0, 0), const _V3(0, 1, 0), const Color(0xFFD9A066),
-          ribbon: TaraBrand.orange, front: true),
-      _Face(_V3(h, -h, -h), const _V3(-1, 0, 0), const _V3(0, 1, 0), const Color(0xFFC98F55),
-          ribbon: const Color(0xFFE85F00)),
+      _Face(
+        _V3(-h, -h, h),
+        const _V3(1, 0, 0),
+        const _V3(0, 1, 0),
+        const Color(0xFFD9A066),
+        ribbon: TaraBrand.orange,
+        front: true,
+      ),
+      _Face(
+        _V3(h, -h, -h),
+        const _V3(-1, 0, 0),
+        const _V3(0, 1, 0),
+        const Color(0xFFC98F55),
+        ribbon: const Color(0xFFE85F00),
+      ),
       _Face(_V3(h, -h, h), const _V3(0, 0, -1), const _V3(0, 1, 0), const Color(0xFFCF9458)),
       _Face(_V3(-h, -h, -h), const _V3(0, 0, 1), const _V3(0, 1, 0), const Color(0xFFC68A4F)),
-      _Face(_V3(-h, -h, -h), const _V3(1, 0, 0), const _V3(0, 0, 1), const Color(0xFFE6B276),
-          ribbon: TaraBrand.orange, top: true),
+      _Face(
+        _V3(-h, -h, -h),
+        const _V3(1, 0, 0),
+        const _V3(0, 0, 1),
+        const Color(0xFFE6B276),
+        ribbon: TaraBrand.orange,
+        top: true,
+      ),
       _Face(_V3(-h, h, h), const _V3(1, 0, 0), const _V3(0, 0, -1), const Color(0xFF8A5A2E)),
     ];
     final center = size.center(Offset.zero);
@@ -179,8 +198,9 @@ class _ParcelPainter extends CustomPainter {
 
     for (final (face, _) in visible) {
       _V3 at(double a, double b) => face.origin + face.u * a + face.v * b;
-      Path quad(double a0, double b0, double a1, double b1) => Path()
-        ..addPolygon([project(at(a0, b0)), project(at(a1, b0)), project(at(a1, b1)), project(at(a0, b1))], true);
+      Path quad(double a0, double b0, double a1, double b1) =>
+          Path()
+            ..addPolygon([project(at(a0, b0)), project(at(a1, b0)), project(at(a1, b1)), project(at(a0, b1))], true);
       // Lumière venue d'en haut à gauche : les faces tournées vers elle s'éclaircissent.
       final normal = face.u.cross(face.v).rotate(yaw, _pitch);
       final light = (normal.x * -.35 + normal.y * -.75 + normal.z * .55).clamp(0.0, 1.0);
@@ -218,9 +238,18 @@ class _ParcelPainter extends CustomPainter {
         final bar = Paint()..color = _carton;
         final t = math.max(2.0, edge * .04);
         canvas
-          ..drawRRect(RRect.fromLTRBR(edge * .09, edge * .78, edge * .35, edge * .78 + t, const Radius.circular(2)), bar)
           ..drawRRect(
-            RRect.fromLTRBR(edge * .09, edge * .78 + t * 1.8, edge * .26, edge * .78 + t * 2.8, const Radius.circular(2)),
+            RRect.fromLTRBR(edge * .09, edge * .78, edge * .35, edge * .78 + t, const Radius.circular(2)),
+            bar,
+          )
+          ..drawRRect(
+            RRect.fromLTRBR(
+              edge * .09,
+              edge * .78 + t * 1.8,
+              edge * .26,
+              edge * .78 + t * 2.8,
+              const Radius.circular(2),
+            ),
             bar,
           );
       }

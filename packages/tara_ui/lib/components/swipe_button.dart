@@ -24,6 +24,7 @@ class SwipeButton extends StatefulWidget {
     this.loading = false,
     this.height = 58,
     this.icon = TaraIcons.arrowRight,
+    this.plain = false,
   });
 
   /// Libellé court sur le rail (« Accepter ») ; les chevrons animés montrent le geste.
@@ -40,6 +41,10 @@ class SwipeButton extends StatefulWidget {
   final bool loading;
   final double height;
   final TaraIconData icon;
+
+  /// Style des maquettes de course : rail neutre, consigne centrée (« Glisser pour
+  /// accepter »), pastille au double chevron.
+  final bool plain;
 
   /// Part du rail à parcourir pour confirmer.
   static const threshold = .82;
@@ -141,11 +146,16 @@ class _SwipeButtonState extends State<SwipeButton> with SingleTickerProviderStat
               _travel = math.max(1, constraints.maxWidth - knob - 2 * _pad);
               return Container(
                 height: widget.height,
-                decoration: BoxDecoration(
-                  gradient: c.chipSelected,
-                  borderRadius: BorderRadius.circular(radius),
-                  border: Border.all(color: c.chipSelectedBorder, width: c.chipSelectedBorderWidth),
-                ),
+                decoration: widget.plain
+                    ? BoxDecoration(
+                        color: c.textPrimary.withValues(alpha: .10),
+                        borderRadius: BorderRadius.circular(radius),
+                      )
+                    : BoxDecoration(
+                        gradient: c.chipSelected,
+                        borderRadius: BorderRadius.circular(radius),
+                        border: Border.all(color: c.chipSelectedBorder, width: c.chipSelectedBorderWidth),
+                      ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(radius - 1),
                   child: AnimatedBuilder(
@@ -166,7 +176,7 @@ class _SwipeButtonState extends State<SwipeButton> with SingleTickerProviderStat
                               child: const DecoratedBox(decoration: BoxDecoration(gradient: TaraBrand.gradient)),
                             ),
                           ),
-                          if (_enabled && t == 0) Sheen(opacity: c.isDark ? .35 : .5),
+                          if (_enabled && t == 0 && !widget.plain) Sheen(opacity: c.isDark ? .35 : .5),
                           Positioned.fill(
                             left: knob + _pad + 8,
                             right: 12,
@@ -181,10 +191,15 @@ class _SwipeButtonState extends State<SwipeButton> with SingleTickerProviderStat
                                       Text(
                                         widget.label,
                                         maxLines: 1,
-                                        style: TaraText.buttonStrong.copyWith(color: c.accentText),
+                                        style: widget.plain
+                                            ? TaraText.bodyStrong.copyWith(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w800,
+                                                color: c.textPrimary,
+                                              )
+                                            : TaraText.buttonStrong.copyWith(color: c.accentText),
                                       ),
-                                      const SizedBox(width: 8),
-                                      _Chevrons(color: c.accentText),
+                                      if (!widget.plain) ...[const SizedBox(width: 8), _Chevrons(color: c.accentText)],
                                     ],
                                   ),
                                 ),
@@ -199,8 +214,8 @@ class _SwipeButtonState extends State<SwipeButton> with SingleTickerProviderStat
                               height: knob,
                               decoration: BoxDecoration(
                                 gradient: TaraBrand.gradient,
-                                borderRadius: BorderRadius.circular(radius - _pad),
-                                boxShadow: c.brandShadow,
+                                borderRadius: BorderRadius.circular(widget.plain ? 16 : radius - _pad),
+                                boxShadow: widget.plain ? null : c.brandShadow,
                               ),
                               child: Center(
                                 child: widget.loading
@@ -214,8 +229,10 @@ class _SwipeButtonState extends State<SwipeButton> with SingleTickerProviderStat
                                         ),
                                       )
                                     : TaraIcon(
-                                        _confirmed ? TaraIcons.check : widget.icon,
-                                        size: 24,
+                                        _confirmed
+                                            ? TaraIcons.check
+                                            : (widget.plain ? TaraIcons.chevronsRight : widget.icon),
+                                        size: widget.plain && !_confirmed ? 22 : 24,
                                         strokeWidth: 2.4,
                                         color: TaraBrand.onBrand,
                                       ),

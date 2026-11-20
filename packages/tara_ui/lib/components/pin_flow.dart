@@ -831,7 +831,9 @@ class BalanceAmount extends StatelessWidget {
                                 ),
                                 TextSpan(
                                   text: ' $unit',
-                                  style: TaraText.unit.copyWith(color: color?.withValues(alpha: .72) ?? c.textSecondary),
+                                  style: TaraText.unit.copyWith(
+                                    color: color?.withValues(alpha: .72) ?? c.textSecondary,
+                                  ),
                                 ),
                               ],
                             ),

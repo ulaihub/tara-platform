@@ -673,5 +673,17 @@
   "termsRowToSign": "New version to accept",
   "securityRow": "Secret code and fingerprint",
   "securityRowSubtitle": "To see the balance and withdraw",
-  "displayMoreRow": "Language and sounds"
+  "displayMoreRow": "Language and sounds",
+  "secondsToAccept": "{seconds} s to accept",
+  "stopPickup": "Pickup · {name}",
+  "stopDropoff": "Delivery · {place}",
+  "approachFromYou": "{distance} from you",
+  "toCollectLower": "to collect {amount}",
+  "alreadyPaid": "already paid",
+  "toCollectChip": "To collect {amount}",
+  "tourOnePickup": "{count} parcels · one pickup",
+  "tripSummary": "{distance} · ~{minutes} min",
+  "tourSummary": "{distance} · {count} stops",
+  "pinPickup": "A · {name}",
+  "pinDropoff": "B · {place}"
 }

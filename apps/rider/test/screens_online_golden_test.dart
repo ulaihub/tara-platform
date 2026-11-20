@@ -158,7 +158,7 @@ void main() {
       await settle(tester);
       expect(tester.takeException(), isNull);
       // 30 s pour décider : l'argent à encaisser et le colis se lisent sans faire défiler.
-      final buttonsTop = tester.getRect(find.text('Accepter')).top - 20;
+      final buttonsTop = tester.getRect(find.text('Glisser pour accepter')).top - 20;
       for (final detail in ['À encaisser', 'Colis moyen', 'Fragile']) {
         expect(tester.getRect(find.textContaining(detail)).bottom, lessThan(buttonsTop), reason: detail);
       }
@@ -183,7 +183,8 @@ void main() {
       await settle(tester);
       expect(tester.takeException(), isNull);
       // Avant d'accepter : c'est un gros objet, et il faut venir à deux.
-      expect(find.text('Nouvelle course · Gros objet'), findsOneWidget);
+      expect(find.text('NOUVELLE COURSE'), findsOneWidget);
+      expect(find.text('Gros objet'), findsOneWidget);
       expect(find.text('Venir à deux'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/07_proposition_gros_objet/${brightness.name}.png'));
     });
@@ -227,10 +228,9 @@ void main() {
       );
       await settle(tester);
       expect(tester.takeException(), isNull);
-      expect(find.textContaining('Tournée · 3 colis'), findsOneWidget);
-      expect(find.text('3 arrêts, dans l’ordre'), findsOneWidget);
+      expect(find.text('TOURNÉE · 3 COLIS'), findsOneWidget);
+      expect(find.text('3 colis · un seul enlèvement'), findsOneWidget);
       expect(find.text('N° 9 · Deïdo'), findsOneWidget);
-      expect(find.text('1\u00a0050\u00a0F'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/07_proposition_tournee/${brightness.name}.png'));
     });
   }

@@ -2187,4 +2187,62 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get displayMoreRow => 'Langue et sons';
+
+  @override
+  String secondsToAccept(int seconds) {
+    return '$seconds s pour accepter';
+  }
+
+  @override
+  String stopPickup(String name) {
+    return 'Enlèvement · $name';
+  }
+
+  @override
+  String stopDropoff(String place) {
+    return 'Livraison · $place';
+  }
+
+  @override
+  String approachFromYou(String distance) {
+    return 'à $distance de vous';
+  }
+
+  @override
+  String toCollectLower(String amount) {
+    return 'à encaisser $amount';
+  }
+
+  @override
+  String get alreadyPaid => 'déjà payé';
+
+  @override
+  String toCollectChip(String amount) {
+    return 'À encaisser $amount';
+  }
+
+  @override
+  String tourOnePickup(int count) {
+    return '$count colis · un seul enlèvement';
+  }
+
+  @override
+  String tripSummary(String distance, int minutes) {
+    return '$distance · ~$minutes min';
+  }
+
+  @override
+  String tourSummary(String distance, int count) {
+    return '$distance · $count arrêts';
+  }
+
+  @override
+  String pinPickup(String name) {
+    return 'A · $name';
+  }
+
+  @override
+  String pinDropoff(String place) {
+    return 'B · $place';
+  }
 }

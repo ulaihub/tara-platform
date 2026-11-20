@@ -35,7 +35,9 @@ class OperatorLogo extends StatelessWidget {
         child: ClipRRect(
           borderRadius: radius,
           child: asset == null
-              ? Center(child: TaraIcon(TaraIcons.phone, size: size * .6, color: const Color(0xFF16120E)))
+              ? Center(
+                  child: TaraIcon(TaraIcons.phone, size: size * .6, color: const Color(0xFF16120E)),
+                )
               : Image.asset(asset, package: 'tara_ui', fit: BoxFit.cover, filterQuality: FilterQuality.medium),
         ),
       ),

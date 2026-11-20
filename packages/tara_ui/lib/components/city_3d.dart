@@ -44,6 +44,29 @@ const cityOffline = [
   CityBlock(293, 273, 49, 33, 17, windows: true),
 ];
 
+/// Quartier de la proposition de course (Livreur-Proposition).
+const cityOffer = [
+  CityBlock(11, 11, 45, 40, 71, windows: true),
+  CityBlock(11, 63, 51, 42, 71, windows: true),
+  CityBlock(68, 11, 50, 42, 29, windows: true),
+  CityBlock(68, 63, 51, 44, 31, windows: true),
+  CityBlock(11, 147, 50, 37, 22, windows: true),
+  CityBlock(68, 196, 49, 41, 73, windows: true),
+  CityBlock(11, 273, 43, 30, 26),
+  CityBlock(68, 273, 45, 26, 30),
+  CityBlock(157, 11, 47, 45, 18),
+  CityBlock(157, 63, 48, 41, 34),
+  CityBlock(211, 11, 44, 43, 43, windows: true),
+  CityBlock(157, 147, 48, 37, 65),
+  CityBlock(157, 196, 45, 38, 15),
+  CityBlock(211, 147, 40, 41, 59, windows: true),
+  CityBlock(211, 196, 45, 40, 45, windows: true),
+  CityBlock(211, 273, 42, 27, 15, windows: true),
+  CityBlock(293, 63, 51, 39, 34, windows: true),
+  CityBlock(293, 147, 54, 40, 25),
+  CityBlock(293, 273, 48, 33, 15, windows: true),
+];
+
 /// Couleurs du quartier selon le thème (variables `--map-*`, `--road-*`, `--b1…b5`).
 @immutable
 class CityPalette {
@@ -151,6 +174,7 @@ class City3D extends StatelessWidget {
     this.height = 450,
     this.period = const Duration(seconds: 30),
     this.overlay,
+    this.foreground,
   });
 
   final List<CityBlock> blocks;
@@ -162,6 +186,9 @@ class City3D extends StatelessWidget {
 
   /// Dessin posé sur le sol, sous les immeubles (zones), en coordonnées du sol.
   final void Function(Canvas canvas, Offset Function(double x, double y) ground)? overlay;
+
+  /// Dessin posé au-dessus des immeubles (étiquettes, livreur), au droit d'un point du sol.
+  final void Function(Canvas canvas, Offset Function(double x, double y) ground)? foreground;
 
   @override
   Widget build(BuildContext context) {
@@ -184,6 +211,7 @@ class City3D extends StatelessWidget {
                 scale: scale,
                 yaw: (-35 + 8 * wave) * math.pi / 180,
                 overlay: overlay,
+                foreground: foreground,
               ),
             );
           },
@@ -216,6 +244,7 @@ class _CityPainter extends CustomPainter {
     required this.scale,
     required this.yaw,
     required this.overlay,
+    required this.foreground,
   });
 
   final List<CityBlock> blocks;
@@ -224,6 +253,7 @@ class _CityPainter extends CustomPainter {
   final double scale;
   final double yaw;
   final void Function(Canvas canvas, Offset Function(double x, double y) ground)? overlay;
+  final void Function(Canvas canvas, Offset Function(double x, double y) ground)? foreground;
 
   static const _side = 360.0;
   static const _pitch = 55 * math.pi / 180;
@@ -329,6 +359,7 @@ class _CityPainter extends CustomPainter {
         }
       }
     }
+    foreground?.call(canvas, (x, y) => _project(_world(x, y, 0), size));
   }
 
   @override
