@@ -517,7 +517,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         height: 92,
                         padding: const EdgeInsets.all(12),
                         alignment: Alignment.bottomLeft,
-                        decoration: BoxDecoration(gradient: TaraBrand.gradient, borderRadius: BorderRadius.circular(18)),
+                        decoration: BoxDecoration(
+                          gradient: TaraBrand.gradient,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
                         child: Text(
                           '${formatAmount(42500)}\u00A0F',
                           style: TaraText.cardTitle.copyWith(color: TaraBrand.onBrand, fontWeight: FontWeight.w800),
@@ -542,7 +545,15 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 height: 96,
                 selected: 3,
                 columns: [
-                  for (final (day, rides) in [('Lun', 4), ('Mar', 6), ('Mer', 3), ('Jeu', 7), ('Ven', 5), ('Sam', 9), ('Dim', 2)])
+                  for (final (day, rides) in [
+                    ('Lun', 4),
+                    ('Mar', 6),
+                    ('Mer', 3),
+                    ('Jeu', 7),
+                    ('Ven', 5),
+                    ('Sam', 9),
+                    ('Dim', 2),
+                  ])
                     Column3D(label: day, value: rides.toDouble(), detail: '$rides courses'),
                 ],
               ),

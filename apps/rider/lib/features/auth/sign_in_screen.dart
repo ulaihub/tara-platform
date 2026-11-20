@@ -7,6 +7,7 @@ import 'package:tara_core/api/legal_api.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/brand.dart';
 import 'package:tara_ui/components/buttons.dart';
+import 'package:tara_ui/components/city_3d.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
@@ -93,16 +94,41 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final c = TaraColors.of(context);
     final config = ref.watch(riderConfigProvider).value;
     final dialCode = config?.dialCode ?? '+237';
+    final width = MediaQuery.sizeOf(context).width;
     return TaraScreen(
       safeBottom: false,
       blobs: _blobs,
+      // Le quartier en relief de la maquette, avec un itinéraire orange, derrière le logo.
+      background: Positioned(
+        left: 0,
+        right: 0,
+        top: 0,
+        height: 330 * width / 390,
+        child: IgnorePointer(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const City3D(blocks: cityOffer, top: -20, height: 330, overlay: _route),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [c.bg.withValues(alpha: .25), c.bg.withValues(alpha: .1), c.bg],
+                    stops: const [0, .5, 1],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       child: ScrollWithFooter(
         horizontal: 24,
         top: 16,
         content: [
-          const SizedBox(height: 12),
-          const Center(child: TaraLogo(width: 214)),
-          const SizedBox(height: 28),
+          const Align(alignment: Alignment.centerLeft, child: TaraLogo(width: 120)),
+          SizedBox(height: (width * 330 / 390 - 150).clamp(60.0, 220.0)),
           Text(l.riderSpace, style: TaraText.overlineLarge.copyWith(color: c.accentText)),
           const SizedBox(height: 8),
           Semantics(
@@ -202,4 +228,30 @@ class _LegalState extends State<_Legal> {
       textAlign: TextAlign.center,
     );
   }
+}
+
+/// Itinéraire orange dessiné sur les rues du quartier de la page de connexion.
+void _route(Canvas canvas, Offset Function(double x, double y) ground) {
+  const points = [
+    Offset(30, 128),
+    Offset(138, 128),
+    Offset(138, 256),
+    Offset(276, 256),
+    Offset(276, 128),
+    Offset(340, 128),
+  ];
+  final path = Path();
+  for (final (i, p) in points.indexed) {
+    final at = ground(p.dx, p.dy);
+    i == 0 ? path.moveTo(at.dx, at.dy) : path.lineTo(at.dx, at.dy);
+  }
+  Paint stroke(Color color, double width) => Paint()
+    ..color = color
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = width
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
+  canvas
+    ..drawPath(path, stroke(const Color.fromRGBO(255, 106, 0, .28), 10))
+    ..drawPath(path, stroke(TaraBrand.orange, 3.6));
 }

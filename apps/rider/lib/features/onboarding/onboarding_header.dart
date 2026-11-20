@@ -1,14 +1,12 @@
 import 'package:flutter/widgets.dart';
 
-import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/progress.dart';
-import 'package:tara_ui/tara_colors.dart';
-import 'package:tara_ui/tara_icons.dart';
-import 'package:tara_ui/tara_typography.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../course/course_page.dart';
 
-/// En-tête des étapes d'inscription : retour, « Étape 1 sur 2 · Profil », avancement.
+/// En-tête des étapes d'inscription (maquette) : retour, « ÉTAPE 1 SUR 2 · PROFIL » en
+/// orange, titre et précision, puis la barre d'avancement.
 class OnboardingHeader extends StatelessWidget {
   const OnboardingHeader({
     super.key,
@@ -16,7 +14,8 @@ class OnboardingHeader extends StatelessWidget {
     required this.total,
     required this.name,
     required this.progress,
-    required this.trailing,
+    required this.title,
+    required this.subtitle,
     this.onBack,
   });
 
@@ -24,33 +23,19 @@ class OnboardingHeader extends StatelessWidget {
   final int total;
   final String name;
   final double progress;
-  final String trailing;
+  final String title;
+  final String subtitle;
   final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
-    final c = TaraColors.of(context);
     final l = AppLocalizations.of(context);
     final label = l.stepOf(step, total, name);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            if (onBack != null) ...[
-              GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: onBack, size: 44),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child: Text(label, style: TaraText.label.copyWith(color: c.textSecondary)),
-            ),
-            Text(
-              trailing,
-              style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
+        CourseHeader(kicker: label, title: title, subtitle: subtitle, onBack: onBack),
+        const SizedBox(height: 14),
         LiquidProgressBar(value: progress, semanticLabel: label),
       ],
     );

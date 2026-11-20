@@ -16,6 +16,7 @@ import 'package:tara_ui/tara_typography.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../course/course_page.dart';
 import 'documents_controller.dart';
 import 'onboarding_header.dart';
 
@@ -91,21 +92,11 @@ class DocumentsScreen extends ConsumerWidget {
         top: 8,
         content: [
           if (fromProfile)
-            Row(
-              children: [
-                GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: onBack ?? onDone),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Semantics(
-                    header: true,
-                    child: Text(l.myDocuments, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
-                  ),
-                ),
-                Text(
-                  l.progressCount(done, total),
-                  style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w700),
-                ),
-              ],
+            CourseHeader(
+              kicker: l.myDocuments,
+              title: l.documentsTitle,
+              subtitle: l.progressCount(done, total),
+              onBack: onBack ?? onDone,
             )
           else ...[
             OnboardingHeader(
@@ -113,13 +104,9 @@ class DocumentsScreen extends ConsumerWidget {
               total: 2,
               name: l.stepDocuments,
               progress: total == 0 ? 0 : done / total,
-              trailing: l.progressCount(done, total),
+              title: l.documentsTitle,
+              subtitle: l.progressCount(done, total),
               onBack: onBack,
-            ),
-            const SizedBox(height: 22),
-            Semantics(
-              header: true,
-              child: Text(l.documentsTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
             ),
           ],
           const SizedBox(height: 8),

@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @riderSpace.
   ///
   /// In fr, this message translates to:
-  /// **'ESPACE LIVREUR'**
+  /// **'TARA LIVREUR · DOUALA'**
   String get riderSpace;
 
   /// No description provided for @signInTitle.
@@ -4081,6 +4081,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Votre contact d’urgence est prévenu aussi'**
   String get sosSubtitle;
+
+  /// No description provided for @onboardingProfileSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelques informations sur vous'**
+  String get onboardingProfileSubtitle;
+
+  /// No description provided for @myAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon compte'**
+  String get myAccount;
+
+  /// No description provided for @emergencyContactSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une personne proche, à prévenir si besoin'**
+  String get emergencyContactSubtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

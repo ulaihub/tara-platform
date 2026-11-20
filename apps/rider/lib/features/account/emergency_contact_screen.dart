@@ -13,6 +13,7 @@ import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../course/course_page.dart';
 
 /// Contact d'urgence (profil) : prévenu par SMS si le livreur déclenche une alerte SOS.
 /// Ajout, modification ou retrait ; le serveur renvoie le dossier à jour.
@@ -95,17 +96,11 @@ class _EmergencyContactScreenState extends ConsumerState<EmergencyContactScreen>
         horizontal: 20,
         top: 8,
         content: [
-          Row(
-            children: [
-              GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: _busy ? null : widget.onBack),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(l.emergencyContactTitle, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
-                ),
-              ),
-            ],
+          CourseHeader(
+            kicker: l.tabProfile,
+            title: l.emergencyContactTitle,
+            subtitle: l.emergencyContactSubtitle,
+            onBack: _busy ? () {} : widget.onBack,
           ),
           const SizedBox(height: 18),
           InfoNote(text: l.emergencyHelp, icon: TaraIcons.shield),

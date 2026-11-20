@@ -144,7 +144,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get stepUpcoming => 'à venir';
 
   @override
-  String get riderSpace => 'ESPACE LIVREUR';
+  String get riderSpace => 'TARA LIVREUR · DOUALA';
 
   @override
   String get signInTitle => 'Prêt à prendre la route ?';
@@ -2386,4 +2386,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sosSubtitle => 'Votre contact d’urgence est prévenu aussi';
+
+  @override
+  String get onboardingProfileSubtitle => 'Quelques informations sur vous';
+
+  @override
+  String get myAccount => 'Mon compte';
+
+  @override
+  String get emergencyContactSubtitle => 'Une personne proche, à prévenir si besoin';
 }

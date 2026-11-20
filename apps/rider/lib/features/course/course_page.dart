@@ -100,7 +100,7 @@ class CourseHeader extends StatelessWidget {
     required this.kicker,
     required this.title,
     required this.subtitle,
-    required this.onBack,
+    this.onBack,
     this.onSos,
     this.onCall,
     this.callLabel,
@@ -109,7 +109,9 @@ class CourseHeader extends StatelessWidget {
   final String kicker;
   final String title;
   final String subtitle;
-  final VoidCallback onBack;
+
+  /// null : pas de retour (premier écran d'un parcours).
+  final VoidCallback? onBack;
 
   /// null : pas de SOS (écrans ouverts par-dessus une course qui l'affiche déjà).
   final VoidCallback? onSos;
@@ -123,26 +125,28 @@ class CourseHeader extends StatelessWidget {
     final ok = c.isDark ? const Color(0xFF4ADE9B) : const Color(0xFF0E7F57);
     return Row(
       children: [
-        Semantics(
-          button: true,
-          label: l.back,
-          excludeSemantics: true,
-          child: GestureDetector(
-            onTap: onBack,
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: c.textPrimary.withValues(alpha: .07),
-                border: Border.all(color: c.textPrimary.withValues(alpha: .12)),
+        if (onBack != null) ...[
+          Semantics(
+            button: true,
+            label: l.back,
+            excludeSemantics: true,
+            child: GestureDetector(
+              onTap: onBack,
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: c.textPrimary.withValues(alpha: .07),
+                  border: Border.all(color: c.textPrimary.withValues(alpha: .12)),
+                ),
+                alignment: Alignment.center,
+                child: TaraIcon(TaraIcons.chevronLeft, size: 22, color: c.textPrimary),
               ),
-              alignment: Alignment.center,
-              child: TaraIcon(TaraIcons.chevronLeft, size: 22, color: c.textPrimary),
             ),
           ),
-        ),
-        const SizedBox(width: 10),
+          const SizedBox(width: 10),
+        ],
         Expanded(
           child: Semantics(
             header: true,

@@ -17,6 +17,7 @@ import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../course/course_page.dart';
 
 /// Fermeture du compte livreur : demandée à l'équipe Tara (service client), qui la fait
 /// depuis le back-office après vérification. Rien ne part tant qu'une course, de l'argent
@@ -97,21 +98,11 @@ class _CloseAccountScreenState extends ConsumerState<CloseAccountScreen> {
                 horizontal: 20,
                 top: 8,
                 content: [
-                  Row(
-                    children: [
-                      GlassIconButton(
-                        icon: TaraIcons.chevronLeft,
-                        label: l.back,
-                        onPressed: _sending ? null : widget.onBack,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Semantics(
-                          header: true,
-                          child: Text(l.closeAccountTitle, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
-                        ),
-                      ),
-                    ],
+                  CourseHeader(
+                    kicker: l.myAccount,
+                    title: l.closeAccountTitle,
+                    subtitle: l.closeAccountRowSubtitle,
+                    onBack: _sending ? () {} : widget.onBack,
                   ),
                   const SizedBox(height: 20),
                   GlassCard(
