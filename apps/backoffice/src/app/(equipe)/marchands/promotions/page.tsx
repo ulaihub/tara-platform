@@ -32,16 +32,16 @@ export default async function PromotionsPage() {
           <p className="font-display text-[18px] font-bold">Aucun code promo</p>
         </div>
       ) : (
-        <div className="relative overflow-x-auto bo-glass rounded-[22px] shadow-card">
-          <table className="w-full min-w-[640px] text-left text-[14px]">
-            <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
+        <div className="relative overflow-x-auto bo-glass rounded-[22px] px-2 pb-1 sm:px-3">
+          <table className="w-full min-w-[640px] border-separate border-spacing-y-1.5 text-left text-[13px]">
+            <thead className="text-[11px] font-extrabold tracking-[.06em] text-faint uppercase">
               <tr>
-                <th className="px-4 py-3">Code</th>
-                <th className="px-4 py-3">Remise</th>
-                <th className="px-4 py-3">Pour qui</th>
-                <th className="px-4 py-3 text-right">Utilisations</th>
-                <th className="px-4 py-3">Valable jusqu’au</th>
-                <th className="px-4 py-3 text-right">
+                <th className="px-3 pb-1">Code</th>
+                <th className="px-3 pb-1">Remise</th>
+                <th className="px-3 pb-1">Pour qui</th>
+                <th className="px-3 pb-1 text-right">Utilisations</th>
+                <th className="px-3 pb-1">Valable jusqu’au</th>
+                <th className="px-3 pb-1 text-right">
                   <span className="sr-only">État</span>
                 </th>
               </tr>
@@ -50,27 +50,29 @@ export default async function PromotionsPage() {
               {promos.map((promo) => {
                 const expired = promo.validTo !== null && Date.parse(promo.validTo) <= now;
                 return (
-                  <tr key={promo.id} className="border-b border-line last:border-0">
-                    <td className="px-4 py-3 font-mono font-bold">{promo.code}</td>
-                    <td className="px-4 py-3">
+                  <tr key={promo.id} className="">
+                    <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] font-mono font-bold">
+                      {promo.code}
+                    </td>
+                    <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
                       <span className="font-bold">{promoValue(promo.kind, promo.value)}</span>
                       <span className="block text-[12px] text-muted">
                         {PROMO_KIND_LABELS[promo.kind]}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted">
+                    <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] text-muted">
                       {promo.newCustomersOnly ? 'Nouveaux clients' : 'Tous'} · {promo.perUserLimit}{' '}
                       fois par personne
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
+                    <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] text-right tabular-nums">
                       {promo.redemptions}
                       {promo.maxRedemptions !== null ? ` / ${promo.maxRedemptions}` : ''}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-muted">
+                    <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] whitespace-nowrap text-muted">
                       {promo.validTo ? dateTime(promo.validTo) : 'Sans limite'}
                       {expired ? <span className="block text-[12px] text-warn">Expiré</span> : null}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
                       <PromoToggle id={promo.id} active={promo.active} />
                     </td>
                   </tr>

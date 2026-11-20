@@ -86,8 +86,8 @@ export default async function PricingPage() {
                     : `${moto.tiers.length} paliers, puis +${money(moto.perKmBeyondLastTier)} par km.`}
                 </p>
                 <div className="relative overflow-x-auto">
-                  <table className="w-full text-left text-[14px]">
-                    <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
+                  <table className="w-full border-separate border-spacing-y-1.5 text-left text-[13px]">
+                    <thead className="text-[11px] font-extrabold tracking-[.06em] text-faint uppercase">
                       <tr>
                         <th className="py-2">Exemple de trajet</th>
                         <th className="py-2 text-right">Client</th>
@@ -97,7 +97,7 @@ export default async function PricingPage() {
                     </thead>
                     <tbody>
                       {EXAMPLE_TRIPS.map((trip, index) => (
-                        <tr key={trip.label} className="border-b border-line last:border-0">
+                        <tr key={trip.label} className="">
                           <td className="py-2.5">
                             <span className="font-semibold">{trip.label}</span>
                             <span className="ml-2 text-[12px] text-faint">{km(trip.meters)}</span>

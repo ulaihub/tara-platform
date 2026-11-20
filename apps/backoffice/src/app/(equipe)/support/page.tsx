@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Icon } from '@/components/icon';
+import { TopBar } from '@/components/top-bar';
 import { cx } from '@/components/ui';
 import { requireStaff, staffApi } from '@/lib/dal';
 import { dateTime } from '@/lib/format';
@@ -50,42 +51,37 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   const current: Search = { q, vue: view === 'TO_HANDLE' ? undefined : view.toLowerCase() };
 
   return (
-    <div className="mx-auto max-w-[1280px]">
-      <header className="mb-6 flex flex-wrap items-end gap-4">
-        <div className="flex-1">
-          <h1 className="font-display text-[28px] font-bold tracking-tight">Support</h1>
-          <p className="text-muted">
-            {page.counts.TO_HANDLE} demande{page.counts.TO_HANDLE > 1 ? 's' : ''} à traiter ·{' '}
-            {page.counts.MINE} suivie{page.counts.MINE > 1 ? 's' : ''} par vous
-          </p>
-        </div>
-        <form action="/support" className="flex w-full max-w-[460px] gap-2">
+    <div className="mx-auto max-w-[1280px] pb-8">
+      <TopBar
+        title="Support"
+        subtitle={`Demandes, litiges et preuves · ${page.counts.TO_HANDLE} à traiter · ${page.counts.MINE} suivie${page.counts.MINE > 1 ? 's' : ''} par vous`}
+      />
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <form
+          action="/support"
+          role="search"
+          className="flex min-w-0 flex-1 gap-2 sm:max-w-[420px]"
+        >
           {current.vue ? <input type="hidden" name="vue" value={current.vue} /> : null}
-          <label className="flex min-h-11 flex-1 items-center gap-2 rounded-2xl border border-line bg-panel px-3 focus-within:border-accent-line">
-            <Icon name="search" size={18} className="text-faint" />
+          <label className="bo-glass flex h-10 flex-1 items-center gap-2 rounded-xl px-3">
+            <Icon name="search" size={16} className="text-faint" />
             <span className="sr-only">Chercher une demande</span>
             <input
               name="q"
               defaultValue={q}
               placeholder="SUP-…, commande, numéro ou sujet"
-              className="w-full bg-transparent text-[15px] focus:outline-none"
+              className="w-full bg-transparent text-[13px] focus:outline-none"
             />
           </label>
-          <button
-            type="submit"
-            className="min-h-11 rounded-2xl border border-line bg-panel px-4 text-[14px] font-extrabold"
-          >
-            Chercher
-          </button>
         </form>
         <Link
           href="/support/nouvelle"
-          className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-brand px-4 text-[14px] font-extrabold text-on-brand"
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-brand px-3.5 text-[13px] font-extrabold text-on-brand shadow-[0_8px_18px_rgba(255,90,0,.22)]"
         >
-          <Icon name="phone" size={18} />
-          Nouvelle demande (appel)
+          <Icon name="phone" size={16} />
+          Nouvelle demande
         </Link>
-      </header>
+      </div>
 
       {alerts.length > 0 ? (
         <Link
@@ -120,8 +116,10 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
               })}
               aria-current={active ? 'page' : undefined}
               className={cx(
-                'inline-flex min-h-9 items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-bold transition',
-                active ? 'bg-text text-bg' : 'bg-panel text-muted hover:text-text',
+                'inline-flex min-h-[34px] items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-extrabold transition',
+                active
+                  ? 'bg-brand text-on-brand shadow-[0_8px_18px_rgba(255,90,0,.22)]'
+                  : 'bo-glass text-text hover:brightness-105',
               )}
             >
               {item.label}
@@ -154,17 +152,17 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
           </p>
         </div>
       ) : (
-        <div className="relative overflow-x-auto bo-glass rounded-[22px] shadow-card">
-          <table className="w-full min-w-[720px] text-left text-[14px]">
-            <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
+        <div className="relative overflow-x-auto bo-glass rounded-[22px] px-2 pb-1 sm:px-3">
+          <table className="w-full min-w-[720px] border-separate border-spacing-y-1.5 text-left text-[13px]">
+            <thead className="text-[11px] font-extrabold tracking-[.06em] text-faint uppercase">
               <tr>
-                <th className="px-4 py-3">Demande</th>
-                <th className="px-4 py-3">Personne</th>
-                <th className="px-4 py-3">Commande</th>
-                <th className="px-4 py-3">Priorité</th>
-                <th className="px-4 py-3">Statut</th>
-                <th className="px-4 py-3">Suivie par</th>
-                <th className="px-4 py-3">Dernier échange</th>
+                <th className="px-3 pb-1">Demande</th>
+                <th className="px-3 pb-1">Personne</th>
+                <th className="px-3 pb-1">Commande</th>
+                <th className="px-3 pb-1">Priorité</th>
+                <th className="px-3 pb-1">Statut</th>
+                <th className="px-3 pb-1">Suivie par</th>
+                <th className="px-3 pb-1">Dernier échange</th>
               </tr>
             </thead>
             <tbody>
@@ -204,8 +202,8 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
 
 function TicketRow({ ticket }: { ticket: AdminTicketRow }) {
   return (
-    <tr className="relative border-b border-line last:border-0 hover:bg-panel-soft">
-      <td className="max-w-[340px] px-4 py-3">
+    <tr className="relative">
+      <td className="max-w-[340px] bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
         <Link
           href={`/support/${ticket.id}`}
           className="block truncate font-bold after:absolute after:inset-0 after:content-['']"
@@ -217,14 +215,16 @@ function TicketRow({ ticket }: { ticket: AdminTicketRow }) {
           {ticket.fromApp ? ' · depuis l’app' : ' · appel'}
         </span>
       </td>
-      <td className="px-4 py-3">
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
         <span className="block font-semibold whitespace-nowrap">
           {ticket.requester.name ?? displayPhone(ticket.requester.phone)}
         </span>
         <span className="block text-[12px] text-muted">{PERSON_LABELS[ticket.requester.kind]}</span>
       </td>
-      <td className="px-4 py-3 whitespace-nowrap text-muted">{ticket.order?.reference ?? '—'}</td>
-      <td className="px-4 py-3">
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] whitespace-nowrap text-muted">
+        {ticket.order?.reference ?? '—'}
+      </td>
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
         <span
           className={cx(
             'rounded-full px-2 py-0.5 text-[12px] font-bold whitespace-nowrap',
@@ -234,7 +234,7 @@ function TicketRow({ ticket }: { ticket: AdminTicketRow }) {
           {PRIORITY_LABELS[ticket.priority]}
         </span>
       </td>
-      <td className="px-4 py-3">
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px]">
         <span
           className={cx(
             'rounded-full px-2 py-0.5 text-[12px] font-bold whitespace-nowrap',
@@ -249,8 +249,12 @@ function TicketRow({ ticket }: { ticket: AdminTicketRow }) {
           </span>
         ) : null}
       </td>
-      <td className="px-4 py-3 text-muted">{ticket.assignee?.name ?? 'Personne'}</td>
-      <td className="px-4 py-3 whitespace-nowrap text-muted">{dateTime(ticket.lastMessageAt)}</td>
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] text-muted">
+        {ticket.assignee?.name ?? 'Personne'}
+      </td>
+      <td className="bg-track px-3 py-3 first:rounded-l-[14px] last:rounded-r-[14px] whitespace-nowrap text-muted">
+        {dateTime(ticket.lastMessageAt)}
+      </td>
     </tr>
   );
 }

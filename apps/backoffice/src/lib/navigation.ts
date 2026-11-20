@@ -86,7 +86,7 @@ export const SECTIONS: readonly Section[] = [
   },
   {
     href: '/equipe',
-    label: 'Équipe et audit',
+    label: 'Équipe et journal',
     icon: 'users',
     requirement: 'H8',
     description: 'Membres de l’équipe et leurs rôles, journal des actions sensibles.',
