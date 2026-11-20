@@ -2942,6 +2942,48 @@ abstract class AppLocalizations {
   /// **'Mouvements'**
   String get movements;
 
+  /// No description provided for @walletShowCard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher la carte {card}'**
+  String walletShowCard(String card);
+
+  /// No description provided for @shopTodayChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'+{amount} aujourd’hui'**
+  String shopTodayChip(String amount);
+
+  /// No description provided for @shopPayoutTonight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversées ce soir à {hour} h'**
+  String shopPayoutTonight(String hour);
+
+  /// No description provided for @shopPayoutWhenAsked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversées à votre demande'**
+  String get shopPayoutWhenAsked;
+
+  /// No description provided for @taraCardLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paie vos livraisons'**
+  String get taraCardLine;
+
+  /// No description provided for @taraCardShopLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paie vos livraisons en premier'**
+  String get taraCardShopLine;
+
+  /// No description provided for @taraCardWithdrawFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'retrait dès {amount}'**
+  String taraCardWithdrawFrom(String amount);
+
   /// No description provided for @movementsShop.
   ///
   /// In fr, this message translates to:

@@ -1641,6 +1641,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get movements => 'Activity';
 
   @override
+  String walletShowCard(String card) {
+    return 'Show the $card card';
+  }
+
+  @override
+  String shopTodayChip(String amount) {
+    return '+$amount today';
+  }
+
+  @override
+  String shopPayoutTonight(String hour) {
+    return 'Paid out tonight at $hour:00';
+  }
+
+  @override
+  String get shopPayoutWhenAsked => 'Paid out when you ask';
+
+  @override
+  String get taraCardLine => 'Pays for your deliveries';
+
+  @override
+  String get taraCardShopLine => 'Pays for your deliveries first';
+
+  @override
+  String taraCardWithdrawFrom(String amount) {
+    return 'withdraw from $amount';
+  }
+
+  @override
   String get movementsShop => 'Shop';
 
   @override
