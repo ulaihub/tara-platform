@@ -1143,7 +1143,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderReturnedNotice => 'Parcel returned to the seller: job done.';
 
   @override
-  String get earningsToday => 'Today\'s earnings';
+  String get earningsToday => 'Today’s earnings';
 
   @override
   String get earningsWeek => 'This week\'s earnings';
@@ -2097,5 +2097,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String photoParcelHintNumber(int n) {
     return 'Number $n clearly visible';
+  }
+
+  @override
+  String get tabCourse => 'Ride';
+
+  @override
+  String get tabEarnings => 'Earnings';
+
+  @override
+  String get onlineTodayWord => 'today';
+
+  @override
+  String get prepaidTitle => 'Prepaid balance';
+
+  @override
+  String get prepaidCovers => 'Covers the cash you collect';
+
+  @override
+  String onlineSince(String time) {
+    return 'Online · $time';
+  }
+
+  @override
+  String get zoneForbiddenLegend => 'No-go zone: no rides';
+
+  @override
+  String todayTotal(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'rides', one: 'ride');
+    return '$amount · $count $_temp0';
   }
 }

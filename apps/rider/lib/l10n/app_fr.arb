@@ -299,47 +299,69 @@
   "nextStopTitle": "Arrêt {stop} sur {total}",
   "@nextStopTitle": {
     "placeholders": {
-      "stop": {"type": "int"},
-      "total": {"type": "int"}
+      "stop": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "nextStopGo": "Partir vers ce client",
   "tourProgress": "Tournée · arrêt {stop} sur {total} · {earned} gagnés",
   "@tourProgress": {
     "placeholders": {
-      "stop": {"type": "int"},
-      "total": {"type": "int"},
-      "earned": {"type": "String"}
+      "stop": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "earned": {
+        "type": "String"
+      }
     }
   },
   "tourToCollect": "COLIS À RÉCUPÉRER · {checked} SUR {total} COCHÉS",
   "@tourToCollect": {
     "placeholders": {
-      "checked": {"type": "int"},
-      "total": {"type": "int"}
+      "checked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "photoTourHint": "Les {count} colis ensemble, numéros visibles",
   "@photoTourHint": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "@newTour": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "tourStops": "{count} arrêts, dans l’ordre",
   "@tourStops": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "parcelNumberShort": "N° {number}",
   "@parcelNumberShort": {
     "placeholders": {
-      "number": {"type": "int"}
+      "number": {
+        "type": "int"
+      }
     }
   },
   "arrivedAction": "Je suis arrivé",
@@ -347,21 +369,31 @@
   "senderAbsentLater": "Il ne vient pas ? Dans {minutes} min, vous pourrez partir : {share} pour vous.",
   "@senderAbsentLater": {
     "placeholders": {
-      "minutes": {"type": "int"},
-      "share": {"type": "String"}
+      "minutes": {
+        "type": "int"
+      },
+      "share": {
+        "type": "String"
+      }
     }
   },
   "senderAbsentCallFirst": "Appelez d’abord l’expéditeur (encore {count} appel(s)) avec le bouton d’appel.",
   "@senderAbsentCallFirst": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "senderAbsentConfirm": "La course sera annulée. L’expéditeur paiera {fee}, dont {share} pour vous. Touchez encore pour confirmer.",
   "@senderAbsentConfirm": {
     "placeholders": {
-      "fee": {"type": "String"},
-      "share": {"type": "String"}
+      "fee": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
     }
   },
   "senderAbsentNotice": "Course annulée : votre attente vous est payée.",
@@ -369,26 +401,46 @@
   "waitingRule": "Sur place, touchez « Je suis arrivé » : l’expéditeur est prévenu. Attente gratuite {free} min, puis {fee} par {step} min ({max} au plus), dont {share} pour vous.",
   "@waitingRule": {
     "placeholders": {
-      "free": {"type": "int"},
-      "fee": {"type": "String"},
-      "step": {"type": "int"},
-      "share": {"type": "String"},
-      "max": {"type": "String"}
+      "free": {
+        "type": "int"
+      },
+      "fee": {
+        "type": "String"
+      },
+      "step": {
+        "type": "int"
+      },
+      "share": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
     }
   },
   "waitingFree": "Vous attendez depuis {minutes} min · gratuit encore {left} min.",
   "@waitingFree": {
     "placeholders": {
-      "minutes": {"type": "int"},
-      "left": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      },
+      "left": {
+        "type": "int"
+      }
     }
   },
   "waitingPaid": "Vous attendez depuis {minutes} min · {fee} d’attente pour l’expéditeur, dont {share} pour vous.",
   "@waitingPaid": {
     "placeholders": {
-      "minutes": {"type": "int"},
-      "fee": {"type": "String"},
-      "share": {"type": "String"}
+      "minutes": {
+        "type": "int"
+      },
+      "fee": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
     }
   },
   "toPickupMinutes": "Vers l’enlèvement · {minutes} min",
@@ -1415,6 +1467,31 @@
   "@photoParcelHintNumber": {
     "placeholders": {
       "n": {
+        "type": "int"
+      }
+    }
+  },
+  "tabCourse": "Course",
+  "tabEarnings": "Gains",
+  "onlineTodayWord": "aujourd’hui",
+  "prepaidTitle": "Solde prépayé",
+  "prepaidCovers": "Couvre les espèces que vous encaissez",
+  "onlineSince": "En ligne · {time}",
+  "@onlineSince": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "zoneForbiddenLegend": "Zone interdite : pas de course",
+  "todayTotal": "{amount} · {count} {count, plural, =0{course} =1{course} other{courses}}",
+  "@todayTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
         "type": "int"
       }
     }

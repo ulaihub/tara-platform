@@ -579,8 +579,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
         const SizedBox(height: 16),
         FloatingTabBar(
           items: [
-            TabItem(TaraIcons.home, l.tabHome),
-            TabItem(TaraIcons.activity, l.tabActivity),
+            TabItem(TaraIcons.route, l.tabCourse),
+            TabItem(TaraIcons.earnings, l.tabEarnings),
             TabItem(TaraIcons.user, l.tabProfile),
           ],
           current: _tab,

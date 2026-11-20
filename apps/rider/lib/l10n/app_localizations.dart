@@ -3679,6 +3679,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Numéro {n} bien visible'**
   String photoParcelHintNumber(int n);
+
+  /// No description provided for @tabCourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course'**
+  String get tabCourse;
+
+  /// No description provided for @tabEarnings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains'**
+  String get tabEarnings;
+
+  /// No description provided for @onlineTodayWord.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui'**
+  String get onlineTodayWord;
+
+  /// No description provided for @prepaidTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde prépayé'**
+  String get prepaidTitle;
+
+  /// No description provided for @prepaidCovers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couvre les espèces que vous encaissez'**
+  String get prepaidCovers;
+
+  /// No description provided for @onlineSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'En ligne · {time}'**
+  String onlineSince(String time);
+
+  /// No description provided for @zoneForbiddenLegend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zone interdite : pas de course'**
+  String get zoneForbiddenLegend;
+
+  /// No description provided for @todayTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} · {count} {count, plural, =0{course} =1{course} other{courses}}'**
+  String todayTotal(String amount, int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

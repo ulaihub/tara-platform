@@ -12,6 +12,7 @@ class HomeSummary {
     required this.delivered,
     required this.onlineSeconds,
     required this.available,
+    this.withdrawalMinimum = 0,
   });
 
   final String fullName;
@@ -21,6 +22,9 @@ class HomeSummary {
 
   /// Solde prépayé disponible (G5) : couvre l'argent des courses avec encaissement.
   final int available;
+
+  /// Plus petit retrait Mobile Money, rappelé avant une recharge.
+  final int withdrawalMinimum;
 }
 
 final homeSummaryProvider = FutureProvider<HomeSummary>((ref) async {
@@ -32,5 +36,6 @@ final homeSummaryProvider = FutureProvider<HomeSummary>((ref) async {
     delivered: earnings.delivered,
     onlineSeconds: earnings.onlineSeconds,
     available: ((wallet['available'] as num?) ?? 0).toInt(),
+    withdrawalMinimum: (((wallet['withdrawal'] as Map?)?['minimum'] as num?) ?? 0).toInt(),
   );
 });
