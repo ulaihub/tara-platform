@@ -113,6 +113,7 @@ class AddressChoice extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.badge,
+    this.leading,
   });
 
   final TaraIconData icon;
@@ -123,6 +124,9 @@ class AddressChoice extends StatelessWidget {
 
   /// Mention sous le détail (« Adresse confirmée par une livraison »).
   final String? badge;
+
+  /// Image à la place de l'icône (logo de l'opérateur Mobile Money).
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +150,7 @@ class AddressChoice extends StatelessWidget {
           ),
           child: Row(
             children: [
-              IconTile(icon: icon, size: 40),
+              leading ?? IconTile(icon: icon, size: 40),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

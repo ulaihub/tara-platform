@@ -1502,6 +1502,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get effectsHint => 'Reduced: fewer effects, smoother on a modest phone.';
 
   @override
+  String get glassLabel => 'Bar transparency';
+
+  @override
+  String get glassClear => 'Glass';
+
+  @override
+  String get glassBalanced => 'Balanced';
+
+  @override
+  String get glassOpaque => 'Solid';
+
+  @override
+  String get glassHint => 'Changes how see-through the bottom bar and the buttons at the bottom of the screen are.';
+
+  @override
   String get effectsAutoReduced => 'Reduced automatically on this phone.';
 
   @override

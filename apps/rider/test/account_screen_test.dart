@@ -66,13 +66,14 @@ void main() {
   AppSettings settingsOf(WidgetTester tester) => AppSettingsScope.of(tester.element(find.byType(AccountScreen)));
 
   group('réglages gardés sur le téléphone', () {
-    test('thème, langue et effets relus au démarrage suivant', () async {
+    test('thème, langue, effets et transparence relus au démarrage suivant', () async {
       final store = MemoryKeyValueStore();
       final first = await AppSettings.load(store);
       first
         ..themeMode = ThemeMode.dark
         ..locale = const Locale('en');
       first.effects.preference = EffectsPreference.reduced;
+      first.effects.glassLevel = GlassLevel.opaque;
       first.sounds = false;
       await Future<void>.delayed(Duration.zero);
 
@@ -81,6 +82,7 @@ void main() {
       expect(next.themeMode, ThemeMode.dark);
       expect(next.locale, const Locale('en'));
       expect(next.effects.preference, EffectsPreference.reduced);
+      expect(next.effects.glassLevel, GlassLevel.opaque);
       expect(next.languageCode(const Locale('fr')), 'en');
     });
 
@@ -88,6 +90,7 @@ void main() {
       final store = MemoryKeyValueStore()..values['settings.display'] = '{pas du json';
       final settings = await AppSettings.load(store);
       expect(settings.themeMode, ThemeMode.system);
+      expect(settings.effects.glassLevel, GlassLevel.balanced);
       expect(settings.sounds, isTrue);
       expect(settings.locale, isNull);
       expect(settings.languageCode(const Locale('en', 'CM')), 'en');
@@ -111,6 +114,12 @@ void main() {
 
     await tapText(tester, 'Réduites');
     expect(settingsOf(tester).effects.preference, EffectsPreference.reduced);
+
+    await show(tester, 'Opaque');
+    await tapText(tester, 'Opaque');
+    expect(settingsOf(tester).effects.glassLevel, GlassLevel.opaque);
+    await tapText(tester, 'Verre');
+    expect(settingsOf(tester).effects.glassLevel, GlassLevel.clear);
   });
 
   testWidgets('sons : coupés puis remis, un exemple se fait entendre', (tester) async {

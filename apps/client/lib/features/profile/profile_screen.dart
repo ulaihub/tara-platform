@@ -335,6 +335,21 @@ class _DisplayCard extends StatelessWidget {
                   : l.effectsHint,
             ),
             const SizedBox(height: 16),
+            setting(
+              l.glassLabel,
+              LiquidSegmented<GlassLevel>(
+                compact: true,
+                segments: [
+                  (GlassLevel.clear, l.glassClear),
+                  (GlassLevel.balanced, l.glassBalanced),
+                  (GlassLevel.opaque, l.glassOpaque),
+                ],
+                selected: effects.glassLevel,
+                onChanged: (value) => effects.glassLevel = value,
+              ),
+              hint: l.glassHint,
+            ),
+            const SizedBox(height: 16),
             MergeSemantics(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,

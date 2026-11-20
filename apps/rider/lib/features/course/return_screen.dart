@@ -6,6 +6,7 @@ import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -483,7 +484,7 @@ class _ReturnFeesCard extends StatelessWidget {
           else ...[
             const SizedBox(height: 4),
             ChoiceChips<String>(
-              options: [for (final o in operators) ChoiceOption(o.code, o.name)],
+              options: [for (final o in operators) operatorChoice(o.code, o.name)],
               selected: operator,
               onSelected: (value) {
                 if (!waiting) onOperator(value);

@@ -7,6 +7,7 @@ import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -359,6 +360,7 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
           ]) ...[
             AddressChoice(
               icon: icon,
+              leading: method.startsWith('MOMO_') ? OperatorLogo(method, size: 40) : null,
               title: title,
               subtitle: body,
               selected: draft.paymentMethod == method,

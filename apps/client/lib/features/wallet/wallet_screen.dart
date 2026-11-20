@@ -12,6 +12,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
@@ -653,7 +654,7 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
             ),
             const SizedBox(height: 10),
             ChoiceChips<String>(
-              options: [ChoiceOption('MTN', l.payMtn), ChoiceOption('ORANGE', l.payOrange)],
+              options: [operatorChoice('MTN', l.payMtn), operatorChoice('ORANGE', l.payOrange)],
               selected: _operator,
               onSelected: pending ? (_) {} : (operator) => setState(() => _operator = operator),
             ),
@@ -706,7 +707,7 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
             ),
             const SizedBox(height: 10),
             ChoiceChips<String>(
-              options: [ChoiceOption('MTN', l.payMtn), ChoiceOption('ORANGE', l.payOrange)],
+              options: [operatorChoice('MTN', l.payMtn), operatorChoice('ORANGE', l.payOrange)],
               selected: _operator,
               onSelected: (operator) => setState(() => _operator = operator),
             ),
