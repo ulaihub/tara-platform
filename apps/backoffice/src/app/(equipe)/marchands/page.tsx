@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Icon } from '@/components/icon';
-import { Badge, cx } from '@/components/ui';
+import { ROW_CELL, ROW_HEAD, ROW_TABLE } from '@/components/pills';
+import { cx } from '@/components/ui';
 import { requireStaff, staffApi } from '@/lib/dal';
 import { dateTime, money } from '@/lib/format';
 import { percent, PRICING_ROLES } from '@/lib/merchants';
@@ -38,31 +39,23 @@ export default async function MerchantsPage({ searchParams }: { searchParams: Pr
   const firstTier = settings.volumeDiscounts[0];
 
   return (
-    <div className="mx-auto max-w-[1280px]">
+    <div className="mx-auto max-w-[1280px] pb-8">
       <MerchantsHeader
         current="/marchands"
-        aside={`${list.total} boutique${list.total > 1 ? 's' : ''} · ${list.onProRate} au tarif pro ce mois-ci`}
+        aside={`Tarif pro, ventes à reverser, dettes · ${list.onProRate} au tarif pro ce mois-ci`}
       />
 
-      <form action="/marchands" className="mb-4 flex max-w-xl gap-2">
-        <label className="relative flex-1">
+      <form action="/marchands" role="search" className="mb-3 flex max-w-[420px] gap-2">
+        <label className="bo-glass flex h-10 flex-1 items-center gap-2 rounded-xl px-3">
+          <Icon name="search" size={16} className="text-faint" />
           <span className="sr-only">Rechercher une boutique</span>
-          <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint">
-            <Icon name="search" size={16} />
-          </span>
           <input
             name="q"
             defaultValue={q}
             placeholder="Boutique, gérant ou numéro"
-            className="block w-full rounded-2xl border border-line bg-panel py-2.5 pr-3 pl-9 text-[14px] focus:border-accent-line focus:outline-none"
+            className="w-full bg-transparent text-[13px] focus:outline-none"
           />
         </label>
-        <button
-          type="submit"
-          className="min-h-10 rounded-2xl bg-text px-4 text-[14px] font-bold text-bg"
-        >
-          Rechercher
-        </button>
       </form>
 
       {firstTier ? (
@@ -80,71 +73,104 @@ export default async function MerchantsPage({ searchParams }: { searchParams: Pr
         </p>
       ) : null}
 
-      {list.items.length === 0 ? (
-        <div className="bo-glass rounded-[22px] px-6 py-16 text-center">
-          <p className="font-display text-[18px] font-bold">Aucune boutique</p>
-          <p className="mt-1 text-muted">
-            {q ? 'Aucun résultat pour cette recherche.' : 'Les boutiques apparaîtront ici.'}
-          </p>
+      <section className="bo-glass rounded-[22px] p-3 sm:px-[18px] sm:py-4">
+        <div className="mb-2 flex items-center justify-between px-1">
+          <h2 className="text-[15px] font-bold">Boutiques</h2>
+          <span className="rounded-full bg-[rgba(255,177,92,.16)] px-2.5 py-1 text-[11px] font-extrabold text-accent">
+            {list.total} boutique{list.total > 1 ? 's' : ''}
+          </span>
         </div>
-      ) : (
-        <div className="relative overflow-x-auto bo-glass rounded-[22px] shadow-card">
-          <table className="w-full min-w-[640px] text-left text-[14px]">
-            <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
-              <tr>
-                <th className="px-4 py-3">Boutique</th>
-                <th className="px-4 py-3">Gérant</th>
-                <th className="px-4 py-3 text-right">Livraisons du mois</th>
-                <th className="px-4 py-3">Tarif</th>
-                <th className="px-4 py-3 text-right">Solde</th>
-                <th className="px-4 py-3">Dernière commande</th>
-              </tr>
-            </thead>
-            <tbody>
+        {list.items.length === 0 ? (
+          <div className="px-6 py-14 text-center">
+            <p className="font-display text-[18px] font-bold">Aucune boutique</p>
+            <p className="mt-1 text-muted">
+              {q ? 'Aucun résultat pour cette recherche.' : 'Les boutiques apparaîtront ici.'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <ul className="flex flex-col gap-2 md:hidden">
               {list.items.map((shop) => (
-                <tr key={shop.id} className="border-b border-line last:border-0">
-                  <td className="px-4 py-3">
+                <li key={shop.id} className="relative rounded-[14px] bg-track px-3 py-2.5">
+                  <div className="flex items-center gap-2">
                     <Link
                       href={`/marchands/${shop.id}`}
-                      className="font-bold text-accent hover:underline"
+                      className="font-display font-bold after:absolute after:inset-0 after:content-['']"
                     >
                       {shop.shopName}
                     </Link>
-                    {shop.category ? (
-                      <span className="block text-[12px] text-muted">{shop.category}</span>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3">
-                    {shop.ownerName ?? '—'}
-                    <span className="block text-[12px] text-muted">{displayPhone(shop.phone)}</span>
-                  </td>
-                  <td className="px-4 py-3 text-right font-bold tabular-nums">
-                    {shop.deliveriesThisMonth}
-                  </td>
-                  <td className="px-4 py-3">
-                    {shop.proDiscountBps > 0 ? (
-                      <Badge tone="ok">Pro −{percent(shop.proDiscountBps)}</Badge>
-                    ) : (
-                      <span className="text-[13px] text-muted">Normal</span>
-                    )}
-                  </td>
-                  <td
-                    className={cx(
-                      'px-4 py-3 text-right font-bold tabular-nums',
-                      shop.balance < 0 && 'text-danger',
-                    )}
-                  >
-                    {money(shop.balance)}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-muted">
-                    {shop.lastOrderAt ? dateTime(shop.lastOrderAt) : '—'}
-                  </td>
-                </tr>
+                    <span className="ml-auto">
+                      <Tier bps={shop.proDiscountBps} />
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[12px] text-muted">
+                    {shop.deliveriesThisMonth} livraison{shop.deliveriesThisMonth > 1 ? 's' : ''} ce
+                    mois · solde{' '}
+                    <b className={cx(shop.balance < 0 ? 'text-danger' : 'text-text')}>
+                      {money(shop.balance)}
+                    </b>
+                  </p>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </ul>
+            <div className="hidden overflow-x-auto md:block">
+              <table className={cx(ROW_TABLE, 'min-w-[720px]')}>
+                <thead className={ROW_HEAD}>
+                  <tr>
+                    <th className="px-3 pb-1">Boutique</th>
+                    <th className="px-3 pb-1">Gérant</th>
+                    <th className="px-3 pb-1 text-right">Colis / mois</th>
+                    <th className="px-3 pb-1">Tarif</th>
+                    <th className="px-3 pb-1 text-right">Solde</th>
+                    <th className="px-3 pb-1">Dernière commande</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {list.items.map((shop) => (
+                    <tr key={shop.id} className="relative transition hover:brightness-95">
+                      <td className={ROW_CELL}>
+                        <Link
+                          href={`/marchands/${shop.id}`}
+                          className="font-display font-bold after:absolute after:inset-0 after:content-['']"
+                        >
+                          {shop.shopName}
+                        </Link>
+                        {shop.category ? (
+                          <span className="block text-[12px] text-muted">{shop.category}</span>
+                        ) : null}
+                      </td>
+                      <td className={ROW_CELL}>
+                        {shop.ownerName ?? '—'}
+                        <span className="block text-[12px] text-muted">
+                          {displayPhone(shop.phone)}
+                        </span>
+                      </td>
+                      <td className={cx(ROW_CELL, 'text-right font-bold tabular-nums')}>
+                        {shop.deliveriesThisMonth}
+                      </td>
+                      <td className={ROW_CELL}>
+                        <Tier bps={shop.proDiscountBps} />
+                      </td>
+                      <td
+                        className={cx(
+                          ROW_CELL,
+                          'text-right font-extrabold tabular-nums',
+                          shop.balance < 0 && 'text-danger',
+                        )}
+                      >
+                        {money(shop.balance)}
+                      </td>
+                      <td className={cx(ROW_CELL, 'whitespace-nowrap text-muted')}>
+                        {shop.lastOrderAt ? dateTime(shop.lastOrderAt) : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </section>
 
       {list.pages > 1 ? (
         <div className="mt-4 flex items-center justify-between text-[14px] font-bold">
@@ -174,5 +200,18 @@ export default async function MerchantsPage({ searchParams }: { searchParams: Pr
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** Tarif de la boutique : pastille verte « Pro −10 % » ou grise « Standard ». */
+function Tier({ bps }: { bps: number }) {
+  return bps > 0 ? (
+    <span className="rounded-md bg-ok-bg px-2 py-0.5 text-[11px] font-extrabold text-ok">
+      Pro −{percent(bps)}
+    </span>
+  ) : (
+    <span className="rounded-md bg-track px-2 py-0.5 text-[11px] font-extrabold text-muted">
+      Standard
+    </span>
   );
 }
