@@ -3,6 +3,8 @@ import { requireStaff, staffApi } from '@/lib/dal';
 import { OPS_ROLES } from '@/lib/navigation';
 import type { LiveMap as LiveMapData } from '@/lib/schemas';
 import { LiveMap } from './live-map';
+import { TopBar } from '@/components/top-bar';
+import { alertsOf } from '@/lib/live';
 
 export const metadata: Metadata = { title: 'Carte en direct' };
 
@@ -18,5 +20,14 @@ export default async function MapPage({
   // Lien « Voir sur la carte » depuis une fiche commande : la commande est choisie d'emblée.
   const focusOrder =
     commande && initial.orders.some((order) => order.id === commande) ? commande : null;
-  return <LiveMap initial={initial} focusOrder={focusOrder} />;
+  return (
+    <div className="mx-auto max-w-[1600px]">
+      <TopBar
+        title="Carte en direct"
+        subtitle="Livreurs, courses et zones à Douala"
+        alerts={alertsOf(initial, Date.now()).length}
+      />
+      <LiveMap initial={initial} focusOrder={focusOrder} />
+    </div>
+  );
 }

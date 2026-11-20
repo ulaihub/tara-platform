@@ -106,7 +106,7 @@ export default async function FinancePage() {
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <section className="bo-glass rounded-[22px] p-5 shadow-card">
           <h2 className="mb-4 font-display text-[17px] font-bold">Comptes de la plateforme</h2>
           <div className="space-y-5">
             {GROUPS.map((group) => (
@@ -131,7 +131,7 @@ export default async function FinancePage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <section className="bo-glass rounded-[22px] p-5 shadow-card">
           <h2 className="font-display text-[17px] font-bold">Export comptable</h2>
           <p className="mt-1 mb-4 text-[13px] text-muted">
             Toutes les écritures de la période, une ligne par mouvement, pour le cabinet comptable.
@@ -178,7 +178,7 @@ function Tile({
       <p className="mt-1 text-[13px] text-muted">{detail}</p>
     </>
   );
-  const className = 'block rounded-3xl border border-line bg-panel p-5 shadow-card';
+  const className = 'block bo-glass rounded-[22px] p-5 shadow-card';
   return href ? (
     <Link href={href} className={cx(className, 'transition hover:border-accent-line')}>
       {body}

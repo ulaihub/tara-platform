@@ -435,7 +435,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+    <section className="bo-glass rounded-[22px] p-5 shadow-card">
       <div className="mb-4 flex items-baseline justify-between gap-3">
         <h2 className="font-display text-[17px] font-bold">{title}</h2>
         {aside ? <span className="text-[13px] font-bold text-muted">{aside}</span> : null}

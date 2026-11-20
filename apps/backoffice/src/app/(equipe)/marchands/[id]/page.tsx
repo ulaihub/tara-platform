@@ -51,7 +51,7 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
       </header>
 
       <div className="mb-5 grid gap-4 md:grid-cols-3">
-        <div className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <div className="bo-glass rounded-[22px] p-5 shadow-card">
           <p className="text-[13px] font-bold text-muted">Livraisons réussies ce mois-ci</p>
           <p className="mt-2 font-display text-[28px] font-bold tabular-nums">
             {shop.deliveriesThisMonth}
@@ -64,7 +64,7 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
                 : 'Pas de tarif pro configuré.'}
           </p>
         </div>
-        <div className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <div className="bo-glass rounded-[22px] p-5 shadow-card">
           <p className="text-[13px] font-bold text-muted">30 derniers jours</p>
           <p className="mt-2 font-display text-[28px] font-bold tabular-nums">
             {shop.last30Days.delivered}
@@ -74,7 +74,7 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
             {shop.last30Days.returned} retour{shop.last30Days.returned > 1 ? 's' : ''}
           </p>
         </div>
-        <div className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <div className="bo-glass rounded-[22px] p-5 shadow-card">
           <p className="text-[13px] font-bold text-muted">Solde de la boutique</p>
           <p
             className={`mt-2 font-display text-[28px] font-bold tabular-nums ${shop.balance < 0 ? 'text-danger' : ''}`}
@@ -91,7 +91,7 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="overflow-hidden rounded-3xl border border-line bg-panel shadow-card">
+        <section className="overflow-hidden bo-glass rounded-[22px] shadow-card">
           <h2 className="px-5 pt-5 font-display text-[17px] font-bold">Dernières commandes</h2>
           {shop.recentOrders.length === 0 ? (
             <p className="px-5 py-5 text-muted">Aucune commande.</p>
@@ -128,7 +128,7 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
             </div>
           )}
         </section>
-        <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <section className="bo-glass rounded-[22px] p-5 shadow-card">
           <h2 className="mb-3 font-display text-[17px] font-bold">Derniers reversements</h2>
           {shop.recentPayouts.length === 0 ? (
             <p className="text-muted">Aucun reversement.</p>

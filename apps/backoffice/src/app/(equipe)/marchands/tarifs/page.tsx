@@ -66,7 +66,7 @@ export default async function PricingPage() {
 
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-5">
-          <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+          <section className="bo-glass rounded-[22px] p-5 shadow-card">
             <div className="mb-3 flex flex-wrap items-start gap-3">
               <div className="flex-1">
                 <h2 className="font-display text-[17px] font-bold">Grille moto de {CITY}</h2>
@@ -130,7 +130,7 @@ export default async function PricingPage() {
           </section>
 
           {moto ? (
-            <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+            <section className="bo-glass rounded-[22px] p-5 shadow-card">
               <h2 className="mb-1 font-display text-[17px] font-bold">Suppléments</h2>
               <p className="mb-3 text-[13px] text-muted">
                 Annoncés au client avant de commander. Un supplément coupé ne s’applique plus aux
@@ -163,7 +163,7 @@ export default async function PricingPage() {
             </section>
           ) : null}
 
-          <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+          <section className="bo-glass rounded-[22px] p-5 shadow-card">
             <h2 className="font-display text-[17px] font-bold">Gros objets (tricycle)</h2>
             {tricycle ? (
               <>
@@ -197,7 +197,7 @@ export default async function PricingPage() {
         </div>
 
         <div className="space-y-5">
-          <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+          <section className="bo-glass rounded-[22px] p-5 shadow-card">
             <h2 className="mb-4 font-display text-[17px] font-bold">Remises et primes</h2>
             <SettingsForm
               tiers={settings.volumeDiscounts}
@@ -213,7 +213,7 @@ export default async function PricingPage() {
             )}
           </section>
 
-          <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+          <section className="bo-glass rounded-[22px] p-5 shadow-card">
             <h2 className="font-display text-[17px] font-bold">Primes de renfort</h2>
             <p className="mt-1 mb-4 text-[13px] text-muted">
               Quand il manque des livreurs (pluie, heures de pointe), Tara ajoute une prime à chaque

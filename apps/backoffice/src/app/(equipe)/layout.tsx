@@ -74,7 +74,7 @@ export default async function TeamLayout({ children }: { children: ReactNode }) 
         </nav>
         {member}
       </aside>
-      <main className="relative z-[1] min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-7 lg:py-0">
+      <main className="relative z-[1] min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-7 lg:py-8">
         {children}
       </main>
     </div>

@@ -30,7 +30,7 @@ export default async function NewTicketPage({
       <p className="mb-6 text-muted">
         Notez l’appel pendant que la personne est au téléphone. La demande vous est confiée.
       </p>
-      <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+      <section className="bo-glass rounded-[22px] p-5 shadow-card">
         <NewTicketForm
           categories={Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }))}
           priorities={Object.entries(PRIORITY_LABELS).map(([value, label]) => ({ value, label }))}

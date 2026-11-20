@@ -27,7 +27,7 @@ export default async function TeamPage() {
         aside={`${members.length} membre${members.length > 1 ? 's' : ''} · chaque action sensible est inscrite au journal.`}
       />
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <section className="overflow-hidden rounded-3xl border border-line bg-panel shadow-card">
+        <section className="overflow-hidden bo-glass rounded-[22px] shadow-card">
           <ul className="divide-y divide-line">
             {members.map((member) => (
               <li key={member.id} className="flex flex-wrap items-start gap-3 px-5 py-4">
@@ -64,7 +64,7 @@ export default async function TeamPage() {
             ))}
           </ul>
         </section>
-        <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <section className="bo-glass rounded-[22px] p-5 shadow-card">
           <h2 className="mb-1 font-display text-[17px] font-bold">Ajouter un membre</h2>
           <p className="mb-4 text-[13px] text-muted">
             Choisissez les rôles au plus juste : chacun ne voit que les écrans de son travail.{' '}

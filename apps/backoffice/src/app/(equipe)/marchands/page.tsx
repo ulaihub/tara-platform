@@ -81,14 +81,14 @@ export default async function MerchantsPage({ searchParams }: { searchParams: Pr
       ) : null}
 
       {list.items.length === 0 ? (
-        <div className="rounded-3xl border border-line bg-panel px-6 py-16 text-center">
+        <div className="bo-glass rounded-[22px] px-6 py-16 text-center">
           <p className="font-display text-[18px] font-bold">Aucune boutique</p>
           <p className="mt-1 text-muted">
             {q ? 'Aucun résultat pour cette recherche.' : 'Les boutiques apparaîtront ici.'}
           </p>
         </div>
       ) : (
-        <div className="relative overflow-x-auto rounded-3xl border border-line bg-panel shadow-card">
+        <div className="relative overflow-x-auto bo-glass rounded-[22px] shadow-card">
           <table className="w-full min-w-[640px] text-left text-[14px]">
             <thead className="border-b border-line text-[12px] font-bold text-faint uppercase">
               <tr>

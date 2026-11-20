@@ -40,7 +40,7 @@ export default async function ChecksPage({
       />
 
       {reports.length === 0 ? (
-        <div className="rounded-3xl border border-line bg-panel px-6 py-16 text-center">
+        <div className="bo-glass rounded-[22px] px-6 py-16 text-center">
           <p className="font-display text-[18px] font-bold">Aucun contrôle pour l’instant</p>
           <p className="mt-1 mb-4 text-muted">
             Le contrôle tourne chaque nuit pour la veille. Vous pouvez le lancer pour hier.
@@ -53,7 +53,7 @@ export default async function ChecksPage({
         <div className="grid items-start gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
           <nav
             aria-label="Journées contrôlées"
-            className="overflow-hidden rounded-3xl border border-line bg-panel shadow-card"
+            className="overflow-hidden bo-glass rounded-[22px] shadow-card"
           >
             <ul className="divide-y divide-line">
               {reports.map((report) => {
@@ -96,7 +96,7 @@ function Day({ report }: { report: Reconciliation }) {
   const issues = report.discrepancies;
   return (
     <div className="space-y-5">
-      <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+      <section className="bo-glass rounded-[22px] p-5 shadow-card">
         <div className="mb-4 flex flex-wrap items-start gap-3">
           <div className="flex-1">
             <h2 className="font-display text-[20px] font-bold">{dayLabel(report.day)}</h2>
@@ -118,7 +118,7 @@ function Day({ report }: { report: Reconciliation }) {
       </section>
 
       {issues.length > 0 ? (
-        <section className="overflow-hidden rounded-3xl border border-line bg-panel shadow-card">
+        <section className="overflow-hidden bo-glass rounded-[22px] shadow-card">
           <h3 className="px-5 pt-5 font-display text-[17px] font-bold">Écarts</h3>
           <div className="relative overflow-x-auto">
             <table className="min-w-[560px] mt-3 w-full text-left text-[14px]">
@@ -157,7 +157,7 @@ function Day({ report }: { report: Reconciliation }) {
         </section>
       ) : null}
 
-      <section className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+      <section className="bo-glass rounded-[22px] p-5 shadow-card">
         <h3 className="mb-3 font-display text-[17px] font-bold">Chiffres de la journée</h3>
         <dl className="divide-y divide-line">
           {TOTAL_LABELS.filter(([key]) => typeof report.totals[key] === 'number').map(
