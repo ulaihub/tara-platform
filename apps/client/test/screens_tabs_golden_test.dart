@@ -71,7 +71,8 @@ void main() {
       await settle(tester);
       await tester.tap(find.text('Terminées'));
       await settle(tester);
-      expect(find.text('Livrée · aujourd’hui · TR-48215'), findsOneWidget);
+      expect(find.text('Livrée · aujourd’hui'), findsWidgets);
+      expect(find.text('TR-48215'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_commandes/terminees_${brightness.name}.png'));
     });
 

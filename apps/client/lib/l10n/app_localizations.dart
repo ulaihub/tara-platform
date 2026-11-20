@@ -524,6 +524,48 @@ abstract class AppLocalizations {
   /// **'En cours'**
   String get inProgress;
 
+  /// No description provided for @ordersSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client, repère ou TR-…'**
+  String get ordersSearchHint;
+
+  /// No description provided for @ordersActiveTab.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours · {count}'**
+  String ordersActiveTab(int count);
+
+  /// No description provided for @ordersSummaryActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Rien en cours} =1{1 en cours} other{{count} en cours}}{decide, plural, =0{} other{ · {decide} à décider}}'**
+  String ordersSummaryActive(int count, int decide);
+
+  /// No description provided for @ordersSummaryHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune livraison terminée} =1{1 livraison terminée} other{{count} livraisons terminées}}'**
+  String ordersSummaryHistory(int count);
+
+  /// No description provided for @ordersNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune livraison ne correspond à votre recherche.'**
+  String get ordersNoMatch;
+
+  /// No description provided for @ordersTomorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'demain'**
+  String get ordersTomorrow;
+
+  /// No description provided for @ordersReceiptOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçu de {reference}'**
+  String ordersReceiptOf(String reference);
+
   /// No description provided for @heroTonight.
   ///
   /// In fr, this message translates to:

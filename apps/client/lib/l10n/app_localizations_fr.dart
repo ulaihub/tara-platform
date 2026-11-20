@@ -235,6 +235,50 @@ class AppLocalizationsFr extends AppLocalizations {
   String get inProgress => 'En cours';
 
   @override
+  String get ordersSearchHint => 'Client, repère ou TR-…';
+
+  @override
+  String ordersActiveTab(int count) {
+    return 'En cours · $count';
+  }
+
+  @override
+  String ordersSummaryActive(int count, int decide) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count en cours',
+      one: '1 en cours',
+      zero: 'Rien en cours',
+    );
+    String _temp1 = intl.Intl.pluralLogic(decide, locale: localeName, other: ' · $decide à décider', zero: '');
+    return '$_temp0$_temp1';
+  }
+
+  @override
+  String ordersSummaryHistory(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count livraisons terminées',
+      one: '1 livraison terminée',
+      zero: 'Aucune livraison terminée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ordersNoMatch => 'Aucune livraison ne correspond à votre recherche.';
+
+  @override
+  String get ordersTomorrow => 'demain';
+
+  @override
+  String ordersReceiptOf(String reference) {
+    return 'Reçu de $reference';
+  }
+
+  @override
   String heroTonight(String hour) {
     return 'Ce soir à $hour h';
   }
