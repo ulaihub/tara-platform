@@ -46,6 +46,9 @@ class HomeFlow extends ConsumerStatefulWidget {
 
 class _HomeFlowState extends ConsumerState<HomeFlow> {
   int _tab = 0;
+
+  /// Liste ouverte dans l'onglet Commandes (« Mes reçus » ouvre les terminées).
+  String _ordersScope = 'active';
   StreamSubscription<RealtimeEvent>? _events;
   ValueNotifier<bool>? _connected;
   bool _cut = false;
@@ -267,15 +270,14 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     ),
   );
 
-  /// Portefeuille (G1, G2, G3, G7), en plein écran.
-  void _openWallet() => unawaited(
-    Navigator.of(context).push(
-      scopedPage<void>(
-        context,
-        (route) => WalletScreen(me: widget.me, onBack: () => Navigator.of(route).pop(), now: widget.now),
-      ),
-    ),
-  );
+  /// Portefeuille (G1, G2, G3, G7) : son onglet.
+  void _openWallet() => setState(() => _tab = 2);
+
+  /// Onglet Commandes, sur la liste demandée.
+  void _showOrders(String scope) => setState(() {
+    _ordersScope = scope;
+    _tab = 1;
+  });
 
   /// Suivi d'une commande (F1), en plein écran.
   void _openOrder(String orderId) =>
@@ -296,17 +298,26 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             items: [
               TabItem(TaraIcons.home, l.tabHome),
               TabItem(TaraIcons.package, l.tabOrders),
+              TabItem(TaraIcons.wallet, l.walletTitle),
               TabItem(TaraIcons.user, l.tabProfile),
             ],
+            // « + » au centre de la barre : nouvelle livraison, depuis n'importe quel onglet.
+            action: TabAction(icon: TaraIcons.plus, label: l.newDelivery, onPressed: _newOrder),
             current: _tab,
-            onSelected: (tab) => setState(() => _tab = tab),
+            onSelected: (tab) => setState(() {
+              if (tab == 1 && _tab != 1) _ordersScope = 'active';
+              _tab = tab;
+            }),
             child: switch (_tab) {
               1 => OrdersScreen(
+                key: ValueKey(_ordersScope),
+                initialScope: _ordersScope,
                 onOpenOrder: (order) => _openOrder(order.id),
                 onOpenOrderId: _openOrder,
                 now: widget.now,
               ),
-              2 => ProfileScreen(me: widget.me),
+              2 => WalletScreen(me: widget.me, now: widget.now),
+              3 => ProfileScreen(me: widget.me),
               _ => HomeScreen(
                 me: widget.me,
                 onNewOrder: _newOrder,
@@ -314,6 +325,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                 onLocationLink: _askAddress,
                 onOpenOrder: (order) => _openOrder(order.id),
                 onWallet: _openWallet,
+                onReceipts: () => _showOrders('history'),
+                onSeeAll: () => _showOrders('active'),
                 now: widget.now,
               ),
             },

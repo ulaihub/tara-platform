@@ -524,6 +524,54 @@ abstract class AppLocalizations {
   /// **'En cours'**
   String get inProgress;
 
+  /// No description provided for @whereToDeliver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où livrer ?'**
+  String get whereToDeliver;
+
+  /// No description provided for @whereToDeliverHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom, numéro ou quartier du client'**
+  String get whereToDeliverHint;
+
+  /// No description provided for @quickBulk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plusieurs colis'**
+  String get quickBulk;
+
+  /// No description provided for @quickAskAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander l’adresse'**
+  String get quickAskAddress;
+
+  /// No description provided for @quickReceipts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes reçus'**
+  String get quickReceipts;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout voir'**
+  String get seeAll;
+
+  /// No description provided for @chipDecide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décider'**
+  String get chipDecide;
+
+  /// No description provided for @chipPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer'**
+  String get chipPay;
+
   /// No description provided for @noOrdersInProgress.
   ///
   /// In fr, this message translates to:

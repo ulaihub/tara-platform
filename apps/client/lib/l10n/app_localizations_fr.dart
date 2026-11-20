@@ -235,6 +235,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get inProgress => 'En cours';
 
   @override
+  String get whereToDeliver => 'Où livrer ?';
+
+  @override
+  String get whereToDeliverHint => 'Nom, numéro ou quartier du client';
+
+  @override
+  String get quickBulk => 'Plusieurs colis';
+
+  @override
+  String get quickAskAddress => 'Demander l’adresse';
+
+  @override
+  String get quickReceipts => 'Mes reçus';
+
+  @override
+  String get seeAll => 'Tout voir';
+
+  @override
+  String get chipDecide => 'Décider';
+
+  @override
+  String get chipPay => 'Payer';
+
+  @override
   String get noOrdersInProgress => 'Aucune livraison en cours. Vos colis apparaissent ici dès leur envoi.';
 
   @override

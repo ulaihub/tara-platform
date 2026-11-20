@@ -19,8 +19,26 @@ class OrderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
+    final (icon, tone, label) = orderStatus(l, order, now);
+    return ListRow(
+      leading: IconTile(icon: icon, size: 40, tone: tone),
+      // Envoi de plusieurs colis : le numéro écrit sur le colis vient en premier.
+      title: [
+        if (order.batchNumber case final number?) l.parcelNumberShort(number),
+        order.recipientName,
+      ].join(' · '),
+      // Lieu précis : le repère écrit à la commande, puis le quartier.
+      detail: precisePlace(order.dropoffLandmark, order.dropoffNeighborhood),
+      subtitle: '$label · ${order.reference}',
+      trailing: TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
+      onTap: onTap,
+    );
+  }
+
+  /// Étape d'une livraison (ou son issue) : icône, ton et libellé.
+  static (TaraIconData, TintTone, String) orderStatus(AppLocalizations l, OrderSummary order, DateTime now) {
     final scheduled = order.scheduledFor?.toLocal();
-    final (icon, tone, label) = switch (order.status) {
+    return switch (order.status) {
       'CREATED' when scheduled != null && scheduled.isAfter(now) => (
         TaraIcons.clock,
         TintTone.accent,
@@ -41,19 +59,6 @@ class OrderRow extends StatelessWidget {
       'CANCELLED' => (TaraIcons.close, TintTone.danger, l.statusCancelled),
       _ => (TaraIcons.package, TintTone.accent, order.status),
     };
-    final place = order.dropoffNeighborhood ?? order.dropoffLandmark;
-    return ListRow(
-      leading: IconTile(icon: icon, size: 40, tone: tone),
-      // Envoi de plusieurs colis : le numéro écrit sur le colis vient en premier.
-      title: [
-        if (order.batchNumber case final number?) l.parcelNumberShort(number),
-        order.recipientName,
-        place,
-      ].join(' · '),
-      subtitle: '$label · ${order.reference}',
-      trailing: TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
-      onTap: onTap,
-    );
   }
 
   /// Jour d'une commande terminée : aujourd'hui, hier ou la date.
@@ -73,4 +78,14 @@ class OrderRow extends StatelessWidget {
     if (nextDay) return l.tomorrowAt(time);
     return '${at.day.toString().padLeft(2, '0')}/${at.month.toString().padLeft(2, '0')} · $time';
   }
+}
+
+/// Lieu d'une adresse tel qu'on le dit à Douala : le repère d'abord (« Collège des
+/// Nations »), puis le quartier s'il n'y figure pas déjà (« Collège des Nations, Bonapriso »).
+String precisePlace(String landmark, String? neighborhood) {
+  final mark = landmark.trim();
+  final area = neighborhood?.trim() ?? '';
+  if (mark.isEmpty) return area;
+  if (area.isEmpty || mark.toLowerCase().contains(area.toLowerCase())) return mark;
+  return '$mark, $area';
 }

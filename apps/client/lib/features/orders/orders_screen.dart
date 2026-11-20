@@ -25,7 +25,10 @@ final ordersProvider = FutureProvider.family<List<OrderSummary>, String>(
 /// Onglet Commandes (non dessiné : style Tara) : livraisons en cours ou terminées, la plus
 /// récente d'abord ; chacune s'ouvre sur son suivi.
 class OrdersScreen extends ConsumerStatefulWidget {
-  const OrdersScreen({super.key, required this.onOpenOrder, this.onOpenOrderId, this.now});
+  const OrdersScreen({super.key, required this.onOpenOrder, this.onOpenOrderId, this.now, this.initialScope = 'active'});
+
+  /// Liste montée au départ : `active` (en cours) ou `history` (terminées, avec leurs reçus).
+  final String initialScope;
 
   final ValueChanged<OrderSummary> onOpenOrder;
 
@@ -45,7 +48,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     BlobSpec(alignment: Alignment(-1.3, 0.9), size: 240, colors: BlobSpec.warm, blur: 64, delay: Duration(seconds: 6)),
   ];
 
-  String _scope = 'active';
+  late String _scope = widget.initialScope;
 
   @override
   Widget build(BuildContext context) {

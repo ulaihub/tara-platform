@@ -15,6 +15,7 @@ import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/pin_flow.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
@@ -50,10 +51,12 @@ String _key() {
 /// G3, G7). Pour tous : solde Tara, recharge et retrait par Mobile Money (G1, G8), et chaque
 /// mouvement ligne par ligne.
 class WalletScreen extends ConsumerStatefulWidget {
-  const WalletScreen({super.key, required this.me, required this.onBack, this.now});
+  const WalletScreen({super.key, required this.me, this.onBack, this.now});
 
   final Me me;
-  final VoidCallback onBack;
+
+  /// Retour à l'écran précédent ; absent quand le portefeuille est un onglet.
+  final VoidCallback? onBack;
 
   /// Horloge (tests) : mois des relevés.
   final DateTime Function()? now;
@@ -226,18 +229,23 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final wallet = ref.watch(walletProvider);
     final data = wallet.value;
     final merchant = widget.me.merchant != null;
+    final onBack = widget.onBack;
     return TaraScreen(
       blobs: _blobs,
+      // Onglet : le contenu défile jusqu'en bas, sous la barre d'onglets en verre.
+      safeBottom: onBack != null,
       child: RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          padding: EdgeInsets.fromLTRB(20, onBack == null ? 16 : 8, 20, 32 + TaraTabShell.bottomInset(context)),
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: widget.onBack),
-            ),
-            const SizedBox(height: 16),
+            if (onBack != null) ...[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: onBack),
+              ),
+              const SizedBox(height: 16),
+            ],
             Semantics(
               header: true,
               child: Text(l.walletTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
