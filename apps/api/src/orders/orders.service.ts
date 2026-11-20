@@ -48,6 +48,7 @@ import {
   type RecipientDto,
   type RecipientResponseBody,
 } from './orders.schemas.js';
+import { receiptUrl } from '../public-tracking/receipt-code.js';
 import { trackingUrl } from './tracking-url.js';
 
 const ADDRESS_INCLUDE = {
@@ -206,6 +207,7 @@ export class OrdersService implements OnModuleInit {
       reference: order.reference,
       status: order.status,
       trackingUrl: trackingUrl(this.env, order.trackingToken),
+      receiptUrl: receiptUrl(this.env.PUBLIC_WEB_URL, this.env.CODE_HASH_SECRET, order.reference),
       batchId: order.batchId,
       batchNumber: order.batchNumber,
       batchSize: order.batch

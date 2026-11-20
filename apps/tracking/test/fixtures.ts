@@ -2,6 +2,7 @@ import type {
   LocationSubmit,
   OrderStatus,
   PublicLocationLink,
+  PublicReceipt,
   PublicTracking,
   RespondResult,
   SubmitResult,
@@ -81,6 +82,25 @@ export function locationLink(patch: Partial<PublicLocationLink> = {}): PublicLoc
   };
 }
 
+/** Reçu authentique : course livrée, payée, encaissement pour l'expéditeur. */
+export function receipt(patch: Partial<PublicReceipt> = {}): PublicReceipt {
+  return {
+    reference: 'TR-48301K',
+    status: 'DELIVERED',
+    issuedAt: '2026-11-19T13:32:00.000Z',
+    senderName: 'Awa Fashion',
+    recipientName: 'Marie N.',
+    dropoffNeighborhood: 'Bonapriso',
+    fee: 1200,
+    feePaid: true,
+    deliveredAt: '2026-11-19T14:24:00.000Z',
+    collectedForSender: 15000,
+    ...patch,
+  };
+}
+
+export const RECEIPT_CODE = 'TR-48301K-4F8M2XQA';
+
 /** API sans réseau : renvoie [data], garde les réponses du destinataire. */
 export class FakeApi implements TrackingApi {
   constructor(public data: PublicTracking | null = tracking('IN_DELIVERY')) {}
@@ -112,6 +132,15 @@ export class FakeApi implements TrackingApi {
     this.views.push({ token, ...(ip ? { ip } : {}) });
     if (this.down) throw new (await import('../src/api.js')).ApiUnavailableError('panne');
     return this.link;
+  }
+
+  receiptData: PublicReceipt | null = receipt();
+  receiptCodes: string[] = [];
+
+  async receipt(code: string): Promise<PublicReceipt | null> {
+    if (this.down) throw new (await import('../src/api.js')).ApiUnavailableError('panne');
+    this.receiptCodes.push(code);
+    return this.receiptData;
   }
 
   async submitLocation(token: string, body: LocationSubmit, ip?: string): Promise<SubmitResult> {

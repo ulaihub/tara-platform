@@ -59,6 +59,36 @@ export const PUBLIC_TRACKING_FIELDS: (keyof PublicTracking)[] = [
 
 export type RespondResult = 'ok' | 'already' | 'not-found';
 
+/** Reçu vérifié (schéma `PublicReceipt`) : ce qui est imprimé sur le papier, sans téléphone. */
+export interface PublicReceipt {
+  reference: string;
+  status: OrderStatus;
+  issuedAt: string;
+  senderName: string | null;
+  recipientName: string;
+  dropoffNeighborhood: string | null;
+  fee: number;
+  feePaid: boolean;
+  deliveredAt: string | null;
+  collectedForSender: number | null;
+}
+
+export const PUBLIC_RECEIPT_FIELDS: (keyof PublicReceipt)[] = [
+  'reference',
+  'status',
+  'issuedAt',
+  'senderName',
+  'recipientName',
+  'dropoffNeighborhood',
+  'fee',
+  'feePaid',
+  'deliveredAt',
+  'collectedForSender',
+];
+
+/** Code signé imprimé sous le QR du reçu (« TR-7K3P9Q-4F8M2XQA »). */
+export const RECEIPT_CODE_PATTERN = /^TR-[0-9A-Za-z]{4,12}-[0-9A-Za-z]{8}$/;
+
 /** Lien de localisation vu par le destinataire (schéma `PublicLocationLink`). */
 export interface PublicLocationLink {
   senderName: string | null;
@@ -97,6 +127,8 @@ export interface TrackingApi {
   /** null : lien de localisation inconnu. */
   locationLink(token: string, clientIp?: string): Promise<PublicLocationLink | null>;
   submitLocation(token: string, body: LocationSubmit, clientIp?: string): Promise<SubmitResult>;
+  /** null : code faux ou reçu inconnu (l'API ne distingue pas les deux). */
+  receipt(code: string, clientIp?: string): Promise<PublicReceipt | null>;
 }
 
 export class ApiUnavailableError extends Error {}
@@ -110,6 +142,7 @@ export function httpApi(baseUrl: string, fetcher: typeof fetch = fetch): Trackin
   const base = baseUrl.replace(/\/$/, '');
   const root = `${base}/v1/public/tracking`;
   const links = `${base}/v1/public/location-links`;
+  const receipts = `${base}/v1/public/receipts`;
   const headers = (clientIp?: string): Record<string, string> => ({
     accept: 'application/json',
     ...(clientIp ? { 'x-forwarded-for': clientIp } : {}),
@@ -167,6 +200,14 @@ export function httpApi(baseUrl: string, fetcher: typeof fetch = fetch): Trackin
         return error?.error?.code === 'OUT_OF_SERVICE_AREA' ? 'out-of-area' : 'invalid';
       }
       throw new ApiUnavailableError(`API : ${response.status}`);
+    },
+    async receipt(code, clientIp) {
+      const response = await call(`${receipts}/${encodeURIComponent(code)}`, {
+        headers: headers(clientIp),
+      });
+      if (response.status === 404) return null;
+      if (!response.ok) throw new ApiUnavailableError(`API : ${response.status}`);
+      return (await response.json()) as PublicReceipt;
     },
   };
 }

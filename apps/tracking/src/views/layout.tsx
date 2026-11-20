@@ -20,6 +20,8 @@ export const Layout: FC<{
   map?: Child;
   /** Sous-titre de l'en-tête sur la carte (par défaut : lien envoyé par SMS). */
   brandSub?: string;
+  /** Fond de taches de couleur, sans carte (maquette Web-Verifier-Recu). */
+  blobs?: boolean;
   children: Child;
 }> = ({
   t,
@@ -32,6 +34,7 @@ export const Layout: FC<{
   script,
   map,
   brandSub,
+  blobs,
   children,
 }) => (
   <>
@@ -48,26 +51,22 @@ export const Layout: FC<{
         <style nonce={nonce} dangerouslySetInnerHTML={{ __html: CSS }} />
       </head>
       <body data-v={fingerprint}>
-        {map ? (
+        {blobs ? (
+          <div class="wrap aura">
+            <div class="blobs" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </div>
+            <BrandHeader t={t} sub={brandSub ?? t.brandSub} />
+            <main>{children}</main>
+            <Footer t={t} langHref={langHref} />
+          </div>
+        ) : map ? (
           <div class="wrap map">
             <div class="top">
               {map}
-              <header class="over">
-                <span class="tile-logo">
-                  <img src="/static/logo-sombre.svg" alt={t.logoAlt} width="40" height="28" />
-                </span>
-                <span class="grow brandline">
-                  <b>{t.brandLine}</b>
-                  <span>{brandSub ?? t.brandSub}</span>
-                </span>
-                <span class="secure">
-                  <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="5" y="11" width="14" height="9" rx="2" />
-                    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                  </svg>
-                  tara.cm
-                </span>
-              </header>
+              <BrandHeader t={t} sub={brandSub ?? t.brandSub} />
             </div>
             <div class="sheet">
               <main>{children}</main>
@@ -101,6 +100,26 @@ export const Layout: FC<{
       </body>
     </html>
   </>
+);
+
+/** En-tête des pages de la refonte : logo sur tuile sombre, marque, sous-titre, « tara.cm ». */
+const BrandHeader: FC<{ t: Strings; sub: string }> = ({ t, sub }) => (
+  <header class="over">
+    <span class="tile-logo">
+      <img src="/static/logo-sombre.svg" alt={t.logoAlt} width="40" height="28" />
+    </span>
+    <span class="grow brandline">
+      <b>{t.brandLine}</b>
+      <span>{sub}</span>
+    </span>
+    <span class="secure">
+      <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="5" y="11" width="14" height="9" rx="2" />
+        <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+      </svg>
+      tara.cm
+    </span>
+  </header>
 );
 
 const Footer: FC<{ t: Strings; fingerprint?: string; langHref: string; refreshHref?: string }> = ({
