@@ -3823,6 +3823,78 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Langue et sons'**
   String get displayMoreRow;
+
+  /// No description provided for @secondsToAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seconds} s pour accepter'**
+  String secondsToAccept(int seconds);
+
+  /// No description provided for @stopPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enlèvement · {name}'**
+  String stopPickup(String name);
+
+  /// No description provided for @stopDropoff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison · {place}'**
+  String stopDropoff(String place);
+
+  /// No description provided for @approachFromYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'à {distance} de vous'**
+  String approachFromYou(String distance);
+
+  /// No description provided for @toCollectLower.
+  ///
+  /// In fr, this message translates to:
+  /// **'à encaisser {amount}'**
+  String toCollectLower(String amount);
+
+  /// No description provided for @alreadyPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'déjà payé'**
+  String get alreadyPaid;
+
+  /// No description provided for @toCollectChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser {amount}'**
+  String toCollectChip(String amount);
+
+  /// No description provided for @tourOnePickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} colis · un seul enlèvement'**
+  String tourOnePickup(int count);
+
+  /// No description provided for @tripSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'{distance} · ~{minutes} min'**
+  String tripSummary(String distance, int minutes);
+
+  /// No description provided for @tourSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'{distance} · {count} arrêts'**
+  String tourSummary(String distance, int count);
+
+  /// No description provided for @pinPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'A · {name}'**
+  String pinPickup(String name);
+
+  /// No description provided for @pinDropoff.
+  ///
+  /// In fr, this message translates to:
+  /// **'B · {place}'**
+  String pinDropoff(String place);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

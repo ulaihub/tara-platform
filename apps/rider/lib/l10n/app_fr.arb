@@ -1528,5 +1528,100 @@
   "termsRowToSign": "Nouvelle version à accepter",
   "securityRow": "Code secret et empreinte",
   "securityRowSubtitle": "Pour voir le solde et retirer",
-  "displayMoreRow": "Langue et sons"
+  "displayMoreRow": "Langue et sons",
+  "secondsToAccept": "{seconds} s pour accepter",
+  "@secondsToAccept": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "stopPickup": "Enlèvement · {name}",
+  "@stopPickup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "stopDropoff": "Livraison · {place}",
+  "@stopDropoff": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "approachFromYou": "à {distance} de vous",
+  "@approachFromYou": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "toCollectLower": "à encaisser {amount}",
+  "@toCollectLower": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyPaid": "déjà payé",
+  "toCollectChip": "À encaisser {amount}",
+  "@toCollectChip": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tourOnePickup": "{count} colis · un seul enlèvement",
+  "@tourOnePickup": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tripSummary": "{distance} · ~{minutes} min",
+  "@tripSummary": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "tourSummary": "{distance} · {count} arrêts",
+  "@tourSummary": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pinPickup": "A · {name}",
+  "@pinPickup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pinDropoff": "B · {place}",
+  "@pinDropoff": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

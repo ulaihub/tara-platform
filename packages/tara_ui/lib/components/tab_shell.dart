@@ -35,13 +35,7 @@ class TabAction {
 /// choisi avec un léger rebond. Effets réduits : surface opaque sans flou ; animations
 /// réduites : le trait se déplace sans transition.
 class FloatingTabBar extends StatelessWidget {
-  const FloatingTabBar({
-    super.key,
-    required this.items,
-    required this.current,
-    required this.onSelected,
-    this.action,
-  });
+  const FloatingTabBar({super.key, required this.items, required this.current, required this.onSelected, this.action});
 
   final List<TabItem> items;
   final int current;
@@ -163,7 +157,9 @@ class _CenterActionState extends State<_CenterAction> {
                     BoxShadow(color: Color.fromRGBO(255, 90, 0, .38), blurRadius: 26, offset: Offset(0, 12)),
                   ],
                 ),
-                child: Center(child: TaraIcon(widget.action.icon, size: 26, strokeWidth: 2.4, color: TaraBrand.onBrand)),
+                child: Center(
+                  child: TaraIcon(widget.action.icon, size: 26, strokeWidth: 2.4, color: TaraBrand.onBrand),
+                ),
               ),
             ),
           ),

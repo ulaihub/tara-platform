@@ -7,11 +7,13 @@ abstract final class TaraIcons {
   static const navigation = TaraIconData([_P('M3 11l18-8-8 18-2-8z')]);
   static const home = TaraIconData([_P('M4 11l8-7 8 7v9h-5v-6H9v6H4z')]);
   static const activity = TaraIconData([_P('M4 20V10M10 20V4M16 20v-7M22 20H2')]);
+
   /// Onglet « Course » du livreur : itinéraire entre deux points (maquette).
   static const route = TaraIconData([_C(6, 18, 2.2), _C(18, 6, 2.2), _P('M8.2 18H15a3 3 0 000-6H9a3 3 0 010-6h6.8')]);
 
   /// Onglet « Gains » du livreur : barres et courbe qui monte (maquette).
   static const earnings = TaraIconData([_P('M4.5 20v-6M10 20V10M15.5 20v-4M21 20V6'), _P('M3 9.5L9 5l5 3.5L20.5 3')]);
+
   /// Contact d'urgence : deux personnes (maquette Livreur-Profil).
   static const contacts = TaraIconData([
     _C(9, 8, 3.2),
@@ -31,6 +33,9 @@ abstract final class TaraIcons {
   static const phone = TaraIconData([
     _P('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2'),
   ]);
+
+  /// Double chevron du bouton à glisser de la maquette.
+  static const chevronsRight = TaraIconData([_P('M6 6l6 6-6 6M13 6l6 6-6 6')]);
   static const chevronLeft = TaraIconData([_P('M15 6l-6 6 6 6')]);
   static const chevronRight = TaraIconData([_P('M9 6l6 6-6 6')]);
   static const timer = TaraIconData([_C(12, 13, 8), _P('M12 9v4l2.5 2M9 2h6')]);
@@ -142,7 +147,9 @@ abstract final class TaraIcons {
 
   /// Globe (langue).
   static const globe = TaraIconData([
-    _P('M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z'),
+    _P(
+      'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z',
+    ),
   ]);
 
   /// Porte de sortie (se déconnecter).
