@@ -1060,6 +1060,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/public/receipts/{code}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PublicReceipt_verify'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/rider/orders/{id}/track': {
     parameters: {
       query?: never;
@@ -2612,6 +2628,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/admin/metrics/today': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Metrics_today'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/admin/team': {
     parameters: {
       query?: never;
@@ -3939,6 +3971,26 @@ export interface components {
         lowRated: number;
       };
     };
+    MetricsToday: {
+      orders: number;
+      previousOrders: number;
+      inProgress: number;
+      searching: number;
+      approvedRiders: number;
+      successRate: number | null;
+      previousSuccessRate: number | null;
+      deliveryMinutes: number | null;
+      previousDeliveryMinutes: number | null;
+      collected: number;
+      hourly: {
+        hour: number;
+        orders: number;
+      }[];
+      neighborhoods: {
+        name: string;
+        orders: number;
+      }[];
+    };
     MfaSetup: {
       /** @description À saisir dans l’application si le QR code ne peut pas être lu */
       secret: string;
@@ -3954,6 +4006,8 @@ export interface components {
       status: components['schemas']['OrderStatus'];
       /** Format: uri */
       trackingUrl: string;
+      /** Format: uri */
+      receiptUrl: string;
       /** Format: uuid */
       batchId: string | null;
       batchNumber: number | null;
@@ -4315,6 +4369,20 @@ export interface components {
       /** Format: date-time */
       expiresAt: string;
       status: components['schemas']['LocationLinkStatus'];
+    };
+    PublicReceipt: {
+      reference: string;
+      status: components['schemas']['OrderStatus'];
+      /** Format: date-time */
+      issuedAt: string;
+      senderName: string | null;
+      recipientName: string;
+      dropoffNeighborhood: string | null;
+      fee: number;
+      feePaid: boolean;
+      /** Format: date-time */
+      deliveredAt: string | null;
+      collectedForSender: number | null;
     };
     PublicTracking: {
       reference: string;
@@ -7050,6 +7118,28 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['PublicTracking'];
+        };
+      };
+    };
+  };
+  PublicReceipt_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PublicReceipt'];
         };
       };
     };
@@ -9854,6 +9944,26 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Metrics'];
+        };
+      };
+    };
+  };
+  Metrics_today: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MetricsToday'];
         };
       };
     };

@@ -88,3 +88,30 @@ export const MetricsDto = z
     }),
   })
   .meta({ id: 'Metrics' });
+
+/** Accueil du back-office : la journée en cours (heure du Cameroun), en un coup d'œil. */
+export const TodayDto = z
+  .object({
+    /** Commandes créées depuis minuit, et le même jour de la semaine dernière à la même heure. */
+    orders: z.int(),
+    previousOrders: z.int(),
+    /** Livreur attribué, colis à bord ou en livraison. */
+    inProgress: z.int(),
+    /** En attente d'un livreur (hors livraisons programmées plus tard). */
+    searching: z.int(),
+    /** Livreurs validés et actifs (dénominateur de « en ligne »). */
+    approvedRiders: z.int(),
+    /** Réussite du jour et de la veille (livrés / livrés + rendus) ; null sans données. */
+    successRate: z.number().nullable(),
+    previousSuccessRate: z.number().nullable(),
+    /** Délai médian commande → livraison, aujourd'hui et la veille, en minutes. */
+    deliveryMinutes: z.number().nullable(),
+    previousDeliveryMinutes: z.number().nullable(),
+    /** Encaissé à la porte pour les boutiques aujourd'hui, en FCFA. */
+    collected: z.int(),
+    /** Commandes créées par heure, de 8 h à 21 h. */
+    hourly: z.array(z.object({ hour: z.int(), orders: z.int() })),
+    /** Quartiers de livraison les plus demandés aujourd'hui (3 au plus). */
+    neighborhoods: z.array(z.object({ name: z.string(), orders: z.int() })),
+  })
+  .meta({ id: 'MetricsToday' });

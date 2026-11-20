@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { z } from 'zod';
 import { cameroonDate, periodStart } from '../common/time.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import type { MetricsDto } from './metrics.schemas.js';
+import type { MetricsDto, TodayDto } from './metrics.schemas.js';
 
 const TZ = 'Africa/Douala';
 const DAY_MS = 86_400_000;
@@ -158,6 +158,74 @@ export class MetricsService {
         count: Number(rating?.count ?? 0),
         lowRated: Number(lowRated[0]?.count ?? 0),
       },
+    };
+  }
+
+  /**
+   * La journée en cours pour l'accueil : commandes (comparées au même jour de la semaine
+   * dernière, à la même heure), en cours, réussite et délai (comparés à la veille), encaissé,
+   * commandes par heure et quartiers les plus demandés.
+   */
+  async today(now = new Date()): Promise<z.output<typeof TodayDto>> {
+    const start = periodStart('day', now);
+    const yesterday = new Date(start.getTime() - DAY_MS);
+    const lastWeek = new Date(start.getTime() - 7 * DAY_MS);
+    const [orders, previousOrders, inProgress, searching, approvedRiders, outcome, previous] =
+      await Promise.all([
+        this.prisma.order.count({ where: { createdAt: { gte: start, lt: now } } }),
+        this.prisma.order.count({
+          where: { createdAt: { gte: lastWeek, lt: new Date(now.getTime() - 7 * DAY_MS) } },
+        }),
+        this.prisma.order.count({
+          where: { status: { in: ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY'] } },
+        }),
+        this.prisma.order.count({
+          where: {
+            status: { in: ['CREATED', 'SEARCHING_RIDER'] },
+            OR: [{ scheduledFor: null }, { scheduledFor: { lte: now } }],
+          },
+        }),
+        this.prisma.riderProfile.count({ where: { status: 'ACTIVE' } }),
+        this.outcome(start, now),
+        this.outcome(yesterday, start),
+      ]);
+    const [delays, previousDelays, collected, hourly, neighborhoods] = await Promise.all([
+      this.delays(start, now),
+      this.delays(yesterday, start),
+      this.prisma.codCollection.aggregate({
+        where: { collectedAt: { gte: start, lt: now } },
+        _sum: { collectedAmount: true },
+      }),
+      this.prisma.$queryRaw<{ hour: number; orders: bigint }[]>`
+        SELECT h AS hour,
+               (SELECT COUNT(*) FROM orders
+                 WHERE created_at >= ${start} AND created_at < ${now}
+                   AND EXTRACT(HOUR FROM created_at AT TIME ZONE ${TZ}) = h)::bigint AS orders
+          FROM generate_series(8, 21) AS h
+         ORDER BY h`,
+      this.prisma.$queryRaw<{ name: string; orders: bigint }[]>`
+        SELECT n.name, COUNT(*)::bigint AS orders
+          FROM orders o
+          JOIN addresses a ON a.id = o.dropoff_address_id
+          JOIN zones n ON n.id = a.neighborhood_id
+         WHERE o.created_at >= ${start} AND o.created_at < ${now}
+         GROUP BY n.name
+         ORDER BY orders DESC, n.name
+         LIMIT 3`,
+    ]);
+    return {
+      orders,
+      previousOrders,
+      inProgress,
+      searching,
+      approvedRiders,
+      successRate: ratio(outcome.delivered, outcome.delivered + outcome.returned),
+      previousSuccessRate: ratio(previous.delivered, previous.delivered + previous.returned),
+      deliveryMinutes: delays.total.median,
+      previousDeliveryMinutes: previousDelays.total.median,
+      collected: collected._sum.collectedAmount ?? 0,
+      hourly: hourly.map((row) => ({ hour: Number(row.hour), orders: Number(row.orders) })),
+      neighborhoods: neighborhoods.map((row) => ({ name: row.name, orders: Number(row.orders) })),
     };
   }
 
