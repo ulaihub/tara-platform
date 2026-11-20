@@ -9,23 +9,35 @@ export const Message: FC<{
   action?: { href: string; label: string };
   /** Pastille verte : action réussie (point envoyé). */
   tone?: 'ok' | 'muted';
-}> = ({ icon, title, body, action, tone = 'muted' }) => (
-  <section class="card">
-    <div class="hero">
-      <span class={`badge ${tone}`}>
-        <Icon name={icon} size={24} />
+  /** Dans la feuille sous la ville (maquette Web-Point) : pastille ronde, texte centré. */
+  sheet?: boolean;
+}> = ({ icon, title, body, action, tone = 'muted', sheet }) =>
+  sheet ? (
+    <section class={`done ${tone}`} role="status">
+      <span class="orb" aria-hidden="true">
+        <span class="fill" />
+        <Icon name={icon} size={32} />
       </span>
-      <div class="grow">
-        <h1>{title}</h1>
-        <p class="sub">{body}</p>
+      <h1>{title}</h1>
+      <p>{body}</p>
+    </section>
+  ) : (
+    <section class="card">
+      <div class="hero">
+        <span class={`badge ${tone}`}>
+          <Icon name={icon} size={24} />
+        </span>
+        <div class="grow">
+          <h1>{title}</h1>
+          <p class="sub">{body}</p>
+        </div>
       </div>
-    </div>
-    {action ? (
-      <p>
-        <a class="btn primary block" href={action.href}>
-          {action.label}
-        </a>
-      </p>
-    ) : null}
-  </section>
-);
+      {action ? (
+        <p>
+          <a class="btn primary block" href={action.href}>
+            {action.label}
+          </a>
+        </p>
+      ) : null}
+    </section>
+  );

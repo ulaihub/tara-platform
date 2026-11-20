@@ -84,14 +84,13 @@ const fr: Strings = {
     title: 'Votre point de livraison',
     from: (sender) => `${sender} vous envoie un colis`,
     fromUnknown: 'Un colis va vous être livré',
-    heading: 'Où voulez-vous être livré ?',
-    intro:
-      'Partagez votre position : le livreur viendra directement à vous, sans chercher ni vous appeler pour trouver le chemin.',
-    step1: 'Votre position',
+    bubble: 'Placez votre point pour que le livreur vous trouve.',
+    pointTitle: 'Placez votre point',
+    pointPlaced: 'Point placé',
     step1Body:
       'Placez-vous à l’endroit où vous voulez recevoir le colis (maison, boutique, bureau), puis touchez le bouton.',
-    locate: 'Utiliser ma position',
-    again: 'Reprendre ma position',
+    locate: 'Ma position',
+    again: 'Reprendre',
     searching: 'Recherche de votre position…',
     found: 'Position trouvée, à {m} m près.',
     rough:
@@ -102,23 +101,22 @@ const fr: Strings = {
     unsupported: 'Votre navigateur ne donne pas la position : ouvrez ce lien dans Chrome.',
     noscript:
       'Cette page a besoin de JavaScript et de la localisation de votre téléphone pour trouver votre position.',
-    step2: 'Votre repère',
-    landmarkLabel: 'Ce que le livreur doit chercher en arrivant',
+    landmarkLabel: 'Un repère pour le livreur',
     landmarkPlaceholder: 'Ex. : portail bleu après la pharmacie du carrefour',
     step3: 'Pour vous joindre (facultatif)',
     nameLabel: 'Votre nom',
     phoneLabel: 'Autre numéro à appeler',
     phonePlaceholder: '6XX XX XX XX',
-    send: 'Envoyer mon point',
-    validUntil: (when) => `Lien valable jusqu’au ${when}.`,
+    send: 'Valider mon point',
+    validUntil: (when) => `Lien valable jusqu’au ${when}`,
     privacy: 'Votre position sert uniquement à cette livraison.',
-    errorPosition: 'Touchez « Utiliser ma position » avant d’envoyer.',
+    errorPosition: 'Touchez « Ma position » avant de valider.',
     errorLandmark: 'Décrivez un repère (au moins 3 caractères).',
     errorPhone: 'Numéro invalide : 9 chiffres commençant par 6.',
     errorArea:
       'Ce point est hors de la zone desservie par Tara (Douala). Vérifiez votre position, puis réessayez.',
     errorInvalid: 'Vérifiez les informations saisies, puis réessayez.',
-    sentTitle: 'Merci, votre point est envoyé !',
+    sentTitle: 'Merci, c’est noté !',
     sentBody: (sender) =>
       `${sender ?? 'L’expéditeur'} l’a reçu. Le livreur viendra directement à ce point : gardez votre téléphone allumé.`,
     usedTitle: 'Point déjà envoyé',
@@ -203,14 +201,13 @@ const en: Strings = {
     title: 'Your delivery point',
     from: (sender) => `${sender} is sending you a parcel`,
     fromUnknown: 'A parcel is coming your way',
-    heading: 'Where should we deliver?',
-    intro:
-      'Share your location: the rider will come straight to you, without searching or calling you for directions.',
-    step1: 'Your location',
+    bubble: 'Place your spot so the rider finds you.',
+    pointTitle: 'Place your spot',
+    pointPlaced: 'Spot placed',
     step1Body:
       'Stand where you want to receive the parcel (home, shop, office), then tap the button.',
-    locate: 'Use my location',
-    again: 'Locate me again',
+    locate: 'My location',
+    again: 'Locate again',
     searching: 'Finding your location…',
     found: 'Location found, accurate to {m} m.',
     rough: 'Imprecise location ({m} m): turn on precise location or step outside, then try again.',
@@ -218,23 +215,22 @@ const en: Strings = {
     failed: 'Location not found: check that location is turned on, then try again.',
     unsupported: 'Your browser does not share your location: open this link in Chrome.',
     noscript: 'This page needs JavaScript and your phone’s location to find where you are.',
-    step2: 'Your landmark',
-    landmarkLabel: 'What the rider should look for',
+    landmarkLabel: 'A landmark for the rider',
     landmarkPlaceholder: 'E.g. blue gate after the pharmacy at the junction',
     step3: 'How to reach you (optional)',
     nameLabel: 'Your name',
     phoneLabel: 'Other number to call',
     phonePlaceholder: '6XX XX XX XX',
-    send: 'Send my location',
-    validUntil: (when) => `Link valid until ${when}.`,
+    send: 'Confirm my spot',
+    validUntil: (when) => `Link valid until ${when}`,
     privacy: 'Your location is used for this delivery only.',
-    errorPosition: 'Tap “Use my location” before sending.',
+    errorPosition: 'Tap “My location” before confirming.',
     errorLandmark: 'Describe a landmark (at least 3 characters).',
     errorPhone: 'Invalid number: 9 digits starting with 6.',
     errorArea:
       'This point is outside the area Tara serves (Douala). Check your location, then try again.',
     errorInvalid: 'Check what you entered, then try again.',
-    sentTitle: 'Thank you, your location was sent!',
+    sentTitle: 'Thanks, all noted!',
     sentBody: (sender) =>
       `${sender ?? 'The sender'} has received it. The rider will come straight to this point: keep your phone on.`,
     usedTitle: 'Location already sent',
@@ -321,9 +317,9 @@ export interface PlaceStrings {
   title: Text;
   from: Template;
   fromUnknown: Text;
-  heading: Text;
-  intro: Text;
-  step1: Text;
+  bubble: Text;
+  pointTitle: Text;
+  pointPlaced: Text;
   step1Body: Text;
   locate: Text;
   again: Text;
@@ -335,7 +331,6 @@ export interface PlaceStrings {
   failed: Text;
   unsupported: Text;
   noscript: Text;
-  step2: Text;
   landmarkLabel: Text;
   landmarkPlaceholder: Text;
   step3: Text;

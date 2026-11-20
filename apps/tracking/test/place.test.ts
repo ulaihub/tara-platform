@@ -33,14 +33,16 @@ describe('lien de localisation : le destinataire place son point (B3)', () => {
     const html = await res.text();
     const visible = text(html);
     expect(visible).toContain('Awa Fashion vous envoie un colis');
-    expect(visible).toContain('Où voulez-vous être livré ?');
-    expect(visible).toContain('Utiliser ma position');
-    expect(visible).toContain('Ce que le livreur doit chercher en arrivant');
+    expect(visible).toContain('Placez votre point pour que le livreur vous trouve.');
+    expect(visible).toContain('Placez votre point');
+    expect(visible).toContain('Ma position');
+    expect(visible).toContain('Un repère pour le livreur');
     // Nom du destinataire proposé, numéro libre.
     expect(html).toContain('value="Marie Ngo"');
     // 17:00 UTC = 18:00 à Douala.
     expect(visible).toContain('Lien valable jusqu’au 6 novembre à 18:00.');
-    expect(html).toMatch(/<button id="send" type="submit" class="btn primary block" disabled/);
+    expect(visible).toContain('Lien valable jusqu’au 06/11');
+    expect(html).toMatch(/<button id="send" type="submit" class="btn primary block big" disabled/);
     expect(html).toContain('<noscript>');
     expect(res.headers.get('permissions-policy')).toContain('geolocation=(self)');
   });
@@ -86,7 +88,7 @@ describe('lien de localisation : le destinataire place son point (B3)', () => {
     const thanks = await app.request(`/l/${TOKEN}?r=ok`);
     expect(thanks.status).toBe(200);
     const visible = text(await thanks.text());
-    expect(visible).toContain('Merci, votre point est envoyé !');
+    expect(visible).toContain('Merci, c’est noté !');
     expect(visible).toContain('Awa Fashion l’a reçu.');
   });
 
@@ -95,7 +97,7 @@ describe('lien de localisation : le destinataire place son point (B3)', () => {
     const noPoint = await send(app, { landmark: 'Portail bleu' });
     expect(noPoint.status).toBe(422);
     const html = await noPoint.text();
-    expect(text(html)).toContain('Touchez « Utiliser ma position » avant d’envoyer.');
+    expect(text(html)).toContain('Touchez « Ma position » avant de valider.');
     expect(html).toContain('Portail bleu</textarea>');
 
     const short = await send(app, { ...POINT, landmark: 'ok' });
@@ -127,7 +129,7 @@ describe('lien de localisation : le destinataire place son point (B3)', () => {
     const usedText = text(await used.text());
     expect(usedText).toContain('Point déjà envoyé');
     expect(usedText).toContain('contactez Awa Fashion');
-    expect(usedText).not.toContain('Utiliser ma position');
+    expect(usedText).not.toContain('Valider mon point');
 
     api.link = locationLink({ status: 'EXPIRED', senderName: null });
     const expired = await app.request(`/l/${TOKEN}?lang=en`);

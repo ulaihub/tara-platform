@@ -1,7 +1,7 @@
 import type { FC } from 'hono/jsx';
 import type { PublicLocationLink } from '../api.js';
 import type { PlaceStrings } from '../i18n.js';
-import { Icon } from './icons.js';
+import { City } from './city.js';
 
 /** Saisie gardée quand la page revient avec une erreur. */
 export interface PlaceValues {
@@ -23,9 +23,38 @@ export const EMPTY_PLACE: PlaceValues = {
 };
 
 /**
- * Page du lien de localisation (B3) : le destinataire partage sa position (bouton), écrit
- * un repère et, s'il le veut, un autre numéro. Un formulaire classique l'envoie ; le seul
- * script lit la position du téléphone.
+ * Haut de la page (maquette Web-Point) : épingle qui rebondit au centre de la ville, bulle
+ * d'accueil et bouton « Ma position » posés sur la carte.
+ */
+export const PlaceMap: FC<{ link: PublicLocationLink; t: PlaceStrings; located: boolean }> = ({
+  link,
+  t,
+  located,
+}) => (
+  <>
+    <City rider={null} point />
+    <span class="drop" aria-hidden="true">
+      <span class="head">
+        <i />
+      </span>
+      <span class="pole" />
+    </span>
+    <p class="bubble">
+      <b>{link.senderName ? `${t.from(link.senderName)}.` : `${t.fromUnknown}.`}</b> {t.bubble}
+    </p>
+    <button type="button" id="locate" class="locate" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+      </svg>
+      <span>{located ? t.again : t.locate}</span>
+    </button>
+  </>
+);
+
+/**
+ * Feuille du bas : point placé (ou à placer), repère pour le livreur, contact facultatif et
+ * « Valider mon point ». Un formulaire classique l'envoie ; le seul script lit la position.
  */
 export const PlacePage: FC<{
   link: PublicLocationLink;
@@ -44,74 +73,45 @@ export const PlacePage: FC<{
     failed: t.failed,
     unsupported: t.unsupported,
     again: t.again,
+    placed: t.pointPlaced,
   };
   return (
     <form id="place" method="post" action={actionHref} data-m={JSON.stringify(messages)}>
-      <section class="card">
-        <div class="hero">
-          <span class="badge">
-            <Icon name="pin" size={24} />
-          </span>
-          <div class="grow">
-            <p class="from">{link.senderName ? t.from(link.senderName) : t.fromUnknown}</p>
-            <h1>{t.heading}</h1>
-            <p class="sub">{t.intro}</p>
-          </div>
-        </div>
-      </section>
-
       {error ? (
         <p class="note error" role="alert">
           {error}
         </p>
       ) : null}
+      <h1 id="pt" class="pt">
+        {located ? t.pointPlaced : t.pointTitle}
+      </h1>
+      <p id="pos" class={`status${located ? ' ok' : ''}`} role="status" aria-live="polite">
+        {located && values.accuracy ? t.found.replace('{m}', values.accuracy) : t.step1Body}
+      </p>
+      <noscript>
+        <p class="note">{t.noscript}</p>
+      </noscript>
+      <input type="hidden" name="latitude" value={values.latitude} />
+      <input type="hidden" name="longitude" value={values.longitude} />
+      <input type="hidden" name="accuracy" value={values.accuracy} />
 
-      <section class="card" aria-labelledby="step1">
-        <div class="row">
-          <span class="num">1</span>
-          <h2 id="step1">{t.step1}</h2>
-        </div>
-        <p class="small step">{t.step1Body}</p>
-        <button type="button" id="locate" class="btn primary block" hidden>
-          <Icon name="pin" />
-          {located ? t.again : t.locate}
-        </button>
-        <noscript>
-          <p class="note">{t.noscript}</p>
-        </noscript>
-        <p id="pos" class={`status${located ? ' ok' : ''}`} role="status" aria-live="polite">
-          {located && values.accuracy ? t.found.replace('{m}', values.accuracy) : ''}
-        </p>
-        <input type="hidden" name="latitude" value={values.latitude} />
-        <input type="hidden" name="longitude" value={values.longitude} />
-        <input type="hidden" name="accuracy" value={values.accuracy} />
-      </section>
-
-      <section class="card" aria-labelledby="step2">
-        <div class="row">
-          <span class="num">2</span>
-          <h2 id="step2">{t.step2}</h2>
-        </div>
-        <label class="field" for="landmark">
-          {t.landmarkLabel}
-        </label>
+      <label class="boxed" for="landmark">
+        <span>{t.landmarkLabel}</span>
         <textarea
           id="landmark"
           name="landmark"
           required
           minlength={3}
           maxlength={300}
+          rows={2}
           placeholder={t.landmarkPlaceholder}
         >
           {values.landmark}
         </textarea>
-      </section>
+      </label>
 
-      <section class="card" aria-labelledby="step3">
-        <div class="row">
-          <span class="num">3</span>
-          <h2 id="step3">{t.step3}</h2>
-        </div>
+      <details class="more" open={Boolean(values.phone) || undefined}>
+        <summary>{t.step3}</summary>
         <label class="field" for="name">
           {t.nameLabel}
         </label>
@@ -136,15 +136,13 @@ export const PlacePage: FC<{
           placeholder={t.phonePlaceholder}
           value={values.phone}
         />
-      </section>
+      </details>
 
-      <p>
-        <button id="send" type="submit" class="btn primary block" disabled={!located}>
-          {t.send}
-        </button>
-      </p>
+      <button id="send" type="submit" class="btn primary block big" disabled={!located}>
+        {t.send}
+      </button>
       <p class="small center">
-        {t.validUntil(validUntil)} {t.privacy}
+        {t.validUntil(validUntil)}. {t.privacy}
       </p>
     </form>
   );
@@ -154,4 +152,4 @@ export const PlacePage: FC<{
  * Seul script de la page : lit la position du téléphone (bouton), la met dans le formulaire
  * et dit sa précision. Sans position, l'envoi reste désactivé.
  */
-export const PLACE_SCRIPT = `(function(){var f=document.getElementById("place"),b=document.getElementById("locate"),s=document.getElementById("pos"),go=document.getElementById("send");if(!f||!b)return;var m=JSON.parse(f.getAttribute("data-m"));b.hidden=false;function say(t,k){s.textContent=t;s.className="status"+(k?" "+k:"")}b.addEventListener("click",function(){if(!navigator.geolocation){say(m.unsupported,"err");return}say(m.searching);b.disabled=true;navigator.geolocation.getCurrentPosition(function(p){var c=p.coords,a=Math.max(1,Math.round(c.accuracy));f.latitude.value=c.latitude.toFixed(6);f.longitude.value=c.longitude.toFixed(6);f.accuracy.value=a;say((a>100?m.rough:m.found).replace("{m}",a),a>100?"warn":"ok");b.disabled=false;b.lastChild.textContent=m.again;go.disabled=false},function(e){say(e.code===1?m.denied:m.failed,"err");b.disabled=false},{enableHighAccuracy:true,timeout:20000,maximumAge:0})})})();`;
+export const PLACE_SCRIPT = `(function(){var f=document.getElementById("place"),b=document.getElementById("locate"),s=document.getElementById("pos"),go=document.getElementById("send");if(!f||!b)return;var m=JSON.parse(f.getAttribute("data-m"));b.hidden=false;function say(t,k){s.textContent=t;s.className="status"+(k?" "+k:"")}b.addEventListener("click",function(){if(!navigator.geolocation){say(m.unsupported,"err");return}say(m.searching);b.disabled=true;navigator.geolocation.getCurrentPosition(function(p){var c=p.coords,a=Math.max(1,Math.round(c.accuracy));f.latitude.value=c.latitude.toFixed(6);f.longitude.value=c.longitude.toFixed(6);f.accuracy.value=a;say((a>100?m.rough:m.found).replace("{m}",a),a>100?"warn":"ok");b.disabled=false;b.lastChild.textContent=m.again;var h=document.getElementById("pt");if(h)h.textContent=m.placed;go.disabled=false},function(e){say(e.code===1?m.denied:m.failed,"err");b.disabled=false},{enableHighAccuracy:true,timeout:20000,maximumAge:0})})})();`;
