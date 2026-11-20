@@ -109,6 +109,8 @@ void main() {
     await settle(tester);
     expect(find.text('Ventes à recevoir'), findsNothing);
     expect(find.text('Relevés mensuels'), findsNothing);
+    // La carte « Solde Tara » seule, avec ses actions.
+    await expectLater(capture, matchesGoldenFile('goldens/09_portefeuille/particulier_dark_390x844_text100.png'));
     await tester.tap(find.text('Recharger'));
     await settle(tester);
     await tester.tap(find.text('10\u00a0000'));
@@ -325,10 +327,21 @@ void main() {
     await settle(tester);
     expect(find.text('Frais d’échec'), findsOneWidget);
     expect(find.text('−750 F'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Boutique'), -200, scrollable: find.byType(Scrollable).first);
+    await tester.scrollUntilVisible(find.text('Mouvements · Boutique'), -200, scrollable: find.byType(Scrollable).first);
+    // La carte « Solde Tara », derrière, passe devant : ses mouvements remplacent ceux
+    // de la boutique.
+    await tester.scrollUntilVisible(
+      find.bySemanticsLabel('Mettre le Solde Tara au premier plan'),
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await settle(tester);
-    await tester.tap(find.text('Solde Tara').last);
+    // Seule la bande du haut de la carte de derrière dépasse : c'est elle qu'on touche.
+    await tester.tapAt(tester.getTopLeft(find.bySemanticsLabel('Mettre le Solde Tara au premier plan')) + const Offset(60, 14));
     await settle(tester);
+    expect(find.bySemanticsLabel('Mettre les ventes à recevoir au premier plan'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Mouvements · Solde Tara'), 200, scrollable: find.byType(Scrollable).first);
+    await tester.scrollUntilVisible(find.text('Livraison payée'), 200, scrollable: find.byType(Scrollable).first);
     expect(find.text('Livraison payée'), findsOneWidget);
     expect(find.text('Vente encaissée'), findsNothing);
   });

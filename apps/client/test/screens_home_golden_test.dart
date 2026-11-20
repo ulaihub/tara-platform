@@ -137,7 +137,7 @@ void main() {
       expect(find.text('Prévue demain à 09:30 · TR-48214'), findsOneWidget);
       expect(find.text('37 500 F'), findsOneWidget);
       expect(find.text('Encaissé aujourd’hui · 3 livraisons'), findsOneWidget);
-      expect(find.text('128 500 F à recevoir cette nuit'), findsOneWidget);
+      expect(find.text('128 500 F reversés'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/04_accueil_boutique/complet_${brightness.name}.png'));
     });
   }

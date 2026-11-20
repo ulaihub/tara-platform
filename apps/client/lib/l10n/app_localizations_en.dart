@@ -234,6 +234,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inProgress => 'In progress';
 
   @override
+  String heroTonight(String hour) {
+    return 'Tonight at $hour:00';
+  }
+
+  @override
+  String heroPaidOut(String amount) {
+    return '$amount paid out';
+  }
+
+  @override
+  String get heroOnDemand => 'When you ask';
+
+  @override
+  String heroToReceive(String amount) {
+    return '$amount to receive';
+  }
+
+  @override
   String get whereToDeliver => 'Where to deliver?';
 
   @override
@@ -1639,6 +1657,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get movements => 'Activity';
+
+  @override
+  String get walletSalesFront => 'Sales to receive, in front';
+
+  @override
+  String get walletSalesShow => 'Bring sales to receive to the front';
+
+  @override
+  String get walletTaraFront => 'Tara balance, in front';
+
+  @override
+  String get walletTaraShow => 'Bring the Tara balance to the front';
+
+  @override
+  String get walletReceive => 'Receive';
+
+  @override
+  String get walletReserve => 'Reserve';
+
+  @override
+  String get walletStatement => 'Statement';
+
+  @override
+  String get walletStatements => 'Monthly statements';
+
+  @override
+  String shopTodayChip(String amount) {
+    return '+$amount today';
+  }
+
+  @override
+  String shopPayoutTonight(String hour) {
+    return 'Paid out tonight at $hour:00';
+  }
+
+  @override
+  String get shopPayoutWhenAsked => 'Paid out when you ask';
+
+  @override
+  String get taraCardLine => 'Pays for your deliveries';
+
+  @override
+  String get taraCardShopLine => 'Pays for your deliveries first';
+
+  @override
+  String taraCardWithdrawFrom(String amount) {
+    return 'withdraw from $amount';
+  }
 
   @override
   String get movementsShop => 'Shop';

@@ -14,7 +14,6 @@ import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/pin_flow.dart';
-import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
@@ -30,6 +29,7 @@ import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../common/pin.dart';
 import '../home/home_screen.dart' show walletProvider;
+import 'wallet_cards.dart';
 
 /// Reversements et retraits récents.
 final payoutsProvider = FutureProvider<List<Payout>>((ref) => ref.read(clientApiProvider).payouts());
@@ -120,6 +120,23 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       ..invalidate(payoutsProvider);
     await _loadLines(reset: true);
   }
+
+  final _shopKey = GlobalKey();
+  final _balanceKey = GlobalKey();
+  final _movementsKey = GlobalKey();
+  final _statementsKey = GlobalKey();
+
+  /// Amène un bloc de l'écran en vue (actions sous les cartes, bouton des relevés).
+  void _reveal(GlobalKey key) => WidgetsBinding.instance.addPostFrameCallback((_) {
+    final target = key.currentContext;
+    if (target == null || !target.mounted) return;
+    unawaited(Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 420), curve: Curves.easeOutCubic));
+  });
+
+  static bool _canWithdraw(Wallet wallet) =>
+      wallet.customerBalance > 0 &&
+      wallet.customerBalance >= wallet.customerWithdrawalMinimum &&
+      wallet.openPayout == null;
 
   void _open(_Panel panel) => setState(() {
     _panel = _panel == panel ? _Panel.none : panel;
@@ -246,11 +263,33 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            Semantics(
-              header: true,
-              child: Text(l.walletTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
+            Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(l.walletTitle, style: TaraText.titleAccess.copyWith(color: c.textPrimary, fontSize: 28)),
+                  ),
+                ),
+                // Œil : afficher (après le code secret) ou masquer les soldes des cartes.
+                ListenableBuilder(
+                  listenable: ref.watch(balanceVisibilityProvider),
+                  builder: (context, _) {
+                    final visibility = ref.read(balanceVisibilityProvider);
+                    return GlassIconButton(
+                      icon: visibility.visible ? TaraIcons.eyeOff : TaraIcons.eye,
+                      label: visibility.visible ? l.balanceHide : l.balanceShow,
+                      onPressed: visibility.visible ? visibility.hide : () => unawaited(revealBalance(context, ref)),
+                    );
+                  },
+                ),
+                if (merchant) ...[
+                  const SizedBox(width: 8),
+                  GlassIconButton(icon: TaraIcons.document, label: l.walletStatements, onPressed: () => _reveal(_statementsKey)),
+                ],
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             if (data == null)
               wallet.hasError
                   ? _Retry(onRetry: () => ref.invalidate(walletProvider))
@@ -277,13 +316,51 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 ),
                 const SizedBox(height: 12),
               ],
-              if (merchant) ...[
-                _ShopCard(wallet: data, busy: _busy, onPayoutNow: _payoutNow),
+              // Cartes de la maquette : ventes à recevoir (sombre) et solde Tara (claire) ;
+              // la carte de devant choisit les actions et les mouvements affichés.
+              WalletCards(
+                wallet: data,
+                merchant: merchant,
+                front: _account,
+                onSwap: (account) {
+                  if (account == _account) return;
+                  setState(() => _account = account);
+                  unawaited(_loadLines(reset: true));
+                },
+              ),
+              if (merchant) ...[const SizedBox(height: 10), WalletCardDots(salesFront: _account == 'merchant')],
+              const SizedBox(height: 16),
+              _WalletActions(
+                actions: merchant && _account == 'merchant'
+                    ? [
+                        (TaraIcons.send, l.walletReceive, () => _reveal(_shopKey)),
+                        (TaraIcons.shield, l.walletReserve, () => _reveal(_balanceKey)),
+                        (TaraIcons.document, l.walletStatement, () => _reveal(_statementsKey)),
+                      ]
+                    : [
+                        (TaraIcons.plus, l.topUpAction, () {
+                          _open(_Panel.topUp);
+                          _reveal(_balanceKey);
+                        }),
+                        (TaraIcons.arrowUpRight, l.withdrawAction, () {
+                          // Retrait de tout le solde, à partir du minimum du prestataire ;
+                          // sinon le bloc du solde explique pourquoi.
+                          if (_canWithdraw(data)) unawaited(_openWithdraw());
+                          _reveal(_balanceKey);
+                        }),
+                        (TaraIcons.document, l.walletStatement, () => _reveal(merchant ? _statementsKey : _movementsKey)),
+                      ],
+              ),
+              const SizedBox(height: 18),
+              if (merchant && _account == 'merchant') ...[
+                _ShopCard(key: _shopKey, wallet: data, busy: _busy, onPayoutNow: _payoutNow, compact: true),
                 const SizedBox(height: 12),
               ],
               // Boutique : son solde Tara (recharges, réserve) paie ses livraisons avant ses
               // ventes, et n'est jamais reversé tout seul.
               _BalanceCard(
+                key: _balanceKey,
+                compact: true,
                 wallet: data,
                 shop: merchant,
                 onReserveSaved: () {
@@ -299,24 +376,20 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 onToppedUp: (amount) => _done(l.topUpDone(_f(amount))),
                 onWithdrawConfirm: _withdraw,
               ),
+              if (merchant && _account != 'merchant') ...[
+                const SizedBox(height: 12),
+                _ShopCard(key: _shopKey, wallet: data, busy: _busy, onPayoutNow: _payoutNow, compact: true),
+              ],
               if (_error != null) ...[const SizedBox(height: 10), ErrorLine(_error!)],
             ],
             const SizedBox(height: 24),
-            SectionHeader(title: l.movements),
+            SectionHeader(
+              key: _movementsKey,
+              title: merchant
+                  ? '${l.movements} · ${_account == 'merchant' ? l.movementsShop : l.movementsBalance}'
+                  : l.movements,
+            ),
             const SizedBox(height: 8),
-            if (merchant) ...[
-              LiquidSegmented<String>(
-                compact: true,
-                segments: [('merchant', l.movementsShop), ('customer', l.movementsBalance)],
-                selected: _account,
-                onChanged: (account) {
-                  if (account == _account) return;
-                  setState(() => _account = account);
-                  unawaited(_loadLines(reset: true));
-                },
-              ),
-              const SizedBox(height: 10),
-            ],
             _Lines(
               lines: _lines,
               loading: _loadingLines,
@@ -327,9 +400,74 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               onRetry: () => unawaited(_loadLines(reset: _lines.isEmpty)),
             ),
             const _Payouts(),
-            if (merchant) _Statements(now: widget.now?.call() ?? DateTime.now()),
+            if (merchant) _Statements(key: _statementsKey, now: widget.now?.call() ?? DateTime.now()),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Ronds d'action sous les cartes (maquette) : le premier en dégradé de la marque, les
+/// autres en verre ; l'icône dans un disque de 56 px, le libellé dessous.
+class _WalletActions extends StatelessWidget {
+  const _WalletActions({required this.actions});
+  final List<(TaraIconData, String, VoidCallback)> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (index, (icon, label, onTap)) in actions.indexed)
+            Expanded(
+              child: Semantics(
+                button: true,
+                label: label,
+                excludeSemantics: true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onTap();
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: index == 0 ? TaraBrand.gradient : null,
+                          color: index == 0 ? null : c.glassStrong,
+                          border: index == 0 ? null : Border.all(color: c.glassBorder),
+                          boxShadow: [
+                            index == 0
+                                ? const BoxShadow(color: Color.fromRGBO(255, 90, 0, .30), blurRadius: 22, offset: Offset(0, 10))
+                                : BoxShadow(color: Color.fromRGBO(140, 70, 10, c.isDark ? .0 : .10), blurRadius: 20, offset: const Offset(0, 8)),
+                          ],
+                        ),
+                        child: Center(
+                          child: TaraIcon(icon, size: 22, color: index == 0 ? TaraBrand.onBrand : c.textPrimary),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TaraText.label.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -338,7 +476,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
 /// Boutique : ventes encaissées à recevoir, quand et où elles arrivent ; reversement
 /// immédiat pour les offres payantes ; frais d'échec à régler si le solde est négatif.
 class _ShopCard extends ConsumerWidget {
-  const _ShopCard({required this.wallet, required this.busy, required this.onPayoutNow});
+  const _ShopCard({super.key, required this.wallet, required this.busy, required this.onPayoutNow, this.compact = false});
+
+  /// Sous les cartes du haut : titre et montant y sont déjà, seules les règles restent.
+  final bool compact;
 
   final Wallet wallet;
   final bool busy;
@@ -358,20 +499,22 @@ class _ShopCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              TaraIcon(TaraIcons.wallet, size: 22, color: balance < 0 ? c.dangerText : c.success),
-              const SizedBox(width: 8),
-              Text(l.shopToReceive, style: TaraText.label.copyWith(color: c.textSecondary)),
-            ],
-          ),
-          const SizedBox(height: 6),
-          // Masqué par défaut, comme sur MoMo ; une dette reste toujours affichée.
-          if (balance < 0)
-            AmountText(balance, unit: 'F', style: TaraText.amountL, color: c.dangerTextStrong)
-          else
-            MaskedBalance(balance, style: TaraText.amountL),
-          const SizedBox(height: 4),
+          if (!compact) ...[
+            Row(
+              children: [
+                TaraIcon(TaraIcons.wallet, size: 22, color: balance < 0 ? c.dangerText : c.success),
+                const SizedBox(width: 8),
+                Text(l.shopToReceive, style: TaraText.label.copyWith(color: c.textSecondary)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            // Masqué par défaut, comme sur MoMo ; une dette reste toujours affichée.
+            if (balance < 0)
+              AmountText(balance, unit: 'F', style: TaraText.amountL, color: c.dangerTextStrong)
+            else
+              MaskedBalance(balance, style: TaraText.amountL),
+            const SizedBox(height: 4),
+          ],
           Text(
             wallet.payoutSchedule == 'DAILY'
                 ? l.shopPayoutDaily('${wallet.payoutHour}', phone)
@@ -436,6 +579,8 @@ class _ShopCard extends ConsumerWidget {
 /// Solde Tara : à quoi il sert, recharge par Mobile Money, retrait de tout le solde.
 class _BalanceCard extends ConsumerStatefulWidget {
   const _BalanceCard({
+    super.key,
+    this.compact = false,
     required this.wallet,
     required this.shop,
     required this.onReserveSaved,
@@ -450,6 +595,9 @@ class _BalanceCard extends ConsumerStatefulWidget {
   });
 
   final Wallet wallet;
+
+  /// Sous les cartes du haut : titre et montant y sont déjà.
+  final bool compact;
 
   /// Boutique : son solde Tara paie ses livraisons avant ses ventes ; réserve du soir.
   final bool shop;
@@ -591,10 +739,12 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l.taraBalance, style: TaraText.label.copyWith(color: c.textSecondary)),
-          const SizedBox(height: 4),
-          MaskedBalance(balance, style: TaraText.amountL),
-          const SizedBox(height: 4),
+          if (!widget.compact) ...[
+            Text(l.taraBalance, style: TaraText.label.copyWith(color: c.textSecondary)),
+            const SizedBox(height: 4),
+            MaskedBalance(balance, style: TaraText.amountL),
+            const SizedBox(height: 4),
+          ],
           Text(
             widget.shop ? l.taraBalanceShopBody : l.taraBalanceBody,
             style: TaraText.small.copyWith(color: c.textSecondary),
@@ -608,7 +758,8 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
             _ReserveRow(wallet: widget.wallet, onChanged: widget.onReserveSaved),
           ],
           const SizedBox(height: 14),
-          if (widget.panel == _Panel.none)
+          // Sous les cartes, « Recharger » et « Retirer » sont les ronds d'action.
+          if (widget.panel == _Panel.none && !widget.compact)
             Row(
               children: [
                 Expanded(
@@ -931,7 +1082,7 @@ class _Payouts extends ConsumerWidget {
 /// Relevés mensuels PDF de la boutique (G7) : le mois en cours et les cinq précédents,
 /// téléchargés puis partagés (WhatsApp, e-mail, enregistrement).
 class _Statements extends ConsumerStatefulWidget {
-  const _Statements({required this.now});
+  const _Statements({super.key, required this.now});
 
   final DateTime now;
 

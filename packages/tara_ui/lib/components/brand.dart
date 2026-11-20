@@ -9,10 +9,13 @@ import '../tara_colors.dart';
 /// Logo complet Tara (« Tara » et « Livraison à la demande »), vectoriel. L'encre suit
 /// le thème : foncée en clair, blanche en sombre.
 class TaraLogo extends StatelessWidget {
-  const TaraLogo({super.key, this.width = 214, this.semanticLabel = 'Tara'});
+  const TaraLogo({super.key, this.width = 214, this.semanticLabel = 'Tara', this.ink});
 
   final double width;
   final String semanticLabel;
+
+  /// Encre imposée (logo posé sur une carte aux couleurs fixes) ; sinon celle du thème.
+  final Color? ink;
 
   static const aspectRatio = 1469 / 551;
 
@@ -21,7 +24,7 @@ class TaraLogo extends StatelessWidget {
     width: width,
     aspectRatio: aspectRatio,
     full: true,
-    ink: TaraColors.of(context).textPrimary,
+    ink: ink ?? TaraColors.of(context).textPrimary,
     semanticLabel: semanticLabel,
   );
 }

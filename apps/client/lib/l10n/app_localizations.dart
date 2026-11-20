@@ -524,6 +524,30 @@ abstract class AppLocalizations {
   /// **'En cours'**
   String get inProgress;
 
+  /// No description provided for @heroTonight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce soir à {hour} h'**
+  String heroTonight(String hour);
+
+  /// No description provided for @heroPaidOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} reversés'**
+  String heroPaidOut(String amount);
+
+  /// No description provided for @heroOnDemand.
+  ///
+  /// In fr, this message translates to:
+  /// **'À votre demande'**
+  String get heroOnDemand;
+
+  /// No description provided for @heroToReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} à recevoir'**
+  String heroToReceive(String amount);
+
   /// No description provided for @whereToDeliver.
   ///
   /// In fr, this message translates to:
@@ -2941,6 +2965,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Mouvements'**
   String get movements;
+
+  /// No description provided for @walletSalesFront.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes à recevoir, au premier plan'**
+  String get walletSalesFront;
+
+  /// No description provided for @walletSalesShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre les ventes à recevoir au premier plan'**
+  String get walletSalesShow;
+
+  /// No description provided for @walletTaraFront.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara, au premier plan'**
+  String get walletTaraFront;
+
+  /// No description provided for @walletTaraShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre le Solde Tara au premier plan'**
+  String get walletTaraShow;
+
+  /// No description provided for @walletReceive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recevoir'**
+  String get walletReceive;
+
+  /// No description provided for @walletReserve.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réserve'**
+  String get walletReserve;
+
+  /// No description provided for @walletStatement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevé'**
+  String get walletStatement;
+
+  /// No description provided for @walletStatements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevés du mois'**
+  String get walletStatements;
+
+  /// No description provided for @shopTodayChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'+{amount} aujourd’hui'**
+  String shopTodayChip(String amount);
+
+  /// No description provided for @shopPayoutTonight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversées ce soir à {hour} h'**
+  String shopPayoutTonight(String hour);
+
+  /// No description provided for @shopPayoutWhenAsked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversées à votre demande'**
+  String get shopPayoutWhenAsked;
+
+  /// No description provided for @taraCardLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paie vos livraisons'**
+  String get taraCardLine;
+
+  /// No description provided for @taraCardShopLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paie vos livraisons en premier'**
+  String get taraCardShopLine;
+
+  /// No description provided for @taraCardWithdrawFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'retrait dès {amount}'**
+  String taraCardWithdrawFrom(String amount);
 
   /// No description provided for @movementsShop.
   ///

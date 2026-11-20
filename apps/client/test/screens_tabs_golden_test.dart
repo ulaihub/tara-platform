@@ -120,7 +120,7 @@ void main() {
     await settle(tester);
     expect(find.text('50\u00a0000\u00a0F'), findsOneWidget);
     expect(find.text('Encaissé aujourd’hui · 4 livraisons'), findsOneWidget);
-    expect(find.text('141\u00a0000\u00a0F à recevoir cette nuit'), findsOneWidget);
+    expect(find.text('141\u00a0000\u00a0F reversés'), findsOneWidget);
     expect(sounds.played, [TaraSound.cash]);
   });
 

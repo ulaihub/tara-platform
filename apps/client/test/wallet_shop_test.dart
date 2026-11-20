@@ -21,6 +21,11 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, wallet(api), surface: const Size(390, 1200));
     await settle(tester);
     expect(find.text('Solde Tara'), findsWidgets);
+    // Ventes devant : leurs actions. La carte « Solde Tara » passe devant : les siennes.
+    expect(find.text('Recevoir'), findsOneWidget);
+    final back = find.bySemanticsLabel('Mettre le Solde Tara au premier plan');
+    await tester.tapAt(tester.getTopLeft(back) + const Offset(60, 14));
+    await settle(tester);
     expect(find.text('Recharger'), findsOneWidget);
     expect(
       find.text(

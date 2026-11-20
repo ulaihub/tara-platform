@@ -76,12 +76,15 @@ Future<void> revealBalance(BuildContext context, WidgetRef ref) async {
 
 /// Solde masqué par défaut (« ••••• F »), avec l'œil pour l'afficher.
 class MaskedBalance extends ConsumerWidget {
-  const MaskedBalance(this.amount, {super.key, this.style, this.unit = 'F', this.color});
+  const MaskedBalance(this.amount, {super.key, this.style, this.unit = 'F', this.color, this.showEye = true});
 
   final int amount;
   final TextStyle? style;
   final String unit;
   final Color? color;
+
+  /// Œil à côté du montant (sinon dans l'en-tête de l'écran).
+  final bool showEye;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -95,6 +98,7 @@ class MaskedBalance extends ConsumerWidget {
       style: style,
       unit: unit,
       color: color,
+      showEye: showEye,
     );
   }
 }
