@@ -24,10 +24,10 @@ export function NavLinks({
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={cx(
-                'flex min-h-11 items-center gap-3 rounded-2xl px-3 text-[14px] font-bold transition',
+                'flex min-h-[42px] items-center gap-3 rounded-[13px] px-3 text-[14px] transition',
                 active
-                  ? 'bg-brand text-on-brand shadow-card'
-                  : 'text-muted hover:bg-panel hover:text-text',
+                  ? 'bg-brand font-extrabold text-on-brand shadow-[0_8px_18px_rgba(255,90,0,.28)]'
+                  : 'font-semibold text-muted hover:bg-glass hover:text-text',
               )}
             >
               <Icon name={item.icon} size={19} />

@@ -7,8 +7,8 @@ import type { LoginState } from './state';
 
 function Heading({ title, body }: { title: string; body: string }) {
   return (
-    <div className="mb-6">
-      <h2 className="font-display text-[28px] leading-tight font-bold tracking-tight">{title}</h2>
+    <div className="mb-4">
+      <h2 className="font-display text-[26px] leading-tight font-bold tracking-tight">{title}</h2>
       <p className="mt-2 text-muted">{body}</p>
     </div>
   );

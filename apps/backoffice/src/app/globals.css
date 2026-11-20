@@ -25,6 +25,13 @@
   --warn-bg: rgba(255, 176, 0, 0.14);
   --on-brand: #140800;
   --shadow: 0 12px 32px -18px rgba(90, 45, 0, 0.35);
+  /* Refonte : verre des cartes et du menu. */
+  --glass: rgba(255, 255, 255, 0.84);
+  --glass-line: #ffffff;
+  --glass-shadow: 0 12px 28px rgba(140, 70, 10, 0.06);
+  --side: rgba(255, 255, 255, 0.62);
+  --fg-rgb: 22, 18, 14;
+  --accent-2: #9a3412;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -47,6 +54,12 @@
     --warn: #ffc14d;
     --warn-bg: rgba(255, 176, 0, 0.14);
     --shadow: none;
+    --glass: rgba(255, 255, 255, 0.06);
+    --glass-line: rgba(255, 255, 255, 0.1);
+    --glass-shadow: none;
+    --side: rgba(22, 22, 30, 0.62);
+    --fg-rgb: 255, 255, 255;
+    --accent-2: #ffc283;
   }
 }
 
@@ -72,6 +85,10 @@
   --color-warn-bg: var(--warn-bg);
   --color-on-brand: var(--on-brand);
   --shadow-card: var(--shadow);
+  --color-glass: var(--glass);
+  --color-glass-line: var(--glass-line);
+  --color-side: var(--side);
+  --shadow-glass: var(--glass-shadow);
 }
 
 @utility bg-brand {
@@ -123,4 +140,557 @@ body {
 .maplibregl-ctrl-group {
   border-radius: 14px !important;
   overflow: hidden;
+}
+
+/* Refonte : taches de couleur du fond, verre, barres qui coulent, colonnes en relief. */
+.bo-blobs {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.bo-blobs i {
+  position: absolute;
+  display: block;
+  width: 520px;
+  height: 520px;
+  filter: blur(46px);
+  border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+  animation: bo-morph 14s ease-in-out infinite alternate;
+}
+.bo-blobs i:first-child {
+  left: -120px;
+  top: -80px;
+  background: radial-gradient(circle at 30% 30%, #ffd27a, #ff8a00);
+  opacity: 0.3;
+}
+.bo-blobs i:last-child {
+  right: -100px;
+  bottom: -60px;
+  background: radial-gradient(circle at 30% 30%, #ff8a00, #ff3d00);
+  opacity: 0.16;
+  animation-delay: -6s;
+}
+@keyframes bo-morph {
+  to {
+    border-radius: 70% 30% 46% 54% / 30% 39% 61% 70%;
+    transform: translate(28px, -22px);
+  }
+}
+.bo-glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+.bo-side {
+  background: var(--side);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 70%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+}
+@media (prefers-color-scheme: dark) {
+  .bo-side {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 70%);
+  }
+}
+.bo-flow {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ffb000, #ff6a00, #ff3d00, #ff6a00, #ffb000);
+  background-size: 200% 100%;
+  animation: bo-flow 2.6s linear infinite;
+}
+@keyframes bo-flow {
+  to {
+    background-position: -200% 0;
+  }
+}
+.bo-col {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: bo-grow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.bo-col .face {
+  fill: rgba(var(--fg-rgb), 0.16);
+}
+.bo-col .side {
+  fill: rgba(var(--fg-rgb), 0.08);
+}
+.bo-col .cap {
+  fill: rgba(var(--fg-rgb), 0.26);
+}
+.bo-col.now .face {
+  fill: #ff6a00;
+}
+.bo-col.now .side {
+  fill: #b83a08;
+}
+.bo-col.now .cap {
+  fill: var(--accent-2);
+}
+.bo-col:nth-child(1) {
+  animation-delay: 0s;
+}
+.bo-col:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.bo-col:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.bo-col:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.bo-col:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.bo-col:nth-child(6) {
+  animation-delay: 0.2s;
+}
+.bo-col:nth-child(7) {
+  animation-delay: 0.24s;
+}
+.bo-col:nth-child(8) {
+  animation-delay: 0.28s;
+}
+.bo-col:nth-child(9) {
+  animation-delay: 0.32s;
+}
+.bo-col:nth-child(10) {
+  animation-delay: 0.36s;
+}
+.bo-col:nth-child(11) {
+  animation-delay: 0.4s;
+}
+.bo-col:nth-child(12) {
+  animation-delay: 0.44s;
+}
+.bo-col:nth-child(13) {
+  animation-delay: 0.48s;
+}
+.bo-col:nth-child(14) {
+  animation-delay: 0.52s;
+}
+@keyframes bo-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bo-blobs i,
+  .bo-flow,
+  .bo-col {
+    animation: none;
+  }
+}
+
+/* Ville en relief (connexion) : plateau, immeubles, trajet et livreurs, sans style en ligne. */
+.bo-city {
+  --map-bg: #efe8de;
+  --map-rgb: 239, 232, 222;
+  --ground: #e7ded2;
+  --road1: #ffffff;
+  --road2: #fbf7f1;
+  --water: #bcd7e4;
+  --b1: #e6d9ca;
+  --b2: #dccdbc;
+  --b3: #efe4d7;
+  --b4: #d6c6b4;
+  --b5: #ffffff;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--map-bg);
+}
+@media (prefers-color-scheme: dark) {
+  .bo-city {
+    --map-bg: #0d0e13;
+    --map-rgb: 13, 14, 19;
+    --ground: #111219;
+    --road1: #252833;
+    --road2: #1e2029;
+    --water: #0f1922;
+    --b1: #1b1d25;
+    --b2: #15161d;
+    --b3: #20222c;
+    --b4: #17181f;
+    --b5: #272a35;
+  }
+}
+.bo-city-zoom {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 390px;
+  height: 450px;
+  transform: scale(2);
+  transform-origin: 0 0;
+}
+.bo-city-persp {
+  position: absolute;
+  inset: 0;
+  perspective: 820px;
+  perspective-origin: 50% 10%;
+}
+.bo-city-ground {
+  position: absolute;
+  left: 15px;
+  top: 20px;
+  width: 360px;
+  height: 360px;
+  background: var(--ground);
+  transform-style: preserve-3d;
+  transform: rotateX(55deg) rotateZ(-35deg);
+  animation: bo-orbit 30s ease-in-out infinite;
+}
+@keyframes bo-orbit {
+  50% {
+    transform: rotateX(55deg) rotateZ(-27deg);
+  }
+}
+.bo-city-ground i,
+.bo-city-ground > svg {
+  position: absolute;
+  display: block;
+}
+.bo-city-ground > svg {
+  left: 0;
+  top: 0;
+}
+.bo-city .road.h {
+  left: 0;
+  width: 360px;
+}
+.bo-city .road.v {
+  top: 0;
+  height: 360px;
+}
+.bo-city .road.r1 {
+  background: var(--road1);
+}
+.bo-city .road.r2 {
+  background: var(--road2);
+}
+.bo-city .road.r1.h {
+  top: 120px;
+  height: 16px;
+}
+.bo-city .road.r2.h {
+  top: 250px;
+  height: 12px;
+}
+.bo-city .road.r1.v {
+  left: 130px;
+  width: 16px;
+}
+.bo-city .road.r2.v {
+  left: 270px;
+  width: 12px;
+}
+.bo-city .water {
+  left: 0;
+  top: 318px;
+  width: 360px;
+  height: 42px;
+  background: var(--water);
+}
+.bo-city .halo,
+.bo-city .dash {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bo-city .halo {
+  stroke: rgba(255, 106, 0, 0.28);
+  stroke-width: 12;
+}
+.bo-city .dash {
+  stroke: #ff6a00;
+  stroke-width: 4.5;
+  stroke-dasharray: 10 8;
+  animation: bo-dash 1s linear infinite;
+}
+@keyframes bo-dash {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+.bo-city .rider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  offset-rotate: 0deg;
+  animation: bo-ride 12s linear infinite;
+}
+.bo-city .rider.r1 {
+  offset-path: path('M20 128 L 138 128 L 138 256 L 276 256 L 276 340');
+}
+.bo-city .rider.r2 {
+  offset-path: path('M276 10 L 276 128 L 138 128 L 138 60');
+  animation-duration: 9s;
+}
+.bo-city .rider.r3 {
+  offset-path: path('M340 256 L 276 256 L 276 128 L 200 128');
+  animation-duration: 11s;
+}
+@keyframes bo-ride {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+.bo-city .glow {
+  position: absolute;
+  left: -18px;
+  top: -18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 106, 0, 0.6), rgba(255, 106, 0, 0) 70%);
+}
+.bo-city .bill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: 0 0;
+  transform: rotateZ(35deg) rotateX(-55deg) translate(-50%, -100%);
+}
+.bo-city .puck {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--map-bg);
+  border-radius: 50%;
+  background: linear-gradient(100deg, #ffb000, #ff6a00 55%, #ff3d00);
+  box-shadow: 0 0 18px rgba(255, 106, 0, 0.75);
+}
+.bo-city .puck svg {
+  fill: #140800;
+}
+.bo-city .stem {
+  width: 2px;
+  height: 12px;
+  background: rgba(255, 177, 92, 0.85);
+}
+.bo-city .bd {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+.bo-city .bd i {
+  transform-origin: 0 0;
+}
+.bo-city .f1 {
+  left: 0;
+  top: 100%;
+  width: 100%;
+  height: var(--h);
+  background: var(--b1);
+  transform: rotateX(90deg);
+}
+.bo-city .f2 {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: var(--h);
+  background: var(--b2);
+  transform: rotateX(90deg);
+}
+.bo-city .f3 {
+  left: 100%;
+  top: 0;
+  width: var(--h);
+  height: 100%;
+  background: var(--b3);
+  transform: rotateY(-90deg);
+}
+.bo-city .f4 {
+  left: 0;
+  top: 0;
+  width: var(--h);
+  height: 100%;
+  background: var(--b4);
+  transform: rotateY(-90deg);
+}
+.bo-city .f5 {
+  inset: 0;
+  background: var(--b5);
+  border: 1px solid rgba(var(--fg-rgb), 0.05);
+  transform: translateZ(var(--h));
+}
+.bo-city .lit .f1,
+.bo-city .lit .f3 {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 177, 92, 0) 0 7px,
+    rgba(255, 177, 92, 0.16) 7px 9px
+  );
+}
+.bo-city .b0 {
+  left: 68px;
+  top: 11px;
+  width: 46px;
+  height: 45px;
+  --h: 21px;
+}
+.bo-city .b1 {
+  left: 68px;
+  top: 63px;
+  width: 50px;
+  height: 40px;
+  --h: 54px;
+}
+.bo-city .b2 {
+  left: 11px;
+  top: 147px;
+  width: 47px;
+  height: 40px;
+  --h: 74px;
+}
+.bo-city .b3 {
+  left: 68px;
+  top: 147px;
+  width: 48px;
+  height: 41px;
+  --h: 34px;
+}
+.bo-city .b4 {
+  left: 68px;
+  top: 196px;
+  width: 49px;
+  height: 41px;
+  --h: 49px;
+}
+.bo-city .b5 {
+  left: 11px;
+  top: 273px;
+  width: 44px;
+  height: 31px;
+  --h: 18px;
+}
+.bo-city .b6 {
+  left: 68px;
+  top: 273px;
+  width: 51px;
+  height: 28px;
+  --h: 30px;
+}
+.bo-city .b7 {
+  left: 157px;
+  top: 11px;
+  width: 42px;
+  height: 40px;
+  --h: 26px;
+}
+.bo-city .b8 {
+  left: 157px;
+  top: 63px;
+  width: 48px;
+  height: 43px;
+  --h: 34px;
+}
+.bo-city .b9 {
+  left: 211px;
+  top: 11px;
+  width: 41px;
+  height: 38px;
+  --h: 73px;
+}
+.bo-city .b10 {
+  left: 211px;
+  top: 63px;
+  width: 46px;
+  height: 45px;
+  --h: 51px;
+}
+.bo-city .b11 {
+  left: 157px;
+  top: 147px;
+  width: 47px;
+  height: 41px;
+  --h: 69px;
+}
+.bo-city .b12 {
+  left: 157px;
+  top: 196px;
+  width: 47px;
+  height: 40px;
+  --h: 69px;
+}
+.bo-city .b13 {
+  left: 211px;
+  top: 147px;
+  width: 46px;
+  height: 39px;
+  --h: 62px;
+}
+.bo-city .b14 {
+  left: 211px;
+  top: 196px;
+  width: 44px;
+  height: 42px;
+  --h: 20px;
+}
+.bo-city .b15 {
+  left: 211px;
+  top: 273px;
+  width: 45px;
+  height: 28px;
+  --h: 29px;
+}
+.bo-city .b16 {
+  left: 293px;
+  top: 11px;
+  width: 50px;
+  height: 44px;
+  --h: 36px;
+}
+.bo-city .b17 {
+  left: 293px;
+  top: 63px;
+  width: 56px;
+  height: 45px;
+  --h: 22px;
+}
+.bo-city .b18 {
+  left: 293px;
+  top: 147px;
+  width: 48px;
+  height: 37px;
+  --h: 29px;
+}
+.bo-city .b19 {
+  left: 293px;
+  top: 196px;
+  width: 53px;
+  height: 43px;
+  --h: 37px;
+}
+.bo-city .vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 35%,
+    rgba(var(--map-rgb), 0) 50%,
+    rgba(var(--map-rgb), 0.85)
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .bo-city-ground,
+  .bo-city .dash,
+  .bo-city .rider {
+    animation: none;
+  }
 }

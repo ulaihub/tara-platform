@@ -22,41 +22,67 @@ export default async function TeamLayout({ children }: { children: ReactNode }) 
     ready,
   }));
   const roles = staffRoles(session.roles).map((role) => ROLE_LABELS[role]);
+  const name = session.name ?? displayPhone(session.phone);
   const member = (
-    <div className="mt-4 rounded-2xl border border-line bg-panel p-3">
-      <p className="truncate text-[14px] font-extrabold">
-        {session.name ?? displayPhone(session.phone)}
-      </p>
-      <p className="truncate text-[12px] text-faint">{roles.join(' · ')}</p>
-      <form action={logout} className="mt-2">
+    <div className="bo-glass mt-auto flex items-center gap-2.5 rounded-2xl p-2.5">
+      <span
+        aria-hidden="true"
+        className="grid size-9 shrink-0 place-items-center rounded-full bg-brand font-display text-[13px] font-extrabold text-on-brand"
+      >
+        {initials(name)}
+      </span>
+      <span className="min-w-0 flex-1">
+        <b className="block truncate text-[13px]">{name}</b>
+        <span className="block truncate text-[11px] text-muted">{roles.join(' · ')} · 2FA ✓</span>
+      </span>
+      <form action={logout}>
         <button
           type="submit"
-          className="flex min-h-9 items-center gap-2 text-[13px] font-bold text-muted hover:text-danger"
+          aria-label="Se déconnecter"
+          title="Se déconnecter"
+          className="grid size-9 place-items-center rounded-xl text-muted hover:bg-danger-bg hover:text-danger"
         >
           <Icon name="logout" size={16} />
-          Se déconnecter
         </button>
       </form>
     </div>
   );
   return (
-    <div className="min-h-screen lg:flex">
+    <div className="relative min-h-screen lg:flex">
+      <div className="bo-blobs" aria-hidden="true">
+        <i />
+        <i />
+      </div>
       <MobileNav>
         <nav aria-label="Sections du back-office" className="flex-1">
           <NavLinks sections={sections} />
         </nav>
         {member}
       </MobileNav>
-      <aside className="sticky top-0 hidden h-screen w-[280px] shrink-0 flex-col border-r border-line bg-panel-soft px-4 py-6 lg:flex">
-        <div className="mb-8 px-2">
-          <Logo className="h-[42px]" />
+      <aside className="bo-side sticky top-0 z-10 hidden h-screen w-[248px] shrink-0 flex-col gap-1 border-r border-line px-3.5 py-5 lg:flex">
+        <div className="flex items-center gap-2.5 px-1.5 pb-[18px]">
+          <span className="flex rounded-xl bg-[#16120E] px-2 py-1.5">
+            <Logo className="h-7 w-10 object-contain" dark />
+          </span>
+          <span>
+            <b className="block text-[15px]">Tara</b>
+            <span className="block text-[11px] text-muted">Espace équipe</span>
+          </span>
         </div>
         <nav aria-label="Sections du back-office" className="flex-1 overflow-y-auto">
           <NavLinks sections={sections} />
         </nav>
         {member}
       </aside>
-      <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-10 lg:py-8">{children}</main>
+      <main className="relative z-[1] min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-7 lg:py-0">
+        {children}
+      </main>
     </div>
   );
+}
+
+/** « Awa Mbappé » → « AM ». */
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || 'T';
 }

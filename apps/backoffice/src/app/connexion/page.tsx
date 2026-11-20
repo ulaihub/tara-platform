@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
+import { City3D } from '@/components/city-3d';
 import { Logo } from '@/components/ui';
 import { api } from '@/lib/api';
 import { config } from '@/lib/config';
@@ -33,37 +34,34 @@ export default async function LoginPage({
   const { expiree } = await searchParams;
   const state = await initialState();
   return (
-    <main className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
-      <section className="relative hidden overflow-hidden bg-[#140800] p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div
-          aria-hidden="true"
-          className="absolute -top-40 -right-32 size-[520px] rounded-full bg-brand opacity-60 blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute -bottom-48 -left-40 size-[440px] rounded-full bg-[#ff3d00] opacity-30 blur-3xl"
-        />
-        <div className="relative">
-          <Logo dark className="h-[52px]" />
-        </div>
-        <div className="relative max-w-md">
-          <h1 className="font-display text-[40px] leading-tight font-extrabold tracking-tight">
-            Le poste de pilotage de l’équipe Tara
+    <main className="relative grid min-h-screen lg:grid-cols-[760px_1fr]">
+      <div className="bo-blobs" aria-hidden="true">
+        <i />
+        <i />
+      </div>
+      <section className="relative hidden min-h-[640px] overflow-hidden lg:block">
+        <City3D />
+        <div className="absolute right-12 bottom-12 left-12 flex flex-col gap-2.5 text-white [text-shadow:0_2px_12px_rgba(0,0,0,.5)]">
+          <span className="text-[13px] font-extrabold tracking-[.12em] text-[var(--accent-2)]">
+            ESPACE ÉQUIPE
+          </span>
+          <h1 className="font-display text-[40px] leading-[1.1] font-bold">
+            Douala en direct,
+            <br />
+            chaque course sous les yeux.
           </h1>
-          <p className="mt-4 text-[17px] text-white/75">
-            Carte en direct, commandes, livreurs, support et finance : tout Douala au même endroit.
-          </p>
         </div>
-        <p className="relative text-[13px] text-white/50">
-          Accès réservé à l’équipe · double authentification obligatoire
-        </p>
       </section>
-      <section className="flex items-center justify-center p-6">
-        <div className="w-full max-w-[420px]">
-          <div className="mb-10 lg:hidden">
-            <Logo />
-          </div>
+      <section className="relative z-[1] flex items-center justify-center p-6">
+        <div className="bo-glass flex w-full max-w-[440px] flex-col gap-4 rounded-[22px] p-[34px]">
+          <span className="flex self-start rounded-[14px] bg-[#16120E] px-2.5 py-2">
+            <Logo dark className="h-9 w-[52px] object-contain" />
+          </span>
           <LoginFlow initial={state} expired={expiree === '1'} />
+          <p className="text-[11px] text-faint">
+            Accès réservé à l’équipe Tara. Double authentification obligatoire ; chaque action est
+            inscrite au journal.
+          </p>
         </div>
       </section>
     </main>

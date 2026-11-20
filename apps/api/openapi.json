@@ -9735,6 +9735,32 @@
         ]
       }
     },
+    "/v1/admin/metrics/today": {
+      "get": {
+        "operationId": "Metrics_today",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsToday"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · indicateurs"
+        ]
+      }
+    },
     "/v1/admin/team": {
       "get": {
         "operationId": "Team_members",
@@ -14517,6 +14543,98 @@
           "merchants",
           "reconciliation",
           "ratings"
+        ],
+        "additionalProperties": false
+      },
+      "MetricsToday": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "integer"
+          },
+          "previousOrders": {
+            "type": "integer"
+          },
+          "inProgress": {
+            "type": "integer"
+          },
+          "searching": {
+            "type": "integer"
+          },
+          "approvedRiders": {
+            "type": "integer"
+          },
+          "successRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "previousSuccessRate": {
+            "nullable": true,
+            "type": "number"
+          },
+          "deliveryMinutes": {
+            "nullable": true,
+            "type": "number"
+          },
+          "previousDeliveryMinutes": {
+            "nullable": true,
+            "type": "number"
+          },
+          "collected": {
+            "type": "integer"
+          },
+          "hourly": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hour": {
+                  "type": "integer"
+                },
+                "orders": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "hour",
+                "orders"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "neighborhoods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "orders": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "name",
+                "orders"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "orders",
+          "previousOrders",
+          "inProgress",
+          "searching",
+          "approvedRiders",
+          "successRate",
+          "previousSuccessRate",
+          "deliveryMinutes",
+          "previousDeliveryMinutes",
+          "collected",
+          "hourly",
+          "neighborhoods"
         ],
         "additionalProperties": false
       },
