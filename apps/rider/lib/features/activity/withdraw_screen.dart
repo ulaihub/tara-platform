@@ -25,6 +25,7 @@ import '../../core/offline/action_queue.dart' show newEventId;
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../common/pin.dart';
+import '../course/course_page.dart';
 import '../course/course_scaffold.dart' show CourseFieldLabel;
 
 /// Plus petit retrait partiel (comme le serveur) ; tout le solde peut toujours être retiré.
@@ -219,17 +220,11 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
         horizontal: 20,
         top: 8,
         content: [
-          Row(
-            children: [
-              GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: busy ? null : widget.onBack),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(l.withdrawTitle, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
-                ),
-              ),
-            ],
+          CourseHeader(
+            kicker: l.myEarnings,
+            title: l.withdrawTitle,
+            subtitle: l.withdrawSubtitle,
+            onBack: busy ? () {} : widget.onBack,
           ),
           const SizedBox(height: 20),
           GlassCard(

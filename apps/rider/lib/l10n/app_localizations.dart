@@ -4051,6 +4051,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Continuer · rester en ligne'**
   String get continueOnline;
+
+  /// No description provided for @cashToDepositKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces à reverser'**
+  String get cashToDepositKicker;
+
+  /// No description provided for @prepaidCoversMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il couvre l’argent que vous encaissez'**
+  String get prepaidCoversMoney;
+
+  /// No description provided for @depositSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces encaissées avant le solde prépayé'**
+  String get depositSubtitle;
+
+  /// No description provided for @withdrawSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vers votre numéro enregistré'**
+  String get withdrawSubtitle;
+
+  /// No description provided for @sosSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre contact d’urgence est prévenu aussi'**
+  String get sosSubtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

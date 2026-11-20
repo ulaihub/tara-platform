@@ -711,5 +711,10 @@
   "addedToEarnings": "Added to today’s earnings",
   "dailyGoal": "Today’s goal: {count} rides",
   "ridesToNextCelebration": "{count, plural, =1{1 more ride to the next celebration.} other{{count} more rides to the next celebration.}}",
-  "continueOnline": "Continue · stay online"
+  "continueOnline": "Continue · stay online",
+  "cashToDepositKicker": "Cash to pay in",
+  "prepaidCoversMoney": "It covers the money you collect",
+  "depositSubtitle": "Cash collected before the prepaid balance",
+  "withdrawSubtitle": "To your registered number",
+  "sosSubtitle": "Your emergency contact is told too"
 }

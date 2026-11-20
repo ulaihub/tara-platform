@@ -24,6 +24,7 @@ import '../../core/offline/action_queue.dart' show newEventId;
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../common/pin.dart';
+import '../course/course_page.dart';
 import '../course/course_scaffold.dart' show CourseFieldLabel;
 
 enum _DepositState { idle, sending, waiting, done, failed }
@@ -222,20 +223,11 @@ class _DepositScreenState extends ConsumerState<DepositScreen> {
         horizontal: 20,
         top: 8,
         content: [
-          Row(
-            children: [
-              GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: busy ? null : widget.onBack),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(
-                    topUp ? l.topUpTitle : l.depositTitle,
-                    style: TaraText.titleCourse.copyWith(color: c.textPrimary),
-                  ),
-                ),
-              ),
-            ],
+          CourseHeader(
+            kicker: topUp ? l.prepaidTitle : l.cashToDepositKicker,
+            title: topUp ? l.topUpTitle : l.depositTitle,
+            subtitle: topUp ? l.prepaidCoversMoney : l.depositSubtitle,
+            onBack: busy ? () {} : widget.onBack,
           ),
           const SizedBox(height: 20),
           GlassCard(

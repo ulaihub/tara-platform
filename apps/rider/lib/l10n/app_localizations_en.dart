@@ -2351,4 +2351,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueOnline => 'Continue · stay online';
+
+  @override
+  String get cashToDepositKicker => 'Cash to pay in';
+
+  @override
+  String get prepaidCoversMoney => 'It covers the money you collect';
+
+  @override
+  String get depositSubtitle => 'Cash collected before the prepaid balance';
+
+  @override
+  String get withdrawSubtitle => 'To your registered number';
+
+  @override
+  String get sosSubtitle => 'Your emergency contact is told too';
 }

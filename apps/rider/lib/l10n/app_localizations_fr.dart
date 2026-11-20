@@ -2371,4 +2371,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get continueOnline => 'Continuer · rester en ligne';
+
+  @override
+  String get cashToDepositKicker => 'Espèces à reverser';
+
+  @override
+  String get prepaidCoversMoney => 'Il couvre l’argent que vous encaissez';
+
+  @override
+  String get depositSubtitle => 'Espèces encaissées avant le solde prépayé';
+
+  @override
+  String get withdrawSubtitle => 'Vers votre numéro enregistré';
+
+  @override
+  String get sosSubtitle => 'Votre contact d’urgence est prévenu aussi';
 }

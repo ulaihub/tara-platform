@@ -123,7 +123,7 @@ void main() {
     expect(find.byType(SosScreen), findsOneWidget);
     expect(find.text('Police · 117'), findsOneWidget);
 
-    await tester.tap(find.bySemanticsLabel('Fermer'));
+    await tester.tap(find.bySemanticsLabel('Retour').last);
     await settle(tester);
     expect(find.byType(SosScreen), findsNothing);
     expect(find.byType(PickupScreen), findsOneWidget);

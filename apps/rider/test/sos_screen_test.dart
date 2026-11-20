@@ -102,8 +102,8 @@ void main() {
     expect(cancelled, [acknowledged.id]);
     expect(find.text('Besoin d’aide ?'), findsOneWidget);
 
-    await tester.ensureVisible(find.bySemanticsLabel('Fermer'));
-    await tester.tap(find.bySemanticsLabel('Fermer'));
+    await tester.ensureVisible(find.bySemanticsLabel('Retour'));
+    await tester.tap(find.bySemanticsLabel('Retour'));
     expect(closed, isTrue);
   });
 }
