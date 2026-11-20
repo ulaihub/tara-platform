@@ -13,8 +13,13 @@ const fr: Strings = {
   lang: 'fr',
   logoAlt: 'Tara, livraison à la demande',
   title: 'Suivi de votre colis',
-  from: (sender: string) => `${sender} vous envoie un colis`,
-  fromUnknown: 'Un colis est en route pour vous',
+  brandLine: 'Tara · livraison à Douala',
+  brandSub: 'Lien de suivi envoyé par SMS',
+  parcelOf: (sender: string) =>
+    `Colis ${/^[aeiouyhàâéèêîïôû]/i.test(sender) ? 'd’' : 'de '}${sender}`,
+  yourParcel: 'Votre colis',
+  riderComing: (name: string) => `${name} arrive chez vous`,
+  minutes: (n: number) => `${n} min`,
   status: {
     CREATED: 'Commande enregistrée',
     SEARCHING_RIDER: 'Recherche d’un livreur',
@@ -35,24 +40,23 @@ const fr: Strings = {
   at: (day: string, time: string) => `${day} à ${time}`,
   searchingBody: 'Dès qu’un livreur accepte, son nom s’affiche ici.',
   assignedBody: 'Il récupère le colis, puis vient vers vous.',
-  etaAt: (time: string, distance: string) => `Arrivée vers ${time} · à ${distance}`,
   etaPending: 'Heure d’arrivée bientôt affichée',
   failedBody: 'Appelez-le vite : il attend la décision de l’expéditeur.',
   deliveredAt: (time: string) => `Remis à ${time}. Merci d’avoir été là !`,
   returnedBody: 'L’expéditeur a récupéré le colis.',
   cancelledBody: 'L’expéditeur a annulé cette livraison.',
-  trackFrom: 'Expéditeur',
   trackTo: 'Vous',
-  steps: ['Commande', 'Récupéré', 'En route', 'Livré'],
+  steps: ['Commande', 'Livreur', 'Récupéré', 'Livré'],
   stepFailed: 'Échec',
   stepReturned: 'Rendu',
   vehicle: { MOTORBIKE: 'Moto', TRICYCLE: 'Tricycle', CAR: 'Voiture' },
-  call: 'Appeler',
+  callName: (first: string) => `Appeler ${first}`,
   callLabel: (name: string) => `Appeler ${name}, votre livreur`,
+  myPoint: 'Mon point',
   toPay: 'À payer à la livraison',
   parcel: 'Colis',
   delivery: 'Livraison',
-  payHow: 'En espèces ou par Mobile Money (MTN, Orange) auprès du livreur.',
+  payShort: 'Espèces ou Mobile Money',
   mobileMoneyFee: (fee: string) => `Par Mobile Money, ${fee} de frais de l’opérateur s’ajoutent.`,
   paymentPending: (amount: string) =>
     `Une demande de ${amount} est arrivée sur votre téléphone : validez-la avec votre code secret Mobile Money.`,
@@ -129,8 +133,12 @@ const en: Strings = {
   lang: 'en',
   logoAlt: 'Tara, on-demand delivery',
   title: 'Track your parcel',
-  from: (sender: string) => `${sender} is sending you a parcel`,
-  fromUnknown: 'A parcel is on its way to you',
+  brandLine: 'Tara · delivery in Douala',
+  brandSub: 'Tracking link sent by SMS',
+  parcelOf: (sender: string) => `Parcel from ${sender}`,
+  yourParcel: 'Your parcel',
+  riderComing: (name: string) => `${name} is on the way to you`,
+  minutes: (n: number) => `${n} min`,
   status: {
     CREATED: 'Order received',
     SEARCHING_RIDER: 'Finding a rider',
@@ -151,24 +159,23 @@ const en: Strings = {
   at: (day: string, time: string) => `${day} at ${time}`,
   searchingBody: 'As soon as a rider accepts, their name shows here.',
   assignedBody: 'They pick up the parcel, then head to you.',
-  etaAt: (time: string, distance: string) => `Arriving around ${time} · ${distance} away`,
   etaPending: 'Arrival time shown soon',
   failedBody: 'Call them quickly: they are waiting for the sender’s decision.',
   deliveredAt: (time: string) => `Handed over at ${time}. Thanks for being there!`,
   returnedBody: 'The sender got the parcel back.',
   cancelledBody: 'The sender cancelled this delivery.',
-  trackFrom: 'Sender',
   trackTo: 'You',
-  steps: ['Ordered', 'Picked up', 'On the way', 'Delivered'],
+  steps: ['Ordered', 'Rider', 'Picked up', 'Delivered'],
   stepFailed: 'Failed',
   stepReturned: 'Returned',
   vehicle: { MOTORBIKE: 'Motorbike', TRICYCLE: 'Tricycle', CAR: 'Car' },
-  call: 'Call',
+  callName: (first: string) => `Call ${first}`,
   callLabel: (name: string) => `Call ${name}, your rider`,
+  myPoint: 'My spot',
   toPay: 'To pay on delivery',
   parcel: 'Parcel',
   delivery: 'Delivery',
-  payHow: 'In cash or by Mobile Money (MTN, Orange) to the rider.',
+  payShort: 'Cash or Mobile Money',
   mobileMoneyFee: (fee: string) => `By Mobile Money, an operator fee of ${fee} is added.`,
   paymentPending: (amount: string) =>
     `A payment request of ${amount} reached your phone: approve it with your Mobile Money PIN.`,
@@ -250,8 +257,12 @@ export interface Strings {
   lang: Locale;
   logoAlt: Text;
   title: Text;
-  from: Template;
-  fromUnknown: Text;
+  brandLine: Text;
+  brandSub: Text;
+  parcelOf: Template;
+  yourParcel: Text;
+  riderComing: Template;
+  minutes: (n: number) => string;
   status: Record<OrderStatus, Text>;
   retrying: Text;
   returning: Text;
@@ -262,24 +273,23 @@ export interface Strings {
   at: Template;
   searchingBody: Text;
   assignedBody: Text;
-  etaAt: Template;
   etaPending: Text;
   failedBody: Text;
   deliveredAt: Template;
   returnedBody: Text;
   cancelledBody: Text;
-  trackFrom: Text;
   trackTo: Text;
   steps: [Text, Text, Text, Text];
   stepFailed: Text;
   stepReturned: Text;
   vehicle: Record<'MOTORBIKE' | 'TRICYCLE' | 'CAR', Text>;
-  call: Text;
+  callName: Template;
   callLabel: Template;
+  myPoint: Text;
   toPay: Text;
   parcel: Text;
   delivery: Text;
-  payHow: Text;
+  payShort: Text;
   mobileMoneyFee: Template;
   paymentPending: Template;
   nothingToPay: Text;

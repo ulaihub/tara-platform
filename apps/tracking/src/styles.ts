@@ -1,12 +1,15 @@
+import { CITY_CSS } from './views/city.js';
+
 /**
  * Feuille de style de la page (inline : une seule requête). Couleurs et rayons des apps
  * (tara_colors) ; thème sombre selon le téléphone ; police de la marque en deux graisses.
  */
-export const CSS = `
+export const CSS =
+  `
 @font-face{font-family:Jakarta;font-weight:500;font-display:swap;src:url(/static/jakarta-500.woff) format("woff")}
 @font-face{font-family:Jakarta;font-weight:800;font-display:swap;src:url(/static/jakarta-800.woff) format("woff")}
-:root{color-scheme:light dark;--bg:#F6F2EC;--card:#FFFFFF;--line:rgba(22,18,14,.09);--text:#16120E;--muted:rgba(22,18,14,.68);--faint:rgba(22,18,14,.46);--track:rgba(22,18,14,.1);--accent:#C24A00;--accent-bg:rgba(255,106,0,.08);--accent-line:rgba(255,106,0,.28);--ok:#12805A;--ok-bg:rgba(18,128,90,.1);--danger:#C9302C;--danger-bg:rgba(201,48,44,.08);--grad:linear-gradient(100deg,#FFB000,#FF6A00 55%,#FF3D00);--on-brand:#140800;--shadow:0 12px 32px -18px rgba(90,45,0,.35)}
-@media (prefers-color-scheme:dark){:root{--bg:#0A0A0F;--card:#15151C;--line:rgba(255,255,255,.09);--text:#FFFFFF;--muted:rgba(255,255,255,.72);--faint:rgba(255,255,255,.5);--track:rgba(255,255,255,.13);--accent:#FF9A4D;--accent-bg:rgba(255,106,0,.12);--accent-line:rgba(255,106,0,.35);--ok:#3DD68C;--ok-bg:rgba(61,214,140,.12);--danger:#FF7A72;--danger-bg:rgba(255,107,107,.12);--shadow:none}}
+:root{color-scheme:light dark;--bg:#F6F2EC;--card:#FFFFFF;--line:rgba(22,18,14,.09);--text:#16120E;--muted:rgba(22,18,14,.68);--faint:rgba(22,18,14,.46);--track:rgba(22,18,14,.1);--accent:#C2410C;--accent-bg:rgba(255,106,0,.08);--accent-line:rgba(255,106,0,.28);--ok:#0E7F57;--ok-bg:rgba(18,128,90,.1);--danger:#C9302C;--danger-bg:rgba(201,48,44,.08);--grad:linear-gradient(100deg,#FFB000,#FF6A00 55%,#FF3D00);--on-brand:#140800;--shadow:0 12px 32px -18px rgba(90,45,0,.35);--sheet:#FFFFFF;--glass:rgba(255,255,255,.84);--glass-line:#FFFFFF;--glass-shadow:0 12px 28px rgba(140,70,10,.08);--soft:rgba(22,18,14,.62)}
+@media (prefers-color-scheme:dark){:root{--bg:#0A0A0F;--card:#15151C;--line:rgba(255,255,255,.09);--text:#FFFFFF;--muted:rgba(255,255,255,.72);--faint:rgba(255,255,255,.5);--track:rgba(255,255,255,.13);--accent:#FFB15C;--accent-bg:rgba(255,106,0,.12);--accent-line:rgba(255,106,0,.35);--ok:#4ADE9B;--ok-bg:rgba(61,214,140,.12);--danger:#FF7A72;--danger-bg:rgba(255,107,107,.12);--shadow:none;--sheet:#16161E;--glass:rgba(255,255,255,.06);--glass-line:rgba(255,255,255,.1);--glass-shadow:none;--soft:rgba(255,255,255,.62)}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:500 15px/1.45 Jakarta,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -67,4 +70,49 @@ input[type=text],input[type=tel]{display:block;width:100%;min-height:48px;margin
 footer{margin-top:22px;text-align:center;color:var(--faint);font-size:12px}
 footer p{margin:4px 0}footer a{color:inherit}
 :focus-visible{outline:3px solid #FF8A3D;outline-offset:2px}
-`;
+.wrap.map{padding:0}
+.top{position:relative}
+header.over{position:absolute;left:0;right:0;top:0;padding:16px 20px 0;display:flex;align-items:center;gap:10px}
+.tile-logo{flex:none;padding:6px 8px;border-radius:12px;background:#16120E;display:flex}
+.tile-logo img{display:block;width:40px;height:28px;object-fit:contain}
+.brandline{display:flex;flex-direction:column;line-height:1.3}
+.brandline b{font-size:14px;font-weight:800}.brandline span{font-size:11px;color:var(--soft)}
+.secure{flex:none;padding:5px 9px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-line);font-size:11px;font-weight:800;display:flex;align-items:center;gap:5px}
+.secure svg{fill:none;stroke:var(--ok);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sheet{position:relative;margin-top:-50px;padding:16px 20px 20px;border-radius:28px 28px 0 0;background:var(--sheet);box-shadow:0 -16px 40px rgba(0,0,0,.2);min-height:calc(100vh - 330px)}
+.sheet main{display:flex;flex-direction:column;gap:12px}
+.sheet .card{margin-top:0;padding:12px 14px;background:var(--glass);border-color:var(--glass-line);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%)}
+.lead{display:flex;flex-direction:column;gap:12px}
+.lead p{margin:0}
+.kicker{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.headline{display:flex;align-items:center;gap:12px}
+.headline h1{flex:1;margin:0;font-size:21px}
+.chip{flex:none;padding:8px 10px;border-radius:12px;background:rgba(255,177,92,.14);font-size:14px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.lead .sub,.lead .small{margin-top:-6px}
+.progress{display:flex;flex-direction:column;gap:6px}
+.rail{display:block;height:6px;border-radius:3px;background:var(--track);overflow:hidden}
+@keyframes flow{from{background-position:0 0}to{background-position:-200% 0}}
+.flow{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,#FFB000,#FF6A00,#FF3D00,#FF6A00,#FFB000);background-size:200% 100%;animation:flow 2.6s linear infinite}
+.flow.k0{width:12%}.flow.k1{width:38%}.flow.k2{width:72%}.flow.k3{width:100%}
+.progress.fail .flow{background:var(--danger);animation:none}
+.progress ol{display:flex;justify-content:space-between;list-style:none;margin:0;padding:0}
+.progress li{font-size:11px;font-weight:800;color:var(--faint)}
+.progress li.on{color:var(--accent)}
+.progress.fail li.on:last-child{color:var(--danger)}
+.note-card{font-size:13px;line-height:1.45;color:var(--muted)}
+.pay .row{gap:10px}
+.pay .name{font-size:13px}.pay .small{font-size:12px;color:var(--soft)}
+.op{flex:none;width:26px;height:26px;border-radius:7px;background:#FFF;box-shadow:0 0 0 1px rgba(22,18,14,.08)}
+.pay .amount{font-size:18px;margin:0 0 0 6px;white-space:nowrap}
+.split{margin-top:8px;padding-top:6px;border-top:1px solid var(--line)}
+.pay .fee{margin-top:6px}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px}
+.actions.one{grid-template-columns:1fr}
+.actions .btn{min-height:50px;font-size:14px}
+.btn.call{background:rgba(74,222,155,.14);color:var(--ok)}
+.btn.glass{background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--glass-shadow);color:var(--text)}
+.btn.glass svg{color:var(--accent)}
+.sheet .note{margin:0}
+.sheet footer{margin-top:18px}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+` + CITY_CSS;

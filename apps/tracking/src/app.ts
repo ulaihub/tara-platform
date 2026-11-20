@@ -29,13 +29,15 @@ export function forwardedClientIp(header: string | undefined): string | undefine
   return last ? last : undefined;
 }
 
-/** Fichiers servis tels quels : polices, logo complet (clair, sombre) et pictogramme de l'onglet (7 jours en cache). */
+/** Fichiers servis tels quels : polices, logo complet (clair, sombre), pictogramme de l'onglet et logos des opérateurs (7 jours en cache). */
 const ASSETS: Record<string, string> = {
   'jakarta-500.woff': 'font/woff',
   'jakarta-800.woff': 'font/woff',
   'logo-clair.svg': 'image/svg+xml',
   'logo-sombre.svg': 'image/svg+xml',
   'marque-clair.svg': 'image/svg+xml',
+  'orange-money.png': 'image/png',
+  'mtn-momo.png': 'image/png',
 };
 
 const FINAL = new Set(['DELIVERED', 'RETURNED', 'CANCELLED']);

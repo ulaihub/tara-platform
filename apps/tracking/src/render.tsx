@@ -2,11 +2,12 @@ import type { Context } from 'hono';
 import type { PublicLocationLink, PublicTracking } from './api.js';
 import { formatDayTime } from './format.js';
 import type { Locale, Strings } from './i18n.js';
+import { City } from './views/city.js';
 import { Layout } from './views/layout.js';
 import { Message } from './views/message.js';
 import { PLACE_SCRIPT, PlacePage, type PlaceValues } from './views/place.js';
 import type { IconName } from './views/icons.js';
-import { type Flash, TrackingPage } from './views/tracking.js';
+import { type Flash, riderStep, TrackingPage } from './views/tracking.js';
 
 /** Lien vers l'autre langue, sur la même page. */
 function langHref(c: Context, t: Strings): string {
@@ -37,6 +38,7 @@ export const renderPage = {
         fingerprint={p.fingerprint}
         langHref={langHref(c, p.t)}
         refreshHref={p.fingerprint ? `${page}${p.langQuery}` : undefined}
+        map={<City rider={riderStep(p.data)} youLabel={p.t.trackTo} />}
       >
         <TrackingPage
           data={p.data}

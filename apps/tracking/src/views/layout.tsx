@@ -16,8 +16,21 @@ export const Layout: FC<{
   title?: string;
   /** Script propre à la page (lien de localisation). */
   script?: string;
+  /** Carte du haut (maquette Web-Suivi) : l'en-tête passe par-dessus, le contenu dans la feuille. */
+  map?: Child;
   children: Child;
-}> = ({ t, nonce, reference, fingerprint, langHref, refreshHref, title, script, children }) => (
+}> = ({
+  t,
+  nonce,
+  reference,
+  fingerprint,
+  langHref,
+  refreshHref,
+  title,
+  script,
+  map,
+  children,
+}) => (
   <>
     {raw('<!doctype html>')}
     <html lang={t.lang}>
@@ -32,29 +45,52 @@ export const Layout: FC<{
         <style nonce={nonce} dangerouslySetInnerHTML={{ __html: CSS }} />
       </head>
       <body data-v={fingerprint}>
-        <div class="wrap">
-          <header>
-            <span class="brand">
-              <picture>
-                <source srcset="/static/logo-sombre.svg" media="(prefers-color-scheme: dark)" />
-                <img src="/static/logo-clair.svg" alt={t.logoAlt} width="128" height="48" />
-              </picture>
-            </span>
-            {reference ? <span class="ref">{reference}</span> : null}
-          </header>
-          <main>{children}</main>
-          <footer>
-            {refreshHref ? (
-              <p>
-                {fingerprint ? `${t.liveHint} ` : null}
-                <a href={refreshHref}>{t.refresh}</a>
-              </p>
-            ) : null}
-            <p>
-              {t.footer} · <a href={langHref}>{t.switchLang}</a>
-            </p>
-          </footer>
-        </div>
+        {map ? (
+          <div class="wrap map">
+            <div class="top">
+              {map}
+              <header class="over">
+                <span class="tile-logo">
+                  <img src="/static/logo-sombre.svg" alt={t.logoAlt} width="40" height="28" />
+                </span>
+                <span class="grow brandline">
+                  <b>{t.brandLine}</b>
+                  <span>{t.brandSub}</span>
+                </span>
+                <span class="secure">
+                  <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="5" y="11" width="14" height="9" rx="2" />
+                    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                  </svg>
+                  tara.cm
+                </span>
+              </header>
+            </div>
+            <div class="sheet">
+              <main>{children}</main>
+              <Footer
+                t={t}
+                fingerprint={fingerprint}
+                langHref={langHref}
+                refreshHref={refreshHref}
+              />
+            </div>
+          </div>
+        ) : (
+          <div class="wrap">
+            <header>
+              <span class="brand">
+                <picture>
+                  <source srcset="/static/logo-sombre.svg" media="(prefers-color-scheme: dark)" />
+                  <img src="/static/logo-clair.svg" alt={t.logoAlt} width="128" height="48" />
+                </picture>
+              </span>
+              {reference ? <span class="ref">{reference}</span> : null}
+            </header>
+            <main>{children}</main>
+            <Footer t={t} fingerprint={fingerprint} langHref={langHref} refreshHref={refreshHref} />
+          </div>
+        )}
         {fingerprint ? (
           <script nonce={nonce} dangerouslySetInnerHTML={{ __html: LIVE_SCRIPT }} />
         ) : null}
@@ -62,6 +98,25 @@ export const Layout: FC<{
       </body>
     </html>
   </>
+);
+
+const Footer: FC<{ t: Strings; fingerprint?: string; langHref: string; refreshHref?: string }> = ({
+  t,
+  fingerprint,
+  langHref,
+  refreshHref,
+}) => (
+  <footer>
+    {refreshHref ? (
+      <p>
+        {fingerprint ? `${t.liveHint} ` : null}
+        <a href={refreshHref}>{t.refresh}</a>
+      </p>
+    ) : null}
+    <p>
+      {t.footer} · <a href={langHref}>{t.switchLang}</a>
+    </p>
+  </footer>
 );
 
 /**
