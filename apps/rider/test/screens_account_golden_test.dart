@@ -123,9 +123,11 @@ void main() {
     goldenTest('16 contact d’urgence ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, AccountHarness().screen());
       await settle(tester);
-      await tester.scrollUntilVisible(find.text('Modifier'), 120, scrollable: find.byType(Scrollable).first);
+      await tester.scrollUntilVisible(find.text('Contact d’urgence'), 120, scrollable: find.byType(Scrollable).first);
+      await Scrollable.ensureVisible(tester.element(find.text('Contact d’urgence')), alignment: .3);
+      await tester.pump();
       await settle(tester);
-      await tester.tap(find.text('Modifier'));
+      await tester.tap(find.text('Contact d’urgence'));
       await settle(tester);
       expect(tester.takeException(), isNull);
       expect(find.byType(EmergencyContactScreen), findsOneWidget);
@@ -169,7 +171,8 @@ void main() {
       );
       await settle(tester);
       expect(tester.takeException(), isNull);
-      expect(find.text('Toutes vos pièces sont validées'), findsOneWidget);
+      expect(find.text('1 pièce à renvoyer'), findsNothing);
+      expect(find.text('Compte actif'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/16_profil/complet_${brightness.name}.png'));
     });
   }

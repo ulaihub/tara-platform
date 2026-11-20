@@ -47,6 +47,14 @@ class DocumentsState {
   int get doneCount => items.where((item) => item.done).length;
   bool get complete => doneCount == requirements.length;
 
+  /// Une pièce est refusée, expirée ou manquante : à renvoyer.
+  bool get needsAttention => items.any(
+    (item) =>
+        item.status == DocumentStatus.rejected ||
+        item.status == DocumentStatus.expired ||
+        item.status == DocumentStatus.toDo,
+  );
+
   DocumentItem _item(DocumentRequirement requirement) {
     final types = requirement.options.map((o) => o.type).toSet();
     final uploading = uploads.entries.where((e) => types.contains(e.key)).firstOrNull;

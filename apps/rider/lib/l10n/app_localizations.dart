@@ -3775,6 +3775,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{hours} h'**
   String hoursShort(int hours);
+
+  /// No description provided for @themeAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Automatique'**
+  String get themeAuto;
+
+  /// No description provided for @effectsAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get effectsAll;
+
+  /// No description provided for @myDocumentsRowSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une pièce refusée ou expirée se renvoie ici'**
+  String get myDocumentsRowSubtitle;
+
+  /// No description provided for @termsRowAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version {version} acceptée le {date}'**
+  String termsRowAccepted(String version, String date);
+
+  /// No description provided for @termsRowToSign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle version à accepter'**
+  String get termsRowToSign;
+
+  /// No description provided for @securityRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code secret et empreinte'**
+  String get securityRow;
+
+  /// No description provided for @securityRowSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour voir le solde et retirer'**
+  String get securityRowSubtitle;
+
+  /// No description provided for @displayMoreRow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue et sons'**
+  String get displayMoreRow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

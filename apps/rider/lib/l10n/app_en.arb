@@ -665,5 +665,13 @@
   "dayNotYetLabel": "not ridden yet",
   "weekOnline": "Online",
   "weekRides": "Rides",
-  "hoursShort": "{hours} h"
+  "hoursShort": "{hours} h",
+  "themeAuto": "Automatic",
+  "effectsAll": "All",
+  "myDocumentsRowSubtitle": "A refused or expired document is sent again here",
+  "termsRowAccepted": "Version {version} accepted on {date}",
+  "termsRowToSign": "New version to accept",
+  "securityRow": "Secret code and fingerprint",
+  "securityRowSubtitle": "To see the balance and withdraw",
+  "displayMoreRow": "Language and sounds"
 }

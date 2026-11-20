@@ -2153,4 +2153,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String hoursShort(int hours) {
     return '$hours h';
   }
+
+  @override
+  String get themeAuto => 'Automatic';
+
+  @override
+  String get effectsAll => 'All';
+
+  @override
+  String get myDocumentsRowSubtitle => 'A refused or expired document is sent again here';
+
+  @override
+  String termsRowAccepted(String version, String date) {
+    return 'Version $version accepted on $date';
+  }
+
+  @override
+  String get termsRowToSign => 'New version to accept';
+
+  @override
+  String get securityRow => 'Secret code and fingerprint';
+
+  @override
+  String get securityRowSubtitle => 'To see the balance and withdraw';
+
+  @override
+  String get displayMoreRow => 'Language and sounds';
 }

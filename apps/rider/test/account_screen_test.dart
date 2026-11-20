@@ -56,7 +56,9 @@ void main() {
   }
 
   Future<void> tapText(WidgetTester tester, String text) async {
-    await tester.ensureVisible(find.text(text).last);
+    // Amené dans le haut de l'écran, loin de la barre d'onglets en verre.
+    await Scrollable.ensureVisible(tester.element(find.text(text).last), alignment: .3);
+    await tester.pump();
     // Défilement terminé : sinon le toucher arrête la liste au lieu d'atteindre le bouton.
     await settle(tester);
     await tester.tap(find.text(text).last);
@@ -108,10 +110,6 @@ void main() {
     await tapText(tester, 'Clair');
     expect(settingsOf(tester).themeMode, ThemeMode.light);
 
-    await tapText(tester, 'English');
-    expect(settingsOf(tester).locale, const Locale('en'));
-    expect(harness.api.locales, ['en']);
-
     await tapText(tester, 'Réduites');
     expect(settingsOf(tester).effects.preference, EffectsPreference.reduced);
 
@@ -120,13 +118,21 @@ void main() {
     expect(settingsOf(tester).effects.glassLevel, GlassLevel.opaque);
     await tapText(tester, 'Verre');
     expect(settingsOf(tester).effects.glassLevel, GlassLevel.clear);
+
+    // La langue est dans « Langue et sons ».
+    await show(tester, 'Langue et sons');
+    await tapText(tester, 'Langue et sons');
+    await tapText(tester, 'English');
+    expect(settingsOf(tester).locale, const Locale('en'));
+    expect(harness.api.locales, ['en']);
   });
 
   testWidgets('sons : coupés puis remis, un exemple se fait entendre', (tester) async {
     final harness = AccountHarness();
     await pumpVariant(tester, Variant.matrix.first, harness.screen());
     await settle(tester);
-    await show(tester, 'Sons');
+    await show(tester, 'Langue et sons');
+    await tapText(tester, 'Langue et sons');
 
     await tapText(tester, 'Sons');
     expect(settingsOf(tester).sounds, isFalse);
@@ -161,9 +167,9 @@ void main() {
     harness.api.profileAfter = (name, phone) => accountProfile(contactName: name);
     await pumpVariant(tester, Variant.matrix.first, harness.screen());
     await settle(tester);
-    expect(find.text('Aucun contact'), findsOneWidget);
+    expect(find.text('Prévenu automatiquement si vous déclenchez une alerte.'), findsOneWidget);
 
-    await tapText(tester, 'Ajouter');
+    await tapText(tester, 'Contact d’urgence');
     expect(find.byType(EmergencyContactScreen), findsOneWidget);
     expect(find.text('Retirer ce contact'), findsNothing);
     await tester.enterText(find.byType(EditableText).at(0), 'Marie Ngo');
@@ -176,7 +182,7 @@ void main() {
     await tapText(tester, 'Enregistrer');
     expect(harness.api.contacts.single, ('Marie Ngo', '+237699112233'));
     expect(find.byType(EmergencyContactScreen), findsNothing);
-    expect(find.text('Marie Ngo'), findsOneWidget);
+    expect(find.text('Marie Ngo · 6 99 •• •• 33'), findsOneWidget);
   });
 
   testWidgets('déconnexion : confirmée, hors ligne d’abord', (tester) async {

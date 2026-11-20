@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,7 @@ import 'package:tara_ui/components/terms_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/motion/motion_clock.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_effects.dart';
 import 'package:tara_ui/tara_icons.dart';
@@ -27,6 +29,7 @@ import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../common/pin.dart';
 import '../common/scoped_page.dart';
+import '../home/home_widgets.dart';
 import '../legal/terms_screen.dart';
 import '../onboarding/documents_controller.dart';
 import '../onboarding/documents_screen.dart';
@@ -34,7 +37,7 @@ import '../support/support.dart';
 import 'close_account_screen.dart';
 import 'emergency_contact_screen.dart';
 
-enum _Sub { documents, contact, close }
+enum _Sub { documents, contact, close, terms, security, display }
 
 /// Profil et réglages (onglet Profil, non dessiné dans la maquette : passation §7) :
 /// identité et véhicule, pièces et leur état (une pièce refusée ou expirée se renvoie
@@ -50,9 +53,25 @@ class AccountScreen extends ConsumerStatefulWidget {
 }
 
 class _AccountScreenState extends ConsumerState<AccountScreen> {
+  // Formes liquides de la maquette (mêmes que l'accueil hors ligne).
   static const _blobs = [
-    BlobSpec(alignment: Alignment(1.2, -1.05), size: 300, colors: BlobSpec.brand, blur: 70),
-    BlobSpec(alignment: Alignment(-1.3, 0.7), size: 240, colors: BlobSpec.warm, blur: 64, delay: Duration(seconds: 5)),
+    BlobSpec(alignment: Alignment(-.69, -.55), size: 300, colors: BlobSpec.warm, blur: 46, opacity: .76),
+    BlobSpec(
+      alignment: Alignment(.74, .02),
+      size: 260,
+      colors: BlobSpec.soft,
+      blur: 46,
+      opacity: .44,
+      delay: Duration(seconds: 4),
+    ),
+    BlobSpec(
+      alignment: Alignment(-.59, .71),
+      size: 240,
+      colors: BlobSpec.warm,
+      blur: 46,
+      opacity: .44,
+      delay: Duration(seconds: 9),
+    ),
   ];
 
   late Future<Json> _me = ref.read(riderApiProvider).me();
@@ -133,111 +152,81 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             child: RefreshIndicator(
               onRefresh: () async => _reload(),
               child: ListView(
-                padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + TaraTabShell.bottomInset(context)),
+                padding: EdgeInsets.fromLTRB(20, 22, 20, 24 + TaraTabShell.bottomInset(context)),
                 children: [
-                  Semantics(
-                    header: true,
-                    child: Text(l.tabProfile, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-                  ),
-                  const SizedBox(height: 16),
                   FutureBuilder<Json>(
                     future: _me,
-                    builder: (context, snapshot) => _IdentityCard(
-                      name: snapshot.data?['fullName'] as String?,
-                      phone: snapshot.data?['phone'] as String?,
-                      profile: profile,
-                    ),
+                    builder: (context, snapshot) =>
+                        _ProfileHeader(name: snapshot.data?['fullName'] as String?, profile: profile),
                   ),
-                  const SizedBox(height: 20),
-                  SectionHeader(
-                    title: l.myDocuments,
-                    action: documents.value == null
-                        ? null
-                        : TaraLink(label: l.seeAll, onPressed: () => setState(() => _sub = _Sub.documents)),
-                  ),
-                  const SizedBox(height: 8),
-                  if (documents.value case final data?)
-                    _DocumentsSummary(state: data, onOpen: () => setState(() => _sub = _Sub.documents))
-                  else if (documents.hasError)
-                    _Failed(onRetry: _reload)
-                  else
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Center(child: GooLoader(compact: true)),
-                    ),
-                  const SizedBox(height: 20),
-                  SectionHeader(title: l.emergencyContactTitle),
-                  const SizedBox(height: 8),
-                  _ContactCard(
-                    profile: profile,
-                    onEdit: profile == null ? null : () => setState(() => _sub = _Sub.contact),
-                  ),
-                  const SizedBox(height: 20),
-                  SectionHeader(title: l.displaySection),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 14),
                   _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
-                  const SizedBox(height: 20),
-                  SectionHeader(title: l.securitySection),
-                  const SizedBox(height: 8),
-                  const SecurityCard(),
-                  const SizedBox(height: 20),
-                  SectionHeader(title: l.termsSection),
-                  const SizedBox(height: 8),
-                  const _TermsCard(),
-                  const SizedBox(height: 20),
-                  SectionHeader(title: l.helpSection),
-                  const SizedBox(height: 8),
-                  GlassCard(
-                    radius: 22,
-                    shadow: false,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                    child: Column(
-                      children: [
-                        ListRow(
-                          leading: const IconTile(icon: TaraIcons.message),
-                          title: l.supportMenuRow,
-                          subtitle: l.supportMenuRowSubtitle,
-                          trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-                          onTap: () => unawaited(openSupport(context, ref)),
-                        ),
-                        if (config?.supportPhone case final support?)
-                          ListRow(
-                            leading: const IconTile(icon: TaraIcons.headset),
-                            title: l.supportTara,
-                            subtitle: displayPhone(support),
-                            trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
-                            onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
-                          ),
-                      ],
-                    ),
+                  if (documents.hasError) ...[const SizedBox(height: 14), _Failed(onRetry: _reload)],
+                  // Pièce refusée, expirée ou manquante : l'alerte reste en évidence.
+                  if (documents.value case final data? when data.needsAttention) ...[
+                    const SizedBox(height: 14),
+                    _DocumentsSummary(state: data, onOpen: () => setState(() => _sub = _Sub.documents)),
+                  ],
+                  const SizedBox(height: 10),
+                  _MenuLine(
+                    icon: TaraIcons.idCard,
+                    title: l.myDocuments,
+                    subtitle: l.myDocumentsRowSubtitle,
+                    onTap: documents.value == null ? null : () => setState(() => _sub = _Sub.documents),
                   ),
-                  const SizedBox(height: 20),
-                  SectionHeader(title: l.accountDataSection),
-                  const SizedBox(height: 8),
-                  GlassCard(
-                    radius: 22,
-                    shadow: false,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                    child: Column(
-                      children: [
-                        ListRow(
-                          leading: const IconTile(icon: TaraIcons.download),
-                          title: l.exportDataRow,
-                          subtitle: l.exportDataRowSubtitle,
-                          trailing: _exporting
-                              ? const SizedBox(width: 44, child: GooLoader(compact: true))
-                              : TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-                          onTap: _exporting ? null : () => unawaited(_exportData()),
-                        ),
-                        ListRow(
-                          leading: const IconTile(icon: TaraIcons.close),
-                          title: l.closeAccountRow,
-                          subtitle: l.closeAccountRowSubtitle,
-                          trailing: TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textTertiary),
-                          onTap: () => setState(() => _sub = _Sub.close),
-                        ),
-                      ],
+                  _MenuLine(
+                    icon: TaraIcons.contacts,
+                    title: l.emergencyContactTitle,
+                    subtitle: switch ((profile?.emergencyContactName, profile?.emergencyContactPhone)) {
+                      (final name?, final phone?) => '$name · ${maskedPhone(phone)}',
+                      _ => l.emergencyHelp,
+                    },
+                    onTap: profile == null ? null : () => setState(() => _sub = _Sub.contact),
+                  ),
+                  _TermsLine(onTap: () => setState(() => _sub = _Sub.terms)),
+                  _MenuLine(
+                    icon: TaraIcons.message,
+                    title: l.supportMenuRow,
+                    subtitle: l.supportMenuRowSubtitle,
+                    onTap: () => unawaited(openSupport(context, ref)),
+                  ),
+                  if (config?.supportPhone case final support?)
+                    _MenuLine(
+                      icon: TaraIcons.headset,
+                      title: l.supportTara,
+                      subtitle: displayPhone(support),
+                      trailing: TaraIcon(TaraIcons.phone, size: 20, color: c.accentText),
+                      onTap: () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: support))),
                     ),
+                  _MenuLine(
+                    icon: TaraIcons.lock,
+                    title: l.securityRow,
+                    subtitle: l.securityRowSubtitle,
+                    onTap: () => setState(() => _sub = _Sub.security),
+                  ),
+                  _MenuLine(
+                    icon: TaraIcons.globe,
+                    title: l.displayMoreRow,
+                    subtitle: settings.locale == null
+                        ? l.optionAuto
+                        : settings.locale!.languageCode == 'en'
+                        ? 'English'
+                        : 'Français',
+                    onTap: () => setState(() => _sub = _Sub.display),
+                  ),
+                  _MenuLine(
+                    icon: TaraIcons.download,
+                    title: l.exportDataRow,
+                    subtitle: l.exportDataRowSubtitle,
+                    trailing: _exporting ? const SizedBox(width: 44, child: GooLoader(compact: true)) : null,
+                    onTap: _exporting ? null : () => unawaited(_exportData()),
+                  ),
+                  _MenuLine(
+                    icon: TaraIcons.closeCircle,
+                    title: l.closeAccountRow,
+                    subtitle: l.closeAccountRowSubtitle,
+                    danger: true,
+                    onTap: () => setState(() => _sub = _Sub.close),
                   ),
                   if (_exportError case final error?) ...[const SizedBox(height: 8), ErrorLine(error)],
                   const SizedBox(height: 24),
@@ -276,6 +265,28 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ),
             ),
           ),
+        if (_sub case _Sub.terms || _Sub.security || _Sub.display)
+          Positioned.fill(
+            child: HideTabBar(
+              child: _SubPage(
+                title: switch (_sub) {
+                  _Sub.terms => l.termsSection,
+                  _Sub.security => l.securityRow,
+                  _ => l.displayMoreRow,
+                },
+                onBack: () => setState(() => _sub = null),
+                child: switch (_sub) {
+                  _Sub.terms => const _TermsCard(),
+                  _Sub.security => const SecurityCard(),
+                  _ => _DisplayCard(
+                    settings: settings,
+                    onLanguage: (code) => _setLanguage(settings, code),
+                    languageAndSounds: true,
+                  ),
+                },
+              ),
+            ),
+          ),
         if (_sub == _Sub.close)
           Positioned.fill(
             child: HideTabBar(child: CloseAccountScreen(onBack: () => setState(() => _sub = null))),
@@ -294,59 +305,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
           ),
       ],
-    );
-  }
-}
-
-/// Nom, numéro, véhicule et état du compte.
-class _IdentityCard extends StatelessWidget {
-  const _IdentityCard({required this.name, required this.phone, required this.profile});
-  final String? name;
-  final String? phone;
-  final RiderProfile? profile;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final c = TaraColors.of(context);
-    final rider = profile;
-    final vehicle = switch (rider?.vehicleType) {
-      'MOTORBIKE' => l.vehicleMotorbike,
-      'CAR' => l.vehicleCar,
-      'TRICYCLE' => l.vehicleTricycle,
-      _ => null,
-    };
-    final plate = rider?.plateNumber;
-    final status = switch (rider?.status) {
-      'ACTIVE' => (l.accountActive, TintTone.success),
-      'SUSPENDED' => (l.accountSuspended, TintTone.danger),
-      'REJECTED' => (l.accountRejected, TintTone.danger),
-      null => null,
-      _ => (l.accountPending, TintTone.accent),
-    };
-    return GlassCard(
-      radius: 24,
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          InitialsAvatar(name: name ?? '', size: 56),
-          const SizedBox(width: 14),
-          Expanded(
-            child: MergeSemantics(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text((name ?? '').isEmpty ? '—' : name!, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
-                  if (phone != null) Text(displayPhone(phone!), style: TaraText.label.copyWith(color: c.textSecondary)),
-                  if (vehicle != null)
-                    Text([vehicle, ?plate].join(' · '), style: TaraText.label.copyWith(color: c.textSecondary)),
-                  if (status != null) ...[const SizedBox(height: 8), InfoPill(label: status.$1, tone: status.$2)],
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -446,37 +404,271 @@ class _DocumentsSummary extends StatelessWidget {
   }
 }
 
-/// Contact d'urgence : prévenu par SMS si le livreur déclenche une alerte.
-class _ContactCard extends StatelessWidget {
-  const _ContactCard({required this.profile, required this.onEdit});
+/// En-tête de la maquette : avatar dans un anneau dégradé qui tourne (6 s), nom,
+/// véhicule et plaque, état du compte.
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({required this.name, required this.profile});
+  final String? name;
   final RiderProfile? profile;
-  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final name = profile?.emergencyContactName;
-    final phone = profile?.emergencyContactPhone;
-    return GlassCard(
-      radius: 22,
-      shadow: false,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      child: ListRow(
-        leading: const IconTile(icon: TaraIcons.shield),
-        title: name ?? l.emergencyNone,
-        subtitle: phone == null ? l.emergencyHelp : displayPhone(phone),
-        trailing: onEdit == null ? null : TaraLink(label: phone == null ? l.add : l.edit, onPressed: onEdit),
-        onTap: onEdit,
+    final c = TaraColors.of(context);
+    final rider = profile;
+    final vehicle = switch (rider?.vehicleType) {
+      'MOTORBIKE' => l.vehicleMotorbike,
+      'CAR' => l.vehicleCar,
+      'TRICYCLE' => l.vehicleTricycle,
+      _ => null,
+    };
+    final ok = c.isDark ? const Color(0xFF4ADE9B) : const Color(0xFF0E7F57);
+    final status = switch (rider?.status) {
+      'ACTIVE' => (l.accountActive, ok),
+      'SUSPENDED' => (l.accountSuspended, c.dangerText),
+      'REJECTED' => (l.accountRejected, c.dangerText),
+      null => null,
+      _ => (l.accountPending, c.accentText),
+    };
+    return Row(
+      children: [
+        SizedBox.square(
+          dimension: 72,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              MotionBuilder(
+                period: const Duration(seconds: 6),
+                stillPhase: 0,
+                builder: (context, t, _) => Transform.rotate(
+                  angle: t * 2 * math.pi,
+                  child: const DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: SweepGradient(
+                        colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red, Color(0x00FF3D00), TaraBrand.amber],
+                        stops: [0, .25, .5, .7, 1],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(4),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.bg),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: RiderAvatar(name: name ?? '', size: 56),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: MergeSemantics(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    (name ?? '').isEmpty ? '—' : name!,
+                    style: TextStyle(
+                      fontFamily: TaraText.sora,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: c.textPrimary,
+                    ),
+                  ),
+                ),
+                if (vehicle != null) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    [vehicle, ?rider?.plateNumber].join(' · '),
+                    style: TaraText.small.copyWith(fontSize: 12, color: c.textPrimary.withValues(alpha: .66)),
+                  ),
+                ],
+                if (status != null) ...[
+                  const SizedBox(height: 3),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: status.$2.withValues(alpha: .14),
+                      border: Border.all(color: status.$2.withValues(alpha: .35)),
+                    ),
+                    child: Text(
+                      status.$1,
+                      style: TaraText.small.copyWith(fontSize: 11, fontWeight: FontWeight.w800, color: status.$2),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Ligne du menu de la maquette : pastille d'icône, titre, sous-titre, chevron, filet.
+class _MenuLine extends StatelessWidget {
+  const _MenuLine({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.trailing,
+    this.danger = false,
+    this.subtitleColor,
+  });
+
+  final TaraIconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+  final bool danger;
+  final Color? subtitleColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    return Semantics(
+      button: onTap != null,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: c.textPrimary.withValues(alpha: .08))),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(255, 177, 92, .12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: TaraIcon(icon, size: 19, strokeWidth: 1.9, color: c.accentText),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TaraText.bodyStrong.copyWith(
+                        fontSize: 14,
+                        color: danger ? (c.isDark ? const Color(0xFFFF6B75) : c.dangerText) : c.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TaraText.small.copyWith(
+                        fontSize: 12,
+                        color: subtitleColor ?? c.textPrimary.withValues(alpha: .62),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              trailing ?? TaraIcon(TaraIcons.chevronRight, size: 18, color: c.textPrimary.withValues(alpha: .4)),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Thème, langue et effets : appliqués tout de suite, gardés sur le téléphone.
+/// « Conditions et confidentialité » : version acceptée, ou nouvelle version à accepter.
+class _TermsLine extends ConsumerWidget {
+  const _TermsLine({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final status = ref.watch(termsStatusProvider).value;
+    final accepted = status?.accepted.where((item) => item.document == 'livreurs').firstOrNull;
+    final toSign = status != null && !status.upToDate;
+    return _MenuLine(
+      icon: TaraIcons.shield,
+      title: l.termsSection,
+      subtitle: toSign
+          ? l.termsRowToSign
+          : accepted == null
+          ? l.termsTitle
+          : l.termsRowAccepted(accepted.version, formatLegalDay(context, accepted.acceptedAt)),
+      subtitleColor: toSign ? c.accentText : null,
+      onTap: onTap,
+    );
+  }
+}
+
+/// Page ouverte depuis le menu : retour, titre, contenu.
+class _SubPage extends StatelessWidget {
+  const _SubPage({required this.title, required this.onBack, required this.child});
+  final String title;
+  final VoidCallback onBack;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return TaraScreen(
+      safeBottom: false,
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + MediaQuery.paddingOf(context).bottom),
+        children: [
+          Row(
+            children: [
+              GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: onBack),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(title, style: TaraText.titleCourse.copyWith(color: c.textPrimary)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Numéro masqué au milieu : « 6 99 •• •• 21 ».
+String maskedPhone(String phone) {
+  final digits = phone.replaceAll(RegExp(r'\D'), '');
+  final national = digits.length > 9 ? digits.substring(digits.length - 9) : digits;
+  if (national.length < 9) return displayPhone(phone);
+  return '${national[0]} ${national.substring(1, 3)} •• •• ${national.substring(7)}';
+}
+
+/// Réglages d'affichage. Sur le profil (maquette) : thème, transparence des barres et
+/// animations, sans cadre. Sur la page « Langue et sons » : langue et sons.
 class _DisplayCard extends StatelessWidget {
-  const _DisplayCard({required this.settings, required this.onLanguage});
+  const _DisplayCard({required this.settings, required this.onLanguage, this.languageAndSounds = false});
   final AppSettings settings;
   final ValueChanged<String?> onLanguage;
+  final bool languageAndSounds;
 
   @override
   Widget build(BuildContext context) {
@@ -488,9 +680,13 @@ class _DisplayCard extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700),
+          style: TaraText.small.copyWith(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: c.textPrimary.withValues(alpha: .66),
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         control,
         if (hint != null) ...[
           const SizedBox(height: 6),
@@ -498,98 +694,89 @@ class _DisplayCard extends StatelessWidget {
         ],
       ],
     );
-    return GlassCard(
-      radius: 22,
-      shadow: false,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
-      child: ListenableBuilder(
-        listenable: Listenable.merge([effects, settings]),
-        builder: (context, _) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            setting(
-              l.themeLabel,
-              LiquidSegmented<ThemeMode>(
-                compact: true,
-                segments: [
-                  (ThemeMode.system, l.optionAuto),
-                  (ThemeMode.light, l.themeLight),
-                  (ThemeMode.dark, l.themeDark),
-                ],
-                selected: settings.themeMode,
-                onChanged: (mode) => settings.themeMode = mode,
-              ),
-            ),
-            const SizedBox(height: 16),
-            setting(
-              l.languageLabel,
-              LiquidSegmented<String>(
-                compact: true,
-                segments: [('auto', l.optionAuto), ('fr', 'Français'), ('en', 'English')],
-                selected: settings.locale?.languageCode ?? 'auto',
-                onChanged: (code) => onLanguage(code == 'auto' ? null : code),
-              ),
-            ),
-            const SizedBox(height: 16),
-            setting(
-              l.effectsLabel,
-              LiquidSegmented<EffectsPreference>(
-                compact: true,
-                segments: [
-                  (EffectsPreference.automatic, l.optionAuto),
-                  (EffectsPreference.full, l.effectsFull),
-                  (EffectsPreference.reduced, l.effectsReduced),
-                ],
-                selected: effects.preference,
-                onChanged: (value) => effects.preference = value,
-              ),
-              hint: effects.preference == EffectsPreference.automatic && effects.lowEndDevice
-                  ? l.effectsAutoReduced
-                  : l.effectsHint,
-            ),
-            const SizedBox(height: 16),
-            setting(
-              l.glassLabel,
-              LiquidSegmented<GlassLevel>(
-                compact: true,
-                segments: [
-                  (GlassLevel.clear, l.glassClear),
-                  (GlassLevel.balanced, l.glassBalanced),
-                  (GlassLevel.opaque, l.glassOpaque),
-                ],
-                selected: effects.glassLevel,
-                onChanged: (value) => effects.glassLevel = value,
-              ),
-              hint: l.glassHint,
-            ),
-            const SizedBox(height: 16),
-            MergeSemantics(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => _toggleSounds(context, settings),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l.soundsLabel,
-                            style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(l.soundsHint, style: TaraText.small.copyWith(color: c.textTertiary)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    GlassSwitch(value: settings.sounds, onChanged: (_) => _toggleSounds(context, settings)),
-                  ],
+    return ListenableBuilder(
+      listenable: Listenable.merge([effects, settings]),
+      builder: (context, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: languageAndSounds
+            ? [
+                setting(
+                  l.languageLabel,
+                  LiquidSegmented<String>(
+                    compact: true,
+                    segments: [('auto', l.optionAuto), ('fr', 'Français'), ('en', 'English')],
+                    selected: settings.locale?.languageCode ?? 'auto',
+                    onChanged: (code) => onLanguage(code == 'auto' ? null : code),
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ),
+                const SizedBox(height: 20),
+                MergeSemantics(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _toggleSounds(context, settings),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l.soundsLabel,
+                                style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(l.soundsHint, style: TaraText.small.copyWith(color: c.textTertiary)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GlassSwitch(value: settings.sounds, onChanged: (_) => _toggleSounds(context, settings)),
+                      ],
+                    ),
+                  ),
+                ),
+              ]
+            : [
+                setting(
+                  l.themeLabel,
+                  LiquidSegmented<ThemeMode>(
+                    compact: true,
+                    segments: [
+                      (ThemeMode.light, l.themeLight),
+                      (ThemeMode.dark, l.themeDark),
+                      (ThemeMode.system, l.themeAuto),
+                    ],
+                    selected: settings.themeMode,
+                    onChanged: (mode) => settings.themeMode = mode,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                setting(
+                  l.glassLabel,
+                  LiquidSegmented<GlassLevel>(
+                    compact: true,
+                    segments: [
+                      (GlassLevel.clear, l.glassClear),
+                      (GlassLevel.balanced, l.glassBalanced),
+                      (GlassLevel.opaque, l.glassOpaque),
+                    ],
+                    selected: effects.glassLevel,
+                    onChanged: (value) => effects.glassLevel = value,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                setting(
+                  l.effectsLabel,
+                  // Deux choix comme la maquette ; « automatique » montre ce qui s'applique.
+                  LiquidSegmented<bool>(
+                    compact: true,
+                    segments: [(false, l.effectsAll), (true, l.effectsReduced)],
+                    selected: effects.reduced,
+                    onChanged: (reduced) =>
+                        effects.preference = reduced ? EffectsPreference.reduced : EffectsPreference.full,
+                  ),
+                ),
+              ],
       ),
     );
   }
