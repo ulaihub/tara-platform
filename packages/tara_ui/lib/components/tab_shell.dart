@@ -35,7 +35,14 @@ class TabAction {
 /// choisi avec un léger rebond. Effets réduits : surface opaque sans flou ; animations
 /// réduites : le trait se déplace sans transition.
 class FloatingTabBar extends StatelessWidget {
-  const FloatingTabBar({super.key, required this.items, required this.current, required this.onSelected, this.action});
+  const FloatingTabBar({
+    super.key,
+    required this.items,
+    required this.current,
+    required this.onSelected,
+    this.action,
+    this.pill = false,
+  });
 
   final List<TabItem> items;
   final int current;
@@ -43,6 +50,17 @@ class FloatingTabBar extends StatelessWidget {
 
   /// Bouton central en relief, entre la première et la seconde moitié des onglets.
   final TabAction? action;
+
+  /// Barre fine en pilule (app livreur) : icônes seules, l'onglet choisi devient une
+  /// pastille sombre avec son nom, qui glisse et s'élargit.
+  final bool pill;
+
+  /// Hauteur de la barre fine et place totale qu'elle prend (hors zone système).
+  static const pillBarHeight = 50.0;
+  static const pillHeight = pillBarHeight + bottomMargin;
+
+  /// Place à réserver sous les listes selon le style de barre.
+  static double heightOf({required bool pill}) => pill ? pillHeight : height;
 
   /// Hauteur de la barre et marge sous elle (hors zone système).
   static const barHeight = 74.0;
@@ -54,6 +72,7 @@ class FloatingTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (pill) return _PillTabBar(items: items, current: current, onSelected: onSelected);
     final effects = TaraEffects.of(context);
     // Posée au-dessus des écrans : sans ce Material transparent, ses textes n'auraient pas
     // de style de base (soulignés en jaune par Flutter).
@@ -103,6 +122,101 @@ class FloatingTabBar extends StatelessWidget {
                   ],
                 );
               },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Barre fine en pilule : verre clair ajusté aux onglets, centré ; l'onglet choisi est une
+/// pastille sombre (claire en thème sombre) avec icône et nom, les autres une icône seule.
+class _PillTabBar extends StatelessWidget {
+  const _PillTabBar({required this.items, required this.current, required this.onSelected});
+
+  final List<TabItem> items;
+  final int current;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: FloatingTabBar.bottomMargin),
+        child: Center(
+          child: GlassDock(
+            radius: FloatingTabBar.pillBarHeight / 2,
+            padding: const EdgeInsets.all(5),
+            child: SizedBox(
+              height: FloatingTabBar.pillBarHeight - 10,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    _PillTab(item: items[i], selected: i == current, onTap: () => onSelected(i)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PillTab extends StatelessWidget {
+  const _PillTab({required this.item, required this.selected, required this.onTap});
+  final TabItem item;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final effects = TaraEffects.of(context);
+    final duration = effects.decorativeMotion ? const Duration(milliseconds: 320) : Duration.zero;
+    // Pastille choisie : encre du thème (sombre en clair, claire en sombre), texte inversé.
+    final fill = c.textPrimary;
+    final ink = selected ? c.bg : c.textPrimary.withValues(alpha: .62);
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: item.label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (!selected) HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: AnimatedContainer(
+          duration: duration,
+          curve: Curves.easeOutCubic,
+          constraints: const BoxConstraints(minWidth: 52),
+          padding: EdgeInsets.symmetric(horizontal: selected ? 16 : 14),
+          decoration: BoxDecoration(
+            color: selected ? fill : fill.withValues(alpha: 0),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          alignment: Alignment.center,
+          child: AnimatedSize(
+            duration: duration,
+            curve: Curves.easeOutCubic,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TaraIcon(item.icon, size: 20, strokeWidth: selected ? 2 : 1.8, color: ink),
+                if (selected) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    item.label,
+                    maxLines: 1,
+                    style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: ink),
+                  ),
+                ],
+              ],
             ),
           ),
         ),
@@ -242,7 +356,11 @@ class TaraTabShell extends StatefulWidget {
     required this.child,
     this.showBar = true,
     this.action,
+    this.pill = false,
   });
+
+  /// Barre fine en pilule (voir [FloatingTabBar.pill]).
+  final bool pill;
 
   final List<TabItem> items;
   final int current;
@@ -278,7 +396,9 @@ class _TaraTabShellState extends State<TaraTabShell> {
   @override
   Widget build(BuildContext context) {
     final effects = TaraEffects.of(context);
-    final inset = widget.showBar ? FloatingTabBar.height + MediaQuery.paddingOf(context).bottom : 0.0;
+    final inset = widget.showBar
+        ? FloatingTabBar.heightOf(pill: widget.pill) + MediaQuery.paddingOf(context).bottom
+        : 0.0;
     final visible = widget.showBar && _hiders.isEmpty;
     final duration = effects.decorativeMotion ? const Duration(milliseconds: 260) : Duration.zero;
     return Stack(
@@ -313,6 +433,7 @@ class _TaraTabShellState extends State<TaraTabShell> {
                       current: widget.current,
                       onSelected: widget.onSelected,
                       action: widget.action,
+                      pill: widget.pill,
                     ),
                   ),
                 ),
