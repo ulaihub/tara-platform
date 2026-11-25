@@ -18,7 +18,7 @@
     "hono": "4.13.16"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.6.6",
     "oxlint": "^1.90.0",
     "oxlint-tsgolint": "^7.0.2005",
     "tsx": "^4.23.15",
