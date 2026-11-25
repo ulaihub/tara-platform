@@ -5,3 +5,9 @@ packages:
 onlyBuiltDependencies:
   - '@prisma/engines'
   - prisma
+
+# Correctifs de sécurité de dépendances indirectes (pnpm audit) :
+# effect (via prisma) — ReDoS, corrigé en 3.22.1 ; minimatch (via @nestjs/cli) — déni de service, corrigé en 11.0.1.
+overrides:
+  'effect@<3.22.1': '^3.22.1'
+  'minimatch@>=7.0.0 <11.0.1': '^11.0.1'
