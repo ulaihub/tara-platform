@@ -81,7 +81,7 @@ jobs:
 
       - name: Écarts de captures
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: client-golden-failures
           path: apps/client/test/**/failures/
@@ -110,14 +110,14 @@ jobs:
           python3 ../rider/tool/apk_report.py --download-max-mo 25 --installed-max-mo 32
           build/app/outputs/flutter-apk/app-*-release.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: github.event_name != 'pull_request'
         with:
           name: tara-apk
           path: apps/client/build/app/outputs/flutter-apk/app-*-release.apk
           retention-days: 14
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: github.event_name != 'pull_request'
         with:
           name: tara-symboles
