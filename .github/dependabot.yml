@@ -9,6 +9,13 @@ updates:
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    ignore:
+      # Le serveur tourne sous Node 22 : ses types doivent rester ceux de Node 22.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+      # TypeScript 7 n'a pas encore l'API de compilation dont NestJS a besoin (attendue en 7.1).
+      - dependency-name: typescript
+        versions: ['7.0.x']
     groups:
       production:
         dependency-type: production
