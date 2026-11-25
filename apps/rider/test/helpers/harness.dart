@@ -26,6 +26,7 @@ Future<void> pumpVariant(
 
 /// Écran d'onglet dans son cadre : contenu sous la barre d'onglets en verre.
 Widget tabs(int current, Widget child) => TaraTabShell(
+  pill: true,
   items: const [
     TabItem(TaraIcons.route, 'Course'),
     TabItem(TaraIcons.earnings, 'Gains'),
