@@ -215,6 +215,19 @@ class ClientApi {
   /// Commande suivie (F1) : trajet, livreur, étapes.
   Future<TrackedOrder> order(String id) async => TrackedOrder.fromJson(await _api.get('/orders/$id') as Json);
 
+  /// Trajet du colis sur les rues (vendeur → destinataire), en paires [longitude, latitude].
+  /// `onRoads` faux : ligne droite de repli (service d'itinéraires indisponible).
+  Future<({List<List<double>> path, bool onRoads})> orderRoute(String id) async {
+    final json = await _api.get('/orders/$id/route') as Json;
+    return (
+      path: [
+        for (final pair in json['path']! as List<Object?>)
+          [for (final v in pair! as List<Object?>) (v! as num).toDouble()],
+      ],
+      onRoads: json['source'] == 'osrm',
+    );
+  }
+
   /// Nouveau code d'enlèvement si l'expéditeur a perdu le précédent.
   Future<String> newPickupCode(String orderId) async =>
       (await _api.post('/orders/$orderId/pickup-code') as Json)['pickupCode']! as String;

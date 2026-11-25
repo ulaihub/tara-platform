@@ -93,23 +93,45 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   late final RealtimeClient _realtime;
   Timer? _refresh;
 
+  /// Trajet du colis sur les rues ; null tant qu'il n'est pas reçu (ou ligne droite seulement).
+  List<List<double>>? _route;
+
   DateTime get _now => (widget.now ?? DateTime.now)();
 
   @override
   void initState() {
     super.initState();
     unawaited(_load());
+    unawaited(_loadRoute());
     _realtime = ref.read(realtimeProvider)..connect();
     _events = _realtime.stream.listen(_onEvent);
     _realtime.subscribeOrder(widget.orderId, onAck: _onAck);
+    // Après une coupure, le serveur a oublié l'abonnement : on se réabonne et on relit
+    // l'étape, sinon l'écran resterait figé sur l'ancienne.
+    _realtime.connected.addListener(_onConnection);
+    _lifecycle = AppLifecycleListener(onResume: () => unawaited(_load()));
     // Temps réel coupé : l'étape est relue de temps en temps.
-    _refresh = Timer.periodic(const Duration(seconds: 30), (_) => unawaited(_load()));
+    _refresh = Timer.periodic(const Duration(seconds: 15), (_) => unawaited(_load()));
+  }
+
+  late final AppLifecycleListener _lifecycle;
+  bool _wasConnected = false;
+
+  void _onConnection() {
+    final connected = _realtime.connected.value;
+    if (connected && _wasConnected == false && mounted) {
+      _realtime.subscribeOrder(widget.orderId, onAck: _onAck);
+      unawaited(_load());
+    }
+    _wasConnected = connected;
   }
 
   @override
   void dispose() {
     unawaited(_events?.cancel());
     _refresh?.cancel();
+    _realtime.connected.removeListener(_onConnection);
+    _lifecycle.dispose();
     _realtime.unsubscribeOrder(widget.orderId);
     _comment.dispose();
     _topUpPhone.dispose();
@@ -132,6 +154,15 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       if (before != null && before != order.status) _announce(order.status);
     } catch (error) {
       if (mounted && _order == null) setState(() => _error = errorMessage(context, error));
+    }
+  }
+
+  Future<void> _loadRoute() async {
+    try {
+      final route = await ref.read(clientApiProvider).orderRoute(widget.orderId);
+      if (mounted && route.onRoads) setState(() => _route = route.path);
+    } catch (_) {
+      // Pas de trajet (réseau, serveur d'avant) : la ligne droite reste.
     }
   }
 
@@ -459,6 +490,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                       const ['PICKED_UP', 'IN_DELIVERY', 'DELIVERED'].contains(order.status) ||
                       (order.status == 'DELIVERY_FAILED' && order.failure?.decision != 'RETURN'),
                   framePadding: EdgeInsets.only(top: top, bottom: panel - 20),
+                  route: _route,
                 ),
         ),
         child: Stack(

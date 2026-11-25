@@ -47,7 +47,9 @@ import {
   type PendingDeliveryDto,
   type RecipientDto,
   type RecipientResponseBody,
+  type OrderRouteDto,
 } from './orders.schemas.js';
+import { DistanceService } from '../routing/distance.service.js';
 import { receiptUrl } from '../public-tracking/receipt-code.js';
 import { trackingUrl } from './tracking-url.js';
 
@@ -149,6 +151,7 @@ export class OrdersService implements OnModuleInit {
     private readonly links: LocationLinksService,
     private readonly notifications: NotificationService,
     @Inject(ENV) private readonly env: Env,
+    private readonly distance: DistanceService,
   ) {}
 
   /** Le client d'un colis en attente a placé son point : le colis part (voir releasePending). */
@@ -321,6 +324,36 @@ export class OrdersService implements OnModuleInit {
     const [dto] = await this.toDtos([order]);
     return dto as z.output<typeof OrderDto>;
   }
+
+  /**
+   * Trajet du colis sur les rues, du vendeur au destinataire, pour la carte de suivi.
+   * Les deux points ne bougent plus : le tracé est gardé en mémoire (une requête par commande).
+   */
+  async route(user: AuthUser, id: string): Promise<z.output<typeof OrderRouteDto>> {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        pickupAddress: { select: { latitude: true, longitude: true } },
+        dropoffAddress: { select: { latitude: true, longitude: true } },
+      },
+    });
+    if (!order || !(await this.roleOn(user, order))) throw AppError.notFound('ORDER_NOT_FOUND');
+    const from = order.pickupAddress;
+    const to = order.dropoffAddress;
+    const key = `${from.latitude},${from.longitude};${to.latitude},${to.longitude}`;
+    const cached = this.routes.get(key);
+    if (cached) return cached;
+    const route = await this.distance.path(from, to);
+    const dto = { meters: route.meters, seconds: route.seconds, source: route.source, path: route.path };
+    // Repli en ligne droite : pas gardé, OSRM peut revenir à la prochaine ouverture.
+    if (route.source === 'osrm') {
+      if (this.routes.size >= 2_000) this.routes.delete(this.routes.keys().next().value!);
+      this.routes.set(key, dto);
+    }
+    return dto;
+  }
+
+  private readonly routes = new Map<string, z.output<typeof OrderRouteDto>>();
 
   async list(
     user: AuthUser,

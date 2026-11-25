@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { cx } from '@/components/ui';
-import { type ActionState, addNote, assignRider, cancelOrder } from '../actions';
+import { type ActionState, addNote, assignRider, cancelOrder, validateDelivery } from '../actions';
 
 const IDLE: ActionState = { error: null, done: false };
 
@@ -146,6 +146,42 @@ export function AssignButton({
           {state.error}
         </p>
       ) : null}
+    </form>
+  );
+}
+
+/** Validation d'une remise sans code après l'appel au destinataire. */
+export function ValidateDeliveryForm({ orderId }: { orderId: string }) {
+  const [state, action, pending] = useActionState(validateDelivery, IDLE);
+  if (state.done) {
+    return (
+      <p role="status" className="text-[14px] font-extrabold text-ok">
+        Remise validée : la commande est livrée et le livreur est prévenu.
+      </p>
+    );
+  }
+  return (
+    <form action={action} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+      <input type="hidden" name="orderId" value={orderId} />
+      <label className="flex-1">
+        <span className="sr-only">Comment le destinataire a confirmé</span>
+        <input
+          name="note"
+          required
+          minLength={3}
+          maxLength={300}
+          placeholder="Ex. : appelé à 12 h 20, la cliente confirme avoir reçu le colis."
+          className="block min-h-11 w-full rounded-xl border border-line bg-panel-soft px-3 text-[14px] focus:border-accent-line focus:outline-none"
+        />
+      </label>
+      <button
+        type="submit"
+        disabled={pending}
+        className="min-h-11 rounded-xl bg-brand px-4 text-[14px] font-extrabold text-on-brand disabled:opacity-60"
+      >
+        {pending ? 'Validation…' : 'Valider la remise'}
+      </button>
+      <Feedback state={state} done="" />
     </form>
   );
 }

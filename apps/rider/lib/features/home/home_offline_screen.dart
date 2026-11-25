@@ -28,7 +28,16 @@ import 'home_widgets.dart';
 /// 05 · Accueil — hors ligne : gains du jour, bouton « Passer en ligne ». Pas de cloche de
 /// notifications au lancement (les messages arrivent par notification du téléphone).
 class HomeOfflineScreen extends ConsumerStatefulWidget {
-  const HomeOfflineScreen({super.key, required this.onWentOnline, required this.onDetails, this.now});
+  const HomeOfflineScreen({
+    super.key,
+    required this.onWentOnline,
+    required this.onDetails,
+    this.courseBanner,
+    this.now,
+  });
+
+  /// Course en cours mise de côté (« Retour à l'accueil ») : bandeau pour la reprendre.
+  final Widget? courseBanner;
 
   final VoidCallback onWentOnline;
   final VoidCallback onDetails;
@@ -212,6 +221,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                     StatusPill(label: l.offline),
                   ],
                 ),
+                if (widget.courseBanner case final banner?) ...[const SizedBox(height: 16), banner],
                 SizedBox(height: 112 * roomy),
                 Center(
                   child: PowerButton(

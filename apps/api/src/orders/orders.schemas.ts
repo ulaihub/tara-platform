@@ -181,6 +181,18 @@ export const RatingDto = z
   })
   .meta({ id: 'Rating' });
 
+/** Trajet du vendeur au destinataire, sur les rues (OSRM) ou en ligne droite (repli). */
+export const OrderRouteDto = z
+  .object({
+    meters: z.int(),
+    seconds: z.int().nullable(),
+    /** « osrm » : tracé routier ; « estimate » : ligne droite, distance estimée. */
+    source: z.enum(['osrm', 'estimate']),
+    /** Tracé en paires [longitude, latitude] (ordre GeoJSON). */
+    path: z.array(z.tuple([z.number(), z.number()])).min(2),
+  })
+  .meta({ id: 'OrderRoute' });
+
 export const OrderDto = z
   .object({
     id: z.uuid(),

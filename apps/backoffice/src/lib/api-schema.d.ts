@@ -932,6 +932,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/orders/{id}/route': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Orders_route'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/orders/{id}/cancel': {
     parameters: {
       query?: never;
@@ -4130,6 +4146,13 @@ export interface components {
       authorName: string | null;
       authorPhone: string;
     };
+    OrderRoute: {
+      meters: number;
+      seconds: number | null;
+      /** @enum {string} */
+      source: 'osrm' | 'estimate';
+      path: number[][];
+    };
     /** @enum {string} */
     OrderStatus:
       | 'CREATED'
@@ -6908,6 +6931,28 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Order'];
+        };
+      };
+    };
+  };
+  Orders_route: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OrderRoute'];
         };
       };
     };
