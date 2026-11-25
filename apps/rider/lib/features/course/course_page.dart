@@ -125,7 +125,15 @@ class CourseHeader extends StatelessWidget {
     this.onSos,
     this.onCall,
     this.callLabel,
+    this.onMessage,
+    this.messageLabel,
+    this.unread = 0,
   });
+
+  /// Conversation avec l'expéditeur ; pastille tant qu'un message n'est pas lu.
+  final VoidCallback? onMessage;
+  final String? messageLabel;
+  final int unread;
 
   final String kicker;
   final String title;
@@ -206,6 +214,53 @@ class CourseHeader extends StatelessWidget {
             ),
           ),
         ),
+        if (onMessage != null) ...[
+          const SizedBox(width: 8),
+          Semantics(
+            button: true,
+            label: messageLabel,
+            excludeSemantics: true,
+            child: GestureDetector(
+              onTap: onMessage,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: c.textPrimary.withValues(alpha: .08),
+                      border: Border.all(color: c.textPrimary.withValues(alpha: .14)),
+                    ),
+                    alignment: Alignment.center,
+                    child: TaraIcon(TaraIcons.message, size: 20, color: c.textPrimary),
+                  ),
+                  if (unread > 0)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 18),
+                        height: 18,
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          gradient: TaraBrand.gradient,
+                          borderRadius: BorderRadius.circular(9),
+                          border: Border.all(color: c.bg, width: 1.5),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$unread',
+                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: TaraBrand.onBrand),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
         if (onCall != null) ...[
           const SizedBox(width: 8),
           Semantics(

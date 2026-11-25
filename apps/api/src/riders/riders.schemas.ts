@@ -23,6 +23,40 @@ export const RiderStatusEnum = z
 export const VehicleTypeEnum = z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']).meta({ id: 'VehicleType' });
 
 /**
+ * Marques courantes au Cameroun (motos chinoises et indiennes surtout) ; « OTHER » sinon.
+ * Liste fixe : l'expéditeur lit toujours le même nom, sans faute de frappe.
+ */
+export const VehicleBrandEnum = z
+  .enum([
+    'NANFANG',
+    'HAOJUE',
+    'SANYA',
+    'LIFAN',
+    'DAYUN',
+    'JIALING',
+    'KYMCO',
+    'HONDA',
+    'YAMAHA',
+    'SUZUKI',
+    'TVS',
+    'BAJAJ',
+    'OTHER',
+  ])
+  .meta({ id: 'VehicleBrand' });
+
+/** Couleur dominante, en mots simples reconnaissables de loin. */
+export const VehicleColorEnum = z
+  .enum(['BLACK', 'RED', 'BLUE', 'WHITE', 'GREY', 'GREEN', 'YELLOW', 'ORANGE', 'BROWN', 'VIOLET'])
+  .meta({ id: 'VehicleColor' });
+
+/** Véhicule déclaré par le livreur : marque, couleur, plaque. */
+export const VehicleBody = z.object({
+  brand: VehicleBrandEnum.nullable(),
+  color: VehicleColorEnum.nullable(),
+  plateNumber: z.string().trim().toUpperCase().min(3).max(20).nullable().optional(),
+});
+
+/**
  * Pièces exigées (A3). Chaque groupe doit être couvert par une pièce validée et non expirée ;
  * pour le véhicule, la carte grise OU le contrat de location suffit. La CNI du garant reste
  * acceptée (type GUARANTOR_ID) sans être exigée.
@@ -110,6 +144,8 @@ export const RiderProfileDto = z
     status: RiderStatusEnum,
     vehicleType: VehicleTypeEnum,
     plateNumber: z.string().nullable(),
+    vehicleBrand: VehicleBrandEnum.nullable(),
+    vehicleColor: VehicleColorEnum.nullable(),
     cashLimit: z.int().meta({ description: 'Plafond d’espèces détenues, en FCFA' }),
     guarantorName: z.string().nullable(),
     guarantorPhone: z.string().nullable(),

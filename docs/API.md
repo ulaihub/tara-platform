@@ -93,6 +93,21 @@ Le back-office (`apps/backoffice`) appelle l'API depuis son serveur avec le jeto
 de l'équipe (second facteur vérifié) ; le navigateur ne voit jamais ce jeton. `GET /me`
 indique où en est le second facteur (`staff.mfaEnrolled`, `staff.mfaVerified`).
 
+**Livreur trouvé : qui il est** — `OrderDto.rider` donne nom, téléphone (pendant la course),
+type, marque (`vehicleBrand`, liste fixe : Nanfang, Haojue, Sanya…), couleur (`vehicleColor`),
+plaque, et `hasPhoto`. La photo est la pièce « selfie » validée par l'équipe :
+`GET /orders/:id/rider-photo` (expéditeur et équipe seulement). Le livreur déclare sa moto
+avec `PUT /riders/me/vehicle`.
+
+**Messages expéditeur ↔ livreur** — `GET/POST /orders/:id/messages` (500 caractères, 20 par
+minute). Écriture tant que la course est en cours (`CONVERSATION_CLOSED` ensuite) ; l'équipe
+lit sans écrire. Chaque message part en direct (`order.message`) et en notification ; ouvrir la
+conversation marque lus les messages reçus. Effacés après 90 jours, et avec le compte.
+
+**Support en direct** — une réponse de l'équipe envoie `support.message` (`ticketId`) à
+l'utilisateur : la demande ouverte se met à jour seule. L'équipe reçoit `ops.support-message` ;
+le back-office relit la demande ouverte toutes les 4 s.
+
 **Livreur muet pendant une course** (balayage toutes les 15 s) : aucun signe du téléphone
 (position, même ancienne rejouée au retour du réseau) depuis `RIDER_SILENT_WITHDRAW_SECONDS`
 (180 par défaut) :

@@ -864,5 +864,19 @@
   "reserveBody": "At the {hour}:00 payout, Tara keeps this amount of your sales on your Tara balance: tomorrow's deliveries are already paid. The rest is paid out to you as usual.",
   "reserveZero": "None",
   "reserveSave": "Save",
-  "reserveSaved": "Reserve saved."
+  "reserveSaved": "Reserve saved.",
+  "chatWithRider": "Message {name}",
+  "@chatWithRider": { "placeholders": { "name": { "type": "String" } } },
+  "chatHint": "Your message…",
+  "chatSend": "Send",
+  "chatEmpty": "No message yet. Write to the rider, they get a notification.",
+  "chatClosed": "The job is over: the conversation is closed.",
+  "chatRead": "Read",
+  "chatSubtitle": "Rider · {reference}",
+  "@chatSubtitle": { "placeholders": { "reference": { "type": "String" } } },
+  "chatQuick1": "The parcel is ready",
+  "chatQuick2": "I'm coming down",
+  "chatQuick3": "Call me when you arrive",
+  "chatQuick4": "Where are you?",
+  "chatNewMessage": "New message from the rider"
 }

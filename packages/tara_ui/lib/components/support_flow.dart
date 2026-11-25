@@ -116,10 +116,14 @@ class SupportHomeScreen extends StatefulWidget {
     required this.onBack,
     this.supportPhone,
     this.onCall,
+    this.updates,
   });
 
   final SupportBackend backend;
   final SupportStrings strings;
+
+  /// Demandes qui viennent de recevoir une réponse (temps réel) : relues aussitôt.
+  final Stream<String>? updates;
 
   /// Motifs proposés, dans l'ordre (ceux d'un expéditeur ou d'un livreur).
   final List<SupportCategory> categories;
@@ -135,6 +139,21 @@ class SupportHomeScreen extends StatefulWidget {
 
 class _SupportHomeScreenState extends State<SupportHomeScreen> {
   late Future<List<SupportTicket>> _tickets = widget.backend.tickets();
+  StreamSubscription<String>? _live;
+
+  @override
+  void initState() {
+    super.initState();
+    _live = widget.updates?.listen((_) {
+      if (mounted) _reload();
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_live?.cancel());
+    super.dispose();
+  }
 
   void _reload() {
     final tickets = widget.backend.tickets();
@@ -150,6 +169,7 @@ class _SupportHomeScreenState extends State<SupportHomeScreen> {
           backend: widget.backend,
           strings: widget.strings,
           ticket: ticket,
+          updates: widget.updates,
           onBack: () => Navigator.of(route).pop(),
         ),
       ),
@@ -409,12 +429,16 @@ class SupportThreadScreen extends StatefulWidget {
     required this.strings,
     required this.ticket,
     required this.onBack,
+    this.updates,
   });
 
   final SupportBackend backend;
   final SupportStrings strings;
   final SupportTicket ticket;
   final VoidCallback onBack;
+
+  /// Demandes qui viennent de recevoir une réponse (temps réel) : celle-ci est relue.
+  final Stream<String>? updates;
 
   @override
   State<SupportThreadScreen> createState() => _SupportThreadScreenState();
@@ -426,11 +450,23 @@ class _SupportThreadScreenState extends State<SupportThreadScreen> {
   bool _sending = false;
   String? _error;
 
+  StreamSubscription<String>? _live;
+
   @override
   void initState() {
     super.initState();
     _reply.addListener(() => setState(() {}));
     // Relue à l'ouverture : une réponse a pu arriver depuis la liste.
+    _refresh();
+    // Réponse de l'équipe en direct : elle apparaît sans quitter l'écran.
+    _live = widget.updates?.listen((ticketId) {
+      if (ticketId != _ticket.id) return;
+      HapticFeedback.lightImpact();
+      _refresh();
+    });
+  }
+
+  void _refresh() {
     unawaited(
       widget.backend.ticket(_ticket.id).then((fresh) {
         if (mounted) setState(() => _ticket = fresh);
@@ -440,6 +476,7 @@ class _SupportThreadScreenState extends State<SupportThreadScreen> {
 
   @override
   void dispose() {
+    unawaited(_live?.cancel());
     _reply.dispose();
     super.dispose();
   }

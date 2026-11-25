@@ -44,6 +44,7 @@ import {
   RiderDecisionBody,
   RiderProfileDto,
   RiderReliabilityDto,
+  VehicleBody,
   UploadDocumentBody,
 } from './riders.schemas.js';
 import { RiderReliabilityService } from './rider-reliability.service.js';
@@ -98,6 +99,19 @@ export class RidersController {
     @Req() request: Request,
   ): Promise<z.output<typeof RiderProfileDto>> {
     return this.riders.setEmergencyContact(user, body, request);
+  }
+
+  /** Marque, couleur et plaque du véhicule (montrées à l'expéditeur). */
+  @Put('me/vehicle')
+  @Roles('RIDER')
+  @ApiZodBody(VehicleBody)
+  @ApiZodResponse(RiderProfileDto)
+  setVehicle(
+    @CurrentUser() user: AuthUser,
+    @ValidBody(VehicleBody) body: z.output<typeof VehicleBody>,
+    @Req() request: Request,
+  ): Promise<z.output<typeof RiderProfileDto>> {
+    return this.riders.setVehicle(user, body, request);
   }
 
   @Delete('me/emergency-contact')

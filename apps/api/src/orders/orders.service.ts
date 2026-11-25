@@ -50,6 +50,7 @@ import {
   type OrderRouteDto,
 } from './orders.schemas.js';
 import { DistanceService } from '../routing/distance.service.js';
+import { VehicleBrandEnum, VehicleColorEnum } from '../riders/riders.schemas.js';
 import { receiptUrl } from '../public-tracking/receipt-code.js';
 import { trackingUrl } from './tracking-url.js';
 
@@ -64,7 +65,15 @@ const ORDER_INCLUDE = {
     select: {
       vehicleType: true,
       plateNumber: true,
+      vehicleBrand: true,
+      vehicleColor: true,
       user: { select: { fullName: true, phone: true } },
+      // Photo de visage validée par l'équipe : montrée à l'expéditeur pour reconnaître le livreur.
+      documents: {
+        where: { type: 'SELFIE', status: 'APPROVED' },
+        select: { id: true },
+        take: 1,
+      },
     },
   },
   ratings: { select: { raterId: true, score: true, comment: true, createdAt: true } },
@@ -260,6 +269,9 @@ export class OrdersService implements OnModuleInit {
             phone: RIDER_REACHABLE.includes(order.status) ? order.rider.user.phone : null,
             vehicleType: order.rider.vehicleType,
             plateNumber: order.rider.plateNumber,
+            vehicleBrand: VehicleBrandEnum.safeParse(order.rider.vehicleBrand).data ?? null,
+            vehicleColor: VehicleColorEnum.safeParse(order.rider.vehicleColor).data ?? null,
+            hasPhoto: order.rider.documents.length > 0,
           }
         : null,
       attemptCount: order.attemptCount,
@@ -351,6 +363,22 @@ export class OrdersService implements OnModuleInit {
       this.routes.set(key, dto);
     }
     return dto;
+  }
+
+  /**
+   * Photo de visage du livreur (pièce validée), pour l'expéditeur et l'équipe, tant qu'un
+   * livreur est sur la commande.
+   */
+  async riderPhoto(user: AuthUser, id: string): Promise<{ buffer: Buffer; mimeType: string }> {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    const role = order ? await this.roleOn(user, order) : null;
+    if (!order?.riderId || !role || role === 'RIDER') throw AppError.notFound('ORDER_NOT_FOUND');
+    const photo = await this.prisma.kycDocument.findFirst({
+      where: { riderId: order.riderId, type: 'SELFIE', status: 'APPROVED' },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!photo) throw AppError.notFound('MEDIA_NOT_FOUND');
+    return this.media.read(photo.storageKey);
   }
 
   private readonly routes = new Map<string, z.output<typeof OrderRouteDto>>();

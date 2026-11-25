@@ -2383,4 +2383,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emergencyContactSubtitle => 'Someone close, to be told if needed';
+
+  @override
+  String get vehicleTitle => 'My motorbike';
+
+  @override
+  String get vehicleSubtitle => 'Shown to the sender so they recognise you';
+
+  @override
+  String get vehicleHelp =>
+      'The sender sees your photo, brand, colour and plate: they recognise you at once, even among other motorbikes.';
+
+  @override
+  String get vehicleBrand => 'Brand';
+
+  @override
+  String get vehicleColor => 'Colour';
+
+  @override
+  String get vehiclePlate => 'Number plate';
+
+  @override
+  String get vehicleRowEmpty => 'Brand and colour to add';
+
+  @override
+  String chatWithSender(String name) {
+    return 'Message $name';
+  }
+
+  @override
+  String get chatHint => 'Your message…';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatEmpty => 'No message yet. Write to the sender, they get a notification.';
+
+  @override
+  String get chatClosed => 'The job is over: the conversation is closed.';
+
+  @override
+  String get chatRead => 'Read';
+
+  @override
+  String chatSubtitle(String reference) {
+    return 'Sender · $reference';
+  }
+
+  @override
+  String get chatQuick1 => 'On my way';
+
+  @override
+  String get chatQuick2 => 'I\'m outside';
+
+  @override
+  String get chatQuick3 => 'I\'m on the road';
+
+  @override
+  String get chatQuick4 => 'Please call me';
+
+  @override
+  String get chatNewMessage => 'New message from the sender';
 }

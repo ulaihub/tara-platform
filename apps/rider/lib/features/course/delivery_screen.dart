@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
@@ -21,6 +23,7 @@ import '../map/tara_map.dart';
 import 'address_help.dart';
 import 'course_page.dart';
 import 'course_scaffold.dart';
+import 'order_chat.dart';
 
 /// Au-delà, le livreur est prévenu que sa livraison sera signalée au support.
 const farFromAddressMeters = 200;
@@ -231,6 +234,9 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         onSos: widget.onSos,
         callLabel: l.callPerson(name),
         onCall: call,
+        messageLabel: l.chatWithSender(order.sender.name ?? order.reference),
+        unread: ref.watch(chatInboxProvider).unread(order.id),
+        onMessage: () => unawaited(openOrderChat(context, ref, order)),
       ),
       footer: Column(
         mainAxisSize: MainAxisSize.min,

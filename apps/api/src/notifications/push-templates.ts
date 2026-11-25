@@ -160,6 +160,14 @@ const TEMPLATES = {
       body: '{reference} · The rider is passing through an area without network. The Tara team is following your parcel.',
     },
   },
+  MESSAGE_FROM_RIDER: {
+    fr: { title: 'Message de {name} (livreur)', body: '{body}' },
+    en: { title: 'Message from {name} (rider)', body: '{body}' },
+  },
+  MESSAGE_FROM_SENDER: {
+    fr: { title: 'Message de {name} · {reference}', body: '{body}' },
+    en: { title: 'Message from {name} · {reference}', body: '{body}' },
+  },
   PAYOUT_SENT: {
     fr: { title: 'Argent envoyé', body: '{amount} FCFA envoyés sur votre Mobile Money.' },
     en: { title: 'Money sent', body: '{amount} XAF sent to your Mobile Money.' },

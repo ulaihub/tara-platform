@@ -8,10 +8,12 @@ import {
   ParseUUIDPipe,
   Post,
   Req,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
 import { CurrentUser, Roles } from '../auth/decorators.js';
@@ -164,6 +166,21 @@ export class OrdersController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<z.output<typeof OrderDto>> {
     return this.orders.get(user, id);
+  }
+
+  /** Photo de visage du livreur (validée par l'équipe), pour le reconnaître à l'arrivée. */
+  @Get(':id/rider-photo')
+  @ApiProduces('image/jpeg', 'image/png', 'image/webp')
+  @ApiOkResponse({ description: 'Photo du livreur', schema: { type: 'string', format: 'binary' } })
+  async riderPhoto(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    const photo = await this.orders.riderPhoto(user, id);
+    response.setHeader('Content-Type', photo.mimeType);
+    response.setHeader('Cache-Control', 'private, max-age=3600');
+    return new StreamableFile(photo.buffer);
   }
 
   /** Trajet du colis sur les rues (vendeur → destinataire), pour la carte de suivi. */

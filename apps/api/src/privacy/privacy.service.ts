@@ -336,6 +336,8 @@ export class PrivacyService {
     await this.tokens.revokeAll(userId, tx);
     await tx.device.deleteMany({ where: { userId } });
     await tx.pinDeviceKey.deleteMany({ where: { userId } });
+    // Ses messages aux livreurs ou aux expéditeurs : effacés avec le compte.
+    await tx.orderMessage.deleteMany({ where: { authorId: userId } });
     await tx.address.updateMany({
       where: { ownerId: userId },
       data: {

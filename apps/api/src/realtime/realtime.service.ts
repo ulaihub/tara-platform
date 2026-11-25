@@ -9,6 +9,9 @@ export const OPS_ROOM = 'ops';
 /** Événements envoyés aux applications. Les noms font partie du contrat (docs/API.md). */
 export type RealtimeEvent =
   | 'order.status'
+  | 'order.message'
+  | 'support.message'
+  | 'ops.support-message'
   | 'rider.position'
   | 'offer.new'
   | 'offer.closed'

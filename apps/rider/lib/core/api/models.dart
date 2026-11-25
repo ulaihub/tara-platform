@@ -374,6 +374,8 @@ class RiderProfile {
     required this.emergencyContactName,
     required this.emergencyContactPhone,
     this.plateNumber,
+    this.vehicleBrand,
+    this.vehicleColor,
   });
   factory RiderProfile.fromJson(Json json) {
     final contact = json['emergencyContact'] as Json?;
@@ -392,9 +394,24 @@ class RiderProfile {
       emergencyContactName: contact?['name'] as String?,
       emergencyContactPhone: contact?['phone'] as String?,
       plateNumber: json['plateNumber'] as String?,
+      vehicleBrand: json['vehicleBrand'] as String?,
+      vehicleColor: json['vehicleColor'] as String?,
     );
   }
-  static const fields = ['status', 'vehicleType', 'plateNumber', 'documents', 'missingDocuments', 'emergencyContact'];
+  static const fields = [
+    'status',
+    'vehicleType',
+    'plateNumber',
+    'vehicleBrand',
+    'vehicleColor',
+    'documents',
+    'missingDocuments',
+    'emergencyContact',
+  ];
+
+  /// Marque et couleur du véhicule (codes du serveur), montrées à l'expéditeur.
+  final String? vehicleBrand;
+  final String? vehicleColor;
 
   /// PENDING (en attente de validation), ACTIVE, SUSPENDED ou REJECTED.
   final String status;

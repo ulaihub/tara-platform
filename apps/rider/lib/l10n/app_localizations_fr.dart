@@ -2403,4 +2403,66 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get emergencyContactSubtitle => 'Une personne proche, à prévenir si besoin';
+
+  @override
+  String get vehicleTitle => 'Ma moto';
+
+  @override
+  String get vehicleSubtitle => 'Montrée à l\'expéditeur pour vous reconnaître';
+
+  @override
+  String get vehicleHelp =>
+      'L\'expéditeur voit votre photo, la marque, la couleur et la plaque : il vous reconnaît tout de suite, même au milieu d\'autres motos.';
+
+  @override
+  String get vehicleBrand => 'Marque';
+
+  @override
+  String get vehicleColor => 'Couleur';
+
+  @override
+  String get vehiclePlate => 'Plaque d\'immatriculation';
+
+  @override
+  String get vehicleRowEmpty => 'Marque et couleur à indiquer';
+
+  @override
+  String chatWithSender(String name) {
+    return 'Écrire à $name';
+  }
+
+  @override
+  String get chatHint => 'Votre message…';
+
+  @override
+  String get chatSend => 'Envoyer';
+
+  @override
+  String get chatEmpty => 'Aucun message. Écrivez à l\'expéditeur, il reçoit une notification.';
+
+  @override
+  String get chatClosed => 'La course est terminée : la conversation est fermée.';
+
+  @override
+  String get chatRead => 'Lu';
+
+  @override
+  String chatSubtitle(String reference) {
+    return 'Expéditeur · $reference';
+  }
+
+  @override
+  String get chatQuick1 => 'J\'arrive';
+
+  @override
+  String get chatQuick2 => 'Je suis devant';
+
+  @override
+  String get chatQuick3 => 'Je suis en route';
+
+  @override
+  String get chatQuick4 => 'Appelez-moi s\'il vous plaît';
+
+  @override
+  String get chatNewMessage => 'Nouveau message de l\'expéditeur';
 }

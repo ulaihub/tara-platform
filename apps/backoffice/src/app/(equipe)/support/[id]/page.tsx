@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Icon } from '@/components/icon';
+import { LiveRefresh } from '@/components/live-refresh';
 import { cx } from '@/components/ui';
 import { ApiError } from '@/lib/api';
 import { requireStaff, staffApi } from '@/lib/dal';
@@ -66,6 +67,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="mx-auto max-w-[1280px]">
+      <LiveRefresh />
       <Link
         href="/support"
         className="inline-flex items-center gap-1 text-[14px] font-bold text-muted hover:text-text"

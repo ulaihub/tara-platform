@@ -228,6 +228,9 @@ class ClientApi {
     );
   }
 
+  /// Photo de visage du livreur (validée par Tara), pour le reconnaître.
+  Future<Uint8List> riderPhoto(String orderId) => _api.getBytes('/orders/$orderId/rider-photo');
+
   /// Nouveau code d'enlèvement si l'expéditeur a perdu le précédent.
   Future<String> newPickupCode(String orderId) async =>
       (await _api.post('/orders/$orderId/pickup-code') as Json)['pickupCode']! as String;

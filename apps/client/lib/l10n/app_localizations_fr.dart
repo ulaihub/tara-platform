@@ -2804,4 +2804,44 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reserveSaved => 'Réserve enregistrée.';
+
+  @override
+  String chatWithRider(String name) {
+    return 'Écrire à $name';
+  }
+
+  @override
+  String get chatHint => 'Votre message…';
+
+  @override
+  String get chatSend => 'Envoyer';
+
+  @override
+  String get chatEmpty => 'Aucun message. Écrivez au livreur, il reçoit une notification.';
+
+  @override
+  String get chatClosed => 'La course est terminée : la conversation est fermée.';
+
+  @override
+  String get chatRead => 'Lu';
+
+  @override
+  String chatSubtitle(String reference) {
+    return 'Livreur · $reference';
+  }
+
+  @override
+  String get chatQuick1 => 'Le colis est prêt';
+
+  @override
+  String get chatQuick2 => 'Je descends';
+
+  @override
+  String get chatQuick3 => 'Appelez-moi en arrivant';
+
+  @override
+  String get chatQuick4 => 'Vous êtes où ?';
+
+  @override
+  String get chatNewMessage => 'Nouveau message du livreur';
 }

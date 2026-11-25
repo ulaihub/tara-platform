@@ -22,6 +22,7 @@ import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_effects.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
+import 'package:tara_ui/vehicle_labels.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
@@ -36,8 +37,9 @@ import '../onboarding/documents_screen.dart';
 import '../support/support.dart';
 import 'close_account_screen.dart';
 import 'emergency_contact_screen.dart';
+import 'vehicle_screen.dart';
 
-enum _Sub { documents, contact, close, terms, security, display }
+enum _Sub { documents, contact, vehicle, close, terms, security, display }
 
 /// Profil et réglages (onglet Profil, non dessiné dans la maquette : passation §7) :
 /// identité et véhicule, pièces et leur état (une pièce refusée ou expirée se renvoie
@@ -175,6 +177,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     onTap: documents.value == null ? null : () => setState(() => _sub = _Sub.documents),
                   ),
                   _MenuLine(
+                    icon: TaraIcons.moto,
+                    title: l.vehicleTitle,
+                    subtitle: switch ((profile?.vehicleBrand, profile?.vehicleColor)) {
+                      (final brand?, final color?) =>
+                        '${vehicleBrandName(brand, Localizations.localeOf(context))} · '
+                            '${vehicleColorName(color, Localizations.localeOf(context))}'
+                            '${profile?.plateNumber == null ? '' : ' · ${profile!.plateNumber}'}',
+                      _ => l.vehicleRowEmpty,
+                    },
+                    onTap: profile == null ? null : () => setState(() => _sub = _Sub.vehicle),
+                  ),
+                  _MenuLine(
                     icon: TaraIcons.contacts,
                     title: l.emergencyContactTitle,
                     subtitle: switch ((profile?.emergencyContactName, profile?.emergencyContactPhone)) {
@@ -290,6 +304,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         if (_sub == _Sub.close)
           Positioned.fill(
             child: HideTabBar(child: CloseAccountScreen(onBack: () => setState(() => _sub = null))),
+          ),
+        if (_sub == _Sub.vehicle && profile != null)
+          Positioned.fill(
+            child: HideTabBar(
+              child: VehicleScreen(
+                profile: profile,
+                onBack: () => setState(() => _sub = null),
+                onSaved: (updated) {
+                  ref.read(documentsControllerProvider.notifier).replaceProfile(updated);
+                  setState(() => _sub = null);
+                },
+              ),
+            ),
           ),
         if (_sub == _Sub.contact && profile != null)
           Positioned.fill(

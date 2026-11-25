@@ -893,14 +893,33 @@ class Payment {
 /// Livreur d'une course, vu par l'expéditeur (F1) : numéro seulement pendant la course.
 @immutable
 class OrderRider {
-  const OrderRider({required this.name, required this.phone, required this.vehicleType, required this.plateNumber});
+  const OrderRider({
+    required this.name,
+    required this.phone,
+    required this.vehicleType,
+    required this.plateNumber,
+    this.vehicleBrand,
+    this.vehicleColor,
+    this.hasPhoto = false,
+  });
   factory OrderRider.fromJson(Json json) => OrderRider(
     name: _field(json, 'name'),
     phone: _field(json, 'phone'),
     vehicleType: _field(json, 'vehicleType'),
     plateNumber: _field(json, 'plateNumber'),
+    // Serveur d'avant : ni marque, ni couleur, ni photo.
+    vehicleBrand: json['vehicleBrand'] as String?,
+    vehicleColor: json['vehicleColor'] as String?,
+    hasPhoto: json['hasPhoto'] as bool? ?? false,
   );
-  static const fields = ['name', 'phone', 'vehicleType', 'plateNumber'];
+  static const fields = ['name', 'phone', 'vehicleType', 'plateNumber', 'vehicleBrand', 'vehicleColor', 'hasPhoto'];
+
+  /// Marque et couleur (codes du serveur : NANFANG, RED…), pour reconnaître le livreur.
+  final String? vehicleBrand;
+  final String? vehicleColor;
+
+  /// Photo de visage validée par Tara : `ClientApi.riderPhoto`.
+  final bool hasPhoto;
 
   final String name;
   final String? phone;

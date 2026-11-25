@@ -526,6 +526,10 @@ export const ERROR_MESSAGES = {
     fr: 'Le colis est déjà récupéré ou la course n’est plus la vôtre.',
     en: 'The parcel has already been picked up or the job is no longer yours.',
   },
+  CONVERSATION_CLOSED: {
+    fr: 'La course est terminée : vous ne pouvez plus écrire.',
+    en: 'The job is over: you can no longer write.',
+  },
 } as const satisfies Record<string, { fr: string; en: string }>;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;

@@ -4789,6 +4789,78 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réserve enregistrée.'**
   String get reserveSaved;
+
+  /// No description provided for @chatWithRider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à {name}'**
+  String chatWithRider(String name);
+
+  /// No description provided for @chatHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre message…'**
+  String get chatHint;
+
+  /// No description provided for @chatSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get chatSend;
+
+  /// No description provided for @chatEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun message. Écrivez au livreur, il reçoit une notification.'**
+  String get chatEmpty;
+
+  /// No description provided for @chatClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La course est terminée : la conversation est fermée.'**
+  String get chatClosed;
+
+  /// No description provided for @chatRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu'**
+  String get chatRead;
+
+  /// No description provided for @chatSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur · {reference}'**
+  String chatSubtitle(String reference);
+
+  /// No description provided for @chatQuick1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le colis est prêt'**
+  String get chatQuick1;
+
+  /// No description provided for @chatQuick2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je descends'**
+  String get chatQuick2;
+
+  /// No description provided for @chatQuick3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appelez-moi en arrivant'**
+  String get chatQuick3;
+
+  /// No description provided for @chatQuick4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes où ?'**
+  String get chatQuick4;
+
+  /// No description provided for @chatNewMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau message du livreur'**
+  String get chatNewMessage;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

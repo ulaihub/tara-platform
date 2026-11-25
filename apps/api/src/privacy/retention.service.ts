@@ -26,6 +26,7 @@ function openCase(orderId: Prisma.Sql): Prisma.Sql {
 }
 
 export interface RetentionReport {
+  orderMessagesDeleted: number;
   ordersMasked: number;
   notificationsMasked: number;
   notificationSecretsPurged: number;
@@ -90,7 +91,11 @@ export class RetentionService {
     const refreshTokensDeleted = await this.prisma.$executeRaw`
       DELETE FROM refresh_tokens WHERE expires_at < ${cutoff} OR revoked_at < ${cutoff}`;
     const longCutoff = addDays(now, -MEDIA_RETENTION_DAYS);
+    // Messages entre l'expéditeur et le livreur : utiles pour un litige, pas au-delà.
+    const orderMessagesDeleted = await this.prisma.$executeRaw`
+      DELETE FROM order_messages WHERE created_at < ${longCutoff}`;
     return {
+      orderMessagesDeleted,
       ordersMasked,
       notificationsMasked,
       notificationSecretsPurged,

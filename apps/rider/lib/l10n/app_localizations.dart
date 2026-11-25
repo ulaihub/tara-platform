@@ -4111,6 +4111,120 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une personne proche, à prévenir si besoin'**
   String get emergencyContactSubtitle;
+
+  /// No description provided for @vehicleTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ma moto'**
+  String get vehicleTitle;
+
+  /// No description provided for @vehicleSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montrée à l\'expéditeur pour vous reconnaître'**
+  String get vehicleSubtitle;
+
+  /// No description provided for @vehicleHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'expéditeur voit votre photo, la marque, la couleur et la plaque : il vous reconnaît tout de suite, même au milieu d\'autres motos.'**
+  String get vehicleHelp;
+
+  /// No description provided for @vehicleBrand.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marque'**
+  String get vehicleBrand;
+
+  /// No description provided for @vehicleColor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get vehicleColor;
+
+  /// No description provided for @vehiclePlate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plaque d\'immatriculation'**
+  String get vehiclePlate;
+
+  /// No description provided for @vehicleRowEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marque et couleur à indiquer'**
+  String get vehicleRowEmpty;
+
+  /// No description provided for @chatWithSender.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire à {name}'**
+  String chatWithSender(String name);
+
+  /// No description provided for @chatHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre message…'**
+  String get chatHint;
+
+  /// No description provided for @chatSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get chatSend;
+
+  /// No description provided for @chatEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun message. Écrivez à l\'expéditeur, il reçoit une notification.'**
+  String get chatEmpty;
+
+  /// No description provided for @chatClosed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La course est terminée : la conversation est fermée.'**
+  String get chatClosed;
+
+  /// No description provided for @chatRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu'**
+  String get chatRead;
+
+  /// No description provided for @chatSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expéditeur · {reference}'**
+  String chatSubtitle(String reference);
+
+  /// No description provided for @chatQuick1.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'arrive'**
+  String get chatQuick1;
+
+  /// No description provided for @chatQuick2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je suis devant'**
+  String get chatQuick2;
+
+  /// No description provided for @chatQuick3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je suis en route'**
+  String get chatQuick3;
+
+  /// No description provided for @chatQuick4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appelez-moi s\'il vous plaît'**
+  String get chatQuick4;
+
+  /// No description provided for @chatNewMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau message de l\'expéditeur'**
+  String get chatNewMessage;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
