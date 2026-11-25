@@ -62,6 +62,7 @@ class TaraMap extends ConsumerStatefulWidget {
     this.onFollowChanged,
     this.zoom = 16,
     this.stop,
+    this.alsoStop,
     this.route,
     this.framePadding = const EdgeInsets.fromLTRB(40, 120, 40, 40),
   });
@@ -69,6 +70,9 @@ class TaraMap extends ConsumerStatefulWidget {
   final GeoPoint? rider;
   final TaraMapHandle? handle;
   final MapStop? stop;
+
+  /// Second point (proposition de course : la zone de livraison, en plus du vendeur).
+  final MapStop? alsoStop;
   final RiderRoute? route;
 
   /// Marges du cadrage livreur + étape (le panneau du bas couvre une partie de la carte).
@@ -116,7 +120,9 @@ class _TaraMapState extends ConsumerState<TaraMap> {
   void didUpdateWidget(TaraMap old) {
     super.didUpdateWidget(old);
     widget.handle?._state = this;
-    if (widget.route != old.route || widget.stop != old.stop) unawaited(_showCourse());
+    if (widget.route != old.route || widget.stop != old.stop || widget.alsoStop != old.alsoStop) {
+      unawaited(_showCourse());
+    }
     if (widget.rider != old.rider || widget.stop != old.stop) unawaited(_showRider());
   }
 
@@ -125,6 +131,9 @@ class _TaraMapState extends ConsumerState<TaraMap> {
     await _showZones();
     await _showCourse();
     await _showRider();
+    // Position du livreur pas encore connue : on cadre au moins les points de la course.
+    final frame = _courseFrame();
+    if (widget.rider == null && frame != null) await _controller?.moveCamera(frame);
   }
 
   Future<void> _showCourse() async {
@@ -135,7 +144,7 @@ class _TaraMapState extends ConsumerState<TaraMap> {
     await controller.setGeoJsonSource('tara-stop', {
       'type': 'FeatureCollection',
       'features': [
-        if (stop != null)
+        for (final stop in [?widget.stop, ?widget.alsoStop])
           {
             'type': 'Feature',
             'properties': {'kind': stop.dropoff ? 'dropoff' : 'pickup', 'label': stop.label},
@@ -191,14 +200,16 @@ class _TaraMapState extends ConsumerState<TaraMap> {
   /// Livreur et étape visée dans le même cadre, au-dessus du panneau.
   CameraUpdate? _courseFrame() {
     final rider = widget.rider;
-    final stop = widget.stop;
-    if (rider == null || stop == null) return null;
+    final stops = [?widget.stop, ?widget.alsoStop];
+    if (stops.isEmpty) return null;
+    final lats = [?rider?.latitude, for (final s in stops) s.latitude];
+    final lngs = [?rider?.longitude, for (final s in stops) s.longitude];
     // Au moins ~200 m de côté : pas de zoom extrême quand le livreur est arrivé.
     const minSpan = 0.001;
-    final south = math.min(rider.latitude, stop.latitude) - minSpan;
-    final north = math.max(rider.latitude, stop.latitude) + minSpan;
-    final west = math.min(rider.longitude, stop.longitude) - minSpan;
-    final east = math.max(rider.longitude, stop.longitude) + minSpan;
+    final south = lats.reduce(math.min) - minSpan;
+    final north = lats.reduce(math.max) + minSpan;
+    final west = lngs.reduce(math.min) - minSpan;
+    final east = lngs.reduce(math.max) + minSpan;
     final pad = widget.framePadding;
     return CameraUpdate.newLatLngBounds(
       LatLngBounds(southwest: LatLng(south, west), northeast: LatLng(north, east)),
@@ -251,7 +262,10 @@ class _TaraMapState extends ConsumerState<TaraMap> {
         rotateGesturesEnabled: false,
         tiltGesturesEnabled: false,
         attributionButtonPosition: AttributionButtonPosition.bottomLeft,
-        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+        // La carte prend les gestes qui la touchent : on la déplace et on zoome au doigt.
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+          const Factory<OneSequenceGestureRecognizer>(EagerGestureRecognizer.new),
+        },
       ),
     );
   }

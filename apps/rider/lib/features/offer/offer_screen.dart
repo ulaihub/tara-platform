@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tara_ui/components/city_3d.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
@@ -17,6 +16,7 @@ import '../../app/providers.dart';
 import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../map/tara_map.dart';
 
 /// 07 · Proposition de course (30 s) : plein écran, par-dessus tout. Le compte à rebours
 /// vient de l'heure d'expiration fixée par le serveur.
@@ -117,45 +117,52 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
     final offer = widget.offer;
     final total = ref.watch(riderConfigProvider).value?.offerTimeoutSeconds ?? 30;
     final remaining = _remaining;
-    final width = MediaQuery.sizeOf(context).width;
     final height = MediaQuery.sizeOf(context).height;
-    final pickupPin = l.pinPickup(offer.pickupName);
-    final dropoffPin = l.pinDropoff(offer.dropoffNeighborhood ?? offer.dropoffCity);
+    final online = ref.watch(onlineControllerProvider);
+    final pickupStop = offer.pickupLatitude == null || offer.pickupLongitude == null
+        ? null
+        : MapStop(
+            latitude: offer.pickupLatitude!,
+            longitude: offer.pickupLongitude!,
+            label: l.pinPickup(offer.pickupName),
+          );
+    final dropoffStop = offer.isTour || offer.dropoffLatitude == null || offer.dropoffLongitude == null
+        ? null
+        : MapStop(
+            latitude: offer.dropoffLatitude!,
+            longitude: offer.dropoffLongitude!,
+            dropoff: true,
+            label: l.pinDropoff(offer.dropoffNeighborhood ?? offer.dropoffCity),
+          );
     return Material(
       color: c.bg,
       child: Stack(
         children: [
-          // Quartier en relief et itinéraire schématique : le point exact de livraison n'est
-          // donné qu'après l'acceptation.
+          // Vraie carte : le livreur en direct, le vendeur exact et la zone de livraison (à
+          // environ 1 km près : le point exact n'est donné qu'après l'acceptation).
           Positioned(
             left: 0,
             right: 0,
             top: 0,
-            height: 440 * width / 390,
-            child: IgnorePointer(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  City3D(
-                    blocks: cityOffer,
-                    top: 40,
-                    height: 440,
-                    overlay: (canvas, ground) => _OfferMap.paintRoutes(canvas, ground, tour: offer.isTour),
-                    foreground: (canvas, ground) => _OfferMap.paintPins(
-                      canvas,
-                      ground,
-                      dark: c.isDark,
-                      bg: c.bg,
-                      ink: c.textPrimary,
-                      pickup: pickupPin,
-                      dropoff: dropoffPin,
-                      stops: offer.isTour ? offer.tourParcels.length : 0,
-                    ),
+            height: height * .5,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ListenableBuilder(
+                  listenable: online,
+                  builder: (context, _) => TaraMap(
+                    rider: online.lastPosition,
+                    stop: pickupStop,
+                    alsoStop: dropoffStop,
+                    zoom: 14,
+                    framePadding: EdgeInsets.fromLTRB(48, 90 + MediaQuery.paddingOf(context).top, 48, 70),
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: IgnorePointer(
                     child: SizedBox(
-                      height: 120,
+                      height: 60,
                       width: double.infinity,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
@@ -168,8 +175,8 @@ class _OfferScreenState extends ConsumerState<OfferScreen> {
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           SafeArea(
@@ -581,128 +588,5 @@ class _OfferSheet extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Dessins de la carte de la proposition, en coordonnées du sol de la maquette (360 × 360).
-abstract final class _OfferMap {
-  static const _course = [Offset(138, 60), Offset(138, 128), Offset(276, 128), Offset(276, 256), Offset(330, 256)];
-  static const _tour = [
-    Offset(138, 60),
-    Offset(138, 128),
-    Offset(138, 256),
-    Offset(200, 256),
-    Offset(276, 256),
-    Offset(276, 190),
-    Offset(276, 128),
-    Offset(340, 128),
-  ];
-  static const _approach = [Offset(30, 128), Offset(138, 128), Offset(138, 60)];
-  static const _tourStops = [Offset(200, 256), Offset(276, 190), Offset(340, 128)];
-
-  static Path _path(List<Offset> points, Offset Function(double x, double y) ground) {
-    final path = Path();
-    for (final (i, p) in points.indexed) {
-      final at = ground(p.dx, p.dy);
-      i == 0 ? path.moveTo(at.dx, at.dy) : path.lineTo(at.dx, at.dy);
-    }
-    return path;
-  }
-
-  static void paintRoutes(Canvas canvas, Offset Function(double x, double y) ground, {required bool tour}) {
-    final route = _path(tour ? _tour : _course, ground);
-    Paint stroke(Color color, double width) => Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = width
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    canvas
-      ..drawPath(route, stroke(const Color.fromRGBO(255, 106, 0, .28), 10))
-      ..drawPath(route, stroke(TaraBrand.orange, 3.6));
-    // Approche du livreur jusqu'à la boutique, en pointillés.
-    final dashes = stroke(const Color.fromRGBO(255, 255, 255, .75), 2.8);
-    for (final metric in _path(_approach, ground).computeMetrics()) {
-      for (var d = 0.0; d < metric.length; d += 9) {
-        canvas.drawPath(metric.extractPath(d, d + 3.5), dashes);
-      }
-    }
-  }
-
-  static void paintPins(
-    Canvas canvas,
-    Offset Function(double x, double y) ground, {
-    required bool dark,
-    required Color bg,
-    required Color ink,
-    required String pickup,
-    required String dropoff,
-    required int stops,
-  }) {
-    void label(Offset at, String text, {required bool white}) {
-      final painter = TextPainter(
-        text: TextSpan(
-          text: text,
-          style: TaraText.small.copyWith(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: white ? const Color(0xFF16120E) : const Color(0xFF140800),
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-        ellipsis: '…',
-      )..layout(maxWidth: 150);
-      final box = Rect.fromCenter(
-        center: at - Offset(0, 14 + (painter.height + 10) / 2),
-        width: painter.width + 18,
-        height: painter.height + 10,
-      );
-      canvas.drawRect(Rect.fromLTWH(at.dx - 1, at.dy - 14, 2, 14), Paint()..color = ink.withValues(alpha: .55));
-      final rrect = RRect.fromRectAndRadius(box, const Radius.circular(10));
-      canvas.drawRRect(
-        rrect,
-        white ? (Paint()..color = const Color(0xFFFFFFFF)) : (Paint()..shader = TaraBrand.gradient.createShader(box)),
-      );
-      painter.paint(canvas, box.topLeft + const Offset(9, 5));
-    }
-
-    label(ground(138, 60), pickup, white: true);
-    if (stops > 0) {
-      for (var i = 0; i < stops && i < _tourStops.length; i++) {
-        final p = _tourStops[i];
-        label(ground(p.dx, p.dy), '${i + 1}', white: false);
-      }
-    } else {
-      label(ground(330, 256), dropoff, white: false);
-    }
-    // Le livreur : rond dégradé avec la flèche, posé sur sa position.
-    final rider = ground(30, 128);
-    canvas.drawRect(
-      Rect.fromLTWH(rider.dx - 1, rider.dy - 12, 2, 12),
-      Paint()..color = const Color.fromRGBO(255, 177, 92, .85),
-    );
-    final center = rider - const Offset(0, 26);
-    canvas
-      ..drawCircle(
-        center,
-        16,
-        Paint()
-          ..color = const Color.fromRGBO(255, 106, 0, .75)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 9),
-      )
-      ..drawCircle(center, 14, Paint()..color = bg)
-      ..drawCircle(
-        center,
-        11,
-        Paint()..shader = TaraBrand.gradient.createShader(Rect.fromCircle(center: center, radius: 11)),
-      );
-    final arrow = Path()
-      ..moveTo(center.dx - 5.5, center.dy + .5)
-      ..lineTo(center.dx + 5.5, center.dy - 5)
-      ..lineTo(center.dx, center.dy + 5.5)
-      ..lineTo(center.dx - 1, center.dy + 1.5)
-      ..close();
-    canvas.drawPath(arrow, Paint()..color = const Color(0xFF140800));
   }
 }

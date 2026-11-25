@@ -411,8 +411,16 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
       listenable: Listenable.merge([online, _activeOrder, queue, network]),
       builder: (context, _) {
         final order = _activeOrder.order;
-        // Hors ligne, une course en cours reste à l'écran : rien ne doit la faire oublier.
-        final showCourse = order != null && (_minimized != order.id || !online.online);
+        // Course mise de côté (« Retour à l'accueil ») : l'accueil, en ligne ou hors ligne,
+        // affiche un bandeau pour la reprendre ; rien ne la fait oublier.
+        final showCourse = order != null && _minimized != order.id;
+        final courseBanner = order == null
+            ? null
+            : CourseBanner(
+                reference: order.reference,
+                stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.toDropoff,
+                onResume: () => setState(() => _minimized = null),
+              );
         return Stack(
           children: [
             Positioned.fill(
@@ -435,13 +443,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                           onWentOffline: () => setState(() {}),
                           onDetails: () => _selectTab(1),
                           onSos: _openSos,
-                          courseBanner: order == null
-                              ? null
-                              : CourseBanner(
-                                  reference: order.reference,
-                                  stepLabel: order.status == 'ASSIGNED' ? l.toPickup : l.toDropoff,
-                                  onResume: () => setState(() => _minimized = null),
-                                ),
+                          courseBanner: courseBanner,
                         ),
                         _ => HomeOfflineScreen(
                           onWentOnline: () {
@@ -449,6 +451,7 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                             unawaited(_loadPendingOffers());
                           },
                           onDetails: () => _selectTab(1),
+                          courseBanner: courseBanner,
                         ),
                       },
                     ),

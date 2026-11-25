@@ -459,6 +459,10 @@ class Offer {
     this.approachBonus = 0,
     this.boostBonus = 0,
     this.tourParcels = const [],
+    this.pickupLatitude,
+    this.pickupLongitude,
+    this.dropoffLatitude,
+    this.dropoffLongitude,
   });
 
   factory Offer.fromJson(Json json) {
@@ -488,6 +492,10 @@ class Offer {
         for (final item in (json['tourParcels'] as List<Object?>?) ?? const <Object?>[])
           TourParcel.fromJson(item! as Json),
       ],
+      pickupLatitude: (pickup['latitude'] as num?)?.toDouble(),
+      pickupLongitude: (pickup['longitude'] as num?)?.toDouble(),
+      dropoffLatitude: (dropoff['latitude'] as num?)?.toDouble(),
+      dropoffLongitude: (dropoff['longitude'] as num?)?.toDouble(),
     );
   }
   static const fields = [
@@ -515,6 +523,13 @@ class Offer {
   final String orderId;
   final DateTime expiresAt;
   final int? approachMeters;
+
+  /// Point d'enlèvement exact ; zone de livraison à environ 1 km près (le point exact n'est
+  /// donné qu'après l'acceptation). Absents d'un ancien serveur.
+  final double? pickupLatitude;
+  final double? pickupLongitude;
+  final double? dropoffLatitude;
+  final double? dropoffLongitude;
 
   /// Tournée (2c) : les colis dans l'ordre des arrêts ; vide pour une course seule. Distance,
   /// gain et montants couvrent alors toute la tournée.

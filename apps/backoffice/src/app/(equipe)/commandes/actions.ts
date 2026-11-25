@@ -24,6 +24,15 @@ function failure(error: unknown): ActionState {
     if (error.code === 'RIDER_NOT_ELIGIBLE') {
       return { error: 'Ce livreur ne peut pas rouler : pièce manquante ou expirée.', done: false };
     }
+    if (error.code === 'DELIVERY_VALIDATION_ADMIN_REQUIRED') {
+      return {
+        error: 'Grosse somme encaissée : seul un administrateur peut valider cette remise.',
+        done: false,
+      };
+    }
+    if (error.code === 'NO_DELIVERY_VALIDATION_REQUEST') {
+      return { error: 'Cette remise n’attend plus de validation.', done: false };
+    }
     if (error.code === 'ORDER_NOT_CANCELLABLE') {
       return {
         error: 'Le colis est déjà récupéré : la commande ne peut plus être annulée.',
@@ -85,5 +94,30 @@ export async function assignRider(_: ActionState, form: FormData): Promise<Actio
     return failure(error);
   }
   revalidatePath(`/commandes/${orderId}`);
+  return { error: null, done: true };
+}
+
+/**
+ * Remise sans code (E4) : le support a appelé le destinataire, qui confirme avoir reçu le
+ * colis. La commande passe en « Livrée » et le livreur est payé.
+ */
+export async function validateDelivery(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireStaff(OPS_ROLES);
+  const orderId = field(form, 'orderId');
+  const note = field(form, 'note');
+  if (!UUID.test(orderId)) return { error: 'Commande inconnue.', done: false };
+  if (note.length < 3) {
+    return { error: 'Notez comment le destinataire a confirmé la remise.', done: false };
+  }
+  try {
+    await staffApi(`/admin/orders/${orderId}/validate-delivery`, {
+      method: 'POST',
+      body: { note: note.slice(0, 300) },
+    });
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath(`/commandes/${orderId}`);
+  revalidatePath('/commandes');
   return { error: null, done: true };
 }

@@ -25,7 +25,7 @@ import {
 } from '@/lib/orders';
 import { displayPhone } from '@/lib/phone';
 import type { AdminOrder, DispatchCandidate } from '@/lib/schemas';
-import { AssignButton, CancelForm, NoteForm } from './order-actions';
+import { AssignButton, CancelForm, NoteForm, ValidateDeliveryForm } from './order-actions';
 
 const VEHICLE_LABELS: Record<NonNullable<AdminOrder['rider']>['vehicleType'], string> = {
   MOTORBIKE: 'Moto',
@@ -77,6 +77,13 @@ export default async function OrderPage({
   const { reattribuer } = await searchParams;
   const order = await load(id);
   const can = orderPermissions(session.roles, order);
+  // Remise déclarée sans code par le livreur : le support appelle le destinataire puis valide.
+  const declared =
+    order.status === 'IN_DELIVERY'
+      ? order.proofs.find(
+          (proof) => proof.kind === 'DELIVERY' && !proof.codeVerified && !proof.validatedBySupport,
+        )
+      : undefined;
   const candidates =
     can.reassign && reattribuer === '1'
       ? await staffApi<DispatchCandidate[]>(`/admin/orders/${id}/candidates`)
@@ -132,6 +139,24 @@ export default async function OrderPage({
           </Link>
         ) : null}
       </header>
+
+      {declared ? (
+        <section
+          aria-label="Remise à valider"
+          className="mb-5 rounded-[22px] border border-warn/30 bg-warn-bg p-4 sm:p-5"
+        >
+          <h2 className="font-display text-[17px] font-bold">Remise sans code à valider</h2>
+          <p className="mt-1 text-[14px] text-muted">
+            Le livreur a déclaré la remise le {dateTime(declared.at)}
+            {declared.receivedBy ? `, colis reçu par ${declared.receivedBy}` : ''}. Appelez le
+            destinataire ({displayPhone(order.recipient.phone)}) : s’il confirme, validez. La
+            commande passe alors en « Livrée ».
+          </p>
+          <div className="mt-3">
+            <ValidateDeliveryForm orderId={order.id} />
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-5">

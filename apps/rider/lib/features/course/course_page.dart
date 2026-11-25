@@ -13,11 +13,11 @@ import '../../l10n/app_localizations.dart';
 import '../map/tara_map.dart';
 
 // Cadre des écrans de course de la refonte (maquette Livreur-Enlevement) : la carte en
-// haut (250 px) qui s'efface vers le fond, l'en-tête par-dessus (retour, étape, nom,
-// appel, SOS), puis des cartes empilées qui défilent et l'action en bas.
+// haut, qu'on déplace et zoome au doigt, l'en-tête par-dessus (retour, étape, nom, appel,
+// SOS), puis des cartes empilées qui défilent sous la carte et l'action en bas.
 
 /// Écran de course : carte du haut, en-tête, cartes, pied fixe.
-class CoursePage extends ConsumerWidget {
+class CoursePage extends ConsumerStatefulWidget {
   const CoursePage({super.key, required this.stop, required this.header, required this.children, required this.footer});
 
   final MapStop stop;
@@ -26,67 +26,88 @@ class CoursePage extends ConsumerWidget {
   final Widget footer;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CoursePage> createState() => _CoursePageState();
+}
+
+class _CoursePageState extends ConsumerState<CoursePage> {
+  final _map = TaraMapHandle();
+  bool _following = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final online = ref.watch(onlineControllerProvider);
     final insets = MediaQuery.paddingOf(context);
+    // La carte garde un vrai morceau d'écran (un tiers environ) : on y voit les rues autour.
+    final mapHeight = (MediaQuery.sizeOf(context).height * .36).clamp(210.0, 330.0) + insets.top;
     return Material(
       color: c.bg,
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            height: 250 + insets.top,
-            child: IgnorePointer(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ListenableBuilder(
-                    listenable: online,
-                    builder: (context, _) => TaraMap(
-                      rider: online.lastPosition,
-                      stop: stop,
-                      framePadding: EdgeInsets.fromLTRB(60, 90 + insets.top, 60, 60),
-                    ),
+          SizedBox(
+            height: mapHeight,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ListenableBuilder(
+                  listenable: online,
+                  builder: (context, _) => TaraMap(
+                    rider: online.lastPosition,
+                    stop: widget.stop,
+                    handle: _map,
+                    onFollowChanged: (value) => setState(() => _following = value),
+                    framePadding: EdgeInsets.fromLTRB(50, 84 + insets.top, 50, 36),
                   ),
-                  DecoratedBox(
+                ),
+                // Voile sous l'en-tête et fondu vers les cartes : ne prend aucun geste.
+                IgnorePointer(
+                  child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [c.bg.withValues(alpha: .55), c.bg.withValues(alpha: 0), c.bg],
-                        stops: const [0, .35, 1],
+                        colors: [c.bg.withValues(alpha: .55), c.bg.withValues(alpha: 0), c.bg.withValues(alpha: 0), c.bg],
+                        stops: const [0, .3, .88, 1],
                       ),
                     ),
                   ),
+                ),
+                Positioned(
+                  left: 20,
+                  right: 20,
+                  top: insets.top + 18,
+                  child: widget.header,
+                ),
+                Positioned(
+                  right: 16,
+                  bottom: 14,
+                  child: GlassIconButton(
+                    icon: TaraIcons.navigation,
+                    label: l.recenterMap,
+                    badge: !_following,
+                    size: 44,
+                    radius: 16,
+                    onPressed: _map.recenter,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            // Peu de cartes : toutes construites d'un coup (pas de liste paresseuse).
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (i, child) in widget.children.indexed) ...[if (i > 0) const SizedBox(height: 10), child],
                 ],
               ),
             ),
           ),
-          SafeArea(
-            bottom: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(padding: const EdgeInsets.fromLTRB(20, 18, 20, 0), child: header),
-                Expanded(
-                  // Peu de cartes : toutes construites d'un coup (pas de liste paresseuse).
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 40, 16, 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (final (i, child) in children.indexed) ...[if (i > 0) const SizedBox(height: 10), child],
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(padding: EdgeInsets.fromLTRB(16, 4, 16, 12 + insets.bottom), child: footer),
-              ],
-            ),
-          ),
+          Padding(padding: EdgeInsets.fromLTRB(16, 4, 16, 12 + insets.bottom), child: widget.footer),
         ],
       ),
     );
