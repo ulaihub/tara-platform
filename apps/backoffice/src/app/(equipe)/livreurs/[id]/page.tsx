@@ -444,6 +444,12 @@ function Reliability({ reliability }: { reliability: RiderReliability }) {
       'Action validée loin de l’adresse, long arrêt avec le colis, position simulée, coupure.',
     ],
     [
+      'Courses retirées (sans signal)',
+      String(reliability.last30Days.silentWithdrawals),
+      String(reliability.allTime.silentWithdrawals),
+      'Téléphone muet 3 min avant l’enlèvement : la course est partie vers un autre livreur.',
+    ],
+    [
       'Alertes SOS',
       String(reliability.last30Days.sosAlerts),
       String(reliability.allTime.sosAlerts),

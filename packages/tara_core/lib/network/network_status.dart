@@ -20,8 +20,9 @@ class NetworkStatus extends ChangeNotifier {
   }
 
   /// État fixé (tests, catalogue).
-  NetworkStatus.fixed({required bool offline}) : _realtime = null, grace = Duration.zero {
+  NetworkStatus.fixed({required bool offline, DateTime? since}) : _realtime = null, grace = Duration.zero {
     _offline = offline;
+    _cutAt = offline ? (since ?? DateTime.now()) : null;
   }
 
   final ValueListenable<bool>? _realtime;
@@ -30,11 +31,16 @@ class NetworkStatus extends ChangeNotifier {
   Timer? _timer;
   bool _hasNetwork = true;
   bool _offline = false;
+  DateTime? _cutAt;
 
   bool get offline => _offline;
 
+  /// Début de la coupure (avant le délai de grâce), null avec du réseau.
+  DateTime? get offlineSince => _offline ? _cutAt : null;
+
   void _update() {
     final cut = !_hasNetwork || (_realtime != null && !_realtime.value);
+    _cutAt = cut ? (_cutAt ?? DateTime.now()) : null;
     if (!cut) {
       _timer?.cancel();
       _timer = null;

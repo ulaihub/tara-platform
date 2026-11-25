@@ -1370,6 +1370,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get offlineNoPending => 'Vos actions sont gardées sur le téléphone';
 
   @override
+  String silentWithdrawIn(int minutes) {
+    return 'Course pas encore récupérée : elle vous sera retirée dans $minutes min si le réseau ne revient pas';
+  }
+
+  @override
+  String get silentWithdrawNow => 'Sans réseau trop longtemps : la course a peut-être été confiée à un autre livreur';
+
+  @override
   String get balanceAvailable => 'Solde disponible';
 
   @override

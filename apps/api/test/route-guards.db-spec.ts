@@ -62,6 +62,7 @@ const PUBLIC_ROUTES = [
   'GET /legal/:document',
   'GET /public/config',
   'GET /public/location-links/:token',
+  'GET /public/receipts/:code',
   'GET /public/tracking/:token',
   'GET /webhooks/payments/:provider',
   'GET /webhooks/whatsapp',

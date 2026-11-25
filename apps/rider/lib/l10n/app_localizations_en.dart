@@ -1364,6 +1364,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineNoPending => 'Your actions are kept on the phone';
 
   @override
+  String silentWithdrawIn(int minutes) {
+    return 'Parcel not picked up yet: the job will be withdrawn in $minutes min if the network does not come back';
+  }
+
+  @override
+  String get silentWithdrawNow => 'Offline for too long: the job may have been given to another rider';
+
+  @override
   String get balanceAvailable => 'Available balance';
 
   @override

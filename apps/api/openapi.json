@@ -12590,7 +12590,8 @@
           "TRACK_GAP",
           "APPROACH_BONUS",
           "OVERDUE",
-          "MOVING_AWAY"
+          "MOVING_AWAY",
+          "RIDER_SILENT"
         ]
       },
       "CourseTrack": {
@@ -16748,6 +16749,9 @@
           "offerTimeoutSeconds": {
             "type": "number"
           },
+          "silentWithdrawSeconds": {
+            "type": "integer"
+          },
           "mobileMoneyFeeBps": {
             "type": "integer"
           },
@@ -16800,6 +16804,7 @@
           "emergencyNumbers",
           "mobileMoneyOperators",
           "offerTimeoutSeconds",
+          "silentWithdrawSeconds",
           "mobileMoneyFeeBps",
           "waiting"
         ],
@@ -17337,6 +17342,9 @@
               },
               "sosAlerts": {
                 "type": "integer"
+              },
+              "silentWithdrawals": {
+                "type": "integer"
               }
             },
             "required": [
@@ -17345,7 +17353,8 @@
               "rating",
               "onlineMinutes",
               "courseAlerts",
-              "sosAlerts"
+              "sosAlerts",
+              "silentWithdrawals"
             ],
             "additionalProperties": false
           },
@@ -17421,6 +17430,9 @@
               },
               "sosAlerts": {
                 "type": "integer"
+              },
+              "silentWithdrawals": {
+                "type": "integer"
               }
             },
             "required": [
@@ -17429,7 +17441,8 @@
               "rating",
               "onlineMinutes",
               "courseAlerts",
-              "sosAlerts"
+              "sosAlerts",
+              "silentWithdrawals"
             ],
             "additionalProperties": false
           },

@@ -3359,7 +3359,8 @@ export interface components {
       | 'TRACK_GAP'
       | 'APPROACH_BONUS'
       | 'OVERDUE'
-      | 'MOVING_AWAY';
+      | 'MOVING_AWAY'
+      | 'RIDER_SILENT';
     CourseTrack: {
       /** Format: uuid */
       orderId: string;
@@ -4550,6 +4551,7 @@ export interface components {
         name: string;
       }[];
       offerTimeoutSeconds: number;
+      silentWithdrawSeconds: number;
       mobileMoneyFeeBps: number;
       waiting: {
         freeMinutes: number;
@@ -4702,6 +4704,7 @@ export interface components {
         onlineMinutes: number;
         courseAlerts: number;
         sosAlerts: number;
+        silentWithdrawals: number;
       };
       allTime: {
         offers: {
@@ -4722,6 +4725,7 @@ export interface components {
         onlineMinutes: number;
         courseAlerts: number;
         sosAlerts: number;
+        silentWithdrawals: number;
       };
       history: {
         /** Format: date-time */

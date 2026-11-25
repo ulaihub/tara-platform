@@ -19,10 +19,10 @@ import { RealtimeService } from '../realtime/realtime.service.js';
 import { QueueService } from '../redis/queue.service.js';
 import { approachBonusFor, vehicleCarries } from '../pricing/pricing.engine.js';
 import { PricingSettingsService } from '../pricing/pricing-settings.service.js';
-import { haversineMeters } from '../routing/distance.service.js';
+import { DistanceService, haversineMeters } from '../routing/distance.service.js';
 import { uncoveredDocuments } from '../riders/riders.service.js';
 import type { CandidateDto, OfferDto } from './dispatch.schemas.js';
-import { PresenceService } from './presence.service.js';
+import { PresenceService, type RiderPosition } from './presence.service.js';
 import { stopOrder, tourMembers, tourMeters } from './tour.js';
 import {
   cashCarried,
@@ -49,6 +49,8 @@ const ACCEPT_GRACE_MS = 3_000;
 export const SCHEDULED_LEAD_MINUTES = 20;
 /** Livreurs examinés autour du point d'enlèvement à chaque rayon. */
 const NEARBY_LIMIT = 30;
+/** Livreurs les mieux placés à vol d'oiseau dont on mesure le vrai trajet par les rues. */
+const ROAD_CHECK = 10;
 
 const OFFER_PLACES = {
   pickupAddress: { include: { neighborhood: true } },
@@ -119,6 +121,7 @@ export class DispatchService implements OnModuleInit {
     private readonly balances: RiderBalanceService,
     private readonly pricingSettings: PricingSettingsService,
     @Inject(ENV) private readonly env: Env,
+    private readonly distance: DistanceService,
   ) {
     this.radii = env.DISPATCH_RADII_METERS.split(',').map(Number);
     this.valueRules = {
@@ -201,6 +204,12 @@ export class DispatchService implements OnModuleInit {
           .map((offer) => offer.riderId),
       );
       for (const riderId of await releasedBy(tx, orderId)) excluded.add(riderId);
+      // Livreur à qui la course a été retirée faute de signal : il ne la revoit pas.
+      const withdrawn = await tx.courseAlert.findMany({
+        where: { orderId, kind: 'RIDER_SILENT' },
+        select: { riderId: true },
+      });
+      for (const { riderId } of withdrawn) excluded.add(riderId);
       const silent = new Set(
         thisSearch.filter((offer) => offer.outcome === 'EXPIRED').map((offer) => offer.riderId),
       );
@@ -352,7 +361,38 @@ export class DispatchService implements OnModuleInit {
     }
     const preferred = eligible.filter((rider) => !silent.has(rider.riderId));
     const pool = preferred.length > 0 ? preferred : eligible;
-    return pool.sort((a, b) => a.score - b.score).slice(0, size);
+    const ranked = await this.byRoad(pool.sort((a, b) => a.score - b.score), order.pickupAddress);
+    return ranked.slice(0, size);
+  }
+
+  /**
+   * Le plus proche par les rues d'abord : à Douala, un livreur proche à vol d'oiseau peut
+   * être de l'autre côté du Wouri ou d'une voie sans passage. Seul l'ordre change : la
+   * distance annoncée et la prime d'approche restent calculées comme avant.
+   */
+  private async byRoad(
+    sorted: Candidate[],
+    pickup: { latitude: number; longitude: number },
+  ): Promise<Candidate[]> {
+    if (sorted.length < 2) return sorted;
+    const head = sorted.slice(0, ROAD_CHECK);
+    const positions = await this.presence.positions(head.map((rider) => rider.riderId));
+    const withPosition = head.filter((rider) => positions.has(rider.riderId));
+    const road = await this.distance.roadMetersTo(
+      withPosition.map((rider) => positions.get(rider.riderId) as RiderPosition),
+      pickup,
+    );
+    if (!road) return sorted;
+    const roadScore = new Map(
+      withPosition.flatMap((rider, index) => {
+        const meters = road[index];
+        return meters === null || meters === undefined
+          ? []
+          : [[rider.riderId, score({ ...rider, distanceMeters: meters })] as const];
+      }),
+    );
+    const rank = (rider: Candidate) => roadScore.get(rider.riderId) ?? rider.score;
+    return [...head.sort((a, b) => rank(a) - rank(b)), ...sorted.slice(ROAD_CHECK)];
   }
 
   /** État de chaque livreur proche, lu en une fois (pièces, courses, offres, espèces). */

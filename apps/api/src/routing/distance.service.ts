@@ -141,6 +141,34 @@ export class DistanceService {
     };
   }
 
+  /**
+   * Distances par les rues de plusieurs points vers un même point (une seule requête OSRM
+   * « table »). null si OSRM est absent ou en panne : l'appelant garde le vol d'oiseau.
+   */
+  async roadMetersTo(sources: GeoPoint[], to: GeoPoint): Promise<(number | null)[] | null> {
+    const baseUrl = this.env.OSRM_URL;
+    if (!baseUrl || sources.length === 0) return null;
+    try {
+      const coordinates = [...sources, to].map((p) => `${p.longitude},${p.latitude}`).join(';');
+      const indexes = sources.map((_, index) => index).join(';');
+      const response = await fetch(
+        `${baseUrl.replace(/\/$/, '')}/table/v1/driving/${coordinates}` +
+          `?sources=${indexes}&destinations=${sources.length}&annotations=distance`,
+        { signal: AbortSignal.timeout(1_500) },
+      );
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const body = (await response.json()) as { code?: string; distances?: (number | null)[][] };
+      if (body.code !== 'Ok' || !body.distances) throw new Error(`réponse OSRM ${body.code}`);
+      return sources.map((_, index) => {
+        const meters = body.distances?.[index]?.[0];
+        return typeof meters === 'number' && Number.isFinite(meters) ? Math.round(meters) : null;
+      });
+    } catch (error) {
+      this.logger.warn(`OSRM indisponible, distances à vol d'oiseau : ${String(error)}`);
+      return null;
+    }
+  }
+
   private async osrm(baseUrl: string, from: GeoPoint, to: GeoPoint): Promise<RouteEstimate> {
     const coordinates = `${from.longitude},${from.latitude};${to.longitude},${to.latitude}`;
     const response = await fetch(

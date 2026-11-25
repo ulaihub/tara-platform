@@ -32,6 +32,7 @@ export const CourseAlertKindEnum = z
     'APPROACH_BONUS',
     'OVERDUE',
     'MOVING_AWAY',
+    'RIDER_SILENT',
   ])
   .meta({ id: 'CourseAlertKind' });
 

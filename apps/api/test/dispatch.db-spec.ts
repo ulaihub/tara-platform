@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { DispatchService } from '../src/dispatch/dispatch.service.js';
+import { SilentRiderService } from '../src/dispatch/silent-rider.service.js';
 import { type FakePushProvider, PUSH_PROVIDER } from '../src/notifications/push.provider.js';
 import { createTestApp, type SignedIn, staffUser, type TestContext } from './helpers/app.js';
 import {
@@ -395,6 +396,59 @@ describe('Attribution des courses (D1 à D4)', () => {
       template: 'ORDER_ASSIGNED_BATCH',
       payload: { params: expect.objectContaining({ number: 2, recipient: 'Jean' }) },
     });
+  });
+
+  it('retire la course au livreur muet depuis 3 min, avant l’enlèvement, sans la lui reproposer', async () => {
+    const silentRider = await onlineRider(0.001);
+    const order = await placeOrder(ctx, shop);
+    const [offer] = await pendingOffers(order.id);
+    expect(offer?.riderId).toBe(silentRider.riderId);
+    await request(ctx.http)
+      .post(`/v1/rider/offers/${offer?.id}/accept`)
+      .set(silentRider.auth)
+      .expect(200);
+    const other = await onlineRider(0.006);
+    const silence = ctx.app.get(SilentRiderService);
+
+    // Deux minutes sans signe : rien ne bouge encore.
+    await silence.scan(new Date(Date.now() + 2 * 60_000), [order.id]);
+    const kept = await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+    expect(kept.status).toBe('ASSIGNED');
+    // Trois minutes : la course repart, vers un autre livreur seulement.
+    await silence.scan(new Date(Date.now() + 3 * 60_000 + 5_000), [order.id]);
+    const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+    expect(stored).toMatchObject({ status: 'SEARCHING_RIDER', riderId: null });
+    expect((await pendingOffers(order.id)).map((o) => o.riderId)).toEqual([other.riderId]);
+    expect(push.lastTo(silentRider.pushToken)).toMatchObject({
+      data: { type: 'order.reassigned', orderId: order.id },
+    });
+    // Le retrait compte dans la fiabilité du livreur.
+    const reliability = await request(ctx.http)
+      .get(`/v1/admin/riders/${silentRider.riderId}/reliability`)
+      .set(admin.auth)
+      .expect(200);
+    expect(reliability.body.last30Days.silentWithdrawals).toBe(1);
+    // Revenu sur le réseau, il ne peut plus valider l'enlèvement de cette course.
+    await request(ctx.http)
+      .get(`/v1/rider/orders/${order.id}`)
+      .set(silentRider.auth)
+      .expect((res) => expect([403, 404]).toContain(res.status));
+  });
+
+  it('ne retire pas la course à un livreur qui donne signe de vie', async () => {
+    const rider = await onlineRider(0.001);
+    const order = await placeOrder(ctx, shop);
+    const [offer] = await pendingOffers(order.id);
+    await request(ctx.http).post(`/v1/rider/offers/${offer?.id}/accept`).set(rider.auth).expect(200);
+    await ctx.prisma.order.update({
+      where: { id: order.id },
+      data: { assignedAt: new Date(Date.now() - 10 * 60_000) },
+    });
+    // Signe de vie à l'instant : course gardée, même acceptée il y a 10 min.
+    await request(ctx.http).post('/v1/rider/location').set(rider.auth).send(nearAkwa(0.001)).expect(204);
+    await ctx.app.get(SilentRiderService).scan(new Date(Date.now() + 60_000), [order.id]);
+    const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+    expect(stored.status).toBe('ASSIGNED');
   });
 
   it('ne repropose pas une course au livreur qui l’a rendue', async () => {

@@ -288,6 +288,8 @@ final onlineControllerProvider = Provider<OnlineController>((ref) {
     // Trajet de la course : positions sans réseau gardées, envoyées au retour du réseau.
     onUnsent: (position) => unawaited(track.add(position)),
     onSent: () => unawaited(track.flush()),
+    // Signe de vie au moins toutes les 30 s, même immobile chez le vendeur.
+    heartbeat: const Duration(seconds: 30),
   );
   ref.onDispose(controller.dispose);
   return controller;

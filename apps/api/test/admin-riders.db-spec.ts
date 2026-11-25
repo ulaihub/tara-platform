@@ -249,6 +249,7 @@ describe('Back-office · livreurs (H3)', () => {
       onlineMinutes: 120,
       courseAlerts: 1,
       sosAlerts: 1,
+      silentWithdrawals: 0,
     });
     expect(res.body.allTime).toMatchObject({
       offers: { accepted: 3, declined: 2, expired: 1 },

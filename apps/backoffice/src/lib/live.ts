@@ -30,6 +30,7 @@ export const COURSE_ALERT_LABELS: Record<CourseAlert['kind'], string> = {
   APPROACH_BONUS: 'prime d’approche sans trajet correspondant',
   OVERDUE: 'livraison bien plus longue que prévu',
   MOVING_AWAY: 's’éloigne de la destination avec le colis',
+  RIDER_SILENT: 'course retirée : téléphone sans signal pendant 3 min',
 };
 
 export interface Point {

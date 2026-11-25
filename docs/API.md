@@ -93,6 +93,25 @@ Le back-office (`apps/backoffice`) appelle l'API depuis son serveur avec le jeto
 de l'équipe (second facteur vérifié) ; le navigateur ne voit jamais ce jeton. `GET /me`
 indique où en est le second facteur (`staff.mfaEnrolled`, `staff.mfaVerified`).
 
+**Livreur muet pendant une course** (balayage toutes les 15 s) : aucun signe du téléphone
+(position, même ancienne rejouée au retour du réseau) depuis `RIDER_SILENT_WITHDRAW_SECONDS`
+(180 par défaut) :
+
+- colis pas encore enlevé (`ASSIGNED`) : la course repart en recherche sans frais pour
+  l'expéditeur, l'argent mis de côté sur le solde du livreur est libéré, une alerte
+  `RIDER_SILENT` est créée (comptée dans `silentWithdrawals` de la fiabilité), le livreur ne
+  revoit pas la course ; il reçoit `RIDER_ORDER_SILENT_WITHDRAWN`, l'expéditeur
+  `ORDER_RIDER_REPLACED` ;
+- colis à bord : rien n'est réattribué ; l'expéditeur reçoit une fois `ORDER_RIDER_NO_SIGNAL`
+  (l'équipe suit le livreur « sans signal » sur la carte).
+
+L'app livreur renvoie sa dernière position toutes les 30 s même immobile, et affiche hors
+réseau le temps restant avant le retrait (`silentWithdrawSeconds` dans `GET /rider/config`).
+
+**Choix du livreur** : les plus proches d'abord ; pour les 10 mieux placés, l'ordre suit la
+distance par les rues (OSRM, table), le vol d'oiseau en repli. La distance annoncée et la
+prime d'approche ne changent pas.
+
 **Carte en direct (H1)** : `GET /admin/live-map` (`ADMIN`, `DISPATCHER`, `SUPPORT`), lue
 toutes les 5 secondes par le back-office. Elle donne :
 

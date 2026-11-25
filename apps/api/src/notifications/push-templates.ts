@@ -130,6 +130,36 @@ const TEMPLATES = {
     },
     en: { title: 'Job withdrawn', body: 'Job {reference} has been given to another rider.' },
   },
+  RIDER_ORDER_SILENT_WITHDRAWN: {
+    fr: {
+      title: 'Course retirée : pas de signal',
+      body: 'Votre téléphone n’a plus donné signe de vie pendant 3 min : la course {reference} a été confiée à un autre livreur.',
+    },
+    en: {
+      title: 'Job withdrawn: no signal',
+      body: 'Your phone gave no sign of life for 3 min: job {reference} has been given to another rider.',
+    },
+  },
+  ORDER_RIDER_REPLACED: {
+    fr: {
+      title: 'Nouveau livreur en recherche',
+      body: '{reference} · Votre livreur ne répond plus : nous cherchons un autre livreur, sans frais pour vous.',
+    },
+    en: {
+      title: 'Finding a new rider',
+      body: '{reference} · Your rider stopped responding: we are finding another rider, at no cost to you.',
+    },
+  },
+  ORDER_RIDER_NO_SIGNAL: {
+    fr: {
+      title: 'Livreur sans réseau',
+      body: '{reference} · Le livreur traverse une zone sans réseau. Votre colis est suivi par l’équipe Tara.',
+    },
+    en: {
+      title: 'Rider out of coverage',
+      body: '{reference} · The rider is passing through an area without network. The Tara team is following your parcel.',
+    },
+  },
   PAYOUT_SENT: {
     fr: { title: 'Argent envoyé', body: '{amount} FCFA envoyés sur votre Mobile Money.' },
     en: { title: 'Money sent', body: '{amount} XAF sent to your Mobile Money.' },

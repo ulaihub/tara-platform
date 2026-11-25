@@ -114,6 +114,7 @@ describe('livreurs au back-office', () => {
         onlineMinutes: 120,
         courseAlerts: 1,
         sosAlerts: 0,
+        silentWithdrawals: 0,
       }),
     ).toEqual({ acceptance: 60, success: 67, onTime: 50 });
   });
