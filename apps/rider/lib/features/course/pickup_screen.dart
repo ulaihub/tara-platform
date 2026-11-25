@@ -22,6 +22,7 @@ import '../map/tara_map.dart';
 import 'address_help.dart';
 import 'course_page.dart';
 import 'course_scaffold.dart';
+import 'order_chat.dart';
 
 /// 08 · Enlèvement : itinéraire jusqu'au vendeur, montant à encaisser sur place, code de
 /// l'expéditeur et photo du colis. « Colis récupéré » passe par la file hors connexion.
@@ -279,6 +280,9 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
         callLabel: l.callPerson(senderName),
         // Appels gardés dans le journal : ils prouvent l'attente si l'expéditeur ne vient pas.
         onCall: phone == null ? null : () => ref.read(callJournalProvider).call(order.id, to: 'SENDER', phone: phone),
+        messageLabel: l.chatWithSender(senderName),
+        unread: ref.watch(chatInboxProvider).unread(order.id),
+        onMessage: () => unawaited(openOrderChat(context, ref, order)),
       ),
       footer: Column(
         mainAxisSize: MainAxisSize.min,

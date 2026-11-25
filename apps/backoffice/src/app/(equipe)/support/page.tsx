@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { LiveRefresh } from '@/components/live-refresh';
 import { Icon } from '@/components/icon';
 import { TopBar } from '@/components/top-bar';
 import { cx } from '@/components/ui';
@@ -52,6 +53,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="mx-auto max-w-[1280px] pb-8">
+      <LiveRefresh seconds={10} />
       <TopBar
         title="Support"
         subtitle={`Demandes, litiges et preuves · ${page.counts.TO_HANDLE} à traiter · ${page.counts.MINE} suivie${page.counts.MINE > 1 ? 's' : ''} par vous`}

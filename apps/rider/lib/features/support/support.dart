@@ -77,6 +77,7 @@ Future<void> openSupport(BuildContext context, WidgetRef ref) {
         strings: supportStrings(route),
         categories: riderCategories,
         onBack: () => Navigator.of(route).pop(),
+        updates: ref.read(realtimeProvider).supportReplies,
         supportPhone: phone == null ? null : displayPhone(phone),
         onCall: phone == null ? null : () => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
       ),

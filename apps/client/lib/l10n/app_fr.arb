@@ -1786,5 +1786,19 @@
   "reserveBody": "Au reversement de {hour} h, Tara garde ce montant de vos ventes sur votre solde Tara : vos livraisons du lendemain sont déjà payées. Le reste vous est reversé, comme d’habitude.",
   "reserveZero": "Aucune",
   "reserveSave": "Enregistrer",
-  "reserveSaved": "Réserve enregistrée."
+  "reserveSaved": "Réserve enregistrée.",
+  "chatWithRider": "Écrire à {name}",
+  "@chatWithRider": { "placeholders": { "name": { "type": "String" } } },
+  "chatHint": "Votre message…",
+  "chatSend": "Envoyer",
+  "chatEmpty": "Aucun message. Écrivez au livreur, il reçoit une notification.",
+  "chatClosed": "La course est terminée : la conversation est fermée.",
+  "chatRead": "Lu",
+  "chatSubtitle": "Livreur · {reference}",
+  "@chatSubtitle": { "placeholders": { "reference": { "type": "String" } } },
+  "chatQuick1": "Le colis est prêt",
+  "chatQuick2": "Je descends",
+  "chatQuick3": "Appelez-moi en arrivant",
+  "chatQuick4": "Vous êtes où ?",
+  "chatNewMessage": "Nouveau message du livreur"
 }

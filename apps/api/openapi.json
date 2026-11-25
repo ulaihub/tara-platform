@@ -1092,6 +1092,70 @@
         ]
       }
     },
+    "/v1/riders/me/vehicle": {
+      "put": {
+        "operationId": "Riders_setVehicle",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "brand": {
+                    "nullable": true,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/VehicleBrand"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "nullable": true,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/VehicleColor"
+                      }
+                    ]
+                  },
+                  "plateNumber": {
+                    "nullable": true,
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20
+                  }
+                },
+                "required": [
+                  "brand",
+                  "color"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderProfile"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreurs"
+        ]
+      }
+    },
     "/v1/riders/me/documents": {
       "post": {
         "operationId": "Riders_uploadDocument",
@@ -3722,6 +3786,54 @@
         ]
       }
     },
+    "/v1/orders/{id}/rider-photo": {
+      "get": {
+        "operationId": "Orders_riderPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo du livreur",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
     "/v1/orders/{id}/route": {
       "get": {
         "operationId": "Orders_route",
@@ -4011,6 +4123,94 @@
         ],
         "tags": [
           "Back-office · commandes"
+        ]
+      }
+    },
+    "/v1/orders/{id}/messages": {
+      "get": {
+        "operationId": "Messages_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderConversation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Messages"
+        ]
+      },
+      "post": {
+        "operationId": "Messages_send",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "body"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Messages"
         ]
       }
     },
@@ -11435,6 +11635,22 @@
             "nullable": true,
             "type": "string"
           },
+          "vehicleBrand": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleBrand"
+              }
+            ]
+          },
+          "vehicleColor": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleColor"
+              }
+            ]
+          },
           "cashLimit": {
             "type": "integer",
             "description": "Plafond d’espèces détenues, en FCFA"
@@ -11575,6 +11791,8 @@
           "status",
           "vehicleType",
           "plateNumber",
+          "vehicleBrand",
+          "vehicleColor",
           "cashLimit",
           "guarantorName",
           "guarantorPhone",
@@ -13391,7 +13609,8 @@
                   "NOT_AT_PICKUP",
                   "SENDER_ABSENT_TOO_EARLY",
                   "SENDER_CALLS_REQUIRED",
-                  "ARRIVAL_NOT_EXPECTED"
+                  "ARRIVAL_NOT_EXPECTED",
+                  "CONVERSATION_CLOSED"
                 ]
               },
               "message": {
@@ -14918,13 +15137,35 @@
               "plateNumber": {
                 "nullable": true,
                 "type": "string"
+              },
+              "vehicleBrand": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/VehicleBrand"
+                  }
+                ]
+              },
+              "vehicleColor": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/VehicleColor"
+                  }
+                ]
+              },
+              "hasPhoto": {
+                "type": "boolean"
               }
             },
             "required": [
               "name",
               "phone",
               "vehicleType",
-              "plateNumber"
+              "plateNumber",
+              "vehicleBrand",
+              "vehicleColor",
+              "hasPhoto"
             ],
             "additionalProperties": false
           },
@@ -15032,6 +15273,25 @@
           "rating",
           "timeline",
           "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "OrderConversation": {
+        "type": "object",
+        "properties": {
+          "open": {
+            "type": "boolean"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderMessage"
+            }
+          }
+        },
+        "required": [
+          "open",
+          "messages"
         ],
         "additionalProperties": false
       },
@@ -15198,6 +15458,46 @@
           "hasParcelPhoto",
           "ratings",
           "trackPoints"
+        ],
+        "additionalProperties": false
+      },
+      "OrderMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mine": {
+            "type": "boolean"
+          },
+          "authorRole": {
+            "type": "string",
+            "enum": [
+              "SENDER",
+              "RIDER"
+            ]
+          },
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "readAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "mine",
+          "authorRole",
+          "body",
+          "createdAt",
+          "readAt"
         ],
         "additionalProperties": false
       },
@@ -17200,6 +17500,22 @@
             "nullable": true,
             "type": "string"
           },
+          "vehicleBrand": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleBrand"
+              }
+            ]
+          },
+          "vehicleColor": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleColor"
+              }
+            ]
+          },
           "cashLimit": {
             "type": "integer",
             "description": "Plafond d’espèces détenues, en FCFA"
@@ -17256,6 +17572,8 @@
           "status",
           "vehicleType",
           "plateNumber",
+          "vehicleBrand",
+          "vehicleColor",
           "cashLimit",
           "guarantorName",
           "guarantorPhone",
@@ -18218,6 +18536,39 @@
           "SUPPORT",
           "FINANCE",
           "ADMIN"
+        ]
+      },
+      "VehicleBrand": {
+        "type": "string",
+        "enum": [
+          "NANFANG",
+          "HAOJUE",
+          "SANYA",
+          "LIFAN",
+          "DAYUN",
+          "JIALING",
+          "KYMCO",
+          "HONDA",
+          "YAMAHA",
+          "SUZUKI",
+          "TVS",
+          "BAJAJ",
+          "OTHER"
+        ]
+      },
+      "VehicleColor": {
+        "type": "string",
+        "enum": [
+          "BLACK",
+          "RED",
+          "BLUE",
+          "WHITE",
+          "GREY",
+          "GREEN",
+          "YELLOW",
+          "ORANGE",
+          "BROWN",
+          "VIOLET"
         ]
       },
       "VehicleType": {

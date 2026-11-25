@@ -16,6 +16,7 @@ import { HealthModule } from './health/health.module.js';
 import { LegalModule } from './legal/legal.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { OpsModule } from './ops/ops.module.js';
+import { MessagesModule } from './messages/messages.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
 import { MetricsModule } from './metrics/metrics.module.js';
@@ -67,6 +68,7 @@ import { UsersModule } from './users/users.module.js';
     GeoModule,
     PricingModule,
     OrdersModule,
+    MessagesModule,
     ParcelAnalysisModule,
     PublicTrackingModule,
     RiderAppModule,

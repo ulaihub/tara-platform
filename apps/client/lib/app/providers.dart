@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/auth_api.dart';
 import 'package:tara_core/api/legal_api.dart';
+import 'package:tara_core/api/order_chat_api.dart';
 import 'package:tara_core/api/pin_api.dart';
 import 'package:tara_core/api/support_api.dart';
 import 'package:tara_core/push/push_service.dart';
@@ -104,6 +105,9 @@ final authApiProvider = Provider<AuthApi>(
 final clientApiProvider = Provider<ClientApi>((ref) => ClientApi(ref.watch(apiClientProvider)));
 
 /// Service client : demandes de l'utilisateur et réponses de l'équipe Tara (H6).
+/// Messages avec le livreur d'une commande.
+final orderChatApiProvider = Provider<OrderChatApi>((ref) => OrderChatApi(ref.watch(apiClientProvider)));
+
 final supportBackendProvider = Provider<SupportBackend>((ref) => SupportApi(ref.watch(apiClientProvider)));
 
 /// Code secret (comme Orange Money et MTN MoMo) et empreinte digitale.

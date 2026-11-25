@@ -356,6 +356,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/riders/me/vehicle': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['Riders_setVehicle'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/riders/me/documents': {
     parameters: {
       query?: never;
@@ -932,6 +948,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/orders/{id}/rider-photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Orders_riderPhoto'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/orders/{id}/route': {
     parameters: {
       query?: never;
@@ -1022,6 +1054,22 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['AdminOrders_transition'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/orders/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Messages_list'];
+    put?: never;
+    post: operations['Messages_send'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3065,6 +3113,8 @@ export interface components {
       status: components['schemas']['RiderStatus'];
       vehicleType: components['schemas']['VehicleType'];
       plateNumber: string | null;
+      vehicleBrand: components['schemas']['VehicleBrand'] | null;
+      vehicleColor: components['schemas']['VehicleColor'] | null;
       /** @description Plafond d’espèces détenues, en FCFA */
       cashLimit: number;
       guarantorName: string | null;
@@ -3680,7 +3730,8 @@ export interface components {
           | 'NOT_AT_PICKUP'
           | 'SENDER_ABSENT_TOO_EARLY'
           | 'SENDER_CALLS_REQUIRED'
-          | 'ARRIVAL_NOT_EXPECTED';
+          | 'ARRIVAL_NOT_EXPECTED'
+          | 'CONVERSATION_CLOSED';
         /** @description Message prêt à afficher, en français ou en anglais */
         message: string;
         details?: unknown;
@@ -4078,6 +4129,9 @@ export interface components {
         /** @enum {string} */
         vehicleType: 'MOTORBIKE' | 'TRICYCLE' | 'CAR';
         plateNumber: string | null;
+        vehicleBrand: components['schemas']['VehicleBrand'] | null;
+        vehicleColor: components['schemas']['VehicleColor'] | null;
+        hasPhoto: boolean;
       } | null;
       attemptCount: number;
       failure: {
@@ -4096,6 +4150,10 @@ export interface components {
       timeline: components['schemas']['OrderEvent'][];
       /** Format: date-time */
       createdAt: string;
+    };
+    OrderConversation: {
+      open: boolean;
+      messages: components['schemas']['OrderMessage'][];
     };
     OrderEvent: {
       status: components['schemas']['OrderStatus'];
@@ -4137,6 +4195,18 @@ export interface components {
         at: string;
       }[];
       trackPoints: number;
+    };
+    OrderMessage: {
+      /** Format: uuid */
+      id: string;
+      mine: boolean;
+      /** @enum {string} */
+      authorRole: 'SENDER' | 'RIDER';
+      body: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      readAt: string | null;
     };
     OrderNote: {
       /** Format: uuid */
@@ -4670,6 +4740,8 @@ export interface components {
       status: components['schemas']['RiderStatus'];
       vehicleType: components['schemas']['VehicleType'];
       plateNumber: string | null;
+      vehicleBrand: components['schemas']['VehicleBrand'] | null;
+      vehicleColor: components['schemas']['VehicleColor'] | null;
       /** @description Plafond d’espèces détenues, en FCFA */
       cashLimit: number;
       guarantorName: string | null;
@@ -4915,6 +4987,33 @@ export interface components {
     };
     /** @enum {string} */
     UserRole: 'CUSTOMER' | 'MERCHANT' | 'RIDER' | 'DISPATCHER' | 'SUPPORT' | 'FINANCE' | 'ADMIN';
+    /** @enum {string} */
+    VehicleBrand:
+      | 'NANFANG'
+      | 'HAOJUE'
+      | 'SANYA'
+      | 'LIFAN'
+      | 'DAYUN'
+      | 'JIALING'
+      | 'KYMCO'
+      | 'HONDA'
+      | 'YAMAHA'
+      | 'SUZUKI'
+      | 'TVS'
+      | 'BAJAJ'
+      | 'OTHER';
+    /** @enum {string} */
+    VehicleColor:
+      | 'BLACK'
+      | 'RED'
+      | 'BLUE'
+      | 'WHITE'
+      | 'GREY'
+      | 'GREEN'
+      | 'YELLOW'
+      | 'ORANGE'
+      | 'BROWN'
+      | 'VIOLET';
     /** @enum {string} */
     VehicleType: 'MOTORBIKE' | 'TRICYCLE' | 'CAR';
     Wallet: {
@@ -5626,6 +5725,34 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderProfile'];
+        };
+      };
+    };
+  };
+  Riders_setVehicle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          brand: components['schemas']['VehicleBrand'] | null;
+          color: components['schemas']['VehicleColor'] | null;
+          plateNumber?: string | null;
+        };
+      };
+    };
     responses: {
       /** @description Succès */
       200: {
@@ -6939,6 +7066,30 @@ export interface operations {
       };
     };
   };
+  Orders_riderPhoto: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Photo du livreur */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'image/jpeg': string;
+          'image/png': string;
+          'image/webp': string;
+        };
+      };
+    };
+  };
   Orders_route: {
     parameters: {
       query?: never;
@@ -7090,6 +7241,56 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Order'];
+        };
+      };
+    };
+  };
+  Messages_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OrderConversation'];
+        };
+      };
+    };
+  };
+  Messages_send: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          body: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OrderMessage'];
         };
       };
     };

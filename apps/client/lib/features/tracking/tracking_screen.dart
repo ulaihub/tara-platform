@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:tara_core/api/api_exception.dart';
+import 'package:tara_core/api/order_chat_api.dart';
 import 'package:tara_core/money/mobile_money_fees.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
@@ -17,6 +19,7 @@ import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/operator_logo.dart';
+import 'package:tara_ui/components/order_chat.dart';
 import 'package:tara_ui/components/star_rating.dart';
 import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
@@ -26,6 +29,7 @@ import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
+import 'package:tara_ui/vehicle_labels.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
@@ -93,6 +97,15 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   late final RealtimeClient _realtime;
   Timer? _refresh;
 
+  /// Messages du livreur reçus en direct (conversation ouverte) ; non lus sinon.
+  final _chatIncoming = StreamController<OrderChatMessage>.broadcast();
+  bool _chatOpen = false;
+  int _unread = 0;
+
+  /// Photo du livreur, chargée une fois par livreur (une nouvelle après une réattribution).
+  Uint8List? _riderPhoto;
+  String? _photoOf;
+
   /// Trajet du colis sur les rues ; null tant qu'il n'est pas reçu (ou ligne droite seulement).
   List<List<double>>? _route;
 
@@ -131,6 +144,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     unawaited(_events?.cancel());
     _refresh?.cancel();
     _realtime.connected.removeListener(_onConnection);
+    unawaited(_chatIncoming.close());
     _lifecycle.dispose();
     _realtime.unsubscribeOrder(widget.orderId);
     _comment.dispose();
@@ -152,6 +166,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
         _error = null;
       });
       if (before != null && before != order.status) _announce(order.status);
+      unawaited(_loadRiderPhoto(order));
     } catch (error) {
       if (mounted && _order == null) setState(() => _error = errorMessage(context, error));
     }
@@ -164,6 +179,59 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     } catch (_) {
       // Pas de trajet (réseau, serveur d'avant) : la ligne droite reste.
     }
+  }
+
+  Future<void> _loadRiderPhoto(TrackedOrder order) async {
+    final rider = order.rider;
+    final key = rider == null ? null : '${rider.name}|${rider.plateNumber}';
+    if (key == _photoOf) return;
+    _photoOf = key;
+    if (rider == null || !rider.hasPhoto) {
+      if (mounted) setState(() => _riderPhoto = null);
+      return;
+    }
+    try {
+      final bytes = await ref.read(clientApiProvider).riderPhoto(order.id);
+      if (mounted) setState(() => _riderPhoto = bytes);
+    } catch (_) {
+      // Sans photo : les initiales restent.
+    }
+  }
+
+  Future<void> _openChat(TrackedOrder order) async {
+    final l = AppLocalizations.of(context);
+    final rider = order.rider;
+    if (rider == null) return;
+    final api = ref.read(orderChatApiProvider);
+    final when = DateFormat('HH:mm', l.localeName);
+    setState(() {
+      _chatOpen = true;
+      _unread = 0;
+    });
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => OrderChatScreen(
+          load: () => api.conversation(order.id),
+          send: (body) => api.send(order.id, body),
+          incoming: _chatIncoming.stream,
+          onBack: () => Navigator.of(context).pop(),
+          strings: OrderChatStrings(
+            back: l.back,
+            title: rider.name,
+            subtitle: l.chatSubtitle(order.reference),
+            hint: l.chatHint,
+            send: l.chatSend,
+            empty: l.chatEmpty,
+            closed: l.chatClosed,
+            read: l.chatRead,
+            quickReplies: [l.chatQuick1, l.chatQuick2, l.chatQuick3, l.chatQuick4],
+            when: when.format,
+            errorText: (error) => errorMessage(context, error),
+          ),
+        ),
+      ),
+    );
+    if (mounted) setState(() => _chatOpen = false);
   }
 
   void _onAck(Json ack) {
@@ -186,6 +254,17 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     switch (event.name) {
       case 'rider.position':
         _move(event.payload);
+      case 'order.message':
+        // Message du livreur, en direct : dans la conversation si elle est ouverte,
+        // sinon pastille sur le bouton « Écrire ».
+        final message = event.payload['message'];
+        if (message is Map) {
+          _chatIncoming.add(OrderChatMessage.fromJson(Map<String, Object?>.from(message)));
+          if (!_chatOpen && mounted) {
+            TaraFeedback.play(context, TaraSound.received);
+            setState(() => _unread += 1);
+          }
+        }
       case 'order.status':
         final status = event.payload['status'];
         final order = _order;
@@ -583,6 +662,9 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                         ),
                         onShare: () => unawaited(_share(order)),
                         onCall: (phone) => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
+                        onMessage: () => unawaited(_openChat(order)),
+                        unread: _unread,
+                        riderPhoto: _riderPhoto,
                         onReport: () =>
                             unawaited(reportProblem(context, ref, orderId: order.id, orderReference: order.reference)),
                       ),
@@ -631,7 +713,15 @@ class _Panel extends StatelessWidget {
     required this.onShare,
     required this.onCall,
     required this.onReport,
+    required this.onMessage,
+    this.unread = 0,
+    this.riderPhoto,
   });
+
+  /// Conversation avec le livreur ; messages pas encore lus.
+  final VoidCallback onMessage;
+  final int unread;
+  final Uint8List? riderPhoto;
 
   final TrackedOrder order;
   final DateTime now;
@@ -817,7 +907,13 @@ class _Panel extends StatelessWidget {
         ],
       ] else ...[
         if (o.rider case final rider? when rider.phone != null) ...[
-          _RiderCard(rider: rider, onCall: () => onCall(rider.phone!)),
+          _RiderCard(
+            rider: rider,
+            photo: riderPhoto,
+            unread: unread,
+            onCall: () => onCall(rider.phone!),
+            onMessage: onMessage,
+          ),
           const SizedBox(height: 10),
         ],
         _recipientRow(l, o, recipientFirst),
@@ -1096,29 +1192,49 @@ class _Steps extends StatelessWidget {
   }
 }
 
-/// Le livreur : initiales, prénom, véhicule et plaque, bouton d'appel.
+/// Le livreur : photo (ou initiales), nom, moto (marque, couleur, plaque), appel et message.
 class _RiderCard extends StatelessWidget {
-  const _RiderCard({required this.rider, required this.onCall});
+  const _RiderCard({
+    required this.rider,
+    required this.onCall,
+    required this.onMessage,
+    this.photo,
+    this.unread = 0,
+  });
 
   final OrderRider rider;
   final VoidCallback onCall;
+  final VoidCallback onMessage;
+  final Uint8List? photo;
+  final int unread;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
+    final locale = Localizations.localeOf(context);
     final vehicle = switch (rider.vehicleType) {
       'CAR' => l.vehicleCar,
       'TRICYCLE' => l.vehicleTricycle,
       _ => l.vehicleMotorbike,
     };
+    final color = rider.vehicleColor;
+    final model = [
+      if (rider.vehicleBrand case final brand?) vehicleBrandName(brand, locale) else vehicle,
+      if (color != null) vehicleColorName(color, locale).toLowerCase(),
+    ].join(' ');
     return GlassCard(
       radius: 20,
       shadow: false,
       padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
       child: Row(
         children: [
-          InitialsAvatar(name: rider.name, size: 44),
+          if (photo case final bytes?)
+            ClipOval(
+              child: Image.memory(bytes, width: 48, height: 48, fit: BoxFit.cover, gaplessPlayback: true),
+            )
+          else
+            InitialsAvatar(name: rider.name, size: 48),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -1128,10 +1244,45 @@ class _RiderCard extends StatelessWidget {
                   rider.name,
                   style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
                 ),
-                Text([vehicle, ?rider.plateNumber].join(' · '), style: TaraText.small.copyWith(color: c.textSecondary)),
+                Row(
+                  children: [
+                    if (color != null) ...[
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: vehicleColors[color],
+                          shape: BoxShape.circle,
+                          border: Border.all(color: c.textPrimary.withValues(alpha: .25)),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Flexible(
+                      child: Text(
+                        model,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TaraText.small.copyWith(color: c.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                if (rider.plateNumber case final plate?)
+                  Text(
+                    plate,
+                    style: TaraText.small.copyWith(color: c.textPrimary, fontWeight: FontWeight.w800, letterSpacing: .6),
+                  ),
               ],
             ),
           ),
+          GlassIconButton(
+            icon: TaraIcons.message,
+            label: l.chatWithRider(rider.name),
+            badge: unread > 0,
+            onPressed: onMessage,
+          ),
+          const SizedBox(width: 8),
           GlassIconButton(icon: TaraIcons.phone, label: l.callRider(rider.name), onPressed: onCall),
         ],
       ),

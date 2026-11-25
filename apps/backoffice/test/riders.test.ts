@@ -39,6 +39,8 @@ function rider(overrides: Partial<AdminRider> = {}): AdminRider {
     status: 'PENDING',
     vehicleType: 'MOTORBIKE',
     plateNumber: 'LT 123 AB',
+    vehicleBrand: null,
+    vehicleColor: null,
     cashLimit: 25000,
     guarantorName: null,
     guarantorPhone: null,

@@ -7,6 +7,7 @@ import { AppError } from '../common/errors/app-error.js';
 import { damageClaimDeadline } from '../common/time.js';
 import type { Prisma, TicketCategory, UserRole } from '../generated/prisma/client.js';
 import { NotificationService } from '../notifications/notification.service.js';
+import { RealtimeService } from '../realtime/realtime.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { MediaService } from '../storage/media.service.js';
 import {
@@ -100,6 +101,7 @@ export class SupportService {
     private readonly notifications: NotificationService,
     private readonly media: MediaService,
     private readonly audit: AuditService,
+    private readonly realtime: RealtimeService,
   ) {}
 
   // --- Côté utilisateur ----------------------------------------------------------------
@@ -194,6 +196,8 @@ export class SupportService {
             : { updatedAt: new Date() },
       }),
     ]);
+    // L'équipe voit la réponse arriver dans la demande ouverte, sans recharger.
+    this.realtime.toOps('ops.support-message', { ticketId: id });
     return this.mine(actor, id);
   }
 
@@ -366,8 +370,12 @@ export class SupportService {
             },
       }),
     ]);
-    if (!body.internal)
+    if (!body.internal) {
+      // L'expéditeur ou le livreur voit la réponse dans la demande ouverte, en direct.
+      if (ticket.requesterId) this.realtime.toUser(ticket.requesterId, 'support.message', { ticketId: id });
       await this.notifyReply(ticket.requesterId, ticket.contactPhone, ticket.number, body.body);
+    }
+    this.realtime.toOps('ops.support-message', { ticketId: id });
     return this.adminDetail(id);
   }
 

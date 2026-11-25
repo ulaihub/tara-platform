@@ -504,6 +504,7 @@ model User {
   orderEvents              OrderEvent[]
   validatedProofs          DeliveryProof[]
   ratingsGiven             Rating[]               @relation("RatingsGiven")
+  orderMessages            OrderMessage[]
   ratingsReceived          Rating[]               @relation("RatingsReceived")
   payments                 Payment[]
   promoRedemptions         PromoRedemption[]
@@ -665,6 +666,9 @@ model RiderProfile {
   status                RiderStatus @default(PENDING)
   vehicleType           VehicleType @default(MOTORBIKE) @map("vehicle_type")
   plateNumber           String?     @map("plate_number")
+  /// Marque et couleur du véhicule (liste fixe dans l'API), montrées à l'expéditeur.
+  vehicleBrand          String?     @map("vehicle_brand")
+  vehicleColor          String?     @map("vehicle_color")
   /// Plafond d'espèces détenues, en FCFA (G5, D4).
   cashLimit             Int         @default(25000) @map("cash_limit")
   /// Retrait gratuit à partir de ce montant (fixé par l'équipe) ; null : seuil général.
@@ -1093,6 +1097,7 @@ model Order {
   proofs          DeliveryProof[]
   offers          DispatchOffer[]
   ratings         Rating[]
+  messages        OrderMessage[]
   pendingDelivery PendingDelivery?
   notes           OrderNote[]
   codCollection   CodCollection?
@@ -1770,4 +1775,23 @@ model RiderBoost {
 
   @@index([city, endsAt])
   @@map("rider_boosts")
+}
+
+/// Message entre l'expéditeur et le livreur d'une commande (« J'arrive », « Je suis devant »).
+model OrderMessage {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  orderId    String    @map("order_id") @db.Uuid
+  authorId   String    @map("author_id") @db.Uuid
+  /// SENDER ou RIDER.
+  authorRole ActorRole @map("author_role")
+  body       String
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  /// Lu par l'autre personne.
+  readAt     DateTime? @map("read_at") @db.Timestamptz(3)
+
+  order  Order @relation(fields: [orderId], references: [id])
+  author User  @relation(fields: [authorId], references: [id])
+
+  @@index([orderId, createdAt])
+  @@map("order_messages")
 }

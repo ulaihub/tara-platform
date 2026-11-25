@@ -3,6 +3,7 @@ import { CameroonMobile } from '../common/phone.js';
 import { PageQuery } from '../common/pagination.js';
 import { AddressDto } from '../geo/geo.schemas.js';
 import { PackageSizeEnum } from '../pricing/pricing.schemas.js';
+import { VehicleBrandEnum, VehicleColorEnum } from '../riders/riders.schemas.js';
 
 export const OrderStatusEnum = z
   .enum([
@@ -266,6 +267,10 @@ export const OrderDto = z
         phone: z.string().nullable(),
         vehicleType: z.enum(['MOTORBIKE', 'TRICYCLE', 'CAR']),
         plateNumber: z.string().nullable(),
+        vehicleBrand: VehicleBrandEnum.nullable(),
+        vehicleColor: VehicleColorEnum.nullable(),
+        /** Photo de visage validée : `GET /orders/:id/rider-photo`. */
+        hasPhoto: z.boolean(),
       })
       .nullable(),
     attemptCount: z.int(),

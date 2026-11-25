@@ -34,11 +34,20 @@ class RealtimeClient {
     'offer.new',
     'offer.closed',
     'order.status',
+    'order.message',
+    'support.message',
     'payment.status',
     'payout.status',
     'location-link.submitted',
     'rider.position',
   ];
+
+  /// Demandes au service client qui viennent de recevoir une réponse de l'équipe.
+  Stream<String> get supportReplies => stream
+      .where((event) => event.name == 'support.message')
+      .map((event) => event.payload['ticketId'])
+      .where((id) => id is String)
+      .cast<String>();
 
   final String baseUrl;
   final SessionStore store;

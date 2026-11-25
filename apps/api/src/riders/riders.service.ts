@@ -26,6 +26,9 @@ import {
   type RiderDecisionBody,
   type RiderProfileDto,
   type UploadDocumentBody,
+  type VehicleBody,
+  VehicleBrandEnum,
+  VehicleColorEnum,
 } from './riders.schemas.js';
 
 type RiderWithDocuments = RiderProfile & { documents: KycDocument[] };
@@ -129,6 +132,8 @@ export class RidersService {
       status: rider.status,
       vehicleType: rider.vehicleType,
       plateNumber: rider.plateNumber,
+      vehicleBrand: VehicleBrandEnum.safeParse(rider.vehicleBrand).data ?? null,
+      vehicleColor: VehicleColorEnum.safeParse(rider.vehicleColor).data ?? null,
       cashLimit: rider.cashLimit,
       guarantorName: rider.guarantorName,
       guarantorPhone: rider.guarantorPhone,
@@ -173,6 +178,48 @@ export class RidersService {
           entityId: before.id,
           before: { emergencyContactName: before.emergencyContactName },
           after: { emergencyContactName: updated.emergencyContactName },
+          request,
+        },
+        tx,
+      );
+      return updated;
+    });
+    return this.toProfileDto(rider);
+  }
+
+  /** Marque, couleur et plaque du véhicule, montrées à l'expéditeur pour reconnaître le livreur. */
+  async setVehicle(
+    actor: AuthUser,
+    body: z.output<typeof VehicleBody>,
+    request: Request,
+  ): Promise<z.output<typeof RiderProfileDto>> {
+    const before = await this.load({ userId: actor.id });
+    const rider = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.riderProfile.update({
+        where: { id: before.id },
+        data: {
+          vehicleBrand: body.brand,
+          vehicleColor: body.color,
+          ...(body.plateNumber === undefined ? {} : { plateNumber: body.plateNumber }),
+        },
+        include: { documents: true },
+      });
+      await this.audit.record(
+        {
+          actor,
+          action: 'rider.vehicle_changed',
+          entityType: 'rider_profile',
+          entityId: before.id,
+          before: {
+            vehicleBrand: before.vehicleBrand,
+            vehicleColor: before.vehicleColor,
+            plateNumber: before.plateNumber,
+          },
+          after: {
+            vehicleBrand: updated.vehicleBrand,
+            vehicleColor: updated.vehicleColor,
+            plateNumber: updated.plateNumber,
+          },
           request,
         },
         tx,

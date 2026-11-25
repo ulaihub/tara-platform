@@ -2797,4 +2797,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reserveSaved => 'Reserve saved.';
+
+  @override
+  String chatWithRider(String name) {
+    return 'Message $name';
+  }
+
+  @override
+  String get chatHint => 'Your message…';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatEmpty => 'No message yet. Write to the rider, they get a notification.';
+
+  @override
+  String get chatClosed => 'The job is over: the conversation is closed.';
+
+  @override
+  String get chatRead => 'Read';
+
+  @override
+  String chatSubtitle(String reference) {
+    return 'Rider · $reference';
+  }
+
+  @override
+  String get chatQuick1 => 'The parcel is ready';
+
+  @override
+  String get chatQuick2 => 'I\'m coming down';
+
+  @override
+  String get chatQuick3 => 'Call me when you arrive';
+
+  @override
+  String get chatQuick4 => 'Where are you?';
+
+  @override
+  String get chatNewMessage => 'New message from the rider';
 }

@@ -85,6 +85,8 @@ TrackedOrder tracked(
             phone: status == 'DELIVERED' ? null : '+237677445566',
             vehicleType: 'MOTORBIKE',
             plateNumber: 'LT 482 KQ',
+            vehicleBrand: 'NANFANG',
+            vehicleColor: 'RED',
           )
         : null,
     timeline: [for (final MapEntry(:key, :value) in reached.entries) (status: key, at: value)],
@@ -201,7 +203,9 @@ void main() {
       await pumpVariant(tester, variant, screen(apiAt('ASSIGNED'), realtime));
       await settle(tester);
       expect(find.text('Jean M. vient chercher le colis'), findsOneWidget);
-      expect(find.text('Moto · LT 482 KQ'), findsOneWidget);
+      // Marque et couleur pour reconnaître la moto, plaque bien lisible.
+      expect(find.text('Nanfang rouge'), findsOneWidget);
+      expect(find.text('LT 482 KQ'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_livreur/${brightness.name}.png'));
     });
 
