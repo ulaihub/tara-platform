@@ -30,7 +30,11 @@ class TrackingMap extends ConsumerStatefulWidget {
     this.rider,
     this.heading,
     this.framePadding = EdgeInsets.zero,
+    this.route,
   });
+
+  /// Trajet sur les rues ([longitude, latitude]) ; null : ligne droite en pointillés.
+  final List<List<double>>? route;
 
   final MapPoint pickup;
   final MapPoint dropoff;
@@ -98,6 +102,7 @@ class _TrackingMapState extends ConsumerState<TrackingMap> with SingleTickerProv
       }
     }
     if (widget.searching != old.searching || widget.toDropoff != old.toDropoff) unawaited(_frame());
+    if (widget.route != old.route) unawaited(_pushRoute());
   }
 
   @override
@@ -144,24 +149,34 @@ class _TrackingMapState extends ConsumerState<TrackingMap> with SingleTickerProv
         _point(widget.dropoff, {'kind': 'dropoff', 'label': ''}),
       ],
     });
+    await _pushRoute();
+    await _pushRider();
+    await _frame();
+  }
+
+  /// Trajet sur les rues (trait plein) dès qu'il est connu ; avant, ligne droite en pointillés.
+  Future<void> _pushRoute() async {
+    final controller = _controller;
+    if (controller == null || !_styleReady) return;
+    final route = widget.route;
     await controller.setGeoJsonSource('tara-route', {
       'type': 'FeatureCollection',
       'features': [
         {
           'type': 'Feature',
-          'properties': {'estimate': true},
+          'properties': {'estimate': route == null},
           'geometry': {
             'type': 'LineString',
-            'coordinates': [
-              [widget.pickup.longitude, widget.pickup.latitude],
-              [widget.dropoff.longitude, widget.dropoff.latitude],
-            ],
+            'coordinates':
+                route ??
+                [
+                  [widget.pickup.longitude, widget.pickup.latitude],
+                  [widget.dropoff.longitude, widget.dropoff.latitude],
+                ],
           },
         },
       ],
     });
-    await _pushRider();
-    await _frame();
   }
 
   static Map<String, Object?> _point(MapPoint point, Map<String, Object?> properties) => {

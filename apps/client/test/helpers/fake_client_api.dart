@@ -432,6 +432,16 @@ class FakeClientApi extends ClientApi {
   @override
   Future<TrackedOrder> order(String id) async => tracked[id]!;
 
+  /// Trajet de la commande : ligne droite (pas de service d'itinéraires en test).
+  @override
+  Future<({List<List<double>> path, bool onRoads})> orderRoute(String id) async => (
+    path: [
+      [tracked[id]!.pickup.longitude, tracked[id]!.pickup.latitude],
+      [tracked[id]!.dropoff.longitude, tracked[id]!.dropoff.latitude],
+    ],
+    onRoads: false,
+  );
+
   @override
   Future<String> newPickupCode(String orderId) async => '5190';
 

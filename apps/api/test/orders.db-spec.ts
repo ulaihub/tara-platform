@@ -485,6 +485,28 @@ describe('Tarification et commandes (C1 à C7)', () => {
       });
     });
 
+    it('donne le trajet du colis à l’expéditeur seulement', async () => {
+      const m = await merchant();
+      const order = await request(ctx.http)
+        .post('/v1/orders')
+        .set(m.auth)
+        .send(orderBody(m))
+        .expect(201);
+      const route = await request(ctx.http)
+        .get(`/v1/orders/${order.body.order.id}/route`)
+        .set(m.auth)
+        .expect(200);
+      // Sans OSRM en test : ligne droite du vendeur au destinataire, distance estimée.
+      expect(route.body.source).toBe('estimate');
+      expect(route.body.path).toHaveLength(2);
+      expect(route.body.meters).toBeGreaterThan(0);
+      const stranger = await signIn(ctx);
+      await request(ctx.http)
+        .get(`/v1/orders/${order.body.order.id}/route`)
+        .set(stranger.auth)
+        .expect(404);
+    });
+
     it('cache la commande aux autres utilisateurs et la montre aux opérations', async () => {
       const m = await merchant();
       const order = await request(ctx.http)

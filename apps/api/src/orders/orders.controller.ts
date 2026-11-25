@@ -10,6 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
@@ -33,6 +34,7 @@ import {
   CreateOrderBody,
   OrderDto,
   OrderListQuery,
+  OrderRouteDto,
   OrderSummaryDto,
   PendingDeliveryDto,
   PendingDeliveryListQuery,
@@ -162,6 +164,17 @@ export class OrdersController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<z.output<typeof OrderDto>> {
     return this.orders.get(user, id);
+  }
+
+  /** Trajet du colis sur les rues (vendeur → destinataire), pour la carte de suivi. */
+  @Get(':id/route')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @ApiZodResponse(OrderRouteDto)
+  route(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<z.output<typeof OrderRouteDto>> {
+    return this.orders.route(user, id);
   }
 
   @Post(':id/cancel')

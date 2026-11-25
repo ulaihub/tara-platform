@@ -3722,6 +3722,41 @@
         ]
       }
     },
+    "/v1/orders/{id}/route": {
+      "get": {
+        "operationId": "Orders_route",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderRoute"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
     "/v1/orders/{id}/cancel": {
       "post": {
         "operationId": "Orders_cancel",
@@ -15193,6 +15228,51 @@
           "createdAt",
           "authorName",
           "authorPhone"
+        ],
+        "additionalProperties": false
+      },
+      "OrderRoute": {
+        "type": "object",
+        "properties": {
+          "meters": {
+            "type": "integer"
+          },
+          "seconds": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "osrm",
+              "estimate"
+            ]
+          },
+          "path": {
+            "minItems": 2,
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "required": [
+          "meters",
+          "seconds",
+          "source",
+          "path"
         ],
         "additionalProperties": false
       },
