@@ -4225,6 +4225,138 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nouveau message de l\'expéditeur'**
   String get chatNewMessage;
+
+  /// No description provided for @introSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get introSkip;
+
+  /// No description provided for @introNext.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivant'**
+  String get introNext;
+
+  /// No description provided for @introStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer'**
+  String get introStart;
+
+  /// No description provided for @introJobsKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses · Douala'**
+  String get introJobsKicker;
+
+  /// No description provided for @introJobsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Des courses près de vous'**
+  String get introJobsTitle;
+
+  /// No description provided for @introJobsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous voyez le trajet et le gain avant d\'accepter. Un glissement suffit pour prendre la course.'**
+  String get introJobsBody;
+
+  /// No description provided for @introJobsChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'30 s pour répondre'**
+  String get introJobsChip;
+
+  /// No description provided for @introJobsOffer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle course'**
+  String get introJobsOffer;
+
+  /// No description provided for @introJobsEarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'1 500 F'**
+  String get introJobsEarning;
+
+  /// No description provided for @introJobsRoute.
+  ///
+  /// In fr, this message translates to:
+  /// **'Akwa → Bonapriso · 4,2 km'**
+  String get introJobsRoute;
+
+  /// No description provided for @introEarningsKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos gains'**
+  String get introEarningsKicker;
+
+  /// No description provided for @introEarningsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre argent, chaque jour'**
+  String get introEarningsTitle;
+
+  /// No description provided for @introEarningsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque course livrée s\'ajoute à votre solde. Vous le retirez sur votre Mobile Money.'**
+  String get introEarningsBody;
+
+  /// No description provided for @introEarningsChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait sur Mobile Money'**
+  String get introEarningsChip;
+
+  /// No description provided for @introEarningsCard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gains du jour'**
+  String get introEarningsCard;
+
+  /// No description provided for @introEarningsFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'+1 050 F · course livrée'**
+  String get introEarningsFooter;
+
+  /// No description provided for @introSafetyKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sécurité'**
+  String get introSafetyKicker;
+
+  /// No description provided for @introSafetyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais seul sur la route'**
+  String get introSafetyTitle;
+
+  /// No description provided for @introSafetyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un appui long sur SOS prévient l\'équipe Tara et votre proche. Pendant la course, l\'équipe voit où vous êtes.'**
+  String get introSafetyBody;
+
+  /// No description provided for @introSafetyTeam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Équipe Tara prévenue'**
+  String get introSafetyTeam;
+
+  /// No description provided for @introSafetyContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre proche reçoit un SMS'**
+  String get introSafetyContact;
+
+  /// No description provided for @introSafetyPosition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position partagée pendant la course'**
+  String get introSafetyPosition;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

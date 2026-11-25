@@ -2844,4 +2844,111 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get chatNewMessage => 'Nouveau message du livreur';
+
+  @override
+  String get introSkip => 'Passer';
+
+  @override
+  String get introNext => 'Suivant';
+
+  @override
+  String get introStart => 'Commencer';
+
+  @override
+  String get introSendKicker => 'Livraison à la demande · Douala';
+
+  @override
+  String get introSendTitle => 'Envoyez un colis en une minute';
+
+  @override
+  String get introSendBody => 'Un livreur vient le chercher chez vous et le livre partout dans Douala.';
+
+  @override
+  String get introSendChip => '1 minute pour commander';
+
+  @override
+  String get introSendFrom => 'Boutique Awa';
+
+  @override
+  String get introSendFromAddress => 'Bd de la Liberté, Akwa';
+
+  @override
+  String get introSendTo => 'Marie · Collège des Nations';
+
+  @override
+  String get introSendDelivered => 'livrée en 38 min';
+
+  @override
+  String get introTrackKicker => 'Suivi en direct';
+
+  @override
+  String get introTrackTitle => 'Suivez votre colis jusqu\'à la porte';
+
+  @override
+  String get introTrackBody => 'Vous voyez le livreur avancer. Votre client reçoit un lien pour le suivre aussi.';
+
+  @override
+  String get introTrackRider => 'Jean M. arrive';
+
+  @override
+  String get introTrackPlate => 'Moto · LT 482 KA';
+
+  @override
+  String get introTrackEta => '4 min';
+
+  @override
+  String get introCollectKicker => 'Paiement à la livraison';
+
+  @override
+  String get introCollectTitle => 'Le livreur encaisse pour vous';
+
+  @override
+  String get introCollectBody =>
+      'En espèces ou par Mobile Money. Vos ventes s\'ajoutent à votre compte et vous sont reversées sur votre Mobile Money.';
+
+  @override
+  String get introCollectDoor => 'À la porte · TR-48211';
+
+  @override
+  String get introCollectRecipient => 'Marie Ngo · Collège des Nations';
+
+  @override
+  String get introCollectAmount => '15 000 F';
+
+  @override
+  String get introCollectCash => 'Espèces';
+
+  @override
+  String get introCollectMomo => 'Mobile Money';
+
+  @override
+  String get introCollectFooter => '+15 000 F · à l\'instant';
+
+  @override
+  String get introSalesLabel => 'Ventes à recevoir';
+
+  @override
+  String get introAccountsKicker => 'Votre argent';
+
+  @override
+  String get introAccountsTitle => 'Deux comptes, d\'un coup d\'œil';
+
+  @override
+  String get introAccountsBody =>
+      'Vos ventes à recevoir et votre Solde Tara, qui paie vos livraisons. Tout est masqué tant que vous ne l\'affichez pas.';
+
+  @override
+  String get introAccountsShopTag => 'Boutique';
+
+  @override
+  String get introAccountsSalesFooter => 'Reversées ce soir à 18 h';
+
+  @override
+  String get introAccountsTaraLabel => 'Solde Tara';
+
+  @override
+  String get introAccountsTaraFooter => 'Paie vos livraisons en premier';
+
+  @override
+  String get introAccountsSwipe => 'Glissez pour changer de compte';
 }

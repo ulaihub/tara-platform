@@ -4861,6 +4861,216 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nouveau message du livreur'**
   String get chatNewMessage;
+
+  /// No description provided for @introSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get introSkip;
+
+  /// No description provided for @introNext.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivant'**
+  String get introNext;
+
+  /// No description provided for @introStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer'**
+  String get introStart;
+
+  /// No description provided for @introSendKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison à la demande · Douala'**
+  String get introSendKicker;
+
+  /// No description provided for @introSendTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyez un colis en une minute'**
+  String get introSendTitle;
+
+  /// No description provided for @introSendBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un livreur vient le chercher chez vous et le livre partout dans Douala.'**
+  String get introSendBody;
+
+  /// No description provided for @introSendChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'1 minute pour commander'**
+  String get introSendChip;
+
+  /// No description provided for @introSendFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique Awa'**
+  String get introSendFrom;
+
+  /// No description provided for @introSendFromAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bd de la Liberté, Akwa'**
+  String get introSendFromAddress;
+
+  /// No description provided for @introSendTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marie · Collège des Nations'**
+  String get introSendTo;
+
+  /// No description provided for @introSendDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'livrée en 38 min'**
+  String get introSendDelivered;
+
+  /// No description provided for @introTrackKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi en direct'**
+  String get introTrackKicker;
+
+  /// No description provided for @introTrackTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez votre colis jusqu\'à la porte'**
+  String get introTrackTitle;
+
+  /// No description provided for @introTrackBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous voyez le livreur avancer. Votre client reçoit un lien pour le suivre aussi.'**
+  String get introTrackBody;
+
+  /// No description provided for @introTrackRider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jean M. arrive'**
+  String get introTrackRider;
+
+  /// No description provided for @introTrackPlate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moto · LT 482 KA'**
+  String get introTrackPlate;
+
+  /// No description provided for @introTrackEta.
+  ///
+  /// In fr, this message translates to:
+  /// **'4 min'**
+  String get introTrackEta;
+
+  /// No description provided for @introCollectKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement à la livraison'**
+  String get introCollectKicker;
+
+  /// No description provided for @introCollectTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur encaisse pour vous'**
+  String get introCollectTitle;
+
+  /// No description provided for @introCollectBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'En espèces ou par Mobile Money. Vos ventes s\'ajoutent à votre compte et vous sont reversées sur votre Mobile Money.'**
+  String get introCollectBody;
+
+  /// No description provided for @introCollectDoor.
+  ///
+  /// In fr, this message translates to:
+  /// **'À la porte · TR-48211'**
+  String get introCollectDoor;
+
+  /// No description provided for @introCollectRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marie Ngo · Collège des Nations'**
+  String get introCollectRecipient;
+
+  /// No description provided for @introCollectAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'15 000 F'**
+  String get introCollectAmount;
+
+  /// No description provided for @introCollectCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get introCollectCash;
+
+  /// No description provided for @introCollectMomo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money'**
+  String get introCollectMomo;
+
+  /// No description provided for @introCollectFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'+15 000 F · à l\'instant'**
+  String get introCollectFooter;
+
+  /// No description provided for @introSalesLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes à recevoir'**
+  String get introSalesLabel;
+
+  /// No description provided for @introAccountsKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre argent'**
+  String get introAccountsKicker;
+
+  /// No description provided for @introAccountsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Deux comptes, d\'un coup d\'œil'**
+  String get introAccountsTitle;
+
+  /// No description provided for @introAccountsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos ventes à recevoir et votre Solde Tara, qui paie vos livraisons. Tout est masqué tant que vous ne l\'affichez pas.'**
+  String get introAccountsBody;
+
+  /// No description provided for @introAccountsShopTag.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique'**
+  String get introAccountsShopTag;
+
+  /// No description provided for @introAccountsSalesFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversées ce soir à 18 h'**
+  String get introAccountsSalesFooter;
+
+  /// No description provided for @introAccountsTaraLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara'**
+  String get introAccountsTaraLabel;
+
+  /// No description provided for @introAccountsTaraFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paie vos livraisons en premier'**
+  String get introAccountsTaraFooter;
+
+  /// No description provided for @introAccountsSwipe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glissez pour changer de compte'**
+  String get introAccountsSwipe;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

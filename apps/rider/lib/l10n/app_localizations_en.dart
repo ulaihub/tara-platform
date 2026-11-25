@@ -2445,4 +2445,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatNewMessage => 'New message from the sender';
+
+  @override
+  String get introSkip => 'Skip';
+
+  @override
+  String get introNext => 'Next';
+
+  @override
+  String get introStart => 'Get started';
+
+  @override
+  String get introJobsKicker => 'Jobs · Douala';
+
+  @override
+  String get introJobsTitle => 'Jobs near you';
+
+  @override
+  String get introJobsBody => 'You see the route and the earning before accepting. One swipe takes the job.';
+
+  @override
+  String get introJobsChip => '30 s to answer';
+
+  @override
+  String get introJobsOffer => 'New job';
+
+  @override
+  String get introJobsEarning => '1,500 F';
+
+  @override
+  String get introJobsRoute => 'Akwa → Bonapriso · 4.2 km';
+
+  @override
+  String get introEarningsKicker => 'Your earnings';
+
+  @override
+  String get introEarningsTitle => 'Your money, every day';
+
+  @override
+  String get introEarningsBody => 'Each delivered job adds to your balance. You withdraw it to your Mobile Money.';
+
+  @override
+  String get introEarningsChip => 'Withdraw to Mobile Money';
+
+  @override
+  String get introEarningsCard => 'Today\'s earnings';
+
+  @override
+  String get introEarningsFooter => '+1,050 F · job delivered';
+
+  @override
+  String get introSafetyKicker => 'Safety';
+
+  @override
+  String get introSafetyTitle => 'Never alone on the road';
+
+  @override
+  String get introSafetyBody =>
+      'A long press on SOS alerts the Tara team and your close contact. During a job, the team sees where you are.';
+
+  @override
+  String get introSafetyTeam => 'Tara team alerted';
+
+  @override
+  String get introSafetyContact => 'Your contact gets an SMS';
+
+  @override
+  String get introSafetyPosition => 'Location shared during the job';
 }
