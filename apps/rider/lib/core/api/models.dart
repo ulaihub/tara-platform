@@ -96,6 +96,7 @@ class RiderConfig {
     this.failurePolicy = const FailurePolicy(),
     this.mobileMoneyFeeBps = 0,
     this.waiting = const WaitingRules(),
+    this.silentWithdrawSeconds = 180,
   });
   factory RiderConfig.fromJson(Json json) {
     final country = _field<Json>(json, 'country');
@@ -115,6 +116,7 @@ class RiderConfig {
       // Réglages gardés par une version plus ancienne : pas de frais connus.
       mobileMoneyFeeBps: (json['mobileMoneyFeeBps'] as num?)?.toInt() ?? 0,
       waiting: waiting == null ? const WaitingRules() : WaitingRules.fromJson(waiting),
+      silentWithdrawSeconds: (json['silentWithdrawSeconds'] as num?)?.toInt() ?? 180,
     );
   }
   static const fields = [
@@ -134,6 +136,9 @@ class RiderConfig {
   final String? supportPhone;
   final List<MobileMoneyOperator> operators;
   final int offerTimeoutSeconds;
+
+  /// Téléphone muet pendant ce délai : une course pas encore enlevée est retirée.
+  final int silentWithdrawSeconds;
   final EmergencyNumbers emergencyNumbers;
   final FailurePolicy failurePolicy;
 

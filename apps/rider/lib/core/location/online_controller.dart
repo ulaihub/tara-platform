@@ -20,6 +20,7 @@ class OnlineController extends ChangeNotifier {
     this.onUnsent,
     this.onSent,
     this.interval = const Duration(seconds: 10),
+    this.heartbeat,
     this.notificationTitle = 'Tara Livreur',
     this.notificationText = 'En ligne : votre position est partagée',
   });
@@ -34,6 +35,10 @@ class OnlineController extends ChangeNotifier {
   /// Position envoyée : le réseau est là, les positions gardées peuvent partir.
   final VoidCallback? onSent;
   final Duration interval;
+
+  /// Renvoi de la dernière position quand le téléphone n'en donne plus (immobile) ; null :
+  /// pas de renvoi (tests).
+  final Duration? heartbeat;
   final String notificationTitle;
   final String notificationText;
 
@@ -41,6 +46,10 @@ class OnlineController extends ChangeNotifier {
   GeoPoint? _last;
   DateTime? _lastSent;
   StreamSubscription<GeoPoint>? _subscription;
+
+  /// Signe de vie : un téléphone immobile peut ne plus donner de position ; la dernière est
+  /// renvoyée pour que le serveur sache le livreur joignable (sinon sa course lui est retirée).
+  Timer? _heartbeat;
 
   bool get online => _online;
 
@@ -72,6 +81,8 @@ class OnlineController extends ChangeNotifier {
 
   Future<void> goOffline() async {
     _online = false;
+    _heartbeat?.cancel();
+    _heartbeat = null;
     await _subscription?.cancel();
     _subscription = null;
     notifyListeners();
@@ -80,6 +91,17 @@ class OnlineController extends ChangeNotifier {
   }
 
   void _startWatching() {
+    _heartbeat?.cancel();
+    final every = heartbeat;
+    _heartbeat = every == null
+        ? null
+        : Timer.periodic(every, (_) {
+            final last = _last;
+            final sent = _lastSent;
+            if (!_online || last == null) return;
+            if (sent != null && DateTime.now().difference(sent) < every * 0.8) return;
+            unawaited(_onPosition(last));
+          });
     unawaited(_subscription?.cancel());
     _subscription = positions
         .watch(interval: interval, notificationTitle: notificationTitle, notificationText: notificationText)
@@ -105,6 +127,7 @@ class OnlineController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _heartbeat?.cancel();
     unawaited(_subscription?.cancel());
     super.dispose();
   }

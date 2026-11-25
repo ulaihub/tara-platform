@@ -192,6 +192,8 @@ const ReliabilityWindowDto = z.object({
   courseAlerts: z.int(),
   /** Alertes de sécurité déclenchées (hors alertes annulées). */
   sosAlerts: z.int(),
+  /** Courses retirées faute de signal du téléphone avant l'enlèvement. */
+  silentWithdrawals: z.int(),
 });
 
 export const RiderHistoryActionEnum = z

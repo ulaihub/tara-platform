@@ -946,6 +946,11 @@
   "removeAction": "Retirer l’action",
   "confirmRemoveAction": "Confirmer le retrait",
   "offlineNoPending": "Vos actions sont gardées sur le téléphone",
+  "silentWithdrawIn": "Course pas encore récupérée : elle vous sera retirée dans {minutes} min si le réseau ne revient pas",
+  "@silentWithdrawIn": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "silentWithdrawNow": "Sans réseau trop longtemps : la course a peut-être été confiée à un autre livreur",
   "balanceAvailable": "Solde disponible",
   "balanceReserved": "{amount} mis de côté pour vos courses en cours",
   "@balanceReserved": {

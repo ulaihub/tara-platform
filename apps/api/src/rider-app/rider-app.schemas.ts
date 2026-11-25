@@ -303,6 +303,8 @@ export const RiderConfigDto = z
     emergencyNumbers: z.object({ police: z.string(), fire: z.string(), medical: z.string() }),
     mobileMoneyOperators: z.array(z.object({ code: z.string(), name: z.string() })),
     offerTimeoutSeconds: z.number(),
+    /** Sans signe du téléphone pendant ce délai, une course pas encore enlevée est retirée. */
+    silentWithdrawSeconds: z.int(),
     /** Frais Mobile Money payés par le client en plus du montant encaissé, en points de base. */
     mobileMoneyFeeBps: z.int(),
     /** Attente au point d'enlèvement : minutes gratuites, puis montant par tranche (D). */

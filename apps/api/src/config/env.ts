@@ -202,6 +202,12 @@ const envSchema = z
     LATE_DELIVERY_MARGIN_MINUTES: z.coerce.number().int().min(0).max(240).default(15),
     /** Position considérée comme périmée au-delà de ce délai (livreur hors ligne de fait). */
     RIDER_POSITION_TTL_SECONDS: z.coerce.number().int().min(10).max(600).default(90),
+    /**
+     * Livreur muet (aucun signe de son téléphone) depuis ce délai : une course pas encore
+     * enlevée lui est retirée et repart vers un autre livreur ; colis à bord, l'expéditeur est
+     * prévenu. 3 minutes, choisi par Tara.
+     */
+    RIDER_SILENT_WITHDRAW_SECONDS: z.coerce.number().int().min(60).max(3600).default(180),
     /** Au-delà de ce montant à encaisser, une livraison sans code exige un administrateur. */
     SUPPORT_VALIDATION_LIMIT: z.coerce.number().int().min(0).default(50000),
 

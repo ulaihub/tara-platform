@@ -1350,6 +1350,8 @@ enum CourseAlertKind {
   APPROACH_BONUS
   /// Colis à bord depuis plus du double du temps prévu pour la livraison.
   OVERDUE
+  /// Livreur muet (aucun signe de son téléphone) : course retirée avant l'enlèvement.
+  RIDER_SILENT
   /// Colis à bord, livreur bien plus loin de la destination qu'au départ.
   MOVING_AWAY
 

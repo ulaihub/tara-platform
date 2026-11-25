@@ -8,6 +8,8 @@ import { REDIS } from '../redis/redis.constants.js';
 const GEO_KEY = 'riders:geo';
 /** Livreurs en ligne → heure de la dernière position (ms), pour écarter les positions périmées. */
 const SEEN_KEY = 'riders:seen';
+/** Dernier signe de vie reçu du téléphone (heure du serveur), en ligne ou non. */
+const HEARD_KEY = 'riders:heard';
 const positionKey = (riderId: string): string => `rider:${riderId}:pos`;
 
 export interface RiderPosition {
@@ -50,9 +52,25 @@ export class PresenceService {
       .multi()
       .geoadd(GEO_KEY, position.longitude, position.latitude, riderId)
       .zadd(SEEN_KEY, Date.now(), riderId)
+      .zadd(HEARD_KEY, Date.now(), riderId)
       .hset(positionKey(riderId), serialize(position))
       .pexpire(positionKey(riderId), this.ttlMs * 10)
       .exec();
+  }
+
+  /**
+   * Heure (ms, horloge du serveur) du dernier envoi reçu de chaque livreur, même d'une
+   * position ancienne rejouée au retour du réseau : il est joignable à ce moment-là.
+   */
+  async heardAt(riderIds: string[]): Promise<Map<string, number>> {
+    const result = new Map<string, number>();
+    if (riderIds.length === 0) return result;
+    const scores = await this.redis.zmscore(HEARD_KEY, ...riderIds);
+    riderIds.forEach((id, index) => {
+      const at = scores[index];
+      if (at !== null && at !== undefined) result.set(id, Number(at));
+    });
+    return result;
   }
 
   async goOffline(riderId: string): Promise<void> {
@@ -70,6 +88,7 @@ export class PresenceService {
    * Renvoie false si la position est plus ancienne que celle déjà connue (envoi hors ligne).
    */
   async update(riderId: string, position: RiderPosition): Promise<boolean> {
+    await this.redis.zadd(HEARD_KEY, Date.now(), riderId);
     const previous = await this.redis.hget(positionKey(riderId), 'at');
     if (previous && Number(previous) > position.at.getTime()) return false;
     const online = (await this.redis.zscore(SEEN_KEY, riderId)) !== null;

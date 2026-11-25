@@ -2414,6 +2414,18 @@ abstract class AppLocalizations {
   /// **'Vos actions sont gardées sur le téléphone'**
   String get offlineNoPending;
 
+  /// No description provided for @silentWithdrawIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course pas encore récupérée : elle vous sera retirée dans {minutes} min si le réseau ne revient pas'**
+  String silentWithdrawIn(int minutes);
+
+  /// No description provided for @silentWithdrawNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans réseau trop longtemps : la course a peut-être été confiée à un autre livreur'**
+  String get silentWithdrawNow;
+
   /// No description provided for @balanceAvailable.
   ///
   /// In fr, this message translates to:

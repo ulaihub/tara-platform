@@ -466,12 +466,20 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                 child: GestureDetector(
                   onTap: () => setState(() => _pending = true),
                   child: network.offline
-                      ? OfflineBanner(
-                          title: l.offlineBannerTitle,
-                          detail: queue.pendingCount > 0
-                              ? l.offlineBannerPending(queue.pendingCount)
-                              : l.offlineNoPending,
-                        )
+                      // Course pas encore enlevée : elle sera retirée si le réseau ne revient pas.
+                      ? order?.status == 'ASSIGNED' && network.offlineSince != null
+                            ? _WithdrawCountdown(
+                                since: network.offlineSince!,
+                                limit: Duration(
+                                  seconds: ref.watch(riderConfigProvider).value?.silentWithdrawSeconds ?? 180,
+                                ),
+                              )
+                            : OfflineBanner(
+                                title: l.offlineBannerTitle,
+                                detail: queue.pendingCount > 0
+                                    ? l.offlineBannerPending(queue.pendingCount)
+                                    : l.offlineNoPending,
+                              )
                       : OfflineBanner(
                           title: l.refusedBannerTitle,
                           detail: l.refusedBannerDetail(queue.failures.length),
@@ -538,6 +546,43 @@ class _Notice extends StatelessWidget {
       child: TintBox(
         child: Text(text, style: TaraText.text.copyWith(color: c.textPrimary)),
       ),
+    );
+  }
+}
+
+/// Hors réseau avec une course pas encore enlevée : minutes restantes avant qu'elle soit
+/// confiée à un autre livreur (le serveur la retire au bout du délai sans signe du téléphone).
+class _WithdrawCountdown extends StatefulWidget {
+  const _WithdrawCountdown({required this.since, required this.limit});
+  final DateTime since;
+  final Duration limit;
+
+  @override
+  State<_WithdrawCountdown> createState() => _WithdrawCountdownState();
+}
+
+class _WithdrawCountdownState extends State<_WithdrawCountdown> {
+  late final Timer _tick = Timer.periodic(const Duration(seconds: 10), (_) => setState(() {}));
+
+  @override
+  void initState() {
+    super.initState();
+    _tick.isActive;
+  }
+
+  @override
+  void dispose() {
+    _tick.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final left = widget.limit - DateTime.now().difference(widget.since);
+    return OfflineBanner(
+      title: l.offlineBannerTitle,
+      detail: left.inSeconds <= 0 ? l.silentWithdrawNow : l.silentWithdrawIn((left.inSeconds / 60).ceil()),
     );
   }
 }

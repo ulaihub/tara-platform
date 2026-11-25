@@ -135,6 +135,9 @@ export class RiderReliabilityService {
     const courseAlerts = await this.prisma.courseAlert.count({
       where: { riderId: rider.id, createdAt: { gte: since } },
     });
+    const silentWithdrawals = await this.prisma.courseAlert.count({
+      where: { riderId: rider.id, kind: 'RIDER_SILENT', createdAt: { gte: since } },
+    });
     const sosAlerts = await this.prisma.safetyAlert.count({
       where: { riderId: rider.id, createdAt: { gte: since }, cancelledAt: null },
     });
@@ -159,6 +162,7 @@ export class RiderReliabilityService {
       onlineMinutes: online?.minutes ?? 0,
       courseAlerts,
       sosAlerts,
+      silentWithdrawals,
     };
   }
 
