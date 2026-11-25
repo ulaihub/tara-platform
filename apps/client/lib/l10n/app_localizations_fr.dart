@@ -2846,6 +2846,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chatNewMessage => 'Nouveau message du livreur';
 
   @override
+  String get introBack => 'Écran précédent';
+
+  @override
   String get introSkip => 'Passer';
 
   @override

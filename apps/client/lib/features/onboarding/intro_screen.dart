@@ -20,26 +20,37 @@ class ClientIntroScreen extends StatelessWidget {
       skip: l.introSkip,
       next: l.introNext,
       start: l.introStart,
+      back: l.introBack,
       onDone: onDone,
       slides: [
-        IntroSlide(kicker: l.introSendKicker, title: l.introSendTitle, body: l.introSendBody, illustration: const SendArt()),
+        IntroSlide(
+          kicker: l.introSendKicker,
+          title: l.introSendTitle,
+          body: l.introSendBody,
+          illustration: const SendArt(),
+          blobs: ClientIntroBlobs.send,
+        ),
         IntroSlide(
           kicker: l.introTrackKicker,
           title: l.introTrackTitle,
           body: l.introTrackBody,
           illustration: const TrackArt(),
+          blobs: ClientIntroBlobs.track,
+          textTop: 24,
         ),
         IntroSlide(
           kicker: l.introCollectKicker,
           title: l.introCollectTitle,
           body: l.introCollectBody,
           illustration: const CollectArt(),
+          blobs: ClientIntroBlobs.collect,
         ),
         IntroSlide(
           kicker: l.introAccountsKicker,
           title: l.introAccountsTitle,
           body: l.introAccountsBody,
           illustration: const AccountsArt(),
+          blobs: ClientIntroBlobs.accounts,
         ),
       ],
     );

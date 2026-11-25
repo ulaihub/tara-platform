@@ -746,6 +746,7 @@
   "chatQuick3": "I'm on the road",
   "chatQuick4": "Please call me",
   "chatNewMessage": "New message from the sender",
+  "introBack": "Previous screen",
   "introSkip": "Skip",
   "introNext": "Next",
   "introStart": "Get started",

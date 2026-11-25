@@ -4226,6 +4226,12 @@ abstract class AppLocalizations {
   /// **'Nouveau message de l\'expéditeur'**
   String get chatNewMessage;
 
+  /// No description provided for @introBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écran précédent'**
+  String get introBack;
+
   /// No description provided for @introSkip.
   ///
   /// In fr, this message translates to:

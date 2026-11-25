@@ -20,6 +20,8 @@ void main() {
           RiderIntroScreen(initialPage: page, onDone: () {}),
         );
         await settle(tester);
+        // Chiffres des gains arrivés au bout de leur défilement.
+        await tester.pump(const Duration(milliseconds: 1400));
         await expectLater(capture, matchesGoldenFile('goldens/00_presentation/${name}_${brightness.name}.png'));
       });
     }
