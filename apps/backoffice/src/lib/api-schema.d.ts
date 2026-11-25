@@ -564,6 +564,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/map/landmarks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Landmarks_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/landmarks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminLandmarks_list'];
+    put?: never;
+    post: operations['AdminLandmarks_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/landmarks/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['AdminLandmarks_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/location-links': {
     parameters: {
       query?: never;
@@ -3794,6 +3842,17 @@ export interface components {
       | 'SELFIE'
       | 'CRIMINAL_RECORD'
       | 'GUARANTOR_ID';
+    Landmark: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      latitude: number;
+      longitude: number;
+    };
+    LandmarkList: {
+      version: string;
+      items: components['schemas']['Landmark'][];
+    };
     LegalDocument: {
       /** @enum {string} */
       document: 'expediteurs' | 'livreurs' | 'destinataires' | 'confidentialite';
@@ -6097,6 +6156,93 @@ export interface operations {
     };
   };
   Addresses_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  Landmarks_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LandmarkList'];
+        };
+      };
+    };
+  };
+  AdminLandmarks_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LandmarkList'];
+        };
+      };
+    };
+  };
+  AdminLandmarks_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string;
+          latitude: number;
+          longitude: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Landmark'];
+        };
+      };
+    };
+  };
+  AdminLandmarks_remove: {
     parameters: {
       query?: never;
       header?: never;

@@ -570,6 +570,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                       (order.status == 'DELIVERY_FAILED' && order.failure?.decision != 'RETURN'),
                   framePadding: EdgeInsets.only(top: top, bottom: panel - 20),
                   route: _route,
+                  landmarks: ref.watch(landmarksProvider).value ?? const [],
                 ),
         ),
         child: Stack(

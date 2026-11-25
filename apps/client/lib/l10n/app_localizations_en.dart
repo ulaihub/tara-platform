@@ -2837,4 +2837,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatNewMessage => 'New message from the rider';
+
+  @override
+  String landmarkNear(String name) {
+    return 'Near $name';
+  }
+
+  @override
+  String landmarkUseNear(String name) {
+    return 'Near $name?';
+  }
 }

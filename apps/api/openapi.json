@@ -1830,6 +1830,142 @@
         ]
       }
     },
+    "/v1/map/landmarks": {
+      "get": {
+        "operationId": "Landmarks_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandmarkList"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Adresses"
+        ]
+      }
+    },
+    "/v1/admin/landmarks": {
+      "get": {
+        "operationId": "AdminLandmarks_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandmarkList"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · zones"
+        ]
+      },
+      "post": {
+        "operationId": "AdminLandmarks_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 80
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                },
+                "required": [
+                  "name",
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Landmark"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · zones"
+        ]
+      }
+    },
+    "/v1/admin/landmarks/{id}": {
+      "delete": {
+        "operationId": "AdminLandmarks_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · zones"
+        ]
+      }
+    },
     "/v1/location-links": {
       "post": {
         "operationId": "LocationLinks_create",
@@ -13797,6 +13933,50 @@
           "CRIMINAL_RECORD",
           "GUARANTOR_ID"
         ]
+      },
+      "Landmark": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "latitude",
+          "longitude"
+        ],
+        "additionalProperties": false
+      },
+      "LandmarkList": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Landmark"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "items"
+        ],
+        "additionalProperties": false
       },
       "LegalDocument": {
         "type": "object",

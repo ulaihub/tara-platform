@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:tara_map/landmarks.dart';
 import 'package:tara_map/map_style.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/layout.dart';
@@ -31,7 +32,11 @@ class TrackingMap extends ConsumerStatefulWidget {
     this.heading,
     this.framePadding = EdgeInsets.zero,
     this.route,
+    this.landmarks = const [],
   });
+
+  /// Repères de l'équipe (carrefours, lieux connus).
+  final List<Landmark> landmarks;
 
   /// Trajet sur les rues ([longitude, latitude]) ; null : ligne droite en pointillés.
   final List<List<double>>? route;
@@ -103,6 +108,9 @@ class _TrackingMapState extends ConsumerState<TrackingMap> with SingleTickerProv
     }
     if (widget.searching != old.searching || widget.toDropoff != old.toDropoff) unawaited(_frame());
     if (widget.route != old.route) unawaited(_pushRoute());
+    if (!identical(widget.landmarks, old.landmarks) && _styleReady) {
+      unawaited(_controller?.setGeoJsonSource('tara-landmarks', landmarksGeoJson(widget.landmarks)));
+    }
   }
 
   @override
@@ -150,6 +158,7 @@ class _TrackingMapState extends ConsumerState<TrackingMap> with SingleTickerProv
       ],
     });
     await _pushRoute();
+    await controller.setGeoJsonSource('tara-landmarks', landmarksGeoJson(widget.landmarks));
     await _pushRider();
     await _frame();
   }

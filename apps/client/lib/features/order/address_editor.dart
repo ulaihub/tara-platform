@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_map/landmarks.dart';
 import 'package:tara_map/pin_picker_map.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
@@ -65,6 +66,10 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
   /// Ce que l'API dit du point sous l'épingle (quartier, zone desservie) ; null pendant la
   /// lecture. [_placeSeq] écarte une réponse arrivée après un nouveau déplacement.
   PointLocation? _place;
+
+  /// Repère de l'équipe le plus proche de l'épingle (250 m au plus).
+  ({Landmark landmark, int meters})? get _near =>
+      nearestLandmark(_point.latitude, _point.longitude, ref.watch(landmarksProvider).value ?? const []);
   int _placeSeq = 0;
   String? _label;
   bool _locating = false;
@@ -174,7 +179,8 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
           handle: _map,
           real: ref.watch(realMapProvider),
           bottomPadding: panelHeight - 24,
-          label: _PlaceBubble(place: _place),
+          label: _PlaceBubble(place: _place, near: _near?.landmark.name),
+          landmarks: ref.watch(landmarksProvider).value ?? const [],
           onChanged: (point) {
             setState(() => _point = point);
             unawaited(_lookUp(point));
@@ -271,6 +277,23 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
                     controller: _landmark,
                     textCapitalization: TextCapitalization.sentences,
                   ),
+                  // Repère connu tout près de l'épingle : proposé en un toucher.
+                  if (_near case final near? when !_landmark.text.contains(near.landmark.name)) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GlassButton(
+                        label: l.landmarkUseNear(near.landmark.name),
+                        icon: TaraIcons.mapPin,
+                        height: 38,
+                        radius: 19,
+                        onPressed: () => setState(() {
+                          final text = l.landmarkNear(near.landmark.name);
+                          _landmark.text = _landmark.text.trim().isEmpty ? text : '${_landmark.text.trim()} · $text';
+                        }),
+                      ),
+                    ),
+                  ],
                   if (_tried && !_valid) ...[const SizedBox(height: 6), ErrorLine(l.landmarkRequired)],
                   if (widget.forPickup) ...[
                     const SizedBox(height: 14),
@@ -308,9 +331,12 @@ String labelText(AppLocalizations l, String code) => switch (code) {
 /// Bulle sous l'épingle : quartier du point, ou point hors de la zone desservie.
 /// Rien pendant la lecture.
 class _PlaceBubble extends StatelessWidget {
-  const _PlaceBubble({required this.place});
+  const _PlaceBubble({required this.place, this.near});
 
   final PointLocation? place;
+
+  /// Repère connu tout près : « Bonapriso · près de Carrefour Nkongmondo ».
+  final String? near;
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +362,12 @@ class _PlaceBubble extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              outside ? l.pinOutOfArea : place.neighborhood?.name ?? l.pinPlaced,
+              outside
+                  ? l.pinOutOfArea
+                  : [
+                      place.neighborhood?.name ?? l.pinPlaced,
+                      if (near case final near?) l.landmarkNear(near),
+                    ].join(' · '),
               style: TaraText.label.copyWith(color: color, fontWeight: FontWeight.w700),
             ),
           ],

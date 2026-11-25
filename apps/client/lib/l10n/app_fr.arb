@@ -1800,5 +1800,9 @@
   "chatQuick2": "Je descends",
   "chatQuick3": "Appelez-moi en arrivant",
   "chatQuick4": "Vous êtes où ?",
-  "chatNewMessage": "Nouveau message du livreur"
+  "chatNewMessage": "Nouveau message du livreur",
+  "landmarkNear": "Près de {name}",
+  "@landmarkNear": { "placeholders": { "name": { "type": "String" } } },
+  "landmarkUseNear": "Près de {name} ?",
+  "@landmarkUseNear": { "placeholders": { "name": { "type": "String" } } }
 }

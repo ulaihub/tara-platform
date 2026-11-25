@@ -878,5 +878,9 @@
   "chatQuick2": "I'm coming down",
   "chatQuick3": "Call me when you arrive",
   "chatQuick4": "Where are you?",
-  "chatNewMessage": "New message from the rider"
+  "chatNewMessage": "New message from the rider",
+  "landmarkNear": "Near {name}",
+  "@landmarkNear": { "placeholders": { "name": { "type": "String" } } },
+  "landmarkUseNear": "Near {name}?",
+  "@landmarkUseNear": { "placeholders": { "name": { "type": "String" } } }
 }

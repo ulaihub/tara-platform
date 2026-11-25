@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tara_map/landmarks.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/models.dart';
@@ -43,3 +44,14 @@ Json labelledZones(Json zones, String noMotoLabel) => {
       },
   ],
 };
+
+/// Repères de Douala (carrefours, lieux connus) ajoutés par l'équipe : chargés une fois ;
+/// sans réseau, la carte s'en passe.
+final landmarksProvider = FutureProvider<List<Landmark>>((ref) async {
+  try {
+    final json = await ref.watch(apiClientProvider).get('/map/landmarks') as Json;
+    return [for (final item in json['items']! as List<Object?>) Landmark.fromJson(item! as Json)];
+  } catch (_) {
+    return const [];
+  }
+});
