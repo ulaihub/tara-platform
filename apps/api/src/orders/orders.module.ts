@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { LegalModule } from '../legal/legal.module.js';
 import { GeoModule } from '../geo/geo.module.js';
+import { PresenceService } from '../dispatch/presence.service.js';
 import { PricingModule } from '../pricing/pricing.module.js';
 import { OrderTransitionsService } from './order-transitions.service.js';
 import {
@@ -15,7 +16,13 @@ import { RatingsService } from './ratings.service.js';
 @Module({
   imports: [GeoModule, PricingModule, LegalModule],
   controllers: [OrdersController, RecipientsController, AdminOrdersController],
-  providers: [OrdersService, OrderTransitionsService, RatingsService, PendingDeliveriesService],
+  providers: [
+    OrdersService,
+    OrderTransitionsService,
+    RatingsService,
+    PendingDeliveriesService,
+    PresenceService,
+  ],
   exports: [OrdersService, OrderTransitionsService, RatingsService],
 })
 export class OrdersModule {}

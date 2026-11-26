@@ -72,11 +72,11 @@ void main() {
     expect(find.textContaining('Enregistrez votre boutique ou votre maison'), findsOneWidget);
     await tester.tap(find.text('Ajouter une adresse'));
     await settle(tester);
-    expect(find.text('Nouvelle adresse'), findsOneWidget);
+    expect(find.text('Placer le point'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, 'Portail vert face à l’école publique');
     await tester.tap(find.text('Maison'));
     await settle(tester);
-    await tester.tap(find.text('Enregistrer l’adresse'));
+    await tester.tap(find.text('Valider ce point'));
     await settle(tester);
     expect(api.createdAddresses.single['label'], 'Maison');
     await showAddresses(tester);

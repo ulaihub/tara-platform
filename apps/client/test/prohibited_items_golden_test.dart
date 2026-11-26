@@ -21,6 +21,10 @@ void main() {
         ),
       );
       await settle(tester);
+      // Replié d'abord ; un toucher déplie la liste.
+      expect(find.textContaining('Armes'), findsNothing);
+      await tester.tap(find.byKey(prohibitedItemsKey));
+      await settle(tester);
       expect(tester.takeException(), isNull);
       expect(find.textContaining('Armes'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/objets_interdits/${variant.name}.png'));

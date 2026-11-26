@@ -384,12 +384,17 @@ class ChoiceChips<T> extends StatelessWidget {
     required this.onSelected,
     this.columns = 2,
     this.height = 42,
+    this.wrap = false,
   });
 
   final List<ChoiceOption<T>> options;
   final T? selected;
   final ValueChanged<T> onSelected;
   final int columns;
+
+  /// Pastilles à la largeur de leur texte, à la ligne quand il faut (maquette « Nature ») :
+  /// 38 de haut, orange plein une fois choisie.
+  final bool wrap;
   final double height;
 
   @override
@@ -453,6 +458,52 @@ class ChoiceChips<T> extends StatelessWidget {
       );
     }
 
+    if (wrap) {
+      return Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          for (final option in options)
+            Semantics(
+              inMutuallyExclusiveGroup: true,
+              checked: option.value == selected,
+              button: true,
+              label: option.label,
+              excludeSemantics: true,
+              child: Squish(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onSelected(option.value);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    constraints: const BoxConstraints(minHeight: 38),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      gradient: option.value == selected ? TaraBrand.gradient : null,
+                      color: option.value == selected ? null : boxedFieldFill(c),
+                      borderRadius: BorderRadius.circular(19),
+                      border: Border.all(
+                        color: option.value == selected ? const Color(0xFFFF8A00) : boxedFieldBorder(c),
+                      ),
+                    ),
+                    child: Text(
+                      option.label,
+                      style: TaraText.label.copyWith(
+                        color: option.value == selected ? TaraBrand.onBrand : c.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
     final rows = <Widget>[];
     for (var i = 0; i < options.length; i += columns) {
       final slice = options.skip(i).take(columns).toList();
@@ -606,6 +657,41 @@ class AmountInputFormatter extends TextInputFormatter {
 /// Fond des champs « libellé dans la case » des maquettes (`--card`).
 Color boxedFieldFill(TaraColors c) =>
     c.isDark ? const Color.fromRGBO(255, 255, 255, .06) : const Color.fromRGBO(255, 255, 255, .84);
+
+/// Bord des cartes des maquettes (`--card-border`) : blanc en clair, blanc à 10 % en sombre.
+Color boxedFieldBorder(TaraColors c) => c.isDark ? const Color.fromRGBO(255, 255, 255, .10) : Colors.white;
+
+/// Bouton radio des maquettes : anneau de 22, point orange de 10 quand il est choisi.
+class RadioDot extends StatelessWidget {
+  const RadioDot({super.key, required this.selected});
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    const on = Color(0xFFFF8A00);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: selected ? on : c.textPrimary.withValues(alpha: .3), width: 2),
+      ),
+      alignment: Alignment.center,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.elasticOut,
+        scale: selected ? 1 : 0,
+        child: Container(
+          width: 10,
+          height: 10,
+          decoration: const BoxDecoration(shape: BoxShape.circle, color: on),
+        ),
+      ),
+    );
+  }
+}
 
 /// Champ des maquettes où le libellé est dans la case (« Numéro de téléphone », « Nom de
 /// votre boutique ») : 56 de haut au moins, coins 16, libellé 11 en gras, valeur 16 en

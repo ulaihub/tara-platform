@@ -53,6 +53,11 @@ abstract final class TaraIcons {
   ]);
   static const camera = TaraIconData([_P('M4 8h3l2-3h6l2 3h3v11H4z'), _C(12, 13, 3.5)]);
   static const check = TaraIconData([_P('M5 12.5l4.5 4.5L19 7.5')]);
+  static const bolt = TaraIconData([_P('M13 3 5 13h6l-1 8 8-10h-6z')]);
+  static const calendar = TaraIconData([_P('M3.5 5h17v15h-17zM3.5 10h17M8 3v4M16 3v4')]);
+  static const link = TaraIconData([
+    _P('M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'),
+  ]);
   static const returnArrow = TaraIconData([_P('M9 14L4 9l5-5'), _P('M4 9h10a6 6 0 010 12h-3')]);
   static const wifiOff = TaraIconData([
     _P('M2 8.5a15 15 0 0120 0M5 12a10.5 10.5 0 0114 0M8.5 15.5a5 5 0 017 0'),

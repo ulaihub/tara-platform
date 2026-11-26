@@ -332,6 +332,13 @@ export const OrderSummaryDto = z
     scheduledFor: z.iso.datetime().nullable(),
     /** Après un échec : choix fait (null tant que l'expéditeur doit décider). */
     failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
+    /** Livreur attribué : prénom et initiale (null avant l'attribution). */
+    riderName: z.string().nullable(),
+    /**
+     * Minutes avant l'arrivée chez le destinataire, quand le livreur roule vers lui avec
+     * une position récente (sinon null).
+     */
+    etaMinutes: z.int().nullable(),
     createdAt: z.iso.datetime(),
   })
   .meta({ id: 'OrderSummary' });

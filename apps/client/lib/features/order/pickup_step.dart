@@ -1,7 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
-import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
@@ -47,13 +49,8 @@ class PickupStep extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          header: true,
-          child: Text(l.pickupTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-        ),
-        const SizedBox(height: 8),
-        Text(l.pickupBody, style: TaraText.body.copyWith(color: c.textSecondary)),
-        const SizedBox(height: 18),
+        StepHeading(title: l.pickupTitle, body: l.pickupBody),
+        const SizedBox(height: 10),
         switch (addresses) {
           AsyncData(:final value) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,8 +58,10 @@ class PickupStep extends ConsumerWidget {
               for (final address in value) ...[
                 AddressChoice(
                   icon: _iconFor(address.label),
-                  title: address.label ?? address.landmark,
-                  subtitle: address.summary,
+                  // « Boutique · Akwa », puis le repère (et la confirmation par une livraison).
+                  title: [address.label ?? address.landmark, ?address.neighborhood?.name].join(' · '),
+                  subtitle: address.label == null ? '' : address.landmark,
+                  badge: address.verified ? l.addressVerifiedShort : null,
                   selected: draft.pickup?.id == address.id,
                   onTap: () => draft.pickup = address,
                 ),
@@ -90,7 +89,7 @@ class PickupStep extends ConsumerWidget {
             child: Center(child: GooLoader(compact: true)),
           ),
         },
-        GlassButton(label: l.newAddress, icon: TaraIcons.mapPin, color: c.accentText, onPressed: onAddAddress),
+        DashedAction(label: l.newAddressOnMap, icon: TaraIcons.plus, onTap: onAddAddress),
         if (showErrors && draft.pickup == null) ...[const SizedBox(height: 10), ErrorLine(l.pickupRequired)],
       ],
     );
@@ -103,7 +102,8 @@ class PickupStep extends ConsumerWidget {
   };
 }
 
-/// Adresse à choisir : icône, titre, détail, coche quand elle est choisie.
+/// Choix en radio des maquettes : petite tuile orange (ou logo), titre et détail, rond à
+/// cocher ; bord orange de 2 et fond teinté quand il est choisi.
 class AddressChoice extends StatelessWidget {
   const AddressChoice({
     super.key,
@@ -122,7 +122,7 @@ class AddressChoice extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  /// Mention sous le détail (« Adresse confirmée par une livraison »).
+  /// Mention ajoutée au détail (« confirmée par une livraison ✓ »).
   final String? badge;
 
   /// Image à la place de l'icône (logo de l'opérateur Mobile Money).
@@ -131,26 +131,40 @@ class AddressChoice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
+    final detail = [if (subtitle.trim().isNotEmpty) subtitle.trim(), ?badge].join(' · ');
     return Semantics(
       selected: selected,
+      inMutuallyExclusiveGroup: true,
       button: true,
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          constraints: const BoxConstraints(minHeight: 60),
+          padding: EdgeInsets.symmetric(horizontal: selected ? 13 : 14, vertical: selected ? 9 : 10),
           decoration: BoxDecoration(
-            gradient: selected ? c.chipSelected : null,
-            color: selected ? null : c.glass,
-            borderRadius: BorderRadius.circular(20),
+            color: selected ? const Color.fromRGBO(255, 138, 0, .08) : boxedFieldFill(c),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? c.chipSelectedBorder : c.glassBorder,
-              width: selected ? c.chipSelectedBorderWidth : 1,
+              color: selected ? const Color(0xFFFF8A00) : boxedFieldBorder(c),
+              width: selected ? 2 : 1,
             ),
+            boxShadow: const [BoxShadow(color: Color.fromRGBO(140, 70, 10, .05), blurRadius: 20, offset: Offset(0, 8))],
           ),
           child: Row(
             children: [
-              leading ?? IconTile(icon: icon, size: 40),
+              leading ??
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(255, 177, 92, .14),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    alignment: Alignment.center,
+                    child: TaraIcon(icon, size: 18, color: c.accentText),
+                  ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -158,38 +172,115 @@ class AddressChoice extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                      style: TaraText.text.copyWith(color: c.textPrimary, fontSize: 14, fontWeight: FontWeight.w700),
                     ),
-                    const SizedBox(height: 2),
-                    Text(subtitle, style: TaraText.small.copyWith(color: c.textSecondary)),
-                    if (badge != null) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          TaraIcon(TaraIcons.shieldCheck, size: 14, color: c.success),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              badge!,
-                              style: TaraText.small.copyWith(color: c.success, fontWeight: FontWeight.w700),
-                            ),
-                          ),
-                        ],
-                      ),
+                    if (detail.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(detail, style: TaraText.small.copyWith(color: c.textTertiary, fontSize: 12)),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 180),
-                opacity: selected ? 1 : 0,
-                child: TaraIcon(TaraIcons.check, size: 22, color: c.accentText),
-              ),
+              const SizedBox(width: 12),
+              RadioDot(selected: selected),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+/// Titre d'une étape (maquettes) : 22 en Sora, phrase d'aide 13 dessous.
+class StepHeading extends StatelessWidget {
+  const StepHeading({super.key, required this.title, required this.body});
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(title, style: TaraText.titleForm.copyWith(color: c.textPrimary, fontSize: 22)),
+        ),
+        const SizedBox(height: 10),
+        Text(body, style: TaraText.label.copyWith(color: c.textSecondary, fontSize: 13, height: 1.35)),
+      ],
+    );
+  }
+}
+
+/// « Nouvelle adresse sur la carte » : bouton en pointillés orange (maquette).
+class DashedAction extends StatelessWidget {
+  const DashedAction({super.key, required this.label, required this.icon, required this.onTap});
+  final String label;
+  final TaraIconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: Squish(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: CustomPaint(
+            painter: const DashedRRectPainter(color: Color.fromRGBO(255, 177, 92, .6)),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TaraIcon(icon, size: 18, color: c.accentText),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: TaraText.text.copyWith(color: c.accentText, fontSize: 14, fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bord en pointillés arrondi des maquettes (1,5 px, tirets de 5).
+class DashedRRectPainter extends CustomPainter {
+  const DashedRRectPainter({required this.color, this.radius = 18});
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radius)).deflate(.75);
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (final metric in (Path()..addRRect(rect)).computeMetrics()) {
+      for (double d = 0; d < metric.length; d += 9) {
+        canvas.drawPath(metric.extractPath(d, math.min(d + 5, metric.length)), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(DashedRRectPainter old) => old.color != color || old.radius != radius;
 }

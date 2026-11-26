@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -16,42 +15,86 @@ List<String> prohibitedItems(AppLocalizations l) => [
   l.prohibitedCash,
 ];
 
-/// Rappel discret des objets interdits : titre, liste, engagement de l'expéditeur.
-class ProhibitedItemsNote extends StatelessWidget {
-  const ProhibitedItemsNote({super.key});
+/// Clé du rappel des objets interdits (tests).
+const prohibitedItemsKey = ValueKey('prohibited-items');
+
+/// Rappel des objets interdits (maquette) : bandeau rouge pâle replié ; un toucher déplie
+/// la liste et l'engagement de l'expéditeur.
+class ProhibitedItemsNote extends StatefulWidget {
+  const ProhibitedItemsNote({super.key, this.initiallyOpen = false});
+
+  /// Ouvert d'emblée (tests, captures).
+  final bool initiallyOpen;
+
+  @override
+  State<ProhibitedItemsNote> createState() => _ProhibitedItemsNoteState();
+}
+
+class _ProhibitedItemsNoteState extends State<ProhibitedItemsNote> {
+  late bool _open = widget.initiallyOpen;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    return TintBox(
-      tone: TintTone.danger,
-      child: MergeSemantics(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 1),
-              child: TaraIcon(TaraIcons.alertCircle, size: 18, color: c.dangerText),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l.prohibitedTitle,
-                    style: TaraText.label.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+    return Semantics(
+      button: true,
+      expanded: _open,
+      child: GestureDetector(
+        key: prohibitedItemsKey,
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _open = !_open),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+          decoration: BoxDecoration(
+            color: const Color.fromRGBO(255, 107, 117, .08),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color.fromRGBO(255, 107, 117, .3)),
+          ),
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 24),
+                  child: Row(
+                    children: [
+                      AnimatedRotation(
+                        turns: _open ? .25 : 0,
+                        duration: const Duration(milliseconds: 220),
+                        child: TaraIcon(TaraIcons.chevronRight, size: 14, color: c.textPrimary),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          l.prohibitedTitle,
+                          style: TaraText.label.copyWith(
+                            color: c.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  for (final item in prohibitedItems(l))
-                    Text('• $item', style: TaraText.small.copyWith(color: c.textSecondary, height: 1.45)),
+                ),
+                if (_open) ...[
                   const SizedBox(height: 6),
-                  Text(l.prohibitedPledge, style: TaraText.small.copyWith(color: c.textTertiary)),
+                  Text(
+                    '${prohibitedItems(l).join(' · ')}. ${l.prohibitedPledge}',
+                    style: TaraText.small.copyWith(
+                      color: c.textPrimary.withValues(alpha: .75),
+                      fontSize: 12,
+                      height: 1.6,
+                    ),
+                  ),
                 ],
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

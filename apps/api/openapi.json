@@ -15637,6 +15637,14 @@
               "RETURN"
             ]
           },
+          "riderName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "etaMinutes": {
+            "nullable": true,
+            "type": "integer"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -15654,6 +15662,8 @@
           "codAmount",
           "scheduledFor",
           "failureDecision",
+          "riderName",
+          "etaMinutes",
           "createdAt"
         ],
         "additionalProperties": false

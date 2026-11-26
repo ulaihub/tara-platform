@@ -8,6 +8,7 @@ import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/operator_logo.dart';
+import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/tara_colors.dart';
@@ -223,46 +224,46 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
     ref.listen(walletProvider, (_, _) => _suggestMethod());
     final walletOption = walletChoice(l, shop: shop, wallet: wallet, total: draft.total);
     final pending = draft.deliveries.where((d) => d.dropoff == null).toList();
-    Widget label(String text) => Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: TaraText.label.copyWith(color: c.textSecondary)),
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
           header: true,
-          child: Text(l.summaryTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-        ),
-        const SizedBox(height: 8),
-        Text(l.summaryBody, style: TaraText.body.copyWith(color: c.textSecondary)),
-        const SizedBox(height: 18),
-        AddressChoice(
-          icon: TaraIcons.package,
-          title: pickup.label ?? l.stepPickup,
-          subtitle: [
-            pickup.summary,
-            if (draft.later && draft.scheduledFor != null)
-              scheduleText(l, locale, draft.scheduledFor!, widget.now())
-            else
-              l.whenNowShort,
-          ].join('\n'),
-          selected: false,
-          onTap: () {},
+          child: Text(l.summaryTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary, fontSize: 22)),
         ),
         const SizedBox(height: 10),
-        for (final (i, delivery) in draft.deliveries.indexed) ...[
-          _DeliveryCard(
-            index: i,
-            delivery: delivery,
-            numbered: _batch,
-            onEdit: () => widget.onEdit(i),
-            onRemove: _batch ? () => draft.removeDelivery(i) : null,
+        if (!_batch && draft.deliveries.length == 1)
+          _RouteCard(
+            pickup: pickup,
+            delivery: draft.deliveries.first,
+            when: draft.later && draft.scheduledFor != null
+                ? scheduleText(l, locale, draft.scheduledFor!, widget.now())
+                : l.whenNowShort,
+            onEdit: () => widget.onEdit(0),
+          )
+        else ...[
+          _RouteCard(
+            pickup: pickup,
+            when: draft.later && draft.scheduledFor != null
+                ? scheduleText(l, locale, draft.scheduledFor!, widget.now())
+                : l.whenNowShort,
           ),
           const SizedBox(height: 10),
         ],
+        for (final (i, delivery) in draft.deliveries.indexed)
+          if (_batch || draft.deliveries.length > 1) ...[
+            _DeliveryCard(
+              index: i,
+              delivery: delivery,
+              numbered: _batch,
+              onEdit: () => widget.onEdit(i),
+              onRemove: _batch ? () => draft.removeDelivery(i) : null,
+            ),
+            const SizedBox(height: 10),
+          ],
         if (draft.deliveries.length < OrderDraft.maxDeliveries) ...[
-          GlassButton(label: l.addDelivery, icon: TaraIcons.package, color: c.accentText, onPressed: widget.onAdd),
+          if (!_batch && draft.deliveries.length == 1) const SizedBox(height: 10),
+          DashedAction(label: l.addDelivery, icon: TaraIcons.package, onTap: widget.onAdd),
           const SizedBox(height: 6),
           Text(l.addDeliveryHint, style: TaraText.small.copyWith(color: c.textTertiary)),
         ],
@@ -338,44 +339,52 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
             ),
           if (_promoError != null) ...[const SizedBox(height: 6), ErrorLine(_promoError!)],
         ],
-        const SizedBox(height: 20),
-        label(l.whoPays),
-        ChoiceChips<String>(
-          options: [ChoiceOption('SENDER', l.payerMe), ChoiceOption('RECIPIENT', l.payerRecipient)],
-          selected: draft.feePayer,
-          onSelected: _setPayer,
+        const SizedBox(height: 18),
+        Semantics(
+          label: l.whoPays,
+          child: LiquidSegmented<String>(
+            segments: [('SENDER', l.payerMe), ('RECIPIENT', l.payerRecipient)],
+            selected: draft.feePayer,
+            onChanged: _setPayer,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         if (!draft.senderPays)
-          Text(l.recipientPaysBody, style: TaraText.small.copyWith(color: c.textTertiary))
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+            decoration: BoxDecoration(
+              color: const Color.fromRGBO(255, 177, 92, .12),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              l.recipientPaysBody,
+              style: TaraText.label.copyWith(color: c.textPrimary, fontSize: 13, height: 1.5),
+            ),
+          )
         else ...[
-          const SizedBox(height: 12),
-          label(l.paymentLabel),
           for (final (method, icon, title, body) in [
-            ('MOMO_MTN', TaraIcons.phone, l.payMtn, l.payMomoBody),
-            ('MOMO_ORANGE', TaraIcons.phone, l.payOrange, l.payMomoBody),
             ('WALLET', TaraIcons.wallet, walletOption.title, walletOption.body),
+            ('MOMO_ORANGE', TaraIcons.phone, l.payOrange, l.payMomoBody),
+            ('MOMO_MTN', TaraIcons.phone, l.payMtn, l.payMomoBody),
             ('CASH', TaraIcons.cash, l.payCash, l.payCashBody),
           ]) ...[
             AddressChoice(
               icon: icon,
-              leading: method.startsWith('MOMO_') ? OperatorLogo(method, size: 40) : null,
+              leading: method.startsWith('MOMO_') ? OperatorLogo(method, size: 34) : null,
               title: title,
               subtitle: body,
               selected: draft.paymentMethod == method,
               onTap: () => _setMethod(method),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
           ],
           if (draft.momo) ...[
-            const SizedBox(height: 6),
-            TaraTextField(
+            BoxedField(
               label: l.payerPhoneLabel,
               hint: l.phoneHint,
               controller: _phone,
               keyboardType: TextInputType.phone,
               inputFormatters: [PhoneInputFormatter()],
-              leading: PhonePrefixButton(prefix: '+237', semanticLabel: l.countryCodeLabel('+237')),
             ),
             if (widget.showErrors && !isCameroonMobile(draft.payerPhone)) ...[
               const SizedBox(height: 6),
@@ -387,8 +396,158 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
             ErrorLine(l.paymentRequired),
           ],
         ],
+        // Boutique : ce que le livreur encaisse et qui revient sur les ventes (maquette).
+        if (!_batch && draft.deliveries.length == 1 && draft.deliveries.first.codAmount > 0) ...[
+          const SizedBox(height: 10),
+          _CodCard(delivery: draft.deliveries.first),
+        ],
         if (widget.error != null) ...[const SizedBox(height: 14), ErrorLine(widget.error!)],
       ],
+    );
+  }
+}
+
+/// Trajet de la maquette : A (enlèvement), B (destinataire, distance), puis le colis et
+/// l'heure. Un toucher reprend la livraison.
+class _RouteCard extends StatelessWidget {
+  const _RouteCard({required this.pickup, required this.when, this.delivery, this.onEdit});
+
+  final Address pickup;
+  final DeliveryDraft? delivery;
+  final String when;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final d = delivery;
+    Widget stop(String letter, String name, String place, {String? trailing, bool brand = false}) => Row(
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            gradient: brand ? TaraBrand.gradient : null,
+            color: brand ? null : c.textPrimary,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            letter,
+            style: TaraText.small.copyWith(
+              color: brand ? TaraBrand.onBrand : c.bg,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: name,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                if (place.isNotEmpty) TextSpan(text: ' · $place'),
+              ],
+            ),
+            style: TaraText.label.copyWith(color: c.textPrimary, fontSize: 13),
+          ),
+        ),
+        if (trailing != null) ...[
+          const SizedBox(width: 8),
+          Text(trailing, style: TaraText.small.copyWith(color: c.textTertiary, fontSize: 12)),
+        ],
+      ],
+    );
+    final package = d == null
+        ? when
+        : [
+            if (d.bulky) l.sizeBulky else l.parcelSize(d.size),
+            if (d.contents case final code?) contentsText(l, code),
+            if (d.declaredValue case final value? when value > 0) '${formatAmount(value)}\u00a0F',
+            when,
+          ].join(' · ');
+    final card = Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: boxedFieldFill(c),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: boxedFieldBorder(c)),
+        boxShadow: const [BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 28, offset: Offset(0, 12))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          stop('A', pickup.label ?? l.stepPickup, pickup.landmark),
+          if (d != null) ...[
+            const SizedBox(height: 8),
+            stop(
+              'B',
+              d.recipientName.trim(),
+              d.dropoff?.landmark ?? l.waitingPoint(d.recipientName.trim().split(RegExp(r'\s+')).first),
+              trailing: d.quote == null ? null : formatDistance(d.quote!.distanceMeters),
+              brand: true,
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(package, style: TaraText.small.copyWith(color: c.textTertiary, fontSize: 12)),
+          if (d?.quoteError case final error?) ...[const SizedBox(height: 6), ErrorLine(error)],
+        ],
+      ),
+    );
+    if (onEdit == null) return card;
+    return Semantics(
+      button: true,
+      hint: l.change,
+      child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: onEdit, child: card),
+    );
+  }
+}
+
+/// « À encaisser auprès de Marie » : montant que le livreur récupère pour la boutique.
+class _CodCard extends StatelessWidget {
+  const _CodCard({required this.delivery});
+  final DeliveryDraft delivery;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    return MergeSemantics(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        decoration: BoxDecoration(
+          color: boxedFieldFill(c),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: boxedFieldBorder(c)),
+          boxShadow: const [BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 28, offset: Offset(0, 12))],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.codToCollectFrom(delivery.recipientName.trim().split(RegExp(r'\s+')).first),
+                    style: TaraText.label.copyWith(color: c.textPrimary, fontSize: 13, fontWeight: FontWeight.w700),
+                  ),
+                  Text(l.codPaidToSales, style: TaraText.small.copyWith(color: c.textTertiary, fontSize: 12)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              '${formatAmount(delivery.codAmount)}\u00a0F',
+              style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 18, fontFeatures: TaraText.tabular),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

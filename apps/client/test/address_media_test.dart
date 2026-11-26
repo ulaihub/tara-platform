@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/core/media/address_media.dart';
 import 'package:tara_client/features/order/address_editor.dart';
+import 'package:tara_client/features/order/address_media_section.dart';
 
 import 'helpers/fake_client_api.dart';
 import 'helpers/harness.dart';
@@ -56,7 +57,7 @@ Widget editor(FakeClientApi api, {VoiceRecorder? recorder, NotePlayer? player, L
 );
 
 Future<void> reveal(WidgetTester tester, String text) async {
-  await tester.scrollUntilVisible(find.text(text), 80, scrollable: find.byType(Scrollable).last);
+  await tester.scrollUntilVisible(find.text(text).first, 80, scrollable: find.byType(Scrollable).last);
   await settle(tester);
 }
 
@@ -78,23 +79,24 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, editor(api, player: player));
     await settle(tester);
     await tester.enterText(find.byType(TextField).first, 'Portail bleu après la pharmacie');
-    await reveal(tester, 'Prendre la photo');
-    await tester.tap(find.text('Prendre la photo'));
+    await reveal(tester, 'Photo de la façade');
+    await tester.tap(find.byKey(facadePhotoKey));
     await settle(tester);
-    expect(find.bySemanticsLabel('Photo de la façade prise'), findsOneWidget);
-    expect(find.text('Reprendre'), findsOneWidget);
+    expect(find.bySemanticsLabel('Photo de la façade prise, Reprendre'), findsOneWidget);
+    expect(find.text('Retirer la photo'), findsOneWidget);
 
-    await reveal(tester, 'Enregistrer');
-    await tester.tap(find.text('Enregistrer'));
+    await reveal(tester, 'Enregistrer une note vocale');
+    await tester.tap(find.byKey(voiceNoteKey));
     await tester.pump(const Duration(seconds: 4));
     expect(find.text('Enregistrement… 0:04 / 0:30'), findsOneWidget);
-    await tester.tap(find.text('Arrêter'));
+    await tester.tap(find.byKey(voiceNoteKey));
     await settle(tester);
-    await tester.tap(find.text('Écouter (0:04)'));
+    expect(find.text('Note vocale · 0:04'), findsOneWidget);
+    await tester.tap(find.byKey(voiceNoteKey));
     await settle(tester);
     expect(player.played, ['/tmp/tara-note-1.m4a']);
 
-    await tester.tap(find.text('Enregistrer l’adresse'));
+    await tester.tap(find.text('Valider ce point'));
     await settle(tester);
     expect(api.uploads, [(photoPath, 'ADDRESS_PHOTO'), ('/tmp/tara-note-1.m4a', 'VOICE_NOTE')]);
     expect(api.createdAddresses.single['photoKey'], 'address/address_photo-1');
@@ -105,15 +107,15 @@ void main() {
     goldenTest('photo prise et note enregistrée ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, editor(orderApi()));
       await settle(tester);
-      await reveal(tester, 'Prendre la photo');
-      await tester.tap(find.text('Prendre la photo'));
+      await reveal(tester, 'Photo de la façade');
+      await tester.tap(find.byKey(facadePhotoKey));
       // Lecture du fichier et décodage de l'image : en temps réel, hors de l'horloge du test.
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
       await settle(tester);
-      await reveal(tester, 'Enregistrer');
-      await tester.tap(find.text('Enregistrer'));
+      await reveal(tester, 'Enregistrer une note vocale');
+      await tester.tap(find.byKey(voiceNoteKey));
       await tester.pump(const Duration(seconds: 12));
-      await tester.tap(find.text('Arrêter'));
+      await tester.tap(find.byKey(voiceNoteKey));
       await settle(tester);
       await tester.drag(find.byType(Scrollable).last, const Offset(0, -300));
       await settle(tester);
@@ -124,14 +126,14 @@ void main() {
   testWidgets('la note s’arrête d’elle-même à 30 secondes', (tester) async {
     await pumpVariant(tester, Variant.matrix.first, editor(orderApi()));
     await settle(tester);
-    await reveal(tester, 'Enregistrer');
-    await tester.tap(find.text('Enregistrer'));
+    await reveal(tester, 'Enregistrer une note vocale');
+    await tester.tap(find.byKey(voiceNoteKey));
     for (var i = 0; i < 31; i++) {
       await tester.pump(const Duration(seconds: 1));
     }
     await settle(tester);
     expect(find.textContaining('Enregistrement…'), findsNothing);
-    expect(find.text('Écouter (0:30)'), findsOneWidget);
+    expect(find.text('Note vocale · 0:30'), findsOneWidget);
   });
 
   testWidgets('sans photo ni note, l’adresse s’enregistre comme avant ; micro refusé expliqué', (tester) async {
@@ -139,11 +141,11 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, editor(api, recorder: _Recorder(allowed: false)));
     await settle(tester);
     await tester.enterText(find.byType(TextField).first, 'Portail bleu');
-    await reveal(tester, 'Enregistrer');
-    await tester.tap(find.text('Enregistrer'));
+    await reveal(tester, 'Enregistrer une note vocale');
+    await tester.tap(find.byKey(voiceNoteKey));
     await settle(tester);
     expect(find.textContaining('Micro refusé'), findsOneWidget);
-    await tester.tap(find.text('Enregistrer l’adresse'));
+    await tester.tap(find.text('Valider ce point'));
     await settle(tester);
     expect(api.uploads, isEmpty);
     expect(api.createdAddresses.single.containsKey('photoKey'), isFalse);

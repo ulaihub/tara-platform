@@ -734,6 +734,36 @@ abstract class AppLocalizations {
   /// **'Livraison impossible · à décider'**
   String get statusFailed;
 
+  /// No description provided for @statusRiderComingYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur en route vers vous'**
+  String get statusRiderComingYou;
+
+  /// No description provided for @statusRiderComingShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur en route vers votre boutique'**
+  String get statusRiderComingShop;
+
+  /// No description provided for @statusRiderArriving.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} arrive'**
+  String statusRiderArriving(String name);
+
+  /// No description provided for @statusFailedYouDecide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison impossible · à vous de décider'**
+  String get statusFailedYouDecide;
+
+  /// No description provided for @etaMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min'**
+  String etaMinutes(int minutes);
+
   /// No description provided for @todayAt.
   ///
   /// In fr, this message translates to:
@@ -1100,6 +1130,12 @@ abstract class AppLocalizations {
   /// **'Nouvelle adresse'**
   String get newAddress;
 
+  /// No description provided for @newAddressOnMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle adresse sur la carte'**
+  String get newAddressOnMap;
+
   /// No description provided for @pickupRequired.
   ///
   /// In fr, this message translates to:
@@ -1129,6 +1165,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Faites glisser la carte : l’épingle au centre marque l’entrée exacte. Le quartier s’affiche dès qu’elle est posée.'**
   String get pinHint;
+
+  /// No description provided for @pinHintShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faites glisser la carte : l’épingle au centre marque l’entrée exacte.'**
+  String get pinHintShort;
+
+  /// No description provided for @placePointTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placer le point'**
+  String get placePointTitle;
+
+  /// No description provided for @landmarkForRider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Repère pour le livreur'**
+  String get landmarkForRider;
+
+  /// No description provided for @validatePoint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider ce point'**
+  String get validatePoint;
 
   /// No description provided for @pinPlaced.
   ///
@@ -1286,6 +1346,78 @@ abstract class AppLocalizations {
   /// **'Il reçoit un lien et place lui-même son point sur la carte.'**
   String get askRecipientBody;
 
+  /// No description provided for @pickFromContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir dans mes contacts'**
+  String get pickFromContacts;
+
+  /// No description provided for @whereToDeliverQ.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où livrer ?'**
+  String get whereToDeliverQ;
+
+  /// No description provided for @knownAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse déjà connue'**
+  String get knownAddress;
+
+  /// No description provided for @lastDeliveryTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière livraison à {name} : {when}'**
+  String lastDeliveryTo(String name, String when);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'il y a {days} jours'**
+  String daysAgo(int days);
+
+  /// No description provided for @placePointOnMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placer le point sur la carte'**
+  String get placePointOnMap;
+
+  /// No description provided for @placePointOnMapBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous connaissez l’endroit'**
+  String get placePointOnMapBody;
+
+  /// No description provided for @askRecipientShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il reçoit un lien et place lui-même son point'**
+  String get askRecipientShort;
+
+  /// No description provided for @placedByYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placée par vous'**
+  String get placedByYou;
+
+  /// No description provided for @withPhotoAndVoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'photo et note vocale'**
+  String get withPhotoAndVoice;
+
+  /// No description provided for @withPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'photo de la façade'**
+  String get withPhoto;
+
+  /// No description provided for @withVoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'note vocale'**
+  String get withVoice;
+
   /// No description provided for @viaWhatsapp.
   ///
   /// In fr, this message translates to:
@@ -1345,6 +1477,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Adresse confirmée par une livraison'**
   String get addressVerified;
+
+  /// No description provided for @addressVerifiedShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'confirmée par une livraison ✓'**
+  String get addressVerifiedShort;
 
   /// No description provided for @addressFromRecipient.
   ///
@@ -1460,11 +1598,23 @@ abstract class AppLocalizations {
   /// **'Taille {size}'**
   String sizeShort(String size);
 
+  /// No description provided for @parcelSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis {size}'**
+  String parcelSize(String size);
+
   /// No description provided for @contentsLabel.
   ///
   /// In fr, this message translates to:
   /// **'Nature du contenu'**
   String get contentsLabel;
+
+  /// No description provided for @contentsShortLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nature'**
+  String get contentsShortLabel;
 
   /// No description provided for @contentsDocuments.
   ///
@@ -1652,6 +1802,18 @@ abstract class AppLocalizations {
   /// **'Gros objet'**
   String get sizeBulky;
 
+  /// No description provided for @sizeBulkyShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gros'**
+  String get sizeBulkyShort;
+
+  /// No description provided for @sizeBulkyVehicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'tricycle'**
+  String get sizeBulkyVehicle;
+
   /// No description provided for @sizeBulkyBody.
   ///
   /// In fr, this message translates to:
@@ -1661,7 +1823,7 @@ abstract class AppLocalizations {
   /// No description provided for @sizeHelpBulky.
   ///
   /// In fr, this message translates to:
-  /// **'Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.'**
+  /// **'Frigo, cuisinière, matelas, meuble : livré en tricycle. Tarif affiché avant de commander.'**
   String get sizeHelpBulky;
 
   /// No description provided for @loadingHelpTitle.
@@ -1735,6 +1897,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.'**
   String get valueHelp;
+
+  /// No description provided for @valueHelpShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte.'**
+  String get valueHelpShort;
+
+  /// No description provided for @guaranteeFree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garantie offerte jusqu’à {amount} de valeur.'**
+  String guaranteeFree(String amount);
 
   /// No description provided for @valueFeeHint.
   ///
@@ -1837,6 +2011,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Demain'**
   String get dayTomorrow;
+
+  /// No description provided for @dayTodayShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auj.'**
+  String get dayTodayShort;
+
+  /// No description provided for @dayTomorrowShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dem.'**
+  String get dayTomorrowShort;
 
   /// No description provided for @dateAt.
   ///
@@ -2018,6 +2204,12 @@ abstract class AppLocalizations {
   /// **'Total'**
   String get totalLabel;
 
+  /// No description provided for @courseFreeCover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course · garantie offerte'**
+  String get courseFreeCover;
+
   /// No description provided for @quoting.
   ///
   /// In fr, this message translates to:
@@ -2071,6 +2263,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Le destinataire paie la course à la livraison, en espèces ou par Mobile Money.'**
   String get recipientPaysBody;
+
+  /// No description provided for @codToCollectFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser auprès de {name}'**
+  String codToCollectFrom(String name);
+
+  /// No description provided for @codPaidToSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversé sur vos ventes'**
+  String get codPaidToSales;
 
   /// No description provided for @paymentLabel.
   ///
@@ -3547,6 +3751,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'30 secondes pour expliquer le chemin, dans la langue de votre choix.'**
   String get voiceNoteHint;
+
+  /// No description provided for @voiceNoteRecord.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer une note vocale'**
+  String get voiceNoteRecord;
+
+  /// No description provided for @voiceNoteLength.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note vocale · {length}'**
+  String voiceNoteLength(String length);
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la photo'**
+  String get removePhoto;
+
+  /// No description provided for @removeNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la note'**
+  String get removeNote;
 
   /// No description provided for @recordNote.
   ///

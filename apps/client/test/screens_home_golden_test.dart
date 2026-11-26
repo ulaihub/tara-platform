@@ -40,6 +40,8 @@ OrderSummary summary(
   DateTime? scheduledFor,
   String? failureDecision,
   int? batchNumber,
+  String? riderName,
+  int? etaMinutes,
 }) => OrderSummary(
   id: '00000000-0000-4000-8000-00000000000$id',
   reference: 'TR-4821$id',
@@ -53,6 +55,8 @@ OrderSummary summary(
   createdAt: DateTime.utc(2026, 11, 4, 8),
   failureDecision: failureDecision,
   batchNumber: batchNumber,
+  riderName: riderName,
+  etaMinutes: etaMinutes,
 );
 
 FakeClientApi shopApi() => FakeClientApi()
@@ -64,9 +68,10 @@ FakeClientApi shopApi() => FakeClientApi()
     todayDeliveries: 3,
   )
   ..active = [
-    summary('1', 'IN_DELIVERY', 'Marie Ngo', 'Bonapriso'),
+    // Le livreur roule vers la destinataire : « Jean M. arrive », minutes restantes.
+    summary('1', 'IN_DELIVERY', 'Marie Ngo', 'Bonapriso', riderName: 'Jean M.', etaMinutes: 4),
     // Colis n° 2 d'un envoi de plusieurs colis : le numéro est rappelé.
-    summary('2', 'ASSIGNED', 'Jean Mbarga', 'Akwa', batchNumber: 2),
+    summary('2', 'ASSIGNED', 'Jean Mbarga', 'Akwa', batchNumber: 2, riderName: 'Jean M.'),
     summary('3', 'DELIVERY_FAILED', 'Chantal Eyike', 'Bépanda'),
     summary('4', 'CREATED', 'Samuel Etoa', 'Deïdo', scheduledFor: DateTime(2026, 11, 5, 9, 30)),
   ];
@@ -135,7 +140,11 @@ void main() {
         surface: const Size(390, 1180),
       );
       await settle(tester);
-      expect(find.text('Prévue demain à 09:30 · TR-48214'), findsOneWidget);
+      expect(find.text('Prévue demain à 09:30'), findsOneWidget);
+      // Comme la maquette : le livreur qui arrive, ses minutes, la boutique où il va.
+      expect(find.text('En livraison · Jean M. arrive'), findsOneWidget);
+      expect(find.text('4 min'), findsOneWidget);
+      expect(find.text('Livreur en route vers votre boutique'), findsOneWidget);
       expect(find.text('37 500 F'), findsOneWidget);
       expect(find.text('Encaissé aujourd’hui · 3 livraisons'), findsOneWidget);
       expect(find.text('128 500 F reversés'), findsOneWidget);
@@ -147,12 +156,14 @@ void main() {
     final api = shopApi();
     await pumpVariant(tester, Variant.matrix.first, home(shopOwner, api), surface: const Size(390, 1180));
     await settle(tester);
-    expect(find.text('Livraison impossible · à décider · TR-48213'), findsOneWidget);
+    expect(find.text('Livraison impossible · à vous de décider'), findsOneWidget);
+    expect(find.text('Décider'), findsOneWidget);
 
     api.active = [summary('3', 'DELIVERY_FAILED', 'Chantal Eyike', 'Bépanda', failureDecision: 'RETURN')];
     await tester.pumpWidget(const SizedBox());
     await pumpVariant(tester, Variant.matrix.first, home(shopOwner, api), surface: const Size(390, 1180));
     await settle(tester);
-    expect(find.text('Retour en cours · TR-48213'), findsOneWidget);
+    expect(find.text('Retour en cours'), findsOneWidget);
+    expect(find.text('Décider'), findsNothing);
   });
 }

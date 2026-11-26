@@ -7,13 +7,7 @@ import type { OrderStatus } from '../generated/prisma/enums.js';
 import type { PublicTrackingDto } from '../orders/orders.schemas.js';
 import { shortName } from '../orders/orders.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { haversineMeters } from '../routing/distance.service.js';
-
-/** Vitesse prudente d'une moto dans Douala (la même que l'app expéditeur). */
-const METERS_PER_MINUTE = 300;
-
-/** Au-delà, la position du livreur est trop vieille pour annoncer une heure. */
-const POSITION_MAX_AGE_MS = 5 * 60_000;
+import { etaFrom } from '../orders/eta.js';
 
 const BEFORE_PICKUP: readonly OrderStatus[] = ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'];
 
@@ -110,14 +104,6 @@ export class PublicTrackingService {
     dropoff: { latitude: number; longitude: number },
     now: Date,
   ): Promise<z.output<typeof PublicTrackingDto>['eta']> {
-    const position = await this.presence.position(riderId);
-    if (!position || now.getTime() - position.at.getTime() > POSITION_MAX_AGE_MS) return null;
-    const remaining = haversineMeters(position, dropoff);
-    const total = Math.max(haversineMeters(pickup, dropoff), 1);
-    return {
-      minutes: Math.max(1, Math.ceil(remaining / METERS_PER_MINUTE)),
-      distanceMeters: Math.round(remaining),
-      progress: Math.round(Math.min(1, Math.max(0, 1 - remaining / total)) * 100) / 100,
-    };
+    return etaFrom(await this.presence.position(riderId), pickup, dropoff, now);
   }
 }

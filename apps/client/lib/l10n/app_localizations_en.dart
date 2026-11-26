@@ -375,6 +375,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusFailed => 'Delivery failed · your decision needed';
 
   @override
+  String get statusRiderComingYou => 'Rider on the way to you';
+
+  @override
+  String get statusRiderComingShop => 'Rider on the way to your shop';
+
+  @override
+  String statusRiderArriving(String name) {
+    return '$name is coming';
+  }
+
+  @override
+  String get statusFailedYouDecide => 'Delivery failed · your call';
+
+  @override
+  String etaMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
   String todayAt(String time) {
     return 'today at $time';
   }
@@ -570,6 +589,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newAddress => 'New address';
 
   @override
+  String get newAddressOnMap => 'New address on the map';
+
+  @override
   String get pickupRequired => 'Choose or add the pickup address.';
 
   @override
@@ -584,6 +606,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pinHint =>
       'Drag the map: the pin in the middle marks the exact entrance. The neighbourhood shows as soon as it lands.';
+
+  @override
+  String get pinHintShort => 'Drag the map: the pin in the centre marks the exact entrance.';
+
+  @override
+  String get placePointTitle => 'Place the point';
+
+  @override
+  String get landmarkForRider => 'Landmark for the rider';
+
+  @override
+  String get validatePoint => 'Confirm this point';
 
   @override
   String get pinPlaced => 'Pin placed';
@@ -667,6 +701,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get askRecipientBody => 'They get a link and place their own point on the map.';
 
   @override
+  String get pickFromContacts => 'Pick from my contacts';
+
+  @override
+  String get whereToDeliverQ => 'Where to deliver?';
+
+  @override
+  String get knownAddress => 'Known address';
+
+  @override
+  String lastDeliveryTo(String name, String when) {
+    return 'Last delivery to $name: $when';
+  }
+
+  @override
+  String daysAgo(int days) {
+    return '$days days ago';
+  }
+
+  @override
+  String get placePointOnMap => 'Place the point on the map';
+
+  @override
+  String get placePointOnMapBody => 'You know the place';
+
+  @override
+  String get askRecipientShort => 'They get a link and place their own point';
+
+  @override
+  String get placedByYou => 'Placed by you';
+
+  @override
+  String get withPhotoAndVoice => 'photo and voice note';
+
+  @override
+  String get withPhoto => 'front photo';
+
+  @override
+  String get withVoice => 'voice note';
+
+  @override
   String get viaWhatsapp => 'WhatsApp';
 
   @override
@@ -698,6 +772,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addressVerified => 'Address confirmed by a delivery';
+
+  @override
+  String get addressVerifiedShort => 'confirmed by a delivery ✓';
 
   @override
   String get addressFromRecipient => 'Placed by the recipient';
@@ -765,7 +842,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String parcelSize(String size) {
+    return 'Parcel $size';
+  }
+
+  @override
   String get contentsLabel => 'Contents';
+
+  @override
+  String get contentsShortLabel => 'Type';
 
   @override
   String get contentsDocuments => 'Documents';
@@ -863,6 +948,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sizeBulky => 'Bulky item';
 
   @override
+  String get sizeBulkyShort => 'Big';
+
+  @override
+  String get sizeBulkyVehicle => 'tricycle';
+
+  @override
   String get sizeBulkyBody => 'Fridge, cooker, mattress, furniture · delivered by tricycle';
 
   @override
@@ -905,6 +996,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get valueHelp =>
       'In FCFA. Never shown to the rider. Sets what Tara repays for loss or damage: free up to 25,000 F, then 1% of the value above.';
+
+  @override
+  String get valueHelpShort => 'Never shown to the rider. Sets what Tara refunds if it is lost.';
+
+  @override
+  String guaranteeFree(String amount) {
+    return 'Free cover up to $amount of value.';
+  }
 
   @override
   String valueFeeHint(String amount) {
@@ -958,6 +1057,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dayTomorrow => 'Tomorrow';
+
+  @override
+  String get dayTodayShort => 'Today';
+
+  @override
+  String get dayTomorrowShort => 'Tmrw';
 
   @override
   String dateAt(String date, String time) {
@@ -1078,6 +1183,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalLabel => 'Total';
 
   @override
+  String get courseFreeCover => 'Delivery · free cover';
+
+  @override
   String get quoting => 'Working out the price…';
 
   @override
@@ -1105,6 +1213,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipientPaysBody => 'The recipient pays on delivery, in cash or by Mobile Money.';
+
+  @override
+  String codToCollectFrom(String name) {
+    return 'To collect from $name';
+  }
+
+  @override
+  String get codPaidToSales => 'Paid out with your sales';
 
   @override
   String get paymentLabel => 'Payment method';
@@ -2007,6 +2123,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceNoteHint => '30 seconds to explain the way, in the language of your choice.';
+
+  @override
+  String get voiceNoteRecord => 'Record a voice note';
+
+  @override
+  String voiceNoteLength(String length) {
+    return 'Voice note · $length';
+  }
+
+  @override
+  String get removePhoto => 'Remove photo';
+
+  @override
+  String get removeNote => 'Remove note';
 
   @override
   String get recordNote => 'Record';

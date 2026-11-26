@@ -375,6 +375,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statusFailed => 'Livraison impossible · à décider';
 
   @override
+  String get statusRiderComingYou => 'Livreur en route vers vous';
+
+  @override
+  String get statusRiderComingShop => 'Livreur en route vers votre boutique';
+
+  @override
+  String statusRiderArriving(String name) {
+    return '$name arrive';
+  }
+
+  @override
+  String get statusFailedYouDecide => 'Livraison impossible · à vous de décider';
+
+  @override
+  String etaMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
   String todayAt(String time) {
     return 'aujourd’hui à $time';
   }
@@ -574,6 +593,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get newAddress => 'Nouvelle adresse';
 
   @override
+  String get newAddressOnMap => 'Nouvelle adresse sur la carte';
+
+  @override
   String get pickupRequired => 'Choisissez ou ajoutez l’adresse d’enlèvement.';
 
   @override
@@ -588,6 +610,18 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get pinHint =>
       'Faites glisser la carte : l’épingle au centre marque l’entrée exacte. Le quartier s’affiche dès qu’elle est posée.';
+
+  @override
+  String get pinHintShort => 'Faites glisser la carte : l’épingle au centre marque l’entrée exacte.';
+
+  @override
+  String get placePointTitle => 'Placer le point';
+
+  @override
+  String get landmarkForRider => 'Repère pour le livreur';
+
+  @override
+  String get validatePoint => 'Valider ce point';
 
   @override
   String get pinPlaced => 'Point placé';
@@ -671,6 +705,46 @@ class AppLocalizationsFr extends AppLocalizations {
   String get askRecipientBody => 'Il reçoit un lien et place lui-même son point sur la carte.';
 
   @override
+  String get pickFromContacts => 'Choisir dans mes contacts';
+
+  @override
+  String get whereToDeliverQ => 'Où livrer ?';
+
+  @override
+  String get knownAddress => 'Adresse déjà connue';
+
+  @override
+  String lastDeliveryTo(String name, String when) {
+    return 'Dernière livraison à $name : $when';
+  }
+
+  @override
+  String daysAgo(int days) {
+    return 'il y a $days jours';
+  }
+
+  @override
+  String get placePointOnMap => 'Placer le point sur la carte';
+
+  @override
+  String get placePointOnMapBody => 'Vous connaissez l’endroit';
+
+  @override
+  String get askRecipientShort => 'Il reçoit un lien et place lui-même son point';
+
+  @override
+  String get placedByYou => 'Placée par vous';
+
+  @override
+  String get withPhotoAndVoice => 'photo et note vocale';
+
+  @override
+  String get withPhoto => 'photo de la façade';
+
+  @override
+  String get withVoice => 'note vocale';
+
+  @override
   String get viaWhatsapp => 'WhatsApp';
 
   @override
@@ -702,6 +776,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get addressVerified => 'Adresse confirmée par une livraison';
+
+  @override
+  String get addressVerifiedShort => 'confirmée par une livraison ✓';
 
   @override
   String get addressFromRecipient => 'Placée par le destinataire';
@@ -769,7 +846,15 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String parcelSize(String size) {
+    return 'Colis $size';
+  }
+
+  @override
   String get contentsLabel => 'Nature du contenu';
+
+  @override
+  String get contentsShortLabel => 'Nature';
 
   @override
   String get contentsDocuments => 'Documents';
@@ -867,10 +952,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sizeBulky => 'Gros objet';
 
   @override
+  String get sizeBulkyShort => 'Gros';
+
+  @override
+  String get sizeBulkyVehicle => 'tricycle';
+
+  @override
   String get sizeBulkyBody => 'Frigo, cuisinière, matelas, meuble · livré en tricycle';
 
   @override
-  String get sizeHelpBulky => 'Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.';
+  String get sizeHelpBulky =>
+      'Frigo, cuisinière, matelas, meuble : livré en tricycle. Tarif affiché avant de commander.';
 
   @override
   String get loadingHelpTitle => 'Aide pour charger';
@@ -909,6 +1001,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get valueHelp =>
       'En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.';
+
+  @override
+  String get valueHelpShort => 'Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte.';
+
+  @override
+  String guaranteeFree(String amount) {
+    return 'Garantie offerte jusqu’à $amount de valeur.';
+  }
 
   @override
   String valueFeeHint(String amount) {
@@ -964,6 +1064,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dayTomorrow => 'Demain';
+
+  @override
+  String get dayTodayShort => 'Auj.';
+
+  @override
+  String get dayTomorrowShort => 'Dem.';
 
   @override
   String dateAt(String date, String time) {
@@ -1084,6 +1190,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get totalLabel => 'Total';
 
   @override
+  String get courseFreeCover => 'Course · garantie offerte';
+
+  @override
   String get quoting => 'Calcul du prix…';
 
   @override
@@ -1111,6 +1220,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recipientPaysBody => 'Le destinataire paie la course à la livraison, en espèces ou par Mobile Money.';
+
+  @override
+  String codToCollectFrom(String name) {
+    return 'À encaisser auprès de $name';
+  }
+
+  @override
+  String get codPaidToSales => 'Reversé sur vos ventes';
 
   @override
   String get paymentLabel => 'Moyen de paiement';
@@ -2013,6 +2130,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get voiceNoteHint => '30 secondes pour expliquer le chemin, dans la langue de votre choix.';
+
+  @override
+  String get voiceNoteRecord => 'Enregistrer une note vocale';
+
+  @override
+  String voiceNoteLength(String length) {
+    return 'Note vocale · $length';
+  }
+
+  @override
+  String get removePhoto => 'Retirer la photo';
+
+  @override
+  String get removeNote => 'Retirer la note';
 
   @override
   String get recordNote => 'Enregistrer';
