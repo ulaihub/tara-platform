@@ -6,7 +6,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && mkdir -p dist/carte && cp ../../packages/tara_map/assets/tara-light.json ../../packages/tara_map/assets/tara-dark.json dist/carte/",
     "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
     "start": "node --env-file-if-exists=.env dist/server.js",
     "lint": "oxlint --type-aware --deny-warnings src/ test/",
@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@hono/node-server": "2.1.6",
-    "hono": "4.13.16"
+    "hono": "4.13.16",
+    "maplibre-gl": "6.15.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

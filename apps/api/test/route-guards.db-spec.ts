@@ -71,6 +71,7 @@ const PUBLIC_ROUTES = [
   'POST /auth/otp/verify',
   'POST /auth/refresh',
   'POST /public/location-links/:token',
+  'POST /public/tracking/:token/delivery-code',
   'POST /public/tracking/:token/response',
   'POST /webhooks/payments/:provider',
   'POST /webhooks/whatsapp',

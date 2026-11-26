@@ -1058,6 +1058,9 @@ model Order {
   /// Codes incorrects saisis par le livreur : au-delà de 5, le code est bloqué (E3, E4).
   pickupCodeFailures   Int              @default(0) @map("pickup_code_failures")
   deliveryCodeFailures Int              @default(0) @map("delivery_code_failures")
+  /// Code de livraison renvoyé par le destinataire depuis sa page (3 fois au plus), et heure du dernier envoi.
+  deliveryCodeResends  Int              @default(0) @map("delivery_code_resends")
+  deliveryCodeSentAt   DateTime?        @map("delivery_code_sent_at") @db.Timestamptz(3)
   /// Début de la recherche de livreur en cours (D2) ; l'alerte part après 5 min.
   searchingSince       DateTime?        @map("searching_since") @db.Timestamptz(3)
   dispatchAlertedAt    DateTime?        @map("dispatch_alerted_at") @db.Timestamptz(3)

@@ -47,16 +47,19 @@ describe('lien de localisation : le destinataire place son point (B3)', () => {
     expect(res.headers.get('permissions-policy')).toContain('geolocation=(self)');
   });
 
-  it('seul script : la lecture de la position, avec le nonce de la page', async () => {
+  it('deux scripts : la lecture de la position et la carte, avec le nonce de la page', async () => {
     const { app } = setup();
     const res = await app.request(`/l/${TOKEN}`);
     const html = await res.text();
     const nonce = /'nonce-([^']+)'/.exec(res.headers.get('content-security-policy') ?? '')?.[1];
     const scripts = [...html.matchAll(/<script nonce="([^"]+)">([\s\S]*?)<\/script>/g)];
-    expect(scripts).toHaveLength(1);
-    expect(scripts[0]?.[1]).toBe(nonce);
+    expect(scripts).toHaveLength(2);
+    for (const script of scripts) expect(script[1]).toBe(nonce);
     expect(scripts[0]?.[2]).toContain('navigator.geolocation.getCurrentPosition');
-    expect(scripts[0]?.[2]?.length).toBeLessThan(1_500);
+    expect(scripts[0]?.[2]?.length).toBeLessThan(2_000);
+    // Carte : MapLibre servi par la page, chargé après elle ; épingle déplaçable.
+    expect(scripts[1]?.[2]).toContain('import("/carte/maplibre-gl.mjs');
+    expect(html).toContain('id="carte"');
     // La page de suivi garde la localisation interdite.
     const tracking = await app.request(`/t/${TOKEN}`);
     expect(tracking.headers.get('permissions-policy')).toContain('geolocation=()');

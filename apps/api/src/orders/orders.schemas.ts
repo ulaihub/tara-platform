@@ -431,6 +431,21 @@ export const PublicTrackingDto = z
         progress: z.number().min(0).max(1),
       })
       .nullable(),
+    /**
+     * Code de livraison (jamais affiché) : envoyé par SMS au numéro du destinataire quand le
+     * livreur a le colis ; numéro masqué, heure du dernier envoi, renvois encore possibles.
+     */
+    deliveryCode: z
+      .object({ phone: z.string(), sentAt: z.iso.datetime(), resendsLeft: z.int() })
+      .nullable(),
+    /**
+     * Carte de la page : point de livraison, et position du livreur seulement quand il roule
+     * vers le destinataire avec une position récente (sinon null). Jamais l'adresse d'enlèvement.
+     */
+    map: z.object({
+      dropoff: z.object({ latitude: z.number(), longitude: z.number() }),
+      rider: z.object({ latitude: z.number(), longitude: z.number() }).nullable(),
+    }),
     /** À payer à la porte : frais de livraison (si le destinataire les paie) et colis. */
     due: z.object({ fee: z.int(), cod: z.int(), total: z.int() }),
     /** Frais Mobile Money ajoutés si le destinataire paie par Mobile Money (en espèces : rien). */

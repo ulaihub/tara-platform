@@ -4595,6 +4595,29 @@
         ]
       }
     },
+    "/v1/public/tracking/{token}/delivery-code": {
+      "post": {
+        "operationId": "PublicTracking_resendCode",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Public"
+        ]
+      }
+    },
     "/v1/public/tracking/{token}/response": {
       "post": {
         "operationId": "PublicTracking_respond",
@@ -13876,6 +13899,9 @@
                   "PICKUP_CODE_LOCKED",
                   "DELIVERY_CODE_INVALID",
                   "DELIVERY_CODE_LOCKED",
+                  "DELIVERY_CODE_NOT_ACTIVE",
+                  "DELIVERY_CODE_RESEND_LIMIT",
+                  "DELIVERY_CODE_RESEND_TOO_SOON",
                   "NO_DELIVERY_VALIDATION_REQUEST",
                   "DELIVERY_VALIDATION_ADMIN_REQUIRED",
                   "RIDER_BALANCE_TOO_LOW",
@@ -17194,6 +17220,71 @@
             ],
             "additionalProperties": false
           },
+          "deliveryCode": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "phone": {
+                "type": "string"
+              },
+              "sentAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "resendsLeft": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "phone",
+              "sentAt",
+              "resendsLeft"
+            ],
+            "additionalProperties": false
+          },
+          "map": {
+            "type": "object",
+            "properties": {
+              "dropoff": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number"
+                  },
+                  "longitude": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ],
+                "additionalProperties": false
+              },
+              "rider": {
+                "nullable": true,
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number"
+                  },
+                  "longitude": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "dropoff",
+              "rider"
+            ],
+            "additionalProperties": false
+          },
           "due": {
             "type": "object",
             "properties": {
@@ -17253,6 +17344,8 @@
           "timeline",
           "rider",
           "eta",
+          "deliveryCode",
+          "map",
           "due",
           "mobileMoneyFee",
           "paymentPending",

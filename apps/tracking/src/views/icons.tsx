@@ -3,6 +3,12 @@ import type { FC } from 'hono/jsx';
 /** Icônes des apps (trait 2 px, grille 24 × 24), reprises tracé pour tracé de tara_icons. */
 const SHAPES = {
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  lock: (
+    <>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </>
+  ),
   moto: (
     <>
       <circle cx="5.5" cy="16.5" r="3" />

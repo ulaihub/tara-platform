@@ -8,6 +8,9 @@ import { Icon } from './icons.js';
 /** Réponse au formulaire de disponibilité, affichée après la redirection. */
 export type Flash = 'yes' | 'no' | 'already' | null;
 
+/** Issue de « Je n'ai pas reçu le code », affichée après la redirection. */
+export type CodeFlash = 'sent' | 'soon' | 'limit' | 'closed' | null;
+
 type Props = {
   data: PublicTracking;
   t: Strings;
@@ -15,6 +18,9 @@ type Props = {
   now: Date;
   actionHref: string;
   flash: Flash;
+  /** Formulaire « Je n'ai pas reçu le code ». */
+  codeHref: string;
+  codeFlash: CodeFlash;
 };
 
 const FINAL: readonly OrderStatus[] = ['DELIVERED', 'RETURNED', 'CANCELLED'];
@@ -43,7 +49,9 @@ export const TrackingPage: FC<Props> = (props) => {
   return (
     <>
       <Lead {...props} />
-      {COMING.includes(data.status) || failedHere ? (
+      {data.deliveryCode ? (
+        <DeliveryCode {...props} code={data.deliveryCode} />
+      ) : COMING.includes(data.status) || failedHere ? (
         <p class="card note-card" role="note">
           {t.codeHint}
         </p>
@@ -78,6 +86,45 @@ export const TrackingPage: FC<Props> = (props) => {
     </>
   );
 };
+
+/**
+ * Code de livraison : jamais montré (le lien peut circuler), seulement où et quand il est
+ * parti ; « Je n'ai pas reçu le code » en renvoie un nouveau au même numéro.
+ */
+const DeliveryCode: FC<Props & { code: NonNullable<PublicTracking['deliveryCode']> }> = ({
+  t,
+  code,
+  codeHref,
+  codeFlash,
+}) => (
+  <section class="card code-card" id="code" aria-labelledby="code-title">
+    <div class="row">
+      <span class="tile">
+        <Icon name="lock" />
+      </span>
+      <div class="grow">
+        <h2 id="code-title" class="name">
+          {t.codeTitle}
+        </h2>
+        <p class="small">{t.codeSent(code.phone, formatClock(code.sentAt))}</p>
+      </div>
+    </div>
+    <p class="small">{t.codeHint}</p>
+    {codeFlash ? (
+      <p class={`note${codeFlash === 'sent' ? ' ok' : ''}`} role="status">
+        {t.codeFlash[codeFlash]}
+      </p>
+    ) : null}
+    {code.resendsLeft > 0 && codeFlash !== 'limit' ? (
+      <form method="post" action={codeHref}>
+        <button type="submit" class="btn glass block">
+          {t.codeResend}
+        </button>
+        <p class="small center">{t.codeResendsLeft(String(code.resendsLeft))}</p>
+      </form>
+    ) : null}
+  </section>
+);
 
 const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
 

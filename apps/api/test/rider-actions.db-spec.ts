@@ -390,6 +390,51 @@ describe('Actions du livreur (E2 à E9)', () => {
       eta: { minutes: expect.any(Number), distanceMeters: expect.any(Number) },
     });
     expect(coming.body.eta.minutes).toBeGreaterThanOrEqual(1);
+    // Carte : point de livraison et position du livreur ; le code n'est jamais montré.
+    expect(coming.body.map.dropoff).toEqual({
+      latitude: expect.any(Number),
+      longitude: expect.any(Number),
+    });
+    expect(coming.body.map.rider).toEqual({ latitude: HERE.latitude, longitude: HERE.longitude });
+    expect(coming.body.deliveryCode).toMatchObject({
+      phone: expect.stringMatching(/^\+237 6•• •• \d{2} \d{2}$/),
+      resendsLeft: 3,
+    });
+    expect(JSON.stringify(coming.body)).not.toContain(deliveryCodeFor(order));
+    expect(before.body.deliveryCode).toBeNull();
+    expect(before.body.map.rider).toBeNull();
+
+    // « Je n'ai pas reçu le code » : trop tôt, puis un nouveau code qui remplace l'ancien.
+    const first = deliveryCodeFor(order);
+    const early = await request(ctx.http)
+      .post(`/v1/public/tracking/${token}/delivery-code`)
+      .expect(429);
+    expect(early.body.error.code).toBe('DELIVERY_CODE_RESEND_TOO_SOON');
+    await ctx.prisma.order.update({
+      where: { id: order.id },
+      data: { pickedUpAt: new Date(Date.now() - 3 * 60_000) },
+    });
+    await request(ctx.http).post(`/v1/public/tracking/${token}/delivery-code`).expect(204);
+    const resent = await request(ctx.http).get(`/v1/public/tracking/${token}`).expect(200);
+    expect(resent.body.deliveryCode.resendsLeft).toBe(2);
+    const stored = await ctx.prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+    expect(stored.deliveryCodeResends).toBe(1);
+    // Ancien code refusé, le nouveau ira à la livraison.
+    const second = deliveryCodeFor(order);
+    if (second !== first) {
+      const photoKey = await proofPhoto(ctx, rider);
+      const old = await request(ctx.http)
+        .post(`/v1/rider/orders/${order.id}/deliver`)
+        .set(rider.auth)
+        .send({ deliveryCode: first, photoKey, ...HERE });
+      expect(old.status).not.toBe(200);
+    }
+    // Trois renvois au plus.
+    await ctx.prisma.order.update({ where: { id: order.id }, data: { deliveryCodeResends: 3 } });
+    const limit = await request(ctx.http)
+      .post(`/v1/public/tracking/${token}/delivery-code`)
+      .expect(429);
+    expect(limit.body.error.code).toBe('DELIVERY_CODE_RESEND_LIMIT');
     expect(coming.body.eta.progress).toBeGreaterThanOrEqual(0);
     expect(coming.body.eta.progress).toBeLessThanOrEqual(1);
     // Même heure d'arrivée sur l'accueil de l'expéditeur.

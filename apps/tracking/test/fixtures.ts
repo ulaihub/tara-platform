@@ -4,6 +4,7 @@ import type {
   PublicLocationLink,
   PublicReceipt,
   PublicTracking,
+  ResendResult,
   RespondResult,
   SubmitResult,
   TrackingApi,
@@ -67,6 +68,13 @@ export function tracking(status: OrderStatus, patch: Partial<PublicTracking> = {
     mobileMoneyFee: 0,
     paymentPending: null,
     failureDecision: null,
+    deliveryCode: ['PICKED_UP', 'IN_DELIVERY'].includes(status)
+      ? { phone: '+237 6•• •• 22 33', sentAt: at('09:12'), resendsLeft: 3 }
+      : null,
+    map: {
+      dropoff: { latitude: 4.0318, longitude: 9.6905 },
+      rider: status === 'IN_DELIVERY' ? { latitude: 4.0405, longitude: 9.695 } : null,
+    },
     ...patch,
   };
 }
@@ -141,6 +149,15 @@ export class FakeApi implements TrackingApi {
     if (this.down) throw new (await import('../src/api.js')).ApiUnavailableError('panne');
     this.receiptCodes.push(code);
     return this.receiptData;
+  }
+
+  resendResult: ResendResult = 'sent';
+  resends: string[] = [];
+
+  async resendCode(token: string): Promise<ResendResult> {
+    if (this.down) throw new (await import('../src/api.js')).ApiUnavailableError('panne');
+    this.resends.push(token);
+    return this.resendResult;
   }
 
   async submitLocation(token: string, body: LocationSubmit, ip?: string): Promise<SubmitResult> {

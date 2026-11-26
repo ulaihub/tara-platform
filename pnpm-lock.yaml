@@ -209,6 +209,9 @@ importers:
       hono:
         specifier: 4.13.16
         version: 4.13.16
+      maplibre-gl:
+        specifier: 6.15.0
+        version: 6.15.0
     devDependencies:
       '@types/node':
         specifier: ^22.0.0

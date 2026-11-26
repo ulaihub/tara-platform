@@ -104,6 +104,13 @@ avec `PUT /riders/me/vehicle`.
 au destinataire). La photo de remise ou du lieu : `GET /orders/:id/proof-photo`, pour
 l'expéditeur seulement (404 une fois la photo effacée après 90 jours).
 
+**Page de suivi du destinataire** — `PublicTracking.map` : point de livraison, et position du
+livreur seulement quand il roule vers le destinataire (jamais l'adresse d'enlèvement).
+`deliveryCode` : numéro masqué, heure d'envoi, renvois restants ; le code n'est jamais renvoyé
+par l'API. `POST /public/tracking/:token/delivery-code` : nouveau code au numéro du
+destinataire (3 fois au plus, 2 min d'écart ; `DELIVERY_CODE_RESEND_LIMIT`,
+`DELIVERY_CODE_RESEND_TOO_SOON`, `DELIVERY_CODE_NOT_ACTIVE`).
+
 **Chiffres du profil** — `GET /me/stats` : livraisons réussies (`delivered`), taux de
 réussite (`successRate`, livrées sur livrées + retournées, null avant la première course
 terminée) et date d'arrivée (`memberSince`).

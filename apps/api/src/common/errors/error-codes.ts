@@ -345,6 +345,18 @@ export const ERROR_MESSAGES = {
     fr: 'Trop de codes incorrects. Demandez la validation du support.',
     en: 'Too many incorrect codes. Ask support to validate.',
   },
+  DELIVERY_CODE_NOT_ACTIVE: {
+    fr: 'Le code de livraison n’est envoyé qu’une fois le colis récupéré par le livreur.',
+    en: 'The delivery code is only sent once the rider has picked up the parcel.',
+  },
+  DELIVERY_CODE_RESEND_LIMIT: {
+    fr: 'Le code a déjà été renvoyé 3 fois. Appelez le livreur ou le service client.',
+    en: 'The code has already been resent 3 times. Call the rider or customer service.',
+  },
+  DELIVERY_CODE_RESEND_TOO_SOON: {
+    fr: 'Code envoyé il y a moins de 2 minutes : attendez encore un peu.',
+    en: 'Code sent less than 2 minutes ago: please wait a little.',
+  },
   NO_DELIVERY_VALIDATION_REQUEST: {
     fr: 'Aucune demande de validation de livraison en attente pour cette commande.',
     en: 'No pending delivery validation request for this order.',

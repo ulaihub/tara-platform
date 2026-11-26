@@ -12,6 +12,15 @@ payer à la porte et demande Mobile Money en cours, confirmation de disponibilit
   et 800, sous-ensemble latin), 2,5 Ko pour le logo complet (tracés simplifiés depuis
   `docs/design/brand`, version claire ou sombre selon le téléphone). Un test garde le total
   sous 200 Ko.
+- **Vraie carte** (rues de Douala, style des apps) : MapLibre est servi par la page
+  (`/carte/…`, 30 jours en cache, environ 450 Ko compressés la première fois) et chargé après
+  elle ; sans WebGL ou sans réseau, la ville dessinée reste. Suivi : point de livraison et
+  livreur (position relue toutes les 20 s) ; « Mon point » : la carte bouge sous l'épingle,
+  un point placé à la main compte comme la position GPS. Tuiles : `MAP_TILES_URL`,
+  `MAP_GLYPHS_URL` (OpenFreeMap par défaut, comme les apps).
+- **Code de livraison** : jamais affiché (le lien peut circuler) ; la page dit à quel numéro
+  (masqué) et à quelle heure il est parti, et « Je n'ai pas reçu le code » en renvoie un
+  nouveau au même numéro (3 fois au plus, 2 minutes d'écart ; l'ancien ne marche plus).
 - **Thème clair ou sombre** selon le téléphone ; français ou anglais selon le navigateur,
   ou `?lang=fr|en`.
 - **Sécurité** : CSP stricte à nonce, `Referrer-Policy: no-referrer` (le jeton est dans
