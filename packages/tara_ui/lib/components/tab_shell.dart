@@ -208,8 +208,8 @@ class _PillTab extends StatelessWidget {
           child: AnimatedContainer(
             duration: duration,
             curve: Curves.easeOutCubic,
-            constraints: const BoxConstraints(minWidth: 52),
-            padding: EdgeInsets.symmetric(horizontal: selected ? 16 : 14),
+            constraints: const BoxConstraints(minWidth: 44),
+            padding: EdgeInsets.symmetric(horizontal: selected ? 14 : 12),
             decoration: BoxDecoration(
               color: selected ? fill : fill.withValues(alpha: 0),
               borderRadius: BorderRadius.circular(999),
@@ -225,13 +225,20 @@ class _PillTab extends StatelessWidget {
                     TaraIcon(item.icon, size: 20, strokeWidth: selected ? 2 : 1.8, color: ink),
                     if (selected) ...[
                       const SizedBox(width: 8),
+                      // Nom toujours entier : s'il manque de place, il rétrécit un peu au lieu
+                      // d'être coupé ; grand texte du téléphone plafonné pour rester dans la barre.
                       Flexible(
-                        child: Text(
-                          item.label,
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                          style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: ink),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: MediaQuery.withClampedTextScaling(
+                            maxScaleFactor: 1.15,
+                            child: Text(
+                              item.label,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: ink),
+                            ),
+                          ),
                         ),
                       ),
                     ],
