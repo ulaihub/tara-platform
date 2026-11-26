@@ -5,6 +5,7 @@ import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_core/api/api_client.dart';
 import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
+import 'package:tara_map/landmarks.dart';
 import 'package:tara_test/fake_pin.dart';
 
 /// API expéditeur sans réseau : compte, nom et boutique enregistrés.
@@ -466,6 +467,12 @@ class FakeClientApi extends ClientApi {
 
   @override
   Future<TrackedOrder> order(String id) async => tracked[id]!;
+
+  /// Repères de l'équipe (vide par défaut).
+  List<Landmark> landmarkList = const [];
+
+  @override
+  Future<List<Landmark>> landmarks() async => landmarkList;
 
   /// Trajet de la commande : ligne droite (pas de service d'itinéraires en test).
   @override

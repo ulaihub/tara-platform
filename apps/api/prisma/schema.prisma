@@ -1814,3 +1814,20 @@ model OrderMessage {
   @@index([orderId, createdAt])
   @@map("order_messages")
 }
+
+/// Repère de Douala ajouté par l'équipe (carrefour, rond-point, lieu connu de tous) que la
+/// carte OpenStreetMap ne nomme pas : affiché dans les apps et proposé sous l'épingle.
+model Landmark {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  name        String
+  city        String   @default("Douala")
+  latitude    Float
+  longitude   Float
+  active      Boolean  @default(true)
+  createdById String?  @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([city, active])
+  @@map("landmarks")
+}

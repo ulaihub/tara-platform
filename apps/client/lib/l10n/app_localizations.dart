@@ -5414,6 +5414,18 @@ abstract class AppLocalizations {
   /// **'Nouveau message du livreur'**
   String get chatNewMessage;
 
+  /// No description provided for @landmarkNear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Près de {name}'**
+  String landmarkNear(String name);
+
+  /// No description provided for @landmarkUseNear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Près de {name} ?'**
+  String landmarkUseNear(String name);
+
   /// No description provided for @introBack.
   ///
   /// In fr, this message translates to:

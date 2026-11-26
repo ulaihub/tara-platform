@@ -15,6 +15,7 @@ import 'package:tara_core/push/push_service.dart';
 import 'package:tara_core/realtime/realtime_client.dart';
 import 'package:tara_core/security/biometrics.dart';
 import 'package:tara_core/session/session_store.dart';
+import 'package:tara_map/landmarks.dart';
 import 'package:tara_sms/tara_sms.dart';
 import 'package:tara_ui/app_settings.dart';
 import 'package:tara_ui/components/pin_flow.dart';
@@ -105,6 +106,16 @@ final authApiProvider = Provider<AuthApi>(
 final clientApiProvider = Provider<ClientApi>((ref) => ClientApi(ref.watch(apiClientProvider)));
 
 /// Service client : demandes de l'utilisateur et réponses de l'équipe Tara (H6).
+/// Repères de Douala (carrefours, lieux connus) : chargés une fois par ouverture de l'app ;
+/// sans réseau, la carte s'en passe.
+final landmarksProvider = FutureProvider<List<Landmark>>((ref) async {
+  try {
+    return await ref.watch(clientApiProvider).landmarks();
+  } catch (_) {
+    return const [];
+  }
+});
+
 /// Messages avec le livreur d'une commande.
 final orderChatApiProvider = Provider<OrderChatApi>((ref) => OrderChatApi(ref.watch(apiClientProvider)));
 

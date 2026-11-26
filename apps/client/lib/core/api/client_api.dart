@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart' show DioMediaType, FormData, MultipartFile;
 import 'package:tara_core/api/api_client.dart';
+import 'package:tara_map/landmarks.dart';
 
 import 'client_models.dart';
 
@@ -236,6 +237,12 @@ class ClientApi {
       ],
       onRoads: json['source'] == 'osrm',
     );
+  }
+
+  /// Repères de Douala ajoutés par l'équipe (carrefours, lieux connus).
+  Future<List<Landmark>> landmarks() async {
+    final json = await _api.get('/map/landmarks') as Json;
+    return [for (final item in json['items']! as List<Object?>) Landmark.fromJson(item! as Json)];
   }
 
   /// Photo de visage du livreur (validée par Tara), pour le reconnaître.

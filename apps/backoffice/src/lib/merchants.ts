@@ -3,6 +3,8 @@ import type { PricingGrid, RiderBoost, Schemas } from './schemas';
 
 /** Marchands et tarifs (H4) : réservé aux administrateurs, comme l'API des tarifs. */
 export const PRICING_ROLES: readonly StaffRole[] = ['ADMIN'];
+/** Repères de la carte : l'équipe du dispatch les connaît aussi bien que l'administration. */
+export const LANDMARK_ROLES: readonly StaffRole[] = ['ADMIN', 'DISPATCHER'];
 
 /** Pourcentage lisible depuis des points de base : 1000 → « 10 % », 1250 → « 12,5 % ». */
 export function percent(bps: number): string {

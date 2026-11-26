@@ -3169,6 +3169,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatNewMessage => 'New message from the rider';
 
   @override
+  String landmarkNear(String name) {
+    return 'Near $name';
+  }
+
+  @override
+  String landmarkUseNear(String name) {
+    return 'Near $name?';
+  }
+
+  @override
   String get introBack => 'Previous screen';
 
   @override
