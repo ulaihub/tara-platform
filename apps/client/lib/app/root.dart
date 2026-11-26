@@ -9,6 +9,7 @@ import '../features/common/splash_screen.dart';
 import '../features/common/status_screen.dart';
 import '../features/home/home_flow.dart';
 import '../features/legal/terms_screen.dart';
+import '../features/onboarding/intro_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'providers.dart';
@@ -37,7 +38,32 @@ class _AuthFlow extends ConsumerStatefulWidget {
   ConsumerState<_AuthFlow> createState() => _AuthFlowState();
 }
 
+/// Présentation déjà vue sur ce téléphone (clé gardée dans le stockage de l'app).
+const introSeenKey = 'intro_seen_v1';
+
 class _AuthFlowState extends ConsumerState<_AuthFlow> {
+  /// null tant que la mémoire du téléphone n'est pas lue.
+  bool? _introSeen;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(keyValueStoreProvider).read(introSeenKey).then(
+      (value) {
+        if (mounted) setState(() => _introSeen = value != null);
+      },
+      // Mémoire illisible : on ne bloque pas l'accès à la connexion.
+      onError: (Object _) {
+        if (mounted) setState(() => _introSeen = true);
+      },
+    );
+  }
+
+  void _introDone() {
+    setState(() => _introSeen = true);
+    ref.read(keyValueStoreProvider).write(introSeenKey, '1').ignore();
+  }
+
   OtpChallenge? _challenge;
   String? _phone;
   String? _referral;
@@ -47,6 +73,15 @@ class _AuthFlowState extends ConsumerState<_AuthFlow> {
 
   @override
   Widget build(BuildContext context) {
+    // Premier lancement : présentation (maquettes) avant la connexion, une seule fois.
+    switch (_introSeen) {
+      case null:
+        return const SplashScreen();
+      case false:
+        return ClientIntroScreen(key: const ValueKey('intro'), onDone: _introDone);
+      case true:
+        break;
+    }
     final challenge = _challenge;
     final signupCode = _signupCode;
     return AnimatedSwitcher(

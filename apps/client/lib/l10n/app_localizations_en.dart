@@ -2837,4 +2837,114 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatNewMessage => 'New message from the rider';
+
+  @override
+  String get introBack => 'Previous screen';
+
+  @override
+  String get introSkip => 'Skip';
+
+  @override
+  String get introNext => 'Next';
+
+  @override
+  String get introStart => 'Get started';
+
+  @override
+  String get introSendKicker => 'On-demand delivery · Douala';
+
+  @override
+  String get introSendTitle => 'Send a parcel in one minute';
+
+  @override
+  String get introSendBody => 'A rider picks it up at your place and delivers it anywhere in Douala.';
+
+  @override
+  String get introSendChip => '1 minute to order';
+
+  @override
+  String get introSendFrom => 'Boutique Awa';
+
+  @override
+  String get introSendFromAddress => 'Bd de la Liberté, Akwa';
+
+  @override
+  String get introSendTo => 'Marie · Collège des Nations';
+
+  @override
+  String get introSendDelivered => 'delivered in 38 min';
+
+  @override
+  String get introTrackKicker => 'Live tracking';
+
+  @override
+  String get introTrackTitle => 'Follow your parcel to the door';
+
+  @override
+  String get introTrackBody => 'You see the rider move. Your customer gets a link to follow it too.';
+
+  @override
+  String get introTrackRider => 'Jean M. is coming';
+
+  @override
+  String get introTrackPlate => 'Motorbike · LT 482 KA';
+
+  @override
+  String get introTrackEta => '4 min';
+
+  @override
+  String get introCollectKicker => 'Payment on delivery';
+
+  @override
+  String get introCollectTitle => 'The rider collects for you';
+
+  @override
+  String get introCollectBody =>
+      'In cash or by Mobile Money. Your sales add up in your account and are paid out to your Mobile Money.';
+
+  @override
+  String get introCollectDoor => 'At the door · TR-48211';
+
+  @override
+  String get introCollectRecipient => 'Marie Ngo · Collège des Nations';
+
+  @override
+  String get introCollectAmount => '15,000 F';
+
+  @override
+  String get introCollectCash => 'Cash';
+
+  @override
+  String get introCollectMomo => 'Mobile Money';
+
+  @override
+  String get introCollectFooter => '+15,000 F · just now';
+
+  @override
+  String get introSalesLabel => 'Sales to receive';
+
+  @override
+  String get introAccountsKicker => 'Your money';
+
+  @override
+  String get introAccountsTitle => 'Two accounts, at a glance';
+
+  @override
+  String get introAccountsBody =>
+      'Your sales to receive and your Tara balance, which pays for your deliveries. Everything stays hidden until you show it.';
+
+  @override
+  String get introAccountsShopTag => 'Shop';
+
+  @override
+  String get introAccountsSalesFooter => 'Paid out tonight at 6 pm';
+
+  @override
+  String get introAccountsTaraLabel => 'Tara balance';
+
+  @override
+  String get introAccountsTaraFooter => 'Pays your deliveries first';
+
+  @override
+  String get introAccountsSwipe => 'Swipe to switch account';
 }

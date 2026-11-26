@@ -6,6 +6,10 @@ import 'package:path_parsing/path_parsing.dart';
 abstract final class TaraIcons {
   static const navigation = TaraIconData([_P('M3 11l18-8-8 18-2-8z')]);
   static const home = TaraIconData([_P('M4 11l8-7 8 7v9h-5v-6H9v6H4z')]);
+
+  /// Maison des étiquettes de la présentation (« Boutique Awa ») et repère de la carte en relief.
+  static const homeSoft = TaraIconData([_P('M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5H9v5H5.5A1.5 1.5 0 0 1 4 19z')]);
+  static const homeFlat = TaraIconData([_P('M4 10.5 12 4l8 6.5V20H4z')]);
   static const activity = TaraIconData([_P('M4 20V10M10 20V4M16 20v-7M22 20H2')]);
 
   /// Onglet « Course » du livreur : itinéraire entre deux points (maquette).
@@ -219,7 +223,15 @@ class TaraIconData {
 
 /// Icône en trait. `semanticLabel` est obligatoire quand l'icône est seule (bouton).
 class TaraIcon extends StatelessWidget {
-  const TaraIcon(this.icon, {super.key, this.size = 22, this.color, this.strokeWidth = 2, this.semanticLabel});
+  const TaraIcon(
+    this.icon, {
+    super.key,
+    this.size = 22,
+    this.color,
+    this.strokeWidth = 2,
+    this.semanticLabel,
+    this.filled = false,
+  });
 
   final TaraIconData icon;
   final double size;
@@ -227,12 +239,15 @@ class TaraIcon extends StatelessWidget {
   final double strokeWidth;
   final String? semanticLabel;
 
+  /// Forme pleine au lieu du trait (flèche du livreur sur la carte).
+  final bool filled;
+
   @override
   Widget build(BuildContext context) {
     final color = this.color ?? DefaultTextStyle.of(context).style.color ?? const Color(0xFF000000);
     final glyph = SizedBox.square(
       dimension: size,
-      child: CustomPaint(painter: _IconPainter(icon, color, strokeWidth)),
+      child: CustomPaint(painter: _IconPainter(icon, color, strokeWidth, filled: filled)),
     );
     if (semanticLabel == null) return ExcludeSemantics(child: glyph);
     return Semantics(
@@ -243,10 +258,11 @@ class TaraIcon extends StatelessWidget {
 }
 
 class _IconPainter extends CustomPainter {
-  _IconPainter(this.icon, this.color, this.strokeWidth);
+  _IconPainter(this.icon, this.color, this.strokeWidth, {this.filled = false});
   final TaraIconData icon;
   final Color color;
   final double strokeWidth;
+  final bool filled;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -256,7 +272,7 @@ class _IconPainter extends CustomPainter {
       icon.path,
       Paint()
         ..color = color
-        ..style = PaintingStyle.stroke
+        ..style = filled ? PaintingStyle.fill : PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
@@ -264,5 +280,6 @@ class _IconPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_IconPainter old) => old.icon != icon || old.color != color || old.strokeWidth != strokeWidth;
+  bool shouldRepaint(_IconPainter old) =>
+      old.icon != icon || old.color != color || old.strokeWidth != strokeWidth || old.filled != filled;
 }
