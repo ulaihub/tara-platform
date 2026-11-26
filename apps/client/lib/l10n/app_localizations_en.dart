@@ -1370,6 +1370,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payOrange => 'Orange Money';
 
   @override
+  String get mobileMoney => 'Mobile Money';
+
+  @override
   String get payMomoBody => 'You confirm the payment on your phone.';
 
   @override
@@ -1422,6 +1425,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String payingBodyOperator(String amount, String phone, String operator) {
+    return 'A request for $amount is coming to $phone: enter your $operator PIN to approve it. We start looking for a rider right after.';
+  }
+
+  @override
+  String get paymentFailedBody => 'Payment refused, cancelled or expired. Try again, or cancel the delivery.';
+
+  @override
+  String payerPhoneHelp(String operator) {
+    return 'The payment request goes to this $operator number.';
+  }
+
+  @override
+  String get cancelDelivery => 'Cancel the delivery';
+
+  @override
   String get paymentFailed => 'The payment didn’t go through.';
 
   @override
@@ -1441,6 +1460,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickupCodeLabel => 'Pickup code';
+
+  @override
+  String get pickupCodeDictate => 'Read these 4 digits to the rider when they arrive.';
 
   @override
   String get pickupCodeHelp =>
@@ -1587,9 +1609,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String pickupCodeShown(String code) {
     return 'Pickup code: $code';
   }
-
-  @override
-  String get cancelDelivery => 'Cancel the delivery';
 
   @override
   String get cancelConfirm => 'Tap again to confirm the cancellation.';

@@ -2516,6 +2516,12 @@ abstract class AppLocalizations {
   /// **'Orange Money'**
   String get payOrange;
 
+  /// No description provided for @mobileMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money'**
+  String get mobileMoney;
+
   /// No description provided for @payMomoBody.
   ///
   /// In fr, this message translates to:
@@ -2600,6 +2606,30 @@ abstract class AppLocalizations {
   /// **'Une demande de {amount} arrive sur le {phone} : entrez votre code secret Mobile Money pour la valider.'**
   String payingBody(String amount, String phone);
 
+  /// No description provided for @payingBodyOperator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une demande de {amount} arrive sur le {phone} : entrez votre code secret {operator} pour la valider. La recherche d’un livreur démarre juste après.'**
+  String payingBodyOperator(String amount, String phone, String operator);
+
+  /// No description provided for @paymentFailedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement refusé, annulé ou expiré. Réessayez, ou annulez la livraison.'**
+  String get paymentFailedBody;
+
+  /// No description provided for @payerPhoneHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'La demande de paiement part vers ce numéro {operator}.'**
+  String payerPhoneHelp(String operator);
+
+  /// No description provided for @cancelDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la livraison'**
+  String get cancelDelivery;
+
   /// No description provided for @paymentFailed.
   ///
   /// In fr, this message translates to:
@@ -2641,6 +2671,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Code d’enlèvement'**
   String get pickupCodeLabel;
+
+  /// No description provided for @pickupCodeDictate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dictez ces 4 chiffres au livreur à son arrivée.'**
+  String get pickupCodeDictate;
 
   /// No description provided for @pickupCodeHelp.
   ///
@@ -2875,12 +2911,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Code d’enlèvement : {code}'**
   String pickupCodeShown(String code);
-
-  /// No description provided for @cancelDelivery.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler la livraison'**
-  String get cancelDelivery;
 
   /// No description provided for @cancelConfirm.
   ///

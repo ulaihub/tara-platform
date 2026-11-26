@@ -942,6 +942,7 @@ class OrderRider {
     this.vehicleBrand,
     this.vehicleColor,
     this.hasPhoto = false,
+    this.rating,
   });
   factory OrderRider.fromJson(Json json) => OrderRider(
     name: _field(json, 'name'),
@@ -952,8 +953,21 @@ class OrderRider {
     vehicleBrand: json['vehicleBrand'] as String?,
     vehicleColor: json['vehicleColor'] as String?,
     hasPhoto: json['hasPhoto'] as bool? ?? false,
+    rating: (json['rating'] as num?)?.toDouble(),
   );
-  static const fields = ['name', 'phone', 'vehicleType', 'plateNumber', 'vehicleBrand', 'vehicleColor', 'hasPhoto'];
+  static const fields = [
+    'name',
+    'phone',
+    'vehicleType',
+    'plateNumber',
+    'vehicleBrand',
+    'vehicleColor',
+    'hasPhoto',
+    'rating',
+  ];
+
+  /// Note moyenne sur 5, dès 3 notes reçues.
+  final double? rating;
 
   /// Marque et couleur (codes du serveur : NANFANG, RED…), pour reconnaître le livreur.
   final String? vehicleBrand;

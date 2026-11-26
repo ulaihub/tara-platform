@@ -311,6 +311,9 @@ class _BulkSendScreenState extends ConsumerState<BulkSendScreen> {
                   error: _payError,
                   onRetry: () => unawaited(_requestPayment()),
                   onCancel: () => unawaited(_cancelUnpaid()),
+                  reference: placed.orders.firstOrNull?.reference,
+                  method: _draft.paymentMethod,
+                  onBack: () => Navigator.of(context).pop(true),
                 )
               : BulkSent(
                   placement: placed,

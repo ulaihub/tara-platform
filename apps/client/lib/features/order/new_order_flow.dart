@@ -20,6 +20,7 @@ import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
+import '../../core/orders/pickup_codes.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../common/scoped_page.dart';
@@ -238,6 +239,13 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
       ref
         ..invalidate(activeOrdersProvider)
         ..invalidate(walletProvider);
+      // Code d'enlèvement retenu pour le suivi de chaque colis.
+      if (placement.pickupCode case final code?) {
+        final codes = PickupCodes(ref.read(keyValueStoreProvider));
+        for (final order in placement.orders) {
+          unawaited(codes.remember(order.id, code));
+        }
+      }
       if (!mounted) return;
       setState(() => _placed = placement);
       if (draft.momo) {
@@ -406,6 +414,9 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
         error: _payError,
         onRetry: () => unawaited(_requestPayment()),
         onCancel: () => unawaited(_cancelUnpaid()),
+        reference: placed.orders.firstOrNull?.reference,
+        method: _draft.paymentMethod,
+        onBack: _finish,
       );
     }
     final now = (widget.now ?? DateTime.now)();
