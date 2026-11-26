@@ -512,6 +512,228 @@ abstract class AppLocalizations {
   /// **'Bonjour,'**
   String get goodMorning;
 
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsUnread.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications, {count, plural, =1{1 nouvelle} other{{count} nouvelles}}'**
+  String notificationsUnread(int count);
+
+  /// No description provided for @unreadCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 non lue} other{{count} non lues}}'**
+  String unreadCount(int count);
+
+  /// No description provided for @unreadLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non lue'**
+  String get unreadLabel;
+
+  /// No description provided for @allRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout est lu'**
+  String get allRead;
+
+  /// No description provided for @readAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout lire'**
+  String get readAll;
+
+  /// No description provided for @noNotifications.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien de nouveau. Vos livraisons, paiements et adresses reçues s’afficheront ici.'**
+  String get noNotifications;
+
+  /// No description provided for @notificationsError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les notifications.'**
+  String get notificationsError;
+
+  /// No description provided for @justNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'à l’instant'**
+  String get justNow;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'il y a {minutes} min'**
+  String minutesAgo(int minutes);
+
+  /// No description provided for @yesterdayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'hier {time}'**
+  String yesterdayAt(String time);
+
+  /// No description provided for @quickActivity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activité'**
+  String get quickActivity;
+
+  /// No description provided for @activityTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon activité'**
+  String get activityTitle;
+
+  /// No description provided for @activityToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui'**
+  String get activityToday;
+
+  /// No description provided for @activityThisWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'cette semaine'**
+  String get activityThisWeek;
+
+  /// No description provided for @activityThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'ce mois-ci'**
+  String get activityThisMonth;
+
+  /// No description provided for @activityPeriod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période'**
+  String get activityPeriod;
+
+  /// No description provided for @periodDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour'**
+  String get periodDay;
+
+  /// No description provided for @periodWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine'**
+  String get periodWeek;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois'**
+  String get periodMonth;
+
+  /// No description provided for @activityError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger votre activité.'**
+  String get activityError;
+
+  /// No description provided for @kpiDeliveries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraisons'**
+  String get kpiDeliveries;
+
+  /// No description provided for @kpiCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé'**
+  String get kpiCollected;
+
+  /// No description provided for @kpiSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réussite'**
+  String get kpiSuccess;
+
+  /// No description provided for @pointsShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 pt} other{{count} pts}}'**
+  String pointsShort(int count);
+
+  /// No description provided for @topZones.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quartiers les plus livrés'**
+  String get topZones;
+
+  /// No description provided for @averageDelay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai moyen {delay}'**
+  String averageDelay(String delay);
+
+  /// No description provided for @noZonesYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de livraison sur cette période.'**
+  String get noZonesYet;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min'**
+  String minutesShort(int minutes);
+
+  /// No description provided for @hoursMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String hoursMinutes(int hours, String minutes);
+
+  /// No description provided for @chartSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes encaissées'**
+  String get chartSales;
+
+  /// No description provided for @legendSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes'**
+  String get legendSales;
+
+  /// No description provided for @legendDeliveries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraisons'**
+  String get legendDeliveries;
+
+  /// No description provided for @hourShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hour}h'**
+  String hourShort(int hour);
+
+  /// No description provided for @hourLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hour} h'**
+  String hourLong(int hour);
+
+  /// No description provided for @weekShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sem. {number}'**
+  String weekShort(int number);
+
+  /// No description provided for @daysRange.
+  ///
+  /// In fr, this message translates to:
+  /// **'{from} au {to} {month}'**
+  String daysRange(int from, int to, String month);
+
   /// No description provided for @goodEvening.
   ///
   /// In fr, this message translates to:

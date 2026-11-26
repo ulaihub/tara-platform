@@ -27,6 +27,7 @@ function openCase(orderId: Prisma.Sql): Prisma.Sql {
 
 export interface RetentionReport {
   orderMessagesDeleted: number;
+  inboxItemsDeleted: number;
   ordersMasked: number;
   notificationsMasked: number;
   notificationSecretsPurged: number;
@@ -46,6 +47,7 @@ export interface RetentionReport {
  * - codes SMS et sessions expirées depuis plus de 30 jours : supprimés ;
  * - photos de preuve et du colis de plus de 90 jours : effacées, sauf litige ou incident
  *   ouvert sur la commande ;
+ * - notifications de la cloche de plus de 90 jours : supprimées ;
  * - demandes au support closes depuis plus de 90 jours : supprimées avec leurs messages ;
  * - pièces d'identité d'un livreur refusé depuis plus de 90 jours : effacées.
  * Les données financières et le journal d'audit sont conservés (obligations légales).
@@ -94,8 +96,12 @@ export class RetentionService {
     // Messages entre l'expéditeur et le livreur : utiles pour un litige, pas au-delà.
     const orderMessagesDeleted = await this.prisma.$executeRaw`
       DELETE FROM order_messages WHERE created_at < ${longCutoff}`;
+    // Cloche de l'app : 90 jours d'historique suffisent.
+    const inboxItemsDeleted = await this.prisma.$executeRaw`
+      DELETE FROM inbox_items WHERE created_at < ${longCutoff}`;
     return {
       orderMessagesDeleted,
+      inboxItemsDeleted,
       ordersMasked,
       notificationsMasked,
       notificationSecretsPurged,

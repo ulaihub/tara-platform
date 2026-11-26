@@ -23,6 +23,7 @@ import '../../l10n/app_localizations.dart';
 import '../bulk/bulk_screen.dart';
 import '../common/card_decor.dart';
 import '../orders/order_row.dart';
+import 'notifications_screen.dart';
 
 /// Commandes en cours de l'expéditeur (accueil), relues à chaque retour sur l'accueil.
 final activeOrdersProvider = FutureProvider<List<OrderSummary>>(
@@ -46,6 +47,8 @@ class HomeScreen extends ConsumerWidget {
     required this.onWallet,
     this.onReceipts,
     this.onSeeAll,
+    this.onNotifications,
+    this.onActivity,
     this.now,
   });
 
@@ -63,6 +66,12 @@ class HomeScreen extends ConsumerWidget {
 
   /// Toutes les livraisons en cours (onglet Commandes).
   final VoidCallback? onSeeAll;
+
+  /// Cloche des notifications ; absente, pas de cloche.
+  final VoidCallback? onNotifications;
+
+  /// « Mon activité » (boutique) ; absent, le raccourci n'est pas proposé.
+  final VoidCallback? onActivity;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -84,7 +93,8 @@ class HomeScreen extends ConsumerWidget {
     Future<void> refresh() async {
       ref
         ..invalidate(activeOrdersProvider)
-        ..invalidate(walletProvider);
+        ..invalidate(walletProvider)
+        ..invalidate(inboxProvider);
       await ref.read(activeOrdersProvider.future).catchError((_) => <OrderSummary>[]);
     }
 
@@ -125,6 +135,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                if (onNotifications != null) NotificationBell(onTap: onNotifications!),
               ],
             ),
             const SizedBox(height: 14),
@@ -136,6 +147,7 @@ class HomeScreen extends ConsumerWidget {
                 if (onBulk != null) (TaraIcons.parcelsFast, l.quickBulk, onBulk!, bulkCount),
                 (TaraIcons.askBubble, l.quickAskAddress, onLocationLink, 0),
                 if (onReceipts != null) (TaraIcons.receipt, l.quickReceipts, onReceipts!, 0),
+                if (onActivity != null) (TaraIcons.trend, l.quickActivity, onActivity!, 0),
               ],
             ),
             const SizedBox(height: 22),

@@ -3,6 +3,7 @@ import { LegalModule } from '../legal/legal.module.js';
 import { GeoModule } from '../geo/geo.module.js';
 import { PresenceService } from '../dispatch/presence.service.js';
 import { PricingModule } from '../pricing/pricing.module.js';
+import { MerchantActivityController, MerchantActivityService } from './merchant-activity.js';
 import { OrderTransitionsService } from './order-transitions.service.js';
 import {
   AdminOrdersController,
@@ -15,13 +16,19 @@ import { RatingsService } from './ratings.service.js';
 
 @Module({
   imports: [GeoModule, PricingModule, LegalModule],
-  controllers: [OrdersController, RecipientsController, AdminOrdersController],
+  controllers: [
+    OrdersController,
+    RecipientsController,
+    AdminOrdersController,
+    MerchantActivityController,
+  ],
   providers: [
     OrdersService,
     OrderTransitionsService,
     RatingsService,
     PendingDeliveriesService,
     PresenceService,
+    MerchantActivityService,
   ],
   exports: [OrdersService, OrderTransitionsService, RatingsService],
 })

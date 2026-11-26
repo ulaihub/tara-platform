@@ -185,8 +185,22 @@ export class NotificationService implements OnModuleInit {
     }
   }
 
-  /** Push sur tous les appareils de l'utilisateur. Renvoie false s'il n'en a aucun. */
+  /**
+   * Push sur tous les appareils de l'utilisateur. Renvoie false s'il n'en a aucun. La
+   * notification entre aussi dans sa boîte de réception (cloche de l'app), même sans
+   * téléphone joignable ; pas les propositions de course, qui ne valent que 30 s.
+   */
   async toUser(userId: string, message: PushNotification): Promise<boolean> {
+    if (!message.urgent && message.template !== 'OFFER_NEW') {
+      await this.prisma.inboxItem.create({
+        data: {
+          userId,
+          template: message.template,
+          params: message.params as Prisma.InputJsonObject,
+          orderId: message.orderId ?? null,
+        },
+      });
+    }
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
