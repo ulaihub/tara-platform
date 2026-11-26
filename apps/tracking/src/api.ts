@@ -23,6 +23,13 @@ export interface PublicTracking {
   mobileMoneyFee: number;
   paymentPending: { amount: number } | null;
   failureDecision: 'RETRY' | 'RETURN' | null;
+  /** Code de livraison (jamais montré) : numéro masqué, dernier envoi, renvois possibles. */
+  deliveryCode: { phone: string; sentAt: string; resendsLeft: number } | null;
+  /** Carte : point de livraison, livreur seulement quand il vient (position récente). */
+  map: {
+    dropoff: { latitude: number; longitude: number };
+    rider: { latitude: number; longitude: number } | null;
+  };
 }
 
 export type OrderStatus =
@@ -55,6 +62,8 @@ export const PUBLIC_TRACKING_FIELDS: (keyof PublicTracking)[] = [
   'mobileMoneyFee',
   'paymentPending',
   'failureDecision',
+  'deliveryCode',
+  'map',
 ];
 
 export type RespondResult = 'ok' | 'already' | 'not-found';
@@ -113,6 +122,9 @@ export interface LocationSubmit {
   contactPhone?: string;
 }
 
+/** « Je n'ai pas reçu le code » : envoyé, trop tôt, plus de renvoi, ou plus possible. */
+export type ResendResult = 'sent' | 'soon' | 'limit' | 'closed' | 'not-found';
+
 export type SubmitResult = 'ok' | 'already' | 'expired' | 'not-found' | 'out-of-area' | 'invalid';
 
 /** Accès à l'API ; `clientIp` est transmis pour que la limite de débit vise le visiteur. */
@@ -127,6 +139,7 @@ export interface TrackingApi {
   /** null : lien de localisation inconnu. */
   locationLink(token: string, clientIp?: string): Promise<PublicLocationLink | null>;
   submitLocation(token: string, body: LocationSubmit, clientIp?: string): Promise<SubmitResult>;
+  resendCode(token: string, clientIp?: string): Promise<ResendResult>;
   /** null : code faux ou reçu inconnu (l'API ne distingue pas les deux). */
   receipt(code: string, clientIp?: string): Promise<PublicReceipt | null>;
 }
@@ -173,6 +186,22 @@ export function httpApi(baseUrl: string, fetcher: typeof fetch = fetch): Trackin
       if (response.status === 409) return 'already';
       if (!response.ok) throw new ApiUnavailableError(`API : ${response.status}`);
       return 'ok';
+    },
+    async resendCode(token, clientIp) {
+      const response = await call(`${root}/${encodeURIComponent(token)}/delivery-code`, {
+        method: 'POST',
+        headers: headers(clientIp),
+      });
+      if (response.ok) return 'sent';
+      if (response.status === 404) return 'not-found';
+      if (response.status === 409) return 'closed';
+      if (response.status === 429) {
+        const error = (await response.json().catch(() => null)) as {
+          error?: { code?: string };
+        } | null;
+        return error?.error?.code === 'DELIVERY_CODE_RESEND_LIMIT' ? 'limit' : 'soon';
+      }
+      throw new ApiUnavailableError(`API : ${response.status}`);
     },
     async locationLink(token, clientIp) {
       const response = await call(`${links}/${encodeURIComponent(token)}`, {

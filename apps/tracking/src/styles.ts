@@ -1,4 +1,5 @@
 import { CITY_CSS } from './views/city.js';
+import { REALMAP_CSS } from './views/realmap.js';
 
 /**
  * Feuille de style de la page (inline : une seule requête). Couleurs et rayons des apps
@@ -164,4 +165,6 @@ header.over{position:absolute;left:0;right:0;top:0;padding:16px 20px 0;display:f
 .facts dt{color:var(--soft)}.facts dd{margin:0;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
 .hint{margin:0;padding:12px 14px;border-radius:16px;background:rgba(255,177,92,.1);font-size:12px;line-height:1.5}
 @media (prefers-reduced-motion:reduce){.blobs i,.halo{animation:none}}
-` + CITY_CSS;
+` +
+  CITY_CSS +
+  REALMAP_CSS;

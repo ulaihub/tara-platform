@@ -61,6 +61,19 @@ const fr: Strings = {
   paymentPending: (amount: string) =>
     `Une demande de ${amount} est arrivée sur votre téléphone : validez-la avec votre code secret Mobile Money.`,
   nothingToPay: 'Rien à payer : la livraison est réglée.',
+  codeTitle: 'Votre code de livraison',
+  codeSent: (phone: string, time: string) =>
+    `Envoyé par SMS au ${phone} à ${time}. Donnez-le au livreur seulement à la remise, jamais au téléphone.`,
+  codeResend: 'Je n’ai pas reçu le code',
+  codeResendsLeft: (n: string) =>
+    n === '1' ? 'Encore 1 renvoi possible.' : `Encore ${n} renvois possibles.`,
+  codeFlash: {
+    sent: 'Nouveau code envoyé par SMS. L’ancien ne marche plus.',
+    soon: 'Code envoyé il y a moins de 2 minutes : attendez un peu, puis réessayez.',
+    limit: 'Le code a déjà été renvoyé 3 fois. Appelez le livreur ou le service client.',
+    closed: 'Le code ne peut plus être renvoyé pour ce colis.',
+  },
+  mapLabel: 'Carte : votre point de livraison et le livreur',
   codeHint:
     'À la remise, vérifiez d’abord l’état du colis, puis donnez au livreur le code à 4 chiffres reçu par SMS. Colis abîmé ? Refusez-le : le livreur le photographie et Tara s’en occupe.',
   address: 'Adresse de livraison',
@@ -109,6 +122,8 @@ const fr: Strings = {
     bubble: 'Placez votre point pour que le livreur vous trouve.',
     pointTitle: 'Placez votre point',
     pointPlaced: 'Point placé',
+    manual: 'Point placé à la main : vérifiez que l’épingle est bien sur votre porte.',
+    dragHint: 'Déplacez la carte pour mettre l’épingle sur votre porte.',
     step1Body:
       'Placez-vous à l’endroit où vous voulez recevoir le colis (maison, boutique, bureau), puis touchez le bouton.',
     locate: 'Ma position',
@@ -200,6 +215,19 @@ const en: Strings = {
   paymentPending: (amount: string) =>
     `A payment request of ${amount} reached your phone: approve it with your Mobile Money PIN.`,
   nothingToPay: 'Nothing to pay: the delivery is settled.',
+  codeTitle: 'Your delivery code',
+  codeSent: (phone: string, time: string) =>
+    `Sent by SMS to ${phone} at ${time}. Give it to the rider only at handover, never over the phone.`,
+  codeResend: 'I didn’t get the code',
+  codeResendsLeft: (n: string) =>
+    n === '1' ? '1 more resend possible.' : `${n} more resends possible.`,
+  codeFlash: {
+    sent: 'New code sent by SMS. The old one no longer works.',
+    soon: 'Code sent less than 2 minutes ago: wait a little, then try again.',
+    limit: 'The code has already been resent 3 times. Call the rider or customer service.',
+    closed: 'The code can no longer be resent for this parcel.',
+  },
+  mapLabel: 'Map: your delivery point and the rider',
   codeHint:
     'At handover, first check the parcel, then give the rider the 4-digit code you got by SMS. Damaged parcel? Refuse it: the rider photographs it and Tara handles it.',
   address: 'Delivery address',
@@ -247,6 +275,8 @@ const en: Strings = {
     bubble: 'Place your spot so the rider finds you.',
     pointTitle: 'Place your spot',
     pointPlaced: 'Spot placed',
+    manual: 'Spot placed by hand: check that the pin is right on your door.',
+    dragHint: 'Move the map to put the pin on your door.',
     step1Body:
       'Stand where you want to receive the parcel (home, shop, office), then tap the button.',
     locate: 'My location',
@@ -333,6 +363,12 @@ export interface Strings {
   paymentPending: Template;
   nothingToPay: Text;
   codeHint: Text;
+  codeTitle: Text;
+  codeSent: Template;
+  codeResend: Text;
+  codeResendsLeft: Template;
+  codeFlash: Record<'sent' | 'soon' | 'limit' | 'closed', Text>;
+  mapLabel: Text;
   address: Text;
   available: Text;
   notePlaceholder: Text;
@@ -386,6 +422,8 @@ export interface PlaceStrings {
   bubble: Text;
   pointTitle: Text;
   pointPlaced: Text;
+  manual: Text;
+  dragHint: Text;
   step1Body: Text;
   locate: Text;
   again: Text;

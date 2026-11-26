@@ -3,12 +3,13 @@ import type { PublicLocationLink, PublicReceipt, PublicTracking } from './api.js
 import { formatDayTime, formatShortDay } from './format.js';
 import type { Locale, Strings } from './i18n.js';
 import { City } from './views/city.js';
+import { RealMap } from './views/realmap.js';
 import { Layout } from './views/layout.js';
 import { Message } from './views/message.js';
 import { ReceiptPage } from './views/receipt.js';
 import { PLACE_SCRIPT, PlaceMap, PlacePage, type PlaceValues } from './views/place.js';
 import type { IconName } from './views/icons.js';
-import { type Flash, riderStep, TrackingPage } from './views/tracking.js';
+import { type CodeFlash, type Flash, riderStep, TrackingPage } from './views/tracking.js';
 
 /** Lien vers l'autre langue, sur la même page. */
 function langHref(c: Context, t: Strings): string {
@@ -28,9 +29,12 @@ export const renderPage = {
       langQuery: string;
       fingerprint: string | undefined;
       flash: Flash;
+      codeFlash: CodeFlash;
     },
   ) {
     const page = `/t/${p.token}`;
+    // Course finie : pas de carte à charger (ni de script), la ville dessinée suffit.
+    const live = Boolean(p.fingerprint);
     return (
       <Layout
         t={p.t}
@@ -39,7 +43,21 @@ export const renderPage = {
         fingerprint={p.fingerprint}
         langHref={langHref(c, p.t)}
         refreshHref={p.fingerprint ? `${page}${p.langQuery}` : undefined}
-        map={<City rider={riderStep(p.data)} youLabel={p.t.trackTo} />}
+        realMap={live}
+        map={
+          <>
+            <City rider={riderStep(p.data)} youLabel={p.t.trackTo} />
+            {live ? (
+              <RealMap
+                kind="track"
+                label={p.t.mapLabel}
+                dropoff={p.data.map.dropoff}
+                rider={p.data.map.rider}
+                youLabel={p.t.trackTo}
+              />
+            ) : null}
+          </>
+        }
       >
         <TrackingPage
           data={p.data}
@@ -48,6 +66,8 @@ export const renderPage = {
           now={p.now}
           actionHref={`${page}/reponse${p.langQuery}`}
           flash={p.flash}
+          codeHref={`${page}/code${p.langQuery}`}
+          codeFlash={p.codeFlash}
         />
       </Layout>
     );
@@ -103,12 +123,18 @@ export const renderPage = {
         langHref={langHref(c, p.t)}
         title={p.t.place.title}
         script={PLACE_SCRIPT}
+        realMap
         brandSub={p.t.place.validUntil(formatShortDay(p.link.expiresAt))}
         map={
           <PlaceMap
             link={p.link}
             t={p.t.place}
             located={p.values.latitude !== '' && p.values.longitude !== ''}
+            at={
+              p.values.latitude !== '' && p.values.longitude !== ''
+                ? { latitude: Number(p.values.latitude), longitude: Number(p.values.longitude) }
+                : null
+            }
           />
         }
       >

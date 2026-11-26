@@ -11,8 +11,10 @@ import {
   type TrackingApi,
 } from './api.js';
 import { type Locale, pickLocale, strings } from './i18n.js';
+import { loadMapAssets, TILES_ORIGIN } from './map-assets.js';
 import { renderPage } from './render.js';
 import { EMPTY_PLACE, type PlaceValues } from './views/place.js';
+import type { CodeFlash } from './views/tracking.js';
 
 export interface AppOptions {
   api: TrackingApi;
@@ -54,6 +56,13 @@ export function cameroonMobile(input: string): string | null {
   return /^6\d{8}$/.test(digits) ? `+237${digits}` : null;
 }
 
+/** Issue d'un renvoi de code lue dans l'adresse (rien d'autre n'est accepté). */
+function codeFlashOf(value: string | undefined): CodeFlash {
+  return value === 'sent' || value === 'soon' || value === 'limit' || value === 'closed'
+    ? value
+    : null;
+}
+
 /** Empreinte de ce qui change à l'écran : la page se recharge quand elle bouge. */
 export function fingerprint(data: PublicTracking): string {
   return [
@@ -64,6 +73,7 @@ export function fingerprint(data: PublicTracking): string {
     data.eta?.minutes ?? '',
     data.rider?.phone ? 1 : 0,
     data.recipientConfirmedAt ?? '',
+    data.deliveryCode?.resendsLeft ?? '',
   ].join('|');
 }
 
@@ -83,6 +93,8 @@ export function createApp(options: AppOptions): Hono {
     ]),
   );
 
+  const mapAssets = loadMapAssets();
+
   const app = new Hono();
   /**
    * Lien de localisation (B3) : seule page qui lit la position du téléphone. Posé avant les
@@ -97,11 +109,14 @@ export function createApp(options: AppOptions): Hono {
     secureHeaders({
       contentSecurityPolicy: {
         defaultSrc: ["'none'"],
-        scriptSrc: [NONCE],
+        // 'self' : MapLibre, servi ici, est chargé par un module (import) depuis le script à nonce.
+        scriptSrc: [NONCE, "'self'"],
         styleSrc: [NONCE],
-        imgSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
         fontSrc: ["'self'"],
-        connectSrc: ["'self'"],
+        // Tuiles et polices de la carte : seulement chez le fournisseur de tuiles.
+        connectSrc: ["'self'", TILES_ORIGIN],
+        workerSrc: ["'self'", 'blob:'],
         formAction: ["'self'"],
         frameAncestors: ["'none'"],
         baseUri: ["'none'"],
@@ -134,6 +149,16 @@ export function createApp(options: AppOptions): Hono {
     return c.body(new Uint8Array(asset.body), 200, {
       'Content-Type': asset.type,
       'Cache-Control': 'public, max-age=604800',
+    });
+  });
+
+  /** Carte : moteur MapLibre (version dans l'adresse, 30 jours en cache) et style Tara. */
+  app.get('/carte/:name', (c) => {
+    const asset = mapAssets.get(c.req.param('name'));
+    if (!asset) return c.notFound();
+    return c.body(new Uint8Array(asset.body), 200, {
+      'Content-Type': asset.type,
+      'Cache-Control': 'public, max-age=2592000',
     });
   });
 
@@ -172,6 +197,7 @@ export function createApp(options: AppOptions): Hono {
         langQuery: langQuery(c),
         fingerprint: FINAL.has(data.status) ? undefined : fingerprint(data),
         flash: flash === 'yes' || flash === 'no' || flash === 'already' ? flash : null,
+        codeFlash: codeFlashOf(c.req.query('c')),
       }),
     );
   });
@@ -183,9 +209,26 @@ export function createApp(options: AppOptions): Hono {
     try {
       const data = await api.view(token, clientIp(c));
       if (!data) return c.json({ error: 'not-found' }, 404);
-      return c.json({ v: fingerprint(data) });
+      // Position du livreur pour la carte (seulement quand il vient vers le destinataire).
+      const rider = data.map?.rider;
+      return c.json({ v: fingerprint(data), p: rider ? [rider.latitude, rider.longitude] : null });
     } catch (error) {
       if (error instanceof ApiUnavailableError) return c.json({ error: 'unavailable' }, 503);
+      throw error;
+    }
+  });
+
+  /** « Je n'ai pas reçu le code » : nouveau code par SMS, puis retour à la carte du code. */
+  app.post('/t/:token/code', async (c) => {
+    const token = c.req.param('token');
+    if (!TOKEN_PATTERN.test(token)) return notFound(c);
+    const back = `/t/${token}${langQuery(c)}`;
+    try {
+      const result = await api.resendCode(token, clientIp(c));
+      if (result === 'not-found') return notFound(c);
+      return c.redirect(`${back}${back.includes('?') ? '&' : '?'}c=${result}#code`, 303);
+    } catch (error) {
+      if (error instanceof ApiUnavailableError) return unavailable(c);
       throw error;
     }
   });

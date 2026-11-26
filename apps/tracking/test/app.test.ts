@@ -278,3 +278,64 @@ describe('client de l’API', () => {
     expect(properties).toEqual(expect.arrayContaining(PUBLIC_TRACKING_FIELDS));
   });
 });
+
+describe('vraie carte et code de livraison', () => {
+  it('carte : point de livraison et livreur, MapLibre servi ici, tuiles autorisées', async () => {
+    const { app } = setup();
+    const { res, html } = await page(app);
+    expect(html).toContain('id="carte"');
+    expect(html).toContain('data-dropoff="4.0318,9.6905"');
+    expect(html).toContain('data-rider="4.0405,9.695"');
+    expect(html).toContain('/carte/maplibre-gl.css?v=');
+    const csp = res.headers.get('content-security-policy') ?? '';
+    expect(csp).toContain('https://tiles.openfreemap.org');
+    expect(csp).toMatch(/worker-src 'self'/);
+    // Fichiers de la carte : moteur, worker, style avec l'adresse des tuiles.
+    for (const name of ['maplibre-gl.mjs', 'maplibre-gl-worker.mjs', 'maplibre-gl.css']) {
+      const asset = await app.request(`/carte/${name}`);
+      expect(asset.status, name).toBe(200);
+      expect(asset.headers.get('cache-control')).toContain('max-age=2592000');
+    }
+    const style = (await (await app.request('/carte/style-clair.json')).json()) as {
+      sources: { openmaptiles: { url: string } };
+    };
+    expect(style.sources.openmaptiles.url).toBe('https://tiles.openfreemap.org/planet');
+    expect((await app.request('/carte/inconnu.js')).status).toBe(404);
+    // La page relit l'état : la carte y prend la position du livreur.
+    const etat = (await (await app.request(`/t/${TOKEN}/etat`)).json()) as { p: number[] };
+    expect(etat.p).toEqual([4.0405, 9.695]);
+  });
+
+  it('code de livraison : où et quand il est parti, jamais le code ; renvoi en un geste', async () => {
+    const { app, api } = setup();
+    const { html } = await page(app);
+    const visible = text(html);
+    expect(visible).toContain('Votre code de livraison');
+    expect(visible).toContain('Envoyé par SMS au +237 6•• •• 22 33 à 10:12');
+    expect(visible).toContain('Je n’ai pas reçu le code');
+    expect(visible).toContain('Encore 3 renvois possibles.');
+    expect(html).toContain(`action="/t/${TOKEN}/code"`);
+
+    const sent = await app.request(`/t/${TOKEN}/code`, { method: 'POST' });
+    expect(sent.status).toBe(303);
+    expect(sent.headers.get('location')).toBe(`/t/${TOKEN}?c=sent#code`);
+    expect(api.resends).toEqual([TOKEN]);
+    expect(text((await page(app, `/t/${TOKEN}?c=sent`)).html)).toContain('Nouveau code envoyé');
+
+    api.resendResult = 'limit';
+    const limit = await app.request(`/t/${TOKEN}/code`, { method: 'POST' });
+    expect(limit.headers.get('location')).toBe(`/t/${TOKEN}?c=limit#code`);
+    const after = text((await page(app, `/t/${TOKEN}?c=limit`)).html);
+    expect(after).toContain('déjà été renvoyé 3 fois');
+    expect(after).not.toContain('Je n’ai pas reçu le code');
+    // Valeur inconnue dans l'adresse : ignorée.
+    expect(text((await page(app, `/t/${TOKEN}?c=<b>`)).html)).not.toContain('<b>');
+  });
+
+  it('avant l’enlèvement : pas de code, pas de livreur sur la carte', async () => {
+    const { app } = setup(new FakeApi(tracking('ASSIGNED')));
+    const { html } = await page(app);
+    expect(text(html)).not.toContain('Votre code de livraison');
+    expect(html).not.toContain('data-rider=');
+  });
+});
