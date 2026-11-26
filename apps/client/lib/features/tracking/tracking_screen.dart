@@ -37,6 +37,7 @@ import '../../core/api/client_models.dart';
 import '../../core/orders/pickup_codes.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pickup_qr.dart';
 import '../home/home_screen.dart';
 import '../order/address_editor.dart' show SheetPanel;
 import '../order/pickup_step.dart' show AddressChoice;
@@ -1027,7 +1028,7 @@ class _Panel extends StatelessWidget {
         ],
         // Code d'enlèvement à donner au livreur (maquette).
         if (pickupCode != null && const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'].contains(o.status)) ...[
-          _PickupCodeCard(code: pickupCode!),
+          _PickupCodeCard(code: pickupCode!, reference: o.reference),
           const SizedBox(height: 12),
         ],
         _recipientRow(l, o, recipientFirst),
@@ -1434,8 +1435,48 @@ class _RiderCard extends StatelessWidget {
 
 /// « CODE D'ENLÈVEMENT » : les 4 chiffres à dicter au livreur, sur une carte (maquette).
 class _PickupCodeCard extends StatelessWidget {
-  const _PickupCodeCard({required this.code});
+  const _PickupCodeCard({required this.code, required this.reference});
   final String code;
+  final String reference;
+
+  /// Le QR en grand, pour que le livreur le scanne de près.
+  void _enlarge(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) => SheetPanel(
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l.pickupCodeLabel,
+                    style: TaraText.cardTitle.copyWith(color: TaraColors.of(context).textPrimary),
+                  ),
+                  const SizedBox(height: 14),
+                  PickupQr(reference: reference, code: code, size: 240),
+                  const SizedBox(height: 12),
+                  Text(
+                    code.split('').join(' '),
+                    style: TaraText.titlePanel.copyWith(
+                      color: TaraColors.of(context).textPrimary,
+                      fontSize: 28,
+                      letterSpacing: 6,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1465,69 +1506,75 @@ class _PickupCodeCard extends StatelessWidget {
     );
     return Semantics(
       label: '${l.pickupCodeLabel} : $spaced',
+      button: true,
       excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-        decoration: BoxDecoration(
-          color: boxedFieldFill(c),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: boxedFieldBorder(c)),
-          boxShadow: const [BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 28, offset: Offset(0, 12))],
-        ),
-        child: Row(
-          children: [
-            // Clé dans un cadre de visée orange.
-            SizedBox.square(
-              dimension: 64,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Container(
-                      margin: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                      alignment: Alignment.center,
-                      child: const TaraIcon(TaraIcons.lock, size: 26, color: Color(0xFF16120E)),
+      onTap: () => _enlarge(context),
+      child: GestureDetector(
+        onTap: () => _enlarge(context),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: boxedFieldFill(c),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: boxedFieldBorder(c)),
+            boxShadow: const [
+              BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 28, offset: Offset(0, 12)),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Clé dans un cadre de visée orange.
+              SizedBox.square(
+                dimension: 64,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      // QR du code dans le cadre de visée (touché : en grand pour le livreur).
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: PickupQr(reference: reference, code: code, size: 56),
+                      ),
                     ),
-                  ),
-                  corner(Alignment.topLeft),
-                  corner(Alignment.topRight),
-                  corner(Alignment.bottomLeft),
-                  corner(Alignment.bottomRight),
-                ],
+                    corner(Alignment.topLeft),
+                    corner(Alignment.topRight),
+                    corner(Alignment.bottomLeft),
+                    corner(Alignment.bottomRight),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l.pickupCodeLabel.toUpperCase(),
-                    style: TaraText.small.copyWith(
-                      color: c.accentText,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: .66,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l.pickupCodeLabel.toUpperCase(),
+                      style: TaraText.small.copyWith(
+                        color: c.accentText,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: .66,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    spaced,
-                    style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 26, letterSpacing: 5),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l.pickupCodeDictate,
-                    style: TaraText.small.copyWith(
-                      color: c.textPrimary.withValues(alpha: .7),
-                      fontSize: 12,
-                      height: 1.4,
+                    const SizedBox(height: 4),
+                    Text(
+                      spaced,
+                      style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 26, letterSpacing: 5),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      l.pickupCodeDictate,
+                      style: TaraText.small.copyWith(
+                        color: c.textPrimary.withValues(alpha: .7),
+                        fontSize: 12,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

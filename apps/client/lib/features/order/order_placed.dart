@@ -15,6 +15,7 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/pickup_qr.dart';
 
 /// Paiement Mobile Money demandé (maquette) : référence en tête, jauge liquide ronde avec
 /// le logo de l'opérateur et le montant, consigne, numéro qui paie. Refusé ou sans réponse :
@@ -303,7 +304,10 @@ class OrderPlaced extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(l.pickupCodeLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
+                    // Le livreur le scanne (maquette Scanner) ; les chiffres restent dessous.
+                    PickupQr(reference: orders.first.reference, code: code, size: 150),
+                    const SizedBox(height: 8),
                     Semantics(
                       label: '${l.pickupCodeLabel} : ${code.split('').join(' ')}',
                       excludeSemantics: true,
