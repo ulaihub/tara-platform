@@ -25,15 +25,23 @@ class RouteTrail extends StatelessWidget {
   /// Carte « Ventes à recevoir » du portefeuille (352 × 196).
   static const walletCard = [
     Offset(-10, 172),
-    Offset(70, 160), Offset(110, 104), Offset(186, 104),
-    Offset(262, 104), Offset(296, 48), Offset(362, 22),
+    Offset(70, 160),
+    Offset(110, 104),
+    Offset(186, 104),
+    Offset(262, 104),
+    Offset(296, 48),
+    Offset(362, 22),
   ];
 
   /// Carte « Encaissé aujourd'hui » de l'accueil (352 × 122).
   static const homeHero = [
     Offset(-10, 110),
-    Offset(90, 104), Offset(120, 60), Offset(200, 62),
-    Offset(280, 64), Offset(300, 24), Offset(362, 12),
+    Offset(90, 104),
+    Offset(120, 60),
+    Offset(200, 62),
+    Offset(280, 64),
+    Offset(300, 24),
+    Offset(362, 12),
   ];
 
   @override
@@ -137,7 +145,9 @@ class SheenSweep extends StatelessWidget {
                       angle: 18 * math.pi / 180,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [color.withValues(alpha: 0), color, color.withValues(alpha: 0)]),
+                          gradient: LinearGradient(
+                            colors: [color.withValues(alpha: 0), color, color.withValues(alpha: 0)],
+                          ),
                         ),
                       ),
                     ),

@@ -88,10 +88,17 @@ void main() {
       _scoped(TermsScreen.signup(onAccept: (versions) async => accepted.add(versions), onBack: () {})),
     );
     await settle(tester);
-    expect(find.byType(TaraCheckRow), findsNothing);
-    expect(find.text('Faites défiler les textes jusqu’en bas pour pouvoir les accepter.'), findsOneWidget);
+    expect(find.text('Faites défiler jusqu’en bas pour pouvoir accepter.'), findsOneWidget);
+    expect(find.text('Lu à 0%'), findsOneWidget);
+    // Avant la lecture : la case ne se coche pas, le bouton ne fait rien.
+    await tester.tap(find.byType(TaraCheckRow));
+    await tester.tap(find.text('Accepter et créer mon compte'));
+    await settle(tester);
+    expect(accepted, isEmpty, reason: 'textes non lus');
 
     await readToEnd(tester);
+    expect(find.text('Lu à 100%'), findsOneWidget);
+    expect(find.text('Faites défiler jusqu’en bas pour pouvoir accepter.'), findsNothing);
     await tester.tap(find.text('Accepter et créer mon compte'));
     await settle(tester);
     expect(accepted, isEmpty, reason: 'case non cochée');
@@ -119,14 +126,17 @@ void main() {
     await settle(tester);
     expect(
       find.text(
-        'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous suivez '
-        'vos livraisons en cours mais ne pouvez plus en commander de nouvelles.',
+        'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vos livraisons '
+        'en cours continuent, mais vous ne pourrez pas en commander de nouvelles.',
       ),
       findsOneWidget,
     );
-    await readToEnd(tester);
-    await tester.tap(find.byType(TaraCheckRow));
+    // Maquette : pas de case pour une nouvelle version ; le bouton s'active après lecture.
+    expect(find.byType(TaraCheckRow), findsNothing);
+    await tester.tap(find.text('J’accepte la nouvelle version'));
     await settle(tester);
+    expect(legal.signed, isEmpty, reason: 'textes non lus');
+    await readToEnd(tester);
 
     // Refus du serveur : message affiché, rien d'accepté, on peut réessayer.
     legal.acceptError = const ApiException(code: 'INTERNAL', message: 'Réessayez dans un instant.', status: 500);

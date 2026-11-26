@@ -48,15 +48,18 @@ class _AuthFlowState extends ConsumerState<_AuthFlow> {
   @override
   void initState() {
     super.initState();
-    ref.read(keyValueStoreProvider).read(introSeenKey).then(
-      (value) {
-        if (mounted) setState(() => _introSeen = value != null);
-      },
-      // Mémoire illisible : on ne bloque pas l'accès à la connexion.
-      onError: (Object _) {
-        if (mounted) setState(() => _introSeen = true);
-      },
-    );
+    ref
+        .read(keyValueStoreProvider)
+        .read(introSeenKey)
+        .then(
+          (value) {
+            if (mounted) setState(() => _introSeen = value != null);
+          },
+          // Mémoire illisible : on ne bloque pas l'accès à la connexion.
+          onError: (Object _) {
+            if (mounted) setState(() => _introSeen = true);
+          },
+        );
   }
 
   void _introDone() {
@@ -166,7 +169,7 @@ class _AccountGateState extends ConsumerState<_AccountGate> {
     }
     final account = me.value!;
     if (account.needsProfile) {
-      return WelcomeScreen(me: account, onDone: () => ref.invalidate(meProvider), onLogout: logout);
+      return WelcomeScreen(me: account, onDone: () => ref.invalidate(meProvider));
     }
     // Nouvelle version des conditions : présentée à l'ouverture (sans réseau, plus tard).
     final terms = ref.watch(termsStatusProvider).value;

@@ -1128,9 +1128,12 @@
   "termsUpdateTitle": "Nos conditions ont changé",
   "termsSignupIntro": "Avant de créer votre compte, lisez les conditions des livreurs et la politique de confidentialité jusqu’en bas. Elles expliquent votre statut, vos gains, l’encaissement et ce que nous faisons de vos données.",
   "termsUpdateIntro": "Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.",
+  "termsSignupKicker": "Avant de commencer",
+  "termsReadPercent": "Lu à {percent}%",
+  "@termsReadPercent": {"placeholders": {"percent": {"type": "int"}}},
   "termsLater": "Plus tard",
   "termsEnd": "Vous êtes arrivé au bout des textes.",
-  "termsScrollFirst": "Faites défiler les textes jusqu’en bas pour pouvoir les accepter.",
+  "termsScrollFirst": "Faites défiler jusqu’en bas pour pouvoir accepter.",
   "termsCheckPrefix": "J’ai lu et j’accepte les ",
   "termsCheckTerms": "conditions des livreurs (version {version})",
   "@termsCheckTerms": {

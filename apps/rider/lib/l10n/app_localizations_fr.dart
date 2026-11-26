@@ -1661,13 +1661,21 @@ class AppLocalizationsFr extends AppLocalizations {
       'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.';
 
   @override
+  String get termsSignupKicker => 'Avant de commencer';
+
+  @override
+  String termsReadPercent(int percent) {
+    return 'Lu à $percent%';
+  }
+
+  @override
   String get termsLater => 'Plus tard';
 
   @override
   String get termsEnd => 'Vous êtes arrivé au bout des textes.';
 
   @override
-  String get termsScrollFirst => 'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.';
+  String get termsScrollFirst => 'Faites défiler jusqu’en bas pour pouvoir accepter.';
 
   @override
   String get termsCheckPrefix => 'J’ai lu et j’accepte les ';

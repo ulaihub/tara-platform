@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -596,4 +598,206 @@ class AmountInputFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: text.length),
     );
   }
+}
+
+/// Fond des champs « libellé dans la case » des maquettes (`--card`).
+Color boxedFieldFill(TaraColors c) =>
+    c.isDark ? const Color.fromRGBO(255, 255, 255, .06) : const Color.fromRGBO(255, 255, 255, .84);
+
+/// Champ des maquettes où le libellé est dans la case (« Numéro de téléphone », « Nom de
+/// votre boutique ») : 56 de haut au moins, coins 16, libellé 11 en gras, valeur 16 en
+/// gras. Sans [controller], la case affiche [value] et ne se modifie pas (« Pays »).
+class BoxedField extends StatefulWidget {
+  const BoxedField({
+    super.key,
+    required this.label,
+    this.controller,
+    this.value,
+    this.valueLeading,
+    this.hint,
+    this.keyboardType,
+    this.textInputAction,
+    this.autofillHints,
+    this.inputFormatters,
+    this.onSubmitted,
+    this.onChanged,
+    this.textCapitalization = TextCapitalization.none,
+    this.trailing,
+    this.helper,
+    this.valueStyle,
+  });
+
+  final String label;
+  final TextEditingController? controller;
+  final String? value;
+
+  /// Devant la valeur fixe (drapeau du pays).
+  final Widget? valueLeading;
+  final String? hint;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
+  final List<TextInputFormatter>? inputFormatters;
+  final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
+  final TextCapitalization textCapitalization;
+
+  /// À droite de la case (bouton contacts, logo de l'opérateur).
+  final Widget? trailing;
+
+  /// Ligne sous la valeur, dans la case (« Il reçoit vos ventes encaissées »).
+  final String? helper;
+  final TextStyle? valueStyle;
+
+  @override
+  State<BoxedField> createState() => _BoxedFieldState();
+}
+
+class _BoxedFieldState extends State<BoxedField> {
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final focused = _focus.hasFocus;
+    final valueStyle =
+        widget.valueStyle ?? TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 16, height: 1.3);
+    final Widget value = widget.controller == null
+        ? Row(
+            children: [
+              if (widget.valueLeading case final leading?) ...[leading, const SizedBox(width: 4)],
+              Flexible(
+                child: Text(widget.value ?? '', style: valueStyle, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          )
+        : TextField(
+            focusNode: _focus,
+            controller: widget.controller,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            autofillHints: widget.autofillHints,
+            inputFormatters: widget.inputFormatters,
+            onSubmitted: widget.onSubmitted,
+            onChanged: widget.onChanged,
+            textCapitalization: widget.textCapitalization,
+            cursorColor: TaraBrand.orange,
+            style: valueStyle,
+            decoration: InputDecoration(
+              isCollapsed: true,
+              border: InputBorder.none,
+              hintText: widget.hint,
+              hintStyle: valueStyle.copyWith(color: c.placeholder, fontWeight: FontWeight.w500),
+            ),
+          );
+    final box = AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      constraints: const BoxConstraints(minHeight: 56),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: boxedFieldFill(c),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: focused ? TaraBrand.focusBorder : c.textPrimary.withValues(alpha: .14),
+          width: focused ? 1.5 : 1,
+        ),
+        boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 4)] : null,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.label,
+                  style: TaraText.smallStrong.copyWith(
+                    fontSize: 11,
+                    height: 1.3,
+                    color: c.textPrimary.withValues(alpha: .62),
+                  ),
+                ),
+                value,
+                if (widget.helper case final helper?)
+                  Text(
+                    helper,
+                    style: TaraText.small.copyWith(
+                      fontSize: 11,
+                      height: 1.3,
+                      color: c.textPrimary.withValues(alpha: .62),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (widget.trailing case final trailing?) ...[const SizedBox(width: 10), trailing],
+        ],
+      ),
+    );
+    if (widget.controller == null) return box;
+    return GestureDetector(behavior: HitTestBehavior.opaque, onTap: _focus.requestFocus, child: box);
+  }
+}
+
+/// Drapeau du Cameroun dessiné (vert, rouge à étoile jaune, jaune) : les émojis de
+/// drapeaux ne s'affichent pas sur tous les téléphones.
+class CameroonFlag extends StatelessWidget {
+  const CameroonFlag({super.key, this.width = 20});
+  final double width;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: 'Cameroun',
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(2),
+      child: SizedBox(
+        width: width,
+        height: width * 2 / 3,
+        child: const CustomPaint(painter: _FlagPainter()),
+      ),
+    ),
+  );
+}
+
+class _FlagPainter extends CustomPainter {
+  const _FlagPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width / 3;
+    canvas
+      ..drawRect(Rect.fromLTWH(0, 0, w, size.height), Paint()..color = const Color(0xFF007A5E))
+      ..drawRect(Rect.fromLTWH(w, 0, w, size.height), Paint()..color = const Color(0xFFCE1126))
+      ..drawRect(Rect.fromLTWH(2 * w, 0, w, size.height), Paint()..color = const Color(0xFFFCD116));
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = size.height * .22;
+    final star = Path();
+    for (var i = 0; i < 10; i++) {
+      final radius = i.isEven ? r : r * .4;
+      final a = -1.5707963 + i * 3.14159265 / 5;
+      final p = center + Offset(radius * _cos(a), radius * _sin(a));
+      i == 0 ? star.moveTo(p.dx, p.dy) : star.lineTo(p.dx, p.dy);
+    }
+    canvas.drawPath(star..close(), Paint()..color = const Color(0xFFFCD116));
+  }
+
+  static double _cos(double a) => math.cos(a);
+  static double _sin(double a) => math.sin(a);
+
+  @override
+  bool shouldRepaint(_FlagPainter old) => false;
 }

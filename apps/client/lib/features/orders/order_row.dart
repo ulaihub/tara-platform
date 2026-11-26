@@ -23,10 +23,7 @@ class OrderRow extends StatelessWidget {
     return ListRow(
       leading: IconTile(icon: icon, size: 40, tone: tone),
       // Envoi de plusieurs colis : le numéro écrit sur le colis vient en premier.
-      title: [
-        if (order.batchNumber case final number?) l.parcelNumberShort(number),
-        order.recipientName,
-      ].join(' · '),
+      title: [if (order.batchNumber case final number?) l.parcelNumberShort(number), order.recipientName].join(' · '),
       // Lieu précis : le repère écrit à la commande, puis le quartier.
       detail: precisePlace(order.dropoffLandmark, order.dropoffNeighborhood),
       subtitle: '$label · ${order.reference}',

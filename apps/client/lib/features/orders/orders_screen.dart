@@ -32,7 +32,13 @@ final ordersProvider = FutureProvider.family<List<OrderSummary>, String>(
 /// livraisons groupées par jour. Chaque ligne : anneau d'avancée animé autour de l'icône
 /// de l'étape, nom et lieu précis, étape en couleur, montant, référence, reçu.
 class OrdersScreen extends ConsumerStatefulWidget {
-  const OrdersScreen({super.key, required this.onOpenOrder, this.onOpenOrderId, this.now, this.initialScope = 'active'});
+  const OrdersScreen({
+    super.key,
+    required this.onOpenOrder,
+    this.onOpenOrderId,
+    this.now,
+    this.initialScope = 'active',
+  });
 
   /// Liste montée au départ : `active` (en cours) ou `history` (terminées, avec leurs reçus).
   final String initialScope;
@@ -210,11 +216,7 @@ class _ParcelStack extends StatelessWidget {
           children: [
             Positioned(left: 0, bottom: -4, child: Parcel3D(size: 18, spin: false, floating: false)),
             Positioned(left: 27, bottom: -4, child: Parcel3D(size: 18, spin: false, floating: false)),
-            Positioned(
-              left: 13,
-              bottom: 12,
-              child: Parcel3D(size: 16, floating: false, period: Duration(seconds: 8)),
-            ),
+            Positioned(left: 13, bottom: 12, child: Parcel3D(size: 16, floating: false, period: Duration(seconds: 8))),
           ],
         ),
       ),
@@ -239,7 +241,8 @@ class _SearchField extends StatelessWidget {
         color: c.glassFallback,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          if (!c.isDark) const BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 24, offset: Offset(0, 10)),
+          if (!c.isDark)
+            const BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 24, offset: Offset(0, 10)),
         ],
       ),
       child: Row(
@@ -280,10 +283,7 @@ class _GradientTabs extends StatelessWidget {
     final index = tabs.indexWhere((tab) => tab.$1 == selected);
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: c.textPrimary.withValues(alpha: .06),
-        borderRadius: BorderRadius.circular(17),
-      ),
+      decoration: BoxDecoration(color: c.textPrimary.withValues(alpha: .06), borderRadius: BorderRadius.circular(17)),
       child: LayoutBuilder(
         builder: (context, box) {
           final width = box.maxWidth / tabs.length;
@@ -300,7 +300,9 @@ class _GradientTabs extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: TaraBrand.gradient,
                     borderRadius: BorderRadius.circular(13),
-                    boxShadow: const [BoxShadow(color: Color.fromRGBO(255, 90, 0, .35), blurRadius: 16, offset: Offset(0, 6))],
+                    boxShadow: const [
+                      BoxShadow(color: Color.fromRGBO(255, 90, 0, .35), blurRadius: 16, offset: Offset(0, 6)),
+                    ],
                   ),
                 ),
               ),
@@ -485,7 +487,11 @@ class _OrderLine extends StatelessWidget {
                 children: [
                   Text(
                     '${formatAmount(amount)} F',
-                    style: TaraText.label.copyWith(color: c.textPrimary, fontWeight: FontWeight.w800, fontFeatures: TaraText.tabular),
+                    style: TaraText.label.copyWith(
+                      color: c.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: TaraText.tabular,
+                    ),
                   ),
                   Text(order.reference, style: TaraText.small.copyWith(color: c.textTertiary, fontSize: 11)),
                 ],
@@ -552,10 +558,16 @@ class _RingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Rect.fromCircle(center: size.center(Offset.zero), radius: 18);
-    canvas.drawArc(rect, 0, 2 * math.pi, false, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..color = track);
+    canvas.drawArc(
+      rect,
+      0,
+      2 * math.pi,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..color = track,
+    );
     if (value <= 0) return;
     final paint = Paint()
       ..style = PaintingStyle.stroke

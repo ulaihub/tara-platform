@@ -2906,6 +2906,18 @@ abstract class AppLocalizations {
   /// **'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.'**
   String get termsUpdateIntro;
 
+  /// No description provided for @termsSignupKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant de commencer'**
+  String get termsSignupKicker;
+
+  /// No description provided for @termsReadPercent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu à {percent}%'**
+  String termsReadPercent(int percent);
+
   /// No description provided for @termsLater.
   ///
   /// In fr, this message translates to:
@@ -2921,7 +2933,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsScrollFirst.
   ///
   /// In fr, this message translates to:
-  /// **'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.'**
+  /// **'Faites défiler jusqu’en bas pour pouvoir accepter.'**
   String get termsScrollFirst;
 
   /// No description provided for @termsCheckPrefix.

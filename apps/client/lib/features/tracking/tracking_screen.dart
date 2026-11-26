@@ -1194,13 +1194,7 @@ class _Steps extends StatelessWidget {
 
 /// Le livreur : photo (ou initiales), nom, moto (marque, couleur, plaque), appel et message.
 class _RiderCard extends StatelessWidget {
-  const _RiderCard({
-    required this.rider,
-    required this.onCall,
-    required this.onMessage,
-    this.photo,
-    this.unread = 0,
-  });
+  const _RiderCard({required this.rider, required this.onCall, required this.onMessage, this.photo, this.unread = 0});
 
   final OrderRider rider;
   final VoidCallback onCall;
@@ -1230,9 +1224,7 @@ class _RiderCard extends StatelessWidget {
       child: Row(
         children: [
           if (photo case final bytes?)
-            ClipOval(
-              child: Image.memory(bytes, width: 48, height: 48, fit: BoxFit.cover, gaplessPlayback: true),
-            )
+            ClipOval(child: Image.memory(bytes, width: 48, height: 48, fit: BoxFit.cover, gaplessPlayback: true))
           else
             InitialsAvatar(name: rider.name, size: 48),
           const SizedBox(width: 12),
@@ -1271,7 +1263,11 @@ class _RiderCard extends StatelessWidget {
                 if (rider.plateNumber case final plate?)
                   Text(
                     plate,
-                    style: TaraText.small.copyWith(color: c.textPrimary, fontWeight: FontWeight.w800, letterSpacing: .6),
+                    style: TaraText.small.copyWith(
+                      color: c.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: .6,
+                    ),
                   ),
               ],
             ),

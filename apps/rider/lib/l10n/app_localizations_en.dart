@@ -1653,13 +1653,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Read the new version to the end, then accept it. Until you accept, you can finish your current delivery but will not receive new ones.';
 
   @override
+  String get termsSignupKicker => 'Before you start';
+
+  @override
+  String termsReadPercent(int percent) {
+    return '$percent% read';
+  }
+
+  @override
   String get termsLater => 'Later';
 
   @override
   String get termsEnd => 'You have reached the end of the texts.';
 
   @override
-  String get termsScrollFirst => 'Scroll to the end of the texts to be able to accept them.';
+  String get termsScrollFirst => 'Scroll to the bottom to be able to accept.';
 
   @override
   String get termsCheckPrefix => 'I have read and accept the ';
