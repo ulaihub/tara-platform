@@ -180,8 +180,7 @@ export class MerchantActivityService {
       successRate: cur.rate,
       deliveriesChange: percentChange(cur.deliveries, before.deliveries),
       collectedChange: percentChange(cur.collected, before.collected),
-      successRateChange:
-        cur.rate !== null && before.rate !== null ? cur.rate - before.rate : null,
+      successRateChange: cur.rate !== null && before.rate !== null ? cur.rate - before.rate : null,
       averageMinutes:
         minutes.length === 0
           ? null

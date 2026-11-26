@@ -15436,6 +15436,10 @@
               },
               "hasPhoto": {
                 "type": "boolean"
+              },
+              "rating": {
+                "nullable": true,
+                "type": "number"
               }
             },
             "required": [
@@ -15445,7 +15449,8 @@
               "plateNumber",
               "vehicleBrand",
               "vehicleColor",
-              "hasPhoto"
+              "hasPhoto",
+              "rating"
             ],
             "additionalProperties": false
           },

@@ -271,6 +271,8 @@ export const OrderDto = z
         vehicleColor: VehicleColorEnum.nullable(),
         /** Photo de visage validée : `GET /orders/:id/rider-photo`. */
         hasPhoto: z.boolean(),
+        /** Note moyenne sur 5 (une décimale), dès 3 notes reçues. */
+        rating: z.number().nullable(),
       })
       .nullable(),
     attemptCount: z.int(),

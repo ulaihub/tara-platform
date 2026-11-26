@@ -4227,6 +4227,7 @@ export interface components {
         vehicleBrand: components['schemas']['VehicleBrand'] | null;
         vehicleColor: components['schemas']['VehicleColor'] | null;
         hasPhoto: boolean;
+        rating: number | null;
       } | null;
       attemptCount: number;
       failure: {

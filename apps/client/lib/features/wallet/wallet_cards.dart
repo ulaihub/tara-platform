@@ -484,7 +484,7 @@ class _SalesCard extends StatelessWidget {
               style: TaraText.small.copyWith(color: soft, fontWeight: FontWeight.w600),
             ),
           ),
-          if (operator != null) ...[OperatorLogo(operator, size: 14), const SizedBox(width: 5)],
+          if (operator != null) ...[OperatorLogo(operator, size: 18), const SizedBox(width: 6)],
           Text(
             tail,
             style: TaraText.small.copyWith(color: soft, fontWeight: FontWeight.w600),

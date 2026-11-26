@@ -69,6 +69,8 @@ const ORDER_INCLUDE = {
       plateNumber: true,
       vehicleBrand: true,
       vehicleColor: true,
+      ratingSum: true,
+      ratingCount: true,
       user: { select: { fullName: true, phone: true } },
       // Photo de visage validée par l'équipe : montrée à l'expéditeur pour reconnaître le livreur.
       documents: {
@@ -275,6 +277,11 @@ export class OrdersService implements OnModuleInit {
             vehicleBrand: VehicleBrandEnum.safeParse(order.rider.vehicleBrand).data ?? null,
             vehicleColor: VehicleColorEnum.safeParse(order.rider.vehicleColor).data ?? null,
             hasPhoto: order.rider.documents.length > 0,
+            // Moyenne des notes dès 3 notes ; avant, rien (un nouveau livreur n'est pas jugé sur une note).
+            rating:
+              order.rider.ratingCount >= 3
+                ? Math.round((order.rider.ratingSum / order.rider.ratingCount) * 10) / 10
+                : null,
           }
         : null,
       attemptCount: order.attemptCount,

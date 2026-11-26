@@ -370,7 +370,7 @@ class _SummaryStepState extends ConsumerState<SummaryStep> {
           ]) ...[
             AddressChoice(
               icon: icon,
-              leading: method.startsWith('MOMO_') ? OperatorLogo(method, size: 34) : null,
+              leading: method.startsWith('MOMO_') ? OperatorLogo(method, size: 40) : null,
               title: title,
               subtitle: body,
               selected: draft.paymentMethod == method,

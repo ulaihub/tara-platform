@@ -818,7 +818,7 @@ void main() {
         operator: 'MTN',
       ));
       expect(find.text('Validez le paiement sur votre téléphone'), findsOneWidget);
-      expect(find.textContaining('6\u00a077\u00a012\u00a034\u00a056'), findsOneWidget);
+      expect(find.textContaining('6 77 •• •• 56'), findsWidgets);
 
       // Validé sur le téléphone : la relecture suivante le voit.
       api.paymentStatuses = ['SUCCEEDED'];
@@ -866,7 +866,7 @@ void main() {
       api.paymentStatuses = ['FAILED'];
       await tester.pump(const Duration(seconds: 4));
       await settle(tester);
-      await tester.tap(find.text('Annuler la commande'));
+      await tester.tap(find.text('Annuler la livraison'));
       await settle(tester);
       expect(api.cancelled, ['00000000-0000-4000-8000-000000000501']);
       expect(closed, 1);

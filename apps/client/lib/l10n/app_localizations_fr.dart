@@ -1377,6 +1377,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payOrange => 'Orange Money';
 
   @override
+  String get mobileMoney => 'Mobile Money';
+
+  @override
   String get payMomoBody => 'Vous validez le paiement sur votre téléphone.';
 
   @override
@@ -1429,6 +1432,22 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String payingBodyOperator(String amount, String phone, String operator) {
+    return 'Une demande de $amount arrive sur le $phone : entrez votre code secret $operator pour la valider. La recherche d’un livreur démarre juste après.';
+  }
+
+  @override
+  String get paymentFailedBody => 'Paiement refusé, annulé ou expiré. Réessayez, ou annulez la livraison.';
+
+  @override
+  String payerPhoneHelp(String operator) {
+    return 'La demande de paiement part vers ce numéro $operator.';
+  }
+
+  @override
+  String get cancelDelivery => 'Annuler la livraison';
+
+  @override
   String get paymentFailed => 'Le paiement n’a pas abouti.';
 
   @override
@@ -1448,6 +1467,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pickupCodeLabel => 'Code d’enlèvement';
+
+  @override
+  String get pickupCodeDictate => 'Dictez ces 4 chiffres au livreur à son arrivée.';
 
   @override
   String get pickupCodeHelp => 'Donnez-le au livreur quand il récupère le colis. Notez-le : il ne sera plus affiché.';
@@ -1593,9 +1615,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String pickupCodeShown(String code) {
     return 'Code d’enlèvement : $code';
   }
-
-  @override
-  String get cancelDelivery => 'Annuler la livraison';
 
   @override
   String get cancelConfirm => 'Touchez encore pour confirmer l’annulation.';
