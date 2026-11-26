@@ -46,7 +46,7 @@ jobs:
       # Java 21 : exigé par le module MapLibre, pris en charge par le plugin Android
       # Gradle 9. Dépendances Gradle en cache : la construction ne dépend plus de la
       # disponibilité de Maven Central à chaque fois.
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
@@ -91,7 +91,7 @@ jobs:
 
       - name: Écarts de captures
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rider-golden-failures
           path: apps/rider/test/**/failures/
@@ -120,14 +120,14 @@ jobs:
           python3 tool/apk_report.py --download-max-mo 25 --installed-max-mo 32
           build/app/outputs/flutter-apk/app-*-release.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: github.event_name != 'pull_request'
         with:
           name: tara-livreur-apk
           path: apps/rider/build/app/outputs/flutter-apk/app-*-release.apk
           retention-days: 14
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: github.event_name != 'pull_request'
         with:
           name: tara-livreur-symboles
