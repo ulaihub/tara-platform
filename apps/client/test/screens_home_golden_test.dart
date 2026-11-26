@@ -89,6 +89,8 @@ Widget home(Me me, FakeClientApi api) => ProviderScope(
       onWallet: () {},
       onReceipts: () {},
       onSeeAll: () {},
+      onNotifications: () {},
+      onActivity: me.merchant == null ? null : () {},
       now: () => homeNow,
     ),
   ),

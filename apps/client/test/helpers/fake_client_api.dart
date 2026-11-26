@@ -29,6 +29,41 @@ class FakeClientApi extends ClientApi {
 
   @override
   Future<Wallet> wallet() async => wallet0;
+
+  /// Cloche : notifications du compte ; « Tout lire » les marque lues.
+  List<InboxItem> inboxItems = [];
+  int inboxReads = 0;
+
+  @override
+  Future<Inbox> inbox() async => Inbox(items: inboxItems, unread: inboxItems.where((n) => !n.read).length);
+
+  @override
+  Future<void> readInbox({List<String>? ids}) async {
+    inboxReads++;
+    inboxItems = [
+      for (final n in inboxItems)
+        InboxItem(
+          id: n.id,
+          kind: n.kind,
+          title: n.title,
+          body: n.body,
+          orderId: n.orderId,
+          read: n.read || ids == null || ids.contains(n.id),
+          createdAt: n.createdAt,
+        ),
+    ];
+  }
+
+  /// « Mon activité » par période (day, week, month).
+  Map<String, MerchantActivity> activity = {};
+  final activityAsked = <String>[];
+
+  @override
+  Future<MerchantActivity> merchantActivity(String period) async {
+    activityAsked.add(period);
+    return activity[period]!;
+  }
+
   final merchants = <Map<String, String?>>[];
 
   @override

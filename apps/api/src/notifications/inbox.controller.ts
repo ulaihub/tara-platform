@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type { AuthUser } from '../auth/auth.types.js';
 import { CurrentUser } from '../auth/decorators.js';
 import { resolveLocale } from '../common/i18n/locale.js';
-import { ApiZodResponse } from '../common/validation/zod.js';
+import { ApiZodBody, ApiZodResponse, ValidBody } from '../common/validation/zod.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { type PushTemplate, renderPush } from './push-templates.js';
 
@@ -23,6 +23,13 @@ export const InboxItemDto = z
     createdAt: z.iso.datetime(),
   })
   .meta({ id: 'InboxItem' });
+
+export const InboxReadBody = z
+  .object({
+    /** Notifications à marquer lues ; absent : toutes. */
+    ids: z.array(z.uuid()).max(INBOX_LIMIT).optional(),
+  })
+  .meta({ id: 'InboxReadBody' });
 
 export const InboxDto = z
   .object({ items: z.array(InboxItemDto), unread: z.int() })
@@ -68,12 +75,16 @@ export class InboxController {
     };
   }
 
-  /** « Tout lire » : plus de pastille sur la cloche. */
+  /** Notification ouverte, ou « Tout lire » (sans `ids`) : plus de pastille sur la cloche. */
   @Post('read')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async readAll(@CurrentUser() user: AuthUser): Promise<void> {
+  @ApiZodBody(InboxReadBody)
+  async read(
+    @CurrentUser() user: AuthUser,
+    @ValidBody(InboxReadBody) body: z.output<typeof InboxReadBody>,
+  ): Promise<void> {
     await this.prisma.inboxItem.updateMany({
-      where: { userId: user.id, readAt: null },
+      where: { userId: user.id, readAt: null, ...(body.ids ? { id: { in: body.ids } } : {}) },
       data: { readAt: new Date() },
     });
   }

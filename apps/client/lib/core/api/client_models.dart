@@ -1243,3 +1243,134 @@ class OrderFailure {
   /// Une seule nouvelle tentative : false après un deuxième échec.
   final bool retryAllowed;
 }
+
+/// Notification de la cloche (boîte de réception du compte).
+@immutable
+class InboxItem {
+  const InboxItem({
+    required this.id,
+    required this.kind,
+    required this.title,
+    required this.body,
+    required this.read,
+    required this.createdAt,
+    this.orderId,
+  });
+
+  factory InboxItem.fromJson(Json json) => InboxItem(
+    id: _field(json, 'id'),
+    kind: _field(json, 'kind'),
+    title: _field(json, 'title'),
+    body: _field(json, 'body'),
+    orderId: json['orderId'] as String?,
+    read: _field(json, 'read'),
+    createdAt: DateTime.parse(_field(json, 'createdAt')),
+  );
+
+  static const fields = ['id', 'kind', 'title', 'body', 'orderId', 'read', 'createdAt'];
+
+  final String id;
+
+  /// Modèle de la notification (ORDER_DELIVERED, PAYOUT_SENT…) : icône et écran à ouvrir.
+  final String kind;
+  final String title;
+  final String body;
+  final String? orderId;
+  final bool read;
+  final DateTime createdAt;
+}
+
+/// Cloche : les notifications récentes et le nombre de non lues.
+@immutable
+class Inbox {
+  const Inbox({required this.items, required this.unread});
+
+  factory Inbox.fromJson(Json json) => Inbox(
+    items: [for (final item in _field<List<Object?>>(json, 'items')) InboxItem.fromJson(item! as Json)],
+    unread: _field<num>(json, 'unread').toInt(),
+  );
+
+  static const fields = ['items', 'unread'];
+  static const empty = Inbox(items: [], unread: 0);
+
+  final List<InboxItem> items;
+  final int unread;
+}
+
+/// Tranche du graphique « Mon activité » : ventes encaissées et livraisons.
+typedef ActivityBucket = ({DateTime from, DateTime to, int sales, int deliveries});
+
+/// « Mon activité » d'une boutique sur un jour, une semaine ou un mois.
+@immutable
+class MerchantActivity {
+  const MerchantActivity({
+    required this.period,
+    required this.from,
+    required this.buckets,
+    required this.deliveries,
+    required this.collected,
+    required this.successRate,
+    required this.deliveriesChange,
+    required this.collectedChange,
+    required this.successRateChange,
+    required this.averageMinutes,
+    required this.zones,
+  });
+
+  factory MerchantActivity.fromJson(Json json) => MerchantActivity(
+    period: _field(json, 'period'),
+    from: DateTime.parse(_field(json, 'from')),
+    buckets: [
+      for (final item in _field<List<Object?>>(json, 'buckets').cast<Json>())
+        (
+          from: DateTime.parse(item['from']! as String),
+          to: DateTime.parse(item['to']! as String),
+          sales: (item['sales']! as num).toInt(),
+          deliveries: (item['deliveries']! as num).toInt(),
+        ),
+    ],
+    deliveries: _field<num>(json, 'deliveries').toInt(),
+    collected: _field<num>(json, 'collected').toInt(),
+    successRate: (json['successRate'] as num?)?.toInt(),
+    deliveriesChange: (json['deliveriesChange'] as num?)?.toInt(),
+    collectedChange: (json['collectedChange'] as num?)?.toInt(),
+    successRateChange: (json['successRateChange'] as num?)?.toInt(),
+    averageMinutes: (json['averageMinutes'] as num?)?.toInt(),
+    zones: [
+      for (final item in _field<List<Object?>>(json, 'zones').cast<Json>())
+        (name: item['name']! as String, share: (item['share']! as num).toInt()),
+    ],
+  );
+
+  static const fields = [
+    'period',
+    'from',
+    'to',
+    'buckets',
+    'deliveries',
+    'collected',
+    'successRate',
+    'deliveriesChange',
+    'collectedChange',
+    'successRateChange',
+    'averageMinutes',
+    'zones',
+  ];
+
+  /// day, week ou month.
+  final String period;
+  final DateTime from;
+  final List<ActivityBucket> buckets;
+  final int deliveries;
+  final int collected;
+
+  /// Part des colis livrés (0 à 100), null sans colis terminé.
+  final int? successRate;
+
+  /// Évolution en % (livraisons, encaissé) et en points (réussite), null sans base.
+  final int? deliveriesChange;
+  final int? collectedChange;
+  final int? successRateChange;
+  final int? averageMinutes;
+  final List<({String name, int share})> zones;
+}

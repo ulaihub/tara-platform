@@ -45,7 +45,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['Inbox_readAll'];
+    post: operations['Inbox_read'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3835,6 +3835,9 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    InboxReadBody: {
+      ids?: string[];
+    };
     KycDocument: {
       /** Format: uuid */
       id: string;
@@ -5215,14 +5218,18 @@ export interface operations {
       };
     };
   };
-  Inbox_readAll: {
+  Inbox_read: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InboxReadBody'];
+      };
+    };
     responses: {
       204: {
         headers: {

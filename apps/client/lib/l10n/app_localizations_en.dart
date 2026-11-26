@@ -233,6 +233,144 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goodMorning => 'Good morning,';
 
   @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String notificationsUnread(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count new', one: '1 new');
+    return 'Notifications, $_temp0';
+  }
+
+  @override
+  String unreadCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count unread', one: '1 unread');
+    return '$_temp0';
+  }
+
+  @override
+  String get unreadLabel => 'Unread';
+
+  @override
+  String get allRead => 'All read';
+
+  @override
+  String get readAll => 'Read all';
+
+  @override
+  String get noNotifications => 'Nothing new. Your deliveries, payments and received addresses will show here.';
+
+  @override
+  String get notificationsError => 'Couldn’t load notifications.';
+
+  @override
+  String get justNow => 'just now';
+
+  @override
+  String minutesAgo(int minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String yesterdayAt(String time) {
+    return 'yesterday $time';
+  }
+
+  @override
+  String get quickActivity => 'Activity';
+
+  @override
+  String get activityTitle => 'My activity';
+
+  @override
+  String get activityToday => 'today';
+
+  @override
+  String get activityThisWeek => 'this week';
+
+  @override
+  String get activityThisMonth => 'this month';
+
+  @override
+  String get activityPeriod => 'Period';
+
+  @override
+  String get periodDay => 'Day';
+
+  @override
+  String get periodWeek => 'Week';
+
+  @override
+  String get periodMonth => 'Month';
+
+  @override
+  String get activityError => 'Couldn’t load your activity.';
+
+  @override
+  String get kpiDeliveries => 'Deliveries';
+
+  @override
+  String get kpiCollected => 'Collected';
+
+  @override
+  String get kpiSuccess => 'Success';
+
+  @override
+  String pointsShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count pts', one: '1 pt');
+    return '$_temp0';
+  }
+
+  @override
+  String get topZones => 'Most delivered areas';
+
+  @override
+  String averageDelay(String delay) {
+    return 'Average time $delay';
+  }
+
+  @override
+  String get noZonesYet => 'No deliveries in this period yet.';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String hoursMinutes(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String get chartSales => 'Collected sales';
+
+  @override
+  String get legendSales => 'Sales';
+
+  @override
+  String get legendDeliveries => 'Deliveries';
+
+  @override
+  String hourShort(int hour) {
+    return '${hour}h';
+  }
+
+  @override
+  String hourLong(int hour) {
+    return '$hour:00';
+  }
+
+  @override
+  String weekShort(int number) {
+    return 'Wk $number';
+  }
+
+  @override
+  String daysRange(int from, int to, String month) {
+    return '$month $from–$to';
+  }
+
+  @override
   String get goodEvening => 'Good evening,';
 
   @override

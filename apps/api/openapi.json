@@ -67,8 +67,18 @@
     },
     "/v1/me/notifications/read": {
       "post": {
-        "operationId": "Inbox_readAll",
+        "operationId": "Inbox_read",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InboxReadBody"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": ""
@@ -13886,6 +13896,19 @@
           "createdAt"
         ],
         "additionalProperties": false
+      },
+      "InboxReadBody": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
       },
       "KycDocument": {
         "type": "object",

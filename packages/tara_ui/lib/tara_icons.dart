@@ -53,6 +53,8 @@ abstract final class TaraIcons {
   ]);
   static const camera = TaraIconData([_P('M4 8h3l2-3h6l2 3h3v11H4z'), _C(12, 13, 3.5)]);
   static const check = TaraIconData([_P('M5 12.5l4.5 4.5L19 7.5')]);
+  static const alertTriangle = TaraIconData([_P('M12 4 2.5 20h19zM12 10v4M12 17h.01')]);
+  static const trend = TaraIconData([_P('M4.5 20v-6M10 20V10M15.5 20v-4M21 20V6M3 9.5 9 5l5 3.5L20.5 3')]);
   static const bolt = TaraIconData([_P('M13 3 5 13h6l-1 8 8-10h-6z')]);
   static const calendar = TaraIconData([_P('M3.5 5h17v15h-17zM3.5 10h17M8 3v4M16 3v4')]);
   static const link = TaraIconData([

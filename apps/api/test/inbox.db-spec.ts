@@ -55,7 +55,24 @@ describe('Cloche de l’app : boîte de réception des notifications', () => {
     const theirs = await request(ctx.http).get('/v1/me/notifications').set(other.auth).expect(200);
     expect(theirs.body.items).toEqual([]);
 
-    await request(ctx.http).post('/v1/me/notifications/read').set(user.auth).expect(204);
+    // Une notification ouverte : seulement elle.
+    await request(ctx.http)
+      .post('/v1/me/notifications/read')
+      .set(user.auth)
+      .send({ ids: [inbox.body.items[1].id] })
+      .expect(204);
+    const one = await request(ctx.http).get('/v1/me/notifications').set(user.auth).expect(200);
+    expect(one.body.unread).toBe(1);
+    // Les notifications d'un autre compte ne bougent pas.
+    await request(ctx.http)
+      .post('/v1/me/notifications/read')
+      .set(other.auth)
+      .send({ ids: [inbox.body.items[0].id] })
+      .expect(204);
+    expect(
+      (await request(ctx.http).get('/v1/me/notifications').set(user.auth).expect(200)).body.unread,
+    ).toBe(1);
+    await request(ctx.http).post('/v1/me/notifications/read').set(user.auth).send({}).expect(204);
     const read = await request(ctx.http).get('/v1/me/notifications').set(user.auth).expect(200);
     expect(read.body.unread).toBe(0);
     expect(read.body.items.every((item: { read: boolean }) => item.read)).toBe(true);
