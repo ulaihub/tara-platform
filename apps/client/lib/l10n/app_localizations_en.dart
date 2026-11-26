@@ -375,6 +375,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusFailed => 'Delivery failed · your decision needed';
 
   @override
+  String get statusRiderComingYou => 'Rider on the way to you';
+
+  @override
+  String get statusRiderComingShop => 'Rider on the way to your shop';
+
+  @override
+  String statusRiderArriving(String name) {
+    return '$name is coming';
+  }
+
+  @override
+  String get statusFailedYouDecide => 'Delivery failed · your call';
+
+  @override
+  String etaMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
   String todayAt(String time) {
     return 'today at $time';
   }

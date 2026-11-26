@@ -375,6 +375,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statusFailed => 'Livraison impossible · à décider';
 
   @override
+  String get statusRiderComingYou => 'Livreur en route vers vous';
+
+  @override
+  String get statusRiderComingShop => 'Livreur en route vers votre boutique';
+
+  @override
+  String statusRiderArriving(String name) {
+    return '$name arrive';
+  }
+
+  @override
+  String get statusFailedYouDecide => 'Livraison impossible · à vous de décider';
+
+  @override
+  String etaMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
   String todayAt(String time) {
     return 'aujourd’hui à $time';
   }

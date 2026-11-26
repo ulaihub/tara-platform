@@ -151,6 +151,13 @@
   "statusRiderComing": "Livreur en route vers l’enlèvement",
   "statusInDelivery": "En livraison",
   "statusFailed": "Livraison impossible · à décider",
+  "statusRiderComingYou": "Livreur en route vers vous",
+  "statusRiderComingShop": "Livreur en route vers votre boutique",
+  "statusRiderArriving": "{name} arrive",
+  "@statusRiderArriving": {"placeholders": {"name": {"type": "String"}}},
+  "statusFailedYouDecide": "Livraison impossible · à vous de décider",
+  "etaMinutes": "{minutes} min",
+  "@etaMinutes": {"placeholders": {"minutes": {"type": "int"}}},
   "todayAt": "aujourd’hui à {time}",
   "@todayAt": {
     "placeholders": {

@@ -171,6 +171,8 @@ class OrderSummary {
     required this.createdAt,
     this.failureDecision,
     this.batchNumber,
+    this.riderName,
+    this.etaMinutes,
   });
 
   factory OrderSummary.fromJson(Json json) => OrderSummary(
@@ -186,6 +188,8 @@ class OrderSummary {
     scheduledFor: _date(json['scheduledFor']),
     createdAt: DateTime.parse(_field(json, 'createdAt')),
     failureDecision: json['failureDecision'] as String?,
+    riderName: json['riderName'] as String?,
+    etaMinutes: (json['etaMinutes'] as num?)?.toInt(),
   );
 
   static const fields = [
@@ -199,6 +203,8 @@ class OrderSummary {
     'codAmount',
     'scheduledFor',
     'failureDecision',
+    'riderName',
+    'etaMinutes',
     'createdAt',
   ];
 
@@ -223,6 +229,12 @@ class OrderSummary {
 
   /// Après un échec : RETRY ou RETURN une fois choisi, null tant qu'il faut décider.
   final String? failureDecision;
+
+  /// Livreur attribué : prénom et initiale (null avant l'attribution).
+  final String? riderName;
+
+  /// Minutes avant l'arrivée chez le destinataire quand le livreur roule vers lui.
+  final int? etaMinutes;
 }
 
 /// Portefeuille (GET /me/wallet) : solde Tara de l'expéditeur, solde de la boutique.

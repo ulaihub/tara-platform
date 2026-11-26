@@ -4250,6 +4250,8 @@ export interface components {
       scheduledFor: string | null;
       /** @enum {string|null} */
       failureDecision: 'RETRY' | 'RETURN' | null;
+      riderName: string | null;
+      etaMinutes: number | null;
       /** Format: date-time */
       createdAt: string;
     };

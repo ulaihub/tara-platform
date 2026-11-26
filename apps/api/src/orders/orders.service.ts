@@ -53,6 +53,8 @@ import { DistanceService } from '../routing/distance.service.js';
 import { VehicleBrandEnum, VehicleColorEnum } from '../riders/riders.schemas.js';
 import { receiptUrl } from '../public-tracking/receipt-code.js';
 import { trackingUrl } from './tracking-url.js';
+import { etaFrom } from './eta.js';
+import { PresenceService } from '../dispatch/presence.service.js';
 
 const ADDRESS_INCLUDE = {
   include: { neighborhood: { select: { id: true, name: true } } },
@@ -161,6 +163,7 @@ export class OrdersService implements OnModuleInit {
     private readonly notifications: NotificationService,
     @Inject(ENV) private readonly env: Env,
     private readonly distance: DistanceService,
+    private readonly presence: PresenceService,
   ) {}
 
   /** Le client d'un colis en attente a placé son point : le colis part (voir releasePending). */
@@ -356,7 +359,12 @@ export class OrdersService implements OnModuleInit {
     const cached = this.routes.get(key);
     if (cached) return cached;
     const route = await this.distance.path(from, to);
-    const dto = { meters: route.meters, seconds: route.seconds, source: route.source, path: route.path };
+    const dto = {
+      meters: route.meters,
+      seconds: route.seconds,
+      source: route.source,
+      path: route.path,
+    };
     // Repli en ligne droite : pas gardé, OSRM peut revenir à la prochaine ouverture.
     if (route.source === 'osrm') {
       if (this.routes.size >= 2_000) this.routes.delete(this.routes.keys().next().value!);
@@ -398,10 +406,26 @@ export class OrdersService implements OnModuleInit {
       orderBy: { id: 'desc' },
       take: query.limit + 1,
       include: {
-        dropoffAddress: { select: { landmark: true, neighborhood: { select: { name: true } } } },
+        pickupAddress: { select: { latitude: true, longitude: true } },
+        dropoffAddress: {
+          select: {
+            landmark: true,
+            latitude: true,
+            longitude: true,
+            neighborhood: { select: { name: true } },
+          },
+        },
+        rider: { select: { id: true, user: { select: { fullName: true } } } },
       },
     });
     const page = pageOf(rows, query.limit);
+    const moving = page.items.filter(
+      (order) => order.rider && (order.status === 'PICKED_UP' || order.status === 'IN_DELIVERY'),
+    );
+    const positions = await this.presence.positions([
+      ...new Set(moving.flatMap((order) => order.rider?.id ?? [])),
+    ]);
+    const now = new Date();
     return {
       items: page.items.map((order) => ({
         id: order.id,
@@ -415,6 +439,16 @@ export class OrdersService implements OnModuleInit {
         codAmount: order.codAmount,
         scheduledFor: order.scheduledFor?.toISOString() ?? null,
         failureDecision: order.status === 'DELIVERY_FAILED' ? order.failureDecision : null,
+        riderName: order.rider ? shortName(order.rider.user.fullName) : null,
+        etaMinutes:
+          order.rider && moving.includes(order)
+            ? (etaFrom(
+                positions.get(order.rider.id),
+                order.pickupAddress,
+                order.dropoffAddress,
+                now,
+              )?.minutes ?? null)
+            : null,
         createdAt: order.createdAt.toISOString(),
       })),
       nextCursor: page.nextCursor,

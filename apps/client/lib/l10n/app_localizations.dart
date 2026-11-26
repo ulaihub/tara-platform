@@ -734,6 +734,36 @@ abstract class AppLocalizations {
   /// **'Livraison impossible · à décider'**
   String get statusFailed;
 
+  /// No description provided for @statusRiderComingYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur en route vers vous'**
+  String get statusRiderComingYou;
+
+  /// No description provided for @statusRiderComingShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur en route vers votre boutique'**
+  String get statusRiderComingShop;
+
+  /// No description provided for @statusRiderArriving.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} arrive'**
+  String statusRiderArriving(String name);
+
+  /// No description provided for @statusFailedYouDecide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison impossible · à vous de décider'**
+  String get statusFailedYouDecide;
+
+  /// No description provided for @etaMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min'**
+  String etaMinutes(int minutes);
+
   /// No description provided for @todayAt.
   ///
   /// In fr, this message translates to:
