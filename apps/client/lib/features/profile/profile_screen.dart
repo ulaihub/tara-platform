@@ -792,13 +792,13 @@ class _LogoutBlock extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: GlassButton(label: l.cancel, height: 48, radius: 14, onPressed: busy ? null : onCancel),
+                child: GlassButton(label: l.cancel, onPressed: busy ? null : onCancel),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: busy
                     ? const SizedBox(height: 48, child: Center(child: GooLoader(compact: true)))
-                    : GlassButton(label: l.logout, height: 48, radius: 14, color: c.dangerText, onPressed: onLogout),
+                    : GlassButton(label: l.logout, color: c.dangerText, onPressed: onLogout),
               ),
             ],
           ),
@@ -969,7 +969,6 @@ class _AddressesCardState extends ConsumerState<_AddressesCard> {
                     icon: TaraIcons.close,
                     label: l.removeAddress(address.label ?? ''),
                     size: 40,
-                    radius: 14,
                     onPressed: () => setState(() {
                       _confirming = address.id;
                       _error = null;

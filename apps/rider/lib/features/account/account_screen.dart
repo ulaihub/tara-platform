@@ -401,14 +401,7 @@ class _DocumentsSummary extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            GlassButton(
-              label: l.sendAgain,
-              icon: TaraIcons.camera,
-              height: 48,
-              radius: 14,
-              color: c.accentText,
-              onPressed: onOpen,
-            ),
+            GlassButton(label: l.sendAgain, icon: TaraIcons.camera, color: c.accentText, onPressed: onOpen),
           ],
         ),
       );
@@ -860,13 +853,13 @@ class _LogoutBlock extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: GlassButton(label: l.cancel, height: 48, radius: 14, onPressed: busy ? null : onCancel),
+                child: GlassButton(label: l.cancel, onPressed: busy ? null : onCancel),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: busy
                     ? const SizedBox(height: 48, child: Center(child: GooLoader(compact: true)))
-                    : GlassButton(label: l.logout, height: 48, radius: 14, color: c.dangerText, onPressed: onLogout),
+                    : GlassButton(label: l.logout, color: c.dangerText, onPressed: onLogout),
               ),
             ],
           ),

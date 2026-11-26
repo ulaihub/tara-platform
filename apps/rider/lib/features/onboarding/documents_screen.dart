@@ -223,8 +223,6 @@ class _DocumentRow extends StatelessWidget {
                   child: GlassButton(
                     label: status == DocumentStatus.toDo ? l.takePhoto : l.sendAgain,
                     icon: TaraIcons.camera,
-                    height: 48,
-                    radius: 14,
                     color: c.accentText,
                     onPressed: () => onTake(main.type, main.asksExpiry),
                   ),

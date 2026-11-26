@@ -359,10 +359,10 @@ class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
                           button: true,
                           enabled: false,
                           child: Container(
-                            height: 58,
+                            height: 50,
                             decoration: BoxDecoration(
                               color: c.textPrimary.withValues(alpha: .08),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(25),
                             ),
                             alignment: Alignment.center,
                             child: Text(_signup ? s.createAccount : s.acceptUpdate, style: disabled),

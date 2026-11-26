@@ -178,14 +178,14 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            GlassButton(label: l.openWallet, icon: TaraIcons.wallet, height: 48, onPressed: _openWallet),
+            GlassButton(label: l.openWallet, icon: TaraIcons.wallet, onPressed: _openWallet),
           ],
           if (_error != null) ...[
             const SizedBox(height: 12),
             ErrorLine(_error!),
             if (_walletError && blocker == null) ...[
               const SizedBox(height: 10),
-              GlassButton(label: l.openWallet, icon: TaraIcons.wallet, height: 48, onPressed: _openWallet),
+              GlassButton(label: l.openWallet, icon: TaraIcons.wallet, onPressed: _openWallet),
             ],
           ],
         ],

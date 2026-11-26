@@ -576,7 +576,7 @@ void main() {
     await settle(tester);
     expect(find.byType(NewOrderFlow), findsNothing);
     // … et le « + » au centre de la barre, depuis n'importe quel onglet.
-    await tester.tap(find.text('Commandes'));
+    await tester.tap(find.bySemanticsLabel('Commandes').last);
     await settle(tester);
     await tester.tap(find.bySemanticsLabel('Nouvelle livraison'));
     await settle(tester);

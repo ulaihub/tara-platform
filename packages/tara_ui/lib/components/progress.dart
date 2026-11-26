@@ -175,8 +175,9 @@ class LiquidSegmented<T> extends StatelessWidget {
     final c = TaraColors.of(context);
     final index = segments.indexWhere((s) => s.$1 == selected);
     // Maquettes : rail encre 7 %, bord encre 10 %, marge 4, coins 17, segments de 50.
-    final height = compact ? 34.0 : 58.0;
-    final radius = compact ? 12.0 : 17.0;
+    // Finesse : rail en pilule, curseur en pilule.
+    final height = compact ? 34.0 : 46.0;
+    final radius = height / 2;
     final pad = compact ? 3.0 : 4.0;
     return Container(
       constraints: BoxConstraints(minHeight: height),

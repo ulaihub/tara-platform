@@ -4,6 +4,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../motion/effects.dart';
 import '../tara_colors.dart';
 import '../tara_effects.dart';
 import '../tara_icons.dart';
@@ -72,7 +73,7 @@ class FloatingTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (pill) return _PillTabBar(items: items, current: current, onSelected: onSelected);
+    if (pill) return _PillTabBar(items: items, current: current, onSelected: onSelected, action: action);
     final effects = TaraEffects.of(context);
     // Posée au-dessus des écrans : sans ce Material transparent, ses textes n'auraient pas
     // de style de base (soulignés en jaune par Flutter).
@@ -133,11 +134,14 @@ class FloatingTabBar extends StatelessWidget {
 /// Barre fine en pilule : verre clair ajusté aux onglets, centré ; l'onglet choisi est une
 /// pastille sombre (claire en thème sombre) avec icône et nom, les autres une icône seule.
 class _PillTabBar extends StatelessWidget {
-  const _PillTabBar({required this.items, required this.current, required this.onSelected});
+  const _PillTabBar({required this.items, required this.current, required this.onSelected, this.action});
 
   final List<TabItem> items;
   final int current;
   final ValueChanged<int> onSelected;
+
+  /// Bouton « + » rond au dégradé de la marque, au milieu des onglets.
+  final TabAction? action;
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +158,16 @@ class _PillTabBar extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  for (var i = 0; i < items.length; i++)
-                    _PillTab(item: items[i], selected: i == current, onTap: () => onSelected(i)),
+                  for (var i = 0; i < items.length; i++) ...[
+                    if (action != null && i == items.length ~/ 2) _PillAction(action: action!),
+                    // Écran étroit ou grand texte : le nom de l'onglet choisi se raccourcit.
+                    if (i == current)
+                      Flexible(
+                        child: _PillTab(item: items[i], selected: true, onTap: () => onSelected(i)),
+                      )
+                    else
+                      _PillTab(item: items[i], selected: false, onTap: () => onSelected(i)),
+                  ],
                 ],
               ),
             ),
@@ -185,38 +197,101 @@ class _PillTab extends StatelessWidget {
       button: true,
       label: item.label,
       excludeSemantics: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          if (!selected) HapticFeedback.selectionClick();
-          onTap();
-        },
-        child: AnimatedContainer(
-          duration: duration,
-          curve: Curves.easeOutCubic,
-          constraints: const BoxConstraints(minWidth: 52),
-          padding: EdgeInsets.symmetric(horizontal: selected ? 16 : 14),
-          decoration: BoxDecoration(
-            color: selected ? fill : fill.withValues(alpha: 0),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          alignment: Alignment.center,
-          child: AnimatedSize(
+      child: Squish(
+        depth: .9,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (!selected) HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: AnimatedContainer(
             duration: duration,
             curve: Curves.easeOutCubic,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TaraIcon(item.icon, size: 20, strokeWidth: selected ? 2 : 1.8, color: ink),
-                if (selected) ...[
-                  const SizedBox(width: 8),
-                  Text(
-                    item.label,
-                    maxLines: 1,
-                    style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: ink),
-                  ),
-                ],
-              ],
+            constraints: const BoxConstraints(minWidth: 52),
+            padding: EdgeInsets.symmetric(horizontal: selected ? 16 : 14),
+            decoration: BoxDecoration(
+              color: selected ? fill : fill.withValues(alpha: 0),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Center(
+              widthFactor: 1,
+              child: AnimatedSize(
+                duration: duration,
+                curve: Curves.easeOutCubic,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TaraIcon(item.icon, size: 20, strokeWidth: selected ? 2 : 1.8, color: ink),
+                    if (selected) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          item.label,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: ink),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// « + » de la barre fine : rond de 40 au dégradé de la marque ; au toucher il s'enfonce,
+/// tourne d'un quart de tour avec un ressort, puis ouvre l'écran.
+class _PillAction extends StatefulWidget {
+  const _PillAction({required this.action});
+  final TabAction action;
+
+  @override
+  State<_PillAction> createState() => _PillActionState();
+}
+
+class _PillActionState extends State<_PillAction> {
+  double _turns = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final motion = TaraEffects.of(context).decorativeMotion;
+    return Semantics(
+      button: true,
+      label: widget.action.label,
+      excludeSemantics: true,
+      child: Squish(
+        depth: .88,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            setState(() => _turns += .25);
+            widget.action.onPressed();
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: AnimatedRotation(
+              turns: _turns,
+              duration: motion ? const Duration(milliseconds: 600) : Duration.zero,
+              curve: Curves.elasticOut,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: TaraBrand.gradient,
+                  boxShadow: [BoxShadow(color: Color.fromRGBO(255, 90, 0, .35), blurRadius: 12, offset: Offset(0, 4))],
+                ),
+                alignment: Alignment.center,
+                child: TaraIcon(widget.action.icon, size: 20, strokeWidth: 2.4, color: TaraBrand.onBrand),
+              ),
             ),
           ),
         ),

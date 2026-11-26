@@ -76,14 +76,9 @@ class RiderApi {
   );
 
   /// Marque, couleur et plaque, montrées à l'expéditeur pour reconnaître le livreur.
-  Future<RiderProfile> setVehicle({String? brand, String? color, String? plateNumber}) async =>
-      RiderProfile.fromJson(
-        await _api.put(
-              '/riders/me/vehicle',
-              body: {'brand': brand, 'color': color, 'plateNumber': ?plateNumber},
-            )
-            as Json,
-      );
+  Future<RiderProfile> setVehicle({String? brand, String? color, String? plateNumber}) async => RiderProfile.fromJson(
+    await _api.put('/riders/me/vehicle', body: {'brand': brand, 'color': color, 'plateNumber': ?plateNumber}) as Json,
+  );
 
   Future<RiderProfile> removeEmergencyContact() async =>
       RiderProfile.fromJson(await _api.delete('/riders/me/emergency-contact') as Json);

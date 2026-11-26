@@ -801,7 +801,6 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
                   child: GlassButton(
                     label: l.topUpAction,
                     icon: TaraIcons.wallet,
-                    height: 48,
                     color: c.accentText,
                     onPressed: widget.onTopUp,
                   ),
@@ -809,12 +808,7 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
                 if (canWithdraw) ...[
                   const SizedBox(width: 10),
                   Expanded(
-                    child: GlassButton(
-                      label: l.withdrawAction,
-                      icon: TaraIcons.send,
-                      height: 48,
-                      onPressed: widget.onWithdraw,
-                    ),
+                    child: GlassButton(label: l.withdrawAction, icon: TaraIcons.send, onPressed: widget.onWithdraw),
                   ),
                 ],
               ],

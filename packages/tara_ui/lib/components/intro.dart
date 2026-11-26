@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../motion/effects.dart';
 import '../motion/motion_clock.dart';
 import '../tara_colors.dart';
 import '../tara_icons.dart';
@@ -120,7 +121,7 @@ class _IntroScreenState extends State<IntroScreen> {
     final bottom = math.max(28.0, padding.bottom);
     const header = 20.0 + 44;
     // Points, bouton, et au moins 16 entre le texte et les points.
-    final footer = 16 + 6 + 22 + 58 + bottom;
+    final footer = 16 + 6 + 22 + 52 + bottom;
     return Material(
       color: c.bg,
       child: MotionClock(
@@ -486,8 +487,8 @@ class _FlowPainter extends CustomPainter {
   bool shouldRepaint(_FlowPainter old) => old.t != t;
 }
 
-/// Bouton de la maquette : 58 de haut, coins 20, « Suivant » à gauche et flèche ambre
-/// dans un carré sombre de 46 ; « Commencer » centré, sans flèche, au dernier écran.
+/// Bouton fin en pilule (52) : « Suivant » à gauche et flèche ambre dans un rond sombre à
+/// droite ; « Commencer » centré, sans flèche, au dernier écran ; rebond au toucher.
 class _IntroButton extends StatelessWidget {
   const _IntroButton({super.key, required this.label, required this.arrow, required this.onPressed});
 
@@ -500,37 +501,39 @@ class _IntroButton extends StatelessWidget {
     button: true,
     label: label,
     excludeSemantics: true,
-    child: GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onPressed();
-      },
-      child: Container(
-        height: 58,
-        padding: EdgeInsets.fromLTRB(arrow ? 22 : 6, 6, 6, 6),
-        decoration: BoxDecoration(
-          gradient: TaraBrand.gradient,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [BoxShadow(color: Color.fromRGBO(255, 90, 0, .32), blurRadius: 30, offset: Offset(0, 14))],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                textAlign: arrow ? TextAlign.left : TextAlign.center,
-                style: TaraText.buttonStrong.copyWith(color: TaraBrand.onBrand),
+    child: Squish(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onPressed();
+        },
+        child: Container(
+          height: 52,
+          padding: EdgeInsets.fromLTRB(arrow ? 22 : 6, 5, 5, 5),
+          decoration: BoxDecoration(
+            gradient: TaraBrand.gradient,
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: const [BoxShadow(color: Color.fromRGBO(255, 90, 0, .26), blurRadius: 18, offset: Offset(0, 8))],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: arrow ? TextAlign.left : TextAlign.center,
+                  style: TaraText.button.copyWith(fontSize: 16, color: TaraBrand.onBrand),
+                ),
               ),
-            ),
-            if (arrow)
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(color: TaraBrand.onBrand, borderRadius: BorderRadius.circular(15)),
-                alignment: Alignment.center,
-                child: const TaraIcon(TaraIcons.arrowRight, size: 22, strokeWidth: 2.4, color: TaraBrand.amber),
-              ),
-          ],
+              if (arrow)
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: const BoxDecoration(color: TaraBrand.onBrand, shape: BoxShape.circle),
+                  alignment: Alignment.center,
+                  child: const TaraIcon(TaraIcons.arrowRight, size: 18, strokeWidth: 2.2, color: TaraBrand.amber),
+                ),
+            ],
+          ),
         ),
       ),
     ),

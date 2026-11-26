@@ -599,7 +599,7 @@ class _ActionBox extends StatelessWidget {
         ),
       ],
     );
-    final button = GlassButton(label: action, height: 44, radius: 14, onPressed: onAction);
+    final button = GlassButton(label: action, height: 44, onPressed: onAction);
     if (secondaryAction case final secondary?) {
       return TintBox(
         tone: tone,
@@ -614,7 +614,7 @@ class _ActionBox extends StatelessWidget {
                 Expanded(child: button),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: GlassButton(label: secondary, height: 44, radius: 14, onPressed: onSecondary),
+                  child: GlassButton(label: secondary, height: 44, onPressed: onSecondary),
                 ),
               ],
             ),

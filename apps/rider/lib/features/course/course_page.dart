@@ -68,18 +68,18 @@ class _CoursePageState extends ConsumerState<CoursePage> {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [c.bg.withValues(alpha: .55), c.bg.withValues(alpha: 0), c.bg.withValues(alpha: 0), c.bg],
+                        colors: [
+                          c.bg.withValues(alpha: .55),
+                          c.bg.withValues(alpha: 0),
+                          c.bg.withValues(alpha: 0),
+                          c.bg,
+                        ],
                         stops: const [0, .3, .88, 1],
                       ),
                     ),
                   ),
                 ),
-                Positioned(
-                  left: 20,
-                  right: 20,
-                  top: insets.top + 18,
-                  child: widget.header,
-                ),
+                Positioned(left: 20, right: 20, top: insets.top + 18, child: widget.header),
                 Positioned(
                   right: 16,
                   bottom: 14,
@@ -88,7 +88,6 @@ class _CoursePageState extends ConsumerState<CoursePage> {
                     label: l.recenterMap,
                     badge: !_following,
                     size: 44,
-                    radius: 16,
                     onPressed: _map.recenter,
                   ),
                 ),

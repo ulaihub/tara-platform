@@ -27,7 +27,7 @@ class TaraTextField extends StatefulWidget {
     this.autofocus = false,
     this.leading,
     this.trailing,
-    this.height = 48,
+    this.height = 46,
     this.textCapitalization = TextCapitalization.none,
     this.minLines = 1,
     this.maxLines = 1,
@@ -83,12 +83,13 @@ class _TaraTextFieldState extends State<TaraTextField> {
     final field = AnimatedContainer(
       duration: const Duration(milliseconds: 160),
       constraints: BoxConstraints(minHeight: widget.height),
-      padding: EdgeInsets.only(left: 16, right: widget.trailing == null ? 16 : 8),
+      padding: EdgeInsets.only(left: 18, right: widget.trailing == null ? 18 : 6),
       decoration: BoxDecoration(
         color: c.inputBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: focused ? TaraBrand.focusBorder : c.chipBorder, width: focused ? 1.5 : 1),
-        boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 4)] : null,
+        // Finesse : pilule pour une ligne, filet d'un pixel, halo discret au focus.
+        borderRadius: BorderRadius.circular(widget.maxLines > 1 ? 18 : widget.height / 2),
+        border: Border.all(color: focused ? TaraBrand.focusBorder : c.chipBorder, width: focused ? 1.2 : 1),
+        boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 3)] : null,
       ),
       child: Row(
         crossAxisAlignment: widget.maxLines > 1 ? CrossAxisAlignment.end : CrossAxisAlignment.center,
@@ -112,13 +113,13 @@ class _TaraTextFieldState extends State<TaraTextField> {
               // La limite suffit : pas de compteur de caractères sous le champ.
               buildCounter: (_, {required currentLength, required isFocused, required maxLength}) => null,
               cursorColor: TaraBrand.orange,
-              style: TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 16),
+              style: TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 15, fontWeight: FontWeight.w600),
               decoration: InputDecoration(
                 isCollapsed: true,
                 border: InputBorder.none,
                 hintText: widget.hint,
-                hintStyle: TaraText.body.copyWith(color: c.placeholder, fontSize: 16),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                hintStyle: TaraText.body.copyWith(color: c.placeholder, fontSize: 15),
+                contentPadding: const EdgeInsets.symmetric(vertical: 11),
               ),
             ),
           ),
@@ -198,7 +199,7 @@ class CodeCells extends StatefulWidget {
     required this.digitLabel,
     this.onChanged,
     this.onCompleted,
-    this.cellHeight = 64,
+    this.cellHeight = 56,
     this.autofocus = true,
     this.controller,
     this.oneTimeCode = false,
@@ -285,15 +286,15 @@ class _CodeCellsState extends State<CodeCells> {
             height: widget.cellHeight,
             decoration: BoxDecoration(
               color: filled ? filledBg : emptyBg,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isActive ? TaraBrand.focusBorder : (filled ? filledBorder : emptyBorder),
-                width: isActive ? 1.5 : 1,
+                width: isActive ? 1.2 : 1,
               ),
-              boxShadow: isActive ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 4)] : null,
+              boxShadow: isActive ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 3)] : null,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(17),
+              borderRadius: BorderRadius.circular(15),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -382,7 +383,7 @@ class ChoiceChips<T> extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.columns = 2,
-    this.height = 48,
+    this.height = 42,
   });
 
   final List<ChoiceOption<T>> options;
@@ -402,47 +403,49 @@ class ChoiceChips<T> extends StatelessWidget {
         button: true,
         label: option.label,
         excludeSemantics: true,
-        child: GestureDetector(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onSelected(option.value);
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            constraints: BoxConstraints(minHeight: height),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? null : c.chipBg,
-              gradient: isSelected ? c.chipSelected : null,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: isSelected ? c.chipSelectedBorder : c.chipBorder,
-                width: isSelected ? c.chipSelectedBorderWidth : 1,
+        child: Squish(
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onSelected(option.value);
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              constraints: BoxConstraints(minHeight: height),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? null : c.chipBg,
+                gradient: isSelected ? c.chipSelected : null,
+                borderRadius: BorderRadius.circular(height / 2),
+                border: Border.all(
+                  color: isSelected ? c.chipSelectedBorder : c.chipBorder,
+                  width: isSelected ? c.chipSelectedBorderWidth : 1,
+                ),
               ),
-            ),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (option.leading != null) ...[
-                    option.leading!,
-                    const SizedBox(width: 8),
-                  ] else if (option.icon != null) ...[
-                    TaraIcon(option.icon!, size: 18, color: isSelected ? c.accentText : c.textSecondary),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(
-                    child: Text(
-                      option.label,
-                      textAlign: TextAlign.center,
-                      style: TaraText.text.copyWith(
-                        color: isSelected ? c.textPrimary : c.textSecondary,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                        fontFeatures: TaraText.tabular,
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (option.leading != null) ...[
+                      option.leading!,
+                      const SizedBox(width: 8),
+                    ] else if (option.icon != null) ...[
+                      TaraIcon(option.icon!, size: 18, color: isSelected ? c.accentText : c.textSecondary),
+                      const SizedBox(width: 8),
+                    ],
+                    Flexible(
+                      child: Text(
+                        option.label,
+                        textAlign: TextAlign.center,
+                        style: TaraText.text.copyWith(
+                          color: isSelected ? c.textPrimary : c.textSecondary,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                          fontFeatures: TaraText.tabular,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -673,7 +676,8 @@ class _BoxedFieldState extends State<BoxedField> {
     final c = TaraColors.of(context);
     final focused = _focus.hasFocus;
     final valueStyle =
-        widget.valueStyle ?? TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 16, height: 1.3);
+        widget.valueStyle ??
+        TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 15, fontWeight: FontWeight.w700, height: 1.3);
     final Widget value = widget.controller == null
         ? Row(
             children: [
@@ -704,16 +708,16 @@ class _BoxedFieldState extends State<BoxedField> {
           );
     final box = AnimatedContainer(
       duration: const Duration(milliseconds: 160),
-      constraints: const BoxConstraints(minHeight: 56),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      constraints: const BoxConstraints(minHeight: 52),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
       decoration: BoxDecoration(
         color: boxedFieldFill(c),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: focused ? TaraBrand.focusBorder : c.textPrimary.withValues(alpha: .14),
-          width: focused ? 1.5 : 1,
+          color: focused ? TaraBrand.focusBorder : c.textPrimary.withValues(alpha: .12),
+          width: focused ? 1.2 : 1,
         ),
-        boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 4)] : null,
+        boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 3)] : null,
       ),
       child: Row(
         children: [
@@ -726,9 +730,11 @@ class _BoxedFieldState extends State<BoxedField> {
                 Text(
                   widget.label,
                   style: TaraText.smallStrong.copyWith(
-                    fontSize: 11,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
                     height: 1.3,
-                    color: c.textPrimary.withValues(alpha: .62),
+                    letterSpacing: .2,
+                    color: c.textPrimary.withValues(alpha: .55),
                   ),
                 ),
                 value,

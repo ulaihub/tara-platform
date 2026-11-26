@@ -229,7 +229,6 @@ class _RecipientStepState extends ConsumerState<RecipientStep> {
                   child: GlassButton(
                     label: l.viaWhatsapp,
                     icon: TaraIcons.message,
-                    height: 46,
                     color: c.accentText,
                     onPressed: _sending ? null : () => unawaited(_ask(whatsapp: true)),
                   ),
@@ -239,7 +238,6 @@ class _RecipientStepState extends ConsumerState<RecipientStep> {
                   child: GlassButton(
                     label: l.viaSms,
                     icon: TaraIcons.message,
-                    height: 46,
                     onPressed: _sending ? null : () => unawaited(_ask(whatsapp: false)),
                   ),
                 ),
