@@ -478,6 +478,9 @@ class Address {
     required this.longitude,
     required this.verified,
     required this.motorbikeRestricted,
+    this.hasPhoto = false,
+    this.hasVoiceNote = false,
+    this.source = 'SENDER',
   });
 
   factory Address.fromJson(Json json) {
@@ -493,6 +496,9 @@ class Address {
       longitude: _field<num>(json, 'longitude').toDouble(),
       verified: json['verifiedAt'] != null,
       motorbikeRestricted: json['motorbikeRestricted'] == true,
+      hasPhoto: json['photoKey'] != null,
+      hasVoiceNote: json['voiceNoteKey'] != null,
+      source: json['source'] as String? ?? 'SENDER',
     );
   }
 
@@ -507,6 +513,9 @@ class Address {
     'longitude',
     'verifiedAt',
     'motorbikeRestricted',
+    'photoKey',
+    'voiceNoteKey',
+    'source',
   ];
 
   final String id;
@@ -524,6 +533,13 @@ class Address {
   /// Dans une zone interdite aux motos (B6).
   final bool motorbikeRestricted;
 
+  /// Photo de la façade et note vocale jointes (B2).
+  final bool hasPhoto;
+  final bool hasVoiceNote;
+
+  /// Qui a placé le point : SENDER, LOCATION_LINK (le destinataire), DELIVERY_CONFIRMED…
+  final String source;
+
   /// « Bonapriso · Portail bleu après la pharmacie ».
   String get summary => [?neighborhood?.name, landmark].join(' · ');
 
@@ -540,25 +556,38 @@ class Address {
     'longitude': longitude,
     'verifiedAt': verified ? 'verified' : null,
     'motorbikeRestricted': motorbikeRestricted,
+    'photoKey': hasPhoto ? 'photo' : null,
+    'voiceNoteKey': hasVoiceNote ? 'voice' : null,
+    'source': source,
   };
 }
 
 /// Destinataire fréquent du carnet (B5), avec sa dernière adresse.
 @immutable
 class Recipient {
-  const Recipient({required this.name, required this.phone, required this.ordersCount, required this.lastAddress});
+  const Recipient({
+    required this.name,
+    required this.phone,
+    required this.ordersCount,
+    required this.lastAddress,
+    this.lastOrderAt,
+  });
   factory Recipient.fromJson(Json json) => Recipient(
     name: _field(json, 'name'),
     phone: _field(json, 'phone'),
     ordersCount: _field<num>(json, 'ordersCount').toInt(),
     lastAddress: Address.fromJson(_field<Json>(json, 'lastAddress')),
+    lastOrderAt: _date(json['lastOrderAt']),
   );
-  static const fields = ['name', 'phone', 'ordersCount', 'lastAddress'];
+  static const fields = ['name', 'phone', 'ordersCount', 'lastOrderAt', 'lastAddress'];
 
   final String name;
   final String phone;
   final int ordersCount;
   final Address lastAddress;
+
+  /// Dernière livraison envoyée à ce destinataire.
+  final DateTime? lastOrderAt;
 }
 
 /// Lien de localisation (B3) envoyé au destinataire pour qu'il place son point.

@@ -12,6 +12,8 @@ import 'package:tara_client/core/media/address_media.dart';
 import 'package:tara_client/features/home/home_flow.dart';
 import 'package:tara_client/features/order/address_editor.dart';
 import 'package:tara_client/features/order/new_order_flow.dart';
+import 'package:tara_client/features/order/parcel_photo_card.dart';
+import 'package:tara_client/features/order/recipient_step.dart';
 import 'package:tara_client/features/order/when_step.dart';
 import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/session/session_store.dart';
@@ -95,11 +97,23 @@ Widget flow(
   child: NewOrderFlow(me: me, onClose: onClose ?? () {}, now: () => homeNow),
 );
 
+/// Destinataire pris dans les récents, par le bouton contacts du numéro.
+Future<void> pickRecent(WidgetTester tester, String name) async {
+  await tester.tap(find.byKey(recipientContactsKey));
+  await settle(tester);
+  await tester.tap(find.textContaining(name, findRichText: true).last);
+  await settle(tester);
+  await tester.tap(find.text('Ajouter 1 client'));
+  await settle(tester);
+}
+
+/// Bouton à glisser : son libellé lu annonce le prix.
+Finder orderFor(String amount) => find.bySemanticsLabel('Commander · $amount');
+
 /// Étape 3 : enlèvement choisi d'office, destinataire pris dans les récents.
 Future<void> toPackage(WidgetTester tester) async {
   await toRecipient(tester);
-  await tester.tap(find.text('Marie'));
-  await settle(tester);
+  await pickRecent(tester, 'Marie Ngo');
   await tester.tap(find.text('Continuer'));
   await settle(tester);
 }
@@ -173,7 +187,7 @@ void main() {
     goldenTest('05 adresse sur la carte ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, flow(orderApi()));
       await settle(tester);
-      await tester.tap(find.text('Nouvelle adresse'));
+      await tester.tap(find.text('Nouvelle adresse sur la carte'));
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(find.byType(AddressEditor), matchesGoldenFile('goldens/05_adresse_carte/${variant.name}.png'));
@@ -192,7 +206,7 @@ void main() {
       await toSummary(tester);
       expect(tester.takeException(), isNull);
       expect(find.text('Étape 5 sur 5 · Récapitulatif'), findsOneWidget);
-      expect(find.text('Commander · 1\u00a0200\u00a0F'), findsOneWidget);
+      expect(orderFor('1\u00a0200\u00a0F'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/${variant.name}.png'));
     });
 
@@ -220,9 +234,9 @@ void main() {
     goldenTest('05 destinataire choisi ${brightness.name}', (tester) async {
       await pumpVariant(tester, variant, flow(orderApi()), surface: const Size(390, 900));
       await toRecipient(tester);
-      await tester.tap(find.text('Marie'));
-      await settle(tester);
-      expect(find.text('Adresse confirmée par une livraison'), findsOneWidget);
+      await pickRecent(tester, 'Marie Ngo');
+      expect(find.text('Adresse déjà connue'), findsOneWidget);
+      expect(find.textContaining('confirmée par une livraison ✓'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_destinataire/choisi_${brightness.name}.png'));
     });
 
@@ -230,6 +244,7 @@ void main() {
       await pumpVariant(tester, variant, flow(orderApi()), surface: const Size(390, 900));
       await toRecipient(tester);
       await typeRecipient(tester);
+      await tapVisible(tester, 'Demander au destinataire');
       await tester.tap(find.text('WhatsApp'));
       await settle(tester);
       expect(find.text('Lien envoyé à Paul'), findsOneWidget);
@@ -258,10 +273,10 @@ void main() {
       await toPackage(tester);
       await tester.tap(find.text('Cuisine, maison'));
       await tester.enterText(find.byType(TextField).at(0), 'Réfrigérateur 2 portes');
-      await tester.tap(find.text('Gros objet'));
+      await tester.tap(find.text('Gros'));
       await settle(tester);
       expect(
-        find.text('Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.'),
+        find.text('Frigo, cuisinière, matelas, meuble : livré en tricycle. Tarif affiché avant de commander.'),
         findsOne,
       );
       await tester.tap(find.text('Aide pour charger'));
@@ -278,7 +293,7 @@ void main() {
       expect(api.quotes.last, containsPair('size', 'BULKY'));
       expect(api.quotes.last, containsPair('loadingHelp', true));
       expect(find.text('Manutention (chargement à deux)'), findsOneWidget);
-      expect(find.text('Commander · 4\u00a0500\u00a0F'), findsOneWidget);
+      expect(orderFor('4\u00a0500\u00a0F'), findsOneWidget);
       expect(find.textContaining('son déplacement (1\u00a0500 F) reste à votre charge'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/gros_objet_${brightness.name}.png'));
     });
@@ -298,8 +313,8 @@ void main() {
       await pumpVariant(tester, variant, flow(api), surface: const Size(390, 1900));
       await toPackage(tester);
       final context = tester.element(find.text('Photographier le colis'));
-      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(parcelPhoto)), width: 168), context));
-      await tester.tap(find.text('Prendre la photo'));
+      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(parcelPhoto)), width: 150), context));
+      await tester.tap(find.byKey(parcelPhotoKey));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await settle(tester);
       expect(api.uploads.last, (parcelPhoto, 'PARCEL_PHOTO'));
@@ -323,14 +338,14 @@ void main() {
       // 1 200 F de course, 77 F de frais Mobile Money (6 %), payés en plus.
       expect(find.text('Frais Mobile Money'), findsOneWidget);
       expect(find.text('+77\u00a0F'), findsOneWidget);
-      expect(find.text('Commander · 1\u00a0277\u00a0F'), findsOneWidget);
+      expect(orderFor('1\u00a0277\u00a0F'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/mobile_money_${brightness.name}.png'));
 
       // En espèces : rien de plus.
       await tapVisible(tester, 'Espèces à l’enlèvement');
       await settle(tester);
       expect(find.text('Frais Mobile Money'), findsNothing);
-      expect(find.text('Commander · 1\u00a0200\u00a0F'), findsOneWidget);
+      expect(orderFor('1\u00a0200\u00a0F'), findsOneWidget);
     });
 
     goldenTest('05 quand programmé ${brightness.name}', (tester) async {
@@ -338,7 +353,7 @@ void main() {
       await toWhen(tester);
       await tester.tap(find.text('Programmer'));
       await settle(tester);
-      await tester.tap(find.text('Demain'));
+      await tester.tap(find.text('Dem.'));
       await settle(tester);
       await tester.tap(find.text('20:00'));
       await settle(tester);
@@ -380,13 +395,12 @@ void main() {
       await pumpVariant(tester, variant, flow(api, realtime: realtime), surface: const Size(390, 1500));
       await toSummary(tester);
       await tapVisible(tester, 'Ajouter une livraison');
-      await tester.tap(find.text('Jean'));
-      await settle(tester);
+      await pickRecent(tester, 'Jean Mbarga');
       await tester.tap(find.text('Continuer'));
       await settle(tester);
       await tester.tap(find.text('Cuisine, maison'));
       await tester.enterText(find.byType(TextField).at(0), 'Réfrigérateur 2 portes');
-      await tester.tap(find.text('Gros objet'));
+      await tester.tap(find.text('Gros'));
       await settle(tester);
       await tester.ensureVisible(find.text('Aide pour charger'));
       await tester.tap(find.text('Aide pour charger'));
@@ -425,18 +439,18 @@ void main() {
     final api = FakeClientApi();
     await pumpVariant(tester, Variant.matrix.first, flow(api));
     await settle(tester);
-    await tester.tap(find.text('Nouvelle adresse'));
+    await tester.tap(find.text('Nouvelle adresse sur la carte'));
     await settle(tester);
 
     // Repère trop court : rien n'est envoyé.
     await tester.enterText(find.byType(TextField), 'Rü');
-    await tester.tap(find.text('Enregistrer l’adresse'));
+    await tester.tap(find.text('Valider ce point'));
     await settle(tester);
     expect(find.text('Décrivez un repère visible (3 caractères au moins).'), findsOneWidget);
     expect(api.createdAddresses, isEmpty);
 
     await tester.enterText(find.byType(TextField), '  Rue Joss, immeuble Socar ');
-    await tester.tap(find.text('Enregistrer l’adresse'));
+    await tester.tap(find.text('Valider ce point'));
     await settle(tester);
     expect(api.createdAddresses.single, {
       'latitude': MapPoint.douala.latitude,
@@ -448,7 +462,8 @@ void main() {
       'contactPhone': null,
     });
     expect(find.text('Étape 1 sur 5 · Enlèvement'), findsOneWidget);
-    expect(find.text('Akwa · Rue Joss, immeuble Socar'), findsOneWidget);
+    expect(find.text('Boutique · Akwa'), findsOneWidget);
+    expect(find.text('Rue Joss, immeuble Socar'), findsOneWidget);
 
     await tester.tap(find.text('Continuer'));
     await settle(tester);
@@ -458,17 +473,16 @@ void main() {
   testWidgets('un récent du carnet remplit nom, numéro et adresse', (tester) async {
     await pumpVariant(tester, Variant.matrix.first, flow(orderApi()), surface: const Size(390, 900));
     await toRecipient(tester);
-    await tester.tap(find.text('Jean'));
-    await settle(tester);
+    await pickRecent(tester, 'Jean Mbarga');
     expect(find.widgetWithText(TextField, 'Jean Mbarga'), findsOneWidget);
     expect(find.widgetWithText(TextField, '6 77 44 55 66'), findsOneWidget);
-    expect(find.text('Immeuble bleu derrière la boulangerie'), findsOneWidget);
+    expect(find.text('Immeuble bleu derrière la boulangerie, Deïdo'), findsOneWidget);
+    expect(find.text('Adresse déjà connue'), findsOneWidget);
 
-    // Changer d'adresse rend les deux façons de la donner.
-    await tester.tap(find.text('Changer d’adresse'));
-    await settle(tester);
-    expect(find.text('Placer sur la carte'), findsOneWidget);
-    expect(find.text('Demander au destinataire'), findsOneWidget);
+    // « Demander au destinataire » retire l'adresse et propose le lien.
+    await tapVisible(tester, 'Demander au destinataire');
+    expect(find.text('Immeuble bleu derrière la boulangerie, Deïdo'), findsNothing);
+    expect(find.text('WhatsApp'), findsOneWidget);
   });
 
   testWidgets('le lien de localisation part par WhatsApp et l’adresse arrive', (tester) async {
@@ -488,6 +502,7 @@ void main() {
     );
     await toRecipient(tester);
     await typeRecipient(tester);
+    await tapVisible(tester, 'Demander au destinataire');
     await tester.tap(find.text('WhatsApp'));
     await settle(tester);
 
@@ -515,7 +530,7 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 5));
     await settle(tester);
-    expect(find.text('Maison jaune après le pont'), findsOneWidget);
+    expect(find.text('Maison jaune après le pont, Makepe'), findsOneWidget);
     expect(find.text('Placée par le destinataire'), findsOneWidget);
     expect(sounds.played, [TaraSound.received]);
   });
@@ -524,6 +539,7 @@ void main() {
     final api = orderApi();
     await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 900));
     await toRecipient(tester);
+    await tapVisible(tester, 'Demander au destinataire');
     await tester.ensureVisible(find.text('WhatsApp'));
     await tester.tap(find.text('WhatsApp'));
     await settle(tester);
@@ -540,6 +556,7 @@ void main() {
     );
     await toRecipient(tester);
     await typeRecipient(tester);
+    await tapVisible(tester, 'Demander au destinataire');
     await tester.tap(find.text('WhatsApp'));
     await settle(tester);
     expect(find.text('WhatsApp ne s’est pas ouvert. Essayez par SMS.'), findsOneWidget);
@@ -635,7 +652,7 @@ void main() {
     await tester.tap(find.text('Cuisine, maison'));
     await settle(tester);
     expect(find.text('Aide pour charger'), findsNothing);
-    await tester.tap(find.text('Gros objet'));
+    await tester.tap(find.text('Gros'));
     await settle(tester);
     await tester.tap(find.text('Aide pour charger'));
     await settle(tester);
@@ -643,7 +660,7 @@ void main() {
     await tester.tap(find.text('L'));
     await settle(tester);
     expect(find.text('Aide pour charger'), findsNothing);
-    await tester.tap(find.text('Gros objet'));
+    await tester.tap(find.text('Gros'));
     await settle(tester);
     await tester.tap(find.text('Continuer'));
     await settle(tester);
@@ -665,7 +682,7 @@ void main() {
       );
     await pumpVariant(tester, Variant.matrix.first, flow(api), surface: const Size(390, 1800));
     await toPackage(tester);
-    await tester.tap(find.text('Prendre la photo'));
+    await tester.tap(find.byKey(parcelPhotoKey));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await settle(tester);
     expect(find.text('Photo jointe'), findsOneWidget);
@@ -745,7 +762,7 @@ void main() {
     expect(find.text('Choisissez une heure de passage.'), findsNothing);
     expect(find.text('Enlèvement prévu aujourd’hui à 11:00.'), findsOneWidget);
 
-    await tester.tap(find.text('Demain'));
+    await tester.tap(find.text('Dem.'));
     await settle(tester);
     expect(find.textContaining('Enlèvement prévu'), findsNothing);
     expect(find.text('06:00'), findsOneWidget);
@@ -890,7 +907,7 @@ void main() {
       await tapVisible(tester, 'Appliquer');
       expect(find.text('Code BIENVENUE appliqué'), findsOneWidget);
       expect(find.text('−500\u00a0F'), findsOneWidget);
-      expect(find.text('Commander · 700\u00a0F'), findsOneWidget);
+      expect(orderFor('700\u00a0F'), findsOneWidget);
       await slideToOrder(tester);
       expect(api.created.single.body['promoCode'], 'BIENVENUE');
     });
@@ -904,7 +921,7 @@ void main() {
       // 10 % de 1 200 F = 120 F, arrondis à 100 F pour la monnaie.
       expect(find.text('Tarif pro (10\u00a0%)'), findsOneWidget);
       expect(find.text('−100\u00a0F'), findsOneWidget);
-      expect(find.text('Commander · 1\u00a0100\u00a0F'), findsOneWidget);
+      expect(orderFor('1\u00a0100\u00a0F'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/05_recapitulatif/tarif_pro.png'));
 
       // Tarif pro de 50 % : plus avantageux que le code de 500 F, qui n'est pas consommé.
@@ -927,14 +944,13 @@ void main() {
       await toSummary(tester);
       await tapVisible(tester, 'Ajouter une livraison');
       expect(find.text('Étape 2 sur 5 · Destinataire'), findsOneWidget);
-      await tester.tap(find.text('Jean'));
-      await settle(tester);
+      await pickRecent(tester, 'Jean Mbarga');
       await tester.tap(find.text('Continuer'));
       await settle(tester);
       // Un frigo : tricycle, ses propres frais d'échec.
       await tester.tap(find.text('Cuisine, maison'));
       await tester.enterText(find.byType(TextField).at(0), 'Réfrigérateur 2 portes');
-      await tester.tap(find.text('Gros objet'));
+      await tester.tap(find.text('Gros'));
       FocusManager.instance.primaryFocus?.unfocus();
       await settle(tester);
       await tester.tap(find.text('Continuer'));
@@ -944,7 +960,7 @@ void main() {
       expect(find.text('COLIS N° 1'), findsOneWidget);
       expect(find.text('COLIS N° 2'), findsOneWidget);
       expect(find.text('Total · 2 livraisons'), findsOneWidget);
-      expect(find.text('Commander · 4\u00a0200\u00a0F'), findsOneWidget);
+      expect(orderFor('4\u00a0200\u00a0F'), findsOneWidget);
       expect(find.text('Code promo'), findsNothing);
       // Chaque colis annonce ses frais d'échec : moto et tricycle n'ont pas les mêmes.
       expect(find.text('Si la livraison échoue : nouvelle tentative 500\u00a0F, retour 600\u00a0F'), findsOneWidget);

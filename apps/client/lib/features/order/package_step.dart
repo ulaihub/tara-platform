@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/three_d.dart';
 import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/tara_colors.dart';
-import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
 import '../../core/api/client_models.dart';
@@ -130,24 +131,20 @@ class _PackageStepState extends State<PackageStep> {
     final d = _d;
     final errors = widget.showErrors;
     final other = d.contents == 'OTHER';
-    Widget label(String text) => Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: TaraText.label.copyWith(color: c.textSecondary)),
+    Widget section(String text) => Text(
+      text,
+      style: TaraText.label.copyWith(color: c.textPrimary, fontSize: 13, fontWeight: FontWeight.w800),
     );
-    Widget help(String text) => Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: Text(text, style: TaraText.small.copyWith(color: c.textTertiary)),
-    );
+    const gap = SizedBox(height: 10);
+    final value = d.declaredValue ?? 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
           header: true,
-          child: Text(l.packageTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
+          child: Text(l.packageTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary, fontSize: 22)),
         ),
-        const SizedBox(height: 8),
-        Text(l.packageBody, style: TaraText.body.copyWith(color: c.textSecondary)),
-        const SizedBox(height: 18),
+        gap,
         ParcelPhotoCard(
           delivery: d,
           onAnalyzed: _applyAnalysis,
@@ -158,16 +155,46 @@ class _PackageStepState extends State<PackageStep> {
               ..parcelAnalysis = null,
           ),
         ),
-        const SizedBox(height: 18),
-        label(l.contentsLabel),
+        gap,
+        section(l.sizeLabel),
+        gap,
+        _SizeTiles(
+          selected: d.size,
+          onSelected: (size) => widget.draft.update(
+            (d) => d
+              ..size = size
+              ..sizeChosen = true,
+          ),
+        ),
+        gap,
+        Text(switch (d.size) {
+          'M' => l.sizeHelpM,
+          'L' => l.sizeHelpL,
+          'XL' => l.sizeHelpXL,
+          'BULKY' => l.sizeHelpBulky,
+          _ => l.sizeHelpS,
+        }, style: TaraText.small.copyWith(color: c.textSecondary, fontSize: 12, height: 1.45)),
+        if (d.bulky) ...[
+          gap,
+          _SwitchRow(
+            title: l.loadingHelpTitle,
+            body: l.loadingHelpBody,
+            value: d.loadingHelp,
+            onChanged: (value) => widget.draft.update((d) => d.loadingHelp = value),
+          ),
+        ],
+        gap,
+        section(l.contentsShortLabel),
+        gap,
         ChoiceChips<String>(
+          wrap: true,
           options: [for (final code in packageContentsCodes) ChoiceOption(code, contentsText(l, code))],
           selected: d.contents,
           onSelected: _chooseContents,
         ),
         if (errors && d.contents == null) ...[const SizedBox(height: 6), ErrorLine(l.contentsRequired)],
-        const SizedBox(height: 14),
-        TaraTextField(
+        gap,
+        BoxedField(
           label: other ? l.descriptionLabelRequired : l.descriptionLabel,
           hint: _descriptionHint(l, d.contents),
           controller: _description,
@@ -178,42 +205,7 @@ class _PackageStepState extends State<PackageStep> {
           const SizedBox(height: 6),
           ErrorLine(l.descriptionRequired),
         ],
-        const SizedBox(height: 18),
-        label(l.sizeLabel),
-        _SizeTiles(
-          selected: d.size,
-          onSelected: (size) => widget.draft.update(
-            (d) => d
-              ..size = size
-              ..sizeChosen = true,
-          ),
-        ),
-        const SizedBox(height: 8),
-        _BulkyTile(
-          selected: d.bulky,
-          onTap: () => widget.draft.update(
-            (d) => d
-              ..size = 'BULKY'
-              ..sizeChosen = true,
-          ),
-        ),
-        help(switch (d.size) {
-          'M' => l.sizeHelpM,
-          'L' => l.sizeHelpL,
-          'XL' => l.sizeHelpXL,
-          'BULKY' => l.sizeHelpBulky,
-          _ => l.sizeHelpS,
-        }),
-        if (d.bulky) ...[
-          const SizedBox(height: 14),
-          _SwitchRow(
-            title: l.loadingHelpTitle,
-            body: l.loadingHelpBody,
-            value: d.loadingHelp,
-            onChanged: (value) => widget.draft.update((d) => d.loadingHelp = value),
-          ),
-        ],
-        const SizedBox(height: 14),
+        gap,
         _SwitchRow(
           title: l.fragileTitle,
           body: l.fragileBody,
@@ -225,52 +217,57 @@ class _PackageStepState extends State<PackageStep> {
           ),
         ),
         if (widget.merchant) ...[
-          const SizedBox(height: 18),
-          TaraTextField(
+          gap,
+          BoxedField(
             label: l.codLabel,
             hint: l.codHint,
+            helper: l.codHelp,
             controller: _cod,
             keyboardType: TextInputType.number,
             inputFormatters: [AmountInputFormatter(maxDigits: 7)],
           ),
           if (d.codAmount > DeliveryDraft.maxCod) ...[const SizedBox(height: 6), ErrorLine(l.codTooHigh)],
-          help(l.codHelp),
         ],
-        const SizedBox(height: 18),
-        TaraTextField(
+        gap,
+        BoxedField(
           label: l.valueLabel,
           hint: l.valueHint,
+          helper: l.valueHelpShort,
           controller: _value,
           keyboardType: TextInputType.number,
           inputFormatters: [AmountInputFormatter(maxDigits: 8)],
         ),
-        if ((d.declaredValue ?? 0) > DeliveryDraft.maxDeclaredValue) ...[
-          const SizedBox(height: 6),
-          ErrorLine(l.valueTooHigh),
-        ] else if (d.valueFee > 0) ...[
-          const SizedBox(height: 6),
+        gap,
+        if (value > DeliveryDraft.maxDeclaredValue)
+          ErrorLine(l.valueTooHigh)
+        else
           Text(
-            l.valueFeeHint('${formatAmount(d.valueFee)}\u00a0F'),
-            style: TaraText.small.copyWith(color: c.textPrimary, fontWeight: FontWeight.w600),
+            d.valueFee > 0
+                ? l.valueFeeHint('${formatAmount(d.valueFee)} F')
+                : l.guaranteeFree('${formatAmount(DeliveryDraft.freeGuarantee)} F'),
+            style: TaraText.small.copyWith(
+              color: d.valueFee > 0 ? c.textPrimary : c.success,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ],
-        help(l.valueHelp),
-        const SizedBox(height: 18),
-        TaraTextField(
+        gap,
+        BoxedField(
           label: l.instructionsLabel,
           hint: l.instructionsHint,
           controller: _instructions,
           textCapitalization: TextCapitalization.sentences,
           inputFormatters: [LengthLimitingTextInputFormatter(300)],
         ),
-        const SizedBox(height: 22),
+        gap,
         const ProhibitedItemsNote(),
       ],
     );
   }
 }
 
-/// Les quatre tailles côte à côte : lettre et poids maximal.
+/// Les cinq tailles côte à côte (maquette) : un colis 3D qui grossit, la lettre, le poids ;
+/// la dernière, « Gros », part en tricycle.
 class _SizeTiles extends StatelessWidget {
   const _SizeTiles({required this.selected, required this.onSelected});
 
@@ -281,43 +278,80 @@ class _SizeTiles extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
+    final tiles = [
+      for (final (i, (size, kg)) in packageSizes.indexed)
+        (size, size, l.sizeMax(kg), '$size, ${l.sizeMax(kg)}', 18.0 + 6 * i),
+      ('BULKY', l.sizeBulkyShort, l.sizeBulkyVehicle, '${l.sizeBulky}, ${l.sizeBulkyBody}', 40.0),
+    ];
     return Row(
       children: [
-        for (final (i, (size, kg)) in packageSizes.indexed) ...[
-          if (i > 0) const SizedBox(width: 8),
+        for (final (i, (code, letter, sub, semantic, cube)) in tiles.indexed) ...[
+          if (i > 0) const SizedBox(width: 6),
           Expanded(
             child: Semantics(
               inMutuallyExclusiveGroup: true,
-              checked: size == selected,
+              checked: code == selected,
               button: true,
-              label: '$size, ${l.sizeMax(kg)}',
+              label: semantic,
               excludeSemantics: true,
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  onSelected(size);
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: size == selected ? c.chipSelected : null,
-                    color: size == selected ? null : c.glass,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: size == selected ? c.chipSelectedBorder : c.glassBorder,
-                      width: size == selected ? c.chipSelectedBorderWidth : 1,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        size,
-                        style: TaraText.titlePanel.copyWith(color: size == selected ? c.accentText : c.textPrimary),
+              child: Squish(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onSelected(code);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    height: 104,
+                    padding: EdgeInsets.only(bottom: code == selected ? 9 : 10),
+                    decoration: BoxDecoration(
+                      color: code == selected ? const Color.fromRGBO(255, 138, 0, .10) : boxedFieldFill(c),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: code == selected ? const Color(0xFFFF8A00) : boxedFieldBorder(c),
+                        width: code == selected ? 2 : 1,
                       ),
-                      const SizedBox(height: 2),
-                      Text(l.sizeMax(kg), maxLines: 1, style: TaraText.small.copyWith(color: c.textSecondary)),
-                    ],
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: cube * 1.25,
+                              child: FittedBox(
+                                child: Parcel3D(size: cube, spin: false, floating: false, shadow: false),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            letter,
+                            maxLines: 1,
+                            style: TaraText.text.copyWith(
+                              color: c.textPrimary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              sub,
+                              maxLines: 1,
+                              style: TaraText.small.copyWith(color: c.textTertiary, fontSize: 10),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -325,69 +359,6 @@ class _SizeTiles extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-/// « Gros objet » : sous les quatre tailles, sur toute la largeur. Il ne tient pas sur une
-/// moto ; la course se fait en tricycle, à un tarif propre.
-class _BulkyTile extends StatelessWidget {
-  const _BulkyTile({required this.selected, required this.onTap});
-
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final c = TaraColors.of(context);
-    return Semantics(
-      inMutuallyExclusiveGroup: true,
-      checked: selected,
-      button: true,
-      label: '${l.sizeBulky}, ${l.sizeBulkyBody}',
-      excludeSemantics: true,
-      child: GestureDetector(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          decoration: BoxDecoration(
-            gradient: selected ? c.chipSelected : null,
-            color: selected ? null : c.glass,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: selected ? c.chipSelectedBorder : c.glassBorder,
-              width: selected ? c.chipSelectedBorderWidth : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              TaraIcon(TaraIcons.package, size: 22, color: selected ? c.accentText : c.textSecondary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.sizeBulky,
-                      style: TaraText.text.copyWith(
-                        color: selected ? c.accentText : c.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(l.sizeBulkyBody, style: TaraText.small.copyWith(color: c.textSecondary)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

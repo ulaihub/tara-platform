@@ -37,6 +37,9 @@ import 'when_step.dart';
 /// récapitulatif. « Retour » (ou le geste retour du téléphone) revient à l'étape
 /// précédente ; à la première, il ferme le parcours. La commande part d'un geste
 /// (glisser), puis : paiement Mobile Money s'il le faut, et « Commande envoyée ».
+/// Lien « Fermer » de l'en-tête (tests).
+const newOrderCloseKey = ValueKey('new-order-close');
+
 class NewOrderFlow extends ConsumerStatefulWidget {
   const NewOrderFlow({super.key, required this.me, required this.onClose, this.onTrack, this.now, this.fromLink});
 
@@ -458,38 +461,66 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
         blobs: _blobs,
         child: Column(
           children: [
+            // En-tête de la maquette : retour, « Nouvelle livraison » et l'étape, « Fermer »,
+            // puis la barre d'avancée sur toute la largeur.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
               child: Row(
                 children: [
-                  GlassIconButton(
-                    icon: _step == 0 ? TaraIcons.close : TaraIcons.chevronLeft,
-                    label: _step == 0 ? l.close : l.back,
-                    onPressed: _back,
-                  ),
-                  const SizedBox(width: 14),
+                  GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: _back),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l.stepOf(_step + 1, _total, titles[_step]),
-                          style: TaraText.label.copyWith(color: c.textSecondary),
-                        ),
-                        const SizedBox(height: 8),
-                        LiquidProgressBar(value: (_step + 1) / _total),
-                      ],
+                    child: MergeSemantics(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              l.newDelivery,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 18),
+                            ),
+                          ),
+                          Text(
+                            l.stepOf(_step + 1, _total, titles[_step]),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TaraText.small.copyWith(color: c.textSecondary, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  TaraLink(
+                    key: newOrderCloseKey,
+                    label: l.close,
+                    onPressed: () {
+                      FocusScope.of(context).unfocus();
+                      widget.onClose();
+                    },
+                    style: TaraText.small.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      decoration: TextDecoration.underline,
+                      decorationColor: c.accentText,
                     ),
                   ),
                 ],
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              child: LiquidProgressBar(value: (_step + 1) / _total),
             ),
             Expanded(
               child: ListenableBuilder(
                 listenable: _draft,
                 builder: (context, _) => ScrollWithFooter(
                   horizontal: 20,
-                  top: 22,
+                  top: 24,
                   content: [
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 260),
@@ -534,16 +565,53 @@ class _NewOrderFlowState extends ConsumerState<NewOrderFlow> {
                   ],
                   footer: _step == _summary
                       // La commande engage l'expéditeur : elle part d'un geste, pas d'un toucher.
-                      ? SwipeButton(
-                          label: _draft.allQuoted
-                              ? l.orderFor('${formatAmount(_draft.amountToPay)}\u00a0F')
-                              : l.quoting,
-                          semanticLabel: l.orderSlide,
-                          icon: TaraIcons.arrowRight,
-                          loading: _placing,
-                          onConfirmed: _draft.allQuoted ? () => unawaited(_place()) : null,
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Total au-dessus du bouton (maquette) : ce qui sera payé.
+                            MergeSemantics(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      _draft.deliveries.length == 1 &&
+                                              (_draft.delivery.declaredValue ?? 0) > 0 &&
+                                              _draft.delivery.valueFee == 0 &&
+                                              _draft.mobileMoneyFeeAmount == 0
+                                          ? l.courseFreeCover
+                                          : l.totalLabel,
+                                      style: TaraText.label.copyWith(color: c.textSecondary, fontSize: 13),
+                                    ),
+                                  ),
+                                  Text(
+                                    _draft.allQuoted ? '${formatAmount(_draft.amountToPay)}\u00a0F' : l.quoting,
+                                    style: _draft.allQuoted
+                                        ? TaraText.titlePanel.copyWith(
+                                            color: c.textPrimary,
+                                            fontSize: 22,
+                                            fontFeatures: TaraText.tabular,
+                                          )
+                                        : TaraText.label.copyWith(color: c.textTertiary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            SwipeButton(
+                              label: _draft.allQuoted ? l.orderSlide : l.quoting,
+                              semanticLabel: _draft.allQuoted
+                                  ? l.orderFor('${formatAmount(_draft.amountToPay)}\u00a0F')
+                                  : l.orderSlide,
+                              icon: TaraIcons.arrowRight,
+                              loading: _placing,
+                              onConfirmed: _draft.allQuoted ? () => unawaited(_place()) : null,
+                            ),
+                          ],
                         )
-                      : PrimaryButton(label: l.continueLabel, icon: TaraIcons.arrowRight, onPressed: _next),
+                      : PrimaryButton(label: l.continueLabel, onPressed: _next),
                 ),
               ),
             ),
