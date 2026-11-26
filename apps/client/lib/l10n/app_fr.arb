@@ -2068,5 +2068,23 @@
   "failureGoRetry": "Relancer la livraison",
   "failureGoReturn": "Faire revenir le colis",
   "returnCodeTitle": "Code de retour",
-  "returnCodeGive": "Quand le livreur vous rend le colis, donnez-lui ce code : c’est la preuve que vous l’avez bien récupéré."
+  "returnCodeGive": "Quand le livreur vous rend le colis, donnez-lui ce code : c’est la preuve que vous l’avez bien récupéré.",
+  "profileStatDelivered": "livraisons",
+  "profileStatSuccess": "réussies",
+  "profileStatSince": "sur Tara depuis",
+  "profileStatsLabel": "{count} livraisons, {rate} réussies, sur Tara depuis {since}",
+  "@profileStatsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "since": {
+        "type": "String"
+      }
+    }
+  },
+  "profileReplayIntro": "Revoir la présentation"
 }

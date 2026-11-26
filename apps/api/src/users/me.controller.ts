@@ -14,6 +14,7 @@ import {
   ConsentBody,
   ConsentDto,
   MeDto,
+  MeStatsDto,
   MerchantBody,
   MerchantDto,
   UpdateMeBody,
@@ -30,6 +31,13 @@ export class MeController {
   @ApiZodResponse(MeDto)
   me(@CurrentUser() user: AuthUser): Promise<z.output<typeof MeDto>> {
     return this.users.me(user.id, user.roles);
+  }
+
+  /** Livraisons réussies et taux de réussite de l'expéditeur, date d'arrivée sur Tara. */
+  @Get('stats')
+  @ApiZodResponse(MeStatsDto)
+  stats(@CurrentUser() user: AuthUser): Promise<z.output<typeof MeStatsDto>> {
+    return this.users.stats(user.id);
   }
 
   @Patch()

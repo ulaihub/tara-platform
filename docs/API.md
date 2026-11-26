@@ -104,6 +104,10 @@ avec `PUT /riders/me/vehicle`.
 au destinataire). La photo de remise ou du lieu : `GET /orders/:id/proof-photo`, pour
 l'expéditeur seulement (404 une fois la photo effacée après 90 jours).
 
+**Chiffres du profil** — `GET /me/stats` : livraisons réussies (`delivered`), taux de
+réussite (`successRate`, livrées sur livrées + retournées, null avant la première course
+terminée) et date d'arrivée (`memberSince`).
+
 **Messages expéditeur ↔ livreur** — `GET/POST /orders/:id/messages` (500 caractères, 20 par
 minute). Écriture tant que la course est en cours (`CONVERSATION_CLOSED` ensuite) ; l'équipe
 lit sans écrire. Chaque message part en direct (`order.message`) et en notification ; ouvrir la

@@ -3388,4 +3388,21 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get returnCodeGive =>
       'Quand le livreur vous rend le colis, donnez-lui ce code : c’est la preuve que vous l’avez bien récupéré.';
+
+  @override
+  String get profileStatDelivered => 'livraisons';
+
+  @override
+  String get profileStatSuccess => 'réussies';
+
+  @override
+  String get profileStatSince => 'sur Tara depuis';
+
+  @override
+  String profileStatsLabel(int count, String rate, String since) {
+    return '$count livraisons, $rate réussies, sur Tara depuis $since';
+  }
+
+  @override
+  String get profileReplayIntro => 'Revoir la présentation';
 }

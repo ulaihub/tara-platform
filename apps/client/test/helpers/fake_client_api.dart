@@ -14,6 +14,12 @@ class FakeClientApi extends ClientApi {
 
   final names = <String>[];
 
+  /// Chiffres du profil.
+  MeStats stats = MeStats(delivered: 312, successRate: 96, memberSince: DateTime(2026, 3, 4));
+
+  @override
+  Future<MeStats> meStats() async => stats;
+
   /// Photo de preuve (remise, lieu de l'échec) ; aucune par défaut.
   Uint8List? proof;
 

@@ -3380,4 +3380,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get returnCodeGive => 'When the rider hands the parcel back, give them this code: it proves you got it back.';
+
+  @override
+  String get profileStatDelivered => 'deliveries';
+
+  @override
+  String get profileStatSuccess => 'successful';
+
+  @override
+  String get profileStatSince => 'on Tara since';
+
+  @override
+  String profileStatsLabel(int count, String rate, String since) {
+    return '$count deliveries, $rate successful, on Tara since $since';
+  }
+
+  @override
+  String get profileReplayIntro => 'See the introduction again';
 }

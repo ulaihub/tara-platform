@@ -5761,6 +5761,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Quand le livreur vous rend le colis, donnez-lui ce code : c’est la preuve que vous l’avez bien récupéré.'**
   String get returnCodeGive;
+
+  /// No description provided for @profileStatDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'livraisons'**
+  String get profileStatDelivered;
+
+  /// No description provided for @profileStatSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'réussies'**
+  String get profileStatSuccess;
+
+  /// No description provided for @profileStatSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur Tara depuis'**
+  String get profileStatSince;
+
+  /// No description provided for @profileStatsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} livraisons, {rate} réussies, sur Tara depuis {since}'**
+  String profileStatsLabel(int count, String rate, String since);
+
+  /// No description provided for @profileReplayIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revoir la présentation'**
+  String get profileReplayIntro;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -14,6 +14,9 @@ class ClientApi {
 
   Future<Me> me() async => Me.fromJson(await _api.get('/me') as Json);
 
+  /// Chiffres du profil : livraisons réussies, taux de réussite, arrivée sur Tara.
+  Future<MeStats> meStats() async => MeStats.fromJson(await _api.get('/me/stats') as Json);
+
   /// Commandes de l'expéditeur, la plus récente d'abord : en cours (active) ou terminées
   /// (history).
   Future<List<OrderSummary>> orders({required String scope, int limit = 20}) async {

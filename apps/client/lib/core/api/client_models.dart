@@ -1425,3 +1425,23 @@ class MerchantActivity {
   final int? averageMinutes;
   final List<({String name, int share})> zones;
 }
+
+/// Chiffres du profil (maquette) : livraisons réussies, part réussie, arrivée sur Tara.
+@immutable
+class MeStats {
+  const MeStats({required this.delivered, required this.successRate, required this.memberSince});
+
+  factory MeStats.fromJson(Json json) => MeStats(
+    delivered: _field<num>(json, 'delivered').toInt(),
+    successRate: (json['successRate'] as num?)?.toInt(),
+    memberSince: DateTime.parse(_field(json, 'memberSince')).toLocal(),
+  );
+
+  static const fields = ['delivered', 'successRate', 'memberSince'];
+
+  final int delivered;
+
+  /// Livrées sur livrées + retournées, en % ; null avant la première course terminée.
+  final int? successRate;
+  final DateTime memberSince;
+}

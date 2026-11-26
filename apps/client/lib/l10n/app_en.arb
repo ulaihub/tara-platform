@@ -1030,5 +1030,10 @@
   "failureGoRetry": "Restart the delivery",
   "failureGoReturn": "Bring the parcel back",
   "returnCodeTitle": "Return code",
-  "returnCodeGive": "When the rider hands the parcel back, give them this code: it proves you got it back."
+  "returnCodeGive": "When the rider hands the parcel back, give them this code: it proves you got it back.",
+  "profileStatDelivered": "deliveries",
+  "profileStatSuccess": "successful",
+  "profileStatSince": "on Tara since",
+  "profileStatsLabel": "{count} deliveries, {rate} successful, on Tara since {since}",
+  "profileReplayIntro": "See the introduction again"
 }

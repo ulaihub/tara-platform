@@ -751,6 +751,32 @@
         ]
       }
     },
+    "/v1/me/stats": {
+      "get": {
+        "operationId": "Me_stats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeStats"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
+        ]
+      }
+    },
     "/v1/me/merchant": {
       "put": {
         "operationId": "Me_upsertMerchant",
@@ -14991,6 +15017,28 @@
           "successRateChange",
           "averageMinutes",
           "zones"
+        ],
+        "additionalProperties": false
+      },
+      "MeStats": {
+        "type": "object",
+        "properties": {
+          "delivered": {
+            "type": "integer"
+          },
+          "successRate": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "memberSince": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "delivered",
+          "successRate",
+          "memberSince"
         ],
         "additionalProperties": false
       },

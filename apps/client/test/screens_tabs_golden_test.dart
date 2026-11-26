@@ -5,6 +5,7 @@ import 'package:tara_client/app/providers.dart';
 import 'package:tara_client/core/api/client_models.dart';
 import 'package:tara_client/core/location.dart';
 import 'package:tara_client/features/home/home_flow.dart';
+import 'package:tara_client/features/onboarding/intro_screen.dart';
 import 'package:tara_client/features/orders/orders_screen.dart';
 import 'package:tara_client/features/profile/profile_screen.dart';
 import 'package:tara_client/features/tracking/tracking_screen.dart';
@@ -54,9 +55,22 @@ void main() {
     });
 
     goldenTest('06 profil ${variant.name}', (tester) async {
-      await pumpVariant(tester, variant, scoped(tabs(3, const ProfileScreen(me: shopOwner)), shopApi()));
+      // Boutique en formule Pro (maquette) : pastille « Offre Pro ».
+      final api = shopApi();
+      api.wallet0 = Wallet(
+        customerBalance: api.wallet0.customerBalance,
+        merchantBalance: api.wallet0.merchantBalance,
+        payoutSchedule: api.wallet0.payoutSchedule,
+        todaySales: api.wallet0.todaySales,
+        todayDeliveries: api.wallet0.todayDeliveries,
+        plan: 'PRO',
+      );
+      await pumpVariant(tester, variant, scoped(tabs(3, const ProfileScreen(me: shopOwner)), api));
       await settle(tester);
       expect(tester.takeException(), isNull);
+      expect(find.text('312'), findsOneWidget);
+      expect(find.text('96\u00a0%'), findsOneWidget);
+      expect(find.text('mars 2026'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/06_profil/${variant.name}.png'));
     });
   }
@@ -204,5 +218,18 @@ void main() {
     expect(find.text('Livraison impossible · TR-48301'), findsNothing);
     await tester.tap(find.bySemanticsLabel('Retour'));
     await settle(tester);
+  });
+
+  testWidgets('profil : revoir la présentation, puis revenir', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, scoped(tabs(3, const ProfileScreen(me: shopOwner)), shopApi()));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Revoir la présentation'));
+    await tester.tap(find.text('Revoir la présentation'));
+    await settle(tester);
+    expect(find.byType(ClientIntroScreen), findsOneWidget);
+    tester.widget<ClientIntroScreen>(find.byType(ClientIntroScreen)).onDone();
+    await settle(tester);
+    expect(find.byType(ClientIntroScreen), findsNothing);
+    expect(find.text('Revoir la présentation'), findsOneWidget);
   });
 }
