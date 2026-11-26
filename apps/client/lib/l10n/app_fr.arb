@@ -858,7 +858,6 @@
       }
     }
   },
-  "cancelDelivery": "Annuler la livraison",
   "cancelConfirm": "Touchez encore pour confirmer l’annulation.",
   "cancelConfirmFee": "Le livreur est déjà en route : annuler coûte {amount}, pour son déplacement. Touchez encore pour confirmer.",
   "@cancelConfirmFee": {
