@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { DevicesController } from './devices.controller.js';
+import { InboxController } from './inbox.controller.js';
 import { NotificationService } from './notification.service.js';
 import { OrderNotificationsListener } from './order-notifications.listener.js';
 import {
@@ -20,7 +21,7 @@ import {
 
 @Global()
 @Module({
-  controllers: [DevicesController, WhatsAppWebhookController],
+  controllers: [DevicesController, InboxController, WhatsAppWebhookController],
   providers: [
     {
       provide: PUSH_PROVIDER,

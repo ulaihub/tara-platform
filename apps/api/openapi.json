@@ -39,6 +39,51 @@
         ]
       }
     },
+    "/v1/me/notifications": {
+      "get": {
+        "operationId": "Inbox_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inbox"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
+        ]
+      }
+    },
+    "/v1/me/notifications/read": {
+      "post": {
+        "operationId": "Inbox_readAll",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
+        ]
+      }
+    },
     "/v1/media": {
       "post": {
         "operationId": "Media_upload",
@@ -4123,6 +4168,46 @@
         ],
         "tags": [
           "Back-office · commandes"
+        ]
+      }
+    },
+    "/v1/me/merchant/activity": {
+      "get": {
+        "operationId": "MerchantActivity_get",
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "week",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ActivityPeriod"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantActivity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Mon compte"
         ]
       }
     },
@@ -10270,6 +10355,14 @@
           "maxLength": 16
         }
       },
+      "ActivityPeriod": {
+        "type": "string",
+        "enum": [
+          "day",
+          "week",
+          "month"
+        ]
+      },
       "ActorRole": {
         "type": "string",
         "enum": [
@@ -13735,6 +13828,65 @@
         ],
         "additionalProperties": false
       },
+      "Inbox": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InboxItem"
+            }
+          },
+          "unread": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "unread"
+        ],
+        "additionalProperties": false
+      },
+      "InboxItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "orderId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "body",
+          "orderId",
+          "read",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
       "KycDocument": {
         "type": "object",
         "properties": {
@@ -14483,6 +14635,111 @@
           "plan",
           "rccm",
           "niu"
+        ],
+        "additionalProperties": false
+      },
+      "MerchantActivity": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/ActivityPeriod"
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "to": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "sales": {
+                  "type": "integer"
+                },
+                "deliveries": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "from",
+                "to",
+                "sales",
+                "deliveries"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "deliveries": {
+            "type": "integer"
+          },
+          "collected": {
+            "type": "integer"
+          },
+          "successRate": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "deliveriesChange": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "collectedChange": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "successRateChange": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "averageMinutes": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "share": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "name",
+                "share"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "period",
+          "from",
+          "to",
+          "buckets",
+          "deliveries",
+          "collected",
+          "successRate",
+          "deliveriesChange",
+          "collectedChange",
+          "successRateChange",
+          "averageMinutes",
+          "zones"
         ],
         "additionalProperties": false
       },

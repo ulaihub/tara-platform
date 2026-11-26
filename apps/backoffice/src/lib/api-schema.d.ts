@@ -20,6 +20,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/me/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Inbox_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/notifications/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Inbox_readAll'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/media': {
     parameters: {
       query?: never;
@@ -1054,6 +1086,22 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['AdminOrders_transition'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/merchant/activity': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['MerchantActivity_get'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -2780,6 +2828,8 @@ export interface components {
       [key: string]: string;
     };
     /** @enum {string} */
+    ActivityPeriod: 'day' | 'week' | 'month';
+    /** @enum {string} */
     ActorRole: 'SENDER' | 'RECIPIENT' | 'RIDER' | 'DISPATCHER' | 'SUPPORT' | 'SYSTEM';
     Address: {
       /** Format: uuid */
@@ -3769,6 +3819,22 @@ export interface components {
       feeBps: number;
       feeSharePercent: number;
     };
+    Inbox: {
+      items: components['schemas']['InboxItem'][];
+      unread: number;
+    };
+    InboxItem: {
+      /** Format: uuid */
+      id: string;
+      kind: string;
+      title: string;
+      body: string;
+      /** Format: uuid */
+      orderId: string | null;
+      read: boolean;
+      /** Format: date-time */
+      createdAt: string;
+    };
     KycDocument: {
       /** Format: uuid */
       id: string;
@@ -3967,6 +4033,32 @@ export interface components {
       plan: 'FREE' | 'PRO' | 'BUSINESS';
       rccm: string | null;
       niu: string | null;
+    };
+    MerchantActivity: {
+      period: components['schemas']['ActivityPeriod'];
+      /** Format: date-time */
+      from: string;
+      /** Format: date-time */
+      to: string;
+      buckets: {
+        /** Format: date-time */
+        from: string;
+        /** Format: date-time */
+        to: string;
+        sales: number;
+        deliveries: number;
+      }[];
+      deliveries: number;
+      collected: number;
+      successRate: number | null;
+      deliveriesChange: number | null;
+      collectedChange: number | null;
+      successRateChange: number | null;
+      averageMinutes: number | null;
+      zones: {
+        name: string;
+        share: number;
+      }[];
     };
     Metrics: {
       period: {
@@ -5094,6 +5186,43 @@ export interface operations {
         'application/json': components['schemas']['PushTokenBody'];
       };
     };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  Inbox_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Inbox'];
+        };
+      };
+    };
+  };
+  Inbox_readAll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
     responses: {
       204: {
         headers: {
@@ -7243,6 +7372,28 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Order'];
+        };
+      };
+    };
+  };
+  MerchantActivity_get: {
+    parameters: {
+      query?: {
+        period?: components['schemas']['ActivityPeriod'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MerchantActivity'];
         };
       };
     };
