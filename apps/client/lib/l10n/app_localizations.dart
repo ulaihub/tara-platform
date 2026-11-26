@@ -149,8 +149,32 @@ abstract class AppLocalizations {
   /// No description provided for @codeSentTo.
   ///
   /// In fr, this message translates to:
-  /// **'Envoyé par SMS au {phone}'**
+  /// **'Code envoyé par SMS au {phone}'**
   String codeSentTo(String phone);
+
+  /// No description provided for @codeAutoReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture automatique du code…'**
+  String get codeAutoReading;
+
+  /// No description provided for @resendShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer dans {time}'**
+  String resendShort(String time);
+
+  /// No description provided for @resendCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le code'**
+  String get resendCode;
+
+  /// No description provided for @smsAvailableIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pourrez demander le SMS dans {time}.'**
+  String smsAvailableIn(String time);
 
   /// No description provided for @codeTitle.
   ///
@@ -163,6 +187,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Continuer'**
   String get continueLabel;
+
+  /// No description provided for @countryLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pays'**
+  String get countryLabel;
 
   /// No description provided for @countryCodeLabel.
   ///
@@ -407,7 +437,7 @@ abstract class AppLocalizations {
   /// No description provided for @signInBody.
   ///
   /// In fr, this message translates to:
-  /// **'Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code par SMS.'**
+  /// **'Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code sur WhatsApp ou par SMS.'**
   String get signInBody;
 
   /// No description provided for @signInTitle.
@@ -433,6 +463,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Votre nom figure dans les messages envoyés à vos destinataires.'**
   String get welcomeBody;
+
+  /// No description provided for @welcomeKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau compte'**
+  String get welcomeKicker;
+
+  /// No description provided for @yourName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre nom'**
+  String get yourName;
+
+  /// No description provided for @yourNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Awa Ngono'**
+  String get yourNameHint;
+
+  /// No description provided for @shopNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de votre boutique'**
+  String get shopNameLabel;
+
+  /// No description provided for @payoutReceives.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il reçoit vos ventes encaissées'**
+  String get payoutReceives;
 
   /// No description provided for @welcomeTitle.
   ///
@@ -2819,8 +2879,20 @@ abstract class AppLocalizations {
   /// No description provided for @termsUpdateIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.'**
+  /// **'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vos livraisons en cours continuent, mais vous ne pourrez pas en commander de nouvelles.'**
   String get termsUpdateIntro;
+
+  /// No description provided for @termsSignupKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant de commencer'**
+  String get termsSignupKicker;
+
+  /// No description provided for @termsReadPercent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu à {percent}%'**
+  String termsReadPercent(int percent);
 
   /// No description provided for @termsLater.
   ///
@@ -2837,7 +2909,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsScrollFirst.
   ///
   /// In fr, this message translates to:
-  /// **'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.'**
+  /// **'Faites défiler jusqu’en bas pour pouvoir accepter.'**
   String get termsScrollFirst;
 
   /// No description provided for @termsCheckPrefix.

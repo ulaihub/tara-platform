@@ -28,6 +28,8 @@ TermsStrings termsStrings(BuildContext context) {
     acceptedOn: l.termsAcceptedOn,
     versionLine: l.termsVersionLine,
     errorText: (error) => errorMessage(context, error),
+    signupKicker: l.termsSignupKicker,
+    readPercent: l.termsReadPercent,
   );
 }
 

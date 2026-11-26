@@ -38,7 +38,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String codeSentTo(String phone) {
-    return 'Envoyé par SMS au $phone';
+    return 'Code envoyé par SMS au $phone';
+  }
+
+  @override
+  String get codeAutoReading => 'Lecture automatique du code…';
+
+  @override
+  String resendShort(String time) {
+    return 'Renvoyer dans $time';
+  }
+
+  @override
+  String get resendCode => 'Renvoyer le code';
+
+  @override
+  String smsAvailableIn(String time) {
+    return 'Vous pourrez demander le SMS dans $time.';
   }
 
   @override
@@ -46,6 +62,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get continueLabel => 'Continuer';
+
+  @override
+  String get countryLabel => 'Pays';
 
   @override
   String countryCodeLabel(String code) {
@@ -175,7 +194,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signInBody =>
-      'Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code par SMS.';
+      'Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code sur WhatsApp ou par SMS.';
 
   @override
   String get signInTitle => 'Vos colis livrés à Douala';
@@ -188,6 +207,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get welcomeBody => 'Votre nom figure dans les messages envoyés à vos destinataires.';
+
+  @override
+  String get welcomeKicker => 'Nouveau compte';
+
+  @override
+  String get yourName => 'Votre nom';
+
+  @override
+  String get yourNameHint => 'Ex. Awa Ngono';
+
+  @override
+  String get shopNameLabel => 'Nom de votre boutique';
+
+  @override
+  String get payoutReceives => 'Il reçoit vos ventes encaissées';
 
   @override
   String get welcomeTitle => 'Bienvenue sur Tara';
@@ -1572,7 +1606,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get termsUpdateIntro =>
-      'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.';
+      'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vos livraisons en cours continuent, mais vous ne pourrez pas en commander de nouvelles.';
+
+  @override
+  String get termsSignupKicker => 'Avant de commencer';
+
+  @override
+  String termsReadPercent(int percent) {
+    return 'Lu à $percent%';
+  }
 
   @override
   String get termsLater => 'Plus tard';
@@ -1581,7 +1623,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get termsEnd => 'Vous êtes arrivé au bout des textes.';
 
   @override
-  String get termsScrollFirst => 'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.';
+  String get termsScrollFirst => 'Faites défiler jusqu’en bas pour pouvoir accepter.';
 
   @override
   String get termsCheckPrefix => 'J’ai lu et j’accepte les ';

@@ -7,12 +7,11 @@ import 'package:tara_core/api/legal_api.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/brand.dart';
 import 'package:tara_ui/components/buttons.dart';
-import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/three_d.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
-import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
@@ -43,16 +42,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   bool _sending = false;
   String? _error;
 
+  // Maquette : halos flous (320 à -110,-60 ; 280 à 200,260 ; 260 à -60,620).
   static const _blobs = [
-    BlobSpec(alignment: Alignment(1.25, -1.0), size: 300, colors: BlobSpec.brand, blur: 70),
-    BlobSpec(
-      alignment: Alignment(-1.35, 0.05),
-      size: 230,
-      colors: BlobSpec.warm,
-      blur: 64,
-      delay: Duration(seconds: 4),
-    ),
-    BlobSpec(alignment: Alignment(1.2, 1.05), size: 260, colors: BlobSpec.soft, blur: 70, delay: Duration(seconds: 8)),
+    BlobSpec(alignment: Alignment(-.74, -.76), size: 320, colors: BlobSpec.soft, blur: 46, opacity: .45 / .5),
+    BlobSpec(alignment: Alignment(.74, -.05), size: 280, colors: BlobSpec.warm, blur: 46, opacity: .22 / .5),
+    BlobSpec(alignment: Alignment(-.64, .78), size: 260, colors: BlobSpec.soft, blur: 46, opacity: .3 / .5),
   ];
 
   static String _grouped(String phone) => PhoneInputFormatter()
@@ -100,48 +94,77 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final c = TaraColors.of(context);
     final config = ref.watch(appConfigProvider).value;
     final dialCode = config?.dialCode ?? '+237';
-    return TaraScreen(
-      safeBottom: false,
-      blobs: _blobs,
-      child: ScrollWithFooter(
-        horizontal: 24,
-        top: 16,
-        content: [
-          const SizedBox(height: 12),
-          const Center(child: TaraLogo(width: 214)),
-          const SizedBox(height: 28),
-          Text(l.senderSpace, style: TaraText.overlineLarge.copyWith(color: c.accentText)),
-          const SizedBox(height: 8),
-          Semantics(
-            header: true,
-            child: Text(l.signInTitle, style: TaraText.titleAccess.copyWith(color: c.textPrimary)),
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Maquette : colis Tara en 3D de 130 qui tourne (12 s) et flotte, logo en haut à gauche.
+        SizedBox(
+          height: 330,
+          child: Stack(
+            children: [
+              const Center(
+                child: Parcel3D(size: 130, label: 'n° 1', period: Duration(seconds: 12)),
+              ),
+              Positioned(
+                left: 20,
+                top: 22,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(color: const Color(0xFF16120E), borderRadius: BorderRadius.circular(14)),
+                  child: const SizedBox(
+                    width: 52,
+                    height: 36,
+                    child: Center(child: TaraLogo(width: 52, ink: Color(0xFFFFFFFF))),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          Text(l.signInBody, style: TaraText.body.copyWith(color: c.textSecondary)),
-          const SizedBox(height: 24),
-          GlassCard(
-            radius: 28,
-            padding: const EdgeInsets.all(20),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TaraTextField(
-                  label: l.phoneLabel,
-                  hint: l.phoneHint,
-                  controller: _phone,
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.done,
-                  autofillHints: const [AutofillHints.telephoneNumberNational],
-                  inputFormatters: [PhoneInputFormatter()],
-                  onSubmitted: (_) => _submit(),
-                  leading: PhonePrefixButton(prefix: dialCode, semanticLabel: l.countryCodeLabel(dialCode)),
+                Semantics(
+                  header: true,
+                  child: Text(l.signInTitle, style: TaraText.titleAccess.copyWith(color: c.textPrimary, height: 1.12)),
                 ),
-                const SizedBox(height: 12),
-                if (_error != null) ...[ErrorLine(_error!), const SizedBox(height: 10)],
-                Text(l.phoneHelp, style: TaraText.small.copyWith(color: c.textTertiary)),
                 const SizedBox(height: 14),
+                Text(l.signInBody, style: TaraText.body.copyWith(color: c.textPrimary.withValues(alpha: .74))),
+                const SizedBox(height: 14),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 92,
+                      child: BoxedField(
+                        label: l.countryLabel,
+                        value: dialCode,
+                        valueLeading: const CameroonFlag(width: 16),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: BoxedField(
+                        label: l.phoneLabel,
+                        hint: l.phoneHint,
+                        controller: _phone,
+                        keyboardType: TextInputType.phone,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.telephoneNumberNational],
+                        inputFormatters: [PhoneInputFormatter()],
+                        onSubmitted: (_) => _submit(),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_error != null) ...[const SizedBox(height: 10), ErrorLine(_error!)],
+                const SizedBox(height: 12),
                 if (_withReferral)
-                  TaraTextField(
+                  BoxedField(
                     label: l.referralLabel,
                     hint: l.referralHint,
                     controller: _referral,
@@ -156,24 +179,37 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               ],
             ),
           ),
+        ),
+      ],
+    );
+    final footer = Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PrimaryButton(label: l.getCode, loading: _sending, onPressed: _digits.length == 9 ? _submit : null),
+          const SizedBox(height: 10),
+          _Legal(
+            style: TaraText.small.copyWith(color: c.textPrimary.withValues(alpha: .62), height: 1.5),
+            link: c.accentText,
+          ),
         ],
-        footer: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 24),
-            PrimaryButton(
-              label: l.getCode,
-              icon: TaraIcons.arrowRight,
-              loading: _sending,
-              onPressed: _digits.length == 9 ? _submit : null,
+      ),
+    );
+    return TaraScreen(
+      blobs: _blobs,
+      child: LayoutBuilder(
+        builder: (context, box) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: box.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [content, const Spacer(), footer],
+              ),
             ),
-            const SizedBox(height: 14),
-            _Legal(
-              style: TaraText.small.copyWith(color: c.textTertiary),
-              link: c.accentText,
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -208,7 +244,12 @@ class _LegalState extends State<_Legal> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final linkStyle = widget.style.copyWith(color: widget.link, fontWeight: FontWeight.w700);
+    final linkStyle = widget.style.copyWith(
+      color: widget.link,
+      fontWeight: FontWeight.w800,
+      decoration: TextDecoration.underline,
+      decorationColor: widget.link,
+    );
     return Text.rich(
       TextSpan(
         style: widget.style,

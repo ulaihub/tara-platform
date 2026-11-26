@@ -8,7 +8,9 @@ abstract final class TaraIcons {
   static const home = TaraIconData([_P('M4 11l8-7 8 7v9h-5v-6H9v6H4z')]);
 
   /// Maison des étiquettes de la présentation (« Boutique Awa ») et repère de la carte en relief.
-  static const homeSoft = TaraIconData([_P('M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5H9v5H5.5A1.5 1.5 0 0 1 4 19z')]);
+  static const homeSoft = TaraIconData([
+    _P('M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5H9v5H5.5A1.5 1.5 0 0 1 4 19z'),
+  ]);
   static const homeFlat = TaraIconData([_P('M4 10.5 12 4l8 6.5V20H4z')]);
   static const activity = TaraIconData([_P('M4 20V10M10 20V4M16 20v-7M22 20H2')]);
 
@@ -31,6 +33,9 @@ abstract final class TaraIcons {
   static const power = TaraIconData([_P('M12 3v8'), _P('M6.3 6.8a8 8 0 1011.4 0')]);
   static const shield = TaraIconData([_P('M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z')]);
   static const close = TaraIconData([_P('M6 6l12 12M18 6L6 18')]);
+
+  /// Bulle de discussion pleine (WhatsApp, maquette du code reçu).
+  static const chatBubble = TaraIconData([_P('M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z')]);
   static const message = TaraIconData([_P('M4 5h16v11H9l-5 4z'), _P('M8 9.5h8M8 12.5h5')]);
   static const mapPin = TaraIconData([_P('M12 21s-7-6.2-7-12a7 7 0 0114 0c0 5.8-7 12-7 12z'), _C(12, 9, 2.5)]);
   static const headset = TaraIconData([_P('M4 14v-2a8 8 0 0116 0v2'), _R(3, 14, 4, 6, 1.5), _R(17, 14, 4, 6, 1.5)]);

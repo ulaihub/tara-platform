@@ -9,7 +9,7 @@
   "categoryHome": "Maison",
   "categoryOther": "Autre",
   "change": "Modifier",
-  "codeSentTo": "Envoyé par SMS au {phone}",
+  "codeSentTo": "Code envoyé par SMS au {phone}",
   "@codeSentTo": {
     "placeholders": {
       "phone": {
@@ -17,8 +17,15 @@
       }
     }
   },
+  "codeAutoReading": "Lecture automatique du code…",
+  "resendShort": "Renvoyer dans {time}",
+  "@resendShort": {"placeholders": {"time": {"type": "String"}}},
+  "resendCode": "Renvoyer le code",
+  "smsAvailableIn": "Vous pourrez demander le SMS dans {time}.",
+  "@smsAvailableIn": {"placeholders": {"time": {"type": "String"}}},
   "codeTitle": "Entrez le code reçu",
   "continueLabel": "Continuer",
+  "countryLabel": "Pays",
   "countryCodeLabel": "Indicatif du pays {code}",
   "@countryCodeLabel": {
     "placeholders": {
@@ -80,11 +87,16 @@
   "shopCategory": "Catégorie (facultatif)",
   "shopName": "Nom de la boutique",
   "shopNameHint": "Ex. Awa Fashion",
-  "signInBody": "Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code par SMS.",
+  "signInBody": "Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code sur WhatsApp ou par SMS.",
   "signInTitle": "Vos colis livrés à Douala",
   "terms": "conditions d’utilisation",
   "validate": "Valider",
   "welcomeBody": "Votre nom figure dans les messages envoyés à vos destinataires.",
+  "welcomeKicker": "Nouveau compte",
+  "yourName": "Votre nom",
+  "yourNameHint": "Ex. Awa Ngono",
+  "shopNameLabel": "Nom de votre boutique",
+  "payoutReceives": "Il reçoit vos ventes encaissées",
   "welcomeTitle": "Bienvenue sur Tara",
   "appTitle": "Tara",
   "goodMorning": "Bonjour,",
@@ -1009,10 +1021,13 @@
   "termsTitle": "Conditions d’utilisation",
   "termsUpdateTitle": "Nos conditions ont changé",
   "termsSignupIntro": "Avant de créer votre compte, lisez les conditions et la politique de confidentialité jusqu’en bas. Elles expliquent les prix, les frais quand une livraison échoue et ce que nous faisons de vos données.",
-  "termsUpdateIntro": "Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.",
+  "termsUpdateIntro": "Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vos livraisons en cours continuent, mais vous ne pourrez pas en commander de nouvelles.",
+  "termsSignupKicker": "Avant de commencer",
+  "termsReadPercent": "Lu à {percent}%",
+  "@termsReadPercent": {"placeholders": {"percent": {"type": "int"}}},
   "termsLater": "Plus tard",
   "termsEnd": "Vous êtes arrivé au bout des textes.",
-  "termsScrollFirst": "Faites défiler les textes jusqu’en bas pour pouvoir les accepter.",
+  "termsScrollFirst": "Faites défiler jusqu’en bas pour pouvoir accepter.",
   "termsCheckPrefix": "J’ai lu et j’accepte les ",
   "termsCheckTerms": "conditions d’utilisation (version {version})",
   "@termsCheckTerms": {

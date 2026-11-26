@@ -97,9 +97,6 @@ void main() {
     const variant = Variant(Brightness.dark, ScreenSize.regular, 1);
     await pumpVariant(tester, variant, scoped(TermsScreen.update(onLater: () {}, onSigned: () {})));
     await settle(tester);
-    await readToEnd(tester);
-    await tester.tap(find.byType(TaraCheckRow));
-    await settle(tester);
     expect(tester.takeException(), isNull);
     await expectLater(capture, matchesGoldenFile('goldens/02_conditions_nouvelle_version/${variant.name}.png'));
   });
@@ -116,14 +113,12 @@ void main() {
       ),
     );
     await settle(tester);
+    // Maquette : pas de case pour une nouvelle version ; bouton inactif avant la lecture.
     expect(find.byType(TaraCheckRow), findsNothing);
-    await readToEnd(tester);
-    // Bouton inactif tant que la case n'est pas cochée.
     await tester.tap(find.text('J’accepte la nouvelle version'));
     await settle(tester);
     expect(legal.signed, isEmpty);
-    await tester.tap(find.byType(TaraCheckRow));
-    await settle(tester);
+    await readToEnd(tester);
     await tester.tap(find.text('J’accepte la nouvelle version'));
     await settle(tester);
     expect(find.byType(EditableText), findsNothing);

@@ -55,7 +55,17 @@ class Parcel3D extends StatelessWidget {
     this.floating = true,
     this.period = const Duration(seconds: 10),
     this.semanticLabel,
+    this.shadow = true,
+    this.bobPeriod = const Duration(seconds: 4),
+    this.bobDelay = Duration.zero,
   });
+
+  /// Ombre au sol sous le colis qui flotte.
+  final bool shadow;
+
+  /// Durée d'un aller-retour du flottement (maquettes : 3 s) et décalage.
+  final Duration bobPeriod;
+  final Duration bobDelay;
 
   /// Arête du carton.
   final double size;
@@ -80,7 +90,8 @@ class Parcel3D extends StatelessWidget {
     );
     if (floating) {
       body = MotionBuilder(
-        period: const Duration(seconds: 4),
+        period: bobPeriod,
+        delay: -bobDelay,
         stillPhase: .25,
         builder: (context, t, child) {
           final lift = (1 - math.cos(t * 2 * math.pi)) / 2; // 0 en bas, 1 en haut
@@ -90,15 +101,16 @@ class Parcel3D extends StatelessWidget {
             child: Stack(
               alignment: Alignment.topCenter,
               children: [
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: size * .3,
-                  child: CustomPaint(
-                    painter: _ShadowPainter(width: size * (1.05 - .18 * lift), opacity: .4 - .18 * lift),
+                if (shadow)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: size * .22,
+                    child: CustomPaint(
+                      painter: _ShadowPainter(width: size * 1.31 * (1 - .18 * lift), opacity: .4 - .18 * lift),
+                    ),
                   ),
-                ),
                 Transform.translate(offset: Offset(0, -8 * lift), child: child),
               ],
             ),
@@ -125,13 +137,23 @@ class _ShadowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromCenter(center: size.center(Offset.zero), width: width, height: size.height * .5);
-    canvas.drawOval(
-      rect,
-      Paint()
-        ..color = Color.fromRGBO(0, 0, 0, opacity.clamp(0, 1))
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, size.height * .18),
-    );
+    // Maquette : ovale brun `radial-gradient(ellipse, rgba(140,70,10,.35), transparent 70%)`.
+    final center = size.center(Offset.zero);
+    final rect = Rect.fromCenter(center: center, width: width, height: size.height);
+    canvas
+      ..save()
+      ..translate(center.dx, center.dy)
+      ..scale(1, rect.height / rect.width)
+      ..drawCircle(
+        Offset.zero,
+        rect.width / 2,
+        Paint()
+          ..shader = RadialGradient(
+            colors: [Color.fromRGBO(140, 70, 10, .35 * opacity.clamp(0, 1)), const Color.fromRGBO(140, 70, 10, 0)],
+            stops: const [0, .7],
+          ).createShader(Rect.fromCircle(center: Offset.zero, radius: rect.width / 2)),
+      )
+      ..restore();
   }
 
   @override

@@ -6,11 +6,11 @@ import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_sms/tara_sms.dart';
 import 'package:tara_ui/components/buttons.dart';
-import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/motion/liquid_wave.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -152,103 +152,233 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     }
   }
 
+  /// « +237 6 77 •• •• 56 » : le milieu du numéro est masqué (maquette).
+  static String _masked(String phone) {
+    final parts = displayPhone(phone).split(RegExp(r'[\s\u00A0\u202F]+'));
+    if (parts.length < 4) return displayPhone(phone);
+    for (var i = parts.length - 3; i < parts.length - 1; i++) {
+      parts[i] = '••';
+    }
+    return parts.join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final support = ref.watch(appConfigProvider).value?.supportPhone;
     final waiting = _remaining > Duration.zero;
+    final whatsapp = _challenge.channel == OtpChannel.whatsapp;
+    final link = TaraText.label.copyWith(
+      fontWeight: FontWeight.w800,
+      color: c.accentText,
+      decoration: TextDecoration.underline,
+      decorationColor: c.accentText,
+    );
     return TaraScreen(
-      safeBottom: false,
       blobs: _blobs,
-      child: ScrollWithFooter(
-        horizontal: 20,
-        top: 8,
-        content: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: widget.onBack),
-          ),
-          const SizedBox(height: 24),
-          Semantics(
-            header: true,
-            child: Text(l.codeTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                '${(_challenge.channel == OtpChannel.whatsapp ? l.codeSentWhatsAppTo : l.codeSentTo)(displayPhone(widget.phone))} · ',
-                style: TaraText.body.copyWith(color: c.textSecondary),
-              ),
-              TaraLink(label: l.change, onPressed: widget.onBack),
-            ],
-          ),
-          const SizedBox(height: 24),
-          CodeCells(
-            length: 6,
-            controller: _code,
-            oneTimeCode: true,
-            digitLabel: l.digitLabel,
-            onCompleted: (_) => _verify(),
-          ),
-          if (_error != null) ...[const SizedBox(height: 14), ErrorLine(_error!)],
-          const SizedBox(height: 20),
-          GlassCard(
-            radius: 20,
-            padding: const EdgeInsets.fromLTRB(16, 10, 10, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Maquette : retour 44 et titre Sora 18 sur la même ligne.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
             child: Row(
               children: [
-                TaraIcon(TaraIcons.timer, size: 20, color: c.textTertiary),
+                GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: widget.onBack),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    waiting ? l.resendIn(formatCountdown(_remaining)) : l.resendNow,
-                    style: TaraText.text.copyWith(color: c.textSecondary),
-                  ),
-                ),
-                SizedBox(
-                  width: 120,
-                  child: GlassButton(
-                    label: l.resend,
-                    height: 48,
-                    radius: 14,
-                    onPressed: waiting || _resending ? null : _resend,
+                  child: Semantics(
+                    header: true,
+                    child: Text(l.codeTitle, style: TaraText.titlePanel.copyWith(fontSize: 18, color: c.textPrimary)),
                   ),
                 ),
               ],
             ),
           ),
-          if (_challenge.channel == OtpChannel.whatsapp) ...[
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TaraLink(
-                label: l.codeBySms,
-                onPressed: waiting || _resending ? null : () => unawaited(_resend(channel: OtpChannel.sms)),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: whatsapp ? const Color(0xFF25D366) : TaraBrand.orange,
+                        ),
+                        alignment: Alignment.center,
+                        child: whatsapp
+                            ? const TaraIcon(TaraIcons.chatBubble, size: 14, filled: true, color: Color(0xFFFFFFFF))
+                            : const TaraIcon(TaraIcons.message, size: 13, strokeWidth: 2.2, color: TaraBrand.onBrand),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          (whatsapp ? l.codeSentWhatsAppTo : l.codeSentTo)(_masked(widget.phone)),
+                          style: TaraText.text.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: c.textPrimary.withValues(alpha: .78),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  CodeCells(
+                    length: 6,
+                    controller: _code,
+                    oneTimeCode: true,
+                    plain: true,
+                    cellWidth: 46,
+                    cellHeight: 58,
+                    digitLabel: l.digitLabel,
+                    onCompleted: (_) => _verify(),
+                  ),
+                  if (_error != null) ...[const SizedBox(height: 14), ErrorLine(_error!)],
+                  if (_challenge.autoRead && !_verifying) ...[
+                    const SizedBox(height: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const _ReadingGauge(),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            l.codeAutoReading,
+                            style: TaraText.label.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: c.textPrimary.withValues(alpha: .74),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 18),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 18,
+                    children: [
+                      if (whatsapp)
+                        _TextLink(
+                          label: l.codeBySms,
+                          style: link,
+                          // Pendant le minuteur, le serveur refuse un nouvel envoi : on dit quand.
+                          onPressed: _resending
+                              ? null
+                              : () => waiting
+                                    ? setState(() => _error = l.smsAvailableIn(formatCountdown(_remaining)))
+                                    : unawaited(_resend(channel: OtpChannel.sms)),
+                        ),
+                      if (waiting)
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 40),
+                          child: Align(
+                            widthFactor: 1,
+                            child: Text(
+                              l.resendShort(formatCountdown(_remaining)),
+                              style: TaraText.label.copyWith(color: c.textPrimary.withValues(alpha: .55)),
+                            ),
+                          ),
+                        )
+                      else
+                        _TextLink(label: l.resendCode, style: link, onPressed: _resending ? null : _resend),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ],
-        ],
-        footer: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 24),
-            PrimaryButton(label: l.validate, loading: _verifying, onPressed: _code.text.length == 6 ? _verify : null),
-            if (support != null) ...[
-              const SizedBox(height: 10),
-              Center(
-                child: TaraLink(
-                  label: l.noSms,
-                  onPressed: () => launchUrl(Uri(scheme: 'tel', path: support)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                PrimaryButton(
+                  label: l.validate,
+                  loading: _verifying,
+                  onPressed: _code.text.length == 6 ? _verify : null,
                 ),
-              ),
-            ],
-          ],
-        ),
+                if (support != null) ...[
+                  const SizedBox(height: 10),
+                  Center(
+                    child: TaraLink(
+                      label: l.noSms,
+                      onPressed: () => launchUrl(Uri(scheme: 'tel', path: support)),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+/// Lien texte de la maquette (13, gras, orange), zone touchable de 40 de haut.
+class _TextLink extends StatelessWidget {
+  const _TextLink({required this.label, required this.style, required this.onPressed});
+  final String label;
+  final TextStyle style;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    enabled: onPressed != null,
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onPressed,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 40),
+        child: Align(
+          widthFactor: 1,
+          child: Opacity(
+            opacity: onPressed == null ? .45 : 1,
+            child: Text(label, style: style),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Rond de 26 au liquide orange qui ondule : le téléphone guette le code.
+class _ReadingGauge extends StatelessWidget {
+  const _ReadingGauge();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 26,
+    height: 26,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      border: Border.all(color: const Color.fromRGBO(255, 177, 92, .45), width: 2),
+    ),
+    child: const ClipOval(
+      child: LiquidFill(
+        level: .55,
+        front: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red],
+          stops: [0, .18, .5],
+        ),
+        back: Color.fromRGBO(255, 61, 0, .5),
+        frontPeriod: Duration(seconds: 5),
+        backPeriod: Duration(seconds: 8),
+        amplitude: 2,
+      ),
+    ),
+  );
 }

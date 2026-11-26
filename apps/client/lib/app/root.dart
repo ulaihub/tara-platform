@@ -166,7 +166,7 @@ class _AccountGateState extends ConsumerState<_AccountGate> {
     }
     final account = me.value!;
     if (account.needsProfile) {
-      return WelcomeScreen(me: account, onDone: () => ref.invalidate(meProvider), onLogout: logout);
+      return WelcomeScreen(me: account, onDone: () => ref.invalidate(meProvider));
     }
     // Nouvelle version des conditions : présentée à l'ouverture (sans réseau, plus tard).
     final terms = ref.watch(termsStatusProvider).value;

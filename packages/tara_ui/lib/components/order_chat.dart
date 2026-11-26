@@ -293,9 +293,7 @@ class _SendButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(13),
               boxShadow: enabled ? c.brandShadow : null,
             ),
-            child: const Center(
-              child: TaraIcon(TaraIcons.send, size: 19, strokeWidth: 2.2, color: TaraBrand.onBrand),
-            ),
+            child: const Center(child: TaraIcon(TaraIcons.send, size: 19, strokeWidth: 2.2, color: TaraBrand.onBrand)),
           ),
         ),
       ),
@@ -319,10 +317,7 @@ class _Bubble extends StatelessWidget {
         children: [
           Text(message.body, style: TaraText.body.copyWith(color: c.textPrimary, height: 1.35)),
           const SizedBox(height: 4),
-          Text(
-            [when(message.at.toLocal()), ?read].join(' · '),
-            style: TaraText.small.copyWith(color: c.textTertiary),
-          ),
+          Text([when(message.at.toLocal()), ?read].join(' · '), style: TaraText.small.copyWith(color: c.textTertiary)),
         ],
       ),
     );

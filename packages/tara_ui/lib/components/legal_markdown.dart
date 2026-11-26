@@ -7,9 +7,12 @@ import '../tara_typography.dart';
 /// paragraphes, listes `-` et `1.`, tableaux `|`, gras `**`. Les tableaux sont présentés en
 /// fiches empilées, lisibles sur un téléphone.
 class LegalMarkdown extends StatelessWidget {
-  const LegalMarkdown(this.markdown, {super.key, this.showTitle = true});
+  const LegalMarkdown(this.markdown, {super.key, this.showTitle = true, this.compact = false});
 
   final String markdown;
+
+  /// Carte de lecture des conditions (maquettes) : titres 14 en gras, texte 13.
+  final bool compact;
 
   /// Titre `#` du document : masqué quand l'écran l'affiche déjà.
   final bool showTitle;
@@ -18,23 +21,34 @@ class LegalMarkdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
     final blocks = parseLegalMarkdown(markdown);
+    final body = compact
+        ? TaraText.label.copyWith(
+            fontWeight: FontWeight.w500,
+            height: 1.55,
+            color: c.textPrimary.withValues(alpha: .76),
+          )
+        : _body(c);
     final children = <Widget>[];
     for (final block in blocks) {
       if (block is LegalHeading && block.level == 1 && !showTitle) continue;
-      if (children.isNotEmpty) children.add(SizedBox(height: block is LegalHeading ? 22 : 12));
+      if (children.isNotEmpty) {
+        children.add(SizedBox(height: compact ? (block is LegalHeading ? 10 : 2) : (block is LegalHeading ? 22 : 12)));
+      }
       children.add(switch (block) {
         LegalHeading() => Semantics(
           header: true,
           child: Text.rich(
             _inline(block.text, c),
-            style: switch (block.level) {
-              1 => TaraText.titlePanel,
-              2 => TaraText.cardTitle,
-              _ => TaraText.bodyStrong,
-            }.copyWith(color: c.textPrimary),
+            style: compact
+                ? TaraText.text.copyWith(fontWeight: FontWeight.w700, color: c.textPrimary)
+                : switch (block.level) {
+                    1 => TaraText.titlePanel,
+                    2 => TaraText.cardTitle,
+                    _ => TaraText.bodyStrong,
+                  }.copyWith(color: c.textPrimary),
           ),
         ),
-        LegalParagraph() => Text.rich(_inline(block.text, c), style: _body(c)),
+        LegalParagraph() => Text.rich(_inline(block.text, c), style: body),
         LegalList() => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -48,10 +62,10 @@ class LegalMarkdown extends StatelessWidget {
                       width: 22,
                       child: Text(
                         block.ordered ? '${index + 1}.' : '•',
-                        style: _body(c).copyWith(color: c.accentText, fontWeight: FontWeight.w700),
+                        style: body.copyWith(color: c.accentText, fontWeight: FontWeight.w700),
                       ),
                     ),
-                    Expanded(child: Text.rich(_inline(item, c), style: _body(c))),
+                    Expanded(child: Text.rich(_inline(item, c), style: body)),
                   ],
                 ),
               ),
