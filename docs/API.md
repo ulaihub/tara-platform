@@ -99,6 +99,11 @@ plaque, et `hasPhoto`. La photo est la pièce « selfie » validée par l'équip
 `GET /orders/:id/rider-photo` (expéditeur et équipe seulement). Le livreur déclare sa moto
 avec `PUT /riders/me/vehicle`.
 
+**Preuves montrées à l'expéditeur** — Colis livré : `OrderDto.delivery` (`hasPhoto`,
+`codeVerified`, `at`). Livraison impossible : `failure.hasPhoto` et `failure.calls` (appels
+au destinataire). La photo de remise ou du lieu : `GET /orders/:id/proof-photo`, pour
+l'expéditeur seulement (404 une fois la photo effacée après 90 jours).
+
 **Messages expéditeur ↔ livreur** — `GET/POST /orders/:id/messages` (500 caractères, 20 par
 minute). Écriture tant que la course est en cours (`CONVERSATION_CLOSED` ensuite) ; l'équipe
 lit sans écrire. Chaque message part en direct (`order.message`) et en notification ; ouvrir la

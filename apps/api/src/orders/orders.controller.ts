@@ -183,6 +183,21 @@ export class OrdersController {
     return new StreamableFile(photo.buffer);
   }
 
+  /** Photo de remise du colis, ou du lieu après une livraison impossible (expéditeur). */
+  @Get(':id/proof-photo')
+  @ApiProduces('image/jpeg', 'image/png', 'image/webp')
+  @ApiOkResponse({ description: 'Photo de preuve', schema: { type: 'string', format: 'binary' } })
+  async proofPhoto(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    const photo = await this.orders.proofPhoto(user, id);
+    response.setHeader('Content-Type', photo.mimeType);
+    response.setHeader('Cache-Control', 'private, max-age=3600');
+    return new StreamableFile(photo.buffer);
+  }
+
   /** Trajet du colis sur les rues (vendeur → destinataire), pour la carte de suivi. */
   @Get(':id/route')
   @Throttle({ default: { limit: 30, ttl: 60_000 } })

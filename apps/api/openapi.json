@@ -4025,6 +4025,54 @@
         ]
       }
     },
+    "/v1/orders/{id}/proof-photo": {
+      "get": {
+        "operationId": "Orders_proofPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo de preuve",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
     "/v1/orders/{id}/route": {
       "get": {
         "operationId": "Orders_route",
@@ -15672,6 +15720,12 @@
               },
               "retryAllowed": {
                 "type": "boolean"
+              },
+              "hasPhoto": {
+                "type": "boolean"
+              },
+              "calls": {
+                "type": "integer"
               }
             },
             "required": [
@@ -15680,7 +15734,31 @@
               "at",
               "decision",
               "decisionDueAt",
-              "retryAllowed"
+              "retryAllowed",
+              "hasPhoto",
+              "calls"
+            ],
+            "additionalProperties": false
+          },
+          "delivery": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "hasPhoto": {
+                "type": "boolean"
+              },
+              "codeVerified": {
+                "type": "boolean"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "hasPhoto",
+              "codeVerified",
+              "at"
             ],
             "additionalProperties": false
           },
@@ -15734,6 +15812,7 @@
           "rider",
           "attemptCount",
           "failure",
+          "delivery",
           "cancelReason",
           "rating",
           "timeline",

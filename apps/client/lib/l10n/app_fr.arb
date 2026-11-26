@@ -793,7 +793,7 @@
   "trackFailed": "Livraison impossible",
   "trackFailedBody": "Le livreur n’a pas pu livrer. Choisissez la suite : nouvelle tentative ou retour.",
   "trackDelivered": "Colis livré !",
-  "trackDeliveredBody": "Remis à {recipient} à {time}.",
+  "trackDeliveredBody": "Remis à {recipient} à {time}",
   "@trackDeliveredBody": {
     "placeholders": {
       "recipient": {
@@ -950,7 +950,7 @@
       }
     }
   },
-  "failureReturnTitle": "Retour du colis",
+  "failureReturnTitle": "Retour au point d’enlèvement",
   "failureReturnBody": "{rider} vous rapporte le colis : {place}.",
   "@failureReturnBody": {
     "placeholders": {
@@ -1957,5 +1957,116 @@
   "introAccountsSalesFooter": "Reversées ce soir à 18 h",
   "introAccountsTaraLabel": "Solde Tara",
   "introAccountsTaraFooter": "Paie vos livraisons en premier",
-  "introAccountsSwipe": "Glissez pour changer de compte"
+  "introAccountsSwipe": "Glissez pour changer de compte",
+  "trackHeaderDelivered": "{reference} · livré",
+  "@trackHeaderDelivered": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "trackHeaderDeciding": "{reference} · à décider",
+  "@trackHeaderDeciding": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "trackHeaderReturning": "{reference} · retour",
+  "@trackHeaderReturning": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveredCollectedForYou": "{amount} encaissés pour vous",
+  "@deliveredCollectedForYou": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveredProofCode": "Photo de remise · code du destinataire vérifié à {time}.",
+  "@deliveredProofCode": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveredProofPhoto": "Photo de remise prise à {time}.",
+  "@deliveredProofPhoto": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveredCodeOnly": "Code du destinataire vérifié à {time}.",
+  "@deliveredCodeOnly": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveredBySupport": "Remise validée par le service client à {time}.",
+  "@deliveredBySupport": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "receipt": "Reçu",
+  "proofPhotoLabel": "Photo prise par le livreur",
+  "failureCountdown": "Choisissez la suite. Sans réponse dans {minutes} min, le colis vous est rapporté.",
+  "@failureCountdown": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "failureMinutesLeft": "{minutes} minutes pour choisir",
+  "@failureMinutesLeft": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "failurePlacePhoto": "Photo du lieu à {time}",
+  "@failurePlacePhoto": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureReportedAt": "Signalé à {time}",
+  "@failureReportedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "failureCalls": "{count, plural, =1{1 appel sans réponse} other{{count} appels sans réponse}}",
+  "@failureCalls": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failureOnceNote": "Une seule nouvelle tentative est possible : ensuite, le colis vous est rapporté. Les frais ont été fixés à la commande.",
+  "failureGoRetry": "Relancer la livraison",
+  "failureGoReturn": "Faire revenir le colis",
+  "returnCodeTitle": "Code de retour",
+  "returnCodeGive": "Quand le livreur vous rend le colis, donnez-lui ce code : c’est la preuve que vous l’avez bien récupéré."
 }

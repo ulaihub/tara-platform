@@ -1549,7 +1549,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trackDeliveredBody(String recipient, String time) {
-    return 'Handed to $recipient at $time.';
+    return 'Handed to $recipient at $time';
   }
 
   @override
@@ -1696,7 +1696,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get failureReturnTitle => 'Return the parcel';
+  String get failureReturnTitle => 'Back to the pickup point';
 
   @override
   String failureReturnBody(String rider, String place) {
@@ -3287,4 +3287,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get introAccountsSwipe => 'Swipe to switch account';
+
+  @override
+  String trackHeaderDelivered(String reference) {
+    return '$reference · delivered';
+  }
+
+  @override
+  String trackHeaderDeciding(String reference) {
+    return '$reference · to decide';
+  }
+
+  @override
+  String trackHeaderReturning(String reference) {
+    return '$reference · return';
+  }
+
+  @override
+  String deliveredCollectedForYou(String amount) {
+    return '$amount collected for you';
+  }
+
+  @override
+  String deliveredProofCode(String time) {
+    return 'Handover photo · recipient’s code checked at $time.';
+  }
+
+  @override
+  String deliveredProofPhoto(String time) {
+    return 'Handover photo taken at $time.';
+  }
+
+  @override
+  String deliveredCodeOnly(String time) {
+    return 'Recipient’s code checked at $time.';
+  }
+
+  @override
+  String deliveredBySupport(String time) {
+    return 'Handover approved by customer service at $time.';
+  }
+
+  @override
+  String get receipt => 'Receipt';
+
+  @override
+  String get proofPhotoLabel => 'Photo taken by the rider';
+
+  @override
+  String failureCountdown(int minutes) {
+    return 'Choose what happens next. Without an answer within $minutes min, the parcel comes back to you.';
+  }
+
+  @override
+  String failureMinutesLeft(int minutes) {
+    return '$minutes minutes to choose';
+  }
+
+  @override
+  String failurePlacePhoto(String time) {
+    return 'Photo of the place at $time';
+  }
+
+  @override
+  String failureReportedAt(String time) {
+    return 'Reported at $time';
+  }
+
+  @override
+  String failureCalls(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unanswered calls',
+      one: '1 unanswered call',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failureOnceNote =>
+      'Only one new attempt is possible: after that, the parcel comes back to you. The fees were set when you ordered.';
+
+  @override
+  String get failureGoRetry => 'Restart the delivery';
+
+  @override
+  String get failureGoReturn => 'Bring the parcel back';
+
+  @override
+  String get returnCodeTitle => 'Return code';
+
+  @override
+  String get returnCodeGive => 'When the rider hands the parcel back, give them this code: it proves you got it back.';
 }

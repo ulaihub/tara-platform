@@ -200,7 +200,7 @@ void main() {
     await tester.tap(find.text('Livraison impossible · TR-48301'));
     await settle(tester);
     expect(find.byType(TrackingScreen), findsOneWidget);
-    expect(find.text('Avant 10:33'), findsOneWidget);
+    expect(find.text('TR-48301 · à décider'), findsOneWidget);
     expect(find.text('Livraison impossible · TR-48301'), findsNothing);
     await tester.tap(find.bySemanticsLabel('Retour'));
     await settle(tester);

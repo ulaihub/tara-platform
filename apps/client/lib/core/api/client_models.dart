@@ -1005,6 +1005,7 @@ class TrackedOrder {
     required this.timeline,
     required this.createdAt,
     this.failure,
+    this.delivery,
     this.rating,
     this.retryFee = 0,
     this.returnFee = 0,
@@ -1025,6 +1026,7 @@ class TrackedOrder {
     final pricing = _field<Json>(json, 'pricing');
     final rider = json['rider'] as Json?;
     final failure = json['failure'] as Json?;
+    final delivery = json['delivery'] as Json?;
     final rating = json['rating'] as Json?;
     final scheduled = json['scheduledFor'] as String?;
     // Annulée par le livreur : colis non conforme refusé à l'enlèvement, motif à l'appui.
@@ -1062,6 +1064,7 @@ class TrackedOrder {
       ],
       createdAt: DateTime.parse(_field(json, 'createdAt')),
       failure: failure == null ? null : OrderFailure.fromJson(failure),
+      delivery: delivery == null ? null : OrderDelivery.fromJson(delivery),
       rating: rating == null ? null : OrderRating.fromJson(rating),
       refusalReason: refused && !absent ? (json['cancelReason'] as String? ?? '') : null,
       senderAbsent: absent,
@@ -1090,6 +1093,7 @@ class TrackedOrder {
     'pricing',
     'rider',
     'failure',
+    'delivery',
     'cancelReason',
     'rating',
     'timeline',
@@ -1117,6 +1121,9 @@ class TrackedOrder {
 
   /// Livraison impossible (E6) : motif, choix et heure limite ; null hors de cet état.
   final OrderFailure? failure;
+
+  /// Colis livré : photo de remise et code vérifié ; null avant la livraison.
+  final OrderDelivery? delivery;
 
   /// Note donnée au livreur (F4), null tant que l'expéditeur n'a pas noté.
   final OrderRating? rating;
@@ -1182,6 +1189,7 @@ class TrackedOrder {
     timeline: timeline,
     createdAt: createdAt,
     failure: status == null ? this.failure : failure,
+    delivery: delivery,
     rating: rating ?? this.rating,
     retryFee: retryFee,
     returnFee: returnFee,
@@ -1226,6 +1234,8 @@ class OrderFailure {
     this.decision,
     this.decisionDueAt,
     this.retryAllowed = true,
+    this.hasPhoto = false,
+    this.calls = 0,
   });
 
   factory OrderFailure.fromJson(Json json) {
@@ -1237,10 +1247,13 @@ class OrderFailure {
       decision: json['decision'] as String?,
       decisionDueAt: due == null ? null : DateTime.parse(due),
       retryAllowed: _field<bool>(json, 'retryAllowed'),
+      // Serveur d'avant : ni photo ni appels.
+      hasPhoto: json['hasPhoto'] as bool? ?? false,
+      calls: (json['calls'] as num?)?.toInt() ?? 0,
     );
   }
 
-  static const fields = ['reason', 'note', 'at', 'decision', 'decisionDueAt', 'retryAllowed'];
+  static const fields = ['reason', 'note', 'at', 'decision', 'decisionDueAt', 'retryAllowed', 'hasPhoto', 'calls'];
 
   /// RECIPIENT_ABSENT, RECIPIENT_UNREACHABLE, REFUSED, ADDRESS_NOT_FOUND, PAYMENT_REFUSED, DAMAGED,
   /// OTHER.
@@ -1256,6 +1269,30 @@ class OrderFailure {
 
   /// Une seule nouvelle tentative : false après un deuxième échec.
   final bool retryAllowed;
+
+  /// Photo du lieu prise par le livreur (`ClientApi.proofPhoto`).
+  final bool hasPhoto;
+
+  /// Appels passés au destinataire avant l'échec.
+  final int calls;
+}
+
+/// Remise du colis (E4) : photo prise par le livreur, code du destinataire vérifié, heure.
+@immutable
+class OrderDelivery {
+  const OrderDelivery({required this.hasPhoto, required this.codeVerified, required this.at});
+
+  factory OrderDelivery.fromJson(Json json) => OrderDelivery(
+    hasPhoto: _field<bool>(json, 'hasPhoto'),
+    codeVerified: _field<bool>(json, 'codeVerified'),
+    at: DateTime.parse(_field(json, 'at')).toLocal(),
+  );
+
+  static const fields = ['hasPhoto', 'codeVerified', 'at'];
+
+  final bool hasPhoto;
+  final bool codeVerified;
+  final DateTime at;
 }
 
 /// Notification de la cloche (boîte de réception du compte).

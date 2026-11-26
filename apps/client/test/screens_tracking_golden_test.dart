@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +12,6 @@ import 'package:tara_client/features/tracking/tracking_screen.dart';
 import 'package:tara_core/api/api_exception.dart';
 import 'package:tara_core/push/push_service.dart';
 import 'package:tara_core/session/session_store.dart';
-import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 
 import 'helpers/fake_client_api.dart';
@@ -100,8 +100,11 @@ TrackedOrder tracked(
             decision: decision,
             decisionDueAt: decision == null ? at(10, 33) : null,
             retryAllowed: retryAllowed,
+            hasPhoto: true,
+            calls: 2,
           )
         : null,
+    delivery: status == 'DELIVERED' ? OrderDelivery(hasPhoto: true, codeVerified: true, at: at(10, 35)) : null,
     retryFee: 500,
     returnFee: 750,
     cancellationFee: cancellationFee,
@@ -136,7 +139,9 @@ Widget screen(FakeClientApi api, FakeRealtime realtime, {VoidCallback? onBack, M
       child: TrackingScreen(orderId: orderId, onBack: onBack ?? () {}, now: () => DateTime(2026, 11, 4, 10, 20)),
     );
 
-FakeClientApi apiAt(String status) => FakeClientApi()..tracked[orderId] = tracked(status);
+FakeClientApi apiAt(String status) => FakeClientApi()
+  ..tracked[orderId] = tracked(status)
+  ..proof = File('test/fixtures/colis.jpg').readAsBytesSync();
 
 /// Livreur à mi-chemin entre l'enlèvement et la livraison.
 const halfway = {'latitude': 4.0405, 'longitude': 9.6950, 'heading': 200};
@@ -169,8 +174,9 @@ void main() {
       await pumpVariant(tester, variant, screen(apiAt('DELIVERY_FAILED'), realtime));
       await settle(tester);
       expect(tester.takeException(), isNull);
-      expect(find.text('Livraison impossible'), findsOneWidget);
-      expect(find.text('Avant 10:33'), findsOneWidget);
+      expect(find.text('Livraison impossible'), findsNWidgets(2));
+      expect(find.text('13′'), findsOneWidget);
+      expect(find.text('Photo du lieu à 10:18 · 2 appels sans réponse'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_echec/${variant.name}.png'));
     });
   }
@@ -244,7 +250,8 @@ void main() {
       await settle(tester);
       await tester.tap(find.bySemanticsLabel('5 étoiles'));
       await settle(tester);
-      expect(find.text('Parfait !'), findsOneWidget);
+      await tester.enterText(find.byType(EditableText), 'Très rapide, merci !');
+      await settle(tester);
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_etoiles/${brightness.name}.png'));
     });
 
@@ -259,8 +266,9 @@ void main() {
     goldenTest('06 suivi livré ${brightness.name}', (tester) async {
       await pumpVariant(tester, variant, screen(apiAt('DELIVERED'), FakeRealtime()));
       await settle(tester);
-      expect(find.text('Colis livré !'), findsNWidgets(2));
-      expect(find.text('12 500 F encaissés'), findsOneWidget);
+      expect(find.text('Colis livré !'), findsOneWidget);
+      expect(find.text('Remis à Marie Ngo à 10:35 · 12\u00a0500\u00a0F encaissés pour vous'), findsOneWidget);
+      expect(find.text('Photo de remise · code du destinataire vérifié à 10:35.'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_livre/${brightness.name}.png'));
     });
   }
@@ -297,8 +305,12 @@ void main() {
     realtime.emit('order.status', {'orderId': orderId, 'status': 'DELIVERED'});
     await settle(tester);
     expect(sounds.played, [TaraSound.received, TaraSound.pickedUp, TaraSound.delivered]);
-    expect(find.text('10:35 · en 23 min · Livré par Jean M.'), findsOneWidget);
+    expect(find.text('Colis livré !'), findsOneWidget);
 
+    // « Reçu » : le récapitulatif à partager en image.
+    await tester.tap(find.text('Reçu'));
+    await settle(tester);
+    expect(find.text('10:35 · en 23 min · Livré par Jean M.'), findsOneWidget);
     await tester.tap(find.text('Partager'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
     await tester.pump();
@@ -313,15 +325,16 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1200));
     await settle(tester);
     expect(find.text('Comment s’est passée la livraison ?'), findsOneWidget);
-    expect(find.text('Envoyer ma note'), findsNothing);
+    // Pas d'étoile : rien à envoyer.
+    await tester.tap(find.text('Envoyer ma note'));
+    await settle(tester);
+    expect(api.ratings, isEmpty);
 
     await tester.ensureVisible(find.bySemanticsLabel('4 étoiles'));
     await tester.tap(find.bySemanticsLabel('4 étoiles'));
     await settle(tester);
-    expect(find.text('Bien'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('5 étoiles'));
     await settle(tester);
-    expect(find.text('Parfait !'), findsOneWidget);
     await tester.enterText(find.byType(EditableText), '  Très aimable  ');
     await tester.ensureVisible(find.text('Envoyer ma note'));
     await tester.tap(find.text('Envoyer ma note'));
@@ -497,38 +510,35 @@ void main() {
     realtime.emit('order.status', {'orderId': orderId, 'status': 'DELIVERY_FAILED'});
     await settle(tester);
     expect(sounds.played, [TaraSound.error]);
-    expect(find.text('Destinataire absent · signalé par Jean M. à 10:18'), findsOneWidget);
-    expect(find.text('Avant 10:33'), findsOneWidget);
-    expect(find.text('Échec'), findsOneWidget);
+    expect(find.text('Destinataire absent'), findsOneWidget);
+    expect(find.text('13′'), findsOneWidget);
 
-    // Rien n'est choisi : glisser ne fait rien.
+    // Rien n'est choisi : le bouton ne fait rien.
     expect(find.text('Choisissez une option'), findsOneWidget);
-    await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
+    await tester.tap(find.text('Choisissez une option'));
     await settle(tester);
     expect(api.decisions, isEmpty);
 
-    await tester.ensureVisible(find.text('Pour Marie Ngo'));
-    await settle(tester);
     await tester.tap(find.bySemanticsLabel('Appeler Marie'));
     await settle(tester);
     expect(launched.single, Uri(scheme: 'tel', path: '+237690112233'));
 
-    await tester.tap(find.text('Retour du colis · 750\u00a0F'));
+    await tester.tap(find.text('Retour au point d’enlèvement · 750\u00a0F'));
     await settle(tester);
-    expect(find.text('Confirmer le retour'), findsOneWidget);
     api.tracked[orderId] = tracked('DELIVERY_FAILED', decision: 'RETURN');
-    await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
+    await tester.tap(find.text('Faire revenir le colis'));
     await settle(tester);
     expect(api.decisions, [(orderId, 'RETURN')]);
     expect(sounds.played, [TaraSound.error, TaraSound.sent]);
     expect(find.text('Jean M. vous rapporte le colis.'), findsOneWidget);
-    expect(find.byType(SwipeButton), findsNothing);
+    expect(find.text('TR-48301 · retour'), findsOneWidget);
 
     // Code de retour perdu : un nouveau.
     await tester.ensureVisible(find.text('Nouveau code de retour'));
     await tester.tap(find.text('Nouveau code de retour'));
     await settle(tester);
-    expect(find.text('Code de retour : 5 1 9 0'), findsOneWidget);
+    expect(find.text('5 1 9 0'), findsOneWidget);
+    expect(find.text('CODE DE RETOUR'), findsOneWidget);
   });
 
   testWidgets('échec : solde insuffisant, recharge Mobile Money puis nouvelle tentative', (tester) async {
@@ -543,10 +553,10 @@ void main() {
     await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1100));
     await settle(tester);
     expect(find.text('Nouvelle tentative · 500\u00a0F'), findsOneWidget);
-    expect(find.text('Retour du colis · 750\u00a0F'), findsOneWidget);
+    expect(find.text('Retour au point d’enlèvement · 750\u00a0F'), findsOneWidget);
     await tester.tap(find.text('Nouvelle tentative · 500\u00a0F'));
     await settle(tester);
-    await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
+    await tester.tap(find.text('Relancer la livraison'));
     await settle(tester);
     expect(api.decisions, isEmpty);
     expect(find.text('Rechargez 500 F pour la nouvelle tentative'), findsOneWidget);
@@ -571,7 +581,7 @@ void main() {
     await settle(tester);
     expect(find.textContaining('Nouvelle tentative ·'), findsNothing);
     expect(find.textContaining('Une seule nouvelle tentative est possible'), findsOneWidget);
-    expect(find.text('Retour du colis · 750\u00a0F'), findsOneWidget);
+    expect(find.text('Retour au point d’enlèvement · 750\u00a0F'), findsOneWidget);
   });
 
   testWidgets('échec : déjà décidé ailleurs, l’écran montre la décision prise', (tester) async {
@@ -580,10 +590,9 @@ void main() {
     await settle(tester);
     await tester.tap(find.text('Nouvelle tentative · 500\u00a0F'));
     await settle(tester);
-    expect(find.text('Confirmer la tentative'), findsOneWidget);
     // Retour automatique passé entre-temps : la décision relue remplace le choix.
     api.tracked[orderId] = tracked('DELIVERY_FAILED', decision: 'RETURN');
-    await tester.drag(find.byType(SwipeButton), const Offset(600, 0));
+    await tester.tap(find.text('Relancer la livraison'));
     await settle(tester);
     expect(api.decisions, isEmpty);
     expect(find.text('Jean M. vous rapporte le colis.'), findsOneWidget);
