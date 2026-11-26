@@ -1,8 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/components/three_d.dart';
 import 'package:tara_ui/format.dart';
+import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/motion_clock.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -90,6 +95,8 @@ class _WhenStepState extends State<WhenStep> {
     }
   }
 
+  static String _capitalized(String text) => text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
+
   static bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
@@ -108,53 +115,84 @@ class _WhenStepState extends State<WhenStep> {
     final days = scheduleDays(now);
     final slots = scheduleSlots(_day, now);
     final chosen = draft.scheduledFor;
+    Widget section(String text) => Text(
+      text,
+      style: TaraText.label.copyWith(color: c.textPrimary, fontSize: 13, fontWeight: FontWeight.w800),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          header: true,
-          child: Text(l.whenTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-        ),
-        const SizedBox(height: 8),
-        Text(l.whenBody, style: TaraText.body.copyWith(color: c.textSecondary)),
-        const SizedBox(height: 18),
-        AddressChoice(
-          icon: TaraIcons.navigation,
-          title: l.whenNow,
-          subtitle: l.whenNowBody,
-          selected: !draft.later,
-          onTap: () => _setLater(false),
-        ),
+        StepHeading(title: l.whenTitle, body: l.whenBody),
         const SizedBox(height: 10),
-        AddressChoice(
-          icon: TaraIcons.clock,
-          title: l.whenLater,
-          subtitle: l.whenLaterBody,
-          selected: draft.later,
-          onTap: () => _setLater(true),
-        ),
-        if (draft.later) ...[
-          const SizedBox(height: 20),
-          Text(l.dayLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            child: Row(
-              children: [
-                for (final day in days) ...[
-                  _DayChip(label: dayLabel(day), selected: _sameDay(day, _day), onTap: () => _chooseDay(day)),
-                  const SizedBox(width: 8),
-                ],
-              ],
-            ),
+        // Deux cartes côte à côte (maquette) : maintenant, ou programmer.
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _ModeCard(
+                  icon: TaraIcons.bolt,
+                  title: l.whenNow,
+                  body: l.whenNowBody,
+                  selected: !draft.later,
+                  onTap: () => _setLater(false),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _ModeCard(
+                  icon: TaraIcons.calendar,
+                  title: l.whenLater,
+                  body: l.whenLaterBody,
+                  selected: draft.later,
+                  onTap: () => _setLater(true),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 18),
-          Text(l.timeLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
-          const SizedBox(height: 8),
+        ),
+        if (!draft.later) const _Departing(),
+        if (draft.later) ...[
+          const SizedBox(height: 10),
+          section(l.dayLabel),
+          const SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Cinq jours visibles, les suivants en faisant glisser.
+              final width = (constraints.maxWidth - 4 * 6) / 5;
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                child: Row(
+                  children: [
+                    for (final (i, day) in days.indexed) ...[
+                      if (i > 0) const SizedBox(width: 6),
+                      SizedBox(
+                        width: width,
+                        child: _DayChip(
+                          top: switch (day.difference(today).inDays) {
+                            0 => l.dayTodayShort,
+                            1 => l.dayTomorrowShort,
+                            _ => _capitalized(DateFormat.E(locale).format(day)),
+                          },
+                          number: '${day.day}',
+                          semanticLabel: dayLabel(day),
+                          selected: _sameDay(day, _day),
+                          onTap: () => _chooseDay(day),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 10),
+          section(l.timeLabel),
+          const SizedBox(height: 10),
           ChoiceChips<DateTime>(
             columns: 4,
-            height: 44,
+            height: 40,
             options: [for (final slot in slots) ChoiceOption(slot, formatClock(slot))],
             selected: chosen,
             onSelected: (slot) => widget.draft
@@ -179,11 +217,19 @@ class _WhenStepState extends State<WhenStep> {
   }
 }
 
-/// Jour proposé : pastille de verre, orange une fois choisie.
-class _DayChip extends StatelessWidget {
-  const _DayChip({required this.label, required this.selected, required this.onTap});
+/// « Maintenant » ou « Programmer » : tuile d'icône (orange quand choisie), titre, phrase.
+class _ModeCard extends StatelessWidget {
+  const _ModeCard({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.selected,
+    required this.onTap,
+  });
 
-  final String label;
+  final TaraIconData icon;
+  final String title;
+  final String body;
   final bool selected;
   final VoidCallback onTap;
 
@@ -191,31 +237,178 @@ class _DayChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
     return Semantics(
+      inMutuallyExclusiveGroup: true,
+      checked: selected,
       button: true,
-      selected: selected,
-      label: label,
+      label: '$title. $body',
       excludeSemantics: true,
-      child: GestureDetector(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          constraints: const BoxConstraints(minHeight: 44),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-          decoration: BoxDecoration(
-            gradient: selected ? c.chipSelected : null,
-            color: selected ? null : c.glass,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected ? c.chipSelectedBorder : c.glassBorder,
-              width: selected ? c.chipSelectedBorderWidth : 1,
+      child: Squish(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            constraints: const BoxConstraints(minHeight: 132),
+            padding: EdgeInsets.all(selected ? 13 : 14),
+            decoration: BoxDecoration(
+              color: selected ? const Color.fromRGBO(255, 138, 0, .10) : boxedFieldFill(c),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: selected ? const Color(0xFFFF8A00) : boxedFieldBorder(c),
+                width: selected ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: selected ? TaraBrand.gradient : null,
+                    color: selected ? null : const Color.fromRGBO(255, 177, 92, .14),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: TaraIcon(icon, size: 20, color: selected ? TaraBrand.onBrand : c.accentText),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  title,
+                  style: TaraText.text.copyWith(color: c.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                Text(body, style: TaraText.small.copyWith(color: c.textTertiary, fontSize: 12, height: 1.4)),
+              ],
             ),
           ),
-          child: Text(
-            label,
-            style: TaraText.label.copyWith(color: selected ? c.accentText : c.textPrimary, fontWeight: FontWeight.w700),
+        ),
+      ),
+    );
+  }
+}
+
+/// « Maintenant » : le colis 3D file, traits de vitesse derrière lui (maquette).
+class _Departing extends StatelessWidget {
+  const _Departing();
+
+  @override
+  Widget build(BuildContext context) {
+    const lines = [
+      (20.0, 60.0, TaraBrand.amber, 600),
+      (38.0, 44.0, TaraBrand.orange, 750),
+      (56.0, 28.0, TaraBrand.red, 900),
+    ];
+    return ExcludeSemantics(
+      child: SizedBox(
+        height: 170,
+        child: Center(
+          child: SizedBox.square(
+            dimension: 96,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Positioned.fill(
+                  child: OverflowBox(
+                    maxWidth: 200,
+                    maxHeight: 200,
+                    child: Parcel3D(
+                      size: 96,
+                      shadow: false,
+                      period: Duration(seconds: 5),
+                      bobPeriod: Duration(milliseconds: 1600),
+                    ),
+                  ),
+                ),
+                for (final (top, width, color, ms) in lines)
+                  Positioned(
+                    top: top,
+                    right: 96 + 10,
+                    child: MotionBuilder(
+                      period: Duration(milliseconds: ms),
+                      builder: (context, t, child) =>
+                          Transform.translate(offset: Offset(3 - 3 * math.cos(t * 2 * math.pi), 0), child: child),
+                      child: Container(
+                        width: width,
+                        height: 7,
+                        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Jour proposé (maquette) : jour court au-dessus, numéro en gras ; orange une fois choisi.
+class _DayChip extends StatelessWidget {
+  const _DayChip({
+    required this.top,
+    required this.number,
+    required this.semanticLabel,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String top;
+  final String number;
+  final String semanticLabel;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final ink = selected ? TaraBrand.onBrand : c.textPrimary;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: semanticLabel,
+      excludeSemantics: true,
+      child: Squish(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            constraints: const BoxConstraints(minHeight: 58),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+            decoration: BoxDecoration(
+              gradient: selected ? TaraBrand.gradient : null,
+              color: selected ? null : boxedFieldFill(c),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: selected ? const Color(0xFFFF8A00) : boxedFieldBorder(c)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    top,
+                    maxLines: 1,
+                    style: TaraText.small.copyWith(
+                      color: ink.withValues(alpha: .75),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  number,
+                  style: TaraText.text.copyWith(color: ink, fontSize: 15, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
           ),
         ),
       ),

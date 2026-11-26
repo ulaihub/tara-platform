@@ -515,6 +515,7 @@ model User {
   pricingGridsCreated      PricingGrid[]
   journalEntriesPosted     JournalEntry[]
   notifications            Notification[]
+  inboxItems               InboxItem[]
   ticketsOpened            Ticket[]               @relation("TicketOpenedBy")
   ticketsAssigned          Ticket[]               @relation("TicketAssignee")
   ticketsRequested         Ticket[]               @relation("TicketRequester")
@@ -1655,6 +1656,24 @@ model Notification {
   @@map("notifications")
 }
 
+/// Boîte de réception de l'app (cloche) : une ligne par notification adressée au compte,
+/// gardée même sans téléphone joignable ; le texte est rendu à la lecture, dans la langue
+/// du compte. Effacée après 90 jours et avec le compte.
+model InboxItem {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  template  String
+  params    Json
+  orderId   String?   @map("order_id") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  readAt    DateTime? @map("read_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("inbox_items")
+}
+
 /// Demande au service client (H6) : réclamation, litige, question. Ouverte depuis une app
 /// par l'utilisateur, ou par l'équipe à la suite d'un appel (la personne n'a pas forcément
 /// de compte : un destinataire, par exemple).
@@ -1794,4 +1813,21 @@ model OrderMessage {
 
   @@index([orderId, createdAt])
   @@map("order_messages")
+}
+
+/// Repère de Douala ajouté par l'équipe (carrefour, rond-point, lieu connu de tous) que la
+/// carte OpenStreetMap ne nomme pas : affiché dans les apps et proposé sous l'épingle.
+model Landmark {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  name        String
+  city        String   @default("Douala")
+  latitude    Float
+  longitude   Float
+  active      Boolean  @default(true)
+  createdById String?  @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([city, active])
+  @@map("landmarks")
 }

@@ -149,8 +149,32 @@ abstract class AppLocalizations {
   /// No description provided for @codeSentTo.
   ///
   /// In fr, this message translates to:
-  /// **'Envoyé par SMS au {phone}'**
+  /// **'Code envoyé par SMS au {phone}'**
   String codeSentTo(String phone);
+
+  /// No description provided for @codeAutoReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture automatique du code…'**
+  String get codeAutoReading;
+
+  /// No description provided for @resendShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer dans {time}'**
+  String resendShort(String time);
+
+  /// No description provided for @resendCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer le code'**
+  String get resendCode;
+
+  /// No description provided for @smsAvailableIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pourrez demander le SMS dans {time}.'**
+  String smsAvailableIn(String time);
 
   /// No description provided for @codeTitle.
   ///
@@ -163,6 +187,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Continuer'**
   String get continueLabel;
+
+  /// No description provided for @countryLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pays'**
+  String get countryLabel;
 
   /// No description provided for @countryCodeLabel.
   ///
@@ -407,7 +437,7 @@ abstract class AppLocalizations {
   /// No description provided for @signInBody.
   ///
   /// In fr, this message translates to:
-  /// **'Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code par SMS.'**
+  /// **'Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code sur WhatsApp ou par SMS.'**
   String get signInBody;
 
   /// No description provided for @signInTitle.
@@ -434,6 +464,36 @@ abstract class AppLocalizations {
   /// **'Votre nom figure dans les messages envoyés à vos destinataires.'**
   String get welcomeBody;
 
+  /// No description provided for @welcomeKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau compte'**
+  String get welcomeKicker;
+
+  /// No description provided for @yourName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre nom'**
+  String get yourName;
+
+  /// No description provided for @yourNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Awa Ngono'**
+  String get yourNameHint;
+
+  /// No description provided for @shopNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de votre boutique'**
+  String get shopNameLabel;
+
+  /// No description provided for @payoutReceives.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il reçoit vos ventes encaissées'**
+  String get payoutReceives;
+
   /// No description provided for @welcomeTitle.
   ///
   /// In fr, this message translates to:
@@ -451,6 +511,228 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Bonjour,'**
   String get goodMorning;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsUnread.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications, {count, plural, =1{1 nouvelle} other{{count} nouvelles}}'**
+  String notificationsUnread(int count);
+
+  /// No description provided for @unreadCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 non lue} other{{count} non lues}}'**
+  String unreadCount(int count);
+
+  /// No description provided for @unreadLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non lue'**
+  String get unreadLabel;
+
+  /// No description provided for @allRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout est lu'**
+  String get allRead;
+
+  /// No description provided for @readAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout lire'**
+  String get readAll;
+
+  /// No description provided for @noNotifications.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien de nouveau. Vos livraisons, paiements et adresses reçues s’afficheront ici.'**
+  String get noNotifications;
+
+  /// No description provided for @notificationsError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les notifications.'**
+  String get notificationsError;
+
+  /// No description provided for @justNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'à l’instant'**
+  String get justNow;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'il y a {minutes} min'**
+  String minutesAgo(int minutes);
+
+  /// No description provided for @yesterdayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'hier {time}'**
+  String yesterdayAt(String time);
+
+  /// No description provided for @quickActivity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activité'**
+  String get quickActivity;
+
+  /// No description provided for @activityTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon activité'**
+  String get activityTitle;
+
+  /// No description provided for @activityToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd’hui'**
+  String get activityToday;
+
+  /// No description provided for @activityThisWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'cette semaine'**
+  String get activityThisWeek;
+
+  /// No description provided for @activityThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'ce mois-ci'**
+  String get activityThisMonth;
+
+  /// No description provided for @activityPeriod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période'**
+  String get activityPeriod;
+
+  /// No description provided for @periodDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour'**
+  String get periodDay;
+
+  /// No description provided for @periodWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine'**
+  String get periodWeek;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois'**
+  String get periodMonth;
+
+  /// No description provided for @activityError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger votre activité.'**
+  String get activityError;
+
+  /// No description provided for @kpiDeliveries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraisons'**
+  String get kpiDeliveries;
+
+  /// No description provided for @kpiCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé'**
+  String get kpiCollected;
+
+  /// No description provided for @kpiSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réussite'**
+  String get kpiSuccess;
+
+  /// No description provided for @pointsShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 pt} other{{count} pts}}'**
+  String pointsShort(int count);
+
+  /// No description provided for @topZones.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quartiers les plus livrés'**
+  String get topZones;
+
+  /// No description provided for @averageDelay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai moyen {delay}'**
+  String averageDelay(String delay);
+
+  /// No description provided for @noZonesYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de livraison sur cette période.'**
+  String get noZonesYet;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min'**
+  String minutesShort(int minutes);
+
+  /// No description provided for @hoursMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String hoursMinutes(int hours, String minutes);
+
+  /// No description provided for @chartSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes encaissées'**
+  String get chartSales;
+
+  /// No description provided for @legendSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes'**
+  String get legendSales;
+
+  /// No description provided for @legendDeliveries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraisons'**
+  String get legendDeliveries;
+
+  /// No description provided for @hourShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hour}h'**
+  String hourShort(int hour);
+
+  /// No description provided for @hourLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hour} h'**
+  String hourLong(int hour);
+
+  /// No description provided for @weekShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sem. {number}'**
+  String weekShort(int number);
+
+  /// No description provided for @daysRange.
+  ///
+  /// In fr, this message translates to:
+  /// **'{from} au {to} {month}'**
+  String daysRange(int from, int to, String month);
 
   /// No description provided for @goodEvening.
   ///
@@ -673,6 +955,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Livraison impossible · à décider'**
   String get statusFailed;
+
+  /// No description provided for @statusRiderComingYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur en route vers vous'**
+  String get statusRiderComingYou;
+
+  /// No description provided for @statusRiderComingShop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livreur en route vers votre boutique'**
+  String get statusRiderComingShop;
+
+  /// No description provided for @statusRiderArriving.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} arrive'**
+  String statusRiderArriving(String name);
+
+  /// No description provided for @statusFailedYouDecide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison impossible · à vous de décider'**
+  String get statusFailedYouDecide;
+
+  /// No description provided for @etaMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min'**
+  String etaMinutes(int minutes);
 
   /// No description provided for @todayAt.
   ///
@@ -1040,6 +1352,12 @@ abstract class AppLocalizations {
   /// **'Nouvelle adresse'**
   String get newAddress;
 
+  /// No description provided for @newAddressOnMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle adresse sur la carte'**
+  String get newAddressOnMap;
+
   /// No description provided for @pickupRequired.
   ///
   /// In fr, this message translates to:
@@ -1069,6 +1387,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Faites glisser la carte : l’épingle au centre marque l’entrée exacte. Le quartier s’affiche dès qu’elle est posée.'**
   String get pinHint;
+
+  /// No description provided for @pinHintShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faites glisser la carte : l’épingle au centre marque l’entrée exacte.'**
+  String get pinHintShort;
+
+  /// No description provided for @placePointTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placer le point'**
+  String get placePointTitle;
+
+  /// No description provided for @landmarkForRider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Repère pour le livreur'**
+  String get landmarkForRider;
+
+  /// No description provided for @validatePoint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider ce point'**
+  String get validatePoint;
 
   /// No description provided for @pinPlaced.
   ///
@@ -1226,6 +1568,78 @@ abstract class AppLocalizations {
   /// **'Il reçoit un lien et place lui-même son point sur la carte.'**
   String get askRecipientBody;
 
+  /// No description provided for @pickFromContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir dans mes contacts'**
+  String get pickFromContacts;
+
+  /// No description provided for @whereToDeliverQ.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où livrer ?'**
+  String get whereToDeliverQ;
+
+  /// No description provided for @knownAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse déjà connue'**
+  String get knownAddress;
+
+  /// No description provided for @lastDeliveryTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière livraison à {name} : {when}'**
+  String lastDeliveryTo(String name, String when);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'il y a {days} jours'**
+  String daysAgo(int days);
+
+  /// No description provided for @placePointOnMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placer le point sur la carte'**
+  String get placePointOnMap;
+
+  /// No description provided for @placePointOnMapBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous connaissez l’endroit'**
+  String get placePointOnMapBody;
+
+  /// No description provided for @askRecipientShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il reçoit un lien et place lui-même son point'**
+  String get askRecipientShort;
+
+  /// No description provided for @placedByYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placée par vous'**
+  String get placedByYou;
+
+  /// No description provided for @withPhotoAndVoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'photo et note vocale'**
+  String get withPhotoAndVoice;
+
+  /// No description provided for @withPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'photo de la façade'**
+  String get withPhoto;
+
+  /// No description provided for @withVoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'note vocale'**
+  String get withVoice;
+
   /// No description provided for @viaWhatsapp.
   ///
   /// In fr, this message translates to:
@@ -1285,6 +1699,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Adresse confirmée par une livraison'**
   String get addressVerified;
+
+  /// No description provided for @addressVerifiedShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'confirmée par une livraison ✓'**
+  String get addressVerifiedShort;
 
   /// No description provided for @addressFromRecipient.
   ///
@@ -1400,11 +1820,23 @@ abstract class AppLocalizations {
   /// **'Taille {size}'**
   String sizeShort(String size);
 
+  /// No description provided for @parcelSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis {size}'**
+  String parcelSize(String size);
+
   /// No description provided for @contentsLabel.
   ///
   /// In fr, this message translates to:
   /// **'Nature du contenu'**
   String get contentsLabel;
+
+  /// No description provided for @contentsShortLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nature'**
+  String get contentsShortLabel;
 
   /// No description provided for @contentsDocuments.
   ///
@@ -1592,6 +2024,18 @@ abstract class AppLocalizations {
   /// **'Gros objet'**
   String get sizeBulky;
 
+  /// No description provided for @sizeBulkyShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gros'**
+  String get sizeBulkyShort;
+
+  /// No description provided for @sizeBulkyVehicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'tricycle'**
+  String get sizeBulkyVehicle;
+
   /// No description provided for @sizeBulkyBody.
   ///
   /// In fr, this message translates to:
@@ -1601,7 +2045,7 @@ abstract class AppLocalizations {
   /// No description provided for @sizeHelpBulky.
   ///
   /// In fr, this message translates to:
-  /// **'Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.'**
+  /// **'Frigo, cuisinière, matelas, meuble : livré en tricycle. Tarif affiché avant de commander.'**
   String get sizeHelpBulky;
 
   /// No description provided for @loadingHelpTitle.
@@ -1675,6 +2119,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.'**
   String get valueHelp;
+
+  /// No description provided for @valueHelpShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte.'**
+  String get valueHelpShort;
+
+  /// No description provided for @guaranteeFree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garantie offerte jusqu’à {amount} de valeur.'**
+  String guaranteeFree(String amount);
 
   /// No description provided for @valueFeeHint.
   ///
@@ -1777,6 +2233,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Demain'**
   String get dayTomorrow;
+
+  /// No description provided for @dayTodayShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auj.'**
+  String get dayTodayShort;
+
+  /// No description provided for @dayTomorrowShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dem.'**
+  String get dayTomorrowShort;
 
   /// No description provided for @dateAt.
   ///
@@ -1958,6 +2426,12 @@ abstract class AppLocalizations {
   /// **'Total'**
   String get totalLabel;
 
+  /// No description provided for @courseFreeCover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course · garantie offerte'**
+  String get courseFreeCover;
+
   /// No description provided for @quoting.
   ///
   /// In fr, this message translates to:
@@ -2012,6 +2486,18 @@ abstract class AppLocalizations {
   /// **'Le destinataire paie la course à la livraison, en espèces ou par Mobile Money.'**
   String get recipientPaysBody;
 
+  /// No description provided for @codToCollectFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'À encaisser auprès de {name}'**
+  String codToCollectFrom(String name);
+
+  /// No description provided for @codPaidToSales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversé sur vos ventes'**
+  String get codPaidToSales;
+
   /// No description provided for @paymentLabel.
   ///
   /// In fr, this message translates to:
@@ -2029,6 +2515,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Orange Money'**
   String get payOrange;
+
+  /// No description provided for @mobileMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money'**
+  String get mobileMoney;
 
   /// No description provided for @payMomoBody.
   ///
@@ -2114,6 +2606,30 @@ abstract class AppLocalizations {
   /// **'Une demande de {amount} arrive sur le {phone} : entrez votre code secret Mobile Money pour la valider.'**
   String payingBody(String amount, String phone);
 
+  /// No description provided for @payingBodyOperator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une demande de {amount} arrive sur le {phone} : entrez votre code secret {operator} pour la valider. La recherche d’un livreur démarre juste après.'**
+  String payingBodyOperator(String amount, String phone, String operator);
+
+  /// No description provided for @paymentFailedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement refusé, annulé ou expiré. Réessayez, ou annulez la livraison.'**
+  String get paymentFailedBody;
+
+  /// No description provided for @payerPhoneHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'La demande de paiement part vers ce numéro {operator}.'**
+  String payerPhoneHelp(String operator);
+
+  /// No description provided for @cancelDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la livraison'**
+  String get cancelDelivery;
+
   /// No description provided for @paymentFailed.
   ///
   /// In fr, this message translates to:
@@ -2155,6 +2671,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Code d’enlèvement'**
   String get pickupCodeLabel;
+
+  /// No description provided for @pickupCodeDictate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dictez ces 4 chiffres au livreur à son arrivée.'**
+  String get pickupCodeDictate;
 
   /// No description provided for @pickupCodeHelp.
   ///
@@ -2389,12 +2911,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Code d’enlèvement : {code}'**
   String pickupCodeShown(String code);
-
-  /// No description provided for @cancelDelivery.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler la livraison'**
-  String get cancelDelivery;
 
   /// No description provided for @cancelConfirm.
   ///
@@ -2819,8 +3335,20 @@ abstract class AppLocalizations {
   /// No description provided for @termsUpdateIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.'**
+  /// **'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vos livraisons en cours continuent, mais vous ne pourrez pas en commander de nouvelles.'**
   String get termsUpdateIntro;
+
+  /// No description provided for @termsSignupKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant de commencer'**
+  String get termsSignupKicker;
+
+  /// No description provided for @termsReadPercent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu à {percent}%'**
+  String termsReadPercent(int percent);
 
   /// No description provided for @termsLater.
   ///
@@ -2837,7 +3365,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsScrollFirst.
   ///
   /// In fr, this message translates to:
-  /// **'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.'**
+  /// **'Faites défiler jusqu’en bas pour pouvoir accepter.'**
   String get termsScrollFirst;
 
   /// No description provided for @termsCheckPrefix.
@@ -3475,6 +4003,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'30 secondes pour expliquer le chemin, dans la langue de votre choix.'**
   String get voiceNoteHint;
+
+  /// No description provided for @voiceNoteRecord.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer une note vocale'**
+  String get voiceNoteRecord;
+
+  /// No description provided for @voiceNoteLength.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note vocale · {length}'**
+  String voiceNoteLength(String length);
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la photo'**
+  String get removePhoto;
+
+  /// No description provided for @removeNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la note'**
+  String get removeNote;
 
   /// No description provided for @recordNote.
   ///
@@ -4861,6 +5413,234 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nouveau message du livreur'**
   String get chatNewMessage;
+
+  /// No description provided for @landmarkNear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Près de {name}'**
+  String landmarkNear(String name);
+
+  /// No description provided for @landmarkUseNear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Près de {name} ?'**
+  String landmarkUseNear(String name);
+
+  /// No description provided for @introBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écran précédent'**
+  String get introBack;
+
+  /// No description provided for @introSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get introSkip;
+
+  /// No description provided for @introNext.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivant'**
+  String get introNext;
+
+  /// No description provided for @introStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer'**
+  String get introStart;
+
+  /// No description provided for @introSendKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison à la demande · Douala'**
+  String get introSendKicker;
+
+  /// No description provided for @introSendTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyez un colis en une minute'**
+  String get introSendTitle;
+
+  /// No description provided for @introSendBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un livreur vient le chercher chez vous et le livre partout dans Douala.'**
+  String get introSendBody;
+
+  /// No description provided for @introSendChip.
+  ///
+  /// In fr, this message translates to:
+  /// **'1 minute pour commander'**
+  String get introSendChip;
+
+  /// No description provided for @introSendFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique Awa'**
+  String get introSendFrom;
+
+  /// No description provided for @introSendFromAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bd de la Liberté, Akwa'**
+  String get introSendFromAddress;
+
+  /// No description provided for @introSendTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marie · Collège des Nations'**
+  String get introSendTo;
+
+  /// No description provided for @introSendDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'livrée en 38 min'**
+  String get introSendDelivered;
+
+  /// No description provided for @introTrackKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi en direct'**
+  String get introTrackKicker;
+
+  /// No description provided for @introTrackTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez votre colis jusqu\'à la porte'**
+  String get introTrackTitle;
+
+  /// No description provided for @introTrackBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous voyez le livreur avancer. Votre client reçoit un lien pour le suivre aussi.'**
+  String get introTrackBody;
+
+  /// No description provided for @introTrackRider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jean M. arrive'**
+  String get introTrackRider;
+
+  /// No description provided for @introTrackPlate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moto · LT 482 KA'**
+  String get introTrackPlate;
+
+  /// No description provided for @introTrackEta.
+  ///
+  /// In fr, this message translates to:
+  /// **'4 min'**
+  String get introTrackEta;
+
+  /// No description provided for @introCollectKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement à la livraison'**
+  String get introCollectKicker;
+
+  /// No description provided for @introCollectTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livreur encaisse pour vous'**
+  String get introCollectTitle;
+
+  /// No description provided for @introCollectBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'En espèces ou par Mobile Money. Vos ventes s\'ajoutent à votre compte et vous sont reversées sur votre Mobile Money.'**
+  String get introCollectBody;
+
+  /// No description provided for @introCollectDoor.
+  ///
+  /// In fr, this message translates to:
+  /// **'À la porte · TR-48211'**
+  String get introCollectDoor;
+
+  /// No description provided for @introCollectRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marie Ngo · Collège des Nations'**
+  String get introCollectRecipient;
+
+  /// No description provided for @introCollectAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'15 000 F'**
+  String get introCollectAmount;
+
+  /// No description provided for @introCollectCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get introCollectCash;
+
+  /// No description provided for @introCollectMomo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile Money'**
+  String get introCollectMomo;
+
+  /// No description provided for @introCollectFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'+15 000 F · à l\'instant'**
+  String get introCollectFooter;
+
+  /// No description provided for @introSalesLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes à recevoir'**
+  String get introSalesLabel;
+
+  /// No description provided for @introAccountsKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre argent'**
+  String get introAccountsKicker;
+
+  /// No description provided for @introAccountsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Deux comptes, d\'un coup d\'œil'**
+  String get introAccountsTitle;
+
+  /// No description provided for @introAccountsBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos ventes à recevoir et votre Solde Tara, qui paie vos livraisons. Tout est masqué tant que vous ne l\'affichez pas.'**
+  String get introAccountsBody;
+
+  /// No description provided for @introAccountsShopTag.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique'**
+  String get introAccountsShopTag;
+
+  /// No description provided for @introAccountsSalesFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reversées ce soir à 18 h'**
+  String get introAccountsSalesFooter;
+
+  /// No description provided for @introAccountsTaraLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde Tara'**
+  String get introAccountsTaraLabel;
+
+  /// No description provided for @introAccountsTaraFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paie vos livraisons en premier'**
+  String get introAccountsTaraFooter;
+
+  /// No description provided for @introAccountsSwipe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glissez pour changer de compte'**
+  String get introAccountsSwipe;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

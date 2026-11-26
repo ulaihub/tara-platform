@@ -3,7 +3,13 @@
 import { revalidatePath } from 'next/cache';
 import { ApiError } from '@/lib/api';
 import { requireStaff, staffApi } from '@/lib/dal';
-import { gridProblem, PRICING_ROLES, type SimpleGrid, tiersFor } from '@/lib/merchants';
+import {
+  gridProblem,
+  LANDMARK_ROLES,
+  PRICING_ROLES,
+  type SimpleGrid,
+  tiersFor,
+} from '@/lib/merchants';
 import type { PriceSimulation, PricingGrid } from '@/lib/schemas';
 
 /** Résultat d'une action, affiché sous le bouton. */
@@ -333,5 +339,45 @@ export async function createZone(_: ActionState, form: FormData): Promise<Action
     return failure(error);
   }
   revalidatePath('/marchands/zones');
+  return { error: null, done: true };
+}
+
+/** Repère placé sur la carte (carrefour, rond-point, lieu connu) : visible dans les apps. */
+export async function createLandmark(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireStaff(LANDMARK_ROLES);
+  const name = field(form, 'name');
+  const latitude = Number(field(form, 'latitude'));
+  const longitude = Number(field(form, 'longitude'));
+  if (name.length < 3)
+    return { error: 'Donnez le nom du repère (3 lettres au moins).', done: false };
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    (latitude === 0 && longitude === 0)
+  ) {
+    return { error: 'Cliquez sur la carte pour placer le repère.', done: false };
+  }
+  try {
+    await staffApi('/admin/landmarks', { method: 'POST', body: { name, latitude, longitude } });
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'OUT_OF_SERVICE_AREA') {
+      return { error: 'Ce point est hors de la zone desservie.', done: false };
+    }
+    return failure(error);
+  }
+  revalidatePath('/marchands/reperes');
+  return { error: null, done: true };
+}
+
+/** Repère faux ou disparu : retiré des cartes. */
+export async function removeLandmark(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireStaff(LANDMARK_ROLES);
+  const id = field(form, 'id');
+  try {
+    await staffApi(`/admin/landmarks/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath('/marchands/reperes');
   return { error: null, done: true };
 }

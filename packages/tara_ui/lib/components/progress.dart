@@ -174,16 +174,18 @@ class LiquidSegmented<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
     final index = segments.indexWhere((s) => s.$1 == selected);
-    final height = compact ? 34.0 : 56.0;
-    final radius = compact ? 12.0 : 20.0;
-    final pad = compact ? 3.0 : 5.0;
+    // Maquettes : rail encre 7 %, bord encre 10 %, marge 4, coins 17, segments de 50.
+    // Finesse : rail en pilule, curseur en pilule.
+    final height = compact ? 34.0 : 46.0;
+    final radius = height / 2;
+    final pad = compact ? 3.0 : 4.0;
     return Container(
       constraints: BoxConstraints(minHeight: height),
       padding: EdgeInsets.all(pad),
       decoration: BoxDecoration(
-        color: c.glassBar,
+        color: c.textPrimary.withValues(alpha: .07),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: c.glassBorder),
+        border: Border.all(color: c.textPrimary.withValues(alpha: .10)),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -201,7 +203,11 @@ class LiquidSegmented<T> extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: TaraBrand.gradient,
                     borderRadius: BorderRadius.circular(radius - pad),
-                    boxShadow: compact ? null : c.brandShadow.map((s) => s.scale(.5)).toList(),
+                    boxShadow: compact
+                        ? null
+                        : const [
+                            BoxShadow(color: Color.fromRGBO(255, 90, 0, .35), blurRadius: 16, offset: Offset(0, 6)),
+                          ],
                   ),
                 ),
               ),
@@ -226,8 +232,9 @@ class LiquidSegmented<T> extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                                 child: AnimatedDefaultTextStyle(
                                   duration: const Duration(milliseconds: 300),
-                                  style: (compact ? TaraText.smallStrong : TaraText.bodyStrong).copyWith(
-                                    color: value == selected ? TaraBrand.onBrand : c.textSecondary,
+                                  style: (compact ? TaraText.smallStrong : TaraText.text).copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: value == selected ? TaraBrand.onBrand : c.textPrimary.withValues(alpha: .78),
                                   ),
                                   child: Text(label, textAlign: TextAlign.center),
                                 ),

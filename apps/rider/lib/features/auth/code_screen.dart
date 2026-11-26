@@ -206,12 +206,7 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
                 ),
                 SizedBox(
                   width: 120,
-                  child: GlassButton(
-                    label: l.resend,
-                    height: 48,
-                    radius: 14,
-                    onPressed: waiting || _resending ? null : _resend,
-                  ),
+                  child: GlassButton(label: l.resend, onPressed: waiting || _resending ? null : _resend),
                 ),
               ],
             ),

@@ -76,7 +76,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     Navigator.of(context).push(
       scopedPage<void>(
         context,
-        (route) => _ProfilePage(title: title, onBack: () => Navigator.of(route).pop(), child: Builder(builder: body)),
+        (route) => _ProfilePage(
+          title: title,
+          onBack: () => Navigator.of(route).pop(),
+          child: Builder(builder: body),
+        ),
       ),
     ),
   );
@@ -110,10 +114,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _open(l.securitySection, (_) => const SecurityCard());
       }),
       _MenuRow(TaraIcons.sun, l.profileDisplayRow, themeName, () {
-        _open(l.profileDisplayRow, (context) => _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)));
+        _open(
+          l.profileDisplayRow,
+          (context) => _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
+        );
       }),
       _MenuRow(TaraIcons.globe, l.languageLabel, language, () {
-        _open(l.profileDisplayRow, (context) => _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)));
+        _open(
+          l.profileDisplayRow,
+          (context) => _DisplayCard(settings: settings, onLanguage: (code) => _setLanguage(settings, code)),
+        );
       }),
       _MenuRow(TaraIcons.headset, l.profileSupportRow, '', () {
         _open(l.helpSection, (context) => _HelpCard(support: support));
@@ -236,7 +246,10 @@ class _MenuTile extends StatelessWidget {
                   TaraIcon(row.icon, size: 22, strokeWidth: 1.8, color: ink),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: Text(row.label, style: TaraText.text.copyWith(color: ink, fontWeight: FontWeight.w700)),
+                    child: Text(
+                      row.label,
+                      style: TaraText.text.copyWith(color: ink, fontWeight: FontWeight.w700),
+                    ),
                   ),
                   if (row.value.isNotEmpty) ...[
                     const SizedBox(width: 8),
@@ -269,7 +282,14 @@ class _RingAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
-    final initials = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).take(2).map((w) => w[0]).join().toUpperCase();
+    final initials = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .take(2)
+        .map((w) => w[0])
+        .join()
+        .toUpperCase();
     return ExcludeSemantics(
       child: SizedBox(
         width: 92,
@@ -294,7 +314,9 @@ class _RingAvatar extends StatelessWidget {
             Positioned.fill(
               child: Padding(
                 padding: const EdgeInsets.all(4),
-                child: DecoratedBox(decoration: BoxDecoration(shape: BoxShape.circle, color: c.bg)),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.bg),
+                ),
               ),
             ),
             Positioned.fill(
@@ -305,7 +327,11 @@ class _RingAvatar extends StatelessWidget {
                   child: Center(
                     child: Text(
                       initials,
-                      style: TaraText.titleCourse.copyWith(color: TaraBrand.onBrand, fontWeight: FontWeight.w800, fontSize: 26),
+                      style: TaraText.titleCourse.copyWith(
+                        color: TaraBrand.onBrand,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 26,
+                      ),
                     ),
                   ),
                 ),
@@ -335,7 +361,10 @@ class _Chip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TaraText.smallStrong.copyWith(color: brand ? TaraBrand.onBrand : c.textPrimary, fontWeight: FontWeight.w800),
+        style: TaraText.smallStrong.copyWith(
+          color: brand ? TaraBrand.onBrand : c.textPrimary,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
@@ -488,7 +517,10 @@ class _ProfilePage extends StatelessWidget {
             child: GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: onBack),
           ),
           const SizedBox(height: 16),
-          Semantics(header: true, child: Text(title, style: TaraText.titleForm.copyWith(color: c.textPrimary))),
+          Semantics(
+            header: true,
+            child: Text(title, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
+          ),
           const SizedBox(height: 16),
           child,
         ],
@@ -760,13 +792,13 @@ class _LogoutBlock extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: GlassButton(label: l.cancel, height: 48, radius: 14, onPressed: busy ? null : onCancel),
+                child: GlassButton(label: l.cancel, onPressed: busy ? null : onCancel),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: busy
                     ? const SizedBox(height: 48, child: Center(child: GooLoader(compact: true)))
-                    : GlassButton(label: l.logout, height: 48, radius: 14, color: c.dangerText, onPressed: onLogout),
+                    : GlassButton(label: l.logout, color: c.dangerText, onPressed: onLogout),
               ),
             ],
           ),
@@ -937,7 +969,6 @@ class _AddressesCardState extends ConsumerState<_AddressesCard> {
                     icon: TaraIcons.close,
                     label: l.removeAddress(address.label ?? ''),
                     size: 40,
-                    radius: 14,
                     onPressed: () => setState(() {
                       _confirming = address.id;
                       _error = null;

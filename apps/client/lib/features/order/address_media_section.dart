@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_ui/components/buttons.dart';
-import 'package:tara_ui/components/glass.dart';
-import 'package:tara_ui/components/layout.dart';
+import 'package:tara_ui/components/inputs.dart';
+import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/motion_clock.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -13,6 +15,7 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../core/media/address_media.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import 'pickup_step.dart' show DashedRRectPainter;
 
 /// Photo et note vocale choisies, envoyées avec l'adresse à l'enregistrement.
 class AddressMedia extends ChangeNotifier {
@@ -147,110 +150,208 @@ class _AddressMediaSectionState extends ConsumerState<AddressMediaSection> {
     final c = TaraColors.of(context);
     final photo = widget.media.photo;
     final voice = widget.media.voice;
+    final voiceLabel = _recording
+        ? l.recordingNote(_clock(_elapsed))
+        : voice == null
+        ? l.voiceNoteRecord
+        : l.voiceNoteLength(_clock(widget.media.voiceLength));
+    // Barres en orange : ce qui est enregistré (ou s'enregistre) sur 30 secondes.
+    final filled = _recording
+        ? (_elapsed.inMilliseconds / maxVoiceNote.inMilliseconds * 18).ceil().clamp(1, 18)
+        : voice == null
+        ? 0
+        : (widget.media.voiceLength.inMilliseconds / maxVoiceNote.inMilliseconds * 18).ceil().clamp(1, 18);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l.mediaSection, style: TaraText.label.copyWith(color: c.textSecondary)),
-        const SizedBox(height: 8),
-        GlassCard(
-          radius: 18,
-          shadow: false,
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              if (photo != null)
-                Semantics(
-                  image: true,
-                  label: l.facadePhotoLabel,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: ColoredBox(
-                      color: c.track,
-                      child: Image.file(File(photo), width: 56, height: 56, fit: BoxFit.cover),
-                    ),
+        // Photo de la façade à gauche, note vocale à droite (maquette).
+        Row(
+          children: [
+            SizedBox(
+              width: 100,
+              height: 70,
+              child: Semantics(
+                button: true,
+                label: photo == null ? l.facadePhoto : '${l.facadePhotoLabel}, ${l.retake}',
+                excludeSemantics: true,
+                child: Squish(
+                  child: GestureDetector(
+                    key: facadePhotoKey,
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => unawaited(_takePhoto()),
+                    child: photo != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: ColoredBox(
+                              color: c.track,
+                              child: Image.file(File(photo), fit: BoxFit.cover, cacheWidth: 300),
+                            ),
+                          )
+                        : CustomPaint(
+                            painter: const DashedRRectPainter(color: Color.fromRGBO(255, 177, 92, .6), radius: 16),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TaraIcon(TaraIcons.camera, size: 20, color: c.accentText),
+                                const SizedBox(height: 4),
+                                Text(
+                                  l.facadePhoto,
+                                  textAlign: TextAlign.center,
+                                  style: TaraText.small.copyWith(
+                                    color: c.textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                   ),
-                )
-              else
-                const IconTile(icon: TaraIcons.camera, size: 56, radius: 12),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l.facadePhoto, style: TaraText.text.copyWith(color: c.textPrimary)),
-                    Text(l.facadePhotoHint, style: TaraText.small.copyWith(color: c.textTertiary)),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 14,
-                      children: [
-                        TaraLink(
-                          label: photo == null ? l.takePhoto : l.retake,
-                          onPressed: () => unawaited(_takePhoto()),
-                        ),
-                        if (photo != null) TaraLink(label: l.removeMedia, onPressed: () => widget.media.photo = null),
-                      ],
-                    ),
-                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        GlassCard(
-          radius: 18,
-          shadow: false,
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              IconTile(
-                icon: _recording ? TaraIcons.stop : (voice == null ? TaraIcons.mic : TaraIcons.play),
-                size: 56,
-                radius: 12,
-                tone: _recording ? TintTone.danger : TintTone.accent,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l.voiceNote, style: TaraText.text.copyWith(color: c.textPrimary)),
-                    Semantics(
-                      liveRegion: _recording,
-                      child: Text(
-                        _recording ? l.recordingNote(_clock(_elapsed)) : l.voiceNoteHint,
-                        style: TaraText.small.copyWith(
-                          color: _recording ? c.dangerText : c.textTertiary,
-                          fontWeight: _recording ? FontWeight.w700 : null,
-                        ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Semantics(
+                button: true,
+                liveRegion: _recording,
+                label: voiceLabel,
+                hint: _recording
+                    ? l.stopRecording
+                    : voice == null
+                    ? l.recordNote
+                    : (_playing ? l.stopListening : l.listenNote(_clock(widget.media.voiceLength))),
+                excludeSemantics: true,
+                child: Squish(
+                  child: GestureDetector(
+                    key: voiceNoteKey,
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => unawaited(
+                      _recording
+                          ? _stopRecording()
+                          : voice == null
+                          ? _record()
+                          : _togglePlay(),
+                    ),
+                    child: Container(
+                      height: 70,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: boxedFieldFill(c),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: boxedFieldBorder(c)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: _recording ? null : TaraBrand.gradient,
+                              color: _recording ? const Color(0xFFF01E2C) : null,
+                            ),
+                            alignment: Alignment.center,
+                            child: TaraIcon(
+                              _recording
+                                  ? TaraIcons.stop
+                                  : voice == null
+                                  ? TaraIcons.mic
+                                  : (_playing ? TaraIcons.stop : TaraIcons.play),
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  voiceLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TaraText.small.copyWith(
+                                    color: c.textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                _Waveform(filled: filled, moving: _recording || _playing),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 14,
-                      children: [
-                        if (_recording)
-                          TaraLink(label: l.stopRecording, onPressed: () => unawaited(_stopRecording()))
-                        else if (voice == null)
-                          TaraLink(label: l.recordNote, onPressed: () => unawaited(_record()))
-                        else ...[
-                          TaraLink(
-                            label: _playing ? l.stopListening : l.listenNote(_clock(widget.media.voiceLength)),
-                            onPressed: () => unawaited(_togglePlay()),
-                          ),
-                          TaraLink(label: l.redoNote, onPressed: () => unawaited(_record())),
-                          TaraLink(label: l.removeMedia, onPressed: () => widget.media.setVoice(null, Duration.zero)),
-                        ],
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
+            ),
+          ],
+        ),
+        // Reprendre ou retirer ce qui a été joint.
+        if (photo != null || (voice != null && !_recording))
+          Wrap(
+            spacing: 14,
+            children: [
+              if (photo != null) TaraLink(label: l.removePhoto, onPressed: () => widget.media.photo = null),
+              if (voice != null && !_recording) ...[
+                TaraLink(label: l.redoNote, onPressed: () => unawaited(_record())),
+                TaraLink(label: l.removeNote, onPressed: () => widget.media.setVoice(null, Duration.zero)),
+              ],
             ],
           ),
-        ),
         if (_error != null) ...[const SizedBox(height: 8), ErrorLine(_error!)],
       ],
+    );
+  }
+}
+
+/// Clés de la photo de façade et de la note vocale (tests).
+const facadePhotoKey = ValueKey('facade-photo');
+const voiceNoteKey = ValueKey('voice-note');
+
+/// Onde de la note vocale (maquette) : 18 barres, orange sur la part enregistrée, qui
+/// ondulent pendant l'enregistrement ou l'écoute.
+class _Waveform extends StatelessWidget {
+  const _Waveform({required this.filled, required this.moving});
+  final int filled;
+  final bool moving;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    const periods = [600, 750, 900, 1050];
+    return SizedBox(
+      height: 20,
+      child: Row(
+        children: [
+          for (var i = 0; i < 18; i++) ...[
+            if (i > 0) const SizedBox(width: 2),
+            MotionBuilder(
+              period: Duration(milliseconds: periods[i % 4]),
+              delay: Duration(milliseconds: 60 * i),
+              stillPhase: .5,
+              builder: (context, t, child) => Transform.scale(
+                scaleY: moving ? .35 + .65 * (1 - math.cos(t * 2 * math.pi)) / 2 : (i.isEven ? .7 : .45),
+                child: child,
+              ),
+              child: Container(
+                width: 3,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: i < filled ? TaraBrand.orange : c.textPrimary.withValues(alpha: .25),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

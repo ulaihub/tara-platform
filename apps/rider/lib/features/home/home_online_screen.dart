@@ -180,7 +180,6 @@ class _HomeOnlineScreenState extends ConsumerState<HomeOnlineScreen> {
                       label: l.recenterMap,
                       badge: !_following,
                       size: 48,
-                      radius: 18,
                       onPressed: _map.recenter,
                     ),
                   ),

@@ -23,6 +23,7 @@ import '../../l10n/app_localizations.dart';
 import '../bulk/bulk_screen.dart';
 import '../common/card_decor.dart';
 import '../orders/order_row.dart';
+import 'notifications_screen.dart';
 
 /// Commandes en cours de l'expéditeur (accueil), relues à chaque retour sur l'accueil.
 final activeOrdersProvider = FutureProvider<List<OrderSummary>>(
@@ -46,6 +47,8 @@ class HomeScreen extends ConsumerWidget {
     required this.onWallet,
     this.onReceipts,
     this.onSeeAll,
+    this.onNotifications,
+    this.onActivity,
     this.now,
   });
 
@@ -63,6 +66,12 @@ class HomeScreen extends ConsumerWidget {
 
   /// Toutes les livraisons en cours (onglet Commandes).
   final VoidCallback? onSeeAll;
+
+  /// Cloche des notifications ; absente, pas de cloche.
+  final VoidCallback? onNotifications;
+
+  /// « Mon activité » (boutique) ; absent, le raccourci n'est pas proposé.
+  final VoidCallback? onActivity;
 
   /// Horloge (tests).
   final DateTime Function()? now;
@@ -84,7 +93,8 @@ class HomeScreen extends ConsumerWidget {
     Future<void> refresh() async {
       ref
         ..invalidate(activeOrdersProvider)
-        ..invalidate(walletProvider);
+        ..invalidate(walletProvider)
+        ..invalidate(inboxProvider);
       await ref.read(activeOrdersProvider.future).catchError((_) => <OrderSummary>[]);
     }
 
@@ -125,6 +135,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                if (onNotifications != null) NotificationBell(onTap: onNotifications!),
               ],
             ),
             const SizedBox(height: 14),
@@ -136,6 +147,7 @@ class HomeScreen extends ConsumerWidget {
                 if (onBulk != null) (TaraIcons.parcelsFast, l.quickBulk, onBulk!, bulkCount),
                 (TaraIcons.askBubble, l.quickAskAddress, onLocationLink, 0),
                 if (onReceipts != null) (TaraIcons.receipt, l.quickReceipts, onReceipts!, 0),
+                if (onActivity != null) (TaraIcons.trend, l.quickActivity, onActivity!, 0),
               ],
             ),
             const SizedBox(height: 22),
@@ -149,7 +161,11 @@ class HomeScreen extends ConsumerWidget {
                       TextSpan(
                         children: [
                           TextSpan(text: l.inProgress),
-                          if (count > 0) TextSpan(text: ' · $count', style: TextStyle(color: c.accentText)),
+                          if (count > 0)
+                            TextSpan(
+                              text: ' · $count',
+                              style: TextStyle(color: c.accentText),
+                            ),
                         ],
                       ),
                       style: TaraText.cardTitle.copyWith(color: c.textPrimary),
@@ -166,7 +182,12 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   for (var i = 0; i < value.length; i++) ...[
                     if (i > 0) const SizedBox(height: 8),
-                    _ActiveOrderCard(order: value[i], now: clock, onTap: () => onOpenOrder(value[i])),
+                    _ActiveOrderCard(
+                      order: value[i],
+                      now: clock,
+                      shop: me.merchant != null,
+                      onTap: () => onOpenOrder(value[i]),
+                    ),
                   ],
                 ],
               ),
@@ -254,7 +275,9 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
               height: 122 + (scale - 1).clamp(0, 1) * 70,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(26),
-                boxShadow: const [BoxShadow(color: Color.fromRGBO(60, 25, 0, .24), blurRadius: 40, offset: Offset(0, 20))],
+                boxShadow: const [
+                  BoxShadow(color: Color.fromRGBO(60, 25, 0, .24), blurRadius: 40, offset: Offset(0, 20)),
+                ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(26),
@@ -271,7 +294,9 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
                   ),
                   child: Stack(
                     children: [
-                      const Positioned.fill(child: RouteTrail(route: RouteTrail.homeHero, base: Size(352, 122))),
+                      const Positioned.fill(
+                        child: RouteTrail(route: RouteTrail.homeHero, base: Size(352, 122)),
+                      ),
                       const SheenSweep(
                         color: Color.fromRGBO(255, 255, 255, .10),
                         delay: Duration(seconds: 1),
@@ -329,11 +354,18 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
                                     children: [
                                       Text(
                                         daily ? l.heroTonight('${data.payoutHour}') : l.heroOnDemand,
-                                        style: TaraText.small.copyWith(color: soft, fontWeight: FontWeight.w700, fontSize: 11),
+                                        style: TaraText.small.copyWith(
+                                          color: soft,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 11,
+                                        ),
                                       ),
                                       Text(
                                         daily ? l.heroPaidOut(pending) : l.heroToReceive(pending),
-                                        style: TaraText.smallStrong.copyWith(color: const Color(0xFFFFC283), fontSize: 13),
+                                        style: TaraText.smallStrong.copyWith(
+                                          color: const Color(0xFFFFC283),
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -454,7 +486,11 @@ class _QuickActions extends StatelessWidget {
                             color: c.glassFallback,
                             boxShadow: [
                               if (!c.isDark)
-                                const BoxShadow(color: Color.fromRGBO(140, 70, 10, .10), blurRadius: 20, offset: Offset(0, 8)),
+                                const BoxShadow(
+                                  color: Color.fromRGBO(140, 70, 10, .10),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 8),
+                                ),
                             ],
                           ),
                           child: Center(child: TaraIcon(icon, size: 22, color: c.textPrimary)),
@@ -467,7 +503,10 @@ class _QuickActions extends StatelessWidget {
                               constraints: const BoxConstraints(minWidth: 20),
                               height: 20,
                               padding: const EdgeInsets.symmetric(horizontal: 6),
-                              decoration: BoxDecoration(gradient: TaraBrand.gradient, borderRadius: BorderRadius.circular(10)),
+                              decoration: BoxDecoration(
+                                gradient: TaraBrand.gradient,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               alignment: Alignment.center,
                               child: Text(
                                 '$badge',
@@ -494,12 +533,16 @@ class _QuickActions extends StatelessWidget {
   }
 }
 
-/// Livraison en cours (maquette) : destinataire et lieu précis, étape, puis une barre qui
-/// avance avec la course (liquide qui coule, livreur qui roule) ; rouge si elle a échoué.
+/// Livraison en cours (maquette) : destinataire et lieu précis, étape (« En livraison ·
+/// Jean M. arrive »), minutes avant l'arrivée ou « Décider », puis une barre qui avance avec
+/// la course (liquide qui coule, livreur qui roule) ; rouge si elle a échoué.
 class _ActiveOrderCard extends StatelessWidget {
-  const _ActiveOrderCard({required this.order, required this.now, required this.onTap});
+  const _ActiveOrderCard({required this.order, required this.now, required this.shop, required this.onTap});
   final OrderSummary order;
   final DateTime now;
+
+  /// Boutique : le livreur vient « vers votre boutique ».
+  final bool shop;
   final VoidCallback onTap;
 
   /// Avancée affichée selon l'étape (le serveur ne donne pas encore la distance restante).
@@ -516,11 +559,30 @@ class _ActiveOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    final (_, tone, label) = OrderRow.orderStatus(l, order, now);
+    final (_, tone, base) = OrderRow.orderStatus(l, order, now);
     final failed = order.status == 'DELIVERY_FAILED' && order.failureDecision == null;
     final unpaid = order.status == 'CREATED' && tone == TintTone.danger;
     final moving = const {'ASSIGNED', 'PICKED_UP', 'IN_DELIVERY'}.contains(order.status);
-    final chip = failed ? l.chipDecide : (unpaid ? l.chipPay : null);
+    final delivering = order.status == 'PICKED_UP' || order.status == 'IN_DELIVERY';
+    final label = switch (order.status) {
+      'ASSIGNED' => shop ? l.statusRiderComingShop : l.statusRiderComingYou,
+      _ when delivering => [
+        l.statusInDelivery,
+        if (order.riderName case final rider? when rider.isNotEmpty) l.statusRiderArriving(rider),
+      ].join(' · '),
+      _ when failed => l.statusFailedYouDecide,
+      _ => base,
+    };
+    // Puce : « Décider » / « Payer » en rouge, sinon les minutes avant l'arrivée.
+    final alert = failed || unpaid;
+    final chip = failed
+        ? l.chipDecide
+        : unpaid
+        ? l.chipPay
+        : switch (order.etaMinutes) {
+            final minutes? when delivering => l.etaMinutes(minutes),
+            _ => null,
+          };
     final name = [
       if (order.batchNumber case final number?) l.parcelNumberShort(number),
       order.recipientName,
@@ -542,29 +604,46 @@ class _ActiveOrderCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: name,
-                                style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w800),
+                        // Nom en gras, lieu plus discret à côté (coupé s'il est long).
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Flexible(
+                              flex: 0,
+                              child: Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TaraText.text.copyWith(
+                                  color: c.textPrimary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                              TextSpan(
-                                text: '  ${precisePlace(order.dropoffLandmark, order.dropoffNeighborhood)}',
-                                style: TaraText.small.copyWith(color: c.textTertiary, fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                precisePlace(order.dropoffLandmark, order.dropoffNeighborhood),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TaraText.small.copyWith(
+                                  color: c.textTertiary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 2),
                         Text(
-                          '$label · ${order.reference}',
+                          label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TaraText.small.copyWith(
-                            color: failed || unpaid ? c.dangerText : c.textSecondary,
+                            color: alert ? c.dangerText : c.textSecondary,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -574,14 +653,24 @@ class _ActiveOrderCard extends StatelessWidget {
                   if (chip != null) ...[
                     const SizedBox(width: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(color: c.dangerTint, borderRadius: BorderRadius.circular(999)),
-                      child: Text(chip, style: TaraText.smallStrong.copyWith(color: c.dangerText)),
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: alert ? c.dangerTint : const Color.fromRGBO(255, 138, 0, .14),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        chip,
+                        style: TaraText.smallStrong.copyWith(
+                          color: alert ? c.dangerText : c.accentStrongText,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
                   ],
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 9),
               _RideProgress(ratio: _progress(order.status), failed: failed, moving: moving),
             ],
           ),

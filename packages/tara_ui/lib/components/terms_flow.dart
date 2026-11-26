@@ -38,7 +38,15 @@ class TermsStrings {
     required this.acceptedOn,
     required this.versionLine,
     required this.errorText,
+    required this.signupKicker,
+    required this.readPercent,
   });
+
+  /// Sur-titre de l'inscription (« AVANT DE COMMENCER »).
+  final String signupKicker;
+
+  /// « Lu à 40% ».
+  final String Function(int percent) readPercent;
 
   final String back;
   final String retry;
@@ -123,6 +131,7 @@ class TermsAcceptScreen extends StatefulWidget {
 class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
   late Future<List<LegalDocument>> _documents = widget.load();
   bool _checked = false;
+  double _read = 0;
   bool _busy = false;
   String? _error;
 
@@ -142,6 +151,7 @@ class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
         if (error.code == 'TERMS_OUTDATED') {
           // Nouvelle version parue entre-temps : textes relus, case à recocher.
           _checked = false;
+          _read = 0;
           _documents = widget.load();
         }
       });
@@ -166,32 +176,32 @@ class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
   @override
   Widget build(BuildContext context) {
     final s = widget.strings;
-    final leading = Row(
-      children: [
-        if (widget.onBack != null)
-          GlassIconButton(icon: TaraIcons.chevronLeft, label: s.back, onPressed: widget.onBack),
-        const Spacer(),
-        if (widget.onLater != null) TaraLink(label: s.later, onPressed: _busy ? null : widget.onLater),
-      ],
-    );
+    final c = TaraColors.of(context);
     return TaraScreen(
-      safeBottom: false,
       blobs: _blobs,
       child: FutureBuilder<List<LegalDocument>>(
         future: _documents,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  leading,
+                  if (widget.onBack != null)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GlassIconButton(icon: TaraIcons.chevronLeft, label: s.back, onPressed: widget.onBack),
+                    ),
                   const Spacer(),
                   _ErrorLine(s.errorText(snapshot.error!)),
                   const SizedBox(height: 16),
                   GlassButton(label: s.retry, onPressed: () => setState(() => _documents = widget.load())),
                   const Spacer(),
+                  if (widget.onLater != null)
+                    Center(
+                      child: TaraLink(label: s.later, onPressed: widget.onLater),
+                    ),
                 ],
               ),
             );
@@ -200,94 +210,194 @@ class _TermsAcceptScreenState extends State<TermsAcceptScreen> {
           if (documents == null || snapshot.connectionState != ConnectionState.done) {
             return const Center(child: GooLoader(compact: true));
           }
-          return TermsReader(
-            leading: leading,
-            title: _signup ? s.title : s.updateTitle,
-            intro: _signup ? s.signupIntro : s.updateIntro,
-            documents: [for (final document in documents) document.markdown],
-            readHint: s.end,
-            footer: (context, readToEnd) => _AcceptFooter(
-              strings: s,
-              version: documents.first.version,
-              checked: _checked,
-              readToEnd: readToEnd,
-              busy: _busy,
-              error: _error,
-              actionLabel: _signup ? s.createAccount : s.acceptUpdate,
-              onChecked: (value) => setState(() => _checked = value),
-              onAccept: () => _accept(documents),
+          final version = documents.first.version;
+          final readToEnd = _read >= 1;
+          final ready = readToEnd && (_checked || !_signup);
+          final intro = Text(
+            _signup ? s.signupIntro : s.updateIntro,
+            style: TaraText.label.copyWith(
+              fontWeight: FontWeight.w500,
+              height: 1.5,
+              color: c.textPrimary.withValues(alpha: _signup ? .78 : .74),
             ),
           );
-        },
-      ),
-    );
-  }
-}
-
-class _AcceptFooter extends StatelessWidget {
-  const _AcceptFooter({
-    required this.strings,
-    required this.version,
-    required this.checked,
-    required this.readToEnd,
-    required this.busy,
-    required this.error,
-    required this.actionLabel,
-    required this.onChecked,
-    required this.onAccept,
-  });
-
-  final TermsStrings strings;
-  final String version;
-  final bool checked;
-  final bool readToEnd;
-  final bool busy;
-  final String? error;
-  final String actionLabel;
-  final ValueChanged<bool> onChecked;
-  final VoidCallback onAccept;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = strings;
-    final c = TaraColors.of(context);
-    final bold = TextStyle(color: c.textPrimary, fontWeight: FontWeight.w800);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 4, 8, 6),
-          child: readToEnd
-              ? TaraCheckRow(
-                  value: checked,
-                  onChanged: busy ? null : onChecked,
-                  label: TextSpan(
+          // Maquettes : inscription (retour, « Avant de commencer », titre 18, version) ;
+          // nouvelle version (« Version … », titre 26, explication).
+          final header = _signup
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                  child: Row(
                     children: [
-                      TextSpan(text: s.checkPrefix),
-                      TextSpan(text: s.checkTerms(version), style: bold),
-                      TextSpan(text: s.checkAnd),
-                      TextSpan(text: s.checkPrivacy, style: bold),
-                      const TextSpan(text: '.'),
+                      if (widget.onBack != null) ...[
+                        GlassIconButton(icon: TaraIcons.chevronLeft, label: s.back, onPressed: widget.onBack),
+                        const SizedBox(width: 10),
+                      ],
+                      Expanded(
+                        child: Semantics(
+                          header: true,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                s.signupKicker.toUpperCase(),
+                                style: TaraText.overline.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.1,
+                                  color: c.accentText,
+                                ),
+                              ),
+                              Text(s.title, style: TaraText.titlePanel.copyWith(fontSize: 18, color: c.textPrimary)),
+                              Text(
+                                s.versionLine(version),
+                                style: TaraText.small.copyWith(color: c.textPrimary.withValues(alpha: .70)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 )
               : Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TaraIcon(TaraIcons.chevronDown, size: 18, color: c.accentText),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(s.scrollFirst, style: TaraText.label.copyWith(color: c.textSecondary)),
+                      Text(
+                        s.versionLine(version).toUpperCase(),
+                        style: TaraText.smallStrong.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                          color: c.accentText,
+                        ),
                       ),
+                      const SizedBox(height: 6),
+                      Semantics(
+                        header: true,
+                        child: Text(s.updateTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
+                      ),
+                      const SizedBox(height: 6),
+                      intro,
+                    ],
+                  ),
+                );
+          final disabled = TaraText.buttonSecondary.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: c.textPrimary.withValues(alpha: .42),
+          );
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              header,
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20, _signup ? 14 : 18, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_signup) ...[intro, const SizedBox(height: 12)],
+                      Expanded(
+                        child: TermsReadCard(
+                          documents: [for (final document in documents) document.markdown],
+                          endLine: s.end,
+                          fade: _signup,
+                          onProgress: (read) => setState(() => _read = read),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TermsReadBar(read: _read, label: s.readPercent),
+                      if (!readToEnd) ...[
+                        const SizedBox(height: 12),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 40),
+                          child: Center(
+                            child: Text(
+                              s.scrollFirst,
+                              textAlign: TextAlign.center,
+                              style: TaraText.label.copyWith(fontWeight: FontWeight.w800, color: c.accentText),
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (_signup) ...[
+                        const SizedBox(height: 12),
+                        Opacity(
+                          opacity: readToEnd ? 1 : .45,
+                          child: TaraCheckRow(
+                            value: _checked,
+                            onChanged: readToEnd && !_busy ? (value) => setState(() => _checked = value) : null,
+                            label: TextSpan(
+                              children: [
+                                TextSpan(text: s.checkPrefix),
+                                TextSpan(
+                                  text: s.checkTerms(version),
+                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                ),
+                                TextSpan(text: s.checkAnd),
+                                TextSpan(
+                                  text: s.checkPrivacy,
+                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                ),
+                                const TextSpan(text: '.'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (_error case final error?) ...[const SizedBox(height: 10), _ErrorLine(error)],
+                      const SizedBox(height: 12),
+                      if (ready || _busy)
+                        PrimaryButton(
+                          label: _signup ? s.createAccount : s.acceptUpdate,
+                          loading: _busy,
+                          onPressed: () => _accept(documents),
+                        )
+                      else
+                        // Maquette : bouton gris tant que les textes ne sont pas lus (et cochés).
+                        Semantics(
+                          button: true,
+                          enabled: false,
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: c.textPrimary.withValues(alpha: .08),
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(_signup ? s.createAccount : s.acceptUpdate, style: disabled),
+                          ),
+                        ),
+                      if (widget.onLater != null) ...[
+                        const SizedBox(height: 12),
+                        Semantics(
+                          button: true,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _busy ? null : widget.onLater,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 40),
+                              child: Center(
+                                child: Text(
+                                  s.later,
+                                  style: TaraText.text.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: c.textPrimary.withValues(alpha: .66),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-        ),
-        if (error != null) Padding(padding: const EdgeInsets.fromLTRB(8, 0, 8, 8), child: _ErrorLine(error!)),
-        PrimaryButton(label: actionLabel, loading: busy, onPressed: checked && readToEnd ? onAccept : null),
-      ],
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

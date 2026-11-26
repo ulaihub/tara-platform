@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:tara_map/landmarks.dart';
 import 'package:tara_map/map_style.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/map_backdrop.dart';
@@ -129,6 +130,7 @@ class _TaraMapState extends ConsumerState<TaraMap> {
   Future<void> _onStyleLoaded() async {
     _styleReady = true;
     await _showZones();
+    await _showLandmarks();
     await _showCourse();
     await _showRider();
     // Position du livreur pas encore connue : on cadre au moins les points de la course.
@@ -173,6 +175,13 @@ class _TaraMapState extends ConsumerState<TaraMap> {
     final zones = ref.read(mapZonesProvider).value;
     if (controller == null || !_styleReady || zones == null || !mounted) return;
     await controller.setGeoJsonSource('tara-zones', labelledZones(zones, AppLocalizations.of(context).noMotoZone));
+  }
+
+  Future<void> _showLandmarks() async {
+    final controller = _controller;
+    final landmarks = ref.read(landmarksProvider).value;
+    if (controller == null || !_styleReady || landmarks == null) return;
+    await controller.setGeoJsonSource('tara-landmarks', landmarksGeoJson(landmarks));
   }
 
   Future<void> _showRider() async {
@@ -239,6 +248,7 @@ class _TaraMapState extends ConsumerState<TaraMap> {
   @override
   Widget build(BuildContext context) {
     ref.listen(mapZonesProvider, (_, _) => unawaited(_showZones()));
+    ref.listen(landmarksProvider, (_, _) => unawaited(_showLandmarks()));
     final c = TaraColors.of(context);
     if (!ref.watch(realMapProvider)) {
       return widget.stop == null ? const MapBackdrop() : _CourseBackdrop(framePadding: widget.framePadding);

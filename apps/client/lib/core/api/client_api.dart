@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart' show DioMediaType, FormData, MultipartFile;
 import 'package:tara_core/api/api_client.dart';
+import 'package:tara_map/landmarks.dart';
 
 import 'client_models.dart';
 
@@ -22,6 +23,16 @@ class ClientApi {
 
   /// Solde Tara de l'expéditeur et, pour un marchand, ventes encaissées à reverser.
   Future<Wallet> wallet() async => Wallet.fromJson(await _api.get('/me/wallet') as Json);
+
+  /// Cloche : notifications récentes et nombre de non lues.
+  Future<Inbox> inbox() async => Inbox.fromJson(await _api.get('/me/notifications') as Json);
+
+  /// Notifications ouvertes ([ids]) ou « Tout lire » : plus de pastille sur la cloche.
+  Future<void> readInbox({List<String>? ids}) => _api.post('/me/notifications/read', body: {'ids': ?ids});
+
+  /// « Mon activité » de la boutique : day, week ou month.
+  Future<MerchantActivity> merchantActivity(String period) async =>
+      MerchantActivity.fromJson(await _api.get('/me/merchant/activity', query: {'period': period}) as Json);
 
   /// Adresses enregistrées de l'expéditeur (enlèvement), la plus récente d'abord.
   Future<List<Address>> addresses() async => [
@@ -226,6 +237,12 @@ class ClientApi {
       ],
       onRoads: json['source'] == 'osrm',
     );
+  }
+
+  /// Repères de Douala ajoutés par l'équipe (carrefours, lieux connus).
+  Future<List<Landmark>> landmarks() async {
+    final json = await _api.get('/map/landmarks') as Json;
+    return [for (final item in json['items']! as List<Object?>) Landmark.fromJson(item! as Json)];
   }
 
   /// Photo de visage du livreur (validée par Tara), pour le reconnaître.

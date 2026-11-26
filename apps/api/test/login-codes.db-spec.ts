@@ -162,5 +162,37 @@ describe('Codes de connexion : empreinte Android dans le SMS, WhatsApp avec SMS 
       await notifications.whatsappStatus(lastReference(late), 'failed');
       expect(ctx.sms.lastTo(late)).toBeUndefined();
     });
+
+    it('renvoie le code par SMS sans accusé « remis » de WhatsApp après 45 secondes', async () => {
+      const silent = randomPhone();
+      const delivered = randomPhone();
+      await request(ctx.http)
+        .post('/v1/auth/otp')
+        .send({ phone: silent, appHash: APP_HASH })
+        .expect(201);
+      await request(ctx.http).post('/v1/auth/otp').send({ phone: delivered }).expect(201);
+      const code = whatsapp.lastTo(silent)?.parameters[0];
+      await notifications.whatsappStatus(lastReference(delivered), 'delivered');
+
+      // Avant 45 s : on attend l'accusé.
+      await notifications.watchWhatsAppCodes(new Date(Date.now() + 30_000));
+      expect(ctx.sms.lastTo(silent)).toBeUndefined();
+
+      await notifications.watchWhatsAppCodes(new Date(Date.now() + 50_000));
+      const text = ctx.sms.lastTo(silent)?.text ?? '';
+      expect(text).toContain(`${code}`);
+      expect(text.endsWith(`\n\n${APP_HASH}`)).toBe(true);
+      expect(ctx.sms.lastTo(delivered)).toBeUndefined();
+      // Une seule fois, même si la surveillance repasse ou si Meta signale l'échec ensuite.
+      await notifications.watchWhatsAppCodes(new Date(Date.now() + 65_000));
+      await notifications.whatsappStatus(lastReference(silent), 'failed');
+      expect(ctx.sms.outbox.filter((sms) => sms.to === silent)).toHaveLength(1);
+      // L'accusé « remis » arrivé en retard est enregistré.
+      await notifications.whatsappStatus(lastReference(silent), 'delivered');
+      const row = await ctx.prisma.notification.findFirstOrThrow({
+        where: { recipientPhone: silent, channel: 'WHATSAPP' },
+      });
+      expect(row.status).toBe('DELIVERED');
+    });
   });
 });

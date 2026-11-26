@@ -87,6 +87,7 @@ TrackedOrder tracked(
             plateNumber: 'LT 482 KQ',
             vehicleBrand: 'NANFANG',
             vehicleColor: 'RED',
+            rating: 4.8,
           )
         : null,
     timeline: [for (final MapEntry(:key, :value) in reached.entries) (status: key, at: value)],
@@ -200,12 +201,15 @@ void main() {
           'ok': true,
           'position': {'latitude': 4.0560, 'longitude': 9.7040},
         };
-      await pumpVariant(tester, variant, screen(apiAt('ASSIGNED'), realtime));
+      // Code d'enlèvement gardé sur le téléphone depuis la commande.
+      final store = MemoryKeyValueStore()..values['tara.pickup-code.$orderId'] = '4830';
+      await pumpVariant(tester, variant, screen(apiAt('ASSIGNED'), realtime, store: store));
       await settle(tester);
       expect(find.text('Jean M. vient chercher le colis'), findsOneWidget);
-      // Marque et couleur pour reconnaître la moto, plaque bien lisible.
-      expect(find.text('Nanfang rouge'), findsOneWidget);
-      expect(find.text('LT 482 KQ'), findsOneWidget);
+      // Note, marque, couleur et plaque pour reconnaître le livreur et sa moto.
+      expect(find.text('Jean M. · 4,8 ★'), findsOneWidget);
+      expect(find.text('Nanfang · rouge · LT 482 KQ'), findsOneWidget);
+      expect(find.text('4 8 3 0'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_livreur/${brightness.name}.png'));
     });
 
@@ -278,7 +282,7 @@ void main() {
     // Position du livreur : arrivée estimée à l'enlèvement (≈ 1,2 km).
     realtime.emit('rider.position', {'orderId': orderId, 'latitude': 4.0560, 'longitude': 9.7040});
     await settle(tester);
-    expect(find.text('Environ 3 min'), findsOneWidget);
+    expect(find.text('3 min'), findsOneWidget);
     // Une autre commande ne change rien.
     realtime.emit('order.status', {'orderId': 'autre', 'status': 'DELIVERED'});
     await settle(tester);
@@ -343,7 +347,7 @@ void main() {
     await tester.ensureVisible(find.text('Nouveau code d’enlèvement'));
     await tester.tap(find.text('Nouveau code d’enlèvement'));
     await settle(tester);
-    expect(find.text('Code d’enlèvement : 5 1 9 0'), findsOneWidget);
+    expect(find.text('5 1 9 0'), findsOneWidget);
   });
 
   testWidgets('annuler pendant la recherche : confirmation, puis annulée', (tester) async {

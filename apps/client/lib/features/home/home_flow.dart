@@ -24,8 +24,10 @@ import '../orders/pending_section.dart';
 import '../profile/profile_screen.dart';
 import '../tracking/tracking_screen.dart';
 import '../wallet/wallet_screen.dart';
+import 'activity_screen.dart';
 import 'ask_address_screen.dart';
 import 'home_screen.dart';
+import 'notifications_screen.dart';
 
 /// Onglets de l'expéditeur (Accueil, Commandes, Profil) : le contenu défile sous la barre en
 /// verre, transition vitrée d'un onglet à l'autre. La nouvelle livraison s'ouvre en plein
@@ -120,6 +122,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
   }
 
   void _onEvent(RealtimeEvent event) {
+    // Toute nouvelle du serveur peut avoir mis une notification dans la cloche.
+    ref.invalidate(inboxProvider);
     switch (event.name) {
       case 'location-link.submitted':
         // Un client de l'envoi a placé son point : son colis part (ou attend le paiement).
@@ -270,6 +274,42 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
     ),
   );
 
+  /// Cloche : notifications ; une notification ouvre la commande, le portefeuille ou les
+  /// adresses demandées.
+  void _openNotifications() => unawaited(
+    Navigator.of(context).push(
+      scopedPage<void>(
+        context,
+        (route) => NotificationsScreen(
+          now: widget.now,
+          onBack: () => Navigator.of(route).pop(),
+          onOpenOrder: _openOrder,
+          onWallet: () {
+            Navigator.of(route).pop();
+            _openWallet();
+          },
+          onAskAddress: () {
+            Navigator.of(route).pop();
+            _askAddress();
+          },
+        ),
+      ),
+    ),
+  );
+
+  /// « Mon activité » de la boutique.
+  void _openActivity() => unawaited(
+    Navigator.of(context).push(
+      scopedPage<void>(
+        context,
+        (route) => ActivityScreen(
+          shopName: widget.me.merchant?.shopName ?? widget.me.fullName ?? '',
+          onBack: () => Navigator.of(route).pop(),
+        ),
+      ),
+    ),
+  );
+
   /// Portefeuille (G1, G2, G3, G7) : son onglet.
   void _openWallet() => setState(() => _tab = 2);
 
@@ -303,6 +343,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             ],
             // « + » au centre de la barre : nouvelle livraison, depuis n'importe quel onglet.
             action: TabAction(icon: TaraIcons.plus, label: l.newDelivery, onPressed: _newOrder),
+            // Finesse : barre en pilule comme l'app livreur, « + » rond au milieu.
+            pill: true,
             current: _tab,
             onSelected: (tab) => setState(() {
               if (tab == 1 && _tab != 1) _ordersScope = 'active';
@@ -327,6 +369,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
                 onWallet: _openWallet,
                 onReceipts: () => _showOrders('history'),
                 onSeeAll: () => _showOrders('active'),
+                onNotifications: _openNotifications,
+                onActivity: widget.me.merchant == null ? null : _openActivity,
                 now: widget.now,
               ),
             },

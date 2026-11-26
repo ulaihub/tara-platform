@@ -218,8 +218,14 @@ class _WalletCardsState extends State<WalletCards> with SingleTickerProviderStat
                     children: [
                       // La carte de derrière d'abord, celle de devant par-dessus.
                       if (merchant) ...[
-                        if (salesFront) place('customer', tara, isFront: false) else place('merchant', sales, isFront: false),
-                        if (salesFront) place('merchant', sales, isFront: true) else place('customer', tara, isFront: true),
+                        if (salesFront)
+                          place('customer', tara, isFront: false)
+                        else
+                          place('merchant', sales, isFront: false),
+                        if (salesFront)
+                          place('merchant', sales, isFront: true)
+                        else
+                          place('customer', tara, isFront: true),
                       ] else
                         place('customer', tara, isFront: true),
                     ],
@@ -373,13 +379,17 @@ class _SalesCard extends StatelessWidget {
               },
               child: const Opacity(
                 opacity: .13,
-                child: Center(child: TaraLogo(width: 236, ink: Color(0xFFFFFFFF), semanticLabel: '')),
+                child: Center(
+                  child: TaraLogo(width: 236, ink: Color(0xFFFFFFFF), semanticLabel: ''),
+                ),
               ),
             ),
           ),
         ),
         // Trajet en pointillé et point lumineux qui le parcourt.
-        const Positioned.fill(child: RouteTrail(route: RouteTrail.walletCard, base: Size(352, 196))),
+        const Positioned.fill(
+          child: RouteTrail(route: RouteTrail.walletCard, base: Size(352, 196)),
+        ),
         // Traits de vitesse.
         Positioned(
           right: 18,
@@ -396,10 +406,8 @@ class _SalesCard extends StatelessWidget {
                   MotionBuilder(
                     period: const Duration(milliseconds: 1600),
                     delay: Duration(milliseconds: 1600 - delay),
-                    builder: (context, t, child) => Transform.translate(
-                      offset: Offset(-7 * (1 - math.cos(t * 2 * math.pi)) / 2, 0),
-                      child: child,
-                    ),
+                    builder: (context, t, child) =>
+                        Transform.translate(offset: Offset(-7 * (1 - math.cos(t * 2 * math.pi)) / 2, 0), child: child),
                     child: Container(
                       width: width,
                       height: 7,
@@ -419,7 +427,10 @@ class _SalesCard extends StatelessWidget {
           Expanded(
             child: Text(
               l.shopToReceive,
-              style: TaraText.label.copyWith(color: const Color.fromRGBO(255, 255, 255, .74), fontWeight: FontWeight.w700),
+              style: TaraText.label.copyWith(
+                color: const Color.fromRGBO(255, 255, 255, .74),
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           if (wallet.todaySales > 0)
@@ -473,8 +484,11 @@ class _SalesCard extends StatelessWidget {
               style: TaraText.small.copyWith(color: soft, fontWeight: FontWeight.w600),
             ),
           ),
-          if (operator != null) ...[OperatorLogo(operator, size: 14), const SizedBox(width: 5)],
-          Text(tail, style: TaraText.small.copyWith(color: soft, fontWeight: FontWeight.w600)),
+          if (operator != null) ...[OperatorLogo(operator, size: 18), const SizedBox(width: 6)],
+          Text(
+            tail,
+            style: TaraText.small.copyWith(color: soft, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
@@ -504,7 +518,9 @@ class _TaraCard extends StatelessWidget {
       shadow: const Color.fromRGBO(140, 70, 10, .16),
       decor: [
         _glow(light, const Color.fromRGBO(255, 255, 255, .65)),
-        const Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _DotGridPainter()))),
+        const Positioned.fill(
+          child: IgnorePointer(child: CustomPaint(painter: _DotGridPainter())),
+        ),
         // Ondes qui partent du coin, comme une notification qui arrive.
         Positioned(
           right: -7,

@@ -8,6 +8,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:tara_ui/components/map_backdrop.dart';
 import 'package:tara_ui/tara_colors.dart';
 
+import 'landmarks.dart';
 import 'map_style.dart';
 
 /// Point choisi sur la carte.
@@ -45,7 +46,11 @@ class PinPickerMap extends StatefulWidget {
     this.zoom = 17,
     this.bottomPadding = 0,
     this.label,
+    this.landmarks = const [],
   });
+
+  /// Repères de l'équipe (carrefours, lieux connus) dessinés sur la carte.
+  final List<Landmark> landmarks;
 
   final MapPoint initial;
   final ValueChanged<MapPoint> onChanged;
@@ -77,10 +82,19 @@ class _PinPickerMapState extends State<PinPickerMap> {
     widget.handle?._state = this;
   }
 
+  bool _styleReady = false;
+
   @override
   void didUpdateWidget(PinPickerMap old) {
     super.didUpdateWidget(old);
     widget.handle?._state = this;
+    if (!identical(widget.landmarks, old.landmarks)) unawaited(_showLandmarks());
+  }
+
+  Future<void> _showLandmarks() async {
+    final controller = _controller;
+    if (controller == null || !_styleReady) return;
+    await controller.setGeoJsonSource('tara-landmarks', landmarksGeoJson(widget.landmarks));
   }
 
   @override
@@ -89,6 +103,7 @@ class _PinPickerMapState extends State<PinPickerMap> {
     final brightness = TaraColors.of(context).brightness;
     if (widget.real && brightness != _brightness) {
       _brightness = brightness;
+      _styleReady = false;
       unawaited(
         loadTaraMapStyle(brightness).then((style) {
           if (mounted) setState(() => _style = style);
@@ -126,6 +141,10 @@ class _PinPickerMapState extends State<PinPickerMap> {
             ),
             trackCameraPosition: true,
             onMapCreated: (controller) => _controller = controller,
+            onStyleLoadedCallback: () {
+              _styleReady = true;
+              unawaited(_showLandmarks());
+            },
             onCameraIdle: _onIdle,
             compassEnabled: false,
             rotateGesturesEnabled: false,

@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import type { Job } from 'bullmq';
 import { ENV } from '../config/config.module.js';
 import { type Env, storageKeys } from '../config/env.js';
@@ -62,6 +63,12 @@ interface StoredPayload {
 }
 
 const DELIVERY_ATTEMPTS = 3;
+
+/**
+ * Code de connexion par WhatsApp sans accusé de remise après ce délai (téléphone sans
+ * WhatsApp que Meta n'a pas encore signalé, webhook en panne…) : le même code part par SMS.
+ */
+export const WHATSAPP_CODE_RECEIPT_SECONDS = 45;
 
 /**
  * Notifications push, WhatsApp et SMS (F3), toutes tracées dans la table `notifications`.
@@ -178,8 +185,22 @@ export class NotificationService implements OnModuleInit {
     }
   }
 
-  /** Push sur tous les appareils de l'utilisateur. Renvoie false s'il n'en a aucun. */
+  /**
+   * Push sur tous les appareils de l'utilisateur. Renvoie false s'il n'en a aucun. La
+   * notification entre aussi dans sa boîte de réception (cloche de l'app), même sans
+   * téléphone joignable ; pas les propositions de course, qui ne valent que 30 s.
+   */
   async toUser(userId: string, message: PushNotification): Promise<boolean> {
+    if (!message.urgent && message.template !== 'OFFER_NEW') {
+      await this.prisma.inboxItem.create({
+        data: {
+          userId,
+          template: message.template,
+          params: message.params as Prisma.InputJsonObject,
+          orderId: message.orderId ?? null,
+        },
+      });
+    }
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -384,6 +405,52 @@ export class NotificationService implements OnModuleInit {
 
   // --- Accusés de remise WhatsApp (webhook) -------------------------------------------------
 
+  @Cron('*/15 * * * * *', { name: 'whatsapp-code-receipts' })
+  async scheduledCodeReceipts(): Promise<void> {
+    if (!this.env.JOBS_ENABLED || !this.whatsapp) return;
+    await this.watchWhatsAppCodes();
+  }
+
+  /**
+   * Codes de connexion envoyés par WhatsApp, encore valables, sans accusé « remis » après
+   * [WHATSAPP_CODE_RECEIPT_SECONDS] : marqués en échec et renvoyés par SMS (une seule fois).
+   * Un accusé « remis » arrivé ensuite est quand même enregistré.
+   */
+  async watchWhatsAppCodes(now = new Date()): Promise<number> {
+    if (!this.whatsapp) return 0;
+    const waiting = await this.prisma.notification.findMany({
+      where: {
+        channel: 'WHATSAPP',
+        template: 'OTP',
+        status: 'SENT',
+        sentAt: { lte: new Date(now.getTime() - WHATSAPP_CODE_RECEIPT_SECONDS * 1000) },
+        createdAt: { gte: new Date(now.getTime() - this.env.OTP_TTL_SECONDS * 1000) },
+      },
+      take: 200,
+    });
+    let resent = 0;
+    for (const notification of waiting) {
+      // Une autre instance peut traiter le même code : seule celle qui le passe en échec renvoie.
+      const claimed = await this.prisma.notification.updateMany({
+        where: { id: notification.id, status: 'SENT' },
+        data: {
+          status: 'FAILED',
+          lastError: `Pas d'accusé de remise WhatsApp après ${WHATSAPP_CODE_RECEIPT_SECONDS} s`,
+          payload: withoutSecrets(
+            notification.payload as unknown as StoredPayload,
+          ) as unknown as Prisma.InputJsonObject,
+        },
+      });
+      if (claimed.count === 0) continue;
+      this.logger.warn(
+        `Code WhatsApp non confirmé pour ${maskPhone(notification.recipientPhone ?? '')} : SMS de secours`,
+      );
+      await this.fallbackToSms(notification, notification.payload as unknown as StoredPayload);
+      resent += 1;
+    }
+    return resent;
+  }
+
   async whatsappStatus(
     providerReference: string,
     status: 'sent' | 'delivered' | 'read' | 'failed',
@@ -402,6 +469,7 @@ export class NotificationService implements OnModuleInit {
         data: {
           status: 'DELIVERED',
           deliveredAt: new Date(),
+          lastError: null,
           payload: withoutSecrets(payload) as unknown as Prisma.InputJsonObject,
         },
       });

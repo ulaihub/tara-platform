@@ -15,7 +15,10 @@ import 'package:tara_ui/tara_typography.dart';
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
 import '../../l10n/app_localizations.dart';
+import '../bulk/bulk_draft.dart';
+import '../bulk/contacts_screen.dart';
 import '../common/error_text.dart';
+import '../common/scoped_page.dart';
 import 'order_draft.dart';
 import 'pickup_step.dart';
 
@@ -82,21 +85,6 @@ class _RecipientStepState extends ConsumerState<RecipientStep> {
     super.dispose();
   }
 
-  /// Un récent du carnet : nom, numéro et sa dernière adresse d'un coup.
-  void _pick(Recipient recipient) {
-    final digits = digitsOf(recipient.phone).replaceFirst(RegExp(r'^237(?=\d{9}$)'), '');
-    widget.draft.update(
-      (d) => d
-        ..recipientName = recipient.name
-        ..recipientPhone = digits
-        ..dropoff = recipient.lastAddress
-        ..link = null,
-    );
-    _name.text = recipient.name;
-    _phone.text = _grouped(digits);
-    FocusScope.of(context).unfocus();
-  }
-
   /// Crée le lien (une fois) puis ouvre WhatsApp ou les SMS avec le message prêt.
   Future<void> _ask({required bool whatsapp}) async {
     final l = AppLocalizations.of(context);
@@ -136,24 +124,88 @@ class _RecipientStepState extends ConsumerState<RecipientStep> {
 
   static String _firstName(String name) => name.trim().split(RegExp(r'\s+')).first;
 
+  /// Destinataire déjà servi qui a ce numéro : sa dernière adresse est proposée.
+  Recipient? _known(List<Recipient> all) {
+    final phone = _delivery.recipientPhone;
+    if (phone.length != 9) return null;
+    for (final r in all) {
+      if (digitsOf(r.phone).endsWith(phone)) return r;
+    }
+    return null;
+  }
+
+  /// Contacts du téléphone et destinataires récents : un choix remplit nom, numéro (et la
+  /// dernière adresse d'un récent).
+  Future<void> _pickContact() async {
+    FocusScope.of(context).unfocus();
+    final picked = await Navigator.of(context)
+        .push<List<BulkLine>>(scopedPage(context, (_) => const ContactsScreen(room: 1, already: {})));
+    final line = picked?.firstOrNull;
+    if (line == null || !mounted) return;
+    widget.draft.update(
+      (d) => d
+        ..recipientName = line.name
+        ..recipientPhone = line.phone
+        ..dropoff = line.dropoff ?? d.dropoff
+        ..link = line.dropoff == null ? d.link : null,
+    );
+    _name.text = line.name;
+    _phone.text = _grouped(line.phone);
+  }
+
+  /// « Où livrer ? » choisi d'après l'état : lien envoyé, adresse connue, point placé.
+  _Where? _where(Recipient? known) {
+    final d = _delivery;
+    if (d.link != null && d.dropoff == null) return _Where.ask;
+    if (d.dropoff case final address?) {
+      if (d.link?.address?.id == address.id) return _Where.ask;
+      return known != null && known.lastAddress.id == address.id ? _Where.known : _Where.map;
+    }
+    return _mode;
+  }
+
+  _Where? _mode;
+
+  static String _ago(AppLocalizations l, DateTime at, DateTime now) {
+    final days = DateTime(now.year, now.month, now.day).difference(DateTime(at.year, at.month, at.day)).inDays;
+    return switch (days) {
+      <= 0 => l.today,
+      1 => l.yesterday,
+      _ => l.daysAgo(days),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final d = _delivery;
     final showErrors = widget.showErrors;
+    final known = _known(ref.watch(recipientsProvider).value ?? const []);
+    final where = _where(known);
+    void choose(_Where mode) {
+      FocusScope.of(context).unfocus();
+      setState(() => _mode = mode);
+      switch (mode) {
+        case _Where.known:
+          widget.draft.update(
+            (d) => d
+              ..dropoff = known!.lastAddress
+              ..link = null,
+          );
+        case _Where.map:
+          widget.onPlaceOnMap();
+        case _Where.ask:
+          widget.draft.update((d) => d.dropoff = null);
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          header: true,
-          child: Text(l.recipientTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-        ),
-        const SizedBox(height: 8),
-        Text(l.recipientBody, style: TaraText.body.copyWith(color: c.textSecondary)),
-        const SizedBox(height: 18),
-        _Recents(draft: widget.draft, onPick: _pick),
-        TaraTextField(
+        StepHeading(title: l.recipientTitle, body: l.recipientBody),
+        const SizedBox(height: 10),
+        BoxedField(
           label: l.recipientName,
           hint: l.recipientNameHint,
           controller: _name,
@@ -165,8 +217,8 @@ class _RecipientStepState extends ConsumerState<RecipientStep> {
           const SizedBox(height: 6),
           ErrorLine(l.recipientNameRequired),
         ],
-        const SizedBox(height: 12),
-        TaraTextField(
+        const SizedBox(height: 10),
+        BoxedField(
           label: l.recipientPhone,
           hint: l.phoneHint,
           controller: _phone,
@@ -174,62 +226,84 @@ class _RecipientStepState extends ConsumerState<RecipientStep> {
           textInputAction: TextInputAction.done,
           autofillHints: const [AutofillHints.telephoneNumberNational],
           inputFormatters: [PhoneInputFormatter()],
-          leading: PhonePrefixButton(prefix: '+237', semanticLabel: l.countryCodeLabel('+237')),
+          trailing: Semantics(
+            button: true,
+            label: l.pickFromContacts,
+            excludeSemantics: true,
+            child: Squish(
+              child: GestureDetector(
+                key: recipientContactsKey,
+                behavior: HitTestBehavior.opaque,
+                onTap: () => unawaited(_pickContact()),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(255, 177, 92, .14),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: TaraIcon(TaraIcons.users, size: 20, color: c.accentText),
+                ),
+              ),
+            ),
+          ),
         ),
         if (showErrors && !isCameroonMobile(d.recipientPhone)) ...[
           const SizedBox(height: 6),
           ErrorLine(l.phoneInvalid),
         ],
-        const SizedBox(height: 22),
-        Text(l.deliveryAddress, style: TaraText.label.copyWith(color: c.textSecondary)),
-        const SizedBox(height: 8),
-        if (d.dropoff case final address?) ...[
+        const SizedBox(height: 14),
+        Text(
+          l.whereToDeliverQ,
+          style: TaraText.label.copyWith(color: c.textPrimary, fontSize: 13, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 10),
+        if (known != null) ...[
           AddressChoice(
-            icon: TaraIcons.mapPin,
-            title: address.neighborhood?.name ?? l.deliveryAddress,
-            subtitle: address.landmark,
-            selected: true,
-            badge: address.verified
-                ? l.addressVerified
-                : d.link?.address?.id == address.id
-                ? l.addressFromRecipient
-                : null,
-            onTap: widget.onPlaceOnMap,
+            icon: TaraIcons.check,
+            title: l.knownAddress,
+            subtitle: known.lastOrderAt == null
+                ? known.lastAddress.summary
+                : l.lastDeliveryTo(_firstName(known.name), _ago(l, known.lastOrderAt!.toLocal(), DateTime.now())),
+            selected: where == _Where.known,
+            onTap: () => choose(_Where.known),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TaraLink(
-              label: l.changeAddress,
-              onPressed: () => widget.draft.update(
-                (d) => d
-                  ..dropoff = null
-                  ..link = null,
-              ),
-            ),
-          ),
-        ] else if (d.link case final link?)
-          _LinkCard(
-            link: link,
-            name: _firstName(d.recipientName),
-            sending: _sending,
-            onWhatsapp: () => unawaited(_ask(whatsapp: true)),
-            onSms: () => unawaited(_ask(whatsapp: false)),
-            onPlaceMyself: widget.onPlaceOnMap,
-          )
-        else ...[
-          _Option(icon: TaraIcons.mapPin, title: l.placeOnMap, body: l.placeOnMapBody, onTap: widget.onPlaceOnMap),
           const SizedBox(height: 10),
-          _Option(
-            icon: TaraIcons.send,
-            title: l.askRecipient,
-            body: l.askRecipientBody,
-            actions: Row(
+        ],
+        AddressChoice(
+          icon: TaraIcons.mapPin,
+          title: l.placePointOnMap,
+          subtitle: l.placePointOnMapBody,
+          selected: where == _Where.map,
+          onTap: () => choose(_Where.map),
+        ),
+        const SizedBox(height: 10),
+        AddressChoice(
+          icon: TaraIcons.link,
+          title: l.askRecipient,
+          subtitle: l.askRecipientShort,
+          selected: where == _Where.ask,
+          onTap: () => choose(_Where.ask),
+        ),
+        if (where == _Where.ask) ...[
+          const SizedBox(height: 10),
+          if (d.link case final link?)
+            _LinkCard(
+              link: link,
+              name: _firstName(d.recipientName),
+              sending: _sending,
+              onWhatsapp: () => unawaited(_ask(whatsapp: true)),
+              onSms: () => unawaited(_ask(whatsapp: false)),
+              onPlaceMyself: widget.onPlaceOnMap,
+            )
+          else
+            Row(
               children: [
                 Expanded(
                   child: GlassButton(
                     label: l.viaWhatsapp,
                     icon: TaraIcons.message,
-                    height: 46,
                     color: c.accentText,
                     onPressed: _sending ? null : () => unawaited(_ask(whatsapp: true)),
                   ),
@@ -239,12 +313,18 @@ class _RecipientStepState extends ConsumerState<RecipientStep> {
                   child: GlassButton(
                     label: l.viaSms,
                     icon: TaraIcons.message,
-                    height: 46,
                     onPressed: _sending ? null : () => unawaited(_ask(whatsapp: false)),
                   ),
                 ),
               ],
             ),
+        ],
+        if (d.dropoff case final address?) ...[
+          const SizedBox(height: 10),
+          _PlacedAddress(
+            address: address,
+            fromRecipient: d.link?.address?.id == address.id,
+            onTap: widget.onPlaceOnMap,
           ),
         ],
         if (_error != null) ...[const SizedBox(height: 10), ErrorLine(_error!)],
@@ -257,173 +337,95 @@ class _RecipientStepState extends ConsumerState<RecipientStep> {
   }
 }
 
-/// Récents du carnet, en bulles qui défilent : un toucher remplit nom, numéro et adresse.
-/// La saisie filtre la liste.
-class _Recents extends ConsumerWidget {
-  const _Recents({required this.draft, required this.onPick});
+enum _Where { known, map, ask }
 
-  final OrderDraft draft;
-  final ValueChanged<Recipient> onPick;
+/// Clé du bouton contacts du numéro (tests).
+const recipientContactsKey = ValueKey('recipient-contacts');
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final c = TaraColors.of(context);
-    final all = ref.watch(recipientsProvider).value ?? const <Recipient>[];
-    final d = draft.delivery;
-    final name = d.recipientName.trim().toLowerCase();
-    final phone = d.recipientPhone;
-    final shown = [
-      for (final r in all)
-        if ((name.isEmpty || r.name.toLowerCase().contains(name)) &&
-            (phone.isEmpty || digitsOf(r.phone).contains(phone)))
-          r,
-    ];
-    if (shown.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l.recentRecipients, style: TaraText.label.copyWith(color: c.textSecondary)),
-          const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final r in shown)
-                  _RecentBubble(
-                    recipient: r,
-                    selected: r.name == d.recipientName && digitsOf(r.phone).endsWith(phone) && phone.length == 9,
-                    onTap: () => onPick(r),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RecentBubble extends StatelessWidget {
-  const _RecentBubble({required this.recipient, required this.selected, required this.onTap});
-
-  final Recipient recipient;
-  final bool selected;
+/// Adresse de livraison retenue (maquette) : vignette de façade, lieu en gras, qui l'a
+/// placée en vert (photo, note vocale, confirmation par une livraison).
+class _PlacedAddress extends StatelessWidget {
+  const _PlacedAddress({required this.address, required this.fromRecipient, required this.onTap});
+  final Address address;
+  final bool fromRecipient;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    final r = recipient;
+    final by = fromRecipient || address.source == 'LOCATION_LINK' ? l.addressFromRecipient : l.placedByYou;
+    final extras = switch ((address.hasPhoto, address.hasVoiceNote)) {
+      (true, true) => l.withPhotoAndVoice,
+      (true, false) => l.withPhoto,
+      (false, true) => l.withVoice,
+      _ => null,
+    };
+    final detail = [by, ?extras, if (address.verified) l.addressVerifiedShort].join(' · ');
+    final place = [
+      [address.landmark, ?address.neighborhood?.name].join(', '),
+    ].join();
     return Semantics(
       button: true,
-      selected: selected,
-      label: [
-        r.name,
-        displayPhone(r.phone),
-        r.lastAddress.summary,
-        if (r.lastAddress.verified) l.addressVerified,
-      ].join(', '),
+      label: '$place, $detail',
       excludeSemantics: true,
       child: GestureDetector(
-        onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: 76,
-          child: Column(
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: selected ? c.accentText : const Color(0x00000000), width: 2),
-                    ),
-                    child: InitialsAvatar(name: r.name, size: 50),
-                  ),
-                  if (r.lastAddress.verified)
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(color: c.glassStrong, shape: BoxShape.circle),
-                        child: TaraIcon(TaraIcons.shieldCheck, size: 16, color: c.success),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                r.name.trim().split(RegExp(r'\s+')).first,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TaraText.smallStrong.copyWith(color: selected ? c.accentText : c.textPrimary),
-              ),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: boxedFieldFill(c),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: boxedFieldBorder(c)),
+            boxShadow: const [
+              BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 28, offset: Offset(0, 12)),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Façon de donner l'adresse : icône, titre, explication, actions éventuelles.
-class _Option extends StatelessWidget {
-  const _Option({required this.icon, required this.title, required this.body, this.onTap, this.actions});
-
-  final TaraIconData icon;
-  final String title;
-  final String body;
-  final VoidCallback? onTap;
-  final Widget? actions;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = TaraColors.of(context);
-    return Semantics(
-      button: onTap != null,
-      child: GestureDetector(
-        onTap: onTap,
-        child: GlassCard(
-          radius: 20,
-          shadow: false,
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  IconTile(icon: icon, size: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(body, style: TaraText.small.copyWith(color: c.textSecondary)),
-                      ],
-                    ),
+              // Vignette « façade » des maquettes : mur sombre, porte bleue, fenêtre.
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  gradient: const LinearGradient(
+                    begin: Alignment(-.35, -1),
+                    end: Alignment(.35, 1),
+                    colors: [Color(0xFF3A4A5C), Color(0xFF1E2732)],
+                    stops: [0, .6],
                   ),
-                  if (onTap != null) ...[
-                    const SizedBox(width: 8),
-                    TaraIcon(TaraIcons.chevronRight, size: 20, color: c.textTertiary),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 8,
+                      top: 10,
+                      child: Container(width: 22, height: 20, color: const Color(0xFF2F6FB3)),
+                    ),
+                    Positioned(
+                      left: 32,
+                      top: 16,
+                      child: Container(width: 12, height: 14, color: const Color(0xFFC9A27A)),
+                    ),
                   ],
-                ],
+                ),
               ),
-              if (actions != null) ...[const SizedBox(height: 12), actions!],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      place,
+                      style: TaraText.text.copyWith(color: c.textPrimary, fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(detail, style: TaraText.small.copyWith(color: c.success, fontSize: 12)),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

@@ -6,6 +6,7 @@ const TABS = [
   { href: '/marchands/tarifs', label: 'Tarifs et primes', title: 'Tarifs et primes' },
   { href: '/marchands/promotions', label: 'Codes promo', title: 'Codes promo' },
   { href: '/marchands/zones', label: 'Zones', title: 'Zones' },
+  { href: '/marchands/reperes', label: 'Repères', title: 'Repères de la carte' },
 ] as const;
 
 /**

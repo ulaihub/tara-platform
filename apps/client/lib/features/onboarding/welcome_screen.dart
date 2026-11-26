@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/components/buttons.dart';
-import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
 import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/progress.dart';
+import 'package:tara_ui/components/three_d.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/tara_colors.dart';
-import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
 
 import '../../app/providers.dart';
@@ -19,18 +18,13 @@ import '../common/error_text.dart';
 
 enum _Kind { person, shop }
 
-/// Catégories proposées pour une boutique (texte libre côté serveur).
-const shopCategories = ['FASHION', 'BEAUTY', 'ELECTRONICS', 'FOOD', 'HOME', 'OTHER'];
-
-/// 03 · Bienvenue (première connexion, non dessiné : style Tara) : prénom et nom, qui
-/// figurent dans les SMS des destinataires ; mode marchand facultatif (A2) avec la
-/// boutique et le numéro Mobile Money des reversements, RCCM et NIU facultatifs.
+/// 03 · Bienvenue (maquette « Client-Bienvenue ») : le nom, qui figure dans les messages aux
+/// destinataires ; pour une boutique (A2), son nom et le numéro Mobile Money des reversements.
 class WelcomeScreen extends ConsumerStatefulWidget {
-  const WelcomeScreen({super.key, required this.me, required this.onDone, required this.onLogout});
+  const WelcomeScreen({super.key, required this.me, required this.onDone});
 
   final Me me;
   final VoidCallback onDone;
-  final VoidCallback onLogout;
 
   @override
   ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -42,67 +36,63 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     BlobSpec(alignment: Alignment(-1.3, 0.8), size: 240, colors: BlobSpec.warm, blur: 64, delay: Duration(seconds: 5)),
   ];
 
-  final _first = TextEditingController();
-  final _last = TextEditingController();
-  final _shop = TextEditingController();
+  /// Nom de la personne, ou de la boutique : il figure dans les messages aux destinataires.
+  final _name = TextEditingController();
   late final _payout = TextEditingController(text: _national(widget.me.phone));
-  final _rccm = TextEditingController();
-  final _niu = TextEditingController();
   _Kind _kind = _Kind.person;
-  String? _category;
-  String? _operator;
-  bool _legalIds = false;
+
+  /// Le numéro des reversements s'affiche masqué ; touché, il devient modifiable.
+  bool _editPayout = false;
   bool _tried = false;
   bool _saving = false;
   String? _error;
-
-  List<TextEditingController> get _all => [_first, _last, _shop, _payout, _rccm, _niu];
 
   static String _national(String phone) {
     final digits = digitsOf(phone).replaceFirst(RegExp('^237'), '');
     return PhoneInputFormatter().formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: digits)).text;
   }
 
+  /// « 6 77 •• •• 56 ».
+  static String _masked(String national) {
+    final parts = national.split(' ');
+    if (parts.length != 5) return national;
+    return [parts[0], parts[1], '••', '••', parts[4]].join(' ');
+  }
+
+  String? get _operator => guessOperator(digitsOf(_payout.text));
+
   @override
   void initState() {
     super.initState();
-    _operator = guessOperator(digitsOf(_payout.text));
-    for (final controller in _all) {
+    for (final controller in [_name, _payout]) {
       controller.addListener(() => setState(() => _error = null));
     }
-    _payout.addListener(() {
-      final guess = guessOperator(digitsOf(_payout.text));
-      if (guess != null && guess != _operator) setState(() => _operator = guess);
-    });
   }
 
   @override
   void dispose() {
-    for (final controller in _all) {
-      controller.dispose();
-    }
+    _name.dispose();
+    _payout.dispose();
     super.dispose();
   }
 
-  bool _name(TextEditingController c) => c.text.trim().length >= 2;
+  bool get _nameValid => _name.text.trim().length >= 2;
   bool get _payoutValid => isCameroonMobile(digitsOf(_payout.text)) && _operator != null;
-  bool get _valid => _name(_first) && _name(_last) && (_kind == _Kind.person || (_name(_shop) && _payoutValid));
+  bool get _valid => _nameValid && (_kind == _Kind.person || _payoutValid);
 
   Future<void> _submit() async {
     setState(() => _tried = true);
     if (!_valid) return;
     setState(() => _saving = true);
     final api = ref.read(clientApiProvider);
+    final name = _name.text.trim();
     try {
-      await api.updateName('${_first.text.trim()} ${_last.text.trim()}');
+      await api.updateName(name);
       if (_kind == _Kind.shop) {
         await api.becomeMerchant(
-          shopName: _shop.text.trim(),
-          category: _category,
+          shopName: name,
           payoutPhone: '+237${digitsOf(_payout.text)}',
           payoutOperator: _operator!,
-          rccm: _rccm.text.trim().isEmpty ? null : _rccm.text.trim(),
-          niu: _niu.text.trim().isEmpty ? null : _niu.text.trim(),
         );
       }
       if (mounted) widget.onDone();
@@ -117,182 +107,190 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    final operators = ref.watch(appConfigProvider).value?.operators ?? const <MobileMoneyOperator>[];
-    String? required(bool ok) => _tried && !ok ? l.requiredField : null;
     final shop = _kind == _Kind.shop;
-
-    return TaraScreen(
-      safeBottom: false,
-      blobs: _blobs,
-      child: ScrollWithFooter(
-        horizontal: 20,
-        top: 8,
-        content: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TaraLink(label: l.logout, onPressed: _saving ? null : widget.onLogout),
-          ),
-          const SizedBox(height: 12),
-          Semantics(
-            header: true,
-            child: Text(l.welcomeTitle, style: TaraText.titleForm.copyWith(color: c.textPrimary)),
-          ),
-          const SizedBox(height: 8),
-          Text(l.welcomeBody, style: TaraText.body.copyWith(color: c.textSecondary)),
-          const SizedBox(height: 20),
-          GlassCard(
-            radius: 26,
-            padding: const EdgeInsets.all(18),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _Field(
-                    label: l.firstName,
-                    controller: _first,
-                    error: required(_name(_first)),
-                    autofill: AutofillHints.givenName,
-                  ),
+    final operator = _operator;
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Maquette : « NOUVEAU COMPTE », titre 28, explication.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l.welcomeKicker.toUpperCase(),
+                style: TaraText.smallStrong.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                  color: c.accentText,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _Field(
-                    label: l.lastName,
-                    controller: _last,
-                    error: required(_name(_last)),
-                    autofill: AutofillHints.familyName,
-                  ),
+              ),
+              const SizedBox(height: 6),
+              Semantics(
+                header: true,
+                child: Text(l.welcomeTitle, style: TaraText.titleForm.copyWith(fontSize: 28, color: c.textPrimary)),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l.welcomeBody,
+                style: TaraText.text.copyWith(
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                  color: c.textPrimary.withValues(alpha: .74),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(height: 14),
-          GlassCard(
-            radius: 26,
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(l.kindQuestion, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
-                const SizedBox(height: 12),
-                LiquidSegmented<_Kind>(
-                  segments: [(_Kind.person, l.kindPerson), (_Kind.shop, l.kindShop)],
-                  selected: _kind,
-                  onChanged: (kind) => setState(() => _kind = kind),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              BoxedField(
+                label: shop ? l.shopNameLabel : l.yourName,
+                hint: shop ? l.shopNameHint : l.yourNameHint,
+                controller: _name,
+                textInputAction: TextInputAction.done,
+                textCapitalization: TextCapitalization.words,
+                autofillHints: shop ? null : const [AutofillHints.name],
+              ),
+              if (_tried && !_nameValid) ...[const SizedBox(height: 6), ErrorLine(l.requiredField)],
+              const SizedBox(height: 14),
+              Text(
+                l.kindQuestion,
+                style: TaraText.text.copyWith(fontWeight: FontWeight.w800, color: c.textPrimary),
+              ),
+              const SizedBox(height: 14),
+              LiquidSegmented<_Kind>(
+                segments: [(_Kind.person, l.kindPerson), (_Kind.shop, l.kindShop)],
+                selected: _kind,
+                onChanged: (kind) => setState(() => _kind = kind),
+              ),
+              const SizedBox(height: 14),
+              _Parcels(shop: shop),
+              const SizedBox(height: 14),
+              Text(
+                shop ? l.kindShopHelp : l.kindPersonHelp,
+                style: TaraText.label.copyWith(
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                  color: c.textPrimary.withValues(alpha: .74),
                 ),
-                const SizedBox(height: 10),
-                Text(shop ? l.kindShopHelp : l.kindPersonHelp, style: TaraText.small.copyWith(color: c.textTertiary)),
-                if (shop) ...[
-                  const SizedBox(height: 18),
-                  _Field(label: l.shopName, hint: l.shopNameHint, controller: _shop, error: required(_name(_shop))),
-                  const SizedBox(height: 16),
-                  Text(l.shopCategory, style: TaraText.label.copyWith(color: c.textSecondary)),
-                  const SizedBox(height: 8),
-                  ChoiceChips<String>(
-                    options: [for (final code in shopCategories) ChoiceOption(code, _categoryLabel(l, code))],
-                    selected: _category,
-                    onSelected: (value) => setState(() => _category = value == _category ? null : value),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (shop) ...[
-            const SizedBox(height: 14),
-            GlassCard(
-              radius: 26,
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(l.payoutTitle, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
-                  const SizedBox(height: 4),
-                  Text(l.payoutHelp, style: TaraText.small.copyWith(color: c.textTertiary)),
-                  const SizedBox(height: 14),
-                  ChoiceChips<String>(
-                    options: [for (final operator in operators) operatorChoice(operator.code, operator.name)],
-                    selected: _operator,
-                    onSelected: (value) => setState(() => _operator = value),
-                  ),
-                  const SizedBox(height: 14),
-                  TaraTextField(
+              ),
+              if (shop) ...[
+                const SizedBox(height: 14),
+                if (_editPayout)
+                  BoxedField(
                     label: l.payoutNumber,
+                    helper: l.payoutReceives,
                     hint: l.phoneHint,
                     controller: _payout,
                     keyboardType: TextInputType.phone,
                     inputFormatters: [PhoneInputFormatter()],
-                    leading: PhonePrefixButton(prefix: '+237', semanticLabel: l.countryCodeLabel('+237')),
-                  ),
-                  if (_tried && !_payoutValid) ...[const SizedBox(height: 6), ErrorLine(l.phoneInvalid)],
-                  const SizedBox(height: 14),
-                  if (_legalIds) ...[
-                    _Field(label: l.rccm, hint: l.rccmHint, controller: _rccm, caps: true),
-                    const SizedBox(height: 14),
-                    _Field(label: l.niu, hint: l.niuHint, controller: _niu, caps: true),
-                  ] else
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TaraLink(label: l.addLegalIds, onPressed: () => setState(() => _legalIds = true)),
+                    trailing: operator == null ? null : _OperatorBadge(operator),
+                  )
+                else
+                  Semantics(
+                    button: true,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => setState(() => _editPayout = true),
+                      child: BoxedField(
+                        label: l.payoutNumber,
+                        value: _masked(_payout.text),
+                        helper: l.payoutReceives,
+                        trailing: operator == null ? null : _OperatorBadge(operator),
+                      ),
                     ),
-                ],
-              ),
-            ),
-          ],
-        ],
-        footer: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_error != null) ...[ErrorLine(_error!), const SizedBox(height: 10)],
-            PrimaryButton(label: l.continueLabel, icon: TaraIcons.arrowRight, loading: _saving, onPressed: _submit),
-          ],
+                  ),
+                if (_tried && !_payoutValid) ...[const SizedBox(height: 6), ErrorLine(l.phoneInvalid)],
+              ],
+            ],
+          ),
         ),
+      ],
+    );
+    return TaraScreen(
+      blobs: _blobs,
+      // Maquette : le bouton reste en bas ; le contenu défile au-dessus s'il manque de place.
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: SingleChildScrollView(child: content)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_error != null) ...[ErrorLine(_error!), const SizedBox(height: 10)],
+                PrimaryButton(label: l.continueLabel, loading: _saving, onPressed: _submit),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
-
-  static String _categoryLabel(AppLocalizations l, String code) => switch (code) {
-    'FASHION' => l.categoryFashion,
-    'BEAUTY' => l.categoryBeauty,
-    'ELECTRONICS' => l.categoryElectronics,
-    'FOOD' => l.categoryFood,
-    'HOME' => l.categoryHome,
-    _ => l.categoryOther,
-  };
 }
 
-class _Field extends StatelessWidget {
-  const _Field({
-    required this.label,
-    required this.controller,
-    this.hint,
-    this.error,
-    this.autofill,
-    this.caps = false,
-  });
+/// Logo de l'opérateur Mobile Money (30, coins 8, fond blanc, liseré).
+class _OperatorBadge extends StatelessWidget {
+  const _OperatorBadge(this.code);
+  final String code;
 
-  final String label;
-  final TextEditingController controller;
-  final String? hint;
-  final String? error;
-  final String? autofill;
-  final bool caps;
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 30,
+    height: 30,
+    decoration: BoxDecoration(
+      color: const Color(0xFFFFFFFF),
+      borderRadius: BorderRadius.circular(8),
+      boxShadow: const [BoxShadow(color: Color.fromRGBO(22, 18, 14, .08), spreadRadius: 1)],
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: OperatorLogo(code, size: 30),
+  );
+}
+
+/// Colis en 3D de la maquette : un grand pour soi ; trois pour une boutique.
+class _Parcels extends StatelessWidget {
+  const _Parcels({required this.shop});
+  final bool shop;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TaraTextField(
-          label: label,
-          hint: hint,
-          controller: controller,
-          textInputAction: TextInputAction.next,
-          autofillHints: autofill == null ? null : [autofill!],
-          textCapitalization: caps ? TextCapitalization.characters : TextCapitalization.words,
-        ),
-        if (error != null) ...[const SizedBox(height: 6), ErrorLine(error!)],
-      ],
+    // Centres relevés sur la maquette, depuis le milieu de la zone de 150 : un colis de 90 ;
+    // pour une boutique, la rangée 90, 58, 46 centrée.
+    final cubes = shop
+        ? const [
+            (90.0, -39.0, 0.0, Duration.zero, 10),
+            (58.0, 19.0, 30.0, Duration(milliseconds: 500), 7),
+            (46.0, 61.0, -20.0, Duration(seconds: 1), 8),
+          ]
+        : const [(90.0, 0.0, 0.0, Duration.zero, 10)];
+    return SizedBox(
+      height: 150,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          for (final (size, dx, dy, delay, seconds) in cubes)
+            Transform.translate(
+              // Le colis est dessiné en haut de son cadre (le bas sert au flottement).
+              offset: Offset(dx, dy + size * .125),
+              child: Parcel3D(
+                size: size,
+                shadow: false,
+                period: Duration(seconds: seconds),
+                bobPeriod: const Duration(seconds: 3),
+                bobDelay: delay,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

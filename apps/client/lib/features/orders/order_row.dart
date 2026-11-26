@@ -23,10 +23,7 @@ class OrderRow extends StatelessWidget {
     return ListRow(
       leading: IconTile(icon: icon, size: 40, tone: tone),
       // Envoi de plusieurs colis : le numéro écrit sur le colis vient en premier.
-      title: [
-        if (order.batchNumber case final number?) l.parcelNumberShort(number),
-        order.recipientName,
-      ].join(' · '),
+      title: [if (order.batchNumber case final number?) l.parcelNumberShort(number), order.recipientName].join(' · '),
       // Lieu précis : le repère écrit à la commande, puis le quartier.
       detail: precisePlace(order.dropoffLandmark, order.dropoffNeighborhood),
       subtitle: '$label · ${order.reference}',
@@ -47,8 +44,13 @@ class OrderRow extends StatelessWidget {
       // « Créée » sans créneau à venir : les frais Mobile Money ne sont pas encore payés.
       'CREATED' => (TaraIcons.timer, TintTone.danger, l.trackAwaitingPayment),
       'SEARCHING_RIDER' => (TaraIcons.timer, TintTone.accent, l.statusSearching),
-      'ASSIGNED' => (TaraIcons.navigation, TintTone.accent, l.statusRiderComing),
-      'PICKED_UP' || 'IN_DELIVERY' => (TaraIcons.package, TintTone.success, l.statusInDelivery),
+      'ASSIGNED' => (TaraIcons.navigation, TintTone.accent, l.statusRiderComingYou),
+      // « En livraison · 4 min » quand le livreur roule vers le destinataire.
+      'PICKED_UP' || 'IN_DELIVERY' => (
+        TaraIcons.package,
+        TintTone.success,
+        [l.statusInDelivery, if (order.etaMinutes case final minutes?) l.etaMinutes(minutes)].join(' · '),
+      ),
       'DELIVERY_FAILED' => switch (order.failureDecision) {
         'RETRY' => (TaraIcons.refresh, TintTone.accent, l.statusRetrying),
         'RETURN' => (TaraIcons.returnArrow, TintTone.accent, l.statusReturning),

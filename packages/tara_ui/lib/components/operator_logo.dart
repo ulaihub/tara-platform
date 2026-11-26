@@ -38,7 +38,7 @@ class OperatorLogo extends StatelessWidget {
               ? Center(
                   child: TaraIcon(TaraIcons.phone, size: size * .6, color: const Color(0xFF16120E)),
                 )
-              : Image.asset(asset, package: 'tara_ui', fit: BoxFit.cover, filterQuality: FilterQuality.medium),
+              : Image.asset(asset, package: 'tara_ui', fit: BoxFit.cover, filterQuality: FilterQuality.high),
         ),
       ),
     );
@@ -47,4 +47,4 @@ class OperatorLogo extends StatelessWidget {
 
 /// Choix d'opérateur avec son logo (recharge, retrait, paiement, encaissement).
 ChoiceOption<String> operatorChoice(String code, String label) =>
-    ChoiceOption(code, label, leading: OperatorLogo(code, size: 22));
+    ChoiceOption(code, label, leading: OperatorLogo(code, size: 26));
