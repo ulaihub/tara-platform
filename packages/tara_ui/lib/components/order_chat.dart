@@ -230,7 +230,6 @@ class _OrderChatScreenState extends State<OrderChatScreen> {
                         return GlassButton(
                           label: reply,
                           height: 36,
-                          radius: 18,
                           onPressed: _sending ? null : () => unawaited(_send(reply)),
                         );
                       },

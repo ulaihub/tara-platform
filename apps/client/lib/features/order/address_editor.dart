@@ -221,7 +221,6 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
               icon: TaraIcons.navigation,
               label: l.myPosition,
               size: 52,
-              radius: 18,
               onPressed: _locating ? null : _locate,
             ),
           ),

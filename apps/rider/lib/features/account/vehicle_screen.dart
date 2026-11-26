@@ -82,7 +82,10 @@ class _VehicleScreenState extends ConsumerState<VehicleScreen> {
           const SizedBox(height: 18),
           InfoNote(text: l.vehicleHelp, icon: TaraIcons.moto),
           const SizedBox(height: 18),
-          Text(l.vehicleColor, style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700)),
+          Text(
+            l.vehicleColor,
+            style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 8),
           ChoiceChips<String>(
             columns: 3,
@@ -107,7 +110,10 @@ class _VehicleScreenState extends ConsumerState<VehicleScreen> {
             ],
           ),
           const SizedBox(height: 18),
-          Text(l.vehicleBrand, style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700)),
+          Text(
+            l.vehicleBrand,
+            style: TaraText.label.copyWith(color: c.textSecondary, fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 8),
           ChoiceChips<String>(
             columns: 3,

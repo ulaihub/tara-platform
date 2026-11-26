@@ -99,6 +99,7 @@ Widget tabs(int current, Widget child) => Builder(
       TabItem(TaraIcons.user, 'Profil'),
     ],
     action: TabAction(icon: TaraIcons.plus, label: 'Nouvelle livraison', onPressed: () {}),
+    pill: true,
     current: current,
     onSelected: (_) {},
     child: child,

@@ -5,7 +5,6 @@ import '../motion/effects.dart';
 import '../tara_colors.dart';
 import '../tara_icons.dart';
 import '../tara_typography.dart';
-import 'glass.dart';
 
 /// Zone tactile d'au moins 48 dp, sans changer le visuel (§2.3).
 class _TapTarget extends StatelessWidget {
@@ -34,7 +33,8 @@ class _TapTarget extends StatelessWidget {
   }
 }
 
-/// Bouton principal : dégradé de marque, texte foncé, ombre orange, reflet qui balaie (A4).
+/// Bouton principal fin, en pilule : dégradé de marque, texte foncé, ombre orange légère,
+/// reflet qui balaie (A4), petit rebond au toucher.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     super.key,
@@ -63,126 +63,76 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
     final enabled = onPressed != null;
-    final style = (strong ? TaraText.buttonStrong : TaraText.button).copyWith(color: TaraBrand.onBrand);
+    final style = (strong ? TaraText.buttonStrong : TaraText.button).copyWith(
+      color: TaraBrand.onBrand,
+      fontSize: 16,
+      letterSpacing: .1,
+    );
+    final radius = BorderRadius.circular(height / 2);
     return Semantics(
       button: true,
       enabled: enabled && !loading,
-      child: GestureDetector(
-        onTap: enabled && !loading
-            ? () {
-                HapticFeedback.selectionClick();
-                onPressed!();
-              }
-            : null,
-        child: Opacity(
-          opacity: enabled ? 1 : .45,
-          child: Container(
-            constraints: BoxConstraints(minHeight: height),
-            decoration: BoxDecoration(
-              gradient: TaraBrand.gradient,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: enabled ? c.brandShadow : null,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Reflet interne en haut.
-                  Positioned(
-                    top: 0,
-                    left: 12,
-                    right: 12,
-                    child: SizedBox(
-                      height: 1,
-                      child: ColoredBox(color: const Color(0xFFFFFFFF).withValues(alpha: c.isDark ? .45 : .5)),
-                    ),
-                  ),
-                  if (enabled) Sheen(period: sheenPeriod, opacity: c.isDark ? .55 : .6),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(label, style: style, textAlign: TextAlign.center),
+      child: Squish(
+        enabled: enabled && !loading,
+        child: GestureDetector(
+          onTap: enabled && !loading
+              ? () {
+                  HapticFeedback.lightImpact();
+                  onPressed!();
+                }
+              : null,
+          child: Opacity(
+            opacity: enabled ? 1 : .45,
+            child: Container(
+              constraints: BoxConstraints(minHeight: height),
+              decoration: BoxDecoration(
+                gradient: TaraBrand.gradient,
+                borderRadius: radius,
+                boxShadow: enabled
+                    ? [
+                        BoxShadow(
+                          color: Color.fromRGBO(255, 90, 0, c.isDark ? .30 : .26),
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
                         ),
-                        if (loading) ...[
-                          const SizedBox(width: 10),
-                          const Spin(
-                            period: Duration(milliseconds: 900),
-                            child: TaraIcon(TaraIcons.refresh, size: 20, strokeWidth: 2.2, color: TaraBrand.onBrand),
-                          ),
-                        ] else if (icon != null) ...[
-                          const SizedBox(width: 10),
-                          TaraIcon(icon!, size: 20, strokeWidth: 2.2, color: TaraBrand.onBrand),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
+                      ]
+                    : null,
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Bouton secondaire en verre (Refuser, Reprendre, Réessayer).
-class GlassButton extends StatelessWidget {
-  const GlassButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon,
-    this.height = 48,
-    this.radius = 18,
-    this.color,
-  });
-
-  final String label;
-  final VoidCallback? onPressed;
-  final TaraIconData? icon;
-  final double height;
-  final double radius;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = TaraColors.of(context);
-    final fg = color ?? c.textPrimary;
-    return Semantics(
-      button: true,
-      enabled: onPressed != null,
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Opacity(
-          opacity: onPressed == null ? .5 : 1,
-          // Hauteur fixe : libellé centré, aligné sur le bouton principal voisin.
-          child: SizedBox(
-            height: height < 48 ? 48 : height,
-            child: GlassCard(
-              radius: radius,
-              shadow: false,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              child: ClipRRect(
+                borderRadius: radius,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    if (icon != null) ...[TaraIcon(icon!, size: 20, color: fg), const SizedBox(width: 8)],
-                    // Une ligne : avec le texte agrandi, le libellé rétrécit au lieu d'être
-                    // coupé au milieu d'un mot.
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          softWrap: false,
-                          style: TaraText.buttonSecondary.copyWith(color: fg),
-                        ),
+                    // Filet de lumière en haut.
+                    Positioned(
+                      top: 0,
+                      left: height / 2,
+                      right: height / 2,
+                      child: SizedBox(
+                        height: 1,
+                        child: ColoredBox(color: const Color(0xFFFFFFFF).withValues(alpha: c.isDark ? .45 : .55)),
+                      ),
+                    ),
+                    if (enabled) Sheen(period: sheenPeriod, opacity: c.isDark ? .55 : .6),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(label, style: style, textAlign: TextAlign.center),
+                          ),
+                          if (loading) ...[
+                            const SizedBox(width: 10),
+                            const Spin(
+                              period: Duration(milliseconds: 900),
+                              child: TaraIcon(TaraIcons.refresh, size: 18, strokeWidth: 2, color: TaraBrand.onBrand),
+                            ),
+                          ] else if (icon != null) ...[
+                            const SizedBox(width: 8),
+                            TaraIcon(icon!, size: 18, strokeWidth: 2, color: TaraBrand.onBrand),
+                          ],
+                        ],
                       ),
                     ),
                   ],
@@ -196,15 +146,110 @@ class GlassButton extends StatelessWidget {
   }
 }
 
-/// Bouton icône en verre (retour, notifications, recentrer, fermer). Libellé obligatoire.
+/// Bouton secondaire fin en verre (Refuser, Reprendre, Réessayer) : pilule de 44 avec un
+/// filet d'un pixel, dans une zone tactile de 48 ; petit rebond au toucher.
+class GlassButton extends StatelessWidget {
+  const GlassButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.height = 44,
+    this.radius,
+    this.color,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final TaraIconData? icon;
+  final double height;
+
+  /// Coins ; pilule par défaut.
+  final double? radius;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final fg = color ?? c.textPrimary;
+    final r = BorderRadius.circular(radius ?? height / 2);
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      child: Squish(
+        enabled: onPressed != null,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onPressed == null
+              ? null
+              : () {
+                  HapticFeedback.selectionClick();
+                  onPressed!();
+                },
+          child: Opacity(
+            opacity: onPressed == null ? .5 : 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Center(
+                heightFactor: 1,
+                child: Container(
+                  height: height,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: c.isDark
+                        ? const Color.fromRGBO(255, 255, 255, .07)
+                        : const Color.fromRGBO(255, 255, 255, .72),
+                    borderRadius: r,
+                    border: Border.all(color: c.textPrimary.withValues(alpha: c.isDark ? .14 : .10)),
+                  ),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (icon != null) ...[
+                          TaraIcon(icon!, size: 18, strokeWidth: 1.8, color: fg),
+                          const SizedBox(width: 8),
+                        ],
+                        // Une ligne : avec le texte agrandi, le libellé rétrécit au lieu d'être
+                        // coupé au milieu d'un mot.
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: TaraText.buttonSecondary.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: fg,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bouton icône fin en verre (retour, notifications, recentrer, fermer) : rond de 42 avec
+/// un filet d'un pixel, dans une zone tactile de 48 ; rebond au toucher. Libellé obligatoire.
 class GlassIconButton extends StatelessWidget {
   const GlassIconButton({
     super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
-    this.size = 48,
-    this.radius = 16,
+    this.size = 42,
+    this.radius,
     this.badge = false,
   });
 
@@ -212,7 +257,9 @@ class GlassIconButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final double size;
-  final double radius;
+
+  /// Coins ; rond par défaut.
+  final double? radius;
 
   /// Pastille orange (notification non lue).
   final bool badge;
@@ -220,36 +267,42 @@ class GlassIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = TaraColors.of(context);
-    return _TapTarget(
-      onTap: onPressed,
-      label: label,
-      child: SizedBox.square(
-        dimension: size,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            GlassCard(
-              radius: radius,
-              shadow: false,
-              padding: EdgeInsets.zero,
-              fill: c.isDark ? const Color.fromRGBO(255, 255, 255, 0.07) : null,
-              child: Center(child: TaraIcon(icon, size: 22, color: c.textPrimary)),
-            ),
-            if (badge)
-              Positioned(
-                top: 10,
-                right: 11,
-                child: Container(
-                  width: 9,
-                  height: 9,
-                  decoration: BoxDecoration(
-                    color: TaraBrand.orange,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: c.bg, width: 1.5),
+    return Squish(
+      enabled: onPressed != null,
+      depth: .9,
+      child: _TapTarget(
+        onTap: onPressed,
+        label: label,
+        child: SizedBox.square(
+          dimension: size,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: c.isDark ? const Color.fromRGBO(255, 255, 255, .07) : const Color.fromRGBO(255, 255, 255, .72),
+                  borderRadius: BorderRadius.circular(radius ?? size / 2),
+                  border: Border.all(color: c.textPrimary.withValues(alpha: c.isDark ? .14 : .10)),
+                ),
+                alignment: Alignment.center,
+                child: TaraIcon(icon, size: 20, strokeWidth: 1.8, color: c.textPrimary),
+              ),
+              if (badge)
+                Positioned(
+                  top: size * .2,
+                  right: size * .22,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: TaraBrand.orange,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: c.bg, width: 1.5),
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

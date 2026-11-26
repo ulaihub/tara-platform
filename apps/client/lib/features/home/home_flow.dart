@@ -303,6 +303,8 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
             ],
             // « + » au centre de la barre : nouvelle livraison, depuis n'importe quel onglet.
             action: TabAction(icon: TaraIcons.plus, label: l.newDelivery, onPressed: _newOrder),
+            // Finesse : barre en pilule comme l'app livreur, « + » rond au milieu.
+            pill: true,
             current: _tab,
             onSelected: (tab) => setState(() {
               if (tab == 1 && _tab != 1) _ordersScope = 'active';

@@ -253,12 +253,7 @@ class _HomeOfflineScreenState extends ConsumerState<HomeOfflineScreen> {
                       children: [
                         Text(l.blockerTerms, style: TaraText.text.copyWith(color: c.textPrimary)),
                         const SizedBox(height: 10),
-                        GlassButton(
-                          label: l.readAndSign,
-                          height: 48,
-                          radius: 14,
-                          onPressed: () => unawaited(_openTerms()),
-                        ),
+                        GlassButton(label: l.readAndSign, onPressed: () => unawaited(_openTerms())),
                       ],
                     ),
                   ),

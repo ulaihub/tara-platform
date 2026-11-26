@@ -85,7 +85,7 @@ void main() {
         scoped(HomeFlow(me: shopOwner, now: () => homeNow), shopApi()),
       );
       await settle(tester);
-      await tester.tap(find.text('Commandes'));
+      await tester.tap(find.bySemanticsLabel('Commandes').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 170));
       await expectLater(capture, matchesGoldenFile('goldens/transition_onglets/${brightness.name}.png'));

@@ -556,7 +556,7 @@ class _ScrollWithFooterState extends State<ScrollWithFooter> {
                   ScrollWithFooter.dockMargin + MediaQuery.paddingOf(context).bottom,
                 ),
                 child: GlassDock(
-                  radius: 20 + pad,
+                  radius: 25 + pad,
                   padding: const EdgeInsets.all(pad),
                   child: SizedBox(width: double.infinity, child: widget.footer),
                 ),
