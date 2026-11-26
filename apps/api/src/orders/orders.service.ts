@@ -81,6 +81,12 @@ const ORDER_INCLUDE = {
     },
   },
   ratings: { select: { raterId: true, score: true, comment: true, createdAt: true } },
+  // Preuves de remise et d'échec : photo (présence seulement), code vérifié, appels.
+  proofs: {
+    where: { kind: { in: ['DELIVERY', 'FAILED_ATTEMPT'] } },
+    select: { kind: true, photoKey: true, codeVerified: true, callLog: true, occurredAt: true },
+    orderBy: { occurredAt: 'asc' },
+  },
   batch: {
     select: {
       _count: {
@@ -286,6 +292,7 @@ export class OrdersService implements OnModuleInit {
         : null,
       attemptCount: order.attemptCount,
       failure: this.failureOf(order),
+      delivery: this.deliveryOf(order),
       cancelReason: order.cancelReason,
       rating: ratingDto(order.ratings.find((r) => r.raterId === order.senderId)),
       timeline: order.events.map((event: OrderEvent) => ({
@@ -303,18 +310,64 @@ export class OrdersService implements OnModuleInit {
   private failureOf(order: OrderFull): z.output<typeof OrderDto>['failure'] {
     if (order.status !== 'DELIVERY_FAILED' || !order.failedAt) return null;
     const event = order.events.findLast((e: OrderEvent) => e.toStatus === 'DELIVERY_FAILED');
+    const proof = order.proofs.findLast((p) => p.kind === 'FAILED_ATTEMPT');
     return {
       reason: order.failureReason,
       note: event?.note ?? null,
       at: order.failedAt.toISOString(),
       decision: order.failureDecision,
       retryAllowed: order.attemptCount < 2,
+      hasPhoto: Boolean(proof?.photoKey),
+      // Appels passés au destinataire avant de déclarer l'échec (preuve jointe par le livreur).
+      calls: Array.isArray(proof?.callLog)
+        ? proof.callLog.filter(
+            (call) =>
+              typeof call === 'object' &&
+              call !== null &&
+              !Array.isArray(call) &&
+              call.to === 'RECIPIENT',
+          ).length
+        : 0,
       decisionDueAt: order.failureDecision
         ? null
         : new Date(
             order.failedAt.getTime() + this.env.FAILURE_DECISION_TIMEOUT_MINUTES * 60_000,
           ).toISOString(),
     };
+  }
+
+  /** Remise du colis : photo prise par le livreur et code du destinataire vérifié (E4). */
+  private deliveryOf(order: OrderFull): z.output<typeof OrderDto>['delivery'] {
+    const proof = order.proofs.findLast((p) => p.kind === 'DELIVERY');
+    if (order.status !== 'DELIVERED' || !proof) return null;
+    return {
+      hasPhoto: proof.photoKey !== null,
+      codeVerified: proof.codeVerified,
+      at: proof.occurredAt.toISOString(),
+    };
+  }
+
+  /**
+   * Photo de la remise (colis livré) ou du lieu (livraison impossible), pour l'expéditeur
+   * seulement : la preuve de ce qui s'est passé à sa course.
+   */
+  async proofPhoto(user: AuthUser, id: string): Promise<{ buffer: Buffer; mimeType: string }> {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order || order.senderId !== user.id) throw AppError.notFound('ORDER_NOT_FOUND');
+    const kind =
+      order.status === 'DELIVERED'
+        ? 'DELIVERY'
+        : order.status === 'DELIVERY_FAILED'
+          ? 'FAILED_ATTEMPT'
+          : null;
+    const proof = kind
+      ? await this.prisma.deliveryProof.findFirst({
+          where: { orderId: id, kind, photoKey: { not: null } },
+          orderBy: { occurredAt: 'desc' },
+        })
+      : null;
+    if (!proof?.photoKey) throw AppError.notFound('MEDIA_NOT_FOUND');
+    return this.media.read(proof.photoKey);
   }
 
   private async loadFull(id: string): Promise<OrderFull> {

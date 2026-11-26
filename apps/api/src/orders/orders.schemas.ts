@@ -287,7 +287,15 @@ export const OrderDto = z
         decisionDueAt: z.iso.datetime().nullable(),
         /** Une seule nouvelle tentative : false après un deuxième échec. */
         retryAllowed: z.boolean(),
+        /** Photo du lieu prise par le livreur (GET /orders/:id/proof-photo). */
+        hasPhoto: z.boolean(),
+        /** Appels passés au destinataire avant l'échec. */
+        calls: z.int(),
       })
+      .nullable(),
+    /** Colis livré : photo de remise (GET /orders/:id/proof-photo), code vérifié, heure. */
+    delivery: z
+      .object({ hasPhoto: z.boolean(), codeVerified: z.boolean(), at: z.iso.datetime() })
       .nullable(),
     cancelReason: z.string().nullable(),
     /** Note donnée au livreur par l'expéditeur (F4), null tant qu'il n'a pas noté. */

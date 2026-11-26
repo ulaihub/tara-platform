@@ -16,6 +16,7 @@ import type {
   ConsentBody,
   ConsentDto,
   MeDto,
+  MeStatsDto,
   MerchantBody,
   MerchantDto,
   UpdateMeBody,
@@ -43,6 +44,25 @@ export class UsersService {
     private readonly notifications: NotificationService,
     @Inject(ENV) private readonly env: Env,
   ) {}
+
+  async stats(userId: string): Promise<z.output<typeof MeStatsDto>> {
+    const [user, counts] = await Promise.all([
+      this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { createdAt: true } }),
+      this.prisma.order.groupBy({
+        by: ['status'],
+        where: { senderId: userId, status: { in: ['DELIVERED', 'RETURNED'] } },
+        _count: { _all: true },
+      }),
+    ]);
+    const count = (status: string) => counts.find((c) => c.status === status)?._count._all ?? 0;
+    const delivered = count('DELIVERED');
+    const finished = delivered + count('RETURNED');
+    return {
+      delivered,
+      successRate: finished === 0 ? null : Math.round((delivered / finished) * 100),
+      memberSince: user.createdAt.toISOString(),
+    };
+  }
 
   /** [effectiveRoles] : rôles de la session (ceux de l'équipe seulement si le second facteur est vérifié). */
   async me(

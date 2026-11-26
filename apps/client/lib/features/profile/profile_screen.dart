@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:tara_core/api/legal_api.dart';
 import 'package:tara_core/phone/phone_format.dart';
 import 'package:tara_ui/app_settings.dart';
@@ -15,6 +16,7 @@ import 'package:tara_ui/components/progress.dart';
 import 'package:tara_ui/components/tab_shell.dart';
 import 'package:tara_ui/components/terms_flow.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
+import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/effects.dart';
 import 'package:tara_ui/motion/liquid_background.dart';
 import 'package:tara_ui/motion/motion_clock.dart';
@@ -31,10 +33,14 @@ import '../common/pin.dart';
 import '../common/scoped_page.dart';
 import '../home/home_screen.dart' show walletProvider;
 import '../legal/terms_screen.dart';
+import '../onboarding/intro_screen.dart';
 import '../order/address_editor.dart';
 import '../order/pickup_step.dart' show pickupAddressesProvider;
 import '../support/support.dart';
 import 'delete_account_screen.dart';
+
+/// Chiffres du profil (livraisons, réussite, arrivée) ; rien à montrer si la lecture échoue.
+final meStatsProvider = FutureProvider.autoDispose<MeStats>((ref) => ref.read(clientApiProvider).meStats());
 
 /// Onglet Profil de l'expéditeur (non dessiné : style Tara) : identité et boutique, code de
 /// parrainage à partager (C6), affichage (thème, langue, animations), support, déconnexion.
@@ -128,6 +134,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       _MenuRow(TaraIcons.headset, l.profileSupportRow, '', () {
         _open(l.helpSection, (context) => _HelpCard(support: support));
       }),
+      _MenuRow(TaraIcons.play, l.profileReplayIntro, '', () {
+        unawaited(
+          Navigator.of(context)
+              .push(scopedPage<void>(context, (route) => ClientIntroScreen(onDone: () => Navigator.of(route).pop()))),
+        );
+      }),
       _MenuRow(TaraIcons.document, l.profileTermsRow, '', () {
         _open(l.profileTermsRow, (context) => _DataCard(me: me));
       }),
@@ -168,6 +180,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
           ],
+          if (ref.watch(meStatsProvider).value case final stats?) ...[
+            const SizedBox(height: 16),
+            _StatsCard(stats: stats),
+          ],
           if (me.referralCode case final code?) ...[
             const SizedBox(height: 16),
             _ReferralTicket(
@@ -206,6 +222,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Trois chiffres (maquette) : livraisons réussies, part réussie, mois d'arrivée sur Tara.
+class _StatsCard extends StatelessWidget {
+  const _StatsCard({required this.stats});
+  final MeStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final rate = stats.successRate == null ? '—' : '${stats.successRate}\u00a0%';
+    final since = DateFormat('MMMM y', Localizations.localeOf(context).toLanguageTag()).format(stats.memberSince);
+    Widget cell(String value, String label) => Expanded(
+      child: Column(
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(value, style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 20)),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TaraText.small.copyWith(color: c.textPrimary.withValues(alpha: .66), fontSize: 11),
+          ),
+        ],
+      ),
+    );
+    Widget divider() => Container(width: 1, height: 34, color: c.glassBorder);
+    return Semantics(
+      label: l.profileStatsLabel(stats.delivered, rate, since),
+      excludeSemantics: true,
+      child: GlassCard(
+        radius: 22,
+        shadow: false,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        child: Row(
+          children: [
+            cell(formatAmount(stats.delivered), l.profileStatDelivered),
+            divider(),
+            cell(rate, l.profileStatSuccess),
+            divider(),
+            cell(since, l.profileStatSince),
+          ],
+        ),
       ),
     );
   }

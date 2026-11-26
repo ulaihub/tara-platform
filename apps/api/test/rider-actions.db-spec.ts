@@ -222,6 +222,19 @@ describe('Actions du livreur (E2 à E9)', () => {
     // Livrée : l'expéditeur garde le nom pour le récapitulatif, plus le numéro.
     const done = await request(ctx.http).get(`/v1/orders/${order.id}`).set(shop.auth).expect(200);
     expect(done.body.rider).toMatchObject({ phone: null });
+    // Preuve de remise : photo et code vérifié, photo visible par l'expéditeur seulement.
+    expect(done.body.delivery).toMatchObject({ hasPhoto: true, codeVerified: true });
+    const photo = await request(ctx.http)
+      .get(`/v1/orders/${order.id}/proof-photo`)
+      .set(shop.auth)
+      .expect(200);
+    expect(photo.headers['content-type']).toMatch(/^image\//);
+    await request(ctx.http).get(`/v1/orders/${order.id}/proof-photo`).set(rider.auth).expect(404);
+    // Profil : livraisons réussies et taux de réussite de l'expéditeur.
+    const stats = await request(ctx.http).get('/v1/me/stats').set(shop.auth).expect(200);
+    expect(stats.body.delivered).toBeGreaterThanOrEqual(1);
+    expect(stats.body.successRate).toBeGreaterThan(0);
+    expect(Date.parse(stats.body.memberSince)).toBeLessThanOrEqual(Date.now());
 
     const earnings = await request(ctx.http)
       .get('/v1/rider/earnings?period=day')
@@ -522,7 +535,11 @@ describe('Actions du livreur (E2 à E9)', () => {
       reason: 'PAYMENT_REFUSED',
       decision: null,
       decisionDueAt: failed.body.failureDecisionDueAt,
+      hasPhoto: true,
+      calls: 0,
     });
+    expect(asSender.body.delivery).toBeNull();
+    await request(ctx.http).get(`/v1/orders/${order.id}/proof-photo`).set(shop.auth).expect(200);
 
     await request(ctx.http)
       .post(`/v1/orders/${order.id}/failure-decision`)

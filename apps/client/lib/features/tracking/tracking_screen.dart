@@ -21,11 +21,12 @@ import 'package:tara_ui/components/layout.dart';
 import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/order_chat.dart';
 import 'package:tara_ui/components/star_rating.dart';
-import 'package:tara_ui/components/swipe_button.dart';
 import 'package:tara_ui/feedback/tara_feedback.dart';
 import 'package:tara_ui/format.dart';
 import 'package:tara_ui/motion/confetti.dart';
 import 'package:tara_ui/motion/effects.dart';
+import 'package:tara_ui/motion/liquid_background.dart';
+import 'package:tara_ui/motion/liquid_wave.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -110,6 +111,10 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   Uint8List? _riderPhoto;
   String? _photoOf;
 
+  /// Photo de remise (livré) ou du lieu (livraison impossible), chargée une fois par étape.
+  Uint8List? _proofPhoto;
+  String? _proofOf;
+
   /// Trajet du colis sur les rues ; null tant qu'il n'est pas reçu (ou ligne droite seulement).
   List<List<double>>? _route;
 
@@ -172,6 +177,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       });
       if (before != null && before != order.status) _announce(order.status);
       unawaited(_loadRiderPhoto(order));
+      unawaited(_loadProofPhoto(order));
       // Colis parti (ou commande finie) : le code d'enlèvement ne sert plus.
       if (!const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'].contains(order.status) && _storedCode != null) {
         unawaited(PickupCodes(ref.read(keyValueStoreProvider)).forget(widget.orderId));
@@ -188,6 +194,23 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       if (mounted && route.onRoads) setState(() => _route = route.path);
     } catch (_) {
       // Pas de trajet (réseau, serveur d'avant) : la ligne droite reste.
+    }
+  }
+
+  Future<void> _loadProofPhoto(TrackedOrder order) async {
+    final has = order.delivery?.hasPhoto ?? order.failure?.hasPhoto ?? false;
+    final key = has ? '${order.status}|${order.failure?.at}' : null;
+    if (key == _proofOf) return;
+    _proofOf = key;
+    if (key == null) {
+      if (mounted) setState(() => _proofPhoto = null);
+      return;
+    }
+    try {
+      final bytes = await ref.read(clientApiProvider).proofPhoto(order.id);
+      if (mounted) setState(() => _proofPhoto = bytes);
+    } catch (_) {
+      // Photo effacée (90 jours) ou réseau : la vignette reste neutre.
     }
   }
 
@@ -565,6 +588,68 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     final deciding = order != null && _deciding(order);
     final panel = height * (delivered ? .66 : (deciding ? .62 : .48));
     final top = MediaQuery.paddingOf(context).top + 72;
+    // Livré, ou livraison impossible à trancher : page entière sans carte (maquettes).
+    if (order != null && (delivered || deciding)) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) widget.onBack();
+        },
+        child: TaraScreen(
+          blobs: _pageBlobs,
+          safeBottom: false,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                    child: Row(
+                      children: [
+                        GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: widget.onBack),
+                        const SizedBox(width: 10),
+                        Expanded(child: _Header(order: order)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: delivered
+                        ? _DeliveredPage(
+                            order: order,
+                            now: _now,
+                            photo: _proofPhoto,
+                            stars: _stars,
+                            comment: _comment,
+                            busy: _busy,
+                            error: _error,
+                            onStars: (stars) => setState(() => _stars = stars),
+                            onRate: () => unawaited(_rate()),
+                            onReceipt: () => unawaited(_showReceipt(order)),
+                          )
+                        : _DecidePage(
+                            order: order,
+                            now: _now,
+                            photo: _proofPhoto,
+                            choice: _choice,
+                            busy: _busy,
+                            error: _error,
+                            onChoose: (choice) => setState(() => _choice = choice),
+                            onDecide: () => unawaited(_decide()),
+                            topUp: _topUpState(),
+                            onCallRecipient: () =>
+                                unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: order.recipientPhone))),
+                          ),
+                  ),
+                ],
+              ),
+              if (_celebrate) const Positioned.fill(child: Confetti()),
+            ],
+          ),
+        ),
+      );
+    }
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -604,34 +689,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                     children: [
                       GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: widget.onBack),
                       const SizedBox(width: 10),
-                      // Référence et trajet (maquette) : « TR-48301 », « Akwa → Bonapriso ».
-                      if (order != null)
-                        Expanded(
-                          child: MergeSemantics(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  // Envoi de plusieurs colis : le numéro écrit sur ce colis.
-                                  switch (order.batchNumber) {
-                                    final number? => '${order.reference} · ${l.parcelNumberShort(number)}',
-                                    null => order.reference,
-                                  },
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 18),
-                                ),
-                                Text(
-                                  '${order.pickup.neighborhood?.name ?? order.pickup.landmark} → '
-                                  '${order.dropoff.neighborhood?.name ?? order.dropoff.landmark}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TaraText.small.copyWith(color: c.textSecondary, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                      if (order != null) Expanded(child: _Header(order: order)),
                     ],
                   ),
                 ),
@@ -660,30 +718,10 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                             (const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'].contains(order.status)
                                 ? _storedCode
                                 : null),
-                        choice: _choice,
-                        stars: _stars,
-                        comment: _comment,
                         confirmCancel: _confirmCancel,
                         busy: _busy,
                         error: _error,
-                        recapKey: _recap,
                         onNewPickupCode: () => unawaited(_newPickupCode()),
-                        onChoose: (choice) => setState(() => _choice = choice),
-                        onDecide: () => unawaited(_decide()),
-                        onStars: (stars) => setState(() => _stars = stars),
-                        onRate: () => unawaited(_rate()),
-                        topUp: _topUp == null
-                            ? null
-                            : _TopUpState(
-                                amount: _topUp!,
-                                operator: _topUpOperator,
-                                phone: _topUpPhone,
-                                pending: _topUpPayment != null,
-                                failed: _topUpFailed,
-                                onOperator: (value) => setState(() => _topUpOperator = value),
-                                onPay: () => unawaited(_payTopUp()),
-                                onCancel: _cancelTopUp,
-                              ),
                         onCancel: () => unawaited(_cancel()),
                         pay: _PayState(
                           // Frais Mobile Money en plus, comme à la commande (payés par l'expéditeur).
@@ -698,7 +736,6 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                           failed: _orderPayFailed,
                           onPay: () => unawaited(_payOrder(order)),
                         ),
-                        onShare: () => unawaited(_share(order)),
                         onCall: (phone) => unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: phone))),
                         onMessage: () => unawaited(_openChat(order)),
                         unread: _unread,
@@ -710,6 +747,70 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
             ),
             if (_celebrate) const Positioned.fill(child: Confetti()),
           ],
+        ),
+      ),
+    );
+  }
+
+  _TopUpState? _topUpState() => _topUp == null
+      ? null
+      : _TopUpState(
+          amount: _topUp!,
+          operator: _topUpOperator,
+          phone: _topUpPhone,
+          pending: _topUpPayment != null,
+          failed: _topUpFailed,
+          onOperator: (value) => setState(() => _topUpOperator = value),
+          onPay: () => unawaited(_payTopUp()),
+          onCancel: _cancelTopUp,
+        );
+
+  /// Fond liquide des pages sans carte (maquettes Livré, Livraison impossible).
+  static const _pageBlobs = [
+    BlobSpec(alignment: Alignment(-.74, -.76), size: 320, colors: BlobSpec.soft, blur: 46),
+    BlobSpec(
+      alignment: Alignment(.74, -.05),
+      size: 280,
+      colors: BlobSpec.warm,
+      blur: 46,
+      opacity: .5,
+      delay: Duration(seconds: 5),
+    ),
+    BlobSpec(
+      alignment: Alignment(-.64, .78),
+      size: 260,
+      colors: BlobSpec.soft,
+      blur: 46,
+      opacity: .67,
+      delay: Duration(seconds: 10),
+    ),
+  ];
+
+  /// « Reçu » : le récapitulatif à partager en image.
+  Future<void> _showReceipt(TrackedOrder order) async {
+    final l = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SheetPanel(
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                RepaintBoundary(
+                  key: _recap,
+                  child: _Recap(order: order),
+                ),
+                const SizedBox(height: 14),
+                PrimaryButton(label: l.shareRecap, icon: TaraIcons.send, onPressed: () => unawaited(_share(order))),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -733,22 +834,12 @@ class _Panel extends StatelessWidget {
     this.waiting = const WaitingRules(),
     required this.rider,
     required this.pickupCode,
-    required this.choice,
-    required this.stars,
-    required this.comment,
     required this.confirmCancel,
     required this.busy,
     required this.error,
-    required this.recapKey,
     required this.onNewPickupCode,
-    required this.onChoose,
-    required this.onDecide,
-    required this.onStars,
-    required this.onRate,
     required this.onCancel,
-    this.topUp,
     this.pay,
-    required this.onShare,
     required this.onCall,
     required this.onReport,
     required this.onMessage,
@@ -768,26 +859,14 @@ class _Panel extends StatelessWidget {
   final WaitingRules waiting;
   final MapPoint? rider;
   final String? pickupCode;
-  final String? choice;
-  final int stars;
-  final TextEditingController comment;
   final bool confirmCancel;
   final bool busy;
   final String? error;
-  final GlobalKey recapKey;
   final VoidCallback onNewPickupCode;
-  final ValueChanged<String> onChoose;
-  final VoidCallback onDecide;
-  final ValueChanged<int> onStars;
-  final VoidCallback onRate;
   final VoidCallback onCancel;
-
-  /// Recharge demandée avant la nouvelle tentative (solde insuffisant).
-  final _TopUpState? topUp;
 
   /// Frais Mobile Money pas encore payés : numéro qui paie, demande envoyée ou refusée.
   final _PayState? pay;
-  final VoidCallback onShare;
   final ValueChanged<String> onCall;
 
   /// « Signaler un problème » : demande au service client sur cette commande.
@@ -860,7 +939,6 @@ class _Panel extends StatelessWidget {
       _ => (l.trackCancelled, ''),
     };
     final eta = _eta(o);
-    final delivered = o.status == 'DELIVERED';
     // Course en cours (maquette) : la barre d'avancée en tête du panneau.
     final flowing = const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED', 'PICKED_UP', 'IN_DELIVERY'].contains(o.status);
     final content = <Widget>[
@@ -913,56 +991,30 @@ class _Panel extends StatelessWidget {
       const SizedBox(height: 16),
       // Livré : le récapitulatif reprend les heures, la frise laisse la place à la note.
       // Échec, retour : la frise avec les heures, sous le titre.
-      if (!delivered && !flowing) ...[_Steps(order: o), const SizedBox(height: 16)],
+      if (!flowing && !returning) ...[_Steps(order: o), const SizedBox(height: 16)],
       if (o.awaitingPayment && pay != null) ...[
         _PayCard(state: pay!, operator: o.feePaymentMethod == 'MOMO_ORANGE' ? l.payOrange : l.payMtn),
         const SizedBox(height: 16),
       ],
-      if (deciding && topUp != null) ...[
-        _TopUpCard(state: topUp!),
-      ] else if (deciding) ...[
-        // Une seule nouvelle tentative (E6) ; chaque choix annonce ses frais.
-        if (failure?.retryAllowed ?? true) ...[
-          AddressChoice(
-            icon: TaraIcons.refresh,
-            title: o.retryFee > 0 ? '${l.failureRetryTitle} · ${formatAmount(o.retryFee)}\u00a0F' : l.failureRetryTitle,
-            subtitle: l.failureRetryBody(riderName, recipientFirst),
-            selected: choice == 'RETRY',
-            onTap: () => onChoose('RETRY'),
-          ),
-          const SizedBox(height: 10),
-        ] else ...[
+      if (returning) ...[
+        // Code de retour (maquette) : à donner au livreur quand il rend le colis.
+        if (pickupCode != null)
+          _ReturnCodeCard(code: pickupCode!)
+        else
           TintBox(
             tone: TintTone.accent,
-            child: Text(l.retryUsed, style: TaraText.label.copyWith(color: c.textPrimary)),
+            child: Text(l.returnCodeHint, style: TaraText.label.copyWith(color: c.textPrimary)),
           ),
+        if (o.returnFee > 0) ...[
           const SizedBox(height: 10),
+          Text(
+            l.returnFeeHint('${formatAmount(o.returnFee)} F'),
+            style: TaraText.small.copyWith(color: c.textSecondary),
+          ),
         ],
-        AddressChoice(
-          icon: TaraIcons.returnArrow,
-          title: o.returnFee > 0
-              ? '${l.failureReturnTitle} · ${formatAmount(o.returnFee)}\u00a0F'
-              : l.failureReturnTitle,
-          subtitle: l.failureReturnBody(riderName, o.pickup.summary),
-          selected: choice == 'RETURN',
-          onTap: () => onChoose('RETURN'),
-        ),
-        const SizedBox(height: 8),
-        Text(l.failureDueBody, style: TaraText.small.copyWith(color: c.textTertiary)),
         const SizedBox(height: 12),
-        _recipientRow(l, o, recipientFirst),
-      ] else if (delivered) ...[
-        RepaintBoundary(
-          key: recapKey,
-          child: _Recap(order: o),
-        ),
-        // Notation du livreur (F4) : dans les 7 jours, une seule fois.
-        if (o.rating != null ||
-            (o.rider != null && deliveredAt != null && now.difference(deliveredAt) < const Duration(days: 7))) ...[
-          const SizedBox(height: 12),
-          _RateCard(order: o, stars: stars, comment: comment, busy: busy, onStars: onStars, onSend: onRate),
-        ],
-      ] else ...[
+      ],
+      ...[
         if (o.rider case final rider? when rider.phone != null) ...[
           _RiderCard(
             rider: rider,
@@ -979,30 +1031,6 @@ class _Panel extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         _recipientRow(l, o, recipientFirst),
-        if (returning && o.returnFee > 0) ...[
-          const SizedBox(height: 8),
-          Text(
-            l.returnFeeHint('${formatAmount(o.returnFee)} F'),
-            style: TaraText.small.copyWith(color: c.textSecondary),
-          ),
-        ],
-        if (returning) ...[
-          const SizedBox(height: 8),
-          TintBox(
-            tone: TintTone.accent,
-            child: Text(l.returnCodeHint, style: TaraText.label.copyWith(color: c.textPrimary)),
-          ),
-        ],
-        if (pickupCode != null && returning) ...[
-          const SizedBox(height: 8),
-          TintBox(
-            tone: TintTone.accent,
-            child: Text(
-              (returning ? l.returnCodeShown : l.pickupCodeShown)(pickupCode!.split('').join(' ')),
-              style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w800),
-            ),
-          ),
-        ],
         if (returning && pickupCode == null)
           Align(
             alignment: Alignment.centerLeft,
@@ -1045,53 +1073,6 @@ class _Panel extends StatelessWidget {
           loading: busy || state.pending,
           onPressed: busy || state.pending ? null : state.onPay,
         ),
-      );
-    }
-    // Solde insuffisant pour la nouvelle tentative : on paie d'abord la recharge.
-    if (deciding && topUp != null) {
-      final state = topUp!;
-      return ScrollWithFooter(
-        horizontal: 20,
-        top: 4,
-        content: content,
-        footer: PrimaryButton(
-          label: l.topUpPay('${formatAmount(state.amount)} F'),
-          icon: TaraIcons.phone,
-          loading: busy || state.pending,
-          onPressed: busy || state.pending ? null : state.onPay,
-        ),
-      );
-    }
-    // Échec : on choisit la suite, puis on glisse pour confirmer.
-    if (deciding) {
-      return ScrollWithFooter(
-        horizontal: 20,
-        top: 4,
-        content: content,
-        footer: SwipeButton(
-          label: switch (choice) {
-            'RETRY' => l.failureConfirmRetry,
-            'RETURN' => l.failureConfirmReturn,
-            _ => l.failureChoose,
-          },
-          semanticLabel: switch (choice) {
-            'RETRY' => l.failureConfirmRetrySemantics,
-            'RETURN' => l.failureConfirmReturnSemantics,
-            _ => null,
-          },
-          icon: choice == 'RETURN' ? TaraIcons.returnArrow : TaraIcons.refresh,
-          loading: busy,
-          onConfirmed: choice == null ? null : onDecide,
-        ),
-      );
-    }
-    // Un bouton seulement une fois livré (« Partager ») : sinon, pas de socle vide.
-    if (delivered) {
-      return ScrollWithFooter(
-        horizontal: 20,
-        top: 4,
-        content: content,
-        footer: PrimaryButton(label: l.shareRecap, icon: TaraIcons.send, onPressed: onShare),
       );
     }
     return SingleChildScrollView(
@@ -1632,102 +1613,6 @@ class _Recap extends StatelessWidget {
 }
 
 /// « Comment s'est passée la livraison ? » : étoiles, mot pour l'équipe, envoi ; une fois
-/// notée, la note et un merci.
-class _RateCard extends StatelessWidget {
-  const _RateCard({
-    required this.order,
-    required this.stars,
-    required this.comment,
-    required this.busy,
-    required this.onStars,
-    required this.onSend,
-  });
-
-  final TrackedOrder order;
-  final int stars;
-  final TextEditingController comment;
-  final bool busy;
-  final ValueChanged<int> onStars;
-  final VoidCallback onSend;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final c = TaraColors.of(context);
-    final rating = order.rating;
-    final Widget child;
-    if (rating != null) {
-      child = Row(
-        children: [
-          StarRating(value: rating.score, onChanged: null, labelOf: l.starsLabel, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l.rateThanks,
-                  style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
-                ),
-                Text(l.rateThanksBody, style: TaraText.small.copyWith(color: c.textSecondary)),
-              ],
-            ),
-          ),
-        ],
-      );
-    } else {
-      final word = switch (stars) {
-        1 => l.starWord1,
-        2 => l.starWord2,
-        3 => l.starWord3,
-        4 => l.starWord4,
-        _ => l.starWord5,
-      };
-      child = Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l.rateTitle, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
-          const SizedBox(height: 2),
-          Text(l.rateBody(order.rider?.name ?? ''), style: TaraText.small.copyWith(color: c.textSecondary)),
-          const SizedBox(height: 14),
-          Center(
-            child: StarRating(value: stars, onChanged: busy ? null : onStars, labelOf: l.starsLabel),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 240),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topCenter,
-            child: stars == 0
-                ? const SizedBox(width: double.infinity)
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 8),
-                      Text(
-                        word,
-                        textAlign: TextAlign.center,
-                        style: TaraText.label.copyWith(color: c.accentText, fontWeight: FontWeight.w800),
-                      ),
-                      const SizedBox(height: 12),
-                      TaraTextField(
-                        controller: comment,
-                        hint: l.rateCommentHint,
-                        textCapitalization: TextCapitalization.sentences,
-                        textInputAction: TextInputAction.done,
-                        inputFormatters: [LengthLimitingTextInputFormatter(300)],
-                      ),
-                      const SizedBox(height: 10),
-                      GlassButton(label: l.rateSend, icon: TaraIcons.send, onPressed: busy ? null : onSend),
-                    ],
-                  ),
-          ),
-        ],
-      );
-    }
-    return GlassCard(radius: 22, shadow: false, padding: const EdgeInsets.fromLTRB(16, 14, 16, 16), child: child);
-  }
-}
-
 /// Paiement Mobile Money des frais relancé depuis le suivi.
 class _PayState {
   const _PayState({
@@ -1868,6 +1753,567 @@ class _TopUpCard extends StatelessWidget {
             child: TaraLink(label: l.topUpCancel, onPressed: state.onCancel),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// En-tête des pages de suivi : référence et étape (« TR-48301 · livré »), trajet.
+class _Header extends StatelessWidget {
+  const _Header({required this.order});
+
+  final TrackedOrder order;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final o = order;
+    // Envoi de plusieurs colis : le numéro écrit sur ce colis.
+    final reference = switch (o.batchNumber) {
+      final number? => '${o.reference} · ${l.parcelNumberShort(number)}',
+      null => o.reference,
+    };
+    final from = o.pickup.neighborhood?.name ?? o.pickup.landmark;
+    final to = o.dropoff.neighborhood?.name ?? o.dropoff.landmark;
+    final decision = o.status == 'DELIVERY_FAILED' ? o.failure?.decision : 'none';
+    final (title, subtitle) = switch (o.status) {
+      'DELIVERED' => (l.trackHeaderDelivered(reference), '$from → $to'),
+      'DELIVERY_FAILED' when decision == null => (l.trackHeaderDeciding(reference), l.trackFailed),
+      // Retour : le colis repart vers l'enlèvement.
+      'DELIVERY_FAILED' when decision == 'RETURN' => (l.trackHeaderReturning(reference), '$to → $from'),
+      _ => (reference, '$from → $to'),
+    };
+    return MergeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 18),
+          ),
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TaraText.small.copyWith(color: c.textSecondary, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Vignette d'une photo de preuve ; sans photo (pas encore reçue, effacée), un fond neutre.
+/// Touchée, la photo s'ouvre en grand.
+class _ProofThumb extends StatelessWidget {
+  const _ProofThumb({required this.photo, required this.size});
+
+  final Uint8List? photo;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final bytes = photo;
+    final thumb = ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox.square(
+        dimension: size,
+        // Fond neutre sous la photo : jamais de trou blanc pendant le décodage.
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(-.35, -1),
+              end: Alignment(.35, 1),
+              colors: [Color(0xFF3A4A5C), Color(0xFF1E2732)],
+              stops: [0, .6],
+            ),
+          ),
+          child: bytes == null ? null : Image.memory(bytes, fit: BoxFit.cover, gaplessPlayback: true),
+        ),
+      ),
+    );
+    if (bytes == null) return ExcludeSemantics(child: thumb);
+    return Semantics(
+      button: true,
+      label: l.proofPhotoLabel,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: () => unawaited(
+          showDialog<void>(
+            context: context,
+            builder: (context) => GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: InteractiveViewer(child: Center(child: Image.memory(bytes))),
+            ),
+          ),
+        ),
+        child: thumb,
+      ),
+    );
+  }
+}
+
+/// Colis livré (maquette) : coche liquide verte, remise et encaissement, photo de remise et
+/// reçu, puis la note du livreur (F4) dans les 7 jours, une seule fois.
+class _DeliveredPage extends StatelessWidget {
+  const _DeliveredPage({
+    required this.order,
+    required this.now,
+    required this.photo,
+    required this.stars,
+    required this.comment,
+    required this.busy,
+    required this.error,
+    required this.onStars,
+    required this.onRate,
+    required this.onReceipt,
+  });
+
+  final TrackedOrder order;
+  final DateTime now;
+  final Uint8List? photo;
+  final int stars;
+  final TextEditingController comment;
+  final bool busy;
+  final String? error;
+  final ValueChanged<int> onStars;
+  final VoidCallback onRate;
+  final VoidCallback onReceipt;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final o = order;
+    final deliveredAt = o.reachedAt('DELIVERED') ?? o.delivery?.at ?? now;
+    final time = formatClock(o.delivery?.at ?? deliveredAt);
+    final headline = [
+      l.trackDeliveredBody(o.recipientName, formatClock(deliveredAt)),
+      if (o.codAmount > 0) l.deliveredCollectedForYou('${formatAmount(o.codAmount)} F'),
+    ].join(' · ');
+    final proof = switch (o.delivery) {
+      OrderDelivery(hasPhoto: true, codeVerified: true) => l.deliveredProofCode(time),
+      OrderDelivery(hasPhoto: true) => l.deliveredProofPhoto(time),
+      OrderDelivery(codeVerified: true) => l.deliveredCodeOnly(time),
+      OrderDelivery() => l.deliveredBySupport(time),
+      // Serveur d'avant : l'heure et le livreur.
+      null => [time, if (o.rider != null) l.deliveredBy(o.rider!.name)].join(' · '),
+    };
+    final rating = o.rating;
+    final canRate = rating == null && o.rider != null && now.difference(deliveredAt) < const Duration(days: 7);
+    final soft = c.textPrimary.withValues(alpha: .72);
+    final content = <Widget>[
+      // Coche dans une goutte verte qui ondule.
+      Center(
+        child: Container(
+          width: 84,
+          height: 84,
+          decoration: const BoxDecoration(shape: BoxShape.circle, color: Color.fromRGBO(74, 222, 155, .14)),
+          child: const ClipOval(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                LiquidFill(
+                  level: .62,
+                  amplitude: 5,
+                  front: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF7CF0B8), Color(0xFF2CC28A), Color(0xFF0E7F57)],
+                    stops: [0, .55, 1],
+                  ),
+                  back: Color.fromRGBO(44, 194, 138, .5),
+                ),
+                Center(child: TaraIcon(TaraIcons.check, size: 40, strokeWidth: 3.2, color: Colors.white)),
+              ],
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      Semantics(
+        header: true,
+        liveRegion: true,
+        child: Text(
+          l.trackDelivered,
+          textAlign: TextAlign.center,
+          style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 24),
+        ),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        headline,
+        textAlign: TextAlign.center,
+        style: TaraText.label.copyWith(color: soft, fontSize: 13),
+      ),
+      const SizedBox(height: 12),
+      GlassCard(
+        radius: 22,
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          children: [
+            _ProofThumb(photo: photo, size: 64),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                proof,
+                style: TaraText.small.copyWith(color: c.textPrimary.withValues(alpha: .75), fontSize: 12, height: 1.45),
+              ),
+            ),
+            const SizedBox(width: 6),
+            TaraLink(
+              label: l.receipt,
+              onPressed: onReceipt,
+              style: TaraText.small.copyWith(fontSize: 12, fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 12),
+      if (rating != null)
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color.fromRGBO(74, 222, 155, .12),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color.fromRGBO(74, 222, 155, .4)),
+          ),
+          child: Column(
+            children: [
+              StarRating(value: rating.score, onChanged: null, labelOf: l.starsLabel, size: 22),
+              const SizedBox(height: 6),
+              Text(
+                l.rateThanks,
+                textAlign: TextAlign.center,
+                style: TaraText.text.copyWith(color: c.textPrimary, fontSize: 15, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l.rateThanksBody,
+                textAlign: TextAlign.center,
+                style: TaraText.label.copyWith(color: c.textPrimary.withValues(alpha: .75), fontSize: 13),
+              ),
+            ],
+          ),
+        )
+      else if (canRate) ...[
+        Text(
+          l.rateTitle,
+          textAlign: TextAlign.center,
+          style: TaraText.text.copyWith(color: c.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          l.rateBody(o.rider!.name),
+          textAlign: TextAlign.center,
+          style: TaraText.label.copyWith(color: c.textPrimary.withValues(alpha: .7), fontSize: 13),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: StarRating(value: stars, onChanged: busy ? null : onStars, labelOf: l.starsLabel),
+        ),
+        const SizedBox(height: 12),
+        BoxedField(
+          label: l.rateCommentHint,
+          controller: comment,
+          textCapitalization: TextCapitalization.sentences,
+          textInputAction: TextInputAction.done,
+          inputFormatters: [LengthLimitingTextInputFormatter(300)],
+        ),
+      ],
+      if (error != null) ...[const SizedBox(height: 8), ErrorLine(error!)],
+    ];
+    if (!canRate) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(20, 36, 20, 20 + MediaQuery.paddingOf(context).bottom),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: content),
+      );
+    }
+    return ScrollWithFooter(
+      horizontal: 20,
+      top: 36,
+      content: content,
+      footer: PrimaryButton(label: l.rateSend, loading: busy, onPressed: stars == 0 || busy ? null : onRate),
+    );
+  }
+}
+
+/// Livraison impossible (maquette) : minutes restantes pour choisir, preuve du livreur
+/// (photo du lieu, appels), nouvelle tentative ou retour, chaque choix avec ses frais.
+class _DecidePage extends StatelessWidget {
+  const _DecidePage({
+    required this.order,
+    required this.now,
+    required this.photo,
+    required this.choice,
+    required this.busy,
+    required this.error,
+    required this.onChoose,
+    required this.onDecide,
+    required this.topUp,
+    required this.onCallRecipient,
+  });
+
+  final TrackedOrder order;
+  final DateTime now;
+  final Uint8List? photo;
+  final String? choice;
+  final bool busy;
+  final String? error;
+  final ValueChanged<String> onChoose;
+  final VoidCallback onDecide;
+
+  /// Recharge demandée avant la nouvelle tentative (solde insuffisant).
+  final _TopUpState? topUp;
+
+  /// Appeler le destinataire avant de choisir (convenir d'un moment pour la tentative).
+  final VoidCallback onCallRecipient;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final o = order;
+    final failure = o.failure;
+    final riderName = o.rider?.name ?? '';
+    final recipientFirst = o.recipientName.trim().split(RegExp(r'\s+')).first;
+    final due = failure?.decisionDueAt;
+    final left = due?.difference(now);
+    final minutes = left == null ? null : math.max(0, (left.inSeconds / 60).ceil());
+    final total = due == null || failure == null ? null : due.difference(failure.at);
+    final level = left == null || total == null || total.inSeconds <= 0
+        ? 1.0
+        : (left.inSeconds / total.inSeconds).clamp(0.0, 1.0);
+    final detail = failure == null
+        ? ''
+        : [
+            if (failure.hasPhoto)
+              l.failurePlacePhoto(formatClock(failure.at))
+            else
+              l.failureReportedAt(formatClock(failure.at)),
+            if (failure.calls > 0) l.failureCalls(failure.calls),
+          ].join(' · ');
+    final content = <Widget>[
+      Row(
+        children: [
+          // Compte à rebours : la goutte se vide jusqu'au retour automatique.
+          Semantics(
+            label: minutes == null ? null : l.failureMinutesLeft(minutes),
+            excludeSemantics: true,
+            child: Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color.fromRGBO(255, 138, 61, .5), width: 3),
+              ),
+              child: ClipOval(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    LiquidFill(
+                      level: level,
+                      amplitude: 5,
+                      front: const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red],
+                        stops: [0, .18, .5],
+                      ),
+                      back: const Color.fromRGBO(255, 61, 0, .5),
+                    ),
+                    if (minutes != null)
+                      Center(
+                        child: Text(
+                          '$minutes′',
+                          style: TaraText.text.copyWith(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            shadows: const [
+                              Shadow(color: Color.fromRGBO(0, 0, 0, .4), blurRadius: 4, offset: Offset(0, 1)),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(
+                  header: true,
+                  liveRegion: true,
+                  child: Text(l.trackFailed, style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 19)),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  minutes == null ? l.failureDueBody : l.failureCountdown(minutes),
+                  style: TaraText.label.copyWith(
+                    color: c.textPrimary.withValues(alpha: .74),
+                    fontSize: 13,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      if (failure != null)
+        GlassCard(
+          radius: 22,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              _ProofThumb(photo: photo, size: 56),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _Panel._reason(l, failure.reason),
+                      style: TaraText.label.copyWith(color: c.textPrimary, fontSize: 13, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      detail,
+                      style: TaraText.small.copyWith(color: c.textPrimary.withValues(alpha: .66), fontSize: 12),
+                    ),
+                    if (failure.note?.isNotEmpty ?? false) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        l.riderNoteQuoted(failure.note!),
+                        style: TaraText.small.copyWith(color: c.textPrimary, fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              GlassIconButton(
+                icon: TaraIcons.phone,
+                label: l.callRecipient(recipientFirst),
+                onPressed: onCallRecipient,
+              ),
+            ],
+          ),
+        ),
+      const SizedBox(height: 12),
+      if (topUp != null)
+        _TopUpCard(state: topUp!)
+      else ...[
+        // Une seule nouvelle tentative (E6) ; chaque choix annonce ses frais.
+        if (failure?.retryAllowed ?? true)
+          AddressChoice(
+            icon: TaraIcons.refresh,
+            title: o.retryFee > 0 ? '${l.failureRetryTitle} · ${formatAmount(o.retryFee)} F' : l.failureRetryTitle,
+            subtitle: l.failureRetryBody(riderName, recipientFirst),
+            selected: choice == 'RETRY',
+            onTap: () => onChoose('RETRY'),
+          )
+        else
+          TintBox(
+            tone: TintTone.accent,
+            child: Text(l.retryUsed, style: TaraText.label.copyWith(color: c.textPrimary)),
+          ),
+        const SizedBox(height: 12),
+        AddressChoice(
+          icon: TaraIcons.returnArrow,
+          title: o.returnFee > 0 ? '${l.failureReturnTitle} · ${formatAmount(o.returnFee)} F' : l.failureReturnTitle,
+          subtitle: l.failureReturnBody(riderName, o.pickup.summary),
+          selected: choice == 'RETURN',
+          onTap: () => onChoose('RETURN'),
+        ),
+        if (failure?.retryAllowed ?? true) ...[
+          const SizedBox(height: 12),
+          Text(
+            l.failureOnceNote,
+            style: TaraText.small.copyWith(color: c.textPrimary.withValues(alpha: .62), fontSize: 12, height: 1.45),
+          ),
+        ],
+      ],
+      if (error != null) ...[const SizedBox(height: 8), ErrorLine(error!)],
+    ];
+    final state = topUp;
+    return ScrollWithFooter(
+      horizontal: 20,
+      top: 30,
+      content: content,
+      footer: state != null
+          ? PrimaryButton(
+              label: l.topUpPay('${formatAmount(state.amount)} F'),
+              icon: TaraIcons.phone,
+              loading: busy || state.pending,
+              onPressed: busy || state.pending ? null : state.onPay,
+            )
+          : PrimaryButton(
+              label: switch (choice) {
+                'RETRY' => l.failureGoRetry,
+                'RETURN' => l.failureGoReturn,
+                _ => l.failureChoose,
+              },
+              loading: busy,
+              onPressed: choice == null || busy ? null : onDecide,
+            ),
+    );
+  }
+}
+
+/// Code de retour (maquette) : à donner au livreur quand il rend le colis.
+class _ReturnCodeCard extends StatelessWidget {
+  const _ReturnCodeCard({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final spaced = code.split('').join(' ');
+    return Semantics(
+      label: '${l.returnCodeTitle} : $spaced. ${l.returnCodeGive}',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        decoration: BoxDecoration(
+          color: boxedFieldFill(c),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: boxedFieldBorder(c)),
+          boxShadow: const [BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 28, offset: Offset(0, 12))],
+        ),
+        child: Column(
+          children: [
+            Text(
+              l.returnCodeTitle.toUpperCase(),
+              style: TaraText.small.copyWith(
+                color: c.accentText,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: .66,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(spaced, style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 34, letterSpacing: 10)),
+            const SizedBox(height: 6),
+            Text(
+              l.returnCodeGive,
+              textAlign: TextAlign.center,
+              style: TaraText.small.copyWith(color: c.textPrimary.withValues(alpha: .7), fontSize: 12, height: 1.4),
+            ),
+          ],
+        ),
       ),
     );
   }

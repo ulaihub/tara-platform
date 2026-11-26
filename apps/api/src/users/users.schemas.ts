@@ -47,6 +47,16 @@ export const MeDto = z
   })
   .meta({ id: 'Me' });
 
+/** Chiffres du profil (maquette) : livraisons réussies et part réussie sur les terminées. */
+export const MeStatsDto = z
+  .object({
+    delivered: z.int(),
+    /** Livrées sur livrées + retournées, en % ; null avant la première course terminée. */
+    successRate: z.int().nullable(),
+    memberSince: z.iso.datetime(),
+  })
+  .meta({ id: 'MeStats' });
+
 export const UpdateMeBody = z
   .object({
     fullName: z.string().trim().min(2).max(80).optional(),

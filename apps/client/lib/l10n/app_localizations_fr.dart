@@ -1555,7 +1555,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String trackDeliveredBody(String recipient, String time) {
-    return 'Remis à $recipient à $time.';
+    return 'Remis à $recipient à $time';
   }
 
   @override
@@ -1702,7 +1702,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get failureReturnTitle => 'Retour du colis';
+  String get failureReturnTitle => 'Retour au point d’enlèvement';
 
   @override
   String failureReturnBody(String rider, String place) {
@@ -3294,4 +3294,115 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get introAccountsSwipe => 'Glissez pour changer de compte';
+
+  @override
+  String trackHeaderDelivered(String reference) {
+    return '$reference · livré';
+  }
+
+  @override
+  String trackHeaderDeciding(String reference) {
+    return '$reference · à décider';
+  }
+
+  @override
+  String trackHeaderReturning(String reference) {
+    return '$reference · retour';
+  }
+
+  @override
+  String deliveredCollectedForYou(String amount) {
+    return '$amount encaissés pour vous';
+  }
+
+  @override
+  String deliveredProofCode(String time) {
+    return 'Photo de remise · code du destinataire vérifié à $time.';
+  }
+
+  @override
+  String deliveredProofPhoto(String time) {
+    return 'Photo de remise prise à $time.';
+  }
+
+  @override
+  String deliveredCodeOnly(String time) {
+    return 'Code du destinataire vérifié à $time.';
+  }
+
+  @override
+  String deliveredBySupport(String time) {
+    return 'Remise validée par le service client à $time.';
+  }
+
+  @override
+  String get receipt => 'Reçu';
+
+  @override
+  String get proofPhotoLabel => 'Photo prise par le livreur';
+
+  @override
+  String failureCountdown(int minutes) {
+    return 'Choisissez la suite. Sans réponse dans $minutes min, le colis vous est rapporté.';
+  }
+
+  @override
+  String failureMinutesLeft(int minutes) {
+    return '$minutes minutes pour choisir';
+  }
+
+  @override
+  String failurePlacePhoto(String time) {
+    return 'Photo du lieu à $time';
+  }
+
+  @override
+  String failureReportedAt(String time) {
+    return 'Signalé à $time';
+  }
+
+  @override
+  String failureCalls(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count appels sans réponse',
+      one: '1 appel sans réponse',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failureOnceNote =>
+      'Une seule nouvelle tentative est possible : ensuite, le colis vous est rapporté. Les frais ont été fixés à la commande.';
+
+  @override
+  String get failureGoRetry => 'Relancer la livraison';
+
+  @override
+  String get failureGoReturn => 'Faire revenir le colis';
+
+  @override
+  String get returnCodeTitle => 'Code de retour';
+
+  @override
+  String get returnCodeGive =>
+      'Quand le livreur vous rend le colis, donnez-lui ce code : c’est la preuve que vous l’avez bien récupéré.';
+
+  @override
+  String get profileStatDelivered => 'livraisons';
+
+  @override
+  String get profileStatSuccess => 'réussies';
+
+  @override
+  String get profileStatSince => 'sur Tara depuis';
+
+  @override
+  String profileStatsLabel(int count, String rate, String since) {
+    return '$count livraisons, $rate réussies, sur Tara depuis $since';
+  }
+
+  @override
+  String get profileReplayIntro => 'Revoir la présentation';
 }

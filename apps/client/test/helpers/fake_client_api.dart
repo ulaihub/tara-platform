@@ -14,6 +14,19 @@ class FakeClientApi extends ClientApi {
 
   final names = <String>[];
 
+  /// Chiffres du profil.
+  MeStats stats = MeStats(delivered: 312, successRate: 96, memberSince: DateTime(2026, 3, 4));
+
+  @override
+  Future<MeStats> meStats() async => stats;
+
+  /// Photo de preuve (remise, lieu de l'échec) ; aucune par défaut.
+  Uint8List? proof;
+
+  @override
+  Future<Uint8List> proofPhoto(String orderId) async =>
+      proof ?? (throw const ApiException(code: 'MEDIA_NOT_FOUND', message: 'Pas de photo', status: 404));
+
   /// Commandes en cours (accueil) et portefeuille renvoyés.
   List<OrderSummary> active = [];
   List<OrderSummary> history = [];
@@ -493,7 +506,10 @@ class FakeClientApi extends ClientApi {
   @override
   Future<OrderRating> rateRider(String orderId, {required int score, String? comment}) async {
     ratings.add((orderId, score, comment));
-    return OrderRating(score: score, comment: comment, at: DateTime(2026, 11, 4, 10, 40));
+    final given = OrderRating(score: score, comment: comment, at: DateTime(2026, 11, 4, 10, 40));
+    // Comme le serveur : la commande relue porte la note.
+    if (tracked[orderId] case final order?) tracked[orderId] = order.withRating(given);
+    return given;
   }
 
   /// Choix après un échec : (commande, RETRY ou RETURN).
