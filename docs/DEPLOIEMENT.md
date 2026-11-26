@@ -83,6 +83,10 @@ Moins chers que le SMS. Le SMS reste en secours : numéro sans WhatsApp, échec 
 
 Les téléphones de test (`tara testeur`) restent au SMS gardé sur le serveur.
 
+**Vérifier que les codes arrivent vraiment** : demander un code dans l'app avec un vrai numéro (pas un téléphone de test), puis lancer `tara whatsapp`. La colonne « whatsapp » donne la réponse de Meta : « remis » (le téléphone l'a reçu), « envoyé, pas encore remis », ou « échec » avec le motif ; la colonne « secours » indique si le SMS est parti.
+
+Le code part aussi par SMS, automatiquement, quand WhatsApp le refuse, quand Meta signale un échec, ou quand Meta n'a pas confirmé la remise au bout de 45 secondes. Sans le webhook de l'étape 4, Meta ne confirme jamais rien : chaque code partirait alors aussi par SMS (payant). Si `tara whatsapp` n'affiche jamais « remis », vérifier le webhook chez Meta.
+
 ## Téléphones de test sans crédit SMS
 
 En essai, Twilio n'envoie qu'aux numéros vérifiés, et refuse de vérifier un numéro camerounais par SMS. Pour tester quand même, déclarer les téléphones de test sur le serveur : leurs SMS (code de connexion, code de livraison, lien de suivi…) ne partent pas chez l'opérateur, ils restent 24 h sur le serveur.
@@ -108,6 +112,7 @@ Ne jamais y mettre le numéro d'un vrai client : il ne recevrait plus aucun SMS.
 | `tara backup`              | sauvegarde immédiate (automatique chaque nuit)                                        |
 | `tara apk`                 | reconstruit les apps après une mise à jour                                            |
 | `tara testeur`             | téléphones de test (voir plus haut)                                                   |
+| `tara whatsapp`            | derniers messages WhatsApp : remis ou non, SMS de secours (voir plus haut)            |
 | `tara sms`                 | derniers SMS des téléphones de test                                                   |
 | `tara paiements`           | derniers paiements et motif d'un échec (réponse du prestataire, sans numéro)          |
 | `tara connexions [numéro]` | derniers codes de connexion demandés, codes faux, numéro bloqué ou non                |

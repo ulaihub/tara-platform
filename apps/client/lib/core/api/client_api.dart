@@ -24,6 +24,16 @@ class ClientApi {
   /// Solde Tara de l'expéditeur et, pour un marchand, ventes encaissées à reverser.
   Future<Wallet> wallet() async => Wallet.fromJson(await _api.get('/me/wallet') as Json);
 
+  /// Cloche : notifications récentes et nombre de non lues.
+  Future<Inbox> inbox() async => Inbox.fromJson(await _api.get('/me/notifications') as Json);
+
+  /// Notifications ouvertes ([ids]) ou « Tout lire » : plus de pastille sur la cloche.
+  Future<void> readInbox({List<String>? ids}) => _api.post('/me/notifications/read', body: {'ids': ?ids});
+
+  /// « Mon activité » de la boutique : day, week ou month.
+  Future<MerchantActivity> merchantActivity(String period) async =>
+      MerchantActivity.fromJson(await _api.get('/me/merchant/activity', query: {'period': period}) as Json);
+
   /// Adresses enregistrées de l'expéditeur (enlèvement), la plus récente d'abord.
   Future<List<Address>> addresses() async => [
     for (final item in await _api.get('/addresses') as List<Object?>) Address.fromJson(item! as Json),

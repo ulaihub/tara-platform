@@ -38,7 +38,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String codeSentTo(String phone) {
-    return 'Envoyé par SMS au $phone';
+    return 'Code envoyé par SMS au $phone';
+  }
+
+  @override
+  String get codeAutoReading => 'Lecture automatique du code…';
+
+  @override
+  String resendShort(String time) {
+    return 'Renvoyer dans $time';
+  }
+
+  @override
+  String get resendCode => 'Renvoyer le code';
+
+  @override
+  String smsAvailableIn(String time) {
+    return 'Vous pourrez demander le SMS dans $time.';
   }
 
   @override
@@ -46,6 +62,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get continueLabel => 'Continuer';
+
+  @override
+  String get countryLabel => 'Pays';
 
   @override
   String countryCodeLabel(String code) {
@@ -175,7 +194,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signInBody =>
-      'Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code par SMS.';
+      'Connectez-vous avec votre numéro, ou créez votre compte. Nous vous envoyons un code sur WhatsApp ou par SMS.';
 
   @override
   String get signInTitle => 'Vos colis livrés à Douala';
@@ -190,6 +209,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get welcomeBody => 'Votre nom figure dans les messages envoyés à vos destinataires.';
 
   @override
+  String get welcomeKicker => 'Nouveau compte';
+
+  @override
+  String get yourName => 'Votre nom';
+
+  @override
+  String get yourNameHint => 'Ex. Awa Ngono';
+
+  @override
+  String get shopNameLabel => 'Nom de votre boutique';
+
+  @override
+  String get payoutReceives => 'Il reçoit vos ventes encaissées';
+
+  @override
   String get welcomeTitle => 'Bienvenue sur Tara';
 
   @override
@@ -197,6 +231,144 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get goodMorning => 'Bonjour,';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String notificationsUnread(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count nouvelles', one: '1 nouvelle');
+    return 'Notifications, $_temp0';
+  }
+
+  @override
+  String unreadCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count non lues', one: '1 non lue');
+    return '$_temp0';
+  }
+
+  @override
+  String get unreadLabel => 'Non lue';
+
+  @override
+  String get allRead => 'Tout est lu';
+
+  @override
+  String get readAll => 'Tout lire';
+
+  @override
+  String get noNotifications => 'Rien de nouveau. Vos livraisons, paiements et adresses reçues s’afficheront ici.';
+
+  @override
+  String get notificationsError => 'Impossible de charger les notifications.';
+
+  @override
+  String get justNow => 'à l’instant';
+
+  @override
+  String minutesAgo(int minutes) {
+    return 'il y a $minutes min';
+  }
+
+  @override
+  String yesterdayAt(String time) {
+    return 'hier $time';
+  }
+
+  @override
+  String get quickActivity => 'Activité';
+
+  @override
+  String get activityTitle => 'Mon activité';
+
+  @override
+  String get activityToday => 'aujourd’hui';
+
+  @override
+  String get activityThisWeek => 'cette semaine';
+
+  @override
+  String get activityThisMonth => 'ce mois-ci';
+
+  @override
+  String get activityPeriod => 'Période';
+
+  @override
+  String get periodDay => 'Jour';
+
+  @override
+  String get periodWeek => 'Semaine';
+
+  @override
+  String get periodMonth => 'Mois';
+
+  @override
+  String get activityError => 'Impossible de charger votre activité.';
+
+  @override
+  String get kpiDeliveries => 'Livraisons';
+
+  @override
+  String get kpiCollected => 'Encaissé';
+
+  @override
+  String get kpiSuccess => 'Réussite';
+
+  @override
+  String pointsShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count pts', one: '1 pt');
+    return '$_temp0';
+  }
+
+  @override
+  String get topZones => 'Quartiers les plus livrés';
+
+  @override
+  String averageDelay(String delay) {
+    return 'Délai moyen $delay';
+  }
+
+  @override
+  String get noZonesYet => 'Pas encore de livraison sur cette période.';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String hoursMinutes(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String get chartSales => 'Ventes encaissées';
+
+  @override
+  String get legendSales => 'Ventes';
+
+  @override
+  String get legendDeliveries => 'Livraisons';
+
+  @override
+  String hourShort(int hour) {
+    return '${hour}h';
+  }
+
+  @override
+  String hourLong(int hour) {
+    return '$hour h';
+  }
+
+  @override
+  String weekShort(int number) {
+    return 'Sem. $number';
+  }
+
+  @override
+  String daysRange(int from, int to, String month) {
+    return '$from au $to $month';
+  }
 
   @override
   String get goodEvening => 'Bonsoir,';
@@ -339,6 +511,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get statusFailed => 'Livraison impossible · à décider';
+
+  @override
+  String get statusRiderComingYou => 'Livreur en route vers vous';
+
+  @override
+  String get statusRiderComingShop => 'Livreur en route vers votre boutique';
+
+  @override
+  String statusRiderArriving(String name) {
+    return '$name arrive';
+  }
+
+  @override
+  String get statusFailedYouDecide => 'Livraison impossible · à vous de décider';
+
+  @override
+  String etaMinutes(int minutes) {
+    return '$minutes min';
+  }
 
   @override
   String todayAt(String time) {
@@ -540,6 +731,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get newAddress => 'Nouvelle adresse';
 
   @override
+  String get newAddressOnMap => 'Nouvelle adresse sur la carte';
+
+  @override
   String get pickupRequired => 'Choisissez ou ajoutez l’adresse d’enlèvement.';
 
   @override
@@ -554,6 +748,18 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get pinHint =>
       'Faites glisser la carte : l’épingle au centre marque l’entrée exacte. Le quartier s’affiche dès qu’elle est posée.';
+
+  @override
+  String get pinHintShort => 'Faites glisser la carte : l’épingle au centre marque l’entrée exacte.';
+
+  @override
+  String get placePointTitle => 'Placer le point';
+
+  @override
+  String get landmarkForRider => 'Repère pour le livreur';
+
+  @override
+  String get validatePoint => 'Valider ce point';
 
   @override
   String get pinPlaced => 'Point placé';
@@ -637,6 +843,46 @@ class AppLocalizationsFr extends AppLocalizations {
   String get askRecipientBody => 'Il reçoit un lien et place lui-même son point sur la carte.';
 
   @override
+  String get pickFromContacts => 'Choisir dans mes contacts';
+
+  @override
+  String get whereToDeliverQ => 'Où livrer ?';
+
+  @override
+  String get knownAddress => 'Adresse déjà connue';
+
+  @override
+  String lastDeliveryTo(String name, String when) {
+    return 'Dernière livraison à $name : $when';
+  }
+
+  @override
+  String daysAgo(int days) {
+    return 'il y a $days jours';
+  }
+
+  @override
+  String get placePointOnMap => 'Placer le point sur la carte';
+
+  @override
+  String get placePointOnMapBody => 'Vous connaissez l’endroit';
+
+  @override
+  String get askRecipientShort => 'Il reçoit un lien et place lui-même son point';
+
+  @override
+  String get placedByYou => 'Placée par vous';
+
+  @override
+  String get withPhotoAndVoice => 'photo et note vocale';
+
+  @override
+  String get withPhoto => 'photo de la façade';
+
+  @override
+  String get withVoice => 'note vocale';
+
+  @override
   String get viaWhatsapp => 'WhatsApp';
 
   @override
@@ -668,6 +914,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get addressVerified => 'Adresse confirmée par une livraison';
+
+  @override
+  String get addressVerifiedShort => 'confirmée par une livraison ✓';
 
   @override
   String get addressFromRecipient => 'Placée par le destinataire';
@@ -735,7 +984,15 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String parcelSize(String size) {
+    return 'Colis $size';
+  }
+
+  @override
   String get contentsLabel => 'Nature du contenu';
+
+  @override
+  String get contentsShortLabel => 'Nature';
 
   @override
   String get contentsDocuments => 'Documents';
@@ -833,10 +1090,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sizeBulky => 'Gros objet';
 
   @override
+  String get sizeBulkyShort => 'Gros';
+
+  @override
+  String get sizeBulkyVehicle => 'tricycle';
+
+  @override
   String get sizeBulkyBody => 'Frigo, cuisinière, matelas, meuble · livré en tricycle';
 
   @override
-  String get sizeHelpBulky => 'Trop grand ou trop lourd pour une moto. Tarif tricycle, affiché avant de commander.';
+  String get sizeHelpBulky =>
+      'Frigo, cuisinière, matelas, meuble : livré en tricycle. Tarif affiché avant de commander.';
 
   @override
   String get loadingHelpTitle => 'Aide pour charger';
@@ -875,6 +1139,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get valueHelp =>
       'En FCFA. Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte ou de dommage : gratuit jusqu’à 25 000 F, puis 1 % de la valeur au-delà.';
+
+  @override
+  String get valueHelpShort => 'Jamais montrée au livreur. Fixe ce que Tara vous rembourse en cas de perte.';
+
+  @override
+  String guaranteeFree(String amount) {
+    return 'Garantie offerte jusqu’à $amount de valeur.';
+  }
 
   @override
   String valueFeeHint(String amount) {
@@ -930,6 +1202,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dayTomorrow => 'Demain';
+
+  @override
+  String get dayTodayShort => 'Auj.';
+
+  @override
+  String get dayTomorrowShort => 'Dem.';
 
   @override
   String dateAt(String date, String time) {
@@ -1050,6 +1328,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get totalLabel => 'Total';
 
   @override
+  String get courseFreeCover => 'Course · garantie offerte';
+
+  @override
   String get quoting => 'Calcul du prix…';
 
   @override
@@ -1079,6 +1360,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recipientPaysBody => 'Le destinataire paie la course à la livraison, en espèces ou par Mobile Money.';
 
   @override
+  String codToCollectFrom(String name) {
+    return 'À encaisser auprès de $name';
+  }
+
+  @override
+  String get codPaidToSales => 'Reversé sur vos ventes';
+
+  @override
   String get paymentLabel => 'Moyen de paiement';
 
   @override
@@ -1086,6 +1375,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payOrange => 'Orange Money';
+
+  @override
+  String get mobileMoney => 'Mobile Money';
 
   @override
   String get payMomoBody => 'Vous validez le paiement sur votre téléphone.';
@@ -1140,6 +1432,22 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String payingBodyOperator(String amount, String phone, String operator) {
+    return 'Une demande de $amount arrive sur le $phone : entrez votre code secret $operator pour la valider. La recherche d’un livreur démarre juste après.';
+  }
+
+  @override
+  String get paymentFailedBody => 'Paiement refusé, annulé ou expiré. Réessayez, ou annulez la livraison.';
+
+  @override
+  String payerPhoneHelp(String operator) {
+    return 'La demande de paiement part vers ce numéro $operator.';
+  }
+
+  @override
+  String get cancelDelivery => 'Annuler la livraison';
+
+  @override
   String get paymentFailed => 'Le paiement n’a pas abouti.';
 
   @override
@@ -1159,6 +1467,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pickupCodeLabel => 'Code d’enlèvement';
+
+  @override
+  String get pickupCodeDictate => 'Dictez ces 4 chiffres au livreur à son arrivée.';
 
   @override
   String get pickupCodeHelp => 'Donnez-le au livreur quand il récupère le colis. Notez-le : il ne sera plus affiché.';
@@ -1304,9 +1615,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String pickupCodeShown(String code) {
     return 'Code d’enlèvement : $code';
   }
-
-  @override
-  String get cancelDelivery => 'Annuler la livraison';
 
   @override
   String get cancelConfirm => 'Touchez encore pour confirmer l’annulation.';
@@ -1572,7 +1880,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get termsUpdateIntro =>
-      'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous suivez vos livraisons en cours mais ne pouvez plus en commander de nouvelles.';
+      'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vos livraisons en cours continuent, mais vous ne pourrez pas en commander de nouvelles.';
+
+  @override
+  String get termsSignupKicker => 'Avant de commencer';
+
+  @override
+  String termsReadPercent(int percent) {
+    return 'Lu à $percent%';
+  }
 
   @override
   String get termsLater => 'Plus tard';
@@ -1581,7 +1897,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get termsEnd => 'Vous êtes arrivé au bout des textes.';
 
   @override
-  String get termsScrollFirst => 'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.';
+  String get termsScrollFirst => 'Faites défiler jusqu’en bas pour pouvoir accepter.';
 
   @override
   String get termsCheckPrefix => 'J’ai lu et j’accepte les ';
@@ -1971,6 +2287,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get voiceNoteHint => '30 secondes pour expliquer le chemin, dans la langue de votre choix.';
+
+  @override
+  String get voiceNoteRecord => 'Enregistrer une note vocale';
+
+  @override
+  String voiceNoteLength(String length) {
+    return 'Note vocale · $length';
+  }
+
+  @override
+  String get removePhoto => 'Retirer la photo';
+
+  @override
+  String get removeNote => 'Retirer la note';
 
   @override
   String get recordNote => 'Enregistrer';
@@ -2854,4 +3184,114 @@ class AppLocalizationsFr extends AppLocalizations {
   String landmarkUseNear(String name) {
     return 'Près de $name ?';
   }
+
+  @override
+  String get introBack => 'Écran précédent';
+
+  @override
+  String get introSkip => 'Passer';
+
+  @override
+  String get introNext => 'Suivant';
+
+  @override
+  String get introStart => 'Commencer';
+
+  @override
+  String get introSendKicker => 'Livraison à la demande · Douala';
+
+  @override
+  String get introSendTitle => 'Envoyez un colis en une minute';
+
+  @override
+  String get introSendBody => 'Un livreur vient le chercher chez vous et le livre partout dans Douala.';
+
+  @override
+  String get introSendChip => '1 minute pour commander';
+
+  @override
+  String get introSendFrom => 'Boutique Awa';
+
+  @override
+  String get introSendFromAddress => 'Bd de la Liberté, Akwa';
+
+  @override
+  String get introSendTo => 'Marie · Collège des Nations';
+
+  @override
+  String get introSendDelivered => 'livrée en 38 min';
+
+  @override
+  String get introTrackKicker => 'Suivi en direct';
+
+  @override
+  String get introTrackTitle => 'Suivez votre colis jusqu\'à la porte';
+
+  @override
+  String get introTrackBody => 'Vous voyez le livreur avancer. Votre client reçoit un lien pour le suivre aussi.';
+
+  @override
+  String get introTrackRider => 'Jean M. arrive';
+
+  @override
+  String get introTrackPlate => 'Moto · LT 482 KA';
+
+  @override
+  String get introTrackEta => '4 min';
+
+  @override
+  String get introCollectKicker => 'Paiement à la livraison';
+
+  @override
+  String get introCollectTitle => 'Le livreur encaisse pour vous';
+
+  @override
+  String get introCollectBody =>
+      'En espèces ou par Mobile Money. Vos ventes s\'ajoutent à votre compte et vous sont reversées sur votre Mobile Money.';
+
+  @override
+  String get introCollectDoor => 'À la porte · TR-48211';
+
+  @override
+  String get introCollectRecipient => 'Marie Ngo · Collège des Nations';
+
+  @override
+  String get introCollectAmount => '15 000 F';
+
+  @override
+  String get introCollectCash => 'Espèces';
+
+  @override
+  String get introCollectMomo => 'Mobile Money';
+
+  @override
+  String get introCollectFooter => '+15 000 F · à l\'instant';
+
+  @override
+  String get introSalesLabel => 'Ventes à recevoir';
+
+  @override
+  String get introAccountsKicker => 'Votre argent';
+
+  @override
+  String get introAccountsTitle => 'Deux comptes, d\'un coup d\'œil';
+
+  @override
+  String get introAccountsBody =>
+      'Vos ventes à recevoir et votre Solde Tara, qui paie vos livraisons. Tout est masqué tant que vous ne l\'affichez pas.';
+
+  @override
+  String get introAccountsShopTag => 'Boutique';
+
+  @override
+  String get introAccountsSalesFooter => 'Reversées ce soir à 18 h';
+
+  @override
+  String get introAccountsTaraLabel => 'Solde Tara';
+
+  @override
+  String get introAccountsTaraFooter => 'Paie vos livraisons en premier';
+
+  @override
+  String get introAccountsSwipe => 'Glissez pour changer de compte';
 }

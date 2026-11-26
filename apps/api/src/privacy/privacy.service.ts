@@ -368,6 +368,8 @@ export class PrivacyService {
     await tx.$executeRaw`
       UPDATE notifications SET recipient_phone = NULL
        WHERE order_id IN (SELECT id FROM orders WHERE sender_id = ${userId}::uuid)`;
+    // Cloche de l'app : noms des destinataires et montants, rien à garder.
+    await tx.inboxItem.deleteMany({ where: { userId } });
     await tx.mediaFile.deleteMany({ where: { id: { in: media.map((m) => m.id) } } });
     return media.map((m) => m.storageKey);
   }

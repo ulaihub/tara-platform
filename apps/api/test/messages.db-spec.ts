@@ -1,7 +1,19 @@
 import request from 'supertest';
 import { type FakePushProvider, PUSH_PROVIDER } from '../src/notifications/push.provider.js';
-import { createTestApp, type SignedIn, signIn, staffUser, type TestContext } from './helpers/app.js';
-import { merchant, nearAkwa, placeOrder, setupDouala, type TestMerchant } from './helpers/orders.js';
+import {
+  createTestApp,
+  type SignedIn,
+  signIn,
+  staffUser,
+  type TestContext,
+} from './helpers/app.js';
+import {
+  merchant,
+  nearAkwa,
+  placeOrder,
+  setupDouala,
+  type TestMerchant,
+} from './helpers/orders.js';
 import { activeRider, goOnline, resetPresence, type TestRider } from './helpers/riders.js';
 
 describe('Livreur trouvé : qui il est, et messages avec l’expéditeur', () => {
@@ -60,7 +72,17 @@ describe('Livreur trouvé : qui il est, et messages avec l’expéditeur', () =>
       vehicleColor: 'RED',
       plateNumber: 'LT 456 CC',
       hasPhoto: true,
+      // Moins de 3 notes : pas de moyenne affichée.
+      rating: null,
     });
+    // Plaque partagée avec d'anciens jeux de test : le livreur de cette course.
+    const { riderId } = await ctx.prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+    await ctx.prisma.riderProfile.update({
+      where: { id: riderId! },
+      data: { ratingSum: 29, ratingCount: 6 },
+    });
+    const rated = await request(ctx.http).get(`/v1/orders/${orderId}`).set(shop.auth).expect(200);
+    expect(rated.body.rider).toMatchObject({ rating: 4.8 });
     // La photo n'est donnée qu'à l'expéditeur et à l'équipe.
     const stranger = await signIn(ctx);
     await request(ctx.http).get(`/v1/orders/${orderId}/rider-photo`).set(stranger.auth).expect(404);

@@ -4,6 +4,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/widgets.dart';
 
 import '../tara_colors.dart';
+import '../tara_effects.dart';
 import 'motion_clock.dart';
 
 /// Reflet qui balaie les boutons principaux (A4) : bande de 70 px inclinée de −20°, de
@@ -252,4 +253,44 @@ class Spin extends StatelessWidget {
     child: child,
     builder: (context, t, child) => Transform.rotate(angle: t * 2 * math.pi, child: child),
   );
+}
+
+/// Rebond au toucher (« finesse ») : l'élément s'enfonce légèrement quand le doigt se pose,
+/// puis revient avec un petit ressort. Sans animations (réglage du téléphone), il ne bouge
+/// pas. N'intercepte pas le geste : le bouton qu'il enveloppe reste seul à réagir.
+class Squish extends StatefulWidget {
+  const Squish({super.key, required this.child, this.enabled = true, this.depth = .95});
+
+  final Widget child;
+  final bool enabled;
+
+  /// Échelle au plus fort de l'appui.
+  final double depth;
+
+  @override
+  State<Squish> createState() => _SquishState();
+}
+
+class _SquishState extends State<Squish> {
+  bool _down = false;
+
+  void _set(bool down) {
+    if (_down != down && mounted) setState(() => _down = down);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled || !TaraEffects.of(context).decorativeMotion) return widget.child;
+    return Listener(
+      onPointerDown: (_) => _set(true),
+      onPointerUp: (_) => _set(false),
+      onPointerCancel: (_) => _set(false),
+      child: AnimatedScale(
+        scale: _down ? widget.depth : 1,
+        duration: _down ? const Duration(milliseconds: 90) : const Duration(milliseconds: 420),
+        curve: _down ? Curves.easeOut : Curves.elasticOut,
+        child: widget.child,
+      ),
+    );
+  }
 }

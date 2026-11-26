@@ -1661,13 +1661,21 @@ class AppLocalizationsFr extends AppLocalizations {
       'Lisez la nouvelle version jusqu’en bas, puis acceptez-la. Sans acceptation, vous terminez votre course en cours mais ne recevez plus de nouvelles courses.';
 
   @override
+  String get termsSignupKicker => 'Avant de commencer';
+
+  @override
+  String termsReadPercent(int percent) {
+    return 'Lu à $percent%';
+  }
+
+  @override
   String get termsLater => 'Plus tard';
 
   @override
   String get termsEnd => 'Vous êtes arrivé au bout des textes.';
 
   @override
-  String get termsScrollFirst => 'Faites défiler les textes jusqu’en bas pour pouvoir les accepter.';
+  String get termsScrollFirst => 'Faites défiler jusqu’en bas pour pouvoir accepter.';
 
   @override
   String get termsCheckPrefix => 'J’ai lu et j’accepte les ';
@@ -2465,4 +2473,76 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get chatNewMessage => 'Nouveau message de l\'expéditeur';
+
+  @override
+  String get introBack => 'Écran précédent';
+
+  @override
+  String get introSkip => 'Passer';
+
+  @override
+  String get introNext => 'Suivant';
+
+  @override
+  String get introStart => 'Commencer';
+
+  @override
+  String get introJobsKicker => 'Courses · Douala';
+
+  @override
+  String get introJobsTitle => 'Des courses près de vous';
+
+  @override
+  String get introJobsBody =>
+      'Vous voyez le trajet et le gain avant d\'accepter. Un glissement suffit pour prendre la course.';
+
+  @override
+  String get introJobsChip => '30 s pour répondre';
+
+  @override
+  String get introJobsOffer => 'Nouvelle course';
+
+  @override
+  String get introJobsEarning => '1 500 F';
+
+  @override
+  String get introJobsRoute => 'Akwa → Bonapriso · 4,2 km';
+
+  @override
+  String get introEarningsKicker => 'Vos gains';
+
+  @override
+  String get introEarningsTitle => 'Votre argent, chaque jour';
+
+  @override
+  String get introEarningsBody =>
+      'Chaque course livrée s\'ajoute à votre solde. Vous le retirez sur votre Mobile Money.';
+
+  @override
+  String get introEarningsChip => 'Retrait sur Mobile Money';
+
+  @override
+  String get introEarningsCard => 'Gains du jour';
+
+  @override
+  String get introEarningsFooter => '+1 050 F · course livrée';
+
+  @override
+  String get introSafetyKicker => 'Sécurité';
+
+  @override
+  String get introSafetyTitle => 'Jamais seul sur la route';
+
+  @override
+  String get introSafetyBody =>
+      'Un appui long sur SOS prévient l\'équipe Tara et votre proche. Pendant la course, l\'équipe voit où vous êtes.';
+
+  @override
+  String get introSafetyTeam => 'Équipe Tara prévenue';
+
+  @override
+  String get introSafetyContact => 'Votre proche reçoit un SMS';
+
+  @override
+  String get introSafetyPosition => 'Position partagée pendant la course';
 }

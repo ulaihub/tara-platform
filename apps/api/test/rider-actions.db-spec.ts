@@ -360,6 +360,12 @@ describe('Actions du livreur (E2 à E9)', () => {
       due: { fee: total, cod: 12_500, total: total + 12_500 },
       paymentPending: null,
     });
+    // Accueil de l'expéditeur : livreur nommé, pas encore d'heure d'arrivée.
+    const listed = async () =>
+      (
+        await request(ctx.http).get('/v1/orders?scope=active').set(shop.auth).expect(200)
+      ).body.items.find((item: { id: string }) => item.id === order.id);
+    expect(await listed()).toMatchObject({ riderName: before.body.rider.name, etaMinutes: null });
 
     // Colis à bord : numéro du livreur et heure estimée d'après sa dernière position.
     await pickUp(rider, order);
@@ -373,6 +379,8 @@ describe('Actions du livreur (E2 à E9)', () => {
     expect(coming.body.eta.minutes).toBeGreaterThanOrEqual(1);
     expect(coming.body.eta.progress).toBeGreaterThanOrEqual(0);
     expect(coming.body.eta.progress).toBeLessThanOrEqual(1);
+    // Même heure d'arrivée sur l'accueil de l'expéditeur.
+    expect(await listed()).toMatchObject({ etaMinutes: coming.body.eta.minutes });
 
     // Le livreur envoie la demande Mobile Money : la page invite à la valider.
     await request(ctx.http)
@@ -775,6 +783,7 @@ describe('Actions du livreur (E2 à E9)', () => {
         { code: 'ORANGE', name: 'Orange Money' },
       ],
       offerTimeoutSeconds: 30,
+      silentWithdrawSeconds: 180,
       mobileMoneyFeeBps: 0,
       waiting: {
         freeMinutes: 10,

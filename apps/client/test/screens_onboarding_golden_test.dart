@@ -40,7 +40,7 @@ const newAccount = Me(
 );
 
 Widget welcome({FakeClientApi? api}) => scoped(
-  WelcomeScreen(me: newAccount, onDone: () {}, onLogout: () {}),
+  WelcomeScreen(me: newAccount, onDone: () {}),
   api: api,
 );
 
@@ -61,15 +61,22 @@ void main() {
         variant,
         scoped(
           CodeScreen(
-            phone: '+237690123456',
-            challenge: challenge,
+            phone: '+237677123456',
+            // Maquette : code envoyé sur WhatsApp, lecture automatique en cours.
+            challenge: OtpChallenge(
+              challengeId: challenge.challengeId,
+              expiresAt: challenge.expiresAt,
+              resendAfterSeconds: 42,
+              channel: OtpChannel.whatsapp,
+              autoRead: true,
+            ),
             onBack: () {},
             onSignedIn: (_) {},
             onTermsRequired: (_, _) {},
           ),
         ),
       );
-      await tester.enterText(find.byType(EditableText).first, '4821');
+      await tester.enterText(find.byType(EditableText).first, '3710');
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(capture, matchesGoldenFile('goldens/02_code/${variant.name}.png'));
@@ -94,9 +101,6 @@ void main() {
 
     goldenTest('02 nouvelle version à accepter ${variant.name}', (tester) async {
       await pumpVariant(tester, variant, scoped(TermsScreen.update(onLater: () {}, onSigned: () {})));
-      await settle(tester);
-      await readToEnd(tester);
-      await tester.tap(find.byType(TaraCheckRow));
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(capture, matchesGoldenFile('goldens/02_conditions_nouvelle_version/${variant.name}.png'));
@@ -132,12 +136,12 @@ void main() {
   });
 
   for (final brightness in Brightness.values) {
-    goldenTest('03 bienvenue boutique complet ${brightness.name}', (tester) async {
-      await pumpVariant(tester, Variant(brightness, ScreenSize.regular, 1), welcome(), surface: const Size(390, 1500));
+    goldenTest('03 bienvenue boutique remplie ${brightness.name}', (tester) async {
+      await pumpVariant(tester, Variant(brightness, ScreenSize.regular, 1), welcome());
       await settle(tester);
       await tester.tap(find.text('Pour ma boutique'));
       await settle(tester);
-      await tester.tap(find.text('Ajouter RCCM et NIU (facultatif)'));
+      await tester.enterText(find.byType(EditableText).first, 'Awa Fashion');
       await settle(tester);
       expect(tester.takeException(), isNull);
       await expectLater(capture, matchesGoldenFile('goldens/03_bienvenue_boutique/complet_${brightness.name}.png'));
@@ -145,7 +149,7 @@ void main() {
   }
 }
 
-/// Fait défiler les textes jusqu'en bas : la case à cocher devient active.
+/// Fait défiler les textes des conditions jusqu'en bas.
 Future<void> readToEnd(WidgetTester tester) async {
   await tester.drag(find.byType(Scrollable).first, const Offset(0, -4000));
   await settle(tester);

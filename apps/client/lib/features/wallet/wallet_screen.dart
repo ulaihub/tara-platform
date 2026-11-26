@@ -130,7 +130,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   void _reveal(GlobalKey key) => WidgetsBinding.instance.addPostFrameCallback((_) {
     final target = key.currentContext;
     if (target == null || !target.mounted) return;
-    unawaited(Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 420), curve: Curves.easeOutCubic));
+    unawaited(
+      Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 420), curve: Curves.easeOutCubic),
+    );
   });
 
   static bool _canWithdraw(Wallet wallet) =>
@@ -268,7 +270,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 Expanded(
                   child: Semantics(
                     header: true,
-                    child: Text(l.walletTitle, style: TaraText.titleAccess.copyWith(color: c.textPrimary, fontSize: 28)),
+                    child: Text(
+                      l.walletTitle,
+                      style: TaraText.titleAccess.copyWith(color: c.textPrimary, fontSize: 28),
+                    ),
                   ),
                 ),
                 // Œil : afficher (après le code secret) ou masquer les soldes des cartes.
@@ -285,7 +290,11 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 ),
                 if (merchant) ...[
                   const SizedBox(width: 8),
-                  GlassIconButton(icon: TaraIcons.document, label: l.walletStatements, onPressed: () => _reveal(_statementsKey)),
+                  GlassIconButton(
+                    icon: TaraIcons.document,
+                    label: l.walletStatements,
+                    onPressed: () => _reveal(_statementsKey),
+                  ),
                 ],
               ],
             ),
@@ -338,17 +347,29 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                         (TaraIcons.document, l.walletStatement, () => _reveal(_statementsKey)),
                       ]
                     : [
-                        (TaraIcons.plus, l.topUpAction, () {
-                          _open(_Panel.topUp);
-                          _reveal(_balanceKey);
-                        }),
-                        (TaraIcons.arrowUpRight, l.withdrawAction, () {
-                          // Retrait de tout le solde, à partir du minimum du prestataire ;
-                          // sinon le bloc du solde explique pourquoi.
-                          if (_canWithdraw(data)) unawaited(_openWithdraw());
-                          _reveal(_balanceKey);
-                        }),
-                        (TaraIcons.document, l.walletStatement, () => _reveal(merchant ? _statementsKey : _movementsKey)),
+                        (
+                          TaraIcons.plus,
+                          l.topUpAction,
+                          () {
+                            _open(_Panel.topUp);
+                            _reveal(_balanceKey);
+                          },
+                        ),
+                        (
+                          TaraIcons.arrowUpRight,
+                          l.withdrawAction,
+                          () {
+                            // Retrait de tout le solde, à partir du minimum du prestataire ;
+                            // sinon le bloc du solde explique pourquoi.
+                            if (_canWithdraw(data)) unawaited(_openWithdraw());
+                            _reveal(_balanceKey);
+                          },
+                        ),
+                        (
+                          TaraIcons.document,
+                          l.walletStatement,
+                          () => _reveal(merchant ? _statementsKey : _movementsKey),
+                        ),
                       ],
               ),
               const SizedBox(height: 18),
@@ -446,8 +467,16 @@ class _WalletActions extends StatelessWidget {
                           border: index == 0 ? null : Border.all(color: c.glassBorder),
                           boxShadow: [
                             index == 0
-                                ? const BoxShadow(color: Color.fromRGBO(255, 90, 0, .30), blurRadius: 22, offset: Offset(0, 10))
-                                : BoxShadow(color: Color.fromRGBO(140, 70, 10, c.isDark ? .0 : .10), blurRadius: 20, offset: const Offset(0, 8)),
+                                ? const BoxShadow(
+                                    color: Color.fromRGBO(255, 90, 0, .30),
+                                    blurRadius: 22,
+                                    offset: Offset(0, 10),
+                                  )
+                                : BoxShadow(
+                                    color: Color.fromRGBO(140, 70, 10, c.isDark ? .0 : .10),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
                           ],
                         ),
                         child: Center(
@@ -476,7 +505,13 @@ class _WalletActions extends StatelessWidget {
 /// Boutique : ventes encaissées à recevoir, quand et où elles arrivent ; reversement
 /// immédiat pour les offres payantes ; frais d'échec à régler si le solde est négatif.
 class _ShopCard extends ConsumerWidget {
-  const _ShopCard({super.key, required this.wallet, required this.busy, required this.onPayoutNow, this.compact = false});
+  const _ShopCard({
+    super.key,
+    required this.wallet,
+    required this.busy,
+    required this.onPayoutNow,
+    this.compact = false,
+  });
 
   /// Sous les cartes du haut : titre et montant y sont déjà, seules les règles restent.
   final bool compact;
@@ -766,7 +801,6 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
                   child: GlassButton(
                     label: l.topUpAction,
                     icon: TaraIcons.wallet,
-                    height: 48,
                     color: c.accentText,
                     onPressed: widget.onTopUp,
                   ),
@@ -774,12 +808,7 @@ class _BalanceCardState extends ConsumerState<_BalanceCard> {
                 if (canWithdraw) ...[
                   const SizedBox(width: 10),
                   Expanded(
-                    child: GlassButton(
-                      label: l.withdrawAction,
-                      icon: TaraIcons.send,
-                      height: 48,
-                      onPressed: widget.onWithdraw,
-                    ),
+                    child: GlassButton(label: l.withdrawAction, icon: TaraIcons.send, onPressed: widget.onWithdraw),
                   ),
                 ],
               ],

@@ -171,6 +171,8 @@ class OrderSummary {
     required this.createdAt,
     this.failureDecision,
     this.batchNumber,
+    this.riderName,
+    this.etaMinutes,
   });
 
   factory OrderSummary.fromJson(Json json) => OrderSummary(
@@ -186,6 +188,8 @@ class OrderSummary {
     scheduledFor: _date(json['scheduledFor']),
     createdAt: DateTime.parse(_field(json, 'createdAt')),
     failureDecision: json['failureDecision'] as String?,
+    riderName: json['riderName'] as String?,
+    etaMinutes: (json['etaMinutes'] as num?)?.toInt(),
   );
 
   static const fields = [
@@ -199,6 +203,8 @@ class OrderSummary {
     'codAmount',
     'scheduledFor',
     'failureDecision',
+    'riderName',
+    'etaMinutes',
     'createdAt',
   ];
 
@@ -223,6 +229,12 @@ class OrderSummary {
 
   /// Après un échec : RETRY ou RETURN une fois choisi, null tant qu'il faut décider.
   final String? failureDecision;
+
+  /// Livreur attribué : prénom et initiale (null avant l'attribution).
+  final String? riderName;
+
+  /// Minutes avant l'arrivée chez le destinataire quand le livreur roule vers lui.
+  final int? etaMinutes;
 }
 
 /// Portefeuille (GET /me/wallet) : solde Tara de l'expéditeur, solde de la boutique.
@@ -466,6 +478,9 @@ class Address {
     required this.longitude,
     required this.verified,
     required this.motorbikeRestricted,
+    this.hasPhoto = false,
+    this.hasVoiceNote = false,
+    this.source = 'SENDER',
   });
 
   factory Address.fromJson(Json json) {
@@ -481,6 +496,9 @@ class Address {
       longitude: _field<num>(json, 'longitude').toDouble(),
       verified: json['verifiedAt'] != null,
       motorbikeRestricted: json['motorbikeRestricted'] == true,
+      hasPhoto: json['photoKey'] != null,
+      hasVoiceNote: json['voiceNoteKey'] != null,
+      source: json['source'] as String? ?? 'SENDER',
     );
   }
 
@@ -495,6 +513,9 @@ class Address {
     'longitude',
     'verifiedAt',
     'motorbikeRestricted',
+    'photoKey',
+    'voiceNoteKey',
+    'source',
   ];
 
   final String id;
@@ -512,6 +533,13 @@ class Address {
   /// Dans une zone interdite aux motos (B6).
   final bool motorbikeRestricted;
 
+  /// Photo de la façade et note vocale jointes (B2).
+  final bool hasPhoto;
+  final bool hasVoiceNote;
+
+  /// Qui a placé le point : SENDER, LOCATION_LINK (le destinataire), DELIVERY_CONFIRMED…
+  final String source;
+
   /// « Bonapriso · Portail bleu après la pharmacie ».
   String get summary => [?neighborhood?.name, landmark].join(' · ');
 
@@ -528,25 +556,38 @@ class Address {
     'longitude': longitude,
     'verifiedAt': verified ? 'verified' : null,
     'motorbikeRestricted': motorbikeRestricted,
+    'photoKey': hasPhoto ? 'photo' : null,
+    'voiceNoteKey': hasVoiceNote ? 'voice' : null,
+    'source': source,
   };
 }
 
 /// Destinataire fréquent du carnet (B5), avec sa dernière adresse.
 @immutable
 class Recipient {
-  const Recipient({required this.name, required this.phone, required this.ordersCount, required this.lastAddress});
+  const Recipient({
+    required this.name,
+    required this.phone,
+    required this.ordersCount,
+    required this.lastAddress,
+    this.lastOrderAt,
+  });
   factory Recipient.fromJson(Json json) => Recipient(
     name: _field(json, 'name'),
     phone: _field(json, 'phone'),
     ordersCount: _field<num>(json, 'ordersCount').toInt(),
     lastAddress: Address.fromJson(_field<Json>(json, 'lastAddress')),
+    lastOrderAt: _date(json['lastOrderAt']),
   );
-  static const fields = ['name', 'phone', 'ordersCount', 'lastAddress'];
+  static const fields = ['name', 'phone', 'ordersCount', 'lastOrderAt', 'lastAddress'];
 
   final String name;
   final String phone;
   final int ordersCount;
   final Address lastAddress;
+
+  /// Dernière livraison envoyée à ce destinataire.
+  final DateTime? lastOrderAt;
 }
 
 /// Lien de localisation (B3) envoyé au destinataire pour qu'il place son point.
@@ -901,6 +942,7 @@ class OrderRider {
     this.vehicleBrand,
     this.vehicleColor,
     this.hasPhoto = false,
+    this.rating,
   });
   factory OrderRider.fromJson(Json json) => OrderRider(
     name: _field(json, 'name'),
@@ -911,8 +953,21 @@ class OrderRider {
     vehicleBrand: json['vehicleBrand'] as String?,
     vehicleColor: json['vehicleColor'] as String?,
     hasPhoto: json['hasPhoto'] as bool? ?? false,
+    rating: (json['rating'] as num?)?.toDouble(),
   );
-  static const fields = ['name', 'phone', 'vehicleType', 'plateNumber', 'vehicleBrand', 'vehicleColor', 'hasPhoto'];
+  static const fields = [
+    'name',
+    'phone',
+    'vehicleType',
+    'plateNumber',
+    'vehicleBrand',
+    'vehicleColor',
+    'hasPhoto',
+    'rating',
+  ];
+
+  /// Note moyenne sur 5, dès 3 notes reçues.
+  final double? rating;
 
   /// Marque et couleur (codes du serveur : NANFANG, RED…), pour reconnaître le livreur.
   final String? vehicleBrand;
@@ -1201,4 +1256,135 @@ class OrderFailure {
 
   /// Une seule nouvelle tentative : false après un deuxième échec.
   final bool retryAllowed;
+}
+
+/// Notification de la cloche (boîte de réception du compte).
+@immutable
+class InboxItem {
+  const InboxItem({
+    required this.id,
+    required this.kind,
+    required this.title,
+    required this.body,
+    required this.read,
+    required this.createdAt,
+    this.orderId,
+  });
+
+  factory InboxItem.fromJson(Json json) => InboxItem(
+    id: _field(json, 'id'),
+    kind: _field(json, 'kind'),
+    title: _field(json, 'title'),
+    body: _field(json, 'body'),
+    orderId: json['orderId'] as String?,
+    read: _field(json, 'read'),
+    createdAt: DateTime.parse(_field(json, 'createdAt')),
+  );
+
+  static const fields = ['id', 'kind', 'title', 'body', 'orderId', 'read', 'createdAt'];
+
+  final String id;
+
+  /// Modèle de la notification (ORDER_DELIVERED, PAYOUT_SENT…) : icône et écran à ouvrir.
+  final String kind;
+  final String title;
+  final String body;
+  final String? orderId;
+  final bool read;
+  final DateTime createdAt;
+}
+
+/// Cloche : les notifications récentes et le nombre de non lues.
+@immutable
+class Inbox {
+  const Inbox({required this.items, required this.unread});
+
+  factory Inbox.fromJson(Json json) => Inbox(
+    items: [for (final item in _field<List<Object?>>(json, 'items')) InboxItem.fromJson(item! as Json)],
+    unread: _field<num>(json, 'unread').toInt(),
+  );
+
+  static const fields = ['items', 'unread'];
+  static const empty = Inbox(items: [], unread: 0);
+
+  final List<InboxItem> items;
+  final int unread;
+}
+
+/// Tranche du graphique « Mon activité » : ventes encaissées et livraisons.
+typedef ActivityBucket = ({DateTime from, DateTime to, int sales, int deliveries});
+
+/// « Mon activité » d'une boutique sur un jour, une semaine ou un mois.
+@immutable
+class MerchantActivity {
+  const MerchantActivity({
+    required this.period,
+    required this.from,
+    required this.buckets,
+    required this.deliveries,
+    required this.collected,
+    required this.successRate,
+    required this.deliveriesChange,
+    required this.collectedChange,
+    required this.successRateChange,
+    required this.averageMinutes,
+    required this.zones,
+  });
+
+  factory MerchantActivity.fromJson(Json json) => MerchantActivity(
+    period: _field(json, 'period'),
+    from: DateTime.parse(_field(json, 'from')),
+    buckets: [
+      for (final item in _field<List<Object?>>(json, 'buckets').cast<Json>())
+        (
+          from: DateTime.parse(item['from']! as String),
+          to: DateTime.parse(item['to']! as String),
+          sales: (item['sales']! as num).toInt(),
+          deliveries: (item['deliveries']! as num).toInt(),
+        ),
+    ],
+    deliveries: _field<num>(json, 'deliveries').toInt(),
+    collected: _field<num>(json, 'collected').toInt(),
+    successRate: (json['successRate'] as num?)?.toInt(),
+    deliveriesChange: (json['deliveriesChange'] as num?)?.toInt(),
+    collectedChange: (json['collectedChange'] as num?)?.toInt(),
+    successRateChange: (json['successRateChange'] as num?)?.toInt(),
+    averageMinutes: (json['averageMinutes'] as num?)?.toInt(),
+    zones: [
+      for (final item in _field<List<Object?>>(json, 'zones').cast<Json>())
+        (name: item['name']! as String, share: (item['share']! as num).toInt()),
+    ],
+  );
+
+  static const fields = [
+    'period',
+    'from',
+    'to',
+    'buckets',
+    'deliveries',
+    'collected',
+    'successRate',
+    'deliveriesChange',
+    'collectedChange',
+    'successRateChange',
+    'averageMinutes',
+    'zones',
+  ];
+
+  /// day, week ou month.
+  final String period;
+  final DateTime from;
+  final List<ActivityBucket> buckets;
+  final int deliveries;
+  final int collected;
+
+  /// Part des colis livrés (0 à 100), null sans colis terminé.
+  final int? successRate;
+
+  /// Évolution en % (livraisons, encaissé) et en points (réussite), null sans base.
+  final int? deliveriesChange;
+  final int? collectedChange;
+  final int? successRateChange;
+  final int? averageMinutes;
+  final List<({String name, int share})> zones;
 }

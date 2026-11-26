@@ -33,6 +33,7 @@ import 'package:tara_ui/vehicle_labels.dart';
 
 import '../../app/providers.dart';
 import '../../core/api/client_models.dart';
+import '../../core/orders/pickup_codes.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
 import '../home/home_screen.dart';
@@ -68,6 +69,9 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   double? _heading;
   bool _celebrate = false;
   String? _pickupCode;
+
+  /// Code d'enlèvement gardé sur le téléphone depuis la commande.
+  String? _storedCode;
   bool _confirmCancel = false;
   bool _busy = false;
 
@@ -116,6 +120,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     super.initState();
     unawaited(_load());
     unawaited(_loadRoute());
+    unawaited(_loadPickupCode());
     _realtime = ref.read(realtimeProvider)..connect();
     _events = _realtime.stream.listen(_onEvent);
     _realtime.subscribeOrder(widget.orderId, onAck: _onAck);
@@ -167,6 +172,11 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       });
       if (before != null && before != order.status) _announce(order.status);
       unawaited(_loadRiderPhoto(order));
+      // Colis parti (ou commande finie) : le code d'enlèvement ne sert plus.
+      if (!const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'].contains(order.status) && _storedCode != null) {
+        unawaited(PickupCodes(ref.read(keyValueStoreProvider)).forget(widget.orderId));
+        _storedCode = null;
+      }
     } catch (error) {
       if (mounted && _order == null) setState(() => _error = errorMessage(context, error));
     }
@@ -295,10 +305,17 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     }
   }
 
+  /// Code d'enlèvement donné à la commande, gardé sur le téléphone.
+  Future<void> _loadPickupCode() async {
+    final code = await PickupCodes(ref.read(keyValueStoreProvider)).read(widget.orderId);
+    if (code != null && mounted) setState(() => _storedCode = code);
+  }
+
   Future<void> _newPickupCode() async {
     setState(() => _busy = true);
     try {
       final code = await ref.read(clientApiProvider).newPickupCode(widget.orderId);
+      unawaited(PickupCodes(ref.read(keyValueStoreProvider)).remember(widget.orderId, code));
       if (mounted) setState(() => _pickupCode = code);
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(context, error));
@@ -587,17 +604,32 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                     children: [
                       GlassIconButton(icon: TaraIcons.chevronLeft, label: l.back, onPressed: widget.onBack),
                       const SizedBox(width: 10),
+                      // Référence et trajet (maquette) : « TR-48301 », « Akwa → Bonapriso ».
                       if (order != null)
-                        GlassCard(
-                          radius: 18,
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                          child: Text(
-                            // Envoi de plusieurs colis : le numéro écrit sur ce colis.
-                            switch (order.batchNumber) {
-                              final number? => '${order.reference} · ${l.parcelNumberShort(number)}',
-                              null => order.reference,
-                            },
-                            style: TaraText.cardTitle.copyWith(color: c.textPrimary),
+                        Expanded(
+                          child: MergeSemantics(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  // Envoi de plusieurs colis : le numéro écrit sur ce colis.
+                                  switch (order.batchNumber) {
+                                    final number? => '${order.reference} · ${l.parcelNumberShort(number)}',
+                                    null => order.reference,
+                                  },
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 18),
+                                ),
+                                Text(
+                                  '${order.pickup.neighborhood?.name ?? order.pickup.landmark} → '
+                                  '${order.dropoff.neighborhood?.name ?? order.dropoff.landmark}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TaraText.small.copyWith(color: c.textSecondary, fontSize: 12),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                     ],
@@ -622,7 +654,12 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                         now: _now,
                         waiting: ref.watch(appConfigProvider).value?.waiting ?? const WaitingRules(),
                         rider: _rider,
-                        pickupCode: _pickupCode,
+                        // Code d'enlèvement : celui de la commande tant que le colis n'est pas parti.
+                        pickupCode:
+                            _pickupCode ??
+                            (const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'].contains(order.status)
+                                ? _storedCode
+                                : null),
                         choice: _choice,
                         stars: _stars,
                         comment: _comment,
@@ -824,7 +861,10 @@ class _Panel extends StatelessWidget {
     };
     final eta = _eta(o);
     final delivered = o.status == 'DELIVERED';
+    // Course en cours (maquette) : la barre d'avancée en tête du panneau.
+    final flowing = const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED', 'PICKED_UP', 'IN_DELIVERY'].contains(o.status);
     final content = <Widget>[
+      if (flowing) ...[_FlowSteps(order: o), const SizedBox(height: 12)],
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -832,7 +872,7 @@ class _Panel extends StatelessWidget {
             child: Semantics(
               header: true,
               liveRegion: true,
-              child: Text(title, style: TaraText.titlePanel.copyWith(color: c.textPrimary)),
+              child: Text(title, style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 19)),
             ),
           ),
           if (deciding && failure?.decisionDueAt != null) ...[
@@ -840,13 +880,28 @@ class _Panel extends StatelessWidget {
             InfoPill(label: l.failureDue(formatClock(failure!.decisionDueAt!)), icon: TaraIcons.clock),
           ] else if (eta != null) ...[
             const SizedBox(width: 10),
-            InfoPill(label: l.trackEta(eta), icon: TaraIcons.clock),
+            // Minutes avant l'arrivée (maquette) : pastille orange.
+            Semantics(
+              label: l.trackEta(eta),
+              excludeSemantics: true,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(255, 177, 92, .14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  l.etaMinutes(eta),
+                  style: TaraText.label.copyWith(color: c.accentText, fontSize: 13, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ),
           ],
         ],
       ),
       if (body.isNotEmpty) ...[
         const SizedBox(height: 4),
-        Text(body, style: TaraText.label.copyWith(color: c.textSecondary)),
+        Text(body, style: TaraText.label.copyWith(color: c.textSecondary, fontSize: 13)),
       ],
       if (deciding && (failure?.note?.isNotEmpty ?? false)) ...[
         const SizedBox(height: 4),
@@ -857,7 +912,8 @@ class _Panel extends StatelessWidget {
       ],
       const SizedBox(height: 16),
       // Livré : le récapitulatif reprend les heures, la frise laisse la place à la note.
-      if (!delivered) ...[_Steps(order: o), const SizedBox(height: 16)],
+      // Échec, retour : la frise avec les heures, sous le titre.
+      if (!delivered && !flowing) ...[_Steps(order: o), const SizedBox(height: 16)],
       if (o.awaitingPayment && pay != null) ...[
         _PayCard(state: pay!, operator: o.feePaymentMethod == 'MOMO_ORANGE' ? l.payOrange : l.payMtn),
         const SizedBox(height: 16),
@@ -915,7 +971,12 @@ class _Panel extends StatelessWidget {
             onCall: () => onCall(rider.phone!),
             onMessage: onMessage,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
+        ],
+        // Code d'enlèvement à donner au livreur (maquette).
+        if (pickupCode != null && const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'].contains(o.status)) ...[
+          _PickupCodeCard(code: pickupCode!),
+          const SizedBox(height: 12),
         ],
         _recipientRow(l, o, recipientFirst),
         if (returning && o.returnFee > 0) ...[
@@ -932,7 +993,7 @@ class _Panel extends StatelessWidget {
             child: Text(l.returnCodeHint, style: TaraText.label.copyWith(color: c.textPrimary)),
           ),
         ],
-        if (pickupCode != null) ...[
+        if (pickupCode != null && returning) ...[
           const SizedBox(height: 8),
           TintBox(
             tone: TintTone.accent,
@@ -1193,15 +1254,80 @@ class _Steps extends StatelessWidget {
   }
 }
 
-/// Le livreur : photo (ou initiales), nom, moto (marque, couleur, plaque), appel et message.
+/// Avancée de la course (maquette) : barre qui coule jusqu'à l'étape, quatre libellés
+/// en orange une fois atteints.
+class _FlowSteps extends StatelessWidget {
+  const _FlowSteps({required this.order});
+  final TrackedOrder order;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final (reached, ratio) = switch (order.status) {
+      'ASSIGNED' => (1, .38),
+      'PICKED_UP' || 'IN_DELIVERY' => (2, .70),
+      _ => (0, .10),
+    };
+    final labels = [l.stepOrdered, l.stepRiderFound, l.stepPickedUp, l.stepDelivered];
+    return Semantics(
+      label: labels.take(reached + 1).join(', '),
+      excludeSemantics: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: SizedBox(
+              height: 6,
+              child: Stack(
+                children: [
+                  Positioned.fill(child: ColoredBox(color: c.textPrimary.withValues(alpha: .10))),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(end: ratio),
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, _) => FractionallySizedBox(
+                      widthFactor: value,
+                      child: const FlowingGradient(
+                        colors: [TaraBrand.amber, TaraBrand.orange, TaraBrand.red, TaraBrand.orange, TaraBrand.amber],
+                        period: Duration(milliseconds: 2600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (final (i, label) in labels.indexed)
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TaraText.small.copyWith(
+                      color: i <= reached ? c.accentText : c.textPrimary.withValues(alpha: .45),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Le livreur (maquette) : photo ou initiales sur tuile orange, « Jean M. · 4,8 ★ »,
+/// véhicule et plaque, message et appel.
 class _RiderCard extends StatelessWidget {
-  const _RiderCard({
-    required this.rider,
-    required this.onCall,
-    required this.onMessage,
-    this.photo,
-    this.unread = 0,
-  });
+  const _RiderCard({required this.rider, required this.onCall, required this.onMessage, this.photo, this.unread = 0});
 
   final OrderRider rider;
   final VoidCallback onCall;
@@ -1223,69 +1349,205 @@ class _RiderCard extends StatelessWidget {
     final model = [
       if (rider.vehicleBrand case final brand?) vehicleBrandName(brand, locale) else vehicle,
       if (color != null) vehicleColorName(color, locale).toLowerCase(),
-    ].join(' ');
-    return GlassCard(
-      radius: 20,
-      shadow: false,
-      padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
-      child: Row(
-        children: [
-          if (photo case final bytes?)
-            ClipOval(
-              child: Image.memory(bytes, width: 48, height: 48, fit: BoxFit.cover, gaplessPlayback: true),
-            )
-          else
-            InitialsAvatar(name: rider.name, size: 48),
-          const SizedBox(width: 12),
-          Expanded(
+      ?rider.plateNumber,
+    ].join(' · ');
+    final initials = rider.name
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part[0].toUpperCase())
+        .join();
+    final rating = rider.rating;
+    return Row(
+      children: [
+        MergeSemantics(
+          child: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(gradient: TaraBrand.gradient, borderRadius: BorderRadius.circular(14)),
+            clipBehavior: Clip.antiAlias,
+            alignment: Alignment.center,
+            child: photo != null
+                ? Image.memory(photo!, width: 42, height: 42, fit: BoxFit.cover, gaplessPlayback: true)
+                : Text(
+                    initials,
+                    style: TaraText.titlePanel.copyWith(
+                      color: TaraBrand.onBrand,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: MergeSemantics(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  rider.name,
-                  style: TaraText.text.copyWith(color: c.textPrimary, fontWeight: FontWeight.w700),
+                  rating == null ? rider.name : '${rider.name} · ${rating.toStringAsFixed(1).replaceAll('.', ',')} ★',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TaraText.text.copyWith(color: c.textPrimary, fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 Row(
                   children: [
                     if (color != null) ...[
                       Container(
-                        width: 10,
-                        height: 10,
+                        width: 9,
+                        height: 9,
                         decoration: BoxDecoration(
                           color: vehicleColors[color],
                           shape: BoxShape.circle,
                           border: Border.all(color: c.textPrimary.withValues(alpha: .25)),
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 5),
                     ],
                     Flexible(
                       child: Text(
                         model,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TaraText.small.copyWith(color: c.textSecondary),
+                        style: TaraText.small.copyWith(color: c.textTertiary, fontSize: 12),
                       ),
                     ),
                   ],
                 ),
-                if (rider.plateNumber case final plate?)
-                  Text(
-                    plate,
-                    style: TaraText.small.copyWith(color: c.textPrimary, fontWeight: FontWeight.w800, letterSpacing: .6),
-                  ),
               ],
             ),
           ),
-          GlassIconButton(
-            icon: TaraIcons.message,
-            label: l.chatWithRider(rider.name),
-            badge: unread > 0,
-            onPressed: onMessage,
+        ),
+        const SizedBox(width: 8),
+        GlassIconButton(
+          icon: TaraIcons.message,
+          label: l.chatWithRider(rider.name),
+          badge: unread > 0,
+          onPressed: onMessage,
+        ),
+        const SizedBox(width: 8),
+        // Appel en vert, comme sur la maquette.
+        Semantics(
+          button: true,
+          label: l.callRider(rider.name),
+          excludeSemantics: true,
+          child: Squish(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onCall,
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(shape: BoxShape.circle, color: Color.fromRGBO(74, 222, 155, .14)),
+                alignment: Alignment.center,
+                child: TaraIcon(TaraIcons.phone, size: 20, color: c.success),
+              ),
+            ),
           ),
-          const SizedBox(width: 8),
-          GlassIconButton(icon: TaraIcons.phone, label: l.callRider(rider.name), onPressed: onCall),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+/// « CODE D'ENLÈVEMENT » : les 4 chiffres à dicter au livreur, sur une carte (maquette).
+class _PickupCodeCard extends StatelessWidget {
+  const _PickupCodeCard({required this.code});
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final spaced = code.split('').join(' ');
+    Widget corner(Alignment at) => Align(
+      alignment: at,
+      child: Container(
+        width: 16,
+        height: 16,
+        decoration: BoxDecoration(
+          border: Border(
+            top: at.y < 0 ? const BorderSide(color: TaraBrand.orange, width: 3) : BorderSide.none,
+            bottom: at.y > 0 ? const BorderSide(color: TaraBrand.orange, width: 3) : BorderSide.none,
+            left: at.x < 0 ? const BorderSide(color: TaraBrand.orange, width: 3) : BorderSide.none,
+            right: at.x > 0 ? const BorderSide(color: TaraBrand.orange, width: 3) : BorderSide.none,
+          ),
+          borderRadius: BorderRadius.only(
+            topLeft: at == Alignment.topLeft ? const Radius.circular(6) : Radius.zero,
+            topRight: at == Alignment.topRight ? const Radius.circular(6) : Radius.zero,
+            bottomLeft: at == Alignment.bottomLeft ? const Radius.circular(6) : Radius.zero,
+            bottomRight: at == Alignment.bottomRight ? const Radius.circular(6) : Radius.zero,
+          ),
+        ),
+      ),
+    );
+    return Semantics(
+      label: '${l.pickupCodeLabel} : $spaced',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        decoration: BoxDecoration(
+          color: boxedFieldFill(c),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: boxedFieldBorder(c)),
+          boxShadow: const [BoxShadow(color: Color.fromRGBO(140, 70, 10, .08), blurRadius: 28, offset: Offset(0, 12))],
+        ),
+        child: Row(
+          children: [
+            // Clé dans un cadre de visée orange.
+            SizedBox.square(
+              dimension: 64,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Container(
+                      margin: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                      alignment: Alignment.center,
+                      child: const TaraIcon(TaraIcons.lock, size: 26, color: Color(0xFF16120E)),
+                    ),
+                  ),
+                  corner(Alignment.topLeft),
+                  corner(Alignment.topRight),
+                  corner(Alignment.bottomLeft),
+                  corner(Alignment.bottomRight),
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.pickupCodeLabel.toUpperCase(),
+                    style: TaraText.small.copyWith(
+                      color: c.accentText,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: .66,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    spaced,
+                    style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 26, letterSpacing: 5),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l.pickupCodeDictate,
+                    style: TaraText.small.copyWith(
+                      color: c.textPrimary.withValues(alpha: .7),
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

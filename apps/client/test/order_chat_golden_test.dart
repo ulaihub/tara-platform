@@ -13,7 +13,13 @@ void main() {
 
   final at = DateTime(2026, 11, 25, 10, 5);
   OrderChatMessage message(String id, String body, {required bool mine, int minutes = 0, bool read = false}) =>
-      OrderChatMessage(id: id, mine: mine, body: body, at: at.add(Duration(minutes: minutes)), read: read);
+      OrderChatMessage(
+        id: id,
+        mine: mine,
+        body: body,
+        at: at.add(Duration(minutes: minutes)),
+        read: read,
+      );
 
   for (final brightness in [Brightness.dark, Brightness.light]) {
     goldenTest('discussion avec le livreur ${brightness.name}', (tester) async {

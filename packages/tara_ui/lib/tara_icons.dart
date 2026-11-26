@@ -6,6 +6,12 @@ import 'package:path_parsing/path_parsing.dart';
 abstract final class TaraIcons {
   static const navigation = TaraIconData([_P('M3 11l18-8-8 18-2-8z')]);
   static const home = TaraIconData([_P('M4 11l8-7 8 7v9h-5v-6H9v6H4z')]);
+
+  /// Maison des étiquettes de la présentation (« Boutique Awa ») et repère de la carte en relief.
+  static const homeSoft = TaraIconData([
+    _P('M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5H9v5H5.5A1.5 1.5 0 0 1 4 19z'),
+  ]);
+  static const homeFlat = TaraIconData([_P('M4 10.5 12 4l8 6.5V20H4z')]);
   static const activity = TaraIconData([_P('M4 20V10M10 20V4M16 20v-7M22 20H2')]);
 
   /// Onglet « Course » du livreur : itinéraire entre deux points (maquette).
@@ -27,6 +33,9 @@ abstract final class TaraIcons {
   static const power = TaraIconData([_P('M12 3v8'), _P('M6.3 6.8a8 8 0 1011.4 0')]);
   static const shield = TaraIconData([_P('M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z')]);
   static const close = TaraIconData([_P('M6 6l12 12M18 6L6 18')]);
+
+  /// Bulle de discussion pleine (WhatsApp, maquette du code reçu).
+  static const chatBubble = TaraIconData([_P('M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z')]);
   static const message = TaraIconData([_P('M4 5h16v11H9l-5 4z'), _P('M8 9.5h8M8 12.5h5')]);
   static const mapPin = TaraIconData([_P('M12 21s-7-6.2-7-12a7 7 0 0114 0c0 5.8-7 12-7 12z'), _C(12, 9, 2.5)]);
   static const headset = TaraIconData([_P('M4 14v-2a8 8 0 0116 0v2'), _R(3, 14, 4, 6, 1.5), _R(17, 14, 4, 6, 1.5)]);
@@ -44,6 +53,13 @@ abstract final class TaraIcons {
   ]);
   static const camera = TaraIconData([_P('M4 8h3l2-3h6l2 3h3v11H4z'), _C(12, 13, 3.5)]);
   static const check = TaraIconData([_P('M5 12.5l4.5 4.5L19 7.5')]);
+  static const alertTriangle = TaraIconData([_P('M12 4 2.5 20h19zM12 10v4M12 17h.01')]);
+  static const trend = TaraIconData([_P('M4.5 20v-6M10 20V10M15.5 20v-4M21 20V6M3 9.5 9 5l5 3.5L20.5 3')]);
+  static const bolt = TaraIconData([_P('M13 3 5 13h6l-1 8 8-10h-6z')]);
+  static const calendar = TaraIconData([_P('M3.5 5h17v15h-17zM3.5 10h17M8 3v4M16 3v4')]);
+  static const link = TaraIconData([
+    _P('M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'),
+  ]);
   static const returnArrow = TaraIconData([_P('M9 14L4 9l5-5'), _P('M4 9h10a6 6 0 010 12h-3')]);
   static const wifiOff = TaraIconData([
     _P('M2 8.5a15 15 0 0120 0M5 12a10.5 10.5 0 0114 0M8.5 15.5a5 5 0 017 0'),
@@ -219,7 +235,15 @@ class TaraIconData {
 
 /// Icône en trait. `semanticLabel` est obligatoire quand l'icône est seule (bouton).
 class TaraIcon extends StatelessWidget {
-  const TaraIcon(this.icon, {super.key, this.size = 22, this.color, this.strokeWidth = 2, this.semanticLabel});
+  const TaraIcon(
+    this.icon, {
+    super.key,
+    this.size = 22,
+    this.color,
+    this.strokeWidth = 2,
+    this.semanticLabel,
+    this.filled = false,
+  });
 
   final TaraIconData icon;
   final double size;
@@ -227,12 +251,15 @@ class TaraIcon extends StatelessWidget {
   final double strokeWidth;
   final String? semanticLabel;
 
+  /// Forme pleine au lieu du trait (flèche du livreur sur la carte).
+  final bool filled;
+
   @override
   Widget build(BuildContext context) {
     final color = this.color ?? DefaultTextStyle.of(context).style.color ?? const Color(0xFF000000);
     final glyph = SizedBox.square(
       dimension: size,
-      child: CustomPaint(painter: _IconPainter(icon, color, strokeWidth)),
+      child: CustomPaint(painter: _IconPainter(icon, color, strokeWidth, filled: filled)),
     );
     if (semanticLabel == null) return ExcludeSemantics(child: glyph);
     return Semantics(
@@ -243,10 +270,11 @@ class TaraIcon extends StatelessWidget {
 }
 
 class _IconPainter extends CustomPainter {
-  _IconPainter(this.icon, this.color, this.strokeWidth);
+  _IconPainter(this.icon, this.color, this.strokeWidth, {this.filled = false});
   final TaraIconData icon;
   final Color color;
   final double strokeWidth;
+  final bool filled;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -256,7 +284,7 @@ class _IconPainter extends CustomPainter {
       icon.path,
       Paint()
         ..color = color
-        ..style = PaintingStyle.stroke
+        ..style = filled ? PaintingStyle.fill : PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
@@ -264,5 +292,6 @@ class _IconPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_IconPainter old) => old.icon != icon || old.color != color || old.strokeWidth != strokeWidth;
+  bool shouldRepaint(_IconPainter old) =>
+      old.icon != icon || old.color != color || old.strokeWidth != strokeWidth || old.filled != filled;
 }

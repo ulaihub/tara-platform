@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -168,8 +169,14 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final size = MediaQuery.sizeOf(context);
-    // Panneau du bas : 58 % de l'écran au plus, la carte garde le reste.
-    final panelHeight = size.height * .58;
+    // Feuille du bas à la taille de son contenu (maquette), la carte garde le reste ; sur
+    // un petit écran, elle défile.
+    final panelHeight = math.min(
+      size.height * .62,
+      (widget.forPickup ? 470.0 : 380.0) + MediaQuery.paddingOf(context).bottom,
+    );
+    final neighborhood = _neighborhood ?? _place?.neighborhood;
+    final outside = _place != null && !_place!.inServiceArea;
     return TaraScreen(
       safeTop: false,
       safeBottom: false,
@@ -190,13 +197,14 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
       child: Stack(
         fit: StackFit.expand,
         children: [
+          // En-tête de la maquette : retour, « Placer le point » et le lieu.
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                 child: Row(
                   children: [
                     GlassIconButton(
@@ -206,17 +214,47 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: GlassCard(
-                        radius: 18,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        child: Semantics(
-                          header: true,
-                          child: Text(widget.title, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
+                      child: MergeSemantics(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Semantics(
+                              header: true,
+                              child: Text(
+                                l.placePointTitle,
+                                style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 18),
+                              ),
+                            ),
+                            Text(
+                              neighborhood?.name ?? widget.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TaraText.small.copyWith(color: c.textSecondary, fontSize: 12),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
+              ),
+            ),
+          ),
+          // Aide sur la carte, au-dessus de la feuille.
+          Positioned(
+            left: 20,
+            right: 84,
+            bottom: panelHeight + 14,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: (c.isDark ? const Color(0xFF16161E) : Colors.white).withValues(alpha: .9),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                l.pinHintShort,
+                textAlign: TextAlign.center,
+                style: TaraText.small.copyWith(color: c.textPrimary, fontSize: 12, height: 1.45),
               ),
             ),
           ),
@@ -227,7 +265,6 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
               icon: TaraIcons.navigation,
               label: l.myPosition,
               size: 52,
-              radius: 18,
               onPressed: _locating ? null : _locate,
             ),
           ),
@@ -241,38 +278,62 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
                 horizontal: 20,
                 top: 4,
                 content: [
-                  Text(l.pinHint, style: TaraText.small.copyWith(color: c.textTertiary)),
-                  const SizedBox(height: 14),
-                  Text(l.neighborhoodLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: _chooseNeighborhood,
-                    child: Container(
-                      constraints: const BoxConstraints(minHeight: 52),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: c.inputBg,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: c.chipBorder),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _neighborhood?.name ?? _place?.neighborhood?.name ?? l.neighborhoodAuto,
-                              style: TaraText.body.copyWith(
-                                color: (_neighborhood ?? _place?.neighborhood) == null ? c.placeholder : c.textPrimary,
+                  // « Point placé · Akwa » : un toucher change le quartier.
+                  Semantics(
+                    button: true,
+                    liveRegion: true,
+                    label: [
+                      if (outside) l.pinOutOfArea else l.pinPlaced,
+                      if (!outside) neighborhood?.name ?? l.neighborhoodAuto,
+                    ].join(' · '),
+                    hint: l.neighborhoodLabel,
+                    excludeSemantics: true,
+                    child: GestureDetector(
+                      key: neighborhoodKey,
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _chooseNeighborhood,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 36),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: outside ? c.dangerText : const Color(0xFF10A06E),
+                              ),
+                              alignment: Alignment.center,
+                              child: TaraIcon(
+                                outside ? TaraIcons.alertCircle : TaraIcons.check,
+                                size: 14,
+                                color: Colors.white,
                               ),
                             ),
-                          ),
-                          TaraIcon(TaraIcons.chevronDown, size: 20, color: c.textTertiary),
-                        ],
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                outside
+                                    ? l.pinOutOfArea
+                                    : '${l.pinPlaced} · ${neighborhood?.name ?? l.neighborhoodAuto}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TaraText.text.copyWith(
+                                  color: outside ? c.dangerText : c.textPrimary,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            TaraIcon(TaraIcons.chevronDown, size: 18, color: c.textTertiary),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  TaraTextField(
-                    label: l.landmarkLabel,
+                  const SizedBox(height: 10),
+                  BoxedField(
+                    label: l.landmarkForRider,
                     hint: l.landmarkHint,
                     controller: _landmark,
                     textCapitalization: TextCapitalization.sentences,
@@ -296,9 +357,7 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
                   ],
                   if (_tried && !_valid) ...[const SizedBox(height: 6), ErrorLine(l.landmarkRequired)],
                   if (widget.forPickup) ...[
-                    const SizedBox(height: 14),
-                    Text(l.addressLabel, style: TaraText.label.copyWith(color: c.textSecondary)),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     ChoiceChips<String>(
                       columns: 3,
                       options: [for (final code in pickupLabels) ChoiceOption(code, labelText(l, code))],
@@ -306,11 +365,11 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
                       onSelected: (value) => setState(() => _label = value),
                     ),
                   ],
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   AddressMediaSection(media: _media),
                   if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
                 ],
-                footer: PrimaryButton(label: l.saveAddress, icon: TaraIcons.check, loading: _saving, onPressed: _save),
+                footer: PrimaryButton(label: l.validatePoint, loading: _saving, onPressed: _save),
               ),
             ),
           ),
@@ -319,6 +378,9 @@ class _AddressEditorState extends ConsumerState<AddressEditor> {
     );
   }
 }
+
+/// Ligne « Point placé · quartier » qui ouvre le choix du quartier (tests).
+const neighborhoodKey = ValueKey('neighborhood-choice');
 
 /// Libellé d'une adresse d'enlèvement dans la langue de l'app.
 String labelText(AppLocalizations l, String code) => switch (code) {

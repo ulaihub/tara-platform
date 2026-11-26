@@ -11,6 +11,7 @@
 #   tara sms       derniers SMS des téléphones de test (codes de connexion, de livraison…)
 #   tara paiements derniers paiements Mobile Money et motif d'un échec (réponse du prestataire)
 #   tara connexions [numéro]   derniers codes de connexion demandés, essais faux, blocage
+#   tara whatsapp  derniers messages WhatsApp : remis ou non (accusés de Meta), SMS de secours
 #   tara debloquer numéro      lève le blocage d'un numéro (trop de codes faux en 24 h)
 #   tara osrm      (re)prépare la carte des itinéraires du Cameroun
 #
@@ -497,6 +498,27 @@ cmd_debloquer() {
   ok "$phone débloqué : demandez un nouveau code dans l'app"
 }
 
+# Derniers messages WhatsApp (codes de connexion compris) et leur sort selon les accusés de
+# Meta : envoyé, remis (ou lu), échec et motif ; « SMS » quand le SMS de secours est parti.
+# Pour vérifier l'envoi réel : demander un code dans l'app, puis lancer cette commande.
+cmd_whatsapp() {
+  need_root
+  dc exec -T postgres psql -U tara -d tara -P pager=off -c "
+    SELECT to_char(w.created_at AT TIME ZONE 'Africa/Douala', 'DD/MM HH24:MI:SS') AS heure,
+           overlay(w.recipient_phone placing '•••••' from 6 for 6) AS numero,
+           w.template AS message,
+           CASE w.status WHEN 'DELIVERED' THEN 'remis' WHEN 'SENT' THEN 'envoyé, pas encore remis'
+                         WHEN 'FAILED' THEN 'échec' ELSE lower(w.status::text) END AS whatsapp,
+           CASE WHEN s.id IS NOT NULL THEN
+                  CASE s.status WHEN 'SENT' THEN 'SMS envoyé' WHEN 'DELIVERED' THEN 'SMS remis'
+                                WHEN 'FAILED' THEN 'SMS en échec' ELSE 'SMS en cours' END
+                WHEN w.template = 'OTP' AND w.sent_at IS NULL THEN 'SMS envoyé (refus immédiat)'
+                ELSE '' END AS secours,
+           left(coalesce(w.last_error, ''), 90) AS motif
+    FROM notifications w LEFT JOIN notifications s ON s.fallback_for_id = w.id
+    WHERE w.channel = 'WHATSAPP' ORDER BY w.created_at DESC LIMIT 15;"
+}
+
 case "${1:-}" in
   install) cmd_install ;;
   config) cmd_config ;;
@@ -523,5 +545,6 @@ case "${1:-}" in
     shift
     cmd_debloquer "$@"
     ;;
-  *) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//' ;;
+  whatsapp) cmd_whatsapp ;;
+  *) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

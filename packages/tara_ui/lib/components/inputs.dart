@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -25,7 +27,7 @@ class TaraTextField extends StatefulWidget {
     this.autofocus = false,
     this.leading,
     this.trailing,
-    this.height = 48,
+    this.height = 46,
     this.textCapitalization = TextCapitalization.none,
     this.minLines = 1,
     this.maxLines = 1,
@@ -81,12 +83,13 @@ class _TaraTextFieldState extends State<TaraTextField> {
     final field = AnimatedContainer(
       duration: const Duration(milliseconds: 160),
       constraints: BoxConstraints(minHeight: widget.height),
-      padding: EdgeInsets.only(left: 16, right: widget.trailing == null ? 16 : 8),
+      padding: EdgeInsets.only(left: 18, right: widget.trailing == null ? 18 : 6),
       decoration: BoxDecoration(
         color: c.inputBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: focused ? TaraBrand.focusBorder : c.chipBorder, width: focused ? 1.5 : 1),
-        boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 4)] : null,
+        // Finesse : pilule pour une ligne, filet d'un pixel, halo discret au focus.
+        borderRadius: BorderRadius.circular(widget.maxLines > 1 ? 18 : widget.height / 2),
+        border: Border.all(color: focused ? TaraBrand.focusBorder : c.chipBorder, width: focused ? 1.2 : 1),
+        boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 3)] : null,
       ),
       child: Row(
         crossAxisAlignment: widget.maxLines > 1 ? CrossAxisAlignment.end : CrossAxisAlignment.center,
@@ -110,13 +113,13 @@ class _TaraTextFieldState extends State<TaraTextField> {
               // La limite suffit : pas de compteur de caractères sous le champ.
               buildCounter: (_, {required currentLength, required isFocused, required maxLength}) => null,
               cursorColor: TaraBrand.orange,
-              style: TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 16),
+              style: TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 15, fontWeight: FontWeight.w600),
               decoration: InputDecoration(
                 isCollapsed: true,
                 border: InputBorder.none,
                 hintText: widget.hint,
-                hintStyle: TaraText.body.copyWith(color: c.placeholder, fontSize: 16),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                hintStyle: TaraText.body.copyWith(color: c.placeholder, fontSize: 15),
+                contentPadding: const EdgeInsets.symmetric(vertical: 11),
               ),
             ),
           ),
@@ -196,7 +199,7 @@ class CodeCells extends StatefulWidget {
     required this.digitLabel,
     this.onChanged,
     this.onCompleted,
-    this.cellHeight = 64,
+    this.cellHeight = 56,
     this.autofocus = true,
     this.controller,
     this.oneTimeCode = false,
@@ -283,15 +286,15 @@ class _CodeCellsState extends State<CodeCells> {
             height: widget.cellHeight,
             decoration: BoxDecoration(
               color: filled ? filledBg : emptyBg,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isActive ? TaraBrand.focusBorder : (filled ? filledBorder : emptyBorder),
-                width: isActive ? 1.5 : 1,
+                width: isActive ? 1.2 : 1,
               ),
-              boxShadow: isActive ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 4)] : null,
+              boxShadow: isActive ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 3)] : null,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(17),
+              borderRadius: BorderRadius.circular(15),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -380,13 +383,18 @@ class ChoiceChips<T> extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.columns = 2,
-    this.height = 48,
+    this.height = 42,
+    this.wrap = false,
   });
 
   final List<ChoiceOption<T>> options;
   final T? selected;
   final ValueChanged<T> onSelected;
   final int columns;
+
+  /// Pastilles à la largeur de leur texte, à la ligne quand il faut (maquette « Nature ») :
+  /// 38 de haut, orange plein une fois choisie.
+  final bool wrap;
   final double height;
 
   @override
@@ -400,47 +408,49 @@ class ChoiceChips<T> extends StatelessWidget {
         button: true,
         label: option.label,
         excludeSemantics: true,
-        child: GestureDetector(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onSelected(option.value);
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            constraints: BoxConstraints(minHeight: height),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? null : c.chipBg,
-              gradient: isSelected ? c.chipSelected : null,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: isSelected ? c.chipSelectedBorder : c.chipBorder,
-                width: isSelected ? c.chipSelectedBorderWidth : 1,
+        child: Squish(
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onSelected(option.value);
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              constraints: BoxConstraints(minHeight: height),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? null : c.chipBg,
+                gradient: isSelected ? c.chipSelected : null,
+                borderRadius: BorderRadius.circular(height / 2),
+                border: Border.all(
+                  color: isSelected ? c.chipSelectedBorder : c.chipBorder,
+                  width: isSelected ? c.chipSelectedBorderWidth : 1,
+                ),
               ),
-            ),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (option.leading != null) ...[
-                    option.leading!,
-                    const SizedBox(width: 8),
-                  ] else if (option.icon != null) ...[
-                    TaraIcon(option.icon!, size: 18, color: isSelected ? c.accentText : c.textSecondary),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(
-                    child: Text(
-                      option.label,
-                      textAlign: TextAlign.center,
-                      style: TaraText.text.copyWith(
-                        color: isSelected ? c.textPrimary : c.textSecondary,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                        fontFeatures: TaraText.tabular,
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (option.leading != null) ...[
+                      option.leading!,
+                      const SizedBox(width: 8),
+                    ] else if (option.icon != null) ...[
+                      TaraIcon(option.icon!, size: 18, color: isSelected ? c.accentText : c.textSecondary),
+                      const SizedBox(width: 8),
+                    ],
+                    Flexible(
+                      child: Text(
+                        option.label,
+                        textAlign: TextAlign.center,
+                        style: TaraText.text.copyWith(
+                          color: isSelected ? c.textPrimary : c.textSecondary,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                          fontFeatures: TaraText.tabular,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -448,6 +458,52 @@ class ChoiceChips<T> extends StatelessWidget {
       );
     }
 
+    if (wrap) {
+      return Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          for (final option in options)
+            Semantics(
+              inMutuallyExclusiveGroup: true,
+              checked: option.value == selected,
+              button: true,
+              label: option.label,
+              excludeSemantics: true,
+              child: Squish(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onSelected(option.value);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    constraints: const BoxConstraints(minHeight: 38),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      gradient: option.value == selected ? TaraBrand.gradient : null,
+                      color: option.value == selected ? null : boxedFieldFill(c),
+                      borderRadius: BorderRadius.circular(19),
+                      border: Border.all(
+                        color: option.value == selected ? const Color(0xFFFF8A00) : boxedFieldBorder(c),
+                      ),
+                    ),
+                    child: Text(
+                      option.label,
+                      style: TaraText.label.copyWith(
+                        color: option.value == selected ? TaraBrand.onBrand : c.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
     final rows = <Widget>[];
     for (var i = 0; i < options.length; i += columns) {
       final slice = options.skip(i).take(columns).toList();
@@ -596,4 +652,244 @@ class AmountInputFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: text.length),
     );
   }
+}
+
+/// Fond des champs « libellé dans la case » des maquettes (`--card`).
+Color boxedFieldFill(TaraColors c) =>
+    c.isDark ? const Color.fromRGBO(255, 255, 255, .06) : const Color.fromRGBO(255, 255, 255, .84);
+
+/// Bord des cartes des maquettes (`--card-border`) : blanc en clair, blanc à 10 % en sombre.
+Color boxedFieldBorder(TaraColors c) => c.isDark ? const Color.fromRGBO(255, 255, 255, .10) : Colors.white;
+
+/// Bouton radio des maquettes : anneau de 22, point orange de 10 quand il est choisi.
+class RadioDot extends StatelessWidget {
+  const RadioDot({super.key, required this.selected});
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    const on = Color(0xFFFF8A00);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: selected ? on : c.textPrimary.withValues(alpha: .3), width: 2),
+      ),
+      alignment: Alignment.center,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.elasticOut,
+        scale: selected ? 1 : 0,
+        child: Container(
+          width: 10,
+          height: 10,
+          decoration: const BoxDecoration(shape: BoxShape.circle, color: on),
+        ),
+      ),
+    );
+  }
+}
+
+/// Champ des maquettes où le libellé est dans la case (« Numéro de téléphone », « Nom de
+/// votre boutique ») : 56 de haut au moins, coins 16, libellé 11 en gras, valeur 16 en
+/// gras. Sans [controller], la case affiche [value] et ne se modifie pas (« Pays »).
+class BoxedField extends StatefulWidget {
+  const BoxedField({
+    super.key,
+    required this.label,
+    this.controller,
+    this.value,
+    this.valueLeading,
+    this.hint,
+    this.keyboardType,
+    this.textInputAction,
+    this.autofillHints,
+    this.inputFormatters,
+    this.onSubmitted,
+    this.onChanged,
+    this.textCapitalization = TextCapitalization.none,
+    this.trailing,
+    this.helper,
+    this.valueStyle,
+  });
+
+  final String label;
+  final TextEditingController? controller;
+  final String? value;
+
+  /// Devant la valeur fixe (drapeau du pays).
+  final Widget? valueLeading;
+  final String? hint;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
+  final List<TextInputFormatter>? inputFormatters;
+  final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
+  final TextCapitalization textCapitalization;
+
+  /// À droite de la case (bouton contacts, logo de l'opérateur).
+  final Widget? trailing;
+
+  /// Ligne sous la valeur, dans la case (« Il reçoit vos ventes encaissées »).
+  final String? helper;
+  final TextStyle? valueStyle;
+
+  @override
+  State<BoxedField> createState() => _BoxedFieldState();
+}
+
+class _BoxedFieldState extends State<BoxedField> {
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = TaraColors.of(context);
+    final focused = _focus.hasFocus;
+    final valueStyle =
+        widget.valueStyle ??
+        TaraText.bodyStrong.copyWith(color: c.textPrimary, fontSize: 15, fontWeight: FontWeight.w700, height: 1.3);
+    final Widget value = widget.controller == null
+        ? Row(
+            children: [
+              if (widget.valueLeading case final leading?) ...[leading, const SizedBox(width: 4)],
+              Flexible(
+                child: Text(widget.value ?? '', style: valueStyle, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          )
+        : TextField(
+            focusNode: _focus,
+            controller: widget.controller,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            autofillHints: widget.autofillHints,
+            inputFormatters: widget.inputFormatters,
+            onSubmitted: widget.onSubmitted,
+            onChanged: widget.onChanged,
+            textCapitalization: widget.textCapitalization,
+            cursorColor: TaraBrand.orange,
+            style: valueStyle,
+            decoration: InputDecoration(
+              isCollapsed: true,
+              border: InputBorder.none,
+              hintText: widget.hint,
+              hintStyle: valueStyle.copyWith(color: c.placeholder, fontWeight: FontWeight.w500),
+            ),
+          );
+    final box = AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      constraints: const BoxConstraints(minHeight: 52),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+      decoration: BoxDecoration(
+        color: boxedFieldFill(c),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: focused ? TaraBrand.focusBorder : c.textPrimary.withValues(alpha: .12),
+          width: focused ? 1.2 : 1,
+        ),
+        boxShadow: focused ? const [BoxShadow(color: TaraBrand.focusHalo, spreadRadius: 3)] : null,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.label,
+                  style: TaraText.smallStrong.copyWith(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                    letterSpacing: .2,
+                    color: c.textPrimary.withValues(alpha: .55),
+                  ),
+                ),
+                value,
+                if (widget.helper case final helper?)
+                  Text(
+                    helper,
+                    style: TaraText.small.copyWith(
+                      fontSize: 11,
+                      height: 1.3,
+                      color: c.textPrimary.withValues(alpha: .62),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (widget.trailing case final trailing?) ...[const SizedBox(width: 10), trailing],
+        ],
+      ),
+    );
+    if (widget.controller == null) return box;
+    return GestureDetector(behavior: HitTestBehavior.opaque, onTap: _focus.requestFocus, child: box);
+  }
+}
+
+/// Drapeau du Cameroun dessiné (vert, rouge à étoile jaune, jaune) : les émojis de
+/// drapeaux ne s'affichent pas sur tous les téléphones.
+class CameroonFlag extends StatelessWidget {
+  const CameroonFlag({super.key, this.width = 20});
+  final double width;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: 'Cameroun',
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(2),
+      child: SizedBox(
+        width: width,
+        height: width * 2 / 3,
+        child: const CustomPaint(painter: _FlagPainter()),
+      ),
+    ),
+  );
+}
+
+class _FlagPainter extends CustomPainter {
+  const _FlagPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width / 3;
+    canvas
+      ..drawRect(Rect.fromLTWH(0, 0, w, size.height), Paint()..color = const Color(0xFF007A5E))
+      ..drawRect(Rect.fromLTWH(w, 0, w, size.height), Paint()..color = const Color(0xFFCE1126))
+      ..drawRect(Rect.fromLTWH(2 * w, 0, w, size.height), Paint()..color = const Color(0xFFFCD116));
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = size.height * .22;
+    final star = Path();
+    for (var i = 0; i < 10; i++) {
+      final radius = i.isEven ? r : r * .4;
+      final a = -1.5707963 + i * 3.14159265 / 5;
+      final p = center + Offset(radius * _cos(a), radius * _sin(a));
+      i == 0 ? star.moveTo(p.dx, p.dy) : star.lineTo(p.dx, p.dy);
+    }
+    canvas.drawPath(star..close(), Paint()..color = const Color(0xFFFCD116));
+  }
+
+  static double _cos(double a) => math.cos(a);
+  static double _sin(double a) => math.sin(a);
+
+  @override
+  bool shouldRepaint(_FlagPainter old) => false;
 }
