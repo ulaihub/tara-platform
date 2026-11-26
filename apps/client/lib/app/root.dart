@@ -48,15 +48,18 @@ class _AuthFlowState extends ConsumerState<_AuthFlow> {
   @override
   void initState() {
     super.initState();
-    ref.read(keyValueStoreProvider).read(introSeenKey).then(
-      (value) {
-        if (mounted) setState(() => _introSeen = value != null);
-      },
-      // Mémoire illisible : on ne bloque pas l'accès à la connexion.
-      onError: (Object _) {
-        if (mounted) setState(() => _introSeen = true);
-      },
-    );
+    ref
+        .read(keyValueStoreProvider)
+        .read(introSeenKey)
+        .then(
+          (value) {
+            if (mounted) setState(() => _introSeen = value != null);
+          },
+          // Mémoire illisible : on ne bloque pas l'accès à la connexion.
+          onError: (Object _) {
+            if (mounted) setState(() => _introSeen = true);
+          },
+        );
   }
 
   void _introDone() {

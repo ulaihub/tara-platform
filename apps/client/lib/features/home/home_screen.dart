@@ -149,7 +149,11 @@ class HomeScreen extends ConsumerWidget {
                       TextSpan(
                         children: [
                           TextSpan(text: l.inProgress),
-                          if (count > 0) TextSpan(text: ' · $count', style: TextStyle(color: c.accentText)),
+                          if (count > 0)
+                            TextSpan(
+                              text: ' · $count',
+                              style: TextStyle(color: c.accentText),
+                            ),
                         ],
                       ),
                       style: TaraText.cardTitle.copyWith(color: c.textPrimary),
@@ -254,7 +258,9 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
               height: 122 + (scale - 1).clamp(0, 1) * 70,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(26),
-                boxShadow: const [BoxShadow(color: Color.fromRGBO(60, 25, 0, .24), blurRadius: 40, offset: Offset(0, 20))],
+                boxShadow: const [
+                  BoxShadow(color: Color.fromRGBO(60, 25, 0, .24), blurRadius: 40, offset: Offset(0, 20)),
+                ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(26),
@@ -271,7 +277,9 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
                   ),
                   child: Stack(
                     children: [
-                      const Positioned.fill(child: RouteTrail(route: RouteTrail.homeHero, base: Size(352, 122))),
+                      const Positioned.fill(
+                        child: RouteTrail(route: RouteTrail.homeHero, base: Size(352, 122)),
+                      ),
                       const SheenSweep(
                         color: Color.fromRGBO(255, 255, 255, .10),
                         delay: Duration(seconds: 1),
@@ -329,11 +337,18 @@ class _SalesHeroState extends State<_SalesHero> with SingleTickerProviderStateMi
                                     children: [
                                       Text(
                                         daily ? l.heroTonight('${data.payoutHour}') : l.heroOnDemand,
-                                        style: TaraText.small.copyWith(color: soft, fontWeight: FontWeight.w700, fontSize: 11),
+                                        style: TaraText.small.copyWith(
+                                          color: soft,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 11,
+                                        ),
                                       ),
                                       Text(
                                         daily ? l.heroPaidOut(pending) : l.heroToReceive(pending),
-                                        style: TaraText.smallStrong.copyWith(color: const Color(0xFFFFC283), fontSize: 13),
+                                        style: TaraText.smallStrong.copyWith(
+                                          color: const Color(0xFFFFC283),
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -454,7 +469,11 @@ class _QuickActions extends StatelessWidget {
                             color: c.glassFallback,
                             boxShadow: [
                               if (!c.isDark)
-                                const BoxShadow(color: Color.fromRGBO(140, 70, 10, .10), blurRadius: 20, offset: Offset(0, 8)),
+                                const BoxShadow(
+                                  color: Color.fromRGBO(140, 70, 10, .10),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 8),
+                                ),
                             ],
                           ),
                           child: Center(child: TaraIcon(icon, size: 22, color: c.textPrimary)),
@@ -467,7 +486,10 @@ class _QuickActions extends StatelessWidget {
                               constraints: const BoxConstraints(minWidth: 20),
                               height: 20,
                               padding: const EdgeInsets.symmetric(horizontal: 6),
-                              decoration: BoxDecoration(gradient: TaraBrand.gradient, borderRadius: BorderRadius.circular(10)),
+                              decoration: BoxDecoration(
+                                gradient: TaraBrand.gradient,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               alignment: Alignment.center,
                               child: Text(
                                 '$badge',

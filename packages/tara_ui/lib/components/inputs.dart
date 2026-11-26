@@ -202,22 +202,9 @@ class CodeCells extends StatefulWidget {
     this.autofocus = true,
     this.controller,
     this.oneTimeCode = false,
-    this.cellWidth,
-    this.plain = false,
-    this.plainFill,
   });
 
   final int length;
-
-  /// Largeur fixe des cases, centrées (maquettes Code : 46) ; sinon elles se partagent la ligne.
-  final double? cellWidth;
-
-  /// Style des maquettes de connexion : bordure de 2, coins 14, case active orange, sans
-  /// vague ni halo, curseur orange.
-  final bool plain;
-
-  /// Fond des cases en style [plain] (sinon `--card`).
-  final Color? plainFill;
 
   /// Libellé lecteur d'écran de chaque case (« Chiffre N »).
   final String Function(int index) digitLabel;
@@ -269,38 +256,6 @@ class _CodeCellsState extends State<CodeCells> {
       color: c.textPrimary,
       fontFeatures: TaraText.tabular,
     );
-
-    Widget plainCell(int index) {
-      final filled = index < value.length;
-      final isActive = index == active && value.length < widget.length;
-      final box = Container(
-        height: widget.cellHeight,
-        decoration: BoxDecoration(
-          color: widget.plainFill ?? boxedFieldFill(c),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isActive ? const Color(0xFFFF8A00) : c.textPrimary.withValues(alpha: .16),
-            width: 2,
-          ),
-        ),
-        alignment: Alignment.center,
-        child: filled
-            ? Text(
-                value[index],
-                style: TextStyle(
-                  fontFamily: TaraText.sora,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: c.textPrimary,
-                  fontFeatures: TaraText.tabular,
-                ),
-              )
-            : isActive
-            ? Blink(child: Container(width: 2, height: 26, color: TaraBrand.orange))
-            : null,
-      );
-      return Semantics(label: widget.digitLabel(index + 1), value: filled ? value[index] : '', child: box);
-    }
 
     Widget cell(int index) {
       final filled = index < value.length;
@@ -375,21 +330,8 @@ class _CodeCellsState extends State<CodeCells> {
       child: Stack(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (var i = 0; i < widget.length; i++) ...[
-                if (i > 0) SizedBox(width: widget.plain ? 8 : 10),
-                // Cases de largeur fixe qui rétrécissent ensemble sur un écran étroit.
-                if (widget.plain)
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: widget.cellWidth ?? double.infinity),
-                      child: plainCell(i),
-                    ),
-                  )
-                else
-                  cell(i),
-              ],
+              for (var i = 0; i < widget.length; i++) ...[if (i > 0) const SizedBox(width: 10), cell(i)],
             ],
           ),
           // Champ invisible qui reçoit la saisie et le code SMS proposé par le système.
