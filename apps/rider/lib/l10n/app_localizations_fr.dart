@@ -2610,4 +2610,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String listAnd(String first, String last) {
     return '$first et $last';
   }
+
+  @override
+  String get addressFacade => 'Façade';
+
+  @override
+  String enRouteEta(int minutes, String distance, String time) {
+    return '$minutes min · $distance · arrivée $time';
+  }
 }

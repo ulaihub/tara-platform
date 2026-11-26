@@ -789,5 +789,7 @@
   "pickupCodeScanned": "Code checked",
   "pickupCodeTyped": "Code entered",
   "pickupCodeChange": "Change",
-  "listAnd": "{first} and {last}"
+  "listAnd": "{first} and {last}",
+  "addressFacade": "Front",
+  "enRouteEta": "{minutes} min · {distance} · arriving {time}"
 }

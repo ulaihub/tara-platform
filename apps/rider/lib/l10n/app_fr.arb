@@ -1866,5 +1866,20 @@
         "type": "String"
       }
     }
+  },
+  "addressFacade": "Façade",
+  "enRouteEta": "{minutes} min · {distance} · arrivée {time}",
+  "@enRouteEta": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

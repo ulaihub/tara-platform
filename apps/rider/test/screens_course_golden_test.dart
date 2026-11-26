@@ -260,9 +260,11 @@ void main() {
       await pumpVariant(
         tester,
         variant,
-        scope(delivery(order(status: 'IN_DELIVERY', collectAtDelivery: 0)), online: online),
+        // Maquette : façade et note vocale du client, somme à encaisser.
+        scope(delivery(order(status: 'IN_DELIVERY', collectAtDelivery: 15000, dropoffMedia: true)), online: online),
       );
       await settle(tester);
+      expect(find.text('Façade'), findsOneWidget);
       // À 2,5 km : d'abord « en route », avec la distance ; « Je suis arrivé » ouvre la remise.
       expect(find.text('À 2,5\u00a0km'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/09_en_route/${variant.name}.png'));

@@ -4489,6 +4489,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{first} et {last}'**
   String listAnd(String first, String last);
+
+  /// No description provided for @addressFacade.
+  ///
+  /// In fr, this message translates to:
+  /// **'Façade'**
+  String get addressFacade;
+
+  /// No description provided for @enRouteEta.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min · {distance} · arrivée {time}'**
+  String enRouteEta(int minutes, String distance, String time);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
