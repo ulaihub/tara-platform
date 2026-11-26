@@ -37,6 +37,7 @@ dependencies:
   tara_ui:
     path: ../../packages/tara_ui
   audioplayers: ^6.8.1
+  mobile_scanner: ^7.5.0
 
 dev_dependencies:
   flutter_test:

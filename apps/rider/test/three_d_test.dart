@@ -17,7 +17,10 @@ void main() {
       Variant.matrix.first,
       Scaffold(
         body: Center(
-          child: SizedBox(width: 300, child: Column3DChart(columns: week, selected: 2, onSelected: chosen.add)),
+          child: SizedBox(
+            width: 300,
+            child: Column3DChart(columns: week, selected: 2, onSelected: chosen.add),
+          ),
         ),
       ),
     );
@@ -32,7 +35,10 @@ void main() {
     expect(chosen, [1]);
     expect(find.text('6 courses'), findsOneWidget);
     expect(find.text('7 courses'), findsNothing);
-    expect(tester.getSemantics(find.bySemanticsLabel('Mar : 6 courses')), isSemantics(isSelected: true, isButton: true));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Mar : 6 courses')),
+      isSemantics(isSelected: true, isButton: true),
+    );
   });
 
   testWidgets('colis 3D : décrit pour le lecteur d’écran, immobile sans animations', (tester) async {
@@ -41,7 +47,9 @@ void main() {
       Variant.matrix.first,
       const MediaQuery(
         data: MediaQueryData(disableAnimations: true),
-        child: Center(child: Parcel3D(label: 'n° 4', semanticLabel: 'Colis Tara')),
+        child: Center(
+          child: Parcel3D(label: 'n° 4', semanticLabel: 'Colis Tara'),
+        ),
       ),
     );
     await tester.pump(const Duration(seconds: 2));

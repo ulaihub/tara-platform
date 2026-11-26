@@ -19,6 +19,7 @@ import 'package:tara_rider/features/course/failure_screen.dart';
 import 'package:tara_rider/features/course/pickup_screen.dart';
 import 'package:tara_rider/features/course/refuse_parcel_screen.dart';
 import 'package:tara_rider/features/course/return_screen.dart';
+import 'package:tara_rider/features/course/scan_code_screen.dart';
 import 'package:tara_rider/features/map/tara_map.dart';
 import 'package:tara_ui/components/buttons.dart';
 import 'package:tara_ui/components/swipe_button.dart';
@@ -67,8 +68,39 @@ class _Positions implements PositionSource {
 /// Retour sans frais à encaisser : le solde de l'expéditeur les couvre.
 FakeRiderApi noReturnFees() => FakeRiderApi()..collections = [const Collection(total: 0, complete: true)];
 
-Widget scope(Widget child, {OnlineController? online, CallJournal? calls, FakeRiderApi? api}) => ProviderScope(
+/// Caméra de test : lit [qr] dès qu'elle s'affiche.
+CodeSource fakeCamera(String qr) =>
+    (context, {required onCode, required onUnavailable}) => _FakeCamera(qr: qr, onCode: onCode);
+
+class _FakeCamera extends StatefulWidget {
+  const _FakeCamera({required this.qr, required this.onCode});
+  final String qr;
+  final ValueChanged<String> onCode;
+
+  @override
+  State<_FakeCamera> createState() => _FakeCameraState();
+}
+
+class _FakeCameraState extends State<_FakeCamera> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => widget.onCode(widget.qr));
+  }
+
+  @override
+  Widget build(BuildContext context) => const ColoredBox(color: Color(0xFF3A2C20));
+}
+
+Widget scope(
+  Widget child, {
+  OnlineController? online,
+  CallJournal? calls,
+  FakeRiderApi? api,
+  String qr = 'TARA:PK:TR-48213:7302',
+}) => ProviderScope(
   overrides: [
+    codeSourceProvider.overrideWithValue(fakeCamera(qr)),
     keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
     riderApiProvider.overrideWithValue(api ?? noReturnFees()),
     realMapProvider.overrideWithValue(false),
@@ -175,6 +207,8 @@ RefuseParcelScreen refusal() => RefuseParcelScreen(
 );
 
 void main() {
+  scanTests();
+
   setUpAll(loadAppFonts);
 
   for (final variant in Variant.matrix) {
@@ -267,7 +301,14 @@ void main() {
       // Vignette décodée avant d'apparaître (le décodage ne progresse pas en temps simulé).
       final context = tester.element(find.byType(PickupScreen));
       await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
-      await tester.enterText(find.byType(EditableText).first, '7302');
+      // Code scanné (maquette) : QR de l'expéditeur, puis « Continuer ».
+      await tester.ensureVisible(find.text('Scanner'));
+      await tester.tap(find.text('Scanner'));
+      await settle(tester);
+      expect(find.text('Code bon !'), findsWidgets);
+      await tester.tap(find.text('Continuer'));
+      await settle(tester);
+      expect(find.text('Code vérifié'), findsOneWidget);
       await tester.ensureVisible(find.text('Photographier le colis'));
       await tester.tap(find.text('Photographier le colis'));
       await tester.pump();
@@ -438,7 +479,10 @@ void main() {
     expect(api.arrivals, ['00000000-0000-4000-8000-000000000002']);
     // Arrivé à 14 h 32, l'écran est à 14 h 32 : rien à payer encore.
     expect(
-      find.text('Vous attendez depuis 0 min · gratuit encore 10 min. Ensuite 100\u00a0F par 5 min pour l’expéditeur.', findRichText: true),
+      find.text(
+        'Vous attendez depuis 0 min · gratuit encore 10 min. Ensuite 100\u00a0F par 5 min pour l’expéditeur.',
+        findRichText: true,
+      ),
       findsOneWidget,
     );
     await tester.pumpWidget(const SizedBox());
@@ -562,6 +606,9 @@ void main() {
     await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
     // Photo à prendre : les 3 colis ensemble.
     expect(find.text('Les 3 colis ensemble, numéros visibles'), findsOneWidget);
+    await tester.ensureVisible(find.text('Taper 4 chiffres'));
+    await tester.tap(find.text('Taper 4 chiffres'));
+    await settle(tester);
     await tester.enterText(find.byType(EditableText).first, '7302');
     await tester.ensureVisible(find.text('Photographier le colis'));
     await tester.tap(find.text('Photographier le colis'));
@@ -587,5 +634,39 @@ void main() {
     expect(find.text('COLIS À RÉCUPÉRER · 3 SUR 3 COCHÉS'), findsOneWidget);
     expect(swipe().onConfirmed, isNotNull);
     await tester.pumpWidget(const SizedBox());
+  });
+}
+
+/// Écran de scan seul (maquette Scanner), avec une caméra de test.
+Widget scanScreen(String qr) => scope(
+  const ScanCodeScreen(references: ['TR-48213'], context: 'Boutique Awa · TR-48213', parcels: 1),
+  qr: qr,
+);
+
+void scanTests() {
+  for (final brightness in Brightness.values) {
+    goldenTest('08 scanner le code ${brightness.name}', (tester) async {
+      // QR quelconque : l'écran attend toujours le bon code (cadre orange).
+      await pumpVariant(tester, Variant(brightness, ScreenSize.regular, 1), scanScreen('bonjour'));
+      await settle(tester);
+      expect(find.text('Ce n’est pas un code d’enlèvement Tara (le QR du reçu ne marche pas ici).'), findsOneWidget);
+      expect(find.text('Taper les 4 chiffres'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/08_scanner/${brightness.name}.png'));
+    });
+
+    goldenTest('08 scanner, code bon ${brightness.name}', (tester) async {
+      await pumpVariant(tester, Variant(brightness, ScreenSize.regular, 1), scanScreen('TARA:PK:TR-48213:7302'));
+      await settle(tester);
+      expect(find.text('Code bon !'), findsOneWidget);
+      expect(find.text('Code d’enlèvement vérifié'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/08_scanner_ok/${brightness.name}.png'));
+    });
+  }
+
+  testWidgets('scanner : le QR d’une autre course est refusé sans compter d’essai', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, scanScreen('TARA:PK:TR-99999:1111'));
+    await settle(tester);
+    expect(find.text('Ce QR est le code d’une autre course. Demandez celui de cette commande.'), findsOneWidget);
+    expect(find.text('Continuer'), findsNothing);
   });
 }

@@ -28,7 +28,10 @@ void main() {
     expect(find.text('17 courses'), findsWidgets);
     // Mercredi 4 en cours : son détail est affiché sous les colonnes.
     expect(find.text('Mercredi 4 nov. · aujourd’hui'), findsOneWidget);
-    expect(find.bySemanticsLabel('Mer : Mercredi 4 nov. · aujourd’hui : 6\u00a0750\u00a0F · 4 courses'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Mer : Mercredi 4 nov. · aujourd’hui : 6\u00a0750\u00a0F · 4 courses'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Mar'));
     await settle(tester);
