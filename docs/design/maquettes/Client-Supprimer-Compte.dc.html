@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Expéditeur · supprimer mon compte</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #FFB15C)}
+button{font-family:inherit}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes r-radar{0%{transform:scale(.3);opacity:.75}100%{transform:scale(3.2);opacity:0}}@keyframes r-dash{to{stroke-dashoffset:-28}}@keyframes r-blink{0%,100%{opacity:1}50%{opacity:.35}}@keyframes r-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}@keyframes r-turn{to{transform:rotate(360deg)}}@keyframes r-rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes r-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-up{from{transform:translateY(100%)}to{transform:translateY(0%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@keyframes am-rise{0%{transform:translateY(40px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes am-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+<div style="position: absolute; inset: 0; overflow: hidden; pointer-events: none"><span class="tara-anim" style="position: absolute; left: -110px; top: -60px; width: 320px; height: 320px; background: radial-gradient(circle at 30% 30%, #FFD27A 0%, #FF8A00 100%); filter: blur(46px); opacity: 0.45; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out 0s infinite alternate, lq-drift 20s ease-in-out 0s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: 200px; top: 260px; width: 280px; height: 280px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -5s infinite alternate, lq-drift 20s ease-in-out -5s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: -60px; top: 620px; width: 260px; height: 260px; background: radial-gradient(circle at 30% 30%, #FFD27A 0%, #FF8A00 100%); filter: blur(46px); opacity: 0.3; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -10s infinite alternate, lq-drift 20s ease-in-out -10s infinite alternate" aria-hidden="true"></span></div>
+<div style="position: relative; padding: 18px 20px 0; display: flex; align-items: center; gap: 10px"><a href="Profil.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 1px solid var(--card-border); display: flex; align-items: center; justify-content: center; color: inherit; box-sizing: border-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><b style="font-family: Sora, sans-serif; font-size: 18px">Mon compte et mes données</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.70)">Télécharger ou supprimer</span></span></div>
+<div style="position: absolute; left: 20px; right: 20px; top: 92px; bottom: 20px; display: flex; flex-direction: column; gap: 12px"><a href="#" style="padding: 12px 14px; border-radius: 22px; background: var(--card); border: 1px solid var(--card-border); box-shadow: 0 12px 28px rgba(140,70,10,.08); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); color: inherit; text-decoration: none; display: flex; align-items: center; gap: 12px"><span style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255,177,92,.14); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--accent)"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg></span><span style="flex: 1; display: flex; flex-direction: column"><b style="font-size: 14px">Télécharger mes données</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.62)">Une copie de tout ce que Tara garde sur vous</span></span></a><b style="margin-top: 6px; font-size: 16px; color: #FF6B75">Supprimer mon compte</b><span style="font-size: 13px; line-height: 1.5; color: rgba(var(--fg-rgb),.8)">Votre nom, votre numéro, vos adresses, photos et notes vocales sont effacés, et l’app se déconnecte. C’est définitif : avec le même numéro, vous repartirez d’un compte vide.</span><sc-if value="{{hasBalance}}" hint-placeholder-val="{{ true }}"><div style="padding: 12px 14px; border-radius: 18px; background: rgba(255,138,61,.08); border: 1px solid rgba(255,138,61,.45); font-size: 13px; line-height: 1.5">Il vous reste <b>3 500 F</b> chez Tara, moins que le plus petit envoi Mobile Money (30 000 F). Utilisez-les pour vos livraisons, ou appelez le service client pour les récupérer.</div></sc-if><sc-if value="{{deleted}}" hint-placeholder-val="{{ false }}"><span class="tara-anim" style="padding: 12px; border-radius: 14px; background: rgba(74,222,155,.12); color: var(--ok); font-size: 13px; font-weight: 700; animation: r-rise .4s ease-out both">Compte supprimé. L’app va se déconnecter.</span></sc-if><div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px"><button type="button" onClick="{{ask}}" style="height: 56px; border-radius: 20px; border: 2px solid {{delBorder}}; background: transparent; color: {{delInk}}; font-size: 15px; font-weight: 800; cursor: pointer">Supprimer avec mon code secret</button><button type="button" onClick="{{toggle}}" style="min-height: 34px; border: 0; background: transparent; color: rgba(var(--fg-rgb),.55); font-size: 12px; font-weight: 700; cursor: pointer">Maquette : {{toggleLabel}}</button></div></div>
+<div style="position: absolute; inset: 0; z-index: 20; display: {{pinShow}}"><button type="button" aria-label="Fermer" onClick="{{pinClose}}" style="position: absolute; inset: 0; border: 0; background: rgba(var(--bg-rgb),.55); cursor: pointer"></button><div role="dialog" aria-label="Code secret" class="tara-anim" style="position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 20px 24px; border-radius: 28px 28px 0 0; background: var(--sheet); display: flex; flex-direction: column; gap: 14px; animation: am-rise .35s ease-out both"><span style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: rgba(var(--fg-rgb),.22)"></span><b style="font-size: 17px; text-align: center">Code secret</b><span style="text-align: center; font-size: 13px; color: rgba(var(--fg-rgb),.72)">{{pinReason}}</span><div style="display: flex; justify-content: center; gap: 14px"><sc-for list="{{dots}}" as="d" hint-placeholder-count="4"><span style="width: 16px; height: 16px; border-radius: 50%; border: 2px solid #FF8A00; background: {{d.fill}}"></span></sc-for></div><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px"><sc-for list="{{pinKeys}}" as="k" hint-placeholder-count="12"><button type="button" aria-label="{{k.aria}}" onClick="{{k.press}}" style="height: 52px; border-radius: 14px; border: 1px solid var(--card-border); background: var(--card); color: inherit; font: 700 20px Sora, sans-serif; cursor: pointer">{{k.label}}</button></sc-for></div></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "clair"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { balance: true, deleted: false, pin: '', pinOpen: false };
+  }
+  vals() {
+
+    const pinVals = (reason, onOk) => {
+      const pin = this.state.pin;
+      return {
+        pinShow: this.state.pinOpen ? 'block' : 'none', pinClose: () => this.setState({ pinOpen: false }), pinReason: reason,
+        dots: [0, 1, 2, 3].map((i) => ({ fill: i < pin.length ? '#FF8A00' : 'transparent' })),
+        pinKeys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '◉', '0', '⌫'].map((k) => ({
+          label: k, aria: k === '⌫' ? 'Effacer' : k === '◉' ? 'Empreinte digitale' : k,
+          press: () => {
+            if (k === '⌫') return this.setState({ pin: pin.slice(0, -1) });
+            const next = k === '◉' ? '0000' : (pin + k).slice(0, 4);
+            if (next.length === 4) { this.setState({ pin: '', pinOpen: false }); onOk(); } else this.setState({ pin: next });
+          },
+        })),
+      };
+    };
+    const { balance, deleted } = this.state;
+    const can = !balance && !deleted;
+    return {
+      hasBalance: balance, deleted,
+      ask: () => { if (can) this.setState({ pinOpen: true, pin: '' }); },
+      delBorder: can ? '#FF6B75' : 'rgba(var(--fg-rgb),.14)', delInk: can ? '#FF6B75' : 'rgba(var(--fg-rgb),.4)',
+      toggle: () => this.setState({ balance: !balance, deleted: false }), toggleLabel: balance ? 'solde utilisé (0 F)' : 'il reste 3 500 F',
+      ...pinVals('Pour supprimer votre compte', () => this.setState({ deleted: true })),
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'clair';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

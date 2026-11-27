@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Barres de menu et icônes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#C2410C}a:hover{color:#9A3412}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 1330px; height: 820px; box-sizing: border-box; padding: 44px 48px; background: #F6F2EC; color: #16120E; font-family: 'Plus Jakarta Sans', sans-serif; display: grid; grid-template-columns: 620px minmax(0, 1fr); gap: 48px">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="mb-grad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#FFB000"></stop>
+        <stop offset=".55" stop-color="#FF6A00"></stop>
+        <stop offset="1" stop-color="#FF3D00"></stop>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="margin: 0; font-family: Sora, sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em">Barres de menu</h1>
+      <p style="margin: 0; font-size: 14px; color: rgba(22,18,14,.70)">Touchez les onglets : le petit trait de vitesse glisse d'un onglet à l'autre, sans rectangle derrière les icônes. Le bouton central lance une livraison.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: rgba(22,18,14,.62)">Avant · expéditeur</span>
+      <div style="height: 104px; border-radius: 24px; background: #0A0A0F; display: flex; align-items: center; justify-content: center">
+        <div style="width: 360px; height: 64px; border-radius: 22px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; padding: 0 4px; box-sizing: border-box">
+          <span style="height: 54px; border-radius: 18px; background: rgba(255,138,0,.20); border: 1px solid rgba(255,138,0,.4); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #FFB15C; font-size: 11px; font-weight: 700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"></path></svg>Accueil</span>
+          <span style="display: flex; flex-direction: column; align-items: center; gap: 2px; color: rgba(255,255,255,.74); font-size: 11px; font-weight: 700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5zM3 7.5L12 12l9-4.5M12 12v9"></path></svg>Commandes</span>
+          <span style="display: flex; flex-direction: column; align-items: center; gap: 2px; color: rgba(255,255,255,.74); font-size: 11px; font-weight: 700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM4.5 20c1.4-3.2 4.2-5 7.5-5s6.1 1.8 7.5 5"></path></svg>Profil</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #C2410C">Proposée · expéditeur, clair</span>
+      <div style="height: 118px; border-radius: 24px; background: #ECE7E0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; box-sizing: border-box">
+        <nav aria-label="Navigation expéditeur, thème clair" style="position: relative; width: 400px; height: 72px; border-radius: 26px; background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.9); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); background-image: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 70%); box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 16px 34px rgba(140,70,10,.14); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; padding: 0 6px; box-sizing: border-box">
+          <span style="position: absolute; top: 6px; left: {{light.pillLeft}}; width: 20px; height: 4px; border-radius: 2px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); transition: left .5s cubic-bezier(.6,-.35,.3,1.45)" aria-hidden="true"></span>
+          <sc-for list="{{light.tabs}}" as="t" hint-placeholder-count="5">
+            <sc-if value="{{t.center}}" hint-placeholder-val="{{ false }}">
+              <button type="button" aria-label="Envoyer un colis" style="justify-self: center; width: 58px; height: 58px; margin-top: -28px; border: 0; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); box-shadow: 0 6px 0 #B8420A, 0 16px 28px rgba(255,90,0,.36); transform: perspective(300px) rotateX(14deg); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#140800" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+            </sc-if>
+            <sc-if value="{{t.plain}}" hint-placeholder-val="{{ true }}">
+              <button type="button" aria-current="{{t.current}}" onClick="{{t.pick}}" style="position: relative; height: 58px; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: {{t.weight}}; color: {{t.ink}}">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{t.stroke}}" stroke-width="{{t.width}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg>
+                {{t.label}}
+              </button>
+            </sc-if>
+          </sc-for>
+        </nav>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #C2410C">Proposée · expéditeur, sombre</span>
+      <div style="height: 118px; border-radius: 24px; background: #0A0A0F; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; box-sizing: border-box">
+        <nav aria-label="Navigation expéditeur, thème sombre" style="position: relative; width: 400px; height: 72px; border-radius: 26px; background: rgba(28,28,36,.62); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); background-image: linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 70%); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 16px 34px rgba(0,0,0,.25); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; padding: 0 6px; box-sizing: border-box">
+          <span style="position: absolute; top: 6px; left: {{dark.pillLeft}}; width: 20px; height: 4px; border-radius: 2px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); transition: left .5s cubic-bezier(.6,-.35,.3,1.45)" aria-hidden="true"></span>
+          <sc-for list="{{dark.tabs}}" as="t" hint-placeholder-count="5">
+            <sc-if value="{{t.center}}" hint-placeholder-val="{{ false }}">
+              <button type="button" aria-label="Envoyer un colis" style="justify-self: center; width: 58px; height: 58px; margin-top: -28px; border: 0; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); box-shadow: 0 6px 0 #B8420A, 0 16px 28px rgba(255,90,0,.36); transform: perspective(300px) rotateX(14deg); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#140800" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+            </sc-if>
+            <sc-if value="{{t.plain}}" hint-placeholder-val="{{ true }}">
+              <button type="button" aria-current="{{t.current}}" onClick="{{t.pick}}" style="position: relative; height: 58px; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: {{t.weight}}; color: {{t.ink}}">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{t.stroke}}" stroke-width="{{t.width}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg>
+                {{t.label}}
+              </button>
+            </sc-if>
+          </sc-for>
+        </nav>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #C2410C">Proposée · livreur, sombre</span>
+      <div style="height: 104px; border-radius: 24px; background: #0A0A0F; display: flex; align-items: center; justify-content: center">
+        <nav aria-label="Navigation livreur" style="position: relative; width: 340px; height: 68px; border-radius: 24px; background: rgba(28,28,36,.62); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); background-image: linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 70%); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 16px 34px rgba(0,0,0,.25); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; padding: 0 6px; box-sizing: border-box">
+          <span style="position: absolute; top: 5px; left: {{rider.pillLeft}}; width: 20px; height: 4px; border-radius: 2px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); transition: left .5s cubic-bezier(.6,-.35,.3,1.45)" aria-hidden="true"></span>
+          <sc-for list="{{rider.tabs}}" as="t" hint-placeholder-count="3">
+            <button type="button" aria-current="{{t.current}}" onClick="{{t.pick}}" style="position: relative; height: 56px; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: {{t.weight}}; color: {{t.ink}}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{t.stroke}}" stroke-width="{{t.width}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg>
+              {{t.label}}
+            </button>
+          </sc-for>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-family: Sora, sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em">Les icônes</h2>
+      <p style="margin: 0; font-size: 14px; color: rgba(22,18,14,.70)">Dessinées pour Tara : grille de 24 px, trait de 1,8 px (2 px quand l'onglet est actif, en dégradé), bouts arrondis. Les traits de vitesse du logo signent « Commandes ».</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+      <sc-for list="{{icons}}" as="i" hint-placeholder-count="8">
+        <div style="padding: 14px 10px 12px; border-radius: 22px; background: rgba(255,255,255,.72); border: 1px solid rgba(255,255,255,.95); display: flex; flex-direction: column; align-items: center; gap: 10px">
+          <div style="height: 52px; display: flex; align-items: flex-end; gap: 26px">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#16120E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{i.label}}, inactif"><path d="{{i.d}}"></path></svg>
+            <span style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+              <span style="width: 20px; height: 4px; border-radius: 2px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)" aria-hidden="true"></span>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="url(#mb-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{i.label}}, actif"><path d="{{i.d}}"></path></svg>
+            </span>
+          </div>
+          <span style="font-size: 13px; font-weight: 800">{{i.label}}</span>
+          <span style="font-size: 11px; font-weight: 600; color: rgba(22,18,14,.66); text-align: center">{{i.where}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="padding: 16px 22px; border-radius: 20px; background: #0A0A0F; display: flex; align-items: center; justify-content: space-between" role="img" aria-label="Les mêmes icônes en thème sombre">
+      <sc-for list="{{icons}}" as="i" hint-placeholder-count="8">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.88)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.d}}"></path></svg>
+      </sc-for>
+    </div>
+    <div style="padding: 14px 16px; border-radius: 20px; background: rgba(255,255,255,.72); border: 1px solid rgba(255,255,255,.95); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; font-size: 13px; line-height: 1.45">
+      <div style="display: flex; flex-direction: column; gap: 4px"><b>Inactif</b><span style="color: rgba(22,18,14,.70)">Contour fin, encre de Tara, libellé en gris lisible. Rien derrière l'icône.</span></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><b>Actif</b><span style="color: rgba(22,18,14,.70)">Trait en dégradé, petit trait de vitesse qui glisse au-dessus, libellé en gras.</span></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><b>Au toucher</b><span style="color: rgba(22,18,14,.70)">Petite vibration et rebond de l'icône, comme les boutons à glisser.</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1330,"height":820}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { light: 3, dark: 0, rider: 1 };
+  }
+  renderVals() {
+    const D = {
+      home: 'M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5H9v5H5.5A1.5 1.5 0 0 1 4 19z',
+      orders: 'M9.5 8 15 5.2 20.5 8v7L15 17.8 9.5 15zM9.5 8 15 10.8 20.5 8M15 10.8v7M2.5 9.5h4.5M3.5 13h3.5',
+      wallet: 'M4 7.5A2.5 2.5 0 0 1 6.5 5H17v3M6.5 8h11A2.5 2.5 0 0 1 20 10.5v6a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9M15.5 13.5h2',
+      profile: 'M15.5 8.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0zM5 19.5c1.3-3 3.9-4.5 7-4.5s5.7 1.5 7 4.5',
+      route: 'M8.2 18a2.2 2.2 0 1 1-4.4 0 2.2 2.2 0 0 1 4.4 0zM20.2 6a2.2 2.2 0 1 1-4.4 0 2.2 2.2 0 0 1 4.4 0zM8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8',
+      gains: 'M4.5 20v-6M10 20V10M15.5 20v-4M21 20V6M3 9.5 9 5l5 3.5L20.5 3',
+      bell: 'M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9zM10 19.5a2 2 0 0 0 4 0',
+      send: 'M12 5v14M5 12h14',
+    };
+    const senderTabs = [
+      ['Accueil', D.home],
+      ['Commandes', D.orders],
+      ['Envoyer', D.send],
+      ['Portefeuille', D.wallet],
+      ['Profil', D.profile],
+    ];
+    const bar = (key, theme) => {
+      const active = this.state[key];
+      const inactiveInk = theme === 'light' ? 'rgba(22,18,14,.66)' : 'rgba(255,255,255,.70)';
+      const activeInk = theme === 'light' ? '#C2410C' : '#FFB15C';
+      const cell = (400 - 12) / 5;
+      return {
+        pillLeft: `${6 + active * cell + (cell - 20) / 2}px`,
+        tabs: senderTabs.map(([label, d], i) => ({
+          label,
+          d,
+          center: i === 2,
+          plain: i !== 2,
+          current: i === active ? 'page' : 'false',
+          pick: () => this.setState({ [key]: i }),
+          ink: i === active ? activeInk : inactiveInk,
+          weight: i === active ? 800 : 700,
+          stroke: i === active ? 'url(#mb-grad)' : 'currentColor',
+          width: i === active ? 2 : 1.8,
+        })),
+      };
+    };
+    const riderActive = this.state.rider;
+    const riderCell = (340 - 12) / 3;
+    return {
+      light: bar('light', 'light'),
+      dark: bar('dark', 'dark'),
+      rider: {
+        pillLeft: `${6 + riderActive * riderCell + (riderCell - 20) / 2}px`,
+        tabs: [['Course', D.route], ['Gains', D.gains], ['Profil', D.profile]].map(([label, d], i) => ({
+          label,
+          d,
+          current: i === riderActive ? 'page' : 'false',
+          pick: () => this.setState({ rider: i }),
+          ink: i === riderActive ? '#FFB15C' : 'rgba(255,255,255,.70)',
+          weight: i === riderActive ? 800 : 700,
+          stroke: i === riderActive ? 'url(#mb-grad)' : 'currentColor',
+          width: i === riderActive ? 2 : 1.8,
+        })),
+      },
+      icons: [
+        { label: 'Accueil', d: D.home, where: 'les deux apps' },
+        { label: 'Commandes', d: D.orders, where: 'expéditeur' },
+        { label: 'Envoyer', d: D.send, where: 'bouton central' },
+        { label: 'Portefeuille', d: D.wallet, where: 'expéditeur' },
+        { label: 'Profil', d: D.profile, where: 'les deux apps' },
+        { label: 'Course', d: D.route, where: 'livreur' },
+        { label: 'Gains', d: D.gains, where: 'livreur' },
+        { label: 'Alertes', d: D.bell, where: 'en-têtes' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

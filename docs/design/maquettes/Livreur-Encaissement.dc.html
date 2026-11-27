@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Livreur · encaissement</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #FFB15C)}
+button{font-family:inherit}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes r-radar{0%{transform:scale(.3);opacity:.75}100%{transform:scale(3.2);opacity:0}}@keyframes r-dash{to{stroke-dashoffset:-28}}@keyframes r-blink{0%,100%{opacity:1}50%{opacity:.35}}@keyframes r-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}@keyframes r-turn{to{transform:rotate(360deg)}}@keyframes r-rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes r-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-up{from{transform:translateY(100%)}to{transform:translateY(0%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@keyframes am-rise{0%{transform:translateY(40px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes am-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+<div style="position: absolute; inset: 0; overflow: hidden; pointer-events: none"><span class="tara-anim" style="position: absolute; left: -90px; top: 40px; width: 300px; height: 300px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.38; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out 0s infinite alternate, lq-drift 20s ease-in-out 0s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: 210px; top: 300px; width: 260px; height: 260px; background: radial-gradient(circle at 30% 30%, #FFD27A 0%, #FF8A00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -4s infinite alternate, lq-drift 20s ease-in-out -4s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: -40px; top: 600px; width: 240px; height: 240px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -9s infinite alternate, lq-drift 20s ease-in-out -9s infinite alternate" aria-hidden="true"></span></div>
+<div style="position: relative; padding: 18px 20px 0; display: flex; align-items: center; gap: 10px"><a href="Scanner-Livraison.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 14px; background: rgba(var(--fg-rgb),.07); border: 1px solid rgba(var(--fg-rgb),.12); display: flex; align-items: center; justify-content: center; color: var(--ink); box-sizing: border-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--accent)">ENCAISSEMENT</span><b style="font-family: Sora, sans-serif; font-size: 18px">Course TR-48301</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.70)">Marie Ngo · Collège des Nations</span></span></div>
+<div style="position: relative; margin: 18px 20px 0; perspective: 900px"><div style="padding: 18px; border-radius: 26px; background: linear-gradient(150deg, #2A170A 0%, #16120E 62%); border: 1px solid rgba(255,177,92,.3); box-shadow: 0 24px 44px rgba(0,0,0,.45); transform: rotateX(8deg); transform-origin: 50% 100%; display: flex; flex-direction: column; gap: 4px; position: relative; overflow: hidden; color: #FFF"><span class="tara-anim" style="position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, .14) 48%, rgba(255, 255, 255, 0) 60%); background-size: 260% 100%; animation: t3-sheen 5s ease-in-out infinite" aria-hidden="true"></span><span style="position: relative; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, .74)">À encaisser auprès de Marie Ngo</span><b style="position: relative; font-family: Sora, sans-serif; font-size: 40px; letter-spacing: -0.02em">15 000 F</b><span style="position: relative; font-size: 12px; color: rgba(255, 255, 255, .72)">Prix des vêtements, pour Awa Fashion · la course est déjà payée</span></div></div>
+<div role="tablist" aria-label="Mode de paiement" style="position: relative; margin: 16px 20px 0; padding: 4px; border-radius: 17px; background: rgba(var(--fg-rgb),.07); border: 1px solid rgba(var(--fg-rgb),.10); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr))"><span aria-hidden="true" style="position: absolute; top: 4px; bottom: 4px; left: calc(4px + (100% - 8px) / 2 * {{tabIdx}}); width: calc((100% - 8px) / 2); border-radius: 13px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); box-shadow: 0 6px 16px rgba(255,90,0,.35); transition: left .5s cubic-bezier(.6,-.35,.3,1.45)"></span><sc-for list="{{tabs}}" as="t" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}" style="position: relative; min-height: 46px; border: 0; border-radius: 13px; background: transparent; color: {{t.ink}}; font-size: 14px; font-weight: 800; cursor: pointer; transition: color .3s">{{t.label}}</button></sc-for></div>
+<div style="position: relative; margin: 14px 20px 0; display: flex; flex-direction: column; gap: 12px"><sc-if value="{{cash}}" hint-placeholder-val="{{ true }}"><span style="font-size: 13px; font-weight: 800; color: rgba(var(--fg-rgb),.8)">Montant reçu</span><div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px"><sc-for list="{{given}}" as="g" hint-placeholder-count="4"><button type="button" onClick="{{g.pick}}" aria-pressed="{{g.pressed}}" style="min-height: 46px; border-radius: 14px; border: 1px solid {{g.border}}; background: {{g.bg}}; color: {{g.ink}}; font-size: 13px; font-weight: 800; cursor: pointer">{{g.label}}</button></sc-for></div><div style="padding: 14px; border-radius: 20px; background: {{changeBg}}; border: 1px solid {{changeBorder}}; display: flex; justify-content: space-between; align-items: center; transition: background .3s"><b style="font-size: 14px">{{changeLabel}}</b><b style="font-family: Sora, sans-serif; font-size: 24px; color: {{changeInk}}">{{change}}</b></div><span style="font-size: 12px; line-height: 1.5; color: rgba(var(--fg-rgb),.72)">Vous gardez les espèces : 15 000 F sont pris sur votre solde prépayé (il vous restera 4 200 F).</span></sc-if><sc-if value="{{momo}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; font-weight: 800; color: rgba(var(--fg-rgb),.8)">Opérateur du client</span><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px"><button type="button" aria-pressed="true" style="min-height: 52px; border-radius: 16px; border: 2px solid #FF8A00; background: rgba(255,138,0,.12); color: var(--ink); font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px"><img src="/_blob/3ffe4daee82fbc623f2a1fe2a7a6a74a" alt="Orange Money" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 7px; background: #FFFFFF; object-fit: cover; box-shadow: 0 0 0 1px rgba(22,18,14,.08); display: inline-block">Orange Money</button><button type="button" aria-pressed="false" style="min-height: 52px; border-radius: 16px; border: 1px solid rgba(var(--fg-rgb),.14); background: rgba(var(--fg-rgb),.06); color: var(--ink); font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px"><img src="/_blob/f99a72ffa4a9e9511e331cd9ecd1df0e" alt="MTN MoMo" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 7px; background: #FFFFFF; object-fit: cover; box-shadow: 0 0 0 1px rgba(22,18,14,.08); display: inline-block">MTN MoMo</button></div><label style="min-height: 52px; padding: 0 14px; border-radius: 16px; background: rgba(var(--fg-rgb),.06); border: 1px solid rgba(var(--fg-rgb),.14); display: flex; flex-direction: column; justify-content: center"><span style="font-size: 11px; font-weight: 700; color: rgba(var(--fg-rgb),.62)">Numéro Mobile Money du client</span><b style="font-size: 16px; letter-spacing: .04em">6 99 •• •• 33</b></label><span style="font-size: 12px; line-height: 1.5; color: rgba(var(--fg-rgb),.72)">15 000 F de colis, plus les frais Mobile Money payés par le client. Le client valide sur son téléphone, puis la course se clôture.</span><button type="button" onClick="{{momoNext}}" style="position: relative; min-height: 54px; border-radius: 18px; border: 0; background: {{momoBg}}; color: {{momoInk}}; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; overflow: hidden"><sc-if value="{{momoWaiting}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; border-radius: 18px; overflow: hidden; pointer-events: none" aria-hidden="true"><span class="tara-anim" style="position: absolute; left: -10px; top: 0; bottom: 0; animation: lq-fill-x 7s ease-in-out infinite; animation-delay: -0.35s; background: var(--lq-back, rgba(255,61,0,.5))"><span style="position: absolute; left: 100%; top: 0; width: 10px; height: 100%; overflow: hidden"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 10px; height: 108px; animation: lq-move-y 2.2s linear infinite; animation-direction: reverse; "><svg width="10" height="108" viewBox="0 0 10 108" style="display: block"><path d="M0 0 L5.0 0 L6.7 3 L8.2 6 L9.3 9 L9.9 12 L9.9 15 L9.3 18 L8.2 21 L6.7 24 L5.0 27 L3.3 30 L1.8 33 L0.7 36 L0.1 39 L0.1 42 L0.7 45 L1.8 48 L3.3 51 L5.0 54 L6.7 57 L8.2 60 L9.3 63 L9.9 66 L9.9 69 L9.3 72 L8.2 75 L6.7 78 L5.0 81 L3.3 84 L1.8 87 L0.7 90 L0.1 93 L0.1 96 L0.7 99 L1.8 102 L3.3 105 L5.0 108 L0 108 Z" style="fill: var(--lq-back, rgba(255,61,0,.5))"></path></svg></span></span></span><span class="tara-anim" style="position: absolute; left: -10px; top: 0; bottom: 0; animation: lq-fill-x 7s ease-in-out infinite; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)"><span style="position: absolute; left: 100%; top: 0; width: 10px; height: 100%; overflow: hidden"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 10px; height: 108px; animation: lq-move-y 1.4s linear infinite; "><svg width="10" height="108" viewBox="0 0 10 108" style="display: block"><path d="M0 0 L5.0 0 L6.7 3 L8.2 6 L9.3 9 L9.9 12 L9.9 15 L9.3 18 L8.2 21 L6.7 24 L5.0 27 L3.3 30 L1.8 33 L0.7 36 L0.1 39 L0.1 42 L0.7 45 L1.8 48 L3.3 51 L5.0 54 L6.7 57 L8.2 60 L9.3 63 L9.9 66 L9.9 69 L9.3 72 L8.2 75 L6.7 78 L5.0 81 L3.3 84 L1.8 87 L0.7 90 L0.1 93 L0.1 96 L0.7 99 L1.8 102 L3.3 105 L5.0 108 L0 108 Z" style="fill: #FF3D00"></path></svg></span></span></span></span></sc-if><span style="position: relative">{{momoLabel}}</span></button></sc-if></div>
+<div style="position: absolute; left: 20px; right: 20px; bottom: 24px; display: flex; flex-direction: column; gap: 8px"><sc-if value="{{cash}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{slide}}" aria-label="{{slideLabel}}" style="position: relative; width: 100%; height: 62px; border: 0; padding: 0; border-radius: 20px; background: {{trackBg}}; overflow: hidden; cursor: pointer; transition: background .3s"><span style="position: absolute; inset: 0; border-radius: 20px; overflow: hidden; pointer-events: none" aria-hidden="true"><span class="tara-anim" style="position: absolute; left: -10px; top: 0; bottom: 0; width: calc({{fillW}} * 1.05); transition: width .45s cubic-bezier(.6,0,.3,1); background: var(--lq-back, rgba(255,61,0,.5))"><span style="position: absolute; left: 100%; top: 0; width: 10px; height: 100%; overflow: hidden"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 10px; height: 124px; animation: lq-move-y 2.2s linear infinite; animation-direction: reverse; "><svg width="10" height="124" viewBox="0 0 10 124" style="display: block"><path d="M0 0 L5.0 0 L6.5 3 L7.9 6 L9.0 9 L9.7 12 L10.0 15 L9.8 18 L9.2 21 L8.3 24 L7.0 27 L5.5 30 L4.0 33 L2.6 36 L1.4 39 L0.5 42 L0.1 45 L0.1 48 L0.5 51 L1.4 54 L2.6 57 L4.0 60 L5.5 63 L7.0 66 L8.3 69 L9.2 72 L9.8 75 L10.0 78 L9.7 81 L9.0 84 L7.9 87 L6.5 90 L5.0 93 L3.5 96 L2.1 99 L1.0 102 L0.3 105 L0.0 108 L0.2 111 L0.8 114 L1.7 117 L3.0 120 L4.5 123 L0 124 Z" style="fill: var(--lq-back, rgba(255,61,0,.5))"></path></svg></span></span></span><span class="tara-anim" style="position: absolute; left: -10px; top: 0; bottom: 0; width: {{fillW}}; transition: width .45s cubic-bezier(.6,0,.3,1); background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)"><span style="position: absolute; left: 100%; top: 0; width: 10px; height: 100%; overflow: hidden"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 10px; height: 124px; animation: lq-move-y 1.4s linear infinite; "><svg width="10" height="124" viewBox="0 0 10 124" style="display: block"><path d="M0 0 L5.0 0 L6.5 3 L7.9 6 L9.0 9 L9.7 12 L10.0 15 L9.8 18 L9.2 21 L8.3 24 L7.0 27 L5.5 30 L4.0 33 L2.6 36 L1.4 39 L0.5 42 L0.1 45 L0.1 48 L0.5 51 L1.4 54 L2.6 57 L4.0 60 L5.5 63 L7.0 66 L8.3 69 L9.2 72 L9.8 75 L10.0 78 L9.7 81 L9.0 84 L7.9 87 L6.5 90 L5.0 93 L3.5 96 L2.1 99 L1.0 102 L0.3 105 L0.0 108 L0.2 111 L0.8 114 L1.7 117 L3.0 120 L4.5 123 L0 124 Z" style="fill: #FF3D00"></path></svg></span></span></span></span><span style="position: absolute; inset: 0; padding: 0 {{padR}} 0 {{padL}}; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: {{trackInk}}; white-space: nowrap; overflow: hidden; transition: color .3s, padding .45s cubic-bezier(.6,0,.3,1)"><span style="overflow: hidden; text-overflow: ellipsis">{{slideText}}</span></span><span class="tara-anim" style="position: absolute; top: 5px; left: {{knobLeft}}; width: 52px; height: 52px; border-radius: 16px; background: {{knobBg}}; color: {{knobInk}}; display: flex; align-items: center; justify-content: center; transition: left .45s cubic-bezier(.6,0,.3,1), background .3s"><span style="display: {{chevShow}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l6 6-6 6M13 6l6 6-6 6"></path></svg></span><span style="display: {{checkShow}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></span></button></sc-if><sc-if value="{{closed}}" hint-placeholder-val="{{ false }}"><a href="Livreur-Gain.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: 800; text-decoration: none">Voir mon gain <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></sc-if></div>
+<div style="position: absolute; inset: 0; z-index: 20; display: {{sheetShow}}"><button type="button" aria-label="Fermer" onClick="{{sheetClose}}" style="position: absolute; inset: 0; border: 0; background: rgba(var(--bg-rgb),.55); cursor: pointer"></button><div role="dialog" aria-label="{{sheetTitle}}" class="tara-anim" style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 20px 22px; border-radius: 28px 28px 0 0; background: var(--sheet); color: var(--ink); box-shadow: 0 -20px 40px rgba(0,0,0,.35); display: flex; flex-direction: column; gap: 12px; animation: am-rise .35s ease-out both"><span style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: rgba(var(--fg-rgb),.22)"></span><b style="font-size: 16px">{{sheetTitle}}</b><div style="height: 66px; border-radius: 18px; border: 2px solid #FF8A00; display: flex; align-items: center; justify-content: center; gap: 4px"><b style="font-family: Sora, sans-serif; font-size: 34px; letter-spacing: -0.02em">{{sheetAmount}}</b><span class="tara-anim" style="width: 3px; height: 34px; border-radius: 2px; background: #FF6A00; animation: am-blink 1s steps(1) infinite"></span><span style="font-family: Sora, sans-serif; font-size: 20px; font-weight: 700; opacity: .55; margin-left: 4px">F</span></div><span style="font-size: 12px; font-weight: 700; color: {{sheetHintInk}}">{{sheetHint}}</span><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px"><sc-for list="{{keys}}" as="k" hint-placeholder-count="12"><button type="button" aria-label="{{k.aria}}" onClick="{{k.press}}" style="height: 48px; border-radius: 14px; border: 1px solid rgba(var(--fg-rgb),.10); background: rgba(var(--fg-rgb),.07); color: var(--ink); font: 700 20px Sora, sans-serif; cursor: pointer">{{k.label}}</button></sc-for></div><button type="button" onClick="{{sheetOk}}" style="height: 56px; border: 0; border-radius: 18px; background: {{sheetOkBg}}; color: {{sheetOkInk}}; font-size: 16px; font-weight: 800; cursor: pointer">Valider</button></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "sombre"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'cash', given: 20000, other: false, sheet: false, typed: '', cashDone: false, momoStep: 0 };
+  }
+  vals() {
+
+    const slider = (enabled, done, idleText, doneText, label, onSlide) => ({
+      slide: onSlide,
+      slideLabel: label,
+      slideText: done ? doneText : idleText,
+      trackBg: enabled || done ? 'rgba(var(--fg-rgb),.10)' : 'rgba(var(--fg-rgb),.05)',
+      trackInk: done ? '#140800' : enabled ? 'var(--ink)' : 'rgba(var(--fg-rgb),.40)',
+      knobLeft: done ? 'calc(100% - 57px)' : '5px',
+      knobBg: done ? '#140800' : enabled ? 'linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)' : 'rgba(var(--fg-rgb),.12)',
+      knobInk: done ? '#FFB000' : enabled ? '#140800' : 'rgba(var(--fg-rgb),.40)',
+      fillW: done ? '100%' : '0%',
+      padL: done ? '18px' : '64px',
+      padR: done ? '66px' : '18px',
+      chevShow: done ? 'none' : 'flex',
+      checkShow: done ? 'flex' : 'none',
+    });
+    const fmt0 = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+    const fmt = fmt0;
+    const typed = this.state.typed;
+    const sheetVals = (title, check, onOk) => {
+      const value = Number(typed || 0);
+      const { ok, hint, warn } = check(value);
+      return {
+        sheetShow: this.state.sheet ? 'block' : 'none',
+        sheetTitle: title,
+        sheetAmount: typed ? fmt(value) : '0',
+        sheetHint: hint,
+        sheetHintInk: warn ? '#FF8A3D' : 'rgba(var(--fg-rgb),.66)',
+        sheetClose: () => this.setState({ sheet: false }),
+        sheetOk: () => { if (ok) onOk(value); },
+        sheetOkBg: ok ? 'linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)' : 'rgba(var(--fg-rgb),.08)',
+        sheetOkInk: ok ? '#140800' : 'rgba(var(--fg-rgb),.42)',
+        keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '⌫'].map((k) => ({
+          label: k,
+          aria: k === '⌫' ? 'Effacer' : k,
+          press: () => {
+            if (k === '⌫') this.setState({ typed: typed.slice(0, -1) });
+            else {
+              const next = (typed + k).replace(/^0+/, '');
+              if (next.length <= 7) this.setState({ typed: next });
+            }
+          },
+        })),
+      };
+    };
+    const { mode, given, other, cashDone, momoStep } = this.state;
+    const cash = mode === 'cash';
+    const options = [15000, 20000, 50000];
+    const tabs = [['cash', 'Espèces'], ['momo', 'Mobile Money']].map(([key, label]) => ({
+      label, selected: key === mode ? 'true' : 'false',
+      ink: key === mode ? '#140800' : 'rgba(var(--fg-rgb),.78)',
+      pick: () => this.setState({ mode: key }),
+    }));
+    const momoLabels = ['Envoyer la demande', 'En attente de la validation du client…', 'Paiement reçu · course clôturée'];
+    return {
+      tabs, cash, momo: !cash,
+      tabIdx: cash ? 0 : 1,
+      given: [
+        ...options.map((v) => {
+          const on = !other && v === given;
+          return {
+            label: fmt(v), pressed: on ? 'true' : 'false',
+            bg: on ? 'rgba(255,138,0,.16)' : 'rgba(var(--fg-rgb),.06)',
+            border: on ? '#FF8A00' : 'rgba(var(--fg-rgb),.14)',
+            ink: 'var(--ink)',
+            pick: () => this.setState({ given: v, other: false }),
+          };
+        }),
+        {
+          label: other ? `${fmt(given)} ✎` : 'Autre',
+          pressed: other ? 'true' : 'false',
+          bg: other ? 'rgba(255,138,0,.16)' : 'rgba(var(--fg-rgb),.06)',
+          border: other ? '#FF8A00' : 'rgba(var(--fg-rgb),.14)',
+          ink: 'var(--ink)',
+          pick: () => this.setState({ sheet: true, typed: '' }),
+        },
+      ],
+      change: given >= 15000 ? `${fmt(given - 15000)} F` : `${fmt(15000 - given)} F`,
+      changeLabel: given >= 15000 ? 'Monnaie à rendre' : 'Il manque',
+      changeInk: given >= 15000 ? 'var(--ok)' : '#FF8A3D',
+      changeBg: given >= 15000 ? 'rgba(74,222,155,.10)' : 'rgba(255,138,61,.10)',
+      changeBorder: given >= 15000 ? 'rgba(74,222,155,.35)' : 'rgba(255,138,61,.45)',
+      ...sheetVals('Montant donné par le client', (v) => (
+        v === 0 ? { ok: false, hint: 'Tapez le montant reçu en espèces.', warn: false }
+          : v < 15000 ? { ok: false, hint: `Il manque ${fmt(15000 - v)} F pour couvrir les 15 000 F.`, warn: true }
+            : { ok: true, hint: `Monnaie à rendre : ${fmt(v - 15000)} F`, warn: false }
+      ), (v) => this.setState({ given: v, other: true, sheet: false })),
+      momoNext: () => this.setState({ momoStep: (momoStep + 1) % 3 }),
+      momoWaiting: momoStep === 1,
+      momoLabel: momoLabels[momoStep],
+      momoBg: momoStep === 2 ? '#0E7F57' : momoStep === 1 ? 'rgba(var(--fg-rgb),.10)' : 'linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)',
+      momoInk: momoStep === 0 ? '#140800' : momoStep === 2 ? '#FFF' : 'var(--ink)',
+      closed: cash ? cashDone : momoStep === 2,
+      ...slider(given >= 15000, cashDone, 'Glisser · Espèces reçues', 'Encaissé · course clôturée', 'Confirmer : espèces reçues', () => this.setState({ cashDone: !cashDone })),
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'sombre';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

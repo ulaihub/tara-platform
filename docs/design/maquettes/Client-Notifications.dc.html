@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Expéditeur · notifications</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #FFB15C)}
+button{font-family:inherit}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes r-radar{0%{transform:scale(.3);opacity:.75}100%{transform:scale(3.2);opacity:0}}@keyframes r-dash{to{stroke-dashoffset:-28}}@keyframes r-blink{0%,100%{opacity:1}50%{opacity:.35}}@keyframes r-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}@keyframes r-turn{to{transform:rotate(360deg)}}@keyframes r-rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes r-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-up{from{transform:translateY(100%)}to{transform:translateY(0%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@keyframes am-rise{0%{transform:translateY(40px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes am-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+<div style="position: absolute; inset: 0; overflow: hidden; pointer-events: none"><span class="tara-anim" style="position: absolute; left: -110px; top: -60px; width: 320px; height: 320px; background: radial-gradient(circle at 30% 30%, #FFD27A 0%, #FF8A00 100%); filter: blur(46px); opacity: 0.45; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out 0s infinite alternate, lq-drift 20s ease-in-out 0s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: 200px; top: 260px; width: 280px; height: 280px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -5s infinite alternate, lq-drift 20s ease-in-out -5s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: -60px; top: 620px; width: 260px; height: 260px; background: radial-gradient(circle at 30% 30%, #FFD27A 0%, #FF8A00 100%); filter: blur(46px); opacity: 0.3; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -10s infinite alternate, lq-drift 20s ease-in-out -10s infinite alternate" aria-hidden="true"></span></div>
+<div style="position: relative; padding: 18px 20px 0; display: flex; align-items: center; gap: 10px"><a href="Accueil.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 1px solid var(--card-border); display: flex; align-items: center; justify-content: center; color: inherit; box-sizing: border-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><b style="font-family: Sora, sans-serif; font-size: 18px">Notifications</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.70)">{{unreadLabel}}</span></span><button type="button" onClick="{{readAll}}" style="min-height: 44px; border: 0; background: transparent; color: var(--accent); font-size: 12px; font-weight: 800; cursor: pointer">Tout lire</button></div>
+<div style="position: absolute; left: 20px; right: 20px; top: 92px; bottom: 20px; display: flex; flex-direction: column; gap: 10px"><sc-for list="{{items}}" as="n" hint-placeholder-count="6"><a href="{{n.href}}" style="padding: 12px 14px; border-radius: 20px; background: {{n.bg}}; border: 1px solid {{n.border}}; display: flex; gap: 12px; align-items: flex-start; text-decoration: none; color: inherit"><span style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; background: {{n.iconBg}}; color: {{n.iconInk}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg></span><span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{n.title}}</b><span style="font-size: 12px; line-height: 1.4; color: rgba(var(--fg-rgb),.7)">{{n.body}}</span><span style="font-size: 11px; color: rgba(var(--fg-rgb),.5)">{{n.time}}</span></span><sc-if value="{{n.unread}}" hint-placeholder-val="{{ true }}"><span style="width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: #FF6A00; box-shadow: 0 0 10px rgba(255,106,0,.7)"></span></sc-if></a></sc-for></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "clair"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { read: false };
+  }
+  vals() {
+    const read = this.state.read;
+    const pin = 'M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z';
+    const check = 'M5 12.5l4.5 4.5L19 7.5';
+    const money = 'M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4zM4 7l11-3v3';
+    const moto = 'M5 17a2 2 0 1 0 0 .1M19 17a2 2 0 1 0 0 .1M7 17h8l3-6h-5l-2 3H7';
+    const alert = 'M12 4 2.5 20h19zM12 10v4M12 17h.01';
+    const N = (title, body, time, icon, href, tone, unread) => ({
+      title, body, time, icon, href, unread: unread && !read,
+      bg: unread && !read ? 'rgba(255,138,0,.08)' : 'var(--card)', border: unread && !read ? 'rgba(255,138,0,.35)' : 'var(--card-border)',
+      iconBg: tone === 'ok' ? 'rgba(74,222,155,.14)' : tone === 'bad' ? 'rgba(255,107,117,.14)' : 'rgba(255,177,92,.14)',
+      iconInk: tone === 'ok' ? 'var(--ok)' : tone === 'bad' ? '#FF6B75' : 'var(--accent)',
+    });
+    return {
+      unreadLabel: read ? 'Tout est lu' : '3 non lues',
+      readAll: () => this.setState({ read: true }),
+      items: [
+        N('Paul Ekane a placé son point', 'Vous pouvez créer la livraison.', 'à l’instant', pin, 'Client-Demander-Adresse.dc.html', 'acc', true),
+        N('Jean M. vous attend', 'Donnez-lui le colis et le code d’enlèvement.', 'il y a 4 min', moto, 'Client-Suivi.dc.html', 'acc', true),
+        N('Livraison impossible · TR-48288', 'Choisissez la suite : nouvelle tentative ou retour.', 'il y a 20 min', alert, 'Client-Suivi-Echec.dc.html', 'bad', true),
+        N('Colis livré · TR-48301', 'Remis à Marie Ngo à 15:24.', '15:24', check, 'Client-Suivi-Livre.dc.html', 'ok', false),
+        N('128 500 F envoyés sur votre Mobile Money', 'Reversement de vos ventes d’hier.', 'hier 18:02', money, 'Portefeuille.dc.html', 'ok', false),
+      ],
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'clair';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

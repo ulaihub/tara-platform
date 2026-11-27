@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Partager le reçu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+@keyframes tara-float{0%,100%{transform:perspective(700px) rotateX(12deg) rotateY(-18deg) rotateZ(-3deg) translateY(0)}50%{transform:perspective(700px) rotateX(6deg) rotateY(-6deg) rotateZ(-1.5deg) translateY(-10px)}}
+@keyframes tara-orbit{0%,100%{transform:rotateX(56deg) rotateZ(-36deg)}50%{transform:rotateX(56deg) rotateZ(-27deg)}}
+@keyframes tara-in{0%{transform:translateY(16px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes tara-toast{0%{transform:translateY(12px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes tara-fly{0%{transform:translate(0,0) rotate(-3deg) scale(1);opacity:1}100%{transform:translate(120px,-260px) rotate(12deg) scale(.3);opacity:0}}
+@keyframes tara-ride{0%{offset-distance:0%}100%{offset-distance:100%}}
+@keyframes tara-pulse{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes tara-dash{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-60}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--map-bg); color: #16120E; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 390px; height: 640px; perspective: 900px; perspective-origin: 50% 18%; overflow: hidden">
+    <div class="tara-anim" style="position: absolute; left: -65px; top: 30px; width: 520px; height: 520px; background: var(--map-bg); transform-style: preserve-3d; transform: rotateX(56deg) rotateZ(-36deg); animation: tara-orbit 26s ease-in-out infinite">
+      <div style="position: absolute; left: 0; top: 170px; width: 520px; height: 18px; background: var(--road-1)"></div>
+      <div style="position: absolute; left: 0; top: 360px; width: 520px; height: 14px; background: var(--road-2)"></div>
+      <div style="position: absolute; left: 180px; top: 0; width: 18px; height: 520px; background: var(--road-1)"></div>
+      <div style="position: absolute; left: 360px; top: 0; width: 14px; height: 520px; background: var(--road-2)"></div>
+      <div style="position: absolute; left: 0; top: 462px; width: 520px; height: 46px; background: var(--water)"></div>
+      <svg width="520" height="520" viewBox="0 0 520 520" style="position: absolute; left: 0; top: 0">
+        <defs><linearGradient id="rp-route" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFB000"></stop><stop offset=".55" stop-color="#FF6A00"></stop><stop offset="1" stop-color="#FF3D00"></stop></linearGradient></defs>
+        <path class="tara-anim" d="M0 179 L 189 179 L 189 367 L 520 367" fill="none" stroke="url(#rp-route)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="12 9" opacity=".75" style="animation: tara-dash 2s linear infinite"></path>
+        <path class="tara-anim" d="M367 0 L 367 179 L 520 179" fill="none" stroke="url(#rp-route)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="12 9" opacity=".6" style="animation: tara-dash 2.4s linear infinite"></path>
+      </svg>
+      <span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #FFB000; box-shadow: 0 0 0 5px rgba(255,176,0,.22), 0 0 22px 8px rgba(255,106,0,.6); offset-path: path('M0 179 L 189 179 L 189 367 L 520 367'); offset-rotate: 0deg; animation: tara-ride 9s linear infinite"></span>
+      <span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #FF6A00; box-shadow: 0 0 0 5px rgba(255,106,0,.22), 0 0 22px 8px rgba(255,61,0,.5); offset-path: path('M367 0 L 367 179 L 520 179'); offset-rotate: 0deg; animation: tara-ride 7s linear 1.5s infinite"></span>
+      <span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 18px 6px rgba(255,138,0,.5); offset-path: path('M520 367 L 189 367 L 189 0'); offset-rotate: 0deg; animation: tara-ride 11s linear 3s infinite"></span>
+      <span style="position: absolute; left: 100px; top: 179px; width: 0; height: 0; transform-style: preserve-3d">
+        <span class="tara-anim" style="position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%; background: rgba(var(--fg-rgb),.35); animation: tara-pulse 2.2s ease-out infinite"></span>
+        <span style="position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; transform: rotateZ(36deg) rotateX(-56deg) translate(-50%, -100%)"><span style="width: 30px; height: 30px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); background: #FFFFFF; box-shadow: 0 6px 14px rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16120E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg)"><path d="M4 10.5 12 4l8 6.5V20H4z"></path></svg></span><span style="width: 2px; height: 18px; background: rgba(var(--fg-rgb),.7)"></span></span>
+      </span>
+      <span style="position: absolute; left: 440px; top: 367px; width: 0; height: 0; transform-style: preserve-3d">
+        <span class="tara-anim" style="position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,106,0,.5); animation: tara-pulse 2.2s ease-out .8s infinite"></span>
+        <span style="position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; transform: rotateZ(36deg) rotateX(-56deg) translate(-50%, -100%)"><span style="width: 30px; height: 30px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); background: linear-gradient(135deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); box-shadow: 0 6px 14px rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center"><span style="width: 10px; height: 10px; border-radius: 50%; background: #FFFFFF"></span></span><span style="width: 2px; height: 18px; background: rgba(255,177,92,.8)"></span></span>
+      </span>
+<div style="position: absolute; left: 20.0px; top: 20.0px; width: 70.0px; height: 60.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 60.0px; width: 70.0px; height: 46.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 70.0px; height: 46.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 70.0px; top: 0; width: 46.0px; height: 60.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 46.0px; height: 60.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(46.0px)"></div></div>
+<div style="position: absolute; left: 100.0px; top: 30.0px; width: 60.0px; height: 110.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 110.0px; width: 60.0px; height: 80.0px; background-color: var(--b1); background-image: none; transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 60.0px; height: 80.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 60.0px; top: 0; width: 80.0px; height: 110.0px; background-color: var(--b3); background-image: none; transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 80.0px; height: 110.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(80.0px)"></div></div>
+<div style="position: absolute; left: 215.0px; top: 20.0px; width: 120.0px; height: 60.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 60.0px; width: 120.0px; height: 36.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 120.0px; height: 36.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 120.0px; top: 0; width: 36.0px; height: 60.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 36.0px; height: 60.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(36.0px)"></div></div>
+<div style="position: absolute; left: 220.0px; top: 100.0px; width: 50.0px; height: 50.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 50.0px; width: 50.0px; height: 64.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 50.0px; height: 64.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 50.0px; top: 0; width: 64.0px; height: 50.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 64.0px; height: 50.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(64.0px)"></div></div>
+<div style="position: absolute; left: 390.0px; top: 30.0px; width: 100.0px; height: 110.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 110.0px; width: 100.0px; height: 52.0px; background-color: var(--b1); background-image: none; transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 100.0px; height: 52.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 100.0px; top: 0; width: 52.0px; height: 110.0px; background-color: var(--b3); background-image: none; transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 52.0px; height: 110.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(52.0px)"></div></div>
+<div style="position: absolute; left: 25.0px; top: 200.0px; width: 130.0px; height: 70.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 70.0px; width: 130.0px; height: 30.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 130.0px; height: 30.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 130.0px; top: 0; width: 30.0px; height: 70.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 30.0px; height: 70.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(30.0px)"></div></div>
+<div style="position: absolute; left: 40.0px; top: 290.0px; width: 60.0px; height: 50.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 50.0px; width: 60.0px; height: 90.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 60.0px; height: 90.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 60.0px; top: 0; width: 90.0px; height: 50.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 90.0px; height: 50.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(90.0px)"></div></div>
+<div style="position: absolute; left: 215.0px; top: 200.0px; width: 60.0px; height: 140.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 140.0px; width: 60.0px; height: 58.0px; background-color: var(--b1); background-image: none; transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 60.0px; height: 58.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 60.0px; top: 0; width: 58.0px; height: 140.0px; background-color: var(--b3); background-image: none; transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 58.0px; height: 140.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(58.0px)"></div></div>
+<div style="position: absolute; left: 290.0px; top: 220.0px; width: 50.0px; height: 60.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 60.0px; width: 50.0px; height: 40.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 50.0px; height: 40.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 50.0px; top: 0; width: 40.0px; height: 60.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 40.0px; height: 60.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(40.0px)"></div></div>
+<div style="position: absolute; left: 390.0px; top: 200.0px; width: 110.0px; height: 60.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 60.0px; width: 110.0px; height: 70.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 110.0px; height: 70.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 110.0px; top: 0; width: 70.0px; height: 60.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 70.0px; height: 60.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(70.0px)"></div></div>
+<div style="position: absolute; left: 400.0px; top: 280.0px; width: 80.0px; height: 60.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 60.0px; width: 80.0px; height: 34.0px; background-color: var(--b1); background-image: none; transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 80.0px; height: 34.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 80.0px; top: 0; width: 34.0px; height: 60.0px; background-color: var(--b3); background-image: none; transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 34.0px; height: 60.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(34.0px)"></div></div>
+<div style="position: absolute; left: 30.0px; top: 380.0px; width: 120.0px; height: 60.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 60.0px; width: 120.0px; height: 24.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 120.0px; height: 24.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 120.0px; top: 0; width: 24.0px; height: 60.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 24.0px; height: 60.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(24.0px)"></div></div>
+<div style="position: absolute; left: 220.0px; top: 380.0px; width: 110.0px; height: 60.0px; transform-style: preserve-3d"><div style="position: absolute; left: 0; top: 60.0px; width: 110.0px; height: 44.0px; background-color: var(--b1); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 110.0px; height: 44.0px; background-color: var(--b2); transform-origin: 0 0; transform: rotateX(90deg)"></div><div style="position: absolute; left: 110.0px; top: 0; width: 44.0px; height: 60.0px; background-color: var(--b3); background-image: repeating-linear-gradient(0deg, rgba(255,177,92,0) 0 7px, rgba(255,177,92,.16) 7px 9px); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; left: 0; top: 0; width: 44.0px; height: 60.0px; background-color: var(--b4); transform-origin: 0 0; transform: rotateY(-90deg)"></div><div style="position: absolute; inset: 0; background: var(--b5); border: 1px solid rgba(var(--fg-rgb),.05); box-sizing: border-box; transform: translateZ(44.0px)"></div></div>
+
+    </div>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(ellipse 62% 40% at 50% 33%, rgba(var(--map-rgb),.05) 0%, rgba(var(--map-rgb),.72) 100%)"></div>
+
+  <div style="position: relative; padding: 18px 20px 0; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center">
+    <a href="Recu.dc.html" aria-label="Retour au reçu" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: var(--ink)"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 style="margin: 0; text-align: center; font-size: 16px; font-weight: 800; color: var(--ink)">Partager le reçu</h1>
+    <span></span>
+  </div>
+
+  <div style="position: relative; height: 352px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px">
+    <div class="tara-anim" style="position: relative; width: 214px; padding: 16px 16px 18px; box-sizing: border-box; background: #FFFFFF; border-radius: 6px 6px 0 0; box-shadow: 0 30px 60px rgba(0,0,0,.55); display: flex; flex-direction: column; gap: 8px; animation: {{ticketAnim}}" aria-hidden="true">
+      <span style="display: flex; align-items: center; gap: 8px"><img src="/_blob/7a49380faa2112b2a8f70b2ded048c4f" alt="" style="width: 30px; height: 21px; object-fit: contain"><b style="flex: 1; font-family: Sora, sans-serif; font-size: 11px">Reçu de livraison</b><b style="font-size: 9px">TR-48301</b></span>
+      <span style="height: 0; border-top: 1px dashed rgba(22,18,14,.2)"></span>
+      <span style="display: flex; flex-direction: column; gap: 4px; font-size: 9px; color: rgba(22,18,14,.72)">
+        <span style="display: flex; justify-content: space-between"><span>Akwa → Bonapriso</span><span>5,2 km</span></span>
+        <span style="display: flex; justify-content: space-between"><span>Marie Ngo</span><span>colis moyen</span></span>
+        <span style="display: flex; justify-content: space-between"><span>Livrée le 19/11</span><span>15:24</span></span>
+      </span>
+      <span style="display: flex; justify-content: space-between; align-items: baseline"><b style="font-size: 10px">Total payé</b><b style="font-family: Sora, sans-serif; font-size: 16px">1 200 F</b></span>
+      <span style="color: #16120E; padding: 7px 8px; border-radius: 8px; background: #F6F2EC; display: flex; align-items: center; gap: 8px">
+        <svg width="46" height="46" viewBox="0 0 84 84"><path d="{{qr}}" fill="#16120E"></path></svg>
+        <span style="display: flex; flex-direction: column; gap: 2px">
+          <span style="display: flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 800; color: #0E7F57"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0E7F57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6zM9 12l2 2 4-4"></path></svg>REÇU VÉRIFIABLE</span>
+          <span style="font-size: 8px; line-height: 1.35; color: rgba(22,18,14,.70)">Scannez pour vérifier qu'il vient de Tara</span>
+        </span>
+      </span>
+      <svg width="214" height="10" viewBox="0 0 214 10" preserveAspectRatio="none" style="position: absolute; left: 0; bottom: -9px"><path d="{{zig}}" style="fill: var(--ink)"></path></svg>
+    </div>
+    <span style="padding: 7px 12px; border-radius: 999px; background: rgba(var(--fg-rgb),.10); border: 1px solid rgba(var(--fg-rgb),.16); display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; color: rgba(var(--fg-rgb),.88)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: var(--accent)"><path d="M5 11h14v10H5zM8 11V8a4 4 0 0 1 8 0v3"></path></svg>Le code d'enlèvement n'est jamais partagé</span>
+  </div>
+
+  <div class="tara-anim" style="color: #16120E; position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 20px 24px; border-radius: 30px 30px 0 0; background: #F6F2EC; display: flex; flex-direction: column; gap: 14px; animation: tara-in .5s cubic-bezier(.2,.8,.2,1) both">
+    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px">
+      <sc-for list="{{options}}" as="o" hint-placeholder-count="5">
+        <button type="button" aria-pressed="{{o.pressed}}" onClick="{{o.pick}}" style="border: 0; background: transparent; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; font-family: inherit; font-size: 12px; font-weight: 700; color: #16120E; cursor: pointer">
+          <span style="width: 54px; height: 54px; border-radius: 50%; background: {{o.bg}}; box-shadow: {{o.shadow}}; display: flex; align-items: center; justify-content: center; transition: background .25s"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="{{o.ink}}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{o.icon}}"></path></svg></span>
+          {{o.label}}
+        </button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{whatsapp}}" hint-placeholder-val="{{ true }}">
+      <label style="position: relative; padding: 12px 14px; border-radius: 18px 18px 18px 6px; background: #FFFFFF; display: block">
+        <span style="display: block; margin-bottom: 4px; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: rgba(22,18,14,.62)">Message envoyé avec le PDF</span>
+        <textarea rows="3" style="width: 100%; border: 0; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 1.45; color: #16120E; padding: 0">Bonjour Marie, voici le reçu de votre livraison Tara TR-48301. Son code QR permet de vérifier qu'il vient bien de Tara. Merci pour votre achat ! Awa Fashion</textarea>
+      </label>
+    </sc-if>
+    <sc-if value="{{other}}" hint-placeholder-val="{{ false }}">
+      <span style="padding: 12px 14px; border-radius: 18px; background: #FFFFFF; font-size: 14px; line-height: 1.45; color: rgba(22,18,14,.78)">{{otherText}}</span>
+    </sc-if>
+
+    <sc-if value="{{toast}}" hint-placeholder-val="{{ false }}">
+      <span class="tara-anim" style="align-self: center; padding: 8px 14px; border-radius: 999px; background: #16120E; color: #FFFFFF; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; animation: tara-toast .35s ease-out both"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE9B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{toastText}}</span>
+    </sc-if>
+
+    <button type="button" onClick="{{act}}" style="height: 58px; border: 0; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); box-shadow: 0 14px 30px rgba(255,90,0,.30); font-family: inherit; font-size: 17px; font-weight: 800; color: #140800; cursor: pointer">{{cta}}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "sombre"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { picked: 'whatsapp', toast: null };
+  }
+  vals() {
+    const picked = this.state.picked;
+    const options = [
+      { key: 'whatsapp', label: 'WhatsApp', icon: 'M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5', cta: 'Envoyer sur WhatsApp', toast: 'Envoyé à Marie sur WhatsApp' },
+      { key: 'pdf', label: 'PDF', icon: 'M12 4v12M7 11l5 5 5-5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2', cta: 'Télécharger le PDF', toast: 'Reçu enregistré dans Téléchargements', text: 'Le reçu en PDF A5, une page : il s’imprime tel quel et garde son code QR de vérification.' },
+      { key: 'image', label: 'Image', icon: 'M4 5h16v14H4zM4 15l4.5-4.5 4 4 3-3L20 15M15.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z', cta: 'Enregistrer l’image', toast: 'Image enregistrée dans la galerie', text: 'Le ticket en image, pour le montrer ou l’envoyer dans n’importe quelle application.' },
+      { key: 'print', label: 'Imprimer', icon: 'M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 14h10v7H7z', cta: 'Imprimer le reçu', toast: 'Envoyé à l’imprimante', text: 'Sur une imprimante du téléphone ou du réseau Wi-Fi, au format A5.' },
+      { key: 'link', label: 'Lien', icon: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1', cta: 'Copier le lien du reçu', toast: 'Lien copié', text: 'Un lien vers le reçu en ligne, sur le site de Tara : il s’ouvre sans application.' },
+    ];
+    const current = options.find((o) => o.key === picked) ?? options[0];
+    let zig = 'M0 0 H214 V1';
+    for (let x = 214; x > 4; x -= 10) zig += ` L${x - 5} 9 L${x - 10} 1`;
+    zig += ' L0 1 Z';
+    const n = 21;
+    const m = 4;
+    let seed = 9001;
+    const rand = () => {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      return seed / 2147483648;
+    };
+    const finder = (x, y, r, c) => {
+      const dx = c - x;
+      const dy = r - y;
+      if (dx < 0 || dy < 0 || dx > 6 || dy > 6) return null;
+      return dx === 0 || dy === 0 || dx === 6 || dy === 6 || (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4);
+    };
+    const near = (x, y, r, c) => c >= x - 1 && c <= x + 7 && r >= y - 1 && r <= y + 7;
+    let qr = '';
+    for (let r = 0; r < n; r += 1) {
+      for (let c = 0; c < n; c += 1) {
+        const f = finder(0, 0, r, c) ?? finder(n - 7, 0, r, c) ?? finder(0, n - 7, r, c);
+        const dark = f !== null ? f : near(0, 0, r, c) || near(n - 7, 0, r, c) || near(0, n - 7, r, c) ? false : rand() > 0.52;
+        if (dark) qr += `M${c * m} ${r * m}h${m}v${m}h-${m}z`;
+      }
+    }
+    const flying = this.state.toast !== null;
+    return {
+      zig,
+      qr,
+      ticketAnim: flying ? 'tara-fly .9s cubic-bezier(.5,0,.3,1) both' : 'tara-float 5s ease-in-out infinite',
+      options: options.map((o) => ({
+        ...o,
+        pressed: o.key === picked ? 'true' : 'false',
+        pick: () => this.setState({ picked: o.key, toast: null }),
+        bg: o.key === picked ? '#16120E' : '#FFF',
+        ink: o.key === picked ? '#FFB15C' : '#16120E',
+        shadow: o.key === picked ? '0 10px 22px rgba(22,18,14,.25)' : '0 8px 20px rgba(140,70,10,.12)',
+      })),
+      whatsapp: picked === 'whatsapp',
+      other: picked !== 'whatsapp',
+      otherText: current.text ?? '',
+      cta: current.cta,
+      toast: this.state.toast !== null,
+      toastText: this.state.toast ?? '',
+      act: () => this.setState({ toast: current.toast }),
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'sombre';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

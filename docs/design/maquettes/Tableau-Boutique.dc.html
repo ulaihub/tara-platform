@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mon activité · boutique</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #C2410C)}a:hover{color:var(--accent-2, #9A3412)}
+@keyframes tara-draw{0%{stroke-dashoffset:900}100%{stroke-dashoffset:0}}
+@keyframes tara-fade{0%{opacity:0}100%{opacity:1}}
+@keyframes tara-grow{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+@keyframes tara-bar{0%{transform:scaleY(0)}100%{transform:scaleY(1)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; display: flex; flex-direction: column; {{themeVars}}">
+  <div class="tara-anim" style="position: absolute; left: -140px; top: -120px; width: 360px; height: 360px; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; background: radial-gradient(circle, rgba(255,176,0,.20) 0%, rgba(255,176,0,0) 68%); animation: lq-morph 14s ease-in-out infinite alternate, lq-drift 20s ease-in-out infinite alternate" aria-hidden="true"></div>
+
+  <div style="position: relative; padding: 20px 20px 0; display: flex; align-items: center; gap: 12px">
+    <a href="Portefeuille.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--card-border); background: var(--card); display: flex; align-items: center; justify-content: center; box-sizing: border-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: var(--ink)"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <div style="display: flex; flex-direction: column">
+      <h1 style="margin: 0; font-family: Sora, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em">Mon activité</h1>
+      <span style="font-size: 13px; font-weight: 600; color: rgba(var(--fg-rgb),.70)">Awa Fashion · {{periodLabel}}</span>
+    </div>
+    <div style="margin-left: auto; width: 48px; height: 48px; perspective: 260px; display: flex; align-items: center; justify-content: center" aria-hidden="true"><div class="tara-anim" style="position: relative; width: 30px; height: 30px; transform-style: preserve-3d; transform: rotateX(-22deg) rotateY(-30deg); animation: t3-spin 9s linear infinite"><div style="position: absolute; left: 0; top: 0; width: 30px; height: 30px; box-sizing: border-box; background: #D9A066; transform: translateZ(15.0px)"><span style="position: absolute; left: 12.9px; top: 0; width: 4.2px; height: 30px; background: #FF6A00"></span></div><div style="position: absolute; left: 0; top: 0; width: 30px; height: 30px; box-sizing: border-box; background: #C98F55; transform: rotateY(180deg) translateZ(15.0px)"><span style="position: absolute; left: 12.9px; top: 0; width: 4.2px; height: 30px; background: #E85F00"></span></div><div style="position: absolute; left: 0; top: 0; width: 30px; height: 30px; box-sizing: border-box; background: #CF9458; transform: rotateY(90deg) translateZ(15.0px)"></div><div style="position: absolute; left: 0; top: 0; width: 30px; height: 30px; box-sizing: border-box; background: #C68A4F; transform: rotateY(-90deg) translateZ(15.0px)"></div><div style="position: absolute; left: 0; top: 0; width: 30px; height: 30px; box-sizing: border-box; background: #E6B276; transform: rotateX(90deg) translateZ(15.0px)"><span style="position: absolute; left: 12.9px; top: 0; width: 4.2px; height: 30px; background: #FF6A00"></span></div><div style="position: absolute; left: 0; top: 0; width: 30px; height: 30px; box-sizing: border-box; background: #8A5A2E; transform: rotateX(-90deg) translateZ(15.0px)"></div></div></div>
+  </div>
+
+  <div role="group" aria-label="Période" style="position: relative; margin: 16px 20px 0; padding: 4px; border-radius: 17px; background: rgba(var(--fg-rgb),.06); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))">
+    <span aria-hidden="true" style="position: absolute; top: 4px; bottom: 4px; left: calc(4px + (100% - 8px) / 3 * {{periodIdx}}); width: calc((100% - 8px) / 3); border-radius: 13px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); box-shadow: 0 6px 16px rgba(255,90,0,.35); transition: left .5s cubic-bezier(.6,-.35,.3,1.45)"></span>
+    <sc-for list="{{periods}}" as="p" hint-placeholder-count="3">
+      <button type="button" aria-pressed="{{p.pressed}}" onClick="{{p.pick}}" style="position: relative; height: 42px; border: 0; border-radius: 13px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 800; color: {{p.ink}}; cursor: pointer; transition: color .3s">{{p.label}}</button>
+    </sc-for>
+  </div>
+
+  <div style="position: relative; margin: 14px 20px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+    <sc-for list="{{kpis}}" as="k" hint-placeholder-count="3">
+      <div style="padding: 12px 10px; border-radius: 18px; background: var(--card); border: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 4px; min-width: 0">
+        <span style="font-size: 11px; font-weight: 700; color: rgba(var(--fg-rgb),.70)">{{k.label}}</span>
+        <b style="font-family: Sora, sans-serif; font-size: 16px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap">{{k.value}}</b>
+        <span style="align-self: flex-start; padding: 2px 7px; border-radius: 999px; background: rgba(14,127,87,.12); font-size: 11px; font-weight: 800; color: var(--ok)">{{k.delta}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="position: relative; margin: 12px 20px 0; padding: 14px 0 10px; border-radius: 24px; background: var(--card); border: 1px solid var(--card-border); box-shadow: 0 16px 36px rgba(140,70,10,.10)">
+    <div style="padding: 0 16px; display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 14px; font-weight: 800">Ventes encaissées</span>
+      <span style="display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 700; color: rgba(var(--fg-rgb),.70)">
+        <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 3px; border-radius: 2px; background: #FF6A00"></span>Ventes</span>
+        <span style="display: flex; align-items: center; gap: 4px"><span style="width: 8px; height: 8px; border-radius: 2px; background: rgba(var(--fg-rgb),.16)"></span>Livraisons</span>
+      </span>
+    </div>
+    <div style="position: relative; height: 196px; margin-top: 6px">
+      <svg width="350" height="196" viewBox="0 0 350 196" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+        <defs>
+          <linearGradient id="tb-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FF8A00" stop-opacity=".34"></stop>
+            <stop offset="1" stop-color="#FF8A00" stop-opacity="0"></stop>
+          </linearGradient>
+          <linearGradient id="tb-line" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#FFB000"></stop>
+            <stop offset=".55" stop-color="#FF6A00"></stop>
+            <stop offset="1" stop-color="#FF3D00"></stop>
+          </linearGradient>
+        </defs>
+        <line x1="16" y1="40" x2="334" y2="40" stroke="rgba(var(--fg-rgb),.07)" stroke-dasharray="3 5"></line>
+        <line x1="16" y1="95" x2="334" y2="95" stroke="rgba(var(--fg-rgb),.07)" stroke-dasharray="3 5"></line>
+        <polygon points="16,150 334,150 340,145 22,145" fill="rgba(var(--fg-rgb),.05)"></polygon><line x1="16" y1="150" x2="334" y2="150" stroke="rgba(var(--fg-rgb),.10)"></line>
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="7">
+          <g class="tara-anim" style="transform-origin: bottom; transform-box: fill-box; animation: tara-bar .7s cubic-bezier(.2,.8,.2,1) both"><polygon points="{{b.side}}" style="fill: {{b.sideFill}}"></polygon><polygon points="{{b.top}}" style="fill: {{b.topFill}}"></polygon><rect x="{{b.x}}" y="{{b.y}}" width="14" height="{{b.h}}" style="fill: {{b.fill}}"></rect></g>
+        </sc-for>
+        <path class="tara-anim" d="{{area}}" fill="url(#tb-area)" style="animation: tara-fade 1s ease-out .3s both"></path>
+        <path class="tara-anim" d="{{line}}" fill="none" stroke="url(#tb-line)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="900" style="animation: tara-draw 1.2s cubic-bezier(.4,0,.2,1) both"></path>
+        <line x1="{{sel.x}}" y1="18" x2="{{sel.x}}" y2="150" stroke="rgba(var(--fg-rgb),.28)" stroke-dasharray="3 4"></line>
+        <circle cx="{{sel.x}}" cy="{{sel.y}}" r="7" fill="#FFFFFF" stroke="#FF6A00" stroke-width="3"></circle>
+        <sc-for list="{{ticks}}" as="t" hint-placeholder-count="7">
+          <text x="{{t.x}}" y="176" text-anchor="middle" font-size="11" font-weight="700" font-family="Plus Jakarta Sans, sans-serif" style="fill: {{t.fill}}">{{t.label}}</text>
+        </sc-for>
+      </svg>
+      <div style="position: absolute; left: {{tipLeft}}; top: 2px; width: 132px; padding: 8px 10px; box-sizing: border-box; border-radius: 14px; background: #16120E; color: #FFFFFF; display: flex; flex-direction: column; gap: 2px; pointer-events: none; transition: left .3s">
+        <span style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,.72)">{{sel.full}}</span>
+        <b style="font-size: 14px">{{sel.amount}}</b>
+        <span style="font-size: 11px; font-weight: 700; color: #FFC283">{{sel.count}}</span>
+      </div>
+      <div style="position: absolute; left: 10px; right: 10px; top: 0; height: 190px; display: grid; grid-template-columns: repeat({{cols}}, minmax(0, 1fr))">
+        <sc-for list="{{hits}}" as="h" hint-placeholder-count="7">
+          <button type="button" aria-label="{{h.label}}" onClick="{{h.pick}}" style="border: 0; background: transparent; cursor: pointer; padding: 0"></button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: relative; margin: 12px 20px 0; padding: 14px 16px; border-radius: 24px; background: var(--card); border: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 14px; font-weight: 800">Quartiers les plus livrés</span>
+      <span style="font-size: 12px; font-weight: 700; color: rgba(var(--fg-rgb),.70)">Délai moyen {{delay}}</span>
+    </div>
+    <sc-for list="{{zones}}" as="z" hint-placeholder-count="4">
+      <div style="display: grid; grid-template-columns: 96px minmax(0, 1fr) 40px; align-items: center; gap: 10px">
+        <span style="font-size: 13px; font-weight: 700">{{z.name}}</span>
+        <span style="height: 10px; border-radius: 5px; background: rgba(var(--fg-rgb),.06); overflow: hidden"><span class="tara-anim" style="display: block; height: 10px; border-radius: 5px; width: {{z.width}}; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); transform-origin: left; animation: tara-grow .9s cubic-bezier(.2,.8,.2,1) both; transition: width .6s"></span></span>
+        <span style="font-size: 12px; font-weight: 800; text-align: right">{{z.share}}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "clair"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { period: 'semaine', picked: null };
+  }
+  vals() {
+    const nb = ' ';
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, nb);
+    const data = {
+      jour: {
+        label: "aujourd'hui",
+        ticks: ['8h', '10h', '12h', '14h', '16h', '18h', '20h'],
+        full: ['8 h', '10 h', '12 h', '14 h', '16 h', '18 h', '20 h'],
+        sales: [0, 12250, 9800, 0, 15450, 0, 0],
+        count: [0, 1, 1, 0, 1, 0, 0],
+        pick: 4,
+        kpis: [['Livraisons', '3', '+1'], ['Encaissé', '37 500 F', '+12 %'], ['Réussite', '100 %', '+4 pts']],
+        delay: '41 min',
+        zones: [['Bonapriso', 34], ['Akwa', 33], ['Deïdo', 33], ['Bonamoussadi', 0]],
+      },
+      semaine: {
+        label: 'cette semaine',
+        ticks: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        full: ['Lundi 16 nov.', 'Mardi 17 nov.', 'Mercredi 18 nov.', 'Jeudi 19 nov.', 'Vendredi 20 nov.', 'Samedi 21 nov.', 'Dimanche 22 nov.'],
+        sales: [41500, 55000, 38500, 72500, 61000, 84000, 34000],
+        count: [5, 6, 4, 9, 7, 8, 3],
+        pick: 3,
+        kpis: [['Livraisons', '42', '+12 %'], ['Encaissé', '386 500 F', '+8 %'], ['Réussite', '96 %', '+2 pts']],
+        delay: '47 min',
+        zones: [['Bonapriso', 28], ['Akwa', 21], ['Deïdo', 17], ['Bonamoussadi', 12]],
+      },
+      mois: {
+        label: 'novembre',
+        ticks: ['Sem. 1', 'Sem. 2', 'Sem. 3', 'Sem. 4'],
+        full: ['1er au 7 nov.', '8 au 14 nov.', '15 au 21 nov.', '22 au 28 nov.'],
+        sales: [298000, 352500, 341000, 386500],
+        count: [33, 39, 38, 42],
+        pick: 3,
+        kpis: [['Livraisons', '152', '+9 %'], ['Encaissé', '1,38 M F', '+11 %'], ['Réussite', '95 %', '+1 pt']],
+        delay: '49 min',
+        zones: [['Bonapriso', 26], ['Akwa', 24], ['Deïdo', 15], ['Bonamoussadi', 14]],
+      },
+    };
+    const period = this.state.period;
+    const d = data[period];
+    const n = d.sales.length;
+    const left = 26;
+    const right = 324;
+    const xs = d.sales.map((_, i) => (n === 1 ? (left + right) / 2 : left + ((right - left) * i) / (n - 1)));
+    const maxSale = Math.max(...d.sales, 1);
+    const ys = d.sales.map((v) => 150 - (v / maxSale) * 112);
+    const pts = xs.map((x, i) => [x, ys[i]]);
+    let line = `M${pts[0][0]} ${pts[0][1]}`;
+    for (let i = 0; i < pts.length - 1; i += 1) {
+      const p0 = pts[Math.max(0, i - 1)];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[Math.min(pts.length - 1, i + 2)];
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, Math.min(150, p1[1] + (p2[1] - p0[1]) / 6)];
+      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, Math.min(150, p2[1] - (p3[1] - p1[1]) / 6)];
+      line += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+    }
+    const area = `${line} L${pts[pts.length - 1][0]} 150 L${pts[0][0]} 150 Z`;
+    const picked = this.state.picked ?? d.pick;
+    const maxCount = Math.max(...d.count, 1);
+    const bars = d.count.map((c, i) => {
+      const h = Math.max(2, (c / maxCount) * 46);
+      const x = xs[i] - 7;
+      const y = 150 - h;
+      const on = i === picked;
+      return {
+        x, y, h,
+        side: `${x + 14},${y} ${x + 20},${y - 5} ${x + 20},${145} ${x + 14},150`,
+        top: `${x},${y} ${x + 6},${y - 5} ${x + 20},${y - 5} ${x + 14},${y}`,
+        fill: on ? '#FF8A3D' : 'rgba(var(--fg-rgb),.10)',
+        sideFill: on ? '#D9530A' : 'rgba(var(--fg-rgb),.17)',
+        topFill: on ? '#FFC283' : 'rgba(var(--fg-rgb),.05)',
+      };
+    });
+    const sel = {
+      x: xs[picked],
+      y: ys[picked],
+      full: d.full[picked],
+      amount: `${fmt(d.sales[picked])} F`,
+      count: d.count[picked] === 1 ? '1 livraison' : `${d.count[picked]} livraisons`,
+    };
+    const tipX = Math.min(350 - 132 - 4, Math.max(4, xs[picked] - 66));
+    const pickPeriod = (p) => () => this.setState({ period: p, picked: null });
+    return {
+      periodLabel: d.label,
+      periodIdx: ['jour', 'semaine', 'mois'].indexOf(period),
+      periods: [['jour', 'Jour'], ['semaine', 'Semaine'], ['mois', 'Mois']].map(([key, label]) => ({
+        label,
+        pressed: key === period ? 'true' : 'false',
+        pick: pickPeriod(key),
+        bg: key === period ? 'var(--sheet)' : 'transparent',
+        shadow: key === period ? '0 4px 12px rgba(140,70,10,.12)' : 'none',
+        ink: key === period ? '#140800' : 'rgba(var(--fg-rgb),.70)',
+      })),
+      kpis: d.kpis.map(([label, value, delta]) => ({ label, value, delta })),
+      line,
+      area,
+      bars,
+      sel,
+      tipLeft: `${tipX}px`,
+      ticks: d.ticks.map((label, i) => ({ label, x: xs[i], fill: i === picked ? '#C2410C' : 'rgba(var(--fg-rgb),.62)' })),
+      cols: n,
+      hits: d.full.map((label, i) => ({ label: `Voir ${label}`, pick: () => this.setState({ picked: i }) })),
+      delay: d.delay,
+      zones: d.zones.map(([name, share]) => ({ name, share: `${share} %`, width: `${Math.max(share, 2) * 2.4}%` })),
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'clair';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Livreur · livraison impossible</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #FFB15C)}
+button{font-family:inherit}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes r-radar{0%{transform:scale(.3);opacity:.75}100%{transform:scale(3.2);opacity:0}}@keyframes r-dash{to{stroke-dashoffset:-28}}@keyframes r-blink{0%,100%{opacity:1}50%{opacity:.35}}@keyframes r-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}@keyframes r-turn{to{transform:rotate(360deg)}}@keyframes r-rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes r-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-up{from{transform:translateY(100%)}to{transform:translateY(0%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+<div style="position: absolute; inset: 0; overflow: hidden; pointer-events: none"><span class="tara-anim" style="position: absolute; left: -90px; top: 40px; width: 300px; height: 300px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.38; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out 0s infinite alternate, lq-drift 20s ease-in-out 0s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: 210px; top: 300px; width: 260px; height: 260px; background: radial-gradient(circle at 30% 30%, #FFD27A 0%, #FF8A00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -4s infinite alternate, lq-drift 20s ease-in-out -4s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: -40px; top: 600px; width: 240px; height: 240px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -9s infinite alternate, lq-drift 20s ease-in-out -9s infinite alternate" aria-hidden="true"></span></div>
+<div style="position: relative; padding: 18px 20px 0; display: flex; align-items: center; gap: 10px"><a href="Livreur-En-Route.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 14px; background: rgba(var(--fg-rgb),.07); border: 1px solid rgba(var(--fg-rgb),.12); display: flex; align-items: center; justify-content: center; color: var(--ink); box-sizing: border-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--accent)">LIVRAISON IMPOSSIBLE</span><b style="font-family: Sora, sans-serif; font-size: 18px">Marie Ngo</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.70)">Collège des Nations · TR-48301</span></span></div>
+<div style="position: absolute; left: 20px; right: 20px; top: 92px; bottom: 20px; display: flex; flex-direction: column; gap: 12px"><sc-if value="{{open}}" hint-placeholder-val="{{ true }}"><span style="font-size: 13px; font-weight: 800; color: rgba(var(--fg-rgb),.8)">Motif</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{reasons}}" as="r" hint-placeholder-count="5"><button type="button" aria-pressed="{{r.checked}}" onClick="{{r.pick}}" style="min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid {{r.border}}; background: {{r.bg}}; color: var(--ink); font-size: 13px; font-weight: 700; cursor: pointer">{{r.label}}</button></sc-for></div><button type="button" onClick="{{photo}}" style="padding: 12px 14px; border-radius: 20px; background: {{photoBg}}; border: 1px solid {{photoBorder}}; color: var(--ink); display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer"><span style="width: 48px; height: 48px; border-radius: 14px; background: rgba(var(--fg-rgb),.07); display: flex; align-items: center; justify-content: center; color: {{photoIcon}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></span><span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{photoTitle}}</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.68)">{{photoHint}}</span></span><span style="font-size: 13px; font-weight: 800; color: var(--accent)">{{photoAction}}</span></button><label style="min-height: 64px; padding: 10px 14px; border-radius: 16px; background: rgba(var(--fg-rgb),.05); border: 1px solid rgba(var(--fg-rgb),.14); display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 700; color: rgba(var(--fg-rgb),.66)">Précisez le motif</span><span style="font-size: 14px; color: rgba(var(--fg-rgb),.45)">{{noteHint}}</span></label><span style="font-size: 12px; line-height: 1.5; color: rgba(var(--fg-rgb),.72)">{{notice}}</span></sc-if><sc-if value="{{done}}" hint-placeholder-val="{{ false }}"><div style="display: flex; justify-content: center; padding: 18px 0 6px; perspective: 400px"><div class="tara-anim" style="animation: t3-bob 2.6s ease-in-out infinite"><div class="tara-anim" style="position: relative; width: 86px; height: 86px; transform-style: preserve-3d; transform: rotateX(-22deg) rotateY(-30deg); animation: t3-spin 12s linear infinite"><div style="position: absolute; left: 0; top: 0; width: 86px; height: 86px; box-sizing: border-box; background: #D9A066; transform: translateZ(43.0px)"><span style="position: absolute; left: 37.0px; top: 0; width: 12.0px; height: 86px; background: #FF6A00"></span><b style="position: absolute; left: 7.7px; top: 6.9px; font: 800 14.6px Sora, sans-serif; color: #16120E">n° 1</b><span style="position: absolute; left: 7.7px; bottom: 8.6px; display: flex; flex-direction: column; gap: 2.6px"><span style="width: 22.4px; height: 3.4px; border-radius: 2px; background: #16120E"></span><span style="width: 14.6px; height: 3.4px; border-radius: 2px; background: #16120E"></span></span></div><div style="position: absolute; left: 0; top: 0; width: 86px; height: 86px; box-sizing: border-box; background: #C98F55; transform: rotateY(180deg) translateZ(43.0px)"><span style="position: absolute; left: 37.0px; top: 0; width: 12.0px; height: 86px; background: #E85F00"></span></div><div style="position: absolute; left: 0; top: 0; width: 86px; height: 86px; box-sizing: border-box; background: #CF9458; transform: rotateY(90deg) translateZ(43.0px)"></div><div style="position: absolute; left: 0; top: 0; width: 86px; height: 86px; box-sizing: border-box; background: #C68A4F; transform: rotateY(-90deg) translateZ(43.0px)"></div><div style="position: absolute; left: 0; top: 0; width: 86px; height: 86px; box-sizing: border-box; background: #E6B276; transform: rotateX(90deg) translateZ(43.0px)"><span style="position: absolute; left: 37.0px; top: 0; width: 12.0px; height: 86px; background: #FF6A00"></span><span style="position: absolute; left: 18.1px; top: 25.8px; width: 49.9px; height: 34.4px; border-radius: 6.9px; background: #FFF6EA; display: flex; align-items: center; justify-content: center"><img src="/_blob/7a49380faa2112b2a8f70b2ded048c4f" alt="" style="width: 82%; height: 82%; object-fit: contain"></span></div><div style="position: absolute; left: 0; top: 0; width: 86px; height: 86px; box-sizing: border-box; background: #8A5A2E; transform: rotateX(-90deg) translateZ(43.0px)"></div></div></div></div><div class="tara-anim" style="padding: 14px; border-radius: 20px; background: rgba(14,127,87,.16); border: 1px solid rgba(74,222,155,.45); display: flex; gap: 12px; align-items: flex-start; animation: r-rise .4s ease-out both"><span style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #10A06E; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--ink)"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{doneTitle}}</b><span style="font-size: 13px; line-height: 1.45; color: rgba(var(--fg-rgb),.8)">{{doneBody}}</span></span></div><a href="Livreur-Retour.dc.html" style="min-height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; text-decoration: none">Maquette : l’expéditeur choisit le retour</a></sc-if><div style="margin-top: auto"><button type="button" onClick="{{act.onClick}}" style="width: 100%; min-height: 58px; border: 0; border-radius: 20px; background: {{act.bg}}; color: {{act.ink}}; font-size: 16px; font-weight: 800; cursor: pointer">{{act.label}}</button></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "sombre"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { reason: 'Client absent', photo: false, done: false };
+  }
+  vals() {
+
+    const radio = (list, current, set) => list.map((label) => ({
+      label, checked: label === current ? 'true' : 'false',
+      border: label === current ? '#FF8A00' : 'rgba(var(--fg-rgb),.16)',
+      bg: label === current ? 'rgba(255,138,0,.12)' : 'rgba(var(--fg-rgb),.05)',
+      dot: label === current ? '#FF8A00' : 'transparent',
+      pick: () => set(label),
+    }));
+    const photoVals = (has, title, takenTitle, hint) => ({
+      photo: () => this.setState({ photo: !has }),
+      photoBg: has ? 'rgba(74,222,155,.08)' : 'rgba(var(--fg-rgb),.06)',
+      photoBorder: has ? 'rgba(74,222,155,.35)' : 'rgba(255,177,92,.45)',
+      photoIcon: has ? 'var(--ok)' : 'var(--accent)',
+      photoTitle: has ? takenTitle : title,
+      photoHint: hint,
+      photoAction: has ? 'Reprendre' : 'Prendre',
+    });
+    const btn = (enabled, label, onClick) => ({
+      label, onClick,
+      bg: enabled ? 'linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)' : 'rgba(var(--fg-rgb),.08)',
+      ink: enabled ? '#140800' : 'rgba(var(--fg-rgb),.42)',
+    });
+    const { reason, photo, done } = this.state;
+    const damaged = reason === 'Colis abîmé, refusé';
+    const ready = photo && !done;
+    return {
+      open: !done, done,
+      reasons: radio(['Client absent', 'Injoignable', 'Adresse introuvable', 'Refuse le colis', 'Colis abîmé, refusé', 'Lieu dangereux'], reason, (r) => this.setState({ reason: r, photo: false })),
+      ...photoVals(photo, damaged ? 'Photo du colis abîmé · obligatoire' : 'Photo du lieu · obligatoire',
+        damaged ? 'Photo du colis abîmé · prise à 15:31' : 'Photo du lieu · prise à 15:31',
+        damaged ? 'Le dommage bien visible' : 'Porte, portail ou devanture visible'),
+      noteHint: damaged ? 'Ex. carton écrasé, bouteille cassée' : 'Ex. portail fermé, chien dangereux',
+      notice: damaged
+        ? 'Photographiez le dommage et décrivez-le : l’équipe Tara ouvre une réclamation pour l’expéditeur.'
+        : 'L’expéditeur est prévenu tout de suite et choisit : nouvelle tentative ou retour.',
+      doneTitle: 'Échec enregistré',
+      doneBody: 'L’expéditeur choisit : nouvelle tentative ou retour. Gardez le colis avec vous.',
+      act: done ? btn(false, 'En attente de l’expéditeur…', () => {}) : btn(ready, 'Déclarer l’échec', () => { if (ready) this.setState({ done: true }); }),
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'sombre';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>
