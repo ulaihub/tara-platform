@@ -207,6 +207,7 @@ class _FailureScreenState extends ConsumerState<FailureScreen> {
               CourseFieldLabel(l.failureReasonLabel),
               const SizedBox(height: 8),
               ChoiceChips<String>(
+                wrap: true,
                 options: [for (final reason in failureReasons) ChoiceOption(reason, failureReasonLabel(l, reason))],
                 selected: _reason,
                 onSelected: (reason) {
@@ -225,15 +226,23 @@ class _FailureScreenState extends ConsumerState<FailureScreen> {
                   child: Text(l.damagedNotice, style: TaraText.label.copyWith(color: c.textPrimary, height: 1.4)),
                 ),
               ],
-              if (_reason == 'OTHER' || _reason == 'DAMAGED') ...[
-                const SizedBox(height: 12),
-                TaraTextField(
-                  label: l.failureNoteLabel,
-                  hint: _reason == 'DAMAGED' ? l.damagedNoteHint : l.failureNoteHint,
-                  controller: _note,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-              ],
+              const SizedBox(height: 14),
+              PhotoCard(
+                taken: _photoPath != null,
+                takenAt: _photoAt,
+                title: _reason == 'DAMAGED' ? l.photoDamaged : l.photoPlace,
+                takenTitle: l.photoPlaceTaken,
+                hint: _reason == 'DAMAGED' ? l.photoDamagedHint : l.photoPlaceHint,
+                onTake: _busy ? null : _takePhoto,
+              ),
+              const SizedBox(height: 12),
+              // « Précisez le motif » (maquette) : toujours là, obligatoire pour « Autre ».
+              BoxedField(
+                label: l.failureNoteLabel,
+                hint: _reason == 'DAMAGED' ? l.damagedNoteHint : l.failureNoteHint,
+                controller: _note,
+                textCapitalization: TextCapitalization.sentences,
+              ),
               const SizedBox(height: 14),
               _CallsCard(
                 calls: calls,
@@ -244,29 +253,13 @@ class _FailureScreenState extends ConsumerState<FailureScreen> {
                 onSupport: support == null ? null : () => unawaited(callPhone(support)),
               ),
               const SizedBox(height: 12),
-              ProofPhotoTile(
-                path: _photoPath,
-                takenAt: _photoAt,
-                onTake: _busy ? null : _takePhoto,
-                title: _reason == 'DAMAGED' ? l.photoDamaged : l.photoPlace,
-                hint: _reason == 'DAMAGED' ? l.photoDamagedHint : l.photoPlaceHint,
-                takenLabel: l.photoPlaceTaken,
-              ),
-              const SizedBox(height: 12),
-              TintBox(
-                child: Text(
-                  l.failureNotice(policy.decisionTimeout.inMinutes),
-                  style: TaraText.label.copyWith(color: c.textSecondary, height: 1.4),
-                ),
+              Text(
+                l.failureNotice(policy.decisionTimeout.inMinutes),
+                style: TaraText.small.copyWith(fontSize: 12, height: 1.5, color: c.textPrimary.withValues(alpha: .72)),
               ),
               if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
             ],
-            footer: PrimaryButton(
-              label: l.validateFailure,
-              icon: TaraIcons.check,
-              loading: _busy,
-              onPressed: ready ? _submit : null,
-            ),
+            footer: PrimaryButton(label: l.validateFailure, loading: _busy, onPressed: ready ? _submit : null),
           ),
         );
       },

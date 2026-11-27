@@ -1056,7 +1056,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get validateFailure => 'Confirm the failure';
+  String get validateFailure => 'Report the failure';
 
   @override
   String get cantDeliver => 'Can\'t deliver?';

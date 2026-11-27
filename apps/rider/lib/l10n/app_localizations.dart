@@ -1889,7 +1889,7 @@ abstract class AppLocalizations {
   /// No description provided for @validateFailure.
   ///
   /// In fr, this message translates to:
-  /// **'Valider l’échec'**
+  /// **'Déclarer l’échec'**
   String get validateFailure;
 
   /// No description provided for @cantDeliver.

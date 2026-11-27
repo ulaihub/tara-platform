@@ -299,7 +299,7 @@
   "photoPlaceHint": "Door, gate or shopfront visible",
   "photoPlaceTaken": "Photo of the place · taken at {time}",
   "failureNotice": "The sender is told right away and chooses: try again or return. Without an answer within {minutes} min, you bring the parcel back.",
-  "validateFailure": "Confirm the failure",
+  "validateFailure": "Report the failure",
   "cantDeliver": "Can't deliver?",
   "failureWaitingTitle": "Failure recorded",
   "failureWaitingBody": "The sender chooses: try again or return. Without an answer, the return is decided at {time}. Keep the parcel with you.",

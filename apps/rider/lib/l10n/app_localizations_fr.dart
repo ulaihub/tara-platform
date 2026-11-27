@@ -1060,7 +1060,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get validateFailure => 'Valider l’échec';
+  String get validateFailure => 'Déclarer l’échec';
 
   @override
   String get cantDeliver => 'Livraison impossible ?';
