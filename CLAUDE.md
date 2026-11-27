@@ -26,6 +26,8 @@ Rester court : ce fichier est relu à chaque message.
 
 ## Fichiers à tenir à jour (dans la branche du lot qui les concerne)
 
+- `docs/LOTS_A_VENIR.md` : instructions détaillées de chaque lot à venir ; retirer un lot fini,
+  ajouter toute nouvelle demande du porteur avec le même niveau de détail.
 - `CLAUDE.md` « État et suite » et le tableau du `README.md` : à chaque lot.
 - `docs/design/maquettes/INVENTAIRE.md` : écrans rendus fidèles, écarts restants.
 - `docs/API.md` (et `apps/api/openapi.json`) : toute route ajoutée ou changée.
@@ -57,7 +59,7 @@ Fait récemment : suivi Livré / Échec / Retour + profil (expéditeur), vraie c
 livraison renvoyable sur les pages web, app livreur lots A (scan QR d'enlèvement, en route) et
 B (livraison impossible, retour), maquettes et outils dans le dépôt.
 
-À faire, dans l'ordre proposé :
+À faire, dans l'ordre proposé (instructions complètes : `docs/LOTS_A_VENIR.md`) :
 
 1. **Retour du colis sans dette** (attend son accord sur 3 points : durée de garde au bureau,
    ce qui se passe après, adresse et horaires du bureau). Proposition : le vendeur paie avant
