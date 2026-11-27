@@ -8,8 +8,22 @@ Décisions à garder (prises par l'utilisateur, différentes des maquettes) :
 - carte réelle (MapLibre) sur les écrans de suivi / adresse / course : la carte 3D est en attente (#167)
 - barre d'onglets en pilule de l'app livreur (PR #73)
 
-## Fait
-- Présentation expéditeur (4) + livreur (3) : refaite d'après le code des maquettes (branche expediteur/presentation, 50139cc)
+## Fait (fusionné)
+- Présentation expéditeur (4) + livreur (3) : PR 77
+- Expéditeur lot 1 : connexion, code, conditions, bienvenue : PR 78
+- Expéditeur lot 2 : accueil, commandes, nouvelle livraison (6 écrans) : PR 80
+- Cloche des notifications, « Mon activité » de la boutique : PR 81
+- Expéditeur lot 3 : paiement en attente, suivi (livreur trouvé, livré, échec, retour), profil : PR 82, 87
+- Pages web : vraie carte, code de livraison : PR 88 (le reste des pages web et le back-office ne sont pas refaits : choix du porteur)
+- Livreur lot A : enlèvement (scan QR + 4 chiffres), en route : PR 89
+- Livreur lot B : livraison impossible, retour du colis : PR 90
+
+## Reste à comparer
+- Livreur lot C : Recharger, Retirer, Reverser, Pièces, Profil
+- Expéditeur, écrans listés plus bas sans PR ci-dessus (envoi en masse, portefeuille, contacts,
+  demander l'adresse, supprimer le compte…) : recomparer avant de les déclarer conformes
+
+Les listes d'écarts ci-dessous datent du premier passage (25 nov.).
 
 ## Expéditeur — écarts constatés (maquette → écran)
 - Connexion : logo en tuile + colis 3D, titre bas, champs Pays / Numéro séparés, « WhatsApp ou SMS » ; à refaire
