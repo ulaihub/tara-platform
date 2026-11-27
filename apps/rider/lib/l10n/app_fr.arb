@@ -750,7 +750,7 @@
       }
     }
   },
-  "validateFailure": "Valider l’échec",
+  "validateFailure": "Déclarer l’échec",
   "cantDeliver": "Livraison impossible ?",
   "failureWaitingTitle": "Échec enregistré",
   "failureWaitingBody": "L’expéditeur choisit : nouvelle tentative ou retour. Sans réponse, le retour sera décidé à {time}. Gardez le colis avec vous.",
@@ -1881,5 +1881,16 @@
         "type": "String"
       }
     }
-  }
+  },
+  "returnStepFeesDone": "Frais de retour réglés",
+  "returnStepFeesDoneSub": "Vous pouvez rendre le colis.",
+  "returnCodeEntered": "Code {code} saisi",
+  "@returnCodeEntered": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "slideParcelReturned": "Glisser · Colis rendu"
 }

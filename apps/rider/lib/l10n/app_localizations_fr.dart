@@ -1060,7 +1060,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get validateFailure => 'Valider l’échec';
+  String get validateFailure => 'Déclarer l’échec';
 
   @override
   String get cantDeliver => 'Livraison impossible ?';
@@ -2618,4 +2618,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String enRouteEta(int minutes, String distance, String time) {
     return '$minutes min · $distance · arrivée $time';
   }
+
+  @override
+  String get returnStepFeesDone => 'Frais de retour réglés';
+
+  @override
+  String get returnStepFeesDoneSub => 'Vous pouvez rendre le colis.';
+
+  @override
+  String returnCodeEntered(String code) {
+    return 'Code $code saisi';
+  }
+
+  @override
+  String get slideParcelReturned => 'Glisser · Colis rendu';
 }

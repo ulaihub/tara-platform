@@ -1889,7 +1889,7 @@ abstract class AppLocalizations {
   /// No description provided for @validateFailure.
   ///
   /// In fr, this message translates to:
-  /// **'Valider l’échec'**
+  /// **'Déclarer l’échec'**
   String get validateFailure;
 
   /// No description provided for @cantDeliver.
@@ -4501,6 +4501,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{minutes} min · {distance} · arrivée {time}'**
   String enRouteEta(int minutes, String distance, String time);
+
+  /// No description provided for @returnStepFeesDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de retour réglés'**
+  String get returnStepFeesDone;
+
+  /// No description provided for @returnStepFeesDoneSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pouvez rendre le colis.'**
+  String get returnStepFeesDoneSub;
+
+  /// No description provided for @returnCodeEntered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code {code} saisi'**
+  String returnCodeEntered(String code);
+
+  /// No description provided for @slideParcelReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser · Colis rendu'**
+  String get slideParcelReturned;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

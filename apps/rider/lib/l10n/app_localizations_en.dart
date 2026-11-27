@@ -1056,7 +1056,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get validateFailure => 'Confirm the failure';
+  String get validateFailure => 'Report the failure';
 
   @override
   String get cantDeliver => 'Can\'t deliver?';
@@ -2595,4 +2595,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String enRouteEta(int minutes, String distance, String time) {
     return '$minutes min · $distance · arriving $time';
   }
+
+  @override
+  String get returnStepFeesDone => 'Return fees settled';
+
+  @override
+  String get returnStepFeesDoneSub => 'You can hand back the parcel.';
+
+  @override
+  String returnCodeEntered(String code) {
+    return 'Code $code entered';
+  }
+
+  @override
+  String get slideParcelReturned => 'Slide · Parcel returned';
 }

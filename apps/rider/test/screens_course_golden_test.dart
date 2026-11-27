@@ -367,11 +367,11 @@ void main() {
       await settle(tester);
       final context = tester.element(find.byType(ReturnScreen));
       await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
-      await tester.tap(find.text('Je suis chez le vendeur'));
+      await tester.tap(find.text('Je suis arrivé'));
       await settle(tester);
       await tester.enterText(find.byType(EditableText).first, '5521');
-      await tester.ensureVisible(find.text('Photographier le colis rendu').last);
-      await tester.tap(find.text('Photographier le colis rendu').last);
+      await tester.ensureVisible(find.text('Prendre').last);
+      await tester.tap(find.text('Prendre').last);
       await tester.pump();
       FocusManager.instance.primaryFocus?.unfocus();
       await settle(tester);
@@ -384,7 +384,7 @@ void main() {
       final api = FakeRiderApi()..collections = [const Collection(total: 750, complete: false)];
       await pumpVariant(tester, variant, scope(returning(), api: api));
       await settle(tester);
-      await tester.tap(find.text('Je suis chez le vendeur'));
+      await tester.tap(find.text('Je suis arrivé'));
       await settle(tester);
       expect(tester.takeException(), isNull);
       expect(find.text('Frais de retour à encaisser'), findsOneWidget);
@@ -447,20 +447,20 @@ void main() {
     final api = FakeRiderApi()..collections = [const Collection(total: 750, complete: false)];
     await pumpVariant(tester, Variant.matrix.first, scope(returning(), api: api), surface: const Size(390, 1400));
     await settle(tester);
-    await tester.tap(find.text('Je suis chez le vendeur'));
+    await tester.tap(find.text('Je suis arrivé'));
     await settle(tester);
     await tester.enterText(find.byType(EditableText).first, '5521');
-    await tester.tap(find.text('Photographier le colis rendu').last);
+    await tester.tap(find.text('Prendre').last);
     await settle(tester);
-    // Code et photo prêts, mais frais non réglés : le bouton reste inactif.
-    final returned = find.widgetWithText(PrimaryButton, 'Colis rendu');
-    expect(tester.widget<PrimaryButton>(returned).onPressed, isNull);
+    // Code et photo prêts, mais frais non réglés : on ne peut pas encore glisser.
+    final returned = find.byType(SwipeButton);
+    expect(tester.widget<SwipeButton>(returned).onConfirmed, isNull);
 
     await tester.tap(find.text('Espèces reçues · 750 F'));
     await settle(tester);
     expect(api.cashCollected, ['00000000-0000-4000-8000-000000000002']);
-    expect(find.text('Frais de retour réglés : vous pouvez rendre le colis.'), findsOneWidget);
-    expect(tester.widget<PrimaryButton>(returned).onPressed, isNotNull);
+    expect(find.text('Frais de retour réglés'), findsOneWidget);
+    expect(tester.widget<SwipeButton>(returned).onConfirmed, isNotNull);
     expect(sounds.played, contains(TaraSound.cash));
   });
 
