@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
@@ -5,8 +6,9 @@ const config: NextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   reactStrictMode: true,
-  // Le monorepo : les fichiers suivis remontent jusqu'à sa racine.
-  outputFileTracingRoot: new URL('../..', import.meta.url).pathname,
+  // Le monorepo : les fichiers suivis remontent jusqu'à sa racine. fileURLToPath : chemin
+  // valable aussi sous Windows (`.pathname` donnerait « /C:/… », refusé par Next.js).
+  outputFileTracingRoot: fileURLToPath(new URL('../..', import.meta.url)),
 };
 
 export default config;
