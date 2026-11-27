@@ -24,6 +24,17 @@ export function cameroonDate(at: Date): string {
   return dateFormatter.format(at);
 }
 
+/** « 27/12/2026 » : date du Cameroun, pour les messages. */
+export function shortDate(at: Date): string {
+  const [year, month, day] = cameroonDate(at).split('-');
+  return `${day}/${month}/${year}`;
+}
+
+/** Jours restants avant [until], arrondis au jour supérieur (0 : délai dépassé). */
+export function daysLeft(until: Date, now = new Date()): number {
+  return Math.max(0, Math.ceil((until.getTime() - now.getTime()) / 86_400_000));
+}
+
 export function addMinutes(at: Date, minutes: number): Date {
   return new Date(at.getTime() + minutes * 60_000);
 }

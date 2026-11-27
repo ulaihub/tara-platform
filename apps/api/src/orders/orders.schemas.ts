@@ -16,8 +16,17 @@ export const OrderStatusEnum = z
     'DELIVERY_FAILED',
     'RETURNED',
     'CANCELLED',
+    'HELD_AT_OFFICE',
+    'UNCLAIMED',
   ])
   .meta({ id: 'OrderStatus' });
+/**
+ * Choix après un échec : nouvelle tentative, retour payé d'avance (RETURN), ou colis gardé
+ * au bureau Tara faute de paiement à temps (OFFICE).
+ */
+export const FailureDecisionEnum = z
+  .enum(['RETRY', 'RETURN', 'OFFICE'])
+  .meta({ id: 'FailureDecision' });
 export const PaymentMethodEnum = z
   .enum(['MOMO_MTN', 'MOMO_ORANGE', 'CASH', 'WALLET'])
   .meta({ id: 'PaymentMethod' });
@@ -282,7 +291,7 @@ export const OrderDto = z
         reason: FailureReasonEnum.nullable(),
         note: z.string().nullable(),
         at: z.iso.datetime(),
-        decision: z.enum(['RETRY', 'RETURN']).nullable(),
+        decision: FailureDecisionEnum.nullable(),
         /** Sans choix d'ici là, le colis repart chez l'expéditeur (null une fois choisi). */
         decisionDueAt: z.iso.datetime().nullable(),
         /** Une seule nouvelle tentative : false après un deuxième échec. */
@@ -291,6 +300,27 @@ export const OrderDto = z
         hasPhoto: z.boolean(),
         /** Appels passés au destinataire avant l'échec. */
         calls: z.int(),
+      })
+      .nullable(),
+    /**
+     * Retour non payé : colis en route vers le bureau Tara, puis gardé là (jusqu'à `until`),
+     * rendu contre paiement de `due` (GET /orders/:id/return-quote : part du solde).
+     */
+    office: z
+      .object({
+        address: z.string(),
+        hours: z.string(),
+        hoursEn: z.string(),
+        latitude: z.number(),
+        longitude: z.number(),
+        /** Déposé au bureau (null tant que le livreur y va). */
+        heldSince: z.iso.datetime().nullable(),
+        /** Fin de la garde sans frais : après, Tara dispose du colis (conditions). */
+        until: z.iso.datetime().nullable(),
+        /** Frais de retour à payer pour récupérer le colis (0 une fois payés). */
+        due: z.int(),
+        /** Payé : un code de retrait a été envoyé par SMS (à donner au bureau). */
+        paidAt: z.iso.datetime().nullable(),
       })
       .nullable(),
     /** Colis livré : photo de remise (GET /orders/:id/proof-photo), code vérifié, heure. */
@@ -341,7 +371,7 @@ export const OrderSummaryDto = z
     codAmount: z.int(),
     scheduledFor: z.iso.datetime().nullable(),
     /** Après un échec : choix fait (null tant que l'expéditeur doit décider). */
-    failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
+    failureDecision: FailureDecisionEnum.nullable(),
     /** Livreur attribué : prénom et initiale (null avant l'attribution). */
     riderName: z.string().nullable(),
     /**
@@ -361,6 +391,8 @@ export const ACTIVE_ORDER_STATUSES = [
   'PICKED_UP',
   'IN_DELIVERY',
   'DELIVERY_FAILED',
+  // Colis gardé au bureau Tara : l'expéditeur doit encore payer et venir le chercher.
+  'HELD_AT_OFFICE',
 ] as const;
 
 export const OrderListQuery = PageQuery.extend({
@@ -453,7 +485,7 @@ export const PublicTrackingDto = z
     /** Demande Mobile Money envoyée par le livreur, à valider sur le téléphone (frais compris). */
     paymentPending: z.object({ amount: z.int() }).nullable(),
     /** Après un échec : nouvelle tentative ou retour à l'expéditeur, si c'est décidé. */
-    failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
+    failureDecision: FailureDecisionEnum.nullable(),
   })
   .meta({ id: 'PublicTracking' });
 

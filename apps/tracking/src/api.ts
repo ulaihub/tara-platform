@@ -22,7 +22,7 @@ export interface PublicTracking {
   /** Frais ajoutés si le destinataire paie par Mobile Money. */
   mobileMoneyFee: number;
   paymentPending: { amount: number } | null;
-  failureDecision: 'RETRY' | 'RETURN' | null;
+  failureDecision: 'RETRY' | 'RETURN' | 'OFFICE' | null;
   /** Code de livraison (jamais montré) : numéro masqué, dernier envoi, renvois possibles. */
   deliveryCode: { phone: string; sentAt: string; resendsLeft: number } | null;
   /** Carte : point de livraison, livreur seulement quand il vient (position récente). */
@@ -41,7 +41,10 @@ export type OrderStatus =
   | 'DELIVERY_FAILED'
   | 'DELIVERED'
   | 'RETURNED'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  // Retour non payé : colis gardé au bureau Tara, puis non réclamé.
+  | 'HELD_AT_OFFICE'
+  | 'UNCLAIMED';
 
 /** Champs lus par la page (vérifiés contre le contrat de l'API par les tests). */
 export const PUBLIC_TRACKING_FIELDS: (keyof PublicTracking)[] = [

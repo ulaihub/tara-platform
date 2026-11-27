@@ -306,6 +306,18 @@ class _HomeFlowState extends ConsumerState<HomeFlow> {
           onAction: minimize,
         );
       }
+      // Retour non payé à temps : le colis va au bureau Tara, pas chez le vendeur.
+      if (order.failureDecision == 'OFFICE' || actions.refused(order.id, 'office-drop') != null) {
+        return OfficeDropScreen(
+          key: ValueKey('office-${order.id}'),
+          order: order,
+          onBack: minimize,
+          onSos: sos,
+          onDropped: (outcome) {
+            if (outcome == ActionOutcome.queued) _showNotice(l.actionSavedOffline);
+          },
+        );
+      }
       if (order.failureDecision == 'RETURN' || actions.refused(order.id, 'return') != null) {
         return ReturnScreen(
           key: ValueKey('return-${order.id}'),

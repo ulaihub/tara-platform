@@ -4525,6 +4525,72 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Glisser · Colis rendu'**
   String get slideParcelReturned;
+
+  /// No description provided for @returnPaidAhead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de retour payés d’avance par le vendeur : rien à encaisser.'**
+  String get returnPaidAhead;
+
+  /// No description provided for @officeDropTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déposer au bureau Tara'**
+  String get officeDropTitle;
+
+  /// No description provided for @officeDropWhy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le vendeur n’a pas payé le retour à temps : le colis est gardé au bureau Tara. Vous êtes payé comme pour un retour.'**
+  String get officeDropWhy;
+
+  /// No description provided for @officeStepGo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller au bureau Tara'**
+  String get officeStepGo;
+
+  /// No description provided for @officeStepPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier le colis déposé'**
+  String get officeStepPhoto;
+
+  /// No description provided for @officeStepPhotoHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis posé au bureau, étiquette visible'**
+  String get officeStepPhotoHint;
+
+  /// No description provided for @officeStepPhotoTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo du dépôt · prise à {time}'**
+  String officeStepPhotoTaken(String time);
+
+  /// No description provided for @slideOfficeDropped.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser · Colis déposé'**
+  String get slideOfficeDropped;
+
+  /// No description provided for @officeDropped.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis déposé au bureau'**
+  String get officeDropped;
+
+  /// No description provided for @queuedOfficeDrop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt au bureau Tara'**
+  String get queuedOfficeDrop;
+
+  /// No description provided for @statusAtOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déposé au bureau Tara'**
+  String get statusAtOffice;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

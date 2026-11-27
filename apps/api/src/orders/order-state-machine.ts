@@ -8,6 +8,12 @@ import type { ActorRole, FailureReason, OrderStatus } from '../generated/prisma/
  *      │              │              │  ▲                       │   ▲
  *      ▼              ▼              ▼  └── réattribution       ▼   │ nouvelle tentative
  *   CANCELLED      CANCELLED      CANCELLED            DELIVERY_FAILED ─► RETURNED
+ *                                                             │              ▲
+ *                     retour non payé : bureau Tara           ▼              │ payé, rendu
+ *                                                       HELD_AT_OFFICE ──────┘
+ *                                                             │ jamais réclamé (garde finie)
+ *                                                             ▼
+ *                                                         UNCLAIMED
  */
 export const ORDER_TRANSITIONS: Record<OrderStatus, Partial<Record<OrderStatus, ActorRole[]>>> = {
   CREATED: {
@@ -35,13 +41,24 @@ export const ORDER_TRANSITIONS: Record<OrderStatus, Partial<Record<OrderStatus, 
   DELIVERY_FAILED: {
     IN_DELIVERY: ['RIDER', 'DISPATCHER'],
     RETURNED: ['RIDER', 'DISPATCHER', 'SUPPORT'],
+    // Retour non payé : le livreur dépose le colis au bureau Tara (photo).
+    HELD_AT_OFFICE: ['RIDER', 'DISPATCHER', 'SUPPORT'],
+  },
+  // Au bureau : l'équipe rend le colis payé, ou constate qu'il n'a pas été réclamé.
+  HELD_AT_OFFICE: {
+    RETURNED: ['DISPATCHER', 'SUPPORT'],
+    UNCLAIMED: ['DISPATCHER', 'SUPPORT'],
   },
   DELIVERED: {},
   RETURNED: {},
   CANCELLED: {},
+  UNCLAIMED: {},
 };
 
-export const TERMINAL_STATUSES: OrderStatus[] = ['DELIVERED', 'RETURNED', 'CANCELLED'];
+export const TERMINAL_STATUSES: OrderStatus[] = ['DELIVERED', 'RETURNED', 'CANCELLED', 'UNCLAIMED'];
+
+/** Course finie pour le livreur : livrée, rendue, annulée, ou colis déposé au bureau Tara. */
+export const RIDER_DONE_STATUSES: OrderStatus[] = [...TERMINAL_STATUSES, 'HELD_AT_OFFICE'];
 
 /** Statuts où l'expéditeur peut encore modifier ou annuler : le colis n'est pas enlevé. */
 export const BEFORE_PICKUP: OrderStatus[] = ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'];

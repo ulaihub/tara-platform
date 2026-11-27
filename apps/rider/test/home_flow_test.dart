@@ -265,6 +265,12 @@ void main() {
     expect(find.textContaining('15:25'), findsOneWidget);
   });
 
+  testWidgets('retour non payé : écran de dépôt au bureau Tara', (tester) async {
+    await pumpHome(tester, order(status: 'DELIVERY_FAILED', failureDecision: 'OFFICE', failureReason: 'REFUSED'));
+    expect(find.byType(OfficeDropScreen), findsOneWidget);
+    expect(find.byType(ReturnScreen), findsNothing);
+  });
+
   testWidgets('retour décidé : écran de retour vers le vendeur', (tester) async {
     await pumpHome(tester, order(status: 'DELIVERY_FAILED', failureDecision: 'RETURN', failureReason: 'REFUSED'));
     expect(find.byType(ReturnScreen), findsOneWidget);

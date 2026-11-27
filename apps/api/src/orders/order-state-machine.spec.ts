@@ -18,6 +18,9 @@ const EXPECTED: [OrderStatus, OrderStatus][] = [
   ['IN_DELIVERY', 'DELIVERY_FAILED'],
   ['DELIVERY_FAILED', 'IN_DELIVERY'],
   ['DELIVERY_FAILED', 'RETURNED'],
+  ['DELIVERY_FAILED', 'HELD_AT_OFFICE'],
+  ['HELD_AT_OFFICE', 'RETURNED'],
+  ['HELD_AT_OFFICE', 'UNCLAIMED'],
 ];
 
 const complete = { riderId: 'r', failureReason: 'RECIPIENT_ABSENT', note: 'motif' } as const;

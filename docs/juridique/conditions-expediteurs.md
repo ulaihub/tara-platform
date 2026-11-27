@@ -1,6 +1,6 @@
 # Conditions générales d'utilisation de Tara — expéditeurs
 
-Version 2026-11.11 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.12 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -198,13 +198,14 @@ Une livraison peut échouer : destinataire absent ou injoignable, adresse introu
 paiement refusé. Avant de déclarer l'échec, le livreur doit appeler le destinataire au moins
 deux fois, à cinq minutes d'écart au moins, et photographier le lieu.
 
-Vous êtes prévenu tout de suite et vous choisissez dans les **15 minutes** :
+Vous êtes prévenu tout de suite, dans l'application, avec les preuves du livreur (photo du lieu,
+appels passés au destinataire, heure), et vous choisissez dans les **15 minutes** :
 
 - **une nouvelle tentative** : le livreur repasse chez le destinataire ;
-- **le retour du colis** : le livreur vous le rapporte à l'adresse d'enlèvement.
+- **le retour du colis** : le livreur vous le rapporte à l'adresse d'enlèvement, une fois les
+  frais de retour payés (voir ci-dessous).
 
-Sans réponse de votre part dans ce délai, le colis vous est rapporté (retour). **Une seule
-nouvelle tentative est possible** : après un deuxième échec, le colis vous revient.
+**Une seule nouvelle tentative est possible** : après un deuxième échec, seul le retour reste.
 
 ### Frais en cas d'échec
 
@@ -221,27 +222,45 @@ Exemple : pour une course dont le prix de base est de 1 500 FCFA, le retour coû
 Si vous aviez choisi « le destinataire paie » et que le colis revient, le prix de la course
 reste dû : c'est vous qui le payez, en plus des frais de retour.
 
-Ces frais sont pris sur votre solde Tara :
+- **Nouvelle tentative** : les frais sont pris sur votre solde Tara. S'il ne suffit pas, vous
+  rechargez la somme manquante par Mobile Money avant que la tentative soit confirmée. Sinon,
+  choisissez le retour.
+- **Retour : payé avant de partir, jamais de dette.** L'application vous affiche les frais de
+  retour, la part payée par votre solde Tara (et, pour une boutique, par ses ventes) et le reste
+  à payer. Ce reste se paie **tout de suite, par Mobile Money, dans l'application**. Une fois
+  payé, le livreur vous rapporte le colis et vous le remet contre votre **code de retour**
+  (reçu par SMS). **Le livreur n'encaisse jamais rien à votre porte.** Un retour ne rend jamais
+  votre solde négatif.
 
-- **Nouvelle tentative** : si votre solde ne suffit pas, vous rechargez la somme manquante par
-  Mobile Money avant que la tentative soit confirmée. Sinon, choisissez le retour.
-- **Retour : pas de paiement, pas de colis.** Ce que votre solde ne couvre pas, vous le payez au
-  livreur (en espèces ou par Mobile Money) au moment où il vous rend le colis. Sans ce
-  paiement, le livreur ne vous remet pas le colis : il est gardé au bureau de Tara et vous est
-  rendu dès que les frais sont réglés.
+### Retour non payé : le colis est gardé au bureau Tara
 
-**Colis non réclamé** : quand un colis est gardé au bureau, le service client vous prévient (SMS ou
-appel) le jour même, puis 7 et 21 jours plus tard. Sans réponse 30 jours après le premier message, Tara peut le vendre pour
-couvrir les frais dus (le reste vous est versé sur votre solde Tara), le donner à une œuvre de
-bienfaisance s'il n'a pas de valeur marchande, ou le détruire s'il est dangereux. Un produit
-périssable peut être donné ou détruit après 48 heures.
+Si les frais de retour ne sont pas payés avant la fin des 15 minutes (ou si vous ne répondez pas),
+le livreur dépose le colis au **bureau Tara**, photo à l'appui :
+
+- **Adresse et horaires** : **[À COMPLÉTER : adresse définitive]** (adresse provisoire :
+  Bonabéri, Douala), **du lundi au vendredi, de 8 h à 17 h**. L'adresse et les horaires à jour
+  sont toujours affichés dans l'application.
+- **Garde gratuite pendant 30 jours** à partir du dépôt : aucun frais de garde.
+- **Pour récupérer le colis**, vous payez les mêmes frais de retour (plus la course si elle
+  n'était pas payée) : dans l'application (votre solde d'abord, puis Mobile Money), ou en
+  espèces au bureau. Après un paiement dans l'application, vous recevez par SMS un **code de
+  retrait** à donner au bureau.
+- **Vous êtes prévenu à chaque étape** : dans l'application, par notification et par SMS (ou
+  WhatsApp) au dépôt, puis 1, 7 et 25 jours après, et à la fin de la garde. Le destinataire voit
+  seulement « Colis rapporté chez Tara » sur sa page de suivi.
+
+**Colis non réclamé** : après les 30 jours, si vous n'êtes pas venu le chercher, Tara peut
+**donner le colis à une association** ou, s'il est périssable, dangereux ou sans valeur, **le
+détruire**. **Tara ne vend jamais votre colis.** Les frais de retour sont alors abandonnés :
+vous ne devez plus rien, et aucune dette n'est inscrite sur votre compte.
 
 ## 9. Solde négatif et plafond de dette
 
 - Un **particulier** ne peut rien devoir à Tara : tant qu'une somme reste due, il ne peut pas
   passer de nouvelle commande ni supprimer son compte.
-- Une **boutique** peut devoir au plus **3 000 FCFA** (frais d'échec, d'annulation ou
-  d'attente que ni son solde Tara ni ses ventes ne couvrent). Seules ses ventes à recevoir passent alors en négatif ; au-delà, ses
+- Une **boutique** peut devoir au plus **3 000 FCFA** (frais de nouvelle tentative,
+  d'annulation ou d'attente que ni son solde Tara ni ses ventes ne couvrent). **Un retour de
+  colis ne crée jamais de dette** : il se paie d'avance ou au bureau (article 8). Seules ses ventes à recevoir passent alors en négatif ; au-delà, ses
   nouvelles commandes attendent le règlement : recharge par Mobile Money, ou ventes encaissées
   qui viennent combler la dette. Aucun reversement n'est fait tant que ses ventes sont en
   négatif.

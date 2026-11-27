@@ -711,6 +711,7 @@ class _CourseRow extends StatelessWidget {
     final (icon, color, background, status) = switch (order.status) {
       'DELIVERED' => (TaraIcons.check, c.success, c.successTintBg, l.statusDelivered),
       'RETURNED' => (TaraIcons.returnArrow, c.accentText, c.accentTintBg, l.statusReturned),
+      'HELD_AT_OFFICE' || 'UNCLAIMED' => (TaraIcons.returnArrow, c.accentText, c.accentTintBg, l.statusAtOffice),
       _ => (TaraIcons.close, c.textTertiary, c.chipBg, l.statusCancelled),
     };
     final from = order.pickup.neighborhood ?? order.pickup.city;

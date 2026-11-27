@@ -161,6 +161,27 @@ const envSchema = z
     FAILURE_CALL_SPACING_MINUTES: z.coerce.number().min(0).max(60).default(5),
     FAILURE_DECISION_TIMEOUT_MINUTES: z.coerce.number().min(0.05).max(240).default(15),
     /**
+     * Retour sans dette : colis non payé gardé au bureau Tara. Adresse, horaires et position
+     * du bureau (valeurs provisoires, à régler sur le serveur), durée de la garde sans frais,
+     * jours des rappels à l'expéditeur (comptés depuis le dépôt).
+     */
+    OFFICE_ADDRESS: z.string().min(3).default('Bureau Tara, Bonabéri, Douala (adresse provisoire)'),
+    OFFICE_HOURS: z.string().min(3).default('Lundi au vendredi, 8 h - 17 h'),
+    OFFICE_HOURS_EN: z.string().min(3).default('Monday to Friday, 8 am - 5 pm'),
+    OFFICE_LATITUDE: z.coerce.number().min(3.8).max(4.3).default(4.0717),
+    OFFICE_LONGITUDE: z.coerce.number().min(9.5).max(9.9).default(9.6625),
+    OFFICE_HOLD_DAYS: z.coerce.number().int().min(1).max(365).default(30),
+    OFFICE_REMINDER_DAYS: z
+      .string()
+      .regex(/^\d+(,\d+)*$/, 'jours séparés par des virgules, ex. 1,7,25')
+      .default('1,7,25')
+      .transform((value) =>
+        value
+          .split(',')
+          .map(Number)
+          .sort((a, b) => a - b),
+      ),
+    /**
      * Dette maximale d'un marchand envers Tara (frais d'échec non couverts par son solde), en
      * FCFA : au-delà, les frais se paient sur le moment et les nouvelles commandes attendent
      * le règlement. Un particulier ne peut rien devoir.

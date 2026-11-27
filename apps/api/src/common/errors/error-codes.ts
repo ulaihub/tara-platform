@@ -417,9 +417,37 @@ export const ERROR_MESSAGES = {
     fr: 'Solde insuffisant pour la nouvelle tentative ({fee} FCFA) : rechargez au moins {amount} FCFA, ou choisissez le retour.',
     en: 'Not enough balance for another attempt ({fee} XAF): top up at least {amount} XAF, or choose the return.',
   },
+  RETURN_PAYMENT_REQUIRED: {
+    fr: 'Votre solde ne couvre pas le retour : payez {amount} FCFA par Mobile Money pour qu’il parte.',
+    en: 'Your balance does not cover the return: pay {amount} XAF by Mobile Money for it to go ahead.',
+  },
+  OFFICE_PAYMENT_REQUIRED: {
+    fr: 'Les frais de retour ({amount} FCFA) ne sont pas payés : le colis reste au bureau Tara.',
+    en: 'The return fees ({amount} XAF) are not paid: the parcel stays at the Tara office.',
+  },
+  ORDER_NOT_AT_OFFICE: {
+    fr: 'Ce colis n’est pas gardé au bureau Tara.',
+    en: 'This parcel is not held at the Tara office.',
+  },
+  OFFICE_ALREADY_PAID: {
+    fr: 'Les frais sont payés : rendez le colis à l’expéditeur.',
+    en: 'The fees are paid: hand the parcel back to the sender.',
+  },
+  OFFICE_HOLD_NOT_OVER: {
+    fr: 'La garde au bureau n’est pas finie (jusqu’au {until}).',
+    en: 'The office hold is not over yet (until {until}).',
+  },
+  OFFICE_DROP_REQUIRED: {
+    fr: 'Retour non payé : déposez le colis au bureau Tara, pas chez l’expéditeur.',
+    en: 'Unpaid return: drop the parcel at the Tara office, not at the sender’s.',
+  },
+  RETURN_ALREADY_PAID: {
+    fr: 'Le retour est déjà payé : il ne peut plus être changé.',
+    en: 'The return is already paid: it can no longer be changed.',
+  },
   RETRY_LIMIT_REACHED: {
-    fr: 'Une seule nouvelle tentative est possible : le colis vous sera rapporté.',
-    en: 'Only one more attempt is possible: the parcel will be brought back to you.',
+    fr: 'Une seule nouvelle tentative est possible : choisissez le retour du colis.',
+    en: 'Only one more attempt is possible: choose the return of the parcel.',
   },
   MERCHANT_DEBT_LIMIT: {
     fr: 'Votre boutique doit {debt} FCFA à Tara (plafond {limit} FCFA) : rechargez votre solde pour commander de nouveau.',

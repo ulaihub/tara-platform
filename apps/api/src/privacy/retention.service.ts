@@ -73,7 +73,7 @@ export class RetentionService {
     const cutoff = addDays(now, -RETENTION_DAYS);
     const ordersMasked = await maskOrdersWhere(
       this.prisma,
-      Prisma.sql`status IN ('DELIVERED', 'RETURNED', 'CANCELLED') AND updated_at < ${cutoff}`,
+      Prisma.sql`status IN ('DELIVERED', 'RETURNED', 'CANCELLED', 'UNCLAIMED') AND updated_at < ${cutoff}`,
     );
     const notificationsMasked = await this.prisma.$executeRaw`
       UPDATE notifications SET recipient_phone = NULL

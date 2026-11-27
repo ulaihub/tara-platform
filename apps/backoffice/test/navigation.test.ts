@@ -9,8 +9,20 @@ describe('menu selon le rôle', () => {
   });
 
   it('limite chaque rôle à son travail', () => {
-    expect(hrefs(['DISPATCHER'])).toEqual(['/carte', '/commandes', '/livreurs', '/indicateurs']);
-    expect(hrefs(['SUPPORT'])).toEqual(['/carte', '/commandes', '/support', '/indicateurs']);
+    expect(hrefs(['DISPATCHER'])).toEqual([
+      '/carte',
+      '/commandes',
+      '/bureau',
+      '/livreurs',
+      '/indicateurs',
+    ]);
+    expect(hrefs(['SUPPORT'])).toEqual([
+      '/carte',
+      '/commandes',
+      '/bureau',
+      '/support',
+      '/indicateurs',
+    ]);
     expect(hrefs(['FINANCE'])).toEqual(['/finance', '/indicateurs']);
   });
 
@@ -18,6 +30,7 @@ describe('menu selon le rôle', () => {
     expect(hrefs(['FINANCE', 'SUPPORT'])).toEqual([
       '/carte',
       '/commandes',
+      '/bureau',
       '/support',
       '/finance',
       '/indicateurs',
@@ -28,8 +41,9 @@ describe('menu selon le rôle', () => {
     expect(hrefs(['CUSTOMER', 'RIDER'])).toEqual([]);
   });
 
-  it('suit les exigences H1 à H8 une fois chacune', () => {
+  it('suit les exigences H1 à H8 une fois chacune, plus le bureau Tara (E6)', () => {
     expect(SECTIONS.map((section) => section.requirement).toSorted()).toEqual([
+      'E6',
       'H1',
       'H2',
       'H3',

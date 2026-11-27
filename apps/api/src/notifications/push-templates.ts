@@ -51,11 +51,11 @@ const TEMPLATES = {
   ORDER_DELIVERY_FAILED: {
     fr: {
       title: 'Livraison impossible',
-      body: '{reference} n’a pas pu être livré. Choisissez vite : nouvelle tentative ou retour. Sans réponse, le colis vous est rapporté.',
+      body: '{reference} n’a pas pu être livré : photo et appels du livreur dans l’app. Choisissez vite : nouvelle tentative ou retour payé. Sans paiement, le colis part au bureau Tara.',
     },
     en: {
       title: 'Delivery failed',
-      body: '{reference} could not be delivered. Choose quickly: try again or return. Without an answer, the parcel is brought back to you.',
+      body: '{reference} could not be delivered: the rider’s photo and calls are in the app. Choose quickly: try again or a paid return. Without payment, the parcel goes to the Tara office.',
     },
   },
   ORDER_RETURNED: {
@@ -289,6 +289,57 @@ const TEMPLATES = {
   RIDER_FAILURE_DECISION: {
     fr: { title: 'Décision de l’expéditeur', body: '{reference} : {decision}.' },
     en: { title: 'Sender decision', body: '{reference}: {decision}.' },
+  },
+  // Retour sans dette : colis non payé gardé au bureau Tara.
+  ORDER_HELD_AT_OFFICE: {
+    fr: {
+      title: 'Colis gardé au bureau Tara',
+      body: '{reference} : payez {amount} FCFA dans l’app ou au bureau pour le récupérer, avant le {until}.',
+    },
+    en: {
+      title: 'Parcel kept at the Tara office',
+      body: '{reference}: pay {amount} XAF in the app or at the office to collect it, before {until}.',
+    },
+  },
+  OFFICE_REMINDER: {
+    fr: {
+      title: 'Votre colis vous attend',
+      body: '{reference} : encore {days} jours pour payer {amount} FCFA et le récupérer au bureau Tara.',
+    },
+    en: {
+      title: 'Your parcel is waiting',
+      body: '{reference}: {days} days left to pay {amount} XAF and collect it at the Tara office.',
+    },
+  },
+  OFFICE_HOLD_OVER: {
+    fr: {
+      title: 'Délai de garde fini',
+      body: '{reference} : le délai est fini, Tara peut disposer du colis (conditions). Contactez-nous vite.',
+    },
+    en: {
+      title: 'Holding period over',
+      body: '{reference}: the period is over, Tara may dispose of the parcel (terms). Contact us quickly.',
+    },
+  },
+  OFFICE_PAID: {
+    fr: {
+      title: 'Frais payés',
+      body: '{reference} : code de retrait envoyé par SMS. Bureau Tara : {hours}.',
+    },
+    en: {
+      title: 'Fees paid',
+      body: '{reference}: pickup code sent by SMS. Tara office: {hours}.',
+    },
+  },
+  ORDER_UNCLAIMED: {
+    fr: {
+      title: 'Colis non réclamé',
+      body: '{reference} n’a pas été récupéré au bureau Tara dans le délai. Plus rien n’est dû.',
+    },
+    en: {
+      title: 'Parcel not collected',
+      body: '{reference} was not collected at the Tara office in time. Nothing is owed anymore.',
+    },
   },
 } as const satisfies Record<string, Record<AppLocale, { title: string; body: string }>>;
 

@@ -23,7 +23,13 @@ type Props = {
   codeFlash: CodeFlash;
 };
 
-const FINAL: readonly OrderStatus[] = ['DELIVERED', 'RETURNED', 'CANCELLED'];
+const FINAL: readonly OrderStatus[] = [
+  'DELIVERED',
+  'RETURNED',
+  'CANCELLED',
+  'HELD_AT_OFFICE',
+  'UNCLAIMED',
+];
 const COMING: readonly OrderStatus[] = ['PICKED_UP', 'IN_DELIVERY'];
 
 const reached = (data: PublicTracking, status: OrderStatus) =>
@@ -44,7 +50,10 @@ export function riderStep(data: PublicTracking): number | null {
 export const TrackingPage: FC<Props> = (props) => {
   const { data, t } = props;
   const settled = FINAL.includes(data.status);
-  const failedHere = data.status === 'DELIVERY_FAILED' && data.failureDecision !== 'RETURN';
+  const failedHere =
+    data.status === 'DELIVERY_FAILED' &&
+    data.failureDecision !== 'RETURN' &&
+    data.failureDecision !== 'OFFICE';
   const phone = data.rider && !settled ? data.rider.phone : null;
   return (
     <>
@@ -143,9 +152,11 @@ const Lead: FC<Props> = ({ data, t, now }) => {
       ? t.retrying
       : data.status === 'DELIVERY_FAILED' && data.failureDecision === 'RETURN'
         ? t.returning
-        : data.status === 'IN_DELIVERY' && data.rider
-          ? t.riderComing(data.rider.name)
-          : t.status[data.status];
+        : data.status === 'DELIVERY_FAILED' && data.failureDecision === 'OFFICE'
+          ? t.toOffice
+          : data.status === 'IN_DELIVERY' && data.rider
+            ? t.riderComing(data.rider.name)
+            : t.status[data.status];
   const sub = eta ? null : subtitle(data, t, Boolean(scheduled));
   const rider = data.rider && !FINAL.includes(data.status) ? data.rider : null;
   return (
@@ -191,6 +202,9 @@ function subtitle(data: PublicTracking, t: Strings, scheduled: boolean): string 
     }
     case 'RETURNED':
       return t.returnedBody;
+    case 'HELD_AT_OFFICE':
+    case 'UNCLAIMED':
+      return t.officeBody;
     case 'CANCELLED':
       return t.cancelledBody;
   }
@@ -204,7 +218,13 @@ const Progress: FC<{ data: PublicTracking; t: Strings }> = ({ data, t }) => {
     t.steps[0],
     t.steps[1],
     t.steps[2],
-    failed ? t.stepFailed : data.status === 'RETURNED' ? t.stepReturned : t.steps[3],
+    failed
+      ? t.stepFailed
+      : data.status === 'RETURNED'
+        ? t.stepReturned
+        : data.status === 'HELD_AT_OFFICE' || data.status === 'UNCLAIMED'
+          ? t.stepOffice
+          : t.steps[3],
   ];
   return (
     <div class={failed ? 'progress fail' : 'progress'}>
@@ -232,6 +252,8 @@ const STEP_OF: Record<OrderStatus, number> = {
   DELIVERED: 3,
   RETURNED: 3,
   CANCELLED: 0,
+  HELD_AT_OFFICE: 3,
+  UNCLAIMED: 3,
 };
 
 /** Somme à payer à la porte, et demande Mobile Money envoyée par le livreur. */

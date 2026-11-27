@@ -30,6 +30,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
 import { RedisModule } from './redis/redis.module.js';
 import { RedisThrottlerStorage } from './redis/redis-throttler.storage.js';
+import { OfficeReturnsModule } from './returns/office-returns.module.js';
 import { RiderAppModule } from './rider-app/rider-app.module.js';
 import { SupportModule } from './support/support.module.js';
 import { RidersModule } from './riders/riders.module.js';
@@ -72,6 +73,7 @@ import { UsersModule } from './users/users.module.js';
     ParcelAnalysisModule,
     PublicTrackingModule,
     RiderAppModule,
+    OfficeReturnsModule,
     FinanceModule,
     PinModule,
     PrivacyModule,

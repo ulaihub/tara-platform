@@ -24,7 +24,7 @@ type Target = 'pickup' | 'dropoff' | null;
 /** Prochain arrêt de la course, d'après son statut et, après un échec, la décision prise. */
 export function targetOf(order: {
   status: OrderStatus;
-  failureDecision: 'RETRY' | 'RETURN' | null;
+  failureDecision: 'RETRY' | 'RETURN' | 'OFFICE' | null;
 }): Target {
   switch (order.status) {
     case 'ASSIGNED':

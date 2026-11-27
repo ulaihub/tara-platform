@@ -13,6 +13,7 @@ export type RiderTrail = Schemas['RiderTrail'];
 export type AdminOrder = Schemas['AdminOrder'];
 export type AdminOrderRow = Schemas['AdminOrderRow'];
 export type AdminOrderPage = Schemas['AdminOrderPage'];
+export type OfficeReturn = Schemas['OfficeReturn'];
 export type OrderNote = Schemas['OrderNote'];
 export type DispatchCandidate = Schemas['DispatchCandidate'];
 export type AdminRider = Schemas['AdminRider'];

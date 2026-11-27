@@ -17,3 +17,8 @@ flutter run --dart-define=TARA_API_URL=http://10.0.2.2:3000
 
 Identifiant Android : `cm.tara.app` (icône claire ; l'app livreur a l'icône sombre).
 Notifications : à brancher quand l'app sera enregistrée dans le projet Firebase.
+
+**Retour sans dette** (PR 94) : après un échec, le prix du retour est annoncé (frais, part du
+solde, reste à payer) ; le reste se paie par Mobile Money dans l'app. Non payé à temps : le
+colis part au bureau Tara ; l'écran « Colis gardé au bureau Tara » montre l'adresse, les
+horaires, les jours restants et le paiement, puis le code de retrait.

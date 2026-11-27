@@ -114,3 +114,5 @@ qui en découlent sont résumées dans [DECISIONS.md](DECISIONS.md) ; les lots �
 | [90](historique/PR-090.md) | 2026-11-27 | Livreur lot B : Livraison impossible et Retour du colis fidèles aux maquettes             |
 | [91](historique/PR-091.md) | 2026-11-27 | Maquettes de la refonte et outils de comparaison dans le projet                           |
 | [92](historique/PR-092.md) | 2026-11-27 | CLAUDE.md : consignes et état du projet, fichiers à tenir à jour                          |
+| [93](historique/PR-093.md) | 2026-11-27 | Mémoire du projet : décisions, historique complet, lots à venir                           |
+| [94](historique/PR-094.md) | 2026-11-27 | Retour du colis sans dette : payé d'avance, sinon gardé au bureau Tara                    |

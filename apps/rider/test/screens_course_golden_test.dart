@@ -140,6 +140,14 @@ ReturnScreen returning() => ReturnScreen(
   now: () => DateTime(2026, 11, 3, 15, 41),
 );
 
+OfficeDropScreen officeDrop() => OfficeDropScreen(
+  order: order(status: 'DELIVERY_FAILED', failureDecision: 'OFFICE', failureReason: 'RECIPIENT_ABSENT'),
+  onBack: () {},
+  onSos: () {},
+  onDropped: (_) {},
+  now: () => DateTime(2026, 11, 3, 16, 12),
+);
+
 Widget collection() => ProviderScope(
   overrides: [
     keyValueStoreProvider.overrideWithValue(MemoryKeyValueStore()),
@@ -380,15 +388,21 @@ void main() {
       await expectLater(capture, matchesGoldenFile('goldens/11_retour_vendeur/${variant.name}.png'));
     });
 
-    goldenTest('11 retour frais à encaisser ${variant.name}', (tester) async {
-      final api = FakeRiderApi()..collections = [const Collection(total: 750, complete: false)];
-      await pumpVariant(tester, variant, scope(returning(), api: api));
+    // Retour non payé à temps : le colis va au bureau Tara, rien n'est encaissé.
+    goldenTest('11 dépôt au bureau Tara ${variant.name}', (tester) async {
+      await pumpVariant(tester, variant, scope(officeDrop()));
       await settle(tester);
+      final context = tester.element(find.byType(OfficeDropScreen));
+      await tester.runAsync(() => precacheImage(ResizeImage(FileImage(File(photo)), width: 168), context));
       await tester.tap(find.text('Je suis arrivé'));
       await settle(tester);
+      await tester.ensureVisible(find.text('Prendre').last);
+      await tester.tap(find.text('Prendre').last);
+      await settle(tester);
       expect(tester.takeException(), isNull);
-      expect(find.text('Frais de retour à encaisser'), findsOneWidget);
-      await expectLater(capture, matchesGoldenFile('goldens/11_retour_frais/${variant.name}.png'));
+      expect(find.text('Photo du dépôt · prise à 16:12'), findsOneWidget);
+      expect(find.textContaining('Bonabéri'), findsWidgets);
+      await expectLater(capture, matchesGoldenFile('goldens/11_depot_bureau/${variant.name}.png'));
     });
   }
 
@@ -443,25 +457,35 @@ void main() {
     });
   }
 
-  testWidgets('retour : pas de paiement, pas de colis ; espèces reçues, puis le colis peut être rendu', (tester) async {
-    final api = FakeRiderApi()..collections = [const Collection(total: 750, complete: false)];
+  testWidgets('retour payé d’avance : rien à encaisser, code et photo suffisent pour rendre', (tester) async {
+    final api = FakeRiderApi();
     await pumpVariant(tester, Variant.matrix.first, scope(returning(), api: api), surface: const Size(390, 1400));
     await settle(tester);
     await tester.tap(find.text('Je suis arrivé'));
     await settle(tester);
+    expect(find.text('Frais de retour payés d’avance par le vendeur : rien à encaisser.'), findsOneWidget);
+    expect(find.textContaining('Espèces reçues'), findsNothing);
+    final returned = find.byType(SwipeButton);
+    expect(tester.widget<SwipeButton>(returned).onConfirmed, isNull);
     await tester.enterText(find.byType(EditableText).first, '5521');
     await tester.tap(find.text('Prendre').last);
     await settle(tester);
-    // Code et photo prêts, mais frais non réglés : on ne peut pas encore glisser.
-    final returned = find.byType(SwipeButton);
-    expect(tester.widget<SwipeButton>(returned).onConfirmed, isNull);
-
-    await tester.tap(find.text('Espèces reçues · 750 F'));
-    await settle(tester);
-    expect(api.cashCollected, ['00000000-0000-4000-8000-000000000002']);
-    expect(find.text('Frais de retour réglés'), findsOneWidget);
     expect(tester.widget<SwipeButton>(returned).onConfirmed, isNotNull);
-    expect(sounds.played, contains(TaraSound.cash));
+    expect(api.cashCollected, isEmpty);
+  });
+
+  testWidgets('dépôt au bureau : la photo est exigée avant de glisser', (tester) async {
+    await pumpVariant(tester, Variant.matrix.first, scope(officeDrop()), surface: const Size(390, 1400));
+    await settle(tester);
+    expect(find.text('Lundi au vendredi, 8 h - 17 h'), findsNothing);
+    expect(find.textContaining('Lundi au vendredi, 8 h - 17 h'), findsOneWidget);
+    final dropped = find.byType(SwipeButton);
+    expect(tester.widget<SwipeButton>(dropped).onConfirmed, isNull);
+    await tester.tap(find.text('Je suis arrivé'));
+    await settle(tester);
+    await tester.tap(find.text('Prendre').last);
+    await settle(tester);
+    expect(tester.widget<SwipeButton>(dropped).onConfirmed, isNotNull);
   });
 
   testWidgets('attente : « Je suis arrivé » démarre le temps, payé au-delà de 10 min', (tester) async {

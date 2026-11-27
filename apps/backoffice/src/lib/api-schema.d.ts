@@ -276,6 +276,22 @@ export interface paths {
     patch: operations['Me_update'];
     trace?: never;
   };
+  '/v1/me/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Me_stats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/me/merchant': {
     parameters: {
       query?: never;
@@ -1044,6 +1060,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/orders/{id}/proof-photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Orders_proofPhoto'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/orders/{id}/route': {
     parameters: {
       query?: never;
@@ -1198,6 +1230,22 @@ export interface paths {
     get: operations['PublicTracking_view'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/public/tracking/{token}/delivery-code': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['PublicTracking_resendCode'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2148,6 +2196,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/rider/orders/{id}/office-drop': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['RiderApp_officeDrop'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/rider/orders/{id}/release': {
     parameters: {
       query?: never;
@@ -2366,6 +2430,86 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['AdminSupport_policeCalled'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/orders/{id}/return-quote': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SenderOffice_quote'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/orders/{id}/office-payment': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SenderOffice_pay'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/office-returns': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminOffice_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/office-returns/{id}/hand-over': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminOffice_handOver'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/office-returns/{id}/unclaimed': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminOffice_unclaimed'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3090,8 +3234,7 @@ export interface components {
         reason: components['schemas']['FailureReason'] | null;
         /** Format: date-time */
         at: string | null;
-        /** @enum {string|null} */
-        decision: 'RETRY' | 'RETURN' | null;
+        decision: components['schemas']['FailureDecision'] | null;
       } | null;
       cancelReason: string | null;
       timeline: {
@@ -3782,6 +3925,9 @@ export interface components {
           | 'PICKUP_CODE_LOCKED'
           | 'DELIVERY_CODE_INVALID'
           | 'DELIVERY_CODE_LOCKED'
+          | 'DELIVERY_CODE_NOT_ACTIVE'
+          | 'DELIVERY_CODE_RESEND_LIMIT'
+          | 'DELIVERY_CODE_RESEND_TOO_SOON'
           | 'NO_DELIVERY_VALIDATION_REQUEST'
           | 'DELIVERY_VALIDATION_ADMIN_REQUIRED'
           | 'RIDER_BALANCE_TOO_LOW'
@@ -3798,6 +3944,13 @@ export interface components {
           | 'PAYMENT_NOT_EXPECTED'
           | 'INSUFFICIENT_BALANCE'
           | 'RETRY_PAYMENT_REQUIRED'
+          | 'RETURN_PAYMENT_REQUIRED'
+          | 'OFFICE_PAYMENT_REQUIRED'
+          | 'ORDER_NOT_AT_OFFICE'
+          | 'OFFICE_ALREADY_PAID'
+          | 'OFFICE_HOLD_NOT_OVER'
+          | 'OFFICE_DROP_REQUIRED'
+          | 'RETURN_ALREADY_PAID'
           | 'RETRY_LIMIT_REACHED'
           | 'MERCHANT_DEBT_LIMIT'
           | 'ACCOUNT_HAS_DEBT'
@@ -3837,6 +3990,8 @@ export interface components {
         requestId?: string;
       };
     };
+    /** @enum {string} */
+    FailureDecision: 'RETRY' | 'RETURN' | 'OFFICE';
     /** @enum {string} */
     FailureReason:
       | 'RECIPIENT_ABSENT'
@@ -4122,6 +4277,12 @@ export interface components {
         share: number;
       }[];
     };
+    MeStats: {
+      delivered: number;
+      successRate: number | null;
+      /** Format: date-time */
+      memberSince: string;
+    };
     Metrics: {
       period: {
         from: string;
@@ -4221,6 +4382,29 @@ export interface components {
     };
     /** @enum {string} */
     MobileMoneyOperator: 'MTN' | 'ORANGE';
+    Office: {
+      address: string;
+      hours: string;
+      hoursEn: string;
+      latitude: number;
+      longitude: number;
+    };
+    OfficeReturn: {
+      /** Format: uuid */
+      orderId: string;
+      reference: string;
+      senderName: string | null;
+      senderPhone: string;
+      /** Format: date-time */
+      heldSince: string;
+      /** Format: date-time */
+      until: string;
+      daysLeft: number;
+      due: number;
+      /** Format: date-time */
+      paidAt: string | null;
+      reminders: number;
+    };
     Order: {
       /** Format: uuid */
       id: string;
@@ -4294,11 +4478,32 @@ export interface components {
         note: string | null;
         /** Format: date-time */
         at: string;
-        /** @enum {string|null} */
-        decision: 'RETRY' | 'RETURN' | null;
+        decision: components['schemas']['FailureDecision'] | null;
         /** Format: date-time */
         decisionDueAt: string | null;
         retryAllowed: boolean;
+        hasPhoto: boolean;
+        calls: number;
+      } | null;
+      office: {
+        address: string;
+        hours: string;
+        hoursEn: string;
+        latitude: number;
+        longitude: number;
+        /** Format: date-time */
+        heldSince: string | null;
+        /** Format: date-time */
+        until: string | null;
+        due: number;
+        /** Format: date-time */
+        paidAt: string | null;
+      } | null;
+      delivery: {
+        hasPhoto: boolean;
+        codeVerified: boolean;
+        /** Format: date-time */
+        at: string;
       } | null;
       cancelReason: string | null;
       rating: components['schemas']['Rating'] | null;
@@ -4389,7 +4594,9 @@ export interface components {
       | 'DELIVERED'
       | 'DELIVERY_FAILED'
       | 'RETURNED'
-      | 'CANCELLED';
+      | 'CANCELLED'
+      | 'HELD_AT_OFFICE'
+      | 'UNCLAIMED';
     OrderSummary: {
       /** Format: uuid */
       id: string;
@@ -4403,8 +4610,7 @@ export interface components {
       codAmount: number;
       /** Format: date-time */
       scheduledFor: string | null;
-      /** @enum {string|null} */
-      failureDecision: 'RETRY' | 'RETURN' | null;
+      failureDecision: components['schemas']['FailureDecision'] | null;
       riderName: string | null;
       etaMinutes: number | null;
       /** Format: date-time */
@@ -4665,6 +4871,22 @@ export interface components {
         distanceMeters: number;
         progress: number;
       } | null;
+      deliveryCode: {
+        phone: string;
+        /** Format: date-time */
+        sentAt: string;
+        resendsLeft: number;
+      } | null;
+      map: {
+        dropoff: {
+          latitude: number;
+          longitude: number;
+        };
+        rider: {
+          latitude: number;
+          longitude: number;
+        } | null;
+      };
       due: {
         fee: number;
         cod: number;
@@ -4674,8 +4896,7 @@ export interface components {
       paymentPending: {
         amount: number;
       } | null;
-      /** @enum {string|null} */
-      failureDecision: 'RETRY' | 'RETURN' | null;
+      failureDecision: components['schemas']['FailureDecision'] | null;
     };
     PushTokenBody: {
       pushToken: string | null;
@@ -4735,6 +4956,11 @@ export interface components {
       }[];
       /** Format: date-time */
       updatedAt: string;
+    };
+    ReturnQuote: {
+      fee: number;
+      fromBalance: number;
+      toPay: number;
     };
     RiderBoost: {
       /** Format: uuid */
@@ -4859,13 +5085,13 @@ export interface components {
         /** Format: uri */
         waze: string;
       } | null;
-      /** @enum {string|null} */
-      failureDecision: 'RETRY' | 'RETURN' | null;
+      failureDecision: components['schemas']['FailureDecision'] | null;
       failureReason: components['schemas']['FailureReason'] | null;
       /** Format: date-time */
       failedAt: string | null;
       /** Format: date-time */
       failureDecisionDueAt: string | null;
+      office: components['schemas']['Office'] | null;
       awaitingSupportValidation: boolean;
       /** Format: date-time */
       assignedAt: string | null;
@@ -4967,7 +5193,7 @@ export interface components {
     };
     RiderRoute: {
       /** @enum {string} */
-      stop: 'PICKUP' | 'DROPOFF';
+      stop: 'PICKUP' | 'DROPOFF' | 'OFFICE';
       meters: number;
       seconds: number | null;
       /** @enum {string} */
@@ -5692,6 +5918,26 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Me'];
+        };
+      };
+    };
+  };
+  Me_stats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MeStats'];
         };
       };
     };
@@ -7375,6 +7621,30 @@ export interface operations {
       };
     };
   };
+  Orders_proofPhoto: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Photo de preuve */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'image/jpeg': string;
+          'image/png': string;
+          'image/webp': string;
+        };
+      };
+    };
+  };
   Orders_route: {
     parameters: {
       query?: never;
@@ -7647,6 +7917,25 @@ export interface operations {
         content: {
           'application/json': components['schemas']['PublicTracking'];
         };
+      };
+    };
+  };
+  PublicTracking_resendCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -9401,6 +9690,39 @@ export interface operations {
       };
     };
   };
+  RiderApp_officeDrop: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          photoKey: string;
+          latitude: number;
+          longitude: number;
+          /** Format: date-time */
+          occurredAt?: string;
+          clientEventId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RiderOrder'];
+        };
+      };
+    };
+  };
   RiderApp_release: {
     parameters: {
       query?: never;
@@ -9639,8 +9961,7 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
-          /** @enum {string} */
-          decision: 'RETRY' | 'RETURN';
+          decision: components['schemas']['FailureDecision'];
         };
       };
     };
@@ -9750,6 +10071,119 @@ export interface operations {
         content: {
           'application/json': components['schemas']['SafetyAlert'];
         };
+      };
+    };
+  };
+  SenderOffice_quote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReturnQuote'];
+        };
+      };
+    };
+  };
+  SenderOffice_pay: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminOffice_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Succès */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OfficeReturn'][];
+        };
+      };
+    };
+  };
+  AdminOffice_handOver: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          code?: string;
+          cashReceived?: boolean;
+          note?: string;
+        };
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminOffice_unclaimed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          note: string;
+        };
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

@@ -80,7 +80,7 @@ describe('Conditions d’utilisation : textes, acceptation, nouvelle version', (
     const res = await request(ctx.http).get('/v1/legal/expediteurs').expect(200);
     expect(res.body).toMatchObject({ document: 'expediteurs', version: VERSION });
     expect(res.body.title).toContain('expéditeurs');
-    expect(res.body.markdown).toContain('pas de paiement, pas de colis');
+    expect(res.body.markdown).toContain('payé avant de partir, jamais de dette');
     await request(ctx.http).get('/v1/legal/livreurs').expect(200);
     await request(ctx.http).get('/v1/legal/inconnu').expect(404);
   });

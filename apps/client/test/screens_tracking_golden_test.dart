@@ -39,16 +39,28 @@ TrackedOrder tracked(
   int cancellationFee = 0,
   DateTime? riderArrivedAt,
   bool senderAbsent = false,
+  bool officePaid = false,
 }) {
   DateTime at(int h, int m) => DateTime(2026, 11, 4, h, m);
-  const ridden = ['ASSIGNED', 'PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED', 'DELIVERED'];
+  const ridden = [
+    'ASSIGNED',
+    'PICKED_UP',
+    'IN_DELIVERY',
+    'DELIVERY_FAILED',
+    'DELIVERED',
+    'HELD_AT_OFFICE',
+    'UNCLAIMED',
+  ];
+  const office = ['HELD_AT_OFFICE', 'UNCLAIMED'];
   final reached = <String, DateTime>{
     'CREATED': at(10, 2),
     if (status != 'CREATED') 'SEARCHING_RIDER': at(10, 2),
     if (ridden.contains(status)) 'ASSIGNED': at(10, 4),
     if (ridden.skip(1).contains(status)) 'PICKED_UP': at(10, 12),
     if (ridden.skip(2).contains(status)) 'IN_DELIVERY': at(10, 12),
-    if (status == 'DELIVERY_FAILED') 'DELIVERY_FAILED': at(10, 18),
+    if (status == 'DELIVERY_FAILED' || office.contains(status)) 'DELIVERY_FAILED': at(10, 18),
+    if (office.contains(status)) 'HELD_AT_OFFICE': at(11, 5),
+    if (status == 'UNCLAIMED') 'UNCLAIMED': DateTime(2026, 12, 5, 9, 0),
     if (status == 'DELIVERED') 'DELIVERED': at(10, 35),
   };
   final riderOn = withRider && reached.containsKey('ASSIGNED');
@@ -102,6 +114,19 @@ TrackedOrder tracked(
             retryAllowed: retryAllowed,
             hasPhoto: true,
             calls: 2,
+          )
+        : null,
+    office: office.contains(status) || decision == 'OFFICE'
+        ? OrderOffice(
+            address: 'Bureau Tara, Bonabéri, Douala (adresse provisoire)',
+            hours: 'Lundi au vendredi, 8 h - 17 h',
+            hoursEn: 'Monday to Friday, 8 am - 5 pm',
+            latitude: 4.0717,
+            longitude: 9.6625,
+            heldSince: office.contains(status) ? at(11, 5) : null,
+            until: office.contains(status) ? DateTime(2026, 12, 4, 11, 5) : null,
+            due: officePaid ? 0 : 750,
+            paidAt: officePaid ? at(12, 0) : null,
           )
         : null,
     delivery: status == 'DELIVERED' ? OrderDelivery(hasPhoto: true, codeVerified: true, at: at(10, 35)) : null,
@@ -243,6 +268,61 @@ void main() {
       expect(find.text('Retour du colis'), findsOneWidget);
       expect(find.text('Jean M. vous rapporte le colis.'), findsOneWidget);
       await expectLater(capture, matchesGoldenFile('goldens/06_suivi_retour/${brightness.name}.png'));
+    });
+
+    // Retour sans dette : le prix du retour est annoncé avant de choisir.
+    goldenTest('06 suivi échec retour à payer ${brightness.name}', (tester) async {
+      final api = apiAt('DELIVERY_FAILED')..returnPrice = const ReturnQuote(fee: 750, fromBalance: 200, toPay: 550);
+      await pumpVariant(tester, variant, screen(api, FakeRealtime()));
+      await settle(tester);
+      await tester.tap(find.text('Retour au point d’enlèvement · 750\u00a0F'));
+      await settle(tester);
+      expect(
+        find.text('Frais de retour 750\u00a0F. Votre solde paie 200\u00a0F. Reste à payer maintenant : 550\u00a0F.'),
+        findsOneWidget,
+      );
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_retour_a_payer/${brightness.name}.png'));
+    });
+
+    goldenTest('06 suivi vers le bureau ${brightness.name}', (tester) async {
+      final realtime = FakeRealtime()..ack = const {'ok': true, 'position': halfway};
+      final api = FakeClientApi()..tracked[orderId] = tracked('DELIVERY_FAILED', decision: 'OFFICE');
+      await pumpVariant(tester, variant, screen(api, realtime));
+      await settle(tester);
+      expect(find.text('Colis en route vers le bureau Tara'), findsOneWidget);
+      expect(find.text('Bureau Tara, Bonabéri, Douala (adresse provisoire)'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_vers_bureau/${brightness.name}.png'));
+    });
+
+    goldenTest('06 suivi gardé au bureau ${brightness.name}', (tester) async {
+      final api = FakeClientApi()
+        ..tracked[orderId] = tracked('HELD_AT_OFFICE')
+        ..returnPrice = const ReturnQuote(fee: 750, fromBalance: 200, toPay: 550);
+      await pumpVariant(tester, variant, screen(api, FakeRealtime()));
+      await settle(tester);
+      expect(find.text('Colis gardé au bureau Tara'), findsOneWidget);
+      expect(find.textContaining('Il vous reste 30 jours.'), findsOneWidget);
+      expect(find.text('Payer 550\u00a0F'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_bureau/${brightness.name}.png'));
+    });
+
+    goldenTest('06 suivi bureau payé ${brightness.name}', (tester) async {
+      final api = FakeClientApi()..tracked[orderId] = tracked('HELD_AT_OFFICE', officePaid: true);
+      await pumpVariant(tester, variant, screen(api, FakeRealtime()));
+      await settle(tester);
+      await tester.tap(find.text('Afficher un nouveau code de retrait'));
+      await settle(tester);
+      expect(find.text('CODE DE RETRAIT'), findsOneWidget);
+      expect(find.text('5 1 9 0'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_bureau_paye/${brightness.name}.png'));
+    });
+
+    goldenTest('06 suivi non réclamé ${brightness.name}', (tester) async {
+      final api = FakeClientApi()..tracked[orderId] = tracked('UNCLAIMED');
+      await pumpVariant(tester, variant, screen(api, FakeRealtime()));
+      await settle(tester);
+      expect(find.text('Colis non réclamé'), findsOneWidget);
+      await expectLater(capture, matchesGoldenFile('goldens/06_suivi_non_reclame/${brightness.name}.png'));
     });
 
     goldenTest('06 suivi livré étoiles ${brightness.name}', (tester) async {
@@ -572,6 +652,69 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await settle(tester);
     expect(api.decisions, [(orderId, 'RETRY')]);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('échec : retour que le solde ne couvre pas, payé par Mobile Money puis confirmé', (tester) async {
+    final api = apiAt('DELIVERY_FAILED')
+      ..returnPrice = const ReturnQuote(fee: 750, fromBalance: 200, toPay: 550)
+      ..decisionError = const ApiException(
+        code: 'RETURN_PAYMENT_REQUIRED',
+        message: 'Solde insuffisant',
+        status: 422,
+        details: {'amount': 550},
+      )
+      ..paymentStatuses = ['PENDING', 'SUCCEEDED'];
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1100));
+    await settle(tester);
+    expect(find.textContaining('Sans réponse ni paiement dans'), findsOneWidget);
+    await tester.tap(find.text('Retour au point d’enlèvement · 750\u00a0F'));
+    await settle(tester);
+    await tester.tap(find.text('Faire revenir le colis'));
+    await settle(tester);
+    expect(api.decisions, isEmpty);
+    expect(find.text('Payez 550 F pour le retour'), findsOneWidget);
+
+    await tester.enterText(find.byType(EditableText), '677 11 22 33');
+    await tester.tap(find.text('Payer 550 F'));
+    await settle(tester);
+    expect(api.topUps, [(550, '677112233', 'MTN')]);
+    // Paiement validé : le retour est confirmé sans autre geste.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(seconds: 3));
+    await settle(tester);
+    expect(api.decisions, [(orderId, 'RETURN')]);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('colis au bureau : solde insuffisant, recharge puis paiement, code par SMS', (tester) async {
+    final api = FakeClientApi()
+      ..tracked[orderId] = tracked('HELD_AT_OFFICE')
+      ..returnPrice = const ReturnQuote(fee: 750, fromBalance: 200, toPay: 550)
+      ..officeError = const ApiException(
+        code: 'RETURN_PAYMENT_REQUIRED',
+        message: 'Solde insuffisant',
+        status: 422,
+        details: {'amount': 550},
+      )
+      ..paymentStatuses = ['PENDING', 'SUCCEEDED'];
+    await pumpVariant(tester, Variant.matrix.first, screen(api, FakeRealtime()), surface: const Size(390, 1100));
+    await settle(tester);
+    await tester.tap(find.text('Payer 550\u00a0F'));
+    await settle(tester);
+    expect(api.officePayments, isEmpty);
+    expect(find.text('Payez 550 F pour récupérer le colis'), findsOneWidget);
+    await tester.enterText(find.byType(EditableText), '677 11 22 33');
+    await tester.tap(find.text('Payer 550 F'));
+    await settle(tester);
+    expect(api.topUps, [(550, '677112233', 'MTN')]);
+    // Recharge validée : les frais sont payés et le code part par SMS.
+    api.tracked[orderId] = tracked('HELD_AT_OFFICE', officePaid: true);
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(seconds: 3));
+    await settle(tester);
+    expect(api.officePayments, [orderId]);
+    expect(find.text('Votre code de retrait vous a été envoyé par SMS.'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 

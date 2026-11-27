@@ -2,14 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tara_core/phone/phone_format.dart';
-import 'package:tara_ui/components/buttons.dart';
-import 'package:tara_ui/components/glass.dart';
 import 'package:tara_ui/components/inputs.dart';
-import 'package:tara_ui/components/operator_logo.dart';
 import 'package:tara_ui/components/swipe_button.dart';
-import 'package:tara_ui/feedback/tara_feedback.dart';
-import 'package:tara_ui/format.dart';
 import 'package:tara_ui/tara_colors.dart';
 import 'package:tara_ui/tara_icons.dart';
 import 'package:tara_ui/tara_typography.dart';
@@ -26,9 +20,10 @@ import 'course_page.dart';
 import 'course_scaffold.dart';
 import 'failure_screen.dart' show failureReasonLabel;
 
-/// 11 · Retour du colis : itinéraire jusqu'au vendeur, puis, sur place, les frais de retour
-/// que son solde ne couvre pas (pas de paiement, pas de colis), le code de retour qu'il a
-/// reçu par SMS et la photo du colis rendu. Le retour passe par la file hors connexion.
+/// 11 · Retour du colis : itinéraire jusqu'au vendeur, puis, sur place, le code de retour
+/// qu'il a reçu par SMS et la photo du colis rendu. Retour sans dette : les frais sont payés
+/// d'avance par le vendeur, rien n'est encaissé à la porte. Le retour passe par la file hors
+/// connexion.
 class ReturnScreen extends ConsumerStatefulWidget {
   const ReturnScreen({
     super.key,
@@ -62,17 +57,6 @@ class _ReturnScreenState extends ConsumerState<ReturnScreen> {
   String? _error;
   String? _refusedActionId;
 
-  /// Frais de retour à encaisser auprès de l'expéditeur (E6) : null tant qu'ils ne sont pas
-  /// connus, 0 s'il n'y a rien (ou plus rien) à payer.
-  int? _fees;
-  bool _feesOffline = false;
-  bool _feesPaidHere = false;
-  bool _momoOpen = false;
-  bool _feesWaiting = false;
-  String? _feesOperator;
-  late final _feesPhone = TextEditingController(text: _senderLocalPhone());
-  Timer? _feesPoll;
-
   @override
   void initState() {
     super.initState();
@@ -84,124 +68,16 @@ class _ReturnScreenState extends ConsumerState<ReturnScreen> {
       _error = refused.failureMessage;
       _photoPath = refused.photoPath;
       _photoAt = refused.createdAt;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) unawaited(_loadFees());
-      });
     }
   }
 
   @override
   void dispose() {
     _code.dispose();
-    _feesPhone.dispose();
-    _feesPoll?.cancel();
     super.dispose();
   }
 
-  String _senderLocalPhone() {
-    final phone = widget.order.sender.phone ?? widget.order.pickup.contactPhone ?? '';
-    final local = digitsOf(phone).replaceFirst(RegExp(r'^237(?=\d{9}$)'), '');
-    return PhoneInputFormatter().formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: local)).text;
-  }
-
-  void _arrive() {
-    setState(() => _arrived = true);
-    unawaited(_loadFees());
-  }
-
-  Future<void> _loadFees() async {
-    setState(() => _feesOffline = false);
-    try {
-      final collection = await ref.read(riderApiProvider).collection(widget.order.id);
-      if (!mounted) return;
-      setState(() {
-        _fees = collection.complete ? 0 : collection.total;
-        _feesWaiting = !collection.complete && collection.paymentStatus == 'PENDING';
-      });
-      if (_feesWaiting) _pollFees();
-    } catch (_) {
-      // Pas de réseau : le retour part dans la file, le serveur vérifiera.
-      if (mounted) setState(() => _feesOffline = true);
-    }
-  }
-
-  void _feesSettled(Collection collection) {
-    setState(() {
-      _fees = collection.complete ? 0 : collection.total;
-      _feesPaidHere = collection.complete;
-      _feesWaiting = !collection.complete && collection.paymentStatus == 'PENDING';
-    });
-    if (collection.complete) {
-      _feesPoll?.cancel();
-      TaraFeedback.play(context, TaraSound.cash);
-    }
-  }
-
-  Future<void> _collectCash() async {
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      final collection = await ref.read(riderApiProvider).collectCash(widget.order.id);
-      if (mounted) _feesSettled(collection);
-    } catch (error) {
-      if (mounted) setState(() => _error = errorMessage(context, error));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _sendMomo() async {
-    final l = AppLocalizations.of(context);
-    final operator = _feesOperator;
-    final phone = digitsOf(_feesPhone.text);
-    if (operator == null) return;
-    if (!isCameroonMobile(phone)) {
-      setState(() => _error = l.phoneInvalid);
-      return;
-    }
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      final collection = await ref
-          .read(riderApiProvider)
-          .collectMobileMoney(widget.order.id, phone: phone, operator: operator);
-      if (!mounted) return;
-      _feesSettled(collection);
-      if (!collection.complete) {
-        setState(() => _feesWaiting = true);
-        _pollFees();
-      }
-    } catch (error) {
-      if (mounted) setState(() => _error = errorMessage(context, error));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  void _pollFees() {
-    _feesPoll?.cancel();
-    _feesPoll = Timer.periodic(const Duration(seconds: 4), (_) async {
-      try {
-        final collection = await ref.read(riderApiProvider).collection(widget.order.id);
-        if (!mounted) return;
-        if (collection.complete) {
-          _feesSettled(collection);
-        } else if (collection.paymentStatus != 'PENDING') {
-          _feesPoll?.cancel();
-          setState(() {
-            _feesWaiting = false;
-            _error = AppLocalizations.of(context).momoFailed;
-          });
-        }
-      } catch (_) {
-        // Réseau : nouvel essai au prochain tour.
-      }
-    });
-  }
+  void _arrive() => setState(() => _arrived = true);
 
   Future<void> _takePhoto() async {
     final path = await ref.read(takeProofPhotoProvider)();
@@ -258,17 +134,12 @@ class _ReturnScreenState extends ConsumerState<ReturnScreen> {
     final senderName = order.sender.name ?? order.pickup.contactName ?? order.reference;
     final phone = order.sender.phone ?? order.pickup.contactPhone;
     final reason = order.failureReason;
-    // Pas de paiement, pas de colis : les frais non couverts sont encaissés d'abord (sans
-    // réseau, le retour part dans la file et le serveur vérifie).
-    final feesOk = _fees == 0 || _feesOffline;
-    final ready = _photoPath != null && _code.text.length == 4 && feesOk;
-    final c = TaraColors.of(context);
-    final hasFees = _arrived && (_feesOffline || _fees == null || _fees! > 0 || _feesPaidHere);
+    final ready = _photoPath != null && _code.text.length == 4;
     final code = _code.text;
     final codeDone = code.length == 4;
     final photoDone = _photoPath != null;
     // Étapes de la maquette : la première pas encore faite est « en cours ».
-    final done = [_arrived, if (hasFees) feesOk && (_fees != null || _feesOffline), codeDone, photoDone];
+    final done = [_arrived, codeDone, photoDone];
     final current = done.indexWhere((d) => !d);
     var index = 0;
     _ReturnStepState stateOf(int i) => done[i]
@@ -287,40 +158,8 @@ class _ReturnScreenState extends ConsumerState<ReturnScreen> {
         action: _arrived ? null : l.arrivedAction,
         onAction: _arrive,
       ),
-      if (hasFees)
-        _ReturnStep(
-          number: ++index,
-          state: stateOf(index - 1),
-          title: done[index - 1] ? l.returnStepFeesDone : l.returnFeesTitle,
-          subtitle: done[index - 1] && !_feesOffline ? l.returnStepFeesDoneSub : null,
-          child: _feesOffline
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ErrorLine(l.returnFeesOffline),
-                    TaraLink(label: l.retry, onPressed: () => unawaited(_loadFees())),
-                  ],
-                )
-              : _fees == null
-              ? Text(l.returnFeesChecking, style: TaraText.small.copyWith(color: c.textSecondary))
-              : _fees! > 0
-              ? _ReturnFeesCard(
-                  bare: true,
-                  name: senderName,
-                  amount: _fees!,
-                  busy: _busy,
-                  momoOpen: _momoOpen,
-                  waiting: _feesWaiting,
-                  operator: _feesOperator,
-                  operators: ref.watch(riderConfigProvider).value?.operators ?? const <MobileMoneyOperator>[],
-                  phone: _feesPhone,
-                  onCash: () => unawaited(_collectCash()),
-                  onOpenMomo: () => setState(() => _momoOpen = true),
-                  onOperator: (value) => setState(() => _feesOperator = value),
-                  onSend: () => unawaited(_sendMomo()),
-                )
-              : null,
-        ),
+      // Retour payé d'avance par le vendeur : rien à encaisser (maquette sans étape frais).
+      if (_arrived) _ReturnStep(number: 0, state: _ReturnStepState.done, title: l.returnPaidAhead),
       _ReturnStep(
         number: ++index,
         state: stateOf(index - 1),
@@ -500,97 +339,157 @@ class _FailureChip extends StatelessWidget {
   }
 }
 
-/// « Frais de retour à encaisser » : espèces (prises sur le solde du livreur, qui les garde)
-/// ou demande Mobile Money au téléphone de l'expéditeur.
-class _ReturnFeesCard extends StatelessWidget {
-  const _ReturnFeesCard({
-    this.bare = false,
-    required this.name,
-    required this.amount,
-    required this.busy,
-    required this.momoOpen,
-    required this.waiting,
-    required this.operator,
-    required this.operators,
-    required this.phone,
-    required this.onCash,
-    required this.onOpenMomo,
-    required this.onOperator,
-    required this.onSend,
+/// Retour non payé à temps : le colis est déposé au bureau Tara (adresse et horaires du
+/// serveur), photo du dépôt à l'appui. Le livreur est payé comme pour un retour.
+class OfficeDropScreen extends ConsumerStatefulWidget {
+  const OfficeDropScreen({
+    super.key,
+    required this.order,
+    required this.onBack,
+    required this.onSos,
+    required this.onDropped,
+    this.now,
   });
 
-  /// Dans la carte d'étape du retour : sans cadre ni titre (l'étape les porte).
-  final bool bare;
-  final String name;
-  final int amount;
-  final bool busy;
-  final bool momoOpen;
-  final bool waiting;
-  final String? operator;
-  final List<MobileMoneyOperator> operators;
-  final TextEditingController phone;
-  final VoidCallback onCash;
-  final VoidCallback onOpenMomo;
-  final ValueChanged<String> onOperator;
-  final VoidCallback onSend;
+  final RiderOrder order;
+  final VoidCallback onBack;
+  final VoidCallback onSos;
+
+  /// Colis déposé : envoyé (sent) ou gardé sur le téléphone (queued).
+  final void Function(ActionOutcome outcome) onDropped;
+
+  /// Horloge (tests).
+  final DateTime Function()? now;
+
+  @override
+  ConsumerState<OfficeDropScreen> createState() => _OfficeDropScreenState();
+}
+
+class _OfficeDropScreenState extends ConsumerState<OfficeDropScreen> {
+  bool _arrived = false;
+  String? _photoPath;
+  DateTime? _photoAt;
+  bool _busy = false;
+  String? _error;
+  String? _refusedActionId;
+
+  @override
+  void initState() {
+    super.initState();
+    final refused = ref.read(courseActionsProvider).refused(widget.order.id, 'office-drop');
+    if (refused != null) {
+      _arrived = true;
+      _refusedActionId = refused.id;
+      _error = refused.failureMessage;
+      _photoPath = refused.photoPath;
+      _photoAt = refused.createdAt;
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    final path = await ref.read(takeProofPhotoProvider)();
+    if (path == null || !mounted) return;
+    setState(() {
+      _photoPath = path;
+      _photoAt = widget.now?.call() ?? DateTime.now();
+      _error = null;
+    });
+  }
+
+  Future<void> _submit() async {
+    final l = AppLocalizations.of(context);
+    final photo = _photoPath;
+    if (photo == null) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final actions = ref.read(courseActionsProvider);
+    final at = await actions.position();
+    if (!mounted) return;
+    if (at == null) {
+      setState(() {
+        _busy = false;
+        _error = l.noPositionYet;
+      });
+      return;
+    }
+    final result = await actions.officeDrop(widget.order, photoPath: photo, at: at, retryActionId: _refusedActionId);
+    if (!mounted) return;
+    if (result.outcome == ActionOutcome.refused) {
+      setState(() {
+        _busy = false;
+        _refusedActionId = result.actionId;
+        _error = result.message ?? l.genericError;
+      });
+      return;
+    }
+    widget.onDropped(result.outcome);
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
-    final money = '${formatAmount(amount)} F';
-    final body = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final order = widget.order;
+    final office = order.office;
+    final reason = order.failureReason;
+    final photoDone = _photoPath != null;
+    final done = [_arrived, photoDone];
+    final current = done.indexWhere((d) => !d);
+    _ReturnStepState stateOf(int i) => done[i]
+        ? _ReturnStepState.done
+        : i == current
+        ? _ReturnStepState.current
+        : _ReturnStepState.todo;
+    String time(DateTime at) => '${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}';
+    final hours = office?.hoursFor(Localizations.localeOf(context).languageCode);
+    return CoursePage(
+      stop: MapStop(
+        latitude: office?.latitude ?? order.pickup.latitude,
+        longitude: office?.longitude ?? order.pickup.longitude,
+        label: l.officeDropTitle,
+      ),
+      header: CourseHeader(
+        kicker: '${l.officeDropTitle} · ${order.reference}',
+        title: l.officeStepGo,
+        subtitle: office?.address ?? '',
+        onBack: widget.onBack,
+        onSos: widget.onSos,
+      ),
+      footer: SwipeButton(
+        plain: true,
+        height: 62,
+        label: l.slideOfficeDropped,
+        semanticLabel: l.officeDropped,
+        loading: _busy,
+        onConfirmed: photoDone ? _submit : null,
+      ),
       children: [
-        if (!bare) ...[
-          Text(l.returnFeesTitle, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
-          const SizedBox(height: 4),
-        ],
-        Text(l.returnFeesBody(name, money), style: TaraText.text.copyWith(color: c.textSecondary)),
-        const SizedBox(height: 12),
-        GlassButton(label: l.returnFeesCash(money), icon: TaraIcons.cash, onPressed: busy || waiting ? null : onCash),
-        const SizedBox(height: 6),
-        Text(l.returnFeesCashNote, style: TaraText.small.copyWith(color: c.textTertiary)),
+        if (reason != null) Align(alignment: Alignment.centerLeft, child: _FailureChip(failureReasonLabel(l, reason))),
         const SizedBox(height: 8),
-        if (!momoOpen)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TaraLink(label: l.returnFeesMomo, onPressed: busy ? null : onOpenMomo),
-          )
-        else ...[
-          const SizedBox(height: 4),
-          ChoiceChips<String>(
-            options: [for (final o in operators) operatorChoice(o.code, o.name)],
-            selected: operator,
-            onSelected: (value) {
-              if (!waiting) onOperator(value);
-            },
-          ),
-          const SizedBox(height: 10),
-          TaraTextField(
-            label: l.phoneLabel,
-            hint: l.phoneHint,
-            controller: phone,
-            keyboardType: TextInputType.phone,
-            inputFormatters: [PhoneInputFormatter()],
-            leading: PhonePrefixButton(prefix: '+237', semanticLabel: l.countryCodeLabel('+237')),
-          ),
-          const SizedBox(height: 10),
-          if (waiting)
-            Text(
-              l.returnFeesWaiting,
-              style: TaraText.text.copyWith(color: c.accentText, fontWeight: FontWeight.w700),
-            )
-          else
-            GlassButton(
-              label: l.returnFeesSend,
-              icon: TaraIcons.phone,
-              onPressed: busy || operator == null ? null : onSend,
-            ),
-        ],
+        Text(l.officeDropWhy, style: TaraText.small.copyWith(color: c.textSecondary, height: 1.4)),
+        const SizedBox(height: 10),
+        _ReturnStep(
+          number: 1,
+          state: stateOf(0),
+          title: l.officeStepGo,
+          subtitle: [?office?.address, ?hours].join(' · '),
+          action: _arrived ? null : l.arrivedAction,
+          onAction: () => setState(() => _arrived = true),
+        ),
+        const SizedBox(height: 10),
+        _ReturnStep(
+          number: 2,
+          state: stateOf(1),
+          title: l.officeStepPhoto,
+          subtitle: photoDone && _photoAt != null ? l.officeStepPhotoTaken(time(_photoAt!)) : l.officeStepPhotoHint,
+          action: _arrived ? (photoDone ? l.retakePhoto : l.takePhoto) : null,
+          onAction: _busy ? null : _takePhoto,
+        ),
+        if (_error != null) ...[const SizedBox(height: 12), ErrorLine(_error!)],
+        const SizedBox(height: 12),
       ],
     );
-    if (bare) return body;
-    return GlassCard(radius: 22, padding: const EdgeInsets.fromLTRB(16, 14, 16, 16), child: body);
   }
 }

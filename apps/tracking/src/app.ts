@@ -44,7 +44,7 @@ const ASSETS: Record<string, string> = {
   'mtn-momo.png': 'image/png',
 };
 
-const FINAL = new Set(['DELIVERED', 'RETURNED', 'CANCELLED']);
+const FINAL = new Set(['DELIVERED', 'RETURNED', 'CANCELLED', 'HELD_AT_OFFICE', 'UNCLAIMED']);
 
 /**
  * Mobile camerounais saisi librement (« 6 77 12 34 56 », « +237677123456 ») au format de

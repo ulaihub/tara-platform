@@ -147,7 +147,7 @@ class ActiveOrderController extends ChangeNotifier {
     if (!order.inProgress) {
       if (order.status == 'CANCELLED') _ended = OrderEnded.cancelled;
       if (order.status == 'DELIVERED') _ended = OrderEnded.delivered;
-      if (order.status == 'RETURNED') _ended = OrderEnded.returned;
+      if (order.status == 'RETURNED' || order.status == 'HELD_AT_OFFICE') _ended = OrderEnded.returned;
     }
     final next = currentStop(_tour);
     if (next != null) return _set(next);

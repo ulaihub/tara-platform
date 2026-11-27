@@ -293,6 +293,30 @@ class CourseActions {
     return const ActionResult(ActionOutcome.queued);
   }
 
+  /// Retour non payé : colis déposé au bureau Tara, photo à l'appui. Hors réseau, le dépôt
+  /// part dans la file comme un retour.
+  Future<ActionResult> officeDrop(
+    RiderOrder order, {
+    required String photoPath,
+    required GeoPoint at,
+    String? retryActionId,
+  }) async {
+    final action = await _send(
+      order,
+      kind: 'office-drop',
+      body: {'latitude': at.latitude, 'longitude': at.longitude},
+      photoPath: photoPath,
+      retryActionId: retryActionId,
+    );
+    if (action != null && action.failed) return _refusal(action);
+    if (action == null) {
+      await activeOrder.update(order.withStatus('HELD_AT_OFFICE'));
+      return const ActionResult(ActionOutcome.sent);
+    }
+    await activeOrder.update(order.withChanges({RiderOrder.returnQueuedKey: true}));
+    return const ActionResult(ActionOutcome.queued);
+  }
+
   /// Action refusée de cette sorte encore dans la file (écran rouvert, app relancée).
   QueuedAction? refused(String orderId, String kind) =>
       queue.forOrder(orderId).where((action) => action.kind == kind && action.failed).lastOrNull;

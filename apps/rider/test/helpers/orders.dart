@@ -72,6 +72,15 @@ Json orderJson({
     'waze': 'https://waze.com/ul?ll=4.0511,9.6942&navigate=yes',
   },
   'failureDecision': failureDecision,
+  'office': failureDecision == 'OFFICE'
+      ? {
+          'address': 'Bureau Tara, Bonabéri, Douala (adresse provisoire)',
+          'hours': 'Lundi au vendredi, 8 h - 17 h',
+          'hoursEn': 'Monday to Friday, 8 am - 5 pm',
+          'latitude': 4.0717,
+          'longitude': 9.6625,
+        }
+      : null,
   'failureReason': failureReason,
   'failedAt': failedAt,
   'failureDecisionDueAt': failureDecisionDueAt,

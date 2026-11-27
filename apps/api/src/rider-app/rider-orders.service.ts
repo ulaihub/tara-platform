@@ -15,7 +15,7 @@ import { type OrderChange, OrderEventsBus } from '../events/order-events.bus.js'
 import type { Order, Prisma, RiderProfile } from '../generated/prisma/client.js';
 import type { FailureReason, OrderStatus, ProofKind } from '../generated/prisma/enums.js';
 import { AddressesService } from '../geo/addresses.service.js';
-import { checkTransition } from '../orders/order-state-machine.js';
+import { checkTransition, RIDER_DONE_STATUSES } from '../orders/order-state-machine.js';
 import {
   OrderTransitionsService,
   type TransitionOptions,
@@ -33,6 +33,8 @@ import type {
   DeliverBody,
   EarningsDto,
   FailBody,
+  OfficeDropBody,
+  OfficeDto,
   RefuseParcelBody,
   PickupBody,
   PositionActionBody,
@@ -134,9 +136,7 @@ export class RiderOrdersService {
     const rows = await this.prisma.order.findMany({
       where: {
         riderId: rider.id,
-        status: active
-          ? { in: [...ACTIVE_RIDER_STATUSES] }
-          : { in: ['DELIVERED', 'RETURNED', 'CANCELLED'] },
+        status: active ? { in: [...ACTIVE_RIDER_STATUSES] } : { in: RIDER_DONE_STATUSES },
         ...(query.cursor ? { id: { lt: query.cursor } } : {}),
       },
       include: ORDER_INCLUDE,
@@ -195,11 +195,12 @@ export class RiderOrdersService {
     from: GeoPoint,
   ): Promise<z.output<typeof RiderRouteDto>> {
     const { order } = await this.load(userId, orderId);
-    const target = navigationTarget(order);
+    const office = this.office();
+    const target = navigationTarget(order, office);
     if (!target) throw AppError.conflict('ORDER_NOT_IN_PROGRESS', { status: order.status });
     const route = await this.distance.path(from, target);
     return {
-      stop: target === order.pickupAddress ? 'PICKUP' : 'DROPOFF',
+      stop: target === office ? 'OFFICE' : target === order.pickupAddress ? 'PICKUP' : 'DROPOFF',
       meters: route.meters,
       seconds: route.seconds,
       source: route.source,
@@ -220,7 +221,7 @@ export class RiderOrdersService {
       const dropoff = addresses.get(order.dropoffAddressId);
       if (!pickup || !dropoff) throw new Error(`Adresses manquantes pour ${order.reference}`);
       const inProgress = (ACTIVE_RIDER_STATUSES as readonly OrderStatus[]).includes(order.status);
-      const target = navigationTarget(order);
+      const target = navigationTarget(order, this.office());
       return {
         id: order.id,
         reference: order.reference,
@@ -269,6 +270,10 @@ export class RiderOrdersService {
                 order.failedAt.getTime() + this.env.FAILURE_DECISION_TIMEOUT_MINUTES * 60_000,
               ).toISOString()
             : null,
+        office:
+          order.status === 'DELIVERY_FAILED' && order.failureDecision === 'OFFICE'
+            ? this.office()
+            : null,
         awaitingSupportValidation: awaiting.has(order.id),
         assignedAt: order.assignedAt?.toISOString() ?? null,
         arrivedPickupAt: order.arrivedPickupAt?.toISOString() ?? null,
@@ -277,7 +282,12 @@ export class RiderOrdersService {
         pickedUpAt: order.pickedUpAt?.toISOString() ?? null,
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
         completedAt:
-          (order.deliveredAt ?? order.returnedAt ?? order.cancelledAt)?.toISOString() ?? null,
+          (
+            order.deliveredAt ??
+            order.officeAt ??
+            order.returnedAt ??
+            order.cancelledAt
+          )?.toISOString() ?? null,
         rating: ratingDto(order.ratings.find((r) => r.raterId !== order.senderId)),
         collected: order.codCollection
           ? {
@@ -761,12 +771,9 @@ export class RiderOrdersService {
     const { order } = await this.load(userId, orderId);
     assertTransition(order, 'RETURNED');
     if (body.photoKey) await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
-    // Pas de paiement, pas de colis (E6) : ce que le solde de l'expéditeur ne couvre pas est
-    // encaissé avant de rendre le colis (le code n'est pas vérifié, donc pas consommé, avant).
-    const collection = await this.finance.collectionState(order);
-    if (!collection.complete) {
-      throw AppError.conflict('RETURN_COLLECTION_REQUIRED', { amount: collection.due.total });
-    }
+    // Retour sans dette : payé d'avance, rien n'est encaissé à la porte. Non payé : le colis
+    // va au bureau Tara (le code n'est pas vérifié, donc pas consommé, avant).
+    if (order.failureDecision === 'OFFICE') throw AppError.conflict('OFFICE_DROP_REQUIRED');
     await this.checkCode(order, 'pickup', body.senderCode);
     await this.act(userId, order, 'RETURNED', body, {
       kind: 'RETURN',
@@ -775,6 +782,45 @@ export class RiderOrdersService {
     });
     await this.tracks.checkAction(order, 'RETURN', body, order.pickupAddress);
     return this.get(userId, orderId);
+  }
+
+  /**
+   * Retour non payé : le livreur dépose le colis au bureau Tara, photo à l'appui. Il est payé
+   * comme pour un retour ; l'expéditeur paiera pour récupérer son colis.
+   */
+  async officeDrop(
+    userId: string,
+    orderId: string,
+    body: z.output<typeof OfficeDropBody>,
+  ): Promise<z.output<typeof RiderOrderDto>> {
+    if (await this.replayed(orderId, body.clientEventId)) return this.get(userId, orderId);
+    const { order } = await this.load(userId, orderId);
+    if (order.status !== 'DELIVERY_FAILED' || order.failureDecision !== 'OFFICE') {
+      throw AppError.conflict('ORDER_TRANSITION_INVALID', {
+        from: order.status,
+        to: 'HELD_AT_OFFICE',
+      });
+    }
+    await this.media.assertOwned(userId, body.photoKey, ['PROOF_PHOTO']);
+    await this.act(userId, order, 'HELD_AT_OFFICE', body, {
+      kind: 'OFFICE_DROP',
+      photoKey: body.photoKey,
+      codeVerified: false,
+    });
+    const office = this.office();
+    await this.tracks.checkAction(order, 'OFFICE_DROP', body, office);
+    return this.get(userId, orderId);
+  }
+
+  /** Bureau Tara (réglages du serveur). */
+  office(): z.output<typeof OfficeDto> {
+    return {
+      address: this.env.OFFICE_ADDRESS,
+      hours: this.env.OFFICE_HOURS,
+      hoursEn: this.env.OFFICE_HOURS_EN,
+      latitude: this.env.OFFICE_LATITUDE,
+      longitude: this.env.OFFICE_LONGITUDE,
+    };
   }
 
   /** Le livreur rend une course pas encore enlevée : elle repart en recherche sans lui. */
@@ -820,7 +866,11 @@ export class RiderOrdersService {
         },
       }),
       this.prisma.orderEvent.count({
-        where: { actorId: userId, toStatus: 'RETURNED', occurredAt: { gte: from, lte: now } },
+        where: {
+          actorId: userId,
+          toStatus: { in: ['RETURNED', 'HELD_AT_OFFICE'] },
+          occurredAt: { gte: from, lte: now },
+        },
       }),
       this.prisma.codCollection.aggregate({
         where: { riderId: rider.id, method: 'CASH', collectedAt: { gte: from, lte: now } },
@@ -985,7 +1035,10 @@ function assertTransition(order: Order, to: OrderStatus): void {
 }
 
 /** Prochaine étape de la course, pour l'itinéraire. */
-function navigationTarget(order: RiderOrder): { latitude: number; longitude: number } | null {
+function navigationTarget(
+  order: RiderOrder,
+  office: { latitude: number; longitude: number },
+): { latitude: number; longitude: number } | null {
   switch (order.status) {
     case 'ASSIGNED':
       return order.pickupAddress;
@@ -993,6 +1046,7 @@ function navigationTarget(order: RiderOrder): { latitude: number; longitude: num
     case 'IN_DELIVERY':
       return order.dropoffAddress;
     case 'DELIVERY_FAILED':
+      if (order.failureDecision === 'OFFICE') return office;
       return order.failureDecision === 'RETURN' ? order.pickupAddress : order.dropoffAddress;
     default:
       return null;

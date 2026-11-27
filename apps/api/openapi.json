@@ -8270,6 +8270,81 @@
         ]
       }
     },
+    "/v1/rider/orders/{id}/office-drop": {
+      "post": {
+        "operationId": "RiderApp_officeDrop",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "photoKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "occurredAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "clientEventId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{8,100}$"
+                  }
+                },
+                "required": [
+                  "photoKey",
+                  "latitude",
+                  "longitude"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiderOrder"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Livreur"
+        ]
+      }
+    },
     "/v1/rider/orders/{id}/release": {
       "post": {
         "operationId": "RiderApp_release",
@@ -8713,11 +8788,7 @@
                 "type": "object",
                 "properties": {
                   "decision": {
-                    "type": "string",
-                    "enum": [
-                      "RETRY",
-                      "RETURN"
-                    ]
+                    "$ref": "#/components/schemas/FailureDecision"
                   }
                 },
                 "required": [
@@ -8927,6 +8998,197 @@
         ],
         "tags": [
           "Back-office · support"
+        ]
+      }
+    },
+    "/v1/orders/{id}/return-quote": {
+      "get": {
+        "operationId": "SenderOffice_quote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnQuote"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/orders/{id}/office-payment": {
+      "post": {
+        "operationId": "SenderOffice_pay",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Commandes"
+        ]
+      }
+    },
+    "/v1/admin/office-returns": {
+      "get": {
+        "operationId": "AdminOffice_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OfficeReturn"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · bureau"
+        ]
+      }
+    },
+    "/v1/admin/office-returns/{id}/hand-over": {
+      "post": {
+        "operationId": "AdminOffice_handOver",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "cashReceived": {
+                    "type": "boolean"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · bureau"
+        ]
+      }
+    },
+    "/v1/admin/office-returns/{id}/unclaimed": {
+      "post": {
+        "operationId": "AdminOffice_unclaimed",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "note"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Back-office · bureau"
         ]
       }
     },
@@ -11455,10 +11717,10 @@
               },
               "decision": {
                 "nullable": true,
-                "type": "string",
-                "enum": [
-                  "RETRY",
-                  "RETURN"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FailureDecision"
+                  }
                 ]
               }
             },
@@ -13918,6 +14180,13 @@
                   "PAYMENT_NOT_EXPECTED",
                   "INSUFFICIENT_BALANCE",
                   "RETRY_PAYMENT_REQUIRED",
+                  "RETURN_PAYMENT_REQUIRED",
+                  "OFFICE_PAYMENT_REQUIRED",
+                  "ORDER_NOT_AT_OFFICE",
+                  "OFFICE_ALREADY_PAID",
+                  "OFFICE_HOLD_NOT_OVER",
+                  "OFFICE_DROP_REQUIRED",
+                  "RETURN_ALREADY_PAID",
                   "RETRY_LIMIT_REACHED",
                   "MERCHANT_DEBT_LIMIT",
                   "ACCOUNT_HAS_DEBT",
@@ -13974,6 +14243,14 @@
         ],
         "additionalProperties": false,
         "description": "Format unique des erreurs de l’API"
+      },
+      "FailureDecision": {
+        "type": "string",
+        "enum": [
+          "RETRY",
+          "RETURN",
+          "OFFICE"
+        ]
       },
       "FailureReason": {
         "type": "string",
@@ -15500,6 +15777,88 @@
           "ORANGE"
         ]
       },
+      "Office": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "hours": {
+            "type": "string"
+          },
+          "hoursEn": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "address",
+          "hours",
+          "hoursEn",
+          "latitude",
+          "longitude"
+        ],
+        "additionalProperties": false
+      },
+      "OfficeReturn": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "senderName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "senderPhone": {
+            "type": "string"
+          },
+          "heldSince": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "daysLeft": {
+            "type": "integer"
+          },
+          "due": {
+            "type": "integer"
+          },
+          "paidAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "reminders": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "orderId",
+          "reference",
+          "senderName",
+          "senderPhone",
+          "heldSince",
+          "until",
+          "daysLeft",
+          "due",
+          "paidAt",
+          "reminders"
+        ],
+        "additionalProperties": false
+      },
       "Order": {
         "type": "object",
         "properties": {
@@ -15781,10 +16140,10 @@
               },
               "decision": {
                 "nullable": true,
-                "type": "string",
-                "enum": [
-                  "RETRY",
-                  "RETURN"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FailureDecision"
+                  }
                 ]
               },
               "decisionDueAt": {
@@ -15811,6 +16170,57 @@
               "retryAllowed",
               "hasPhoto",
               "calls"
+            ],
+            "additionalProperties": false
+          },
+          "office": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "hours": {
+                "type": "string"
+              },
+              "hoursEn": {
+                "type": "string"
+              },
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              },
+              "heldSince": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time"
+              },
+              "until": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time"
+              },
+              "due": {
+                "type": "integer"
+              },
+              "paidAt": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "address",
+              "hours",
+              "hoursEn",
+              "latitude",
+              "longitude",
+              "heldSince",
+              "until",
+              "due",
+              "paidAt"
             ],
             "additionalProperties": false
           },
@@ -15886,6 +16296,7 @@
           "rider",
           "attemptCount",
           "failure",
+          "office",
           "delivery",
           "cancelReason",
           "rating",
@@ -16206,7 +16617,9 @@
           "DELIVERED",
           "DELIVERY_FAILED",
           "RETURNED",
-          "CANCELLED"
+          "CANCELLED",
+          "HELD_AT_OFFICE",
+          "UNCLAIMED"
         ]
       },
       "OrderSummary": {
@@ -16249,10 +16662,10 @@
           },
           "failureDecision": {
             "nullable": true,
-            "type": "string",
-            "enum": [
-              "RETRY",
-              "RETURN"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FailureDecision"
+              }
             ]
           },
           "riderName": {
@@ -17323,10 +17736,10 @@
           },
           "failureDecision": {
             "nullable": true,
-            "type": "string",
-            "enum": [
-              "RETRY",
-              "RETURN"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FailureDecision"
+              }
             ]
           }
         },
@@ -17580,6 +17993,26 @@
           "totals",
           "discrepancies",
           "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ReturnQuote": {
+        "type": "object",
+        "properties": {
+          "fee": {
+            "type": "integer"
+          },
+          "fromBalance": {
+            "type": "integer"
+          },
+          "toPay": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "fee",
+          "fromBalance",
+          "toPay"
         ],
         "additionalProperties": false
       },
@@ -18029,10 +18462,10 @@
           },
           "failureDecision": {
             "nullable": true,
-            "type": "string",
-            "enum": [
-              "RETRY",
-              "RETURN"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FailureDecision"
+              }
             ]
           },
           "failureReason": {
@@ -18052,6 +18485,14 @@
             "nullable": true,
             "type": "string",
             "format": "date-time"
+          },
+          "office": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Office"
+              }
+            ]
           },
           "awaitingSupportValidation": {
             "type": "boolean"
@@ -18146,6 +18587,7 @@
           "failureReason",
           "failedAt",
           "failureDecisionDueAt",
+          "office",
           "awaitingSupportValidation",
           "assignedAt",
           "arrivedPickupAt",
@@ -18513,7 +18955,8 @@
             "type": "string",
             "enum": [
               "PICKUP",
-              "DROPOFF"
+              "DROPOFF",
+              "OFFICE"
             ]
           },
           "meters": {

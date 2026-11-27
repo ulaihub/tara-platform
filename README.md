@@ -29,16 +29,16 @@ L'API répond alors sur <http://localhost:3000/health>.
 
 ## État d'avancement
 
-| Phase                              | État                               |
-| ---------------------------------- | ---------------------------------- |
-| 0. Fondations et schéma de données | Terminée                           |
-| 1. Back-end cœur                   | Terminée                           |
-| 2. Attribution et temps réel       | Terminée                           |
-| 3. Argent                          | Terminée (Sebpay en cours)         |
-| 4. App livreur                     | Terminée, refonte en cours (lot C) |
-| 5. App expéditeur et page de suivi | Terminée, refonte faite            |
-| 6. Back-office                     | Terminé                            |
-| 7. Préparation du pilote           | En cours                           |
+| Phase                              | État                                                  |
+| ---------------------------------- | ----------------------------------------------------- |
+| 0. Fondations et schéma de données | Terminée                                              |
+| 1. Back-end cœur                   | Terminée                                              |
+| 2. Attribution et temps réel       | Terminée                                              |
+| 3. Argent                          | Terminée (Sebpay en cours), retour sans dette (PR 94) |
+| 4. App livreur                     | Terminée, refonte en cours (lot C)                    |
+| 5. App expéditeur et page de suivi | Terminée, refonte faite                               |
+| 6. Back-office                     | Terminé                                               |
+| 7. Préparation du pilote           | En cours                                              |
 
 Le détail de ce qui reste à faire est dans [CLAUDE.md](CLAUDE.md) (« État et suite »).
 

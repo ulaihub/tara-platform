@@ -277,32 +277,43 @@ stateDiagram-v2
   IN_DELIVERY --> DELIVERED: code destinataire + photo
   IN_DELIVERY --> DELIVERY_FAILED: motif obligatoire
   DELIVERY_FAILED --> IN_DELIVERY: nouvelle tentative
-  DELIVERY_FAILED --> RETURNED: code de l'expéditeur
+  DELIVERY_FAILED --> RETURNED: retour payé d'avance, code de retour
+  DELIVERY_FAILED --> HELD_AT_OFFICE: retour non payé, dépôt au bureau (photo)
+  HELD_AT_OFFICE --> RETURNED: payé (app ou espèces), remis au bureau
+  HELD_AT_OFFICE --> UNCLAIMED: garde finie (30 jours), Tara en dispose
   DELIVERED --> [*]
   RETURNED --> [*]
   CANCELLED --> [*]
+  UNCLAIMED --> [*]
 ```
+
+Retour sans dette (PR 94) : module `apps/api/src/returns/` (devis du retour, paiement au
+bureau, remise, colis non réclamé, rappels) ; l'argent reste dans `OrderFinanceService`
+(`prepayReturn`, `payOffice`, frais abandonnés). Bureau réglable : `OFFICE_*` dans
+`apps/api/src/config/env.ts`.
 
 ## Plan de comptes
 
 Montant positif = débit, négatif = crédit. Les soldes se calculent toujours à partir des lignes.
 
-| Code                             | Type    | Sens                                                                   |
-| -------------------------------- | ------- | ---------------------------------------------------------------------- |
-| `platform:mobile_money`          | Actif   | Argent détenu chez l'agrégateur Mobile Money                           |
-| `platform:office_cash`           | Actif   | Espèces déposées au bureau                                             |
-| `rider:<id>:cash_held`           | Actif   | Espèces encaissées par le livreur et pas encore déposées (dues à Tara) |
-| `platform:orders_prepaid`        | Passif  | Frais de livraison payés, course pas encore terminée                   |
-| `platform:payouts_in_transit`    | Passif  | Reversements demandés, pas encore confirmés                            |
-| `platform:unallocated`           | Passif  | Paiements reçus sans emploi, à rembourser ou affecter                  |
-| `merchant:<id>:payable`          | Passif  | Portefeuille du marchand (encaissements nets, avoirs)                  |
-| `rider:<id>:payable`             | Passif  | Gains dus au livreur                                                   |
-| `customer:<id>:wallet`           | Passif  | Solde Tara d'un client (recharges, avoirs)                             |
-| `platform:revenue:commission`    | Produit | Commission sur les livraisons                                          |
-| `platform:revenue:cod_fees`      | Produit | Frais d'encaissement (2 %, minimum 250 FCFA)                           |
-| `platform:expense:provider_fees` | Charge  | Frais Mobile Money                                                     |
-| `platform:expense:promotions`    | Charge  | Remises financées par Tara                                             |
-| `platform:expense:goodwill`      | Charge  | Avoirs commerciaux                                                     |
+| Code                              | Type    | Sens                                                                   |
+| --------------------------------- | ------- | ---------------------------------------------------------------------- |
+| `platform:mobile_money`           | Actif   | Argent détenu chez l'agrégateur Mobile Money                           |
+| `platform:office_cash`            | Actif   | Espèces déposées au bureau                                             |
+| `platform:office_receivables`     | Actif   | Frais de retour avancés par Tara pour les colis gardés au bureau       |
+| `rider:<id>:cash_held`            | Actif   | Espèces encaissées par le livreur et pas encore déposées (dues à Tara) |
+| `platform:orders_prepaid`         | Passif  | Frais de livraison payés, course pas encore terminée                   |
+| `platform:payouts_in_transit`     | Passif  | Reversements demandés, pas encore confirmés                            |
+| `platform:unallocated`            | Passif  | Paiements reçus sans emploi, à rembourser ou affecter                  |
+| `merchant:<id>:payable`           | Passif  | Portefeuille du marchand (encaissements nets, avoirs)                  |
+| `rider:<id>:payable`              | Passif  | Gains dus au livreur                                                   |
+| `customer:<id>:wallet`            | Passif  | Solde Tara d'un client (recharges, avoirs)                             |
+| `platform:revenue:commission`     | Produit | Commission sur les livraisons                                          |
+| `platform:revenue:cod_fees`       | Produit | Frais d'encaissement (2 %, minimum 250 FCFA)                           |
+| `platform:expense:provider_fees`  | Charge  | Frais Mobile Money                                                     |
+| `platform:expense:promotions`     | Charge  | Remises financées par Tara                                             |
+| `platform:expense:goodwill`       | Charge  | Avoirs commerciaux                                                     |
+| `platform:expense:unpaid_returns` | Charge  | Frais de retour abandonnés (colis jamais réclamé au bureau)            |
 
 ### Écritures d'une commande
 
@@ -314,7 +325,10 @@ Montant positif = débit, négatif = crédit. Les soldes se calculent toujours �
 | Encaissement à la porte             | Espèces du livreur ou Mobile Money ↑ / livraisons payées ↑ (frais du destinataire), marchand ↑ (COD − frais), frais d'encaissement ↑  |
 | Livraison ou retour                 | Livraisons payées ↓ / gains du livreur ↑, commission ↑ (ou promotions ↓) ; puis le livreur garde sa part sur les espèces de la course |
 | Annulation après prépaiement        | Livraisons payées ↓ / solde de l'expéditeur ↑ (avoir)                                                                                 |
-| Retour non payé par le destinataire | Solde de l'expéditeur ↓ (au besoin négatif) / livraisons payées ↑                                                                     |
+| Retour choisi et payé               | Solde Tara puis ventes positives de l'expéditeur ↓ (jamais sous zéro) / livraisons payées ↑ (course impayée, frais de retour)         |
+| Dépôt au bureau (retour non payé)   | Frais à recevoir du bureau ↑ / livraisons payées ↑ ; puis comme un retour (part du livreur, commission)                               |
+| Frais du bureau payés               | Solde de l'expéditeur ↓ ou espèces du bureau ↑ / frais à recevoir ↓                                                                   |
+| Colis non réclamé                   | Frais de retour non payés (charge) ↑ / frais à recevoir ↓ : rien n'est dû par l'expéditeur                                            |
 | Reversement demandé, envoyé, échoué | Portefeuille ↓ / en cours ↑ ; puis en cours ↓ / Mobile Money ↓ ; ou en cours ↓ / portefeuille ↑                                       |
 
 ## Développement local

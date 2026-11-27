@@ -57,6 +57,20 @@ export function isReturning(order: Pick<Order, 'status' | 'failureDecision'>): b
   return order.status === 'DELIVERY_FAILED' && order.failureDecision === 'RETURN';
 }
 
+/** Ce que coûte le retour à l'expéditeur : frais de retour, plus la course si impayée. */
+export function returnCharges(
+  order: Pick<Order, 'returnFee' | 'feePaidAt' | 'totalPrice'>,
+): number {
+  return order.returnFee + (order.feePaidAt ? 0 : order.totalPrice);
+}
+
+/** Retour sans dette : ce que le solde paie et ce qui reste à payer maintenant. */
+export interface ReturnQuote {
+  fee: number;
+  fromBalance: number;
+  toPay: number;
+}
+
 /** Compte qui paie pour l'expéditeur : portefeuille marchand ou solde client. */
 export function senderAccount(order: Pick<Order, 'merchantId' | 'senderId'>): AccountSpec {
   return order.merchantId ? merchantPayable(order.merchantId) : customerWallet(order.senderId);
@@ -113,7 +127,18 @@ export class OrderFinanceService implements OnModuleInit {
       case 'DELIVERED':
         return this.onCompleted(tx, after, false, actor.role);
       case 'RETURNED':
+        // Rendu au bureau : la course a été réglée au dépôt, il faut seulement être payé.
+        if (before?.status === 'HELD_AT_OFFICE') {
+          if (!after.officePaidAt) {
+            throw AppError.conflict('OFFICE_PAYMENT_REQUIRED', { amount: after.officeDue });
+          }
+          return Promise.resolve();
+        }
         return this.onCompleted(tx, after, true, actor.role);
+      case 'HELD_AT_OFFICE':
+        return this.onHeldAtOffice(tx, after, actor.role);
+      case 'UNCLAIMED':
+        return this.onUnclaimed(tx, after);
       case 'CANCELLED':
         return this.onCancelled(tx, after, before, actor.role);
       default:
@@ -401,19 +426,18 @@ export class OrderFinanceService implements OnModuleInit {
     order: Order,
     db: Prisma.TransactionClient | PrismaService = this.prisma,
   ): Promise<CollectionState> {
-    // Retour : ce que l'expéditeur doit payer avant de récupérer son colis (E6).
-    if (isReturning(order)) {
-      const total = await this.returnShortfall(order, db);
-      const topUp = await db.payment.findFirst({
-        where: { orderId: order.id, purpose: 'WALLET_TOPUP', status: 'PENDING' },
-        orderBy: { createdAt: 'desc' },
-      });
+    // Retour sans dette : payé d'avance par l'expéditeur, rien n'est encaissé à la porte.
+    if (
+      order.status === 'DELIVERY_FAILED' &&
+      order.failureDecision !== null &&
+      order.failureDecision !== 'RETRY'
+    ) {
       return {
-        due: { fee: total, cod: 0, total },
-        mobileMoneyFee: mobileMoneySurcharge(total, this.env.MOBILE_MONEY_FEE_BPS),
+        due: { fee: 0, cod: 0, total: 0 },
+        mobileMoneyFee: 0,
         reason: 'RETURN',
-        complete: total === 0,
-        payment: topUp ? pendingPayment(topUp) : null,
+        complete: true,
+        payment: null,
       };
     }
     // Une requête après l'autre : `db` peut être une transaction (une seule connexion).
@@ -447,22 +471,20 @@ export class OrderFinanceService implements OnModuleInit {
     if (!rider || order?.riderId !== rider.id) throw AppError.notFound('ORDER_NOT_FOUND');
     // Encaissement en espèces renvoyé par la file hors connexion (réponse perdue) : déjà
     // enregistré, il est sans effet et ne bloque pas la livraison qui suit.
-    const returning = isReturning(order);
     if (method.kind === 'CASH') {
       const recorded = await this.prisma.journalEntry.findUnique({
-        where: {
-          idempotencyKey: `order:${orderId}:${returning ? 'return-cash' : 'collect-cash'}`,
-        },
+        where: { idempotencyKey: `order:${orderId}:collect-cash` },
         select: { id: true },
       });
       if (recorded) return this.collectionState(order);
     }
-    if (!returning && order.status !== 'IN_DELIVERY') {
+    // Retour sans dette : plus rien n'est encaissé à la porte de l'expéditeur.
+    const state = await this.collectionState(order);
+    if (state.reason === 'RETURN') throw AppError.conflict('COLLECTION_NOT_EXPECTED');
+    if (order.status !== 'IN_DELIVERY') {
       throw AppError.conflict('ORDER_TRANSITION_INVALID', { from: order.status, to: 'DELIVERED' });
     }
-    const state = await this.collectionState(order);
     if (state.complete) throw AppError.conflict('COLLECTION_NOT_EXPECTED');
-    if (returning) return this.collectReturn(order, rider.id, method, state.due.total);
 
     if (method.kind === 'MOBILE_MONEY') {
       const attempts = await this.prisma.payment.count({
@@ -500,61 +522,6 @@ export class OrderFinanceService implements OnModuleInit {
     });
     return this.collectionState(
       await this.prisma.order.findUniqueOrThrow({ where: { id: orderId } }),
-    );
-  }
-
-  /**
-   * Retour contre paiement (E6) : le livreur encaisse auprès de l'expéditeur ce que son solde
-   * ne couvre pas, en espèces (pris sur le solde prépayé du livreur, qui garde les espèces) ou
-   * par Mobile Money (recharge du solde de l'expéditeur, confirmée automatiquement).
-   */
-  private async collectReturn(
-    order: Order,
-    riderId: string,
-    method: { kind: 'CASH' } | { kind: 'MOBILE_MONEY'; phone: string; operator: 'MTN' | 'ORANGE' },
-    amount: number,
-  ): Promise<CollectionState> {
-    if (method.kind === 'MOBILE_MONEY') {
-      const attempts = await this.prisma.payment.count({
-        where: { orderId: order.id, purpose: 'WALLET_TOPUP' },
-      });
-      await this.payments.request({
-        purpose: 'WALLET_TOPUP',
-        amount,
-        phone: method.phone,
-        method: method.operator === 'ORANGE' ? 'MOMO_ORANGE' : 'MOMO_MTN',
-        payerId: order.senderId,
-        orderId: order.id,
-        riderId,
-        idempotencyKey: `order:${order.id}:return-collect:${attempts + 1}`,
-        description: `Tara retour ${order.reference}`,
-      });
-      return this.collectionState(order);
-    }
-    await this.prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`SELECT id FROM orders WHERE id = ${order.id}::uuid FOR UPDATE`;
-      const fresh = await tx.order.findUniqueOrThrow({ where: { id: order.id } });
-      const due = await this.returnShortfall(fresh, tx);
-      if (due === 0) throw AppError.conflict('ALREADY_COLLECTED');
-      // Le livreur garde les espèces : le montant est pris sur son solde prépayé, qui ne
-      // peut pas devenir négatif (G5).
-      const { available } = await this.riderBalance.overview(riderId, tx);
-      if (available < due) {
-        throw AppError.unprocessable('RIDER_BALANCE_TOO_LOW', { available, required: due });
-      }
-      await this.ledger.post(tx, {
-        kind: 'PAYMENT_RECEIVED',
-        description: `Frais de retour ${fresh.reference} payés en espèces au livreur`,
-        idempotencyKey: `order:${order.id}:return-cash`,
-        orderId: order.id,
-        postings: [
-          { account: riderPayable(riderId), amount: due },
-          { account: senderAccount(fresh), amount: -due },
-        ],
-      });
-    });
-    return this.collectionState(
-      await this.prisma.order.findUniqueOrThrow({ where: { id: order.id } }),
     );
   }
 
@@ -638,6 +605,7 @@ export class OrderFinanceService implements OnModuleInit {
     actorRole: string,
   ): Promise<void> {
     if (!order.riderId) throw new Error(`Course terminée sans livreur (${order.reference})`);
+    void actorRole;
     if (!order.feePaidAt) {
       if (!returned) {
         throw AppError.conflict('COLLECTION_REQUIRED', { amount: order.totalPrice });
@@ -666,13 +634,6 @@ export class OrderFinanceService implements OnModuleInit {
           { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.returnFee },
         ],
       });
-    }
-    // Pas de paiement, pas de colis : le livreur ne rend le colis qu'une fois couvert ce que
-    // le solde de l'expéditeur ne couvre pas (le support peut passer outre : colis au bureau).
-    if (returned && actorRole === 'RIDER') {
-      const balance = await this.funds(order, tx);
-      const missing = -balance - this.debtLimit(order);
-      if (missing > 0) throw AppError.conflict('RETURN_COLLECTION_REQUIRED', { amount: missing });
     }
     if (!returned && order.codAmount > 0) {
       const collected = await tx.codCollection.findUnique({ where: { orderId: order.id } });
@@ -803,14 +764,193 @@ export class OrderFinanceService implements OnModuleInit {
     });
   }
 
-  /** Ce que l'expéditeur doit payer à la remise du colis retourné (non couvert par son solde). */
-  async returnShortfall(
-    order: Order,
+  // --- Retour sans dette ------------------------------------------------------------------
+
+  /**
+   * Argent de l'expéditeur utilisable sans dette : son solde Tara puis ses ventes (boutique),
+   * seulement ce qui est positif. Un retour ne fait jamais passer un compte sous zéro.
+   */
+  async available(
+    order: Pick<Order, 'merchantId' | 'senderId'>,
     db: Prisma.TransactionClient | PrismaService = this.prisma,
   ): Promise<number> {
-    const charges = order.returnFee + (order.feePaidAt ? 0 : order.totalPrice);
-    const balance = await this.funds(order, db);
-    return Math.max(0, charges - balance - this.debtLimit(order));
+    const accounts = payingAccounts(order);
+    const balances = await this.ledger.balances(accounts, db);
+    return accounts.reduce((sum, account) => sum + Math.max(0, balances.get(account.code) ?? 0), 0);
+  }
+
+  /** Lignes qui prennent [amount] sur l'argent disponible, compte après compte, sans dette. */
+  private async noDebtPostings(
+    tx: Prisma.TransactionClient,
+    order: Pick<Order, 'merchantId' | 'senderId'>,
+    amount: number,
+  ): Promise<PostingInput[]> {
+    const postings: PostingInput[] = [];
+    let left = amount;
+    for (const account of payingAccounts(order)) {
+      const part = Math.min(left, Math.max(0, await this.ledger.balance(account, tx)));
+      if (part > 0) postings.push({ account, amount: part });
+      left -= part;
+    }
+    if (left > 0)
+      throw AppError.unprocessable('RETURN_PAYMENT_REQUIRED', { amount: left }, { amount: left });
+    return postings;
+  }
+
+  /**
+   * Ce que le retour coûte, ce que le solde paie, ce qui reste à payer (Mobile Money dans
+   * l'app ou au bureau). Colis au bureau : le montant fixé au dépôt, tant qu'il est dû.
+   */
+  async returnQuote(
+    order: Order,
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<ReturnQuote> {
+    const fee =
+      order.status === 'HELD_AT_OFFICE'
+        ? order.officePaidAt
+          ? 0
+          : order.officeDue
+        : order.returnPaidAt
+          ? 0
+          : returnCharges(order);
+    const fromBalance = Math.min(fee, await this.available(order, db));
+    return { fee, fromBalance, toPay: fee - fromBalance };
+  }
+
+  /**
+   * Retour choisi : ses frais sont pris tout de suite sur l'argent disponible de
+   * l'expéditeur, sans dette. Renvoie false (rien n'est pris) s'il ne suffit pas : l'expéditeur
+   * paie le reste par Mobile Money, sinon le colis part au bureau Tara.
+   */
+  async prepayReturn(tx: Prisma.TransactionClient, order: Order): Promise<boolean> {
+    if (order.returnPaidAt) return true;
+    await this.ledger.lock(tx, payingAccounts(order));
+    if ((await this.available(order, tx)) < returnCharges(order)) return false;
+    await this.postReturnCharges(tx, order, (amount) => this.noDebtPostings(tx, order, amount));
+    await tx.order.update({ where: { id: order.id }, data: { returnPaidAt: new Date() } });
+    return true;
+  }
+
+  /**
+   * Course et frais de retour passés sur « livraisons payées », pris à [from] ; mêmes clés
+   * que la fin de course, qui ne les reprend donc pas.
+   */
+  private async postReturnCharges(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    from: (amount: number) => Promise<PostingInput[]>,
+  ): Promise<void> {
+    if (!order.feePaidAt) {
+      await this.ledger.post(tx, {
+        kind: 'ORDER_CHARGED',
+        description: `Frais de livraison ${order.reference} facturés à l'expéditeur (retour)`,
+        idempotencyKey: `order:${order.id}:charge`,
+        orderId: order.id,
+        postings: [
+          ...(await from(order.totalPrice)),
+          { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.totalPrice },
+        ],
+      });
+      await tx.order.update({ where: { id: order.id }, data: { feePaidAt: new Date() } });
+    }
+    if (order.returnFee > 0) {
+      await this.ledger.post(tx, {
+        kind: 'FAILURE_FEE_CHARGED',
+        description: `Frais de retour ${order.reference}`,
+        idempotencyKey: `order:${order.id}:return-fee`,
+        orderId: order.id,
+        postings: [
+          ...(await from(order.returnFee)),
+          { account: PLATFORM_ACCOUNTS.ordersPrepaid, amount: -order.returnFee },
+        ],
+      });
+    }
+  }
+
+  /**
+   * Colis déposé au bureau Tara : le livreur est payé comme pour un retour, Tara avance les
+   * frais (à recevoir) ; l'expéditeur les paiera pour récupérer son colis, sans dette.
+   */
+  private async onHeldAtOffice(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    actorRole: string,
+  ): Promise<void> {
+    const due = order.returnPaidAt ? 0 : returnCharges(order);
+    if (!order.returnPaidAt) {
+      await this.postReturnCharges(tx, order, (amount) =>
+        Promise.resolve([{ account: PLATFORM_ACCOUNTS.officeReceivables, amount }]),
+      );
+    }
+    const now = new Date();
+    const fresh = await tx.order.update({
+      where: { id: order.id },
+      data: {
+        officeAt: now,
+        officeUntil: new Date(now.getTime() + this.env.OFFICE_HOLD_DAYS * 86_400_000),
+        officeDue: due,
+        officePaidAt: due === 0 ? now : null,
+      },
+    });
+    await this.onCompleted(tx, fresh, true, actorRole);
+  }
+
+  /**
+   * Colis gardé au bureau : l'expéditeur paie pour le récupérer, avec son solde (rechargé
+   * par Mobile Money au besoin) ou en espèces au bureau. Une seule fois.
+   */
+  async payOffice(
+    tx: Prisma.TransactionClient,
+    order: Order,
+    via: { kind: 'BALANCE' } | { kind: 'CASH'; staffId: string },
+  ): Promise<void> {
+    if (order.status !== 'HELD_AT_OFFICE') throw AppError.conflict('ORDER_NOT_AT_OFFICE');
+    if (order.officePaidAt) throw AppError.conflict('ALREADY_COLLECTED');
+    const due = order.officeDue;
+    if (due > 0) {
+      let postings: PostingInput[];
+      if (via.kind === 'BALANCE') {
+        await this.ledger.lock(tx, payingAccounts(order));
+        postings = await this.noDebtPostings(tx, order, due);
+      } else {
+        postings = [{ account: PLATFORM_ACCOUNTS.officeCash, amount: due }];
+      }
+      await this.ledger.post(tx, {
+        kind: 'OFFICE_RETURN_PAID',
+        description: `Frais de retour ${order.reference} payés (${via.kind === 'CASH' ? 'espèces au bureau' : 'solde Tara'})`,
+        idempotencyKey: `order:${order.id}:office-paid`,
+        orderId: order.id,
+        postedById: via.kind === 'CASH' ? via.staffId : null,
+        postings: [...postings, { account: PLATFORM_ACCOUNTS.officeReceivables, amount: -due }],
+      });
+    }
+    await tx.order.update({ where: { id: order.id }, data: { officePaidAt: new Date() } });
+  }
+
+  /**
+   * Garde finie sans que l'expéditeur vienne : Tara dispose du colis (conditions) et abandonne
+   * les frais. Rien ne reste dû, aucune dette.
+   */
+  private async onUnclaimed(tx: Prisma.TransactionClient, order: Order): Promise<void> {
+    if (order.officePaidAt) throw AppError.conflict('OFFICE_ALREADY_PAID');
+    if (!order.officeUntil || order.officeUntil.getTime() > Date.now()) {
+      throw AppError.conflict('OFFICE_HOLD_NOT_OVER', {
+        until: order.officeUntil?.toISOString() ?? '',
+      });
+    }
+    if (order.officeDue > 0) {
+      await this.ledger.post(tx, {
+        kind: 'OFFICE_RETURN_WRITTEN_OFF',
+        description: `Colis ${order.reference} non réclamé : frais de retour abandonnés`,
+        idempotencyKey: `order:${order.id}:office-written-off`,
+        orderId: order.id,
+        postings: [
+          { account: PLATFORM_ACCOUNTS.unpaidReturns, amount: order.officeDue },
+          { account: PLATFORM_ACCOUNTS.officeReceivables, amount: -order.officeDue },
+        ],
+      });
+    }
+    await tx.order.update({ where: { id: order.id }, data: { unclaimedAt: new Date() } });
   }
 
   /** Frais d'échec gardés pour la course, partagés comme elle entre le livreur et Tara. */

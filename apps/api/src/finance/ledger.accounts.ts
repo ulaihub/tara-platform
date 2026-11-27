@@ -22,6 +22,12 @@ const platform = (code: string, name: string, type: LedgerAccountType): AccountS
 export const PLATFORM_ACCOUNTS = {
   mobileMoney: platform('mobile_money', 'Mobile Money détenu chez l’agrégateur', 'ASSET'),
   officeCash: platform('office_cash', 'Espèces déposées au bureau', 'ASSET'),
+  /** Retour sans dette : frais des colis gardés au bureau Tara, payés pour les récupérer. */
+  officeReceivables: platform(
+    'office_receivables',
+    'Frais de retour des colis gardés au bureau',
+    'ASSET',
+  ),
   ordersPrepaid: platform(
     'orders_prepaid',
     'Livraisons payées, pas encore effectuées',
@@ -39,6 +45,8 @@ export const PLATFORM_ACCOUNTS = {
   providerFees: platform('expense:provider_fees', 'Frais Mobile Money', 'EXPENSE'),
   promotions: platform('expense:promotions', 'Remises financées par Tara', 'EXPENSE'),
   goodwill: platform('expense:goodwill', 'Avoirs commerciaux', 'EXPENSE'),
+  /** Colis jamais réclamé au bureau : frais de retour abandonnés (jamais une dette). */
+  unpaidReturns: platform('expense:unpaid_returns', 'Frais de retour non payés', 'EXPENSE'),
   /** Primes d'approche et de renfort versées aux livreurs (H4), en plus de leur part. */
   riderBonuses: platform('expense:rider_bonuses', 'Primes des livreurs', 'EXPENSE'),
   /** Paiement reçu sans emploi (doublon, commande déjà réglée) : à rembourser ou affecter. */

@@ -53,6 +53,13 @@ Fonds de carte : style Tara des apps (`packages/tara_map`), tuiles OpenFreeMap e
 les nôtres. Le fichier de calcul de la carte est copié dans `public/` avant `dev` et `build`
 (`scripts/copy-map-worker.mjs`).
 
+## Bureau Tara (retour non payé)
+
+Page « Bureau Tara » (dispatch, support, administrateurs) : colis gardés au bureau, la fin de
+garde la plus proche d'abord, montant dû et rappels envoyés. « Remis à l'expéditeur » avec le
+code de retrait (payé dans l'app) ou les frais reçus en espèces ; la garde finie, « non
+réclamé » avec ce que Tara a fait du colis (frais abandonnés, aucune dette).
+
 ## Connexion
 
 1. Numéro de mobile, puis code reçu par SMS (comme dans les apps).

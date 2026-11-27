@@ -228,7 +228,10 @@ export class ReconciliationService {
 
     // 6. Commandes terminées ou annulées : plus rien sur « livraisons payées ».
     const closed = await this.prisma.order.findMany({
-      where: { status: { in: ['DELIVERED', 'RETURNED', 'CANCELLED'] }, updatedAt: within },
+      where: {
+        status: { in: ['DELIVERED', 'RETURNED', 'CANCELLED', 'HELD_AT_OFFICE', 'UNCLAIMED'] },
+        updatedAt: within,
+      },
       select: { id: true, reference: true, status: true },
     });
     const open = await this.ordersPrepaidBy(closed.map((order) => order.id));

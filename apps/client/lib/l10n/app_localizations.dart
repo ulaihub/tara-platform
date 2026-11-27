@@ -3035,7 +3035,7 @@ abstract class AppLocalizations {
   /// No description provided for @failureDueBody.
   ///
   /// In fr, this message translates to:
-  /// **'Sans réponse d’ici là, le colis vous est rapporté.'**
+  /// **'Sans réponse ni paiement d’ici là, le colis part au bureau Tara.'**
   String get failureDueBody;
 
   /// No description provided for @failureRetryTitle.
@@ -3275,7 +3275,7 @@ abstract class AppLocalizations {
   /// No description provided for @returnFeeHint.
   ///
   /// In fr, this message translates to:
-  /// **'Frais de retour : {amount}, pris sur votre solde Tara. S’il ne suffit pas, vous réglez le reste au livreur à la remise du colis (espèces ou Mobile Money).'**
+  /// **'Frais de retour : {amount}, déjà payés. Rien à régler au livreur.'**
   String returnFeeHint(String amount);
 
   /// No description provided for @topUpTitle.
@@ -5705,7 +5705,7 @@ abstract class AppLocalizations {
   /// No description provided for @failureCountdown.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez la suite. Sans réponse dans {minutes} min, le colis vous est rapporté.'**
+  /// **'Choisissez la suite. Sans réponse ni paiement dans {minutes} min, le colis part au bureau Tara.'**
   String failureCountdown(int minutes);
 
   /// No description provided for @failureMinutesLeft.
@@ -5735,7 +5735,7 @@ abstract class AppLocalizations {
   /// No description provided for @failureOnceNote.
   ///
   /// In fr, this message translates to:
-  /// **'Une seule nouvelle tentative est possible : ensuite, le colis vous est rapporté. Les frais ont été fixés à la commande.'**
+  /// **'Une seule nouvelle tentative est possible : ensuite, c’est le retour. Les frais ont été fixés à la commande.'**
   String get failureOnceNote;
 
   /// No description provided for @failureGoRetry.
@@ -5791,6 +5791,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Revoir la présentation'**
   String get profileReplayIntro;
+
+  /// No description provided for @statusToOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vers le bureau Tara'**
+  String get statusToOffice;
+
+  /// No description provided for @statusAtOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au bureau Tara'**
+  String get statusAtOffice;
+
+  /// No description provided for @statusUnclaimed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non réclamé'**
+  String get statusUnclaimed;
+
+  /// No description provided for @returnQuoteLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de retour {fee}. Votre solde paie {fromBalance}. Reste à payer maintenant : {toPay}.'**
+  String returnQuoteLine(String fee, String fromBalance, String toPay);
+
+  /// No description provided for @returnQuoteCovered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de retour {fee}, payés par votre solde Tara. Rien à régler au livreur.'**
+  String returnQuoteCovered(String fee);
+
+  /// No description provided for @returnPayTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payez {amount} pour le retour'**
+  String returnPayTitle(String amount);
+
+  /// No description provided for @returnPayBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre solde ne couvre pas tout le retour. Payez par Mobile Money : le livreur vous rapporte le colis dès le paiement validé. Sans paiement avant la fin du compte à rebours, le colis part au bureau Tara.'**
+  String get returnPayBody;
+
+  /// No description provided for @trackToOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis en route vers le bureau Tara'**
+  String get trackToOffice;
+
+  /// No description provided for @trackToOfficeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour non payé à temps : {rider} dépose le colis au bureau Tara. Vous paierez {amount} pour le récupérer.'**
+  String trackToOfficeBody(String rider, String amount);
+
+  /// No description provided for @trackAtOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis gardé au bureau Tara'**
+  String get trackAtOffice;
+
+  /// No description provided for @trackAtOfficeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payez {amount} (dans l’app ou au bureau) pour le récupérer.'**
+  String trackAtOfficeBody(String amount);
+
+  /// No description provided for @officeDaysLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days, plural, =0{Le délai de garde est fini.} =1{Il vous reste 1 jour.} other{Il vous reste {days} jours.}}'**
+  String officeDaysLeft(int days);
+
+  /// No description provided for @trackAtOfficePaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais payés. Au bureau, donnez votre code de retrait pour récupérer le colis.'**
+  String get trackAtOfficePaid;
+
+  /// No description provided for @trackUnclaimed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis non réclamé'**
+  String get trackUnclaimed;
+
+  /// No description provided for @trackUnclaimedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le délai de garde est fini : Tara dispose du colis selon les conditions. Plus rien n’est dû.'**
+  String get trackUnclaimedBody;
+
+  /// No description provided for @officeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bureau Tara'**
+  String get officeTitle;
+
+  /// No description provided for @officeKeptUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gardé sans frais jusqu’au {date}.'**
+  String officeKeptUntil(String date);
+
+  /// No description provided for @officePayTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payez {amount} pour récupérer le colis'**
+  String officePayTitle(String amount);
+
+  /// No description provided for @officePayBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre solde ne couvre pas les frais. Payez par Mobile Money : votre code de retrait arrive par SMS dès le paiement validé.'**
+  String get officePayBody;
+
+  /// No description provided for @officePayNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer {amount}'**
+  String officePayNow(String amount);
+
+  /// No description provided for @officeCodeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de retrait'**
+  String get officeCodeTitle;
+
+  /// No description provided for @officeCodeGive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au bureau Tara, donnez ce code pour récupérer votre colis.'**
+  String get officeCodeGive;
+
+  /// No description provided for @officeCodeSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre code de retrait vous a été envoyé par SMS.'**
+  String get officeCodeSent;
+
+  /// No description provided for @newOfficeCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher un nouveau code de retrait'**
+  String get newOfficeCode;
+
+  /// No description provided for @stepAtOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au bureau Tara'**
+  String get stepAtOffice;
+
+  /// No description provided for @stepUnclaimed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non réclamé'**
+  String get stepUnclaimed;
+
+  /// No description provided for @trackHeaderOffice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{reference} · bureau Tara'**
+  String trackHeaderOffice(String reference);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

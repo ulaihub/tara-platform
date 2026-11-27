@@ -2609,4 +2609,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get slideParcelReturned => 'Slide · Parcel returned';
+
+  @override
+  String get returnPaidAhead => 'Return fees paid in advance by the seller: nothing to collect.';
+
+  @override
+  String get officeDropTitle => 'Drop at the Tara office';
+
+  @override
+  String get officeDropWhy =>
+      'The seller did not pay for the return in time: the parcel is kept at the Tara office. You are paid as for a return.';
+
+  @override
+  String get officeStepGo => 'Go to the Tara office';
+
+  @override
+  String get officeStepPhoto => 'Photograph the dropped parcel';
+
+  @override
+  String get officeStepPhotoHint => 'Parcel at the office, label visible';
+
+  @override
+  String officeStepPhotoTaken(String time) {
+    return 'Drop photo · taken at $time';
+  }
+
+  @override
+  String get slideOfficeDropped => 'Slide · Parcel dropped';
+
+  @override
+  String get officeDropped => 'Parcel dropped at the office';
+
+  @override
+  String get queuedOfficeDrop => 'Drop at the Tara office';
+
+  @override
+  String get statusAtOffice => 'Dropped at the Tara office';
 }

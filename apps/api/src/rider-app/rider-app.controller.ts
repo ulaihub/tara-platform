@@ -51,6 +51,8 @@ import {
   FailBody,
   RefuseParcelBody,
   FailureDecisionBody,
+  OfficeDropBody,
+  SupportFailureDecisionBody,
   PickupBody,
   PoliceCalledBody,
   PositionActionBody,
@@ -431,6 +433,19 @@ export class RiderAppController {
     return this.orders.returnToSender(user.id, id, body);
   }
 
+  /** Retour non payé : le colis est déposé au bureau Tara (photo du dépôt). */
+  @Post('orders/:id/office-drop')
+  @HttpCode(HttpStatus.OK)
+  @ApiZodBody(OfficeDropBody)
+  @ApiZodResponse(RiderOrderDto)
+  officeDrop(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @ValidBody(OfficeDropBody) body: z.output<typeof OfficeDropBody>,
+  ): Out<typeof RiderOrderDto> {
+    return this.orders.officeDrop(user.id, id, body);
+  }
+
   /** Rendre une course pas encore enlevée (imprévu) : elle repart en recherche. */
   @Post('orders/:id/release')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -594,15 +609,16 @@ export class AdminSupportController {
 
   /**
    * Après un échec, le support choisit à la place de l'expéditeur (joint par téléphone, ou
-   * injoignable alors que le livreur attend). Action tracée (E6).
+   * injoignable alors que le livreur attend). Action tracée (E6). Retour : payé d'avance par
+   * le solde, sinon colis au bureau Tara ; OFFICE l'y envoie directement.
    */
   @Post('orders/:id/failure-decision')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiZodBody(FailureDecisionBody)
+  @ApiZodBody(SupportFailureDecisionBody)
   async failureDecisionForSender(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
-    @ValidBody(FailureDecisionBody) body: z.output<typeof FailureDecisionBody>,
+    @ValidBody(SupportFailureDecisionBody) body: z.output<typeof SupportFailureDecisionBody>,
     @Req() request: Request,
   ): Promise<void> {
     await this.support.failureDecisionForSender(user, id, body.decision, request);

@@ -937,7 +937,7 @@
       }
     }
   },
-  "failureDueBody": "Sans réponse d’ici là, le colis vous est rapporté.",
+  "failureDueBody": "Sans réponse ni paiement d’ici là, le colis part au bureau Tara.",
   "failureRetryTitle": "Nouvelle tentative",
   "failureRetryBody": "{rider} repasse chez {recipient}. Appelez d’abord pour convenir du moment.",
   "@failureRetryBody": {
@@ -1080,7 +1080,7 @@
     }
   },
   "retryUsed": "Une seule nouvelle tentative est possible : le colis vous sera rapporté.",
-  "returnFeeHint": "Frais de retour : {amount}, pris sur votre solde Tara. S’il ne suffit pas, vous réglez le reste au livreur à la remise du colis (espèces ou Mobile Money).",
+  "returnFeeHint": "Frais de retour : {amount}, déjà payés. Rien à régler au livreur.",
   "@returnFeeHint": {
     "placeholders": {
       "amount": {
@@ -2024,7 +2024,7 @@
   },
   "receipt": "Reçu",
   "proofPhotoLabel": "Photo prise par le livreur",
-  "failureCountdown": "Choisissez la suite. Sans réponse dans {minutes} min, le colis vous est rapporté.",
+  "failureCountdown": "Choisissez la suite. Sans réponse ni paiement dans {minutes} min, le colis part au bureau Tara.",
   "@failureCountdown": {
     "placeholders": {
       "minutes": {
@@ -2064,7 +2064,7 @@
       }
     }
   },
-  "failureOnceNote": "Une seule nouvelle tentative est possible : ensuite, le colis vous est rapporté. Les frais ont été fixés à la commande.",
+  "failureOnceNote": "Une seule nouvelle tentative est possible : ensuite, c’est le retour. Les frais ont été fixés à la commande.",
   "failureGoRetry": "Relancer la livraison",
   "failureGoReturn": "Faire revenir le colis",
   "returnCodeTitle": "Code de retour",
@@ -2086,5 +2086,111 @@
       }
     }
   },
-  "profileReplayIntro": "Revoir la présentation"
+  "profileReplayIntro": "Revoir la présentation",
+  "statusToOffice": "Vers le bureau Tara",
+  "statusAtOffice": "Au bureau Tara",
+  "statusUnclaimed": "Non réclamé",
+  "returnQuoteLine": "Frais de retour {fee}. Votre solde paie {fromBalance}. Reste à payer maintenant : {toPay}.",
+  "@returnQuoteLine": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "fromBalance": {
+        "type": "String"
+      },
+      "toPay": {
+        "type": "String"
+      }
+    }
+  },
+  "returnQuoteCovered": "Frais de retour {fee}, payés par votre solde Tara. Rien à régler au livreur.",
+  "@returnQuoteCovered": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "returnPayTitle": "Payez {amount} pour le retour",
+  "@returnPayTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "returnPayBody": "Votre solde ne couvre pas tout le retour. Payez par Mobile Money : le livreur vous rapporte le colis dès le paiement validé. Sans paiement avant la fin du compte à rebours, le colis part au bureau Tara.",
+  "trackToOffice": "Colis en route vers le bureau Tara",
+  "trackToOfficeBody": "Retour non payé à temps : {rider} dépose le colis au bureau Tara. Vous paierez {amount} pour le récupérer.",
+  "@trackToOfficeBody": {
+    "placeholders": {
+      "rider": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "trackAtOffice": "Colis gardé au bureau Tara",
+  "trackAtOfficeBody": "Payez {amount} (dans l’app ou au bureau) pour le récupérer.",
+  "@trackAtOfficeBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "officeDaysLeft": "{days, plural, =0{Le délai de garde est fini.} =1{Il vous reste 1 jour.} other{Il vous reste {days} jours.}}",
+  "@officeDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trackAtOfficePaid": "Frais payés. Au bureau, donnez votre code de retrait pour récupérer le colis.",
+  "trackUnclaimed": "Colis non réclamé",
+  "trackUnclaimedBody": "Le délai de garde est fini : Tara dispose du colis selon les conditions. Plus rien n’est dû.",
+  "officeTitle": "Bureau Tara",
+  "officeKeptUntil": "Gardé sans frais jusqu’au {date}.",
+  "@officeKeptUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "officePayTitle": "Payez {amount} pour récupérer le colis",
+  "@officePayTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "officePayBody": "Votre solde ne couvre pas les frais. Payez par Mobile Money : votre code de retrait arrive par SMS dès le paiement validé.",
+  "officePayNow": "Payer {amount}",
+  "@officePayNow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "officeCodeTitle": "Code de retrait",
+  "officeCodeGive": "Au bureau Tara, donnez ce code pour récupérer votre colis.",
+  "officeCodeSent": "Votre code de retrait vous a été envoyé par SMS.",
+  "newOfficeCode": "Afficher un nouveau code de retrait",
+  "stepAtOffice": "Au bureau Tara",
+  "stepUnclaimed": "Non réclamé",
+  "trackHeaderOffice": "{reference} · bureau Tara",
+  "@trackHeaderOffice": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  }
 }

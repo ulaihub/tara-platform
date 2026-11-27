@@ -1,6 +1,6 @@
 # Conditions des livreurs partenaires de Tara
 
-Version 2026-11.11 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
+Version 2026-11.12 · Rédigé au regard du droit camerounais et du droit OHADA (sources et points
 à faire confirmer par un avocat : `docs/juridique/README.md`). Les informations marquées
 **[À COMPLÉTER]** sont à renseigner avant la publication.
 
@@ -97,8 +97,8 @@ remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le dema
   normal (70 % de son prix) et les primes sont payées une seule fois pour toute la tournée.
 
 - **Solde prépayé** : vous rechargez votre solde par Mobile Money (frais payés par Tara) ou au
-  bureau. Quand vous encaissez de l'argent en espèces (frais de livraison, prix d'un article,
-  frais de retour), **vous gardez les espèces** et le même montant est pris sur votre solde.
+  bureau. Quand vous encaissez de l'argent en espèces (frais de livraison, prix d'un article),
+  **vous gardez les espèces** et le même montant est pris sur votre solde.
   L'argent à encaisser pour une course est mis de côté sur votre solde dès que vous
   l'acceptez : votre solde ne peut jamais devenir négatif, et vous ne devez jamais rien à Tara.
 - Vous pouvez retirer la partie disponible de votre solde sur votre numéro Mobile Money
@@ -114,9 +114,11 @@ remplacer sur votre téléphone. Ne le donnez à personne : Tara ne vous le dema
 - Encaissez exactement le montant affiché dans l'application, ni plus, ni moins.
 - Par Mobile Money, la demande part sur le téléphone du client ; attendez la confirmation dans
   l'application avant de remettre le colis.
-- **Retour d'un colis** : si l'application indique des frais de retour à encaisser, le colis
-  n'est rendu à l'expéditeur qu'une fois ces frais réglés. S'il refuse de payer, gardez le colis
-  et déposez-le au bureau de Tara.
+- **Retour d'un colis** : vous n'encaissez **jamais rien** auprès de l'expéditeur. Ses frais de
+  retour sont payés d'avance dans son application ; vous lui rendez le colis contre son code de
+  retour. Si le retour n'est pas payé à temps, l'application vous demande de **déposer le colis
+  au bureau Tara** (adresse et horaires affichés), photo du dépôt à l'appui. Dans les deux cas,
+  vous êtes payé pour le retour comme d'habitude.
 
 ## 6. Si la livraison échoue
 
