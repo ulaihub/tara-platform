@@ -1469,10 +1469,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pickupCodeLabel => 'Code d’enlèvement';
 
   @override
-  String get pickupCodeDictate => 'Dictez ces 4 chiffres au livreur à son arrivée.';
+  String get pickupCodeDictate => 'Montrez ce QR au livreur ou dictez-lui les 4 chiffres. Touchez pour l’agrandir.';
 
   @override
-  String get pickupCodeHelp => 'Donnez-le au livreur quand il récupère le colis. Notez-le : il ne sera plus affiché.';
+  String get pickupCodeHelp =>
+      'Le livreur scanne ce QR ou tape les 4 chiffres quand il récupère le colis. Notez le code : il ne sera plus affiché.';
 
   @override
   String get searchingRider => 'Recherche d’un livreur…';
@@ -2638,7 +2639,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pickupCodeHelpBatch =>
-      'Le même code pour chaque livreur qui vient chercher un colis. Notez-le : il ne sera plus affiché.';
+      'Le même code pour chaque livreur qui vient chercher un colis : il scanne ce QR ou tape les 4 chiffres. Notez-le : il ne sera plus affiché.';
 
   @override
   String get writeNumbersTitle => 'Écrivez son numéro sur chaque colis';

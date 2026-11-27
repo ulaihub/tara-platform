@@ -221,6 +221,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         collect: collect,
         onArrived: () => setState(() => _arrived = true),
         onFailure: _busy ? null : widget.onFailure,
+        now: widget.now?.call() ?? DateTime.now(),
       );
     }
 
@@ -384,8 +385,10 @@ class _EnRoute extends ConsumerWidget {
     required this.collect,
     required this.onArrived,
     required this.onFailure,
+    required this.now,
   });
 
+  final DateTime now;
   final RiderOrder order;
   final String name;
   final String kicker;
@@ -501,109 +504,155 @@ class _EnRoute extends ConsumerWidget {
             left: 12,
             right: 12,
             bottom: 16 + insets.bottom,
-            child: Container(
-              constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .66),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                color: sheet,
-                border: Border.all(color: c.textPrimary.withValues(alpha: .10)),
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (tourProgress case final tour?) ...[
-                      InfoPill(
-                        label: l.tourProgress(tour.stop, tour.total, '${formatAmount(tour.earned)} F'),
-                        icon: TaraIcons.package,
-                        tone: TintTone.accent,
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                    Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Arrivée estimée (maquette) : minutes, distance, heure, au-dessus de la fiche.
+                _EtaPill(meters: meters, now: now),
+                const SizedBox(height: 12),
+                Container(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .56),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    color: sheet,
+                    border: Border.all(color: c.textPrimary.withValues(alpha: .10)),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                kicker.toUpperCase(),
-                                style: TaraText.small.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.1,
-                                  color: c.accentText,
-                                ),
+                        if (tourProgress case final tour?) ...[
+                          InfoPill(
+                            label: l.tourProgress(tour.stop, tour.total, '${formatAmount(tour.earned)} F'),
+                            icon: TaraIcons.package,
+                            tone: TintTone.accent,
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    kicker.toUpperCase(),
+                                    style: TaraText.small.copyWith(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.1,
+                                      color: c.accentText,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    name,
+                                    style: TextStyle(
+                                      fontFamily: TaraText.sora,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                      color: c.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    order.dropoff.line,
+                                    style: TaraText.text.copyWith(
+                                      fontSize: 13,
+                                      color: c.textPrimary.withValues(alpha: .78),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                name,
-                                style: TextStyle(
-                                  fontFamily: TaraText.sora,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: c.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                order.dropoff.line,
-                                style: TaraText.text.copyWith(
-                                  fontSize: 13,
-                                  color: c.textPrimary.withValues(alpha: .78),
+                            ),
+                            if (onCall != null) ...[
+                              const SizedBox(width: 12),
+                              Semantics(
+                                button: true,
+                                label: l.callPerson(name),
+                                excludeSemantics: true,
+                                child: GestureDetector(
+                                  onTap: onCall,
+                                  child: Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: c.textPrimary.withValues(alpha: .08),
+                                      border: Border.all(color: c.textPrimary.withValues(alpha: .14)),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: TaraIcon(TaraIcons.phone, size: 20, color: ok),
+                                  ),
                                 ),
                               ),
                             ],
-                          ),
+                          ],
                         ),
-                        if (onCall != null) ...[
-                          const SizedBox(width: 12),
-                          Semantics(
-                            button: true,
-                            label: l.callPerson(name),
-                            excludeSemantics: true,
-                            child: GestureDetector(
-                              onTap: onCall,
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: c.textPrimary.withValues(alpha: .08),
-                                  border: Border.all(color: c.textPrimary.withValues(alpha: .14)),
-                                ),
-                                alignment: Alignment.center,
-                                child: TaraIcon(TaraIcons.phone, size: 20, color: ok),
+                        AddressHelp(
+                          orderId: order.id,
+                          stop: 'dropoff',
+                          address: order.dropoff,
+                          name: name,
+                          tiles: true,
+                        ),
+                        if (collect != null) ...[const SizedBox(height: 12), collect!],
+                        const SizedBox(height: 12),
+                        PrimaryButton(label: l.arrivedAction, height: 56, strong: true, onPressed: onArrived),
+                        Center(
+                          child: TextButton(
+                            onPressed: onFailure,
+                            child: Text(
+                              l.cantDeliverShort,
+                              style: TaraText.label.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: c.textPrimary.withValues(alpha: .72),
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ],
                     ),
-                    AddressHelp(orderId: order.id, stop: 'dropoff', address: order.dropoff, name: name),
-                    if (collect != null) ...[const SizedBox(height: 12), collect!],
-                    const SizedBox(height: 12),
-                    PrimaryButton(label: l.arrivedAction, height: 56, strong: true, onPressed: onArrived),
-                    Center(
-                      child: TextButton(
-                        onPressed: onFailure,
-                        child: Text(
-                          l.cantDeliverShort,
-                          style: TaraText.label.copyWith(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: c.textPrimary.withValues(alpha: .72),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// « 12 min · 4,1 km · arrivée 15:24 » : à une allure prudente de moto dans Douala.
+class _EtaPill extends StatelessWidget {
+  const _EtaPill({required this.meters, required this.now});
+
+  final double meters;
+  final DateTime now;
+
+  /// Même allure que l'app expéditeur et le serveur (300 m par minute).
+  static const metersPerMinute = 300;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final minutes = (meters / metersPerMinute).ceil().clamp(1, 600);
+    final arrival = now.add(Duration(minutes: minutes));
+    final time = '${arrival.hour.toString().padLeft(2, '0')}:${arrival.minute.toString().padLeft(2, '0')}';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: c.bg.withValues(alpha: .86),
+        border: Border.all(color: c.textPrimary.withValues(alpha: .14)),
+      ),
+      child: Text(
+        l.enRouteEta(minutes, formatDistance(meters.round()), time),
+        style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w800, color: c.textPrimary),
       ),
     );
   }

@@ -56,6 +56,25 @@ abstract final class TaraIcons {
   static const alertTriangle = TaraIconData([_P('M12 4 2.5 20h19zM12 10v4M12 17h.01')]);
   static const trend = TaraIconData([_P('M4.5 20v-6M10 20V10M15.5 20v-4M21 20V6M3 9.5 9 5l5 3.5L20.5 3')]);
   static const bolt = TaraIconData([_P('M13 3 5 13h6l-1 8 8-10h-6z')]);
+
+  /// Scanner un QR : coins du cadre de visée et ligne (maquette Livreur-Enlèvement).
+  static const scan = TaraIconData([
+    _P('M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M7 12h10'),
+  ]);
+
+  /// Taper des chiffres : pavé numérique.
+  static const keypad = TaraIconData([
+    _C(6, 5, 1.2),
+    _C(12, 5, 1.2),
+    _C(18, 5, 1.2),
+    _C(6, 11, 1.2),
+    _C(12, 11, 1.2),
+    _C(18, 11, 1.2),
+    _C(6, 17, 1.2),
+    _C(12, 17, 1.2),
+    _C(18, 17, 1.2),
+    _C(12, 22, 1.2),
+  ]);
   static const calendar = TaraIconData([_P('M3.5 5h17v15h-17zM3.5 10h17M8 3v4M16 3v4')]);
   static const link = TaraIconData([
     _P('M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'),

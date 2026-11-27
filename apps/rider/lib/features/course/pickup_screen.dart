@@ -18,11 +18,13 @@ import '../../core/course/course_actions.dart';
 import '../../core/course/proof_photo.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/error_text.dart';
+import '../common/scoped_page.dart';
 import '../map/tara_map.dart';
 import 'address_help.dart';
 import 'course_page.dart';
 import 'course_scaffold.dart';
 import 'order_chat.dart';
+import 'scan_code_screen.dart';
 
 /// 08 · Enlèvement : itinéraire jusqu'au vendeur, montant à encaisser sur place, code de
 /// l'expéditeur et photo du colis. « Colis récupéré » passe par la file hors connexion.
@@ -75,6 +77,46 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
   String? _error;
   String? _refusedActionId;
 
+  /// Code lu par la caméra (QR de l'expéditeur) ou en train d'être tapé.
+  bool _scanned = false;
+  bool _typing = false;
+
+  /// QR du code d'enlèvement (maquette Scanner) : il doit être celui de cette course (ou d'un
+  /// colis de la tournée) ; le code lu remplit les 4 chiffres.
+  Future<void> _scan() async {
+    final l = AppLocalizations.of(context);
+    final order = widget.order;
+    final orders = widget.isTour ? widget.tour : [order];
+    final shop = order.sender.name ?? order.pickup.contactName ?? order.reference;
+    final numbers = [for (final o in orders) ?o.batchNumber];
+    final code = await Navigator.of(context).push<String>(
+      scopedPage(
+        context,
+        (_) => ScanCodeScreen(
+          references: [for (final o in orders) o.reference],
+          context: numbers.length > 1 ? '$shop · ${l.scanParcels(_list(l, numbers))}' : '$shop · ${order.reference}',
+          parcels: orders.length,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (code == null) {
+      // Retour sans code (ou « Taper les 4 chiffres ») : on tape.
+      if (_code.text.length != 4) setState(() => _typing = true);
+      return;
+    }
+    setState(() {
+      _code.text = code;
+      _scanned = true;
+      _typing = false;
+      _error = null;
+    });
+  }
+
+  static String _list(AppLocalizations l, List<int> numbers) => numbers.length == 1
+      ? '${numbers.single}'
+      : l.listAnd(numbers.take(numbers.length - 1).join(', '), '${numbers.last}');
+
   /// Tournée : colis cochés un à un par le livreur, en les prenant.
   final Set<String> _checked = {};
 
@@ -93,6 +135,8 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
   void initState() {
     super.initState();
     _code.addListener(() => setState(() => _error = null));
+    // Code déjà tapé (écran rouvert après un refus) : les cases restent ouvertes.
+    _typing = _code.text.isNotEmpty;
     if (_arrivedAt != null) _startTick();
     // Enlèvement refusé resté dans la file (écran rouvert) : on reprend où il en était.
     final refused = ref.read(courseActionsProvider).refused(widget.order.id, _pickupKind);
@@ -395,30 +439,20 @@ class _PickupScreenState extends ConsumerState<PickupScreen> {
             ),
           ),
         if (order.pickup.motorbikeRestricted) CourseWarning(l.noMotoAddress),
-        CourseCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l.pickupCodeLabel,
-                      style: TaraText.bodyStrong.copyWith(fontSize: 14, color: c.textPrimary),
-                    ),
-                  ),
-                  Text(
-                    l.pickupCodeHint,
-                    style: TaraText.small.copyWith(fontSize: 12, color: c.textPrimary.withValues(alpha: .66)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              CodeCells(length: 4, controller: _code, cellHeight: 52, autofocus: false, digitLabel: l.digitLabel),
-            ],
-          ),
+        _PickupCodeCard(
+          code: hasCode ? _code.text : null,
+          scanned: _scanned,
+          typing: _typing,
+          controller: _code,
+          onScan: _busy ? null : _scan,
+          onType: _busy ? null : () => setState(() => _typing = true),
+          onChange: _busy
+              ? null
+              : () => setState(() {
+                  _code.clear();
+                  _scanned = false;
+                  _typing = false;
+                }),
         ),
         if (_error != null) ErrorLine(_error!),
         Wrap(
@@ -684,6 +718,157 @@ class _TourChecklist extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Code d'enlèvement (maquette) : « Scanner » le QR de l'expéditeur ou « Taper 4 chiffres » ;
+/// une fois le code là, ses chiffres en vert (« Code vérifié » s'il a été scanné).
+class _PickupCodeCard extends StatelessWidget {
+  const _PickupCodeCard({
+    required this.code,
+    required this.scanned,
+    required this.typing,
+    required this.controller,
+    required this.onScan,
+    required this.onType,
+    required this.onChange,
+  });
+
+  final String? code;
+  final bool scanned;
+  final bool typing;
+  final TextEditingController controller;
+  final VoidCallback? onScan;
+  final VoidCallback? onType;
+  final VoidCallback? onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final ok = c.isDark ? const Color(0xFF4ADE9B) : const Color(0xFF0E7F57);
+    final Widget body;
+    if (code case final value? when !typing || scanned) {
+      body = Row(
+        children: [
+          for (final digit in value.split('')) ...[
+            Container(
+              width: 34,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(74, 222, 155, .14),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color.fromRGBO(74, 222, 155, .4)),
+              ),
+              child: Text(digit, style: TaraText.titlePanel.copyWith(fontSize: 18, color: c.textPrimary)),
+            ),
+            const SizedBox(width: 6),
+          ],
+          const SizedBox(width: 4),
+          TaraIcon(TaraIcons.check, size: 16, strokeWidth: 2.6, color: ok),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              scanned ? l.pickupCodeScanned : l.pickupCodeTyped,
+              style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w800, color: ok),
+            ),
+          ),
+          TextButton(onPressed: onChange, child: Text(l.pickupCodeChange)),
+        ],
+      );
+    } else if (typing) {
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CodeCells(length: 4, controller: controller, cellHeight: 52, digitLabel: l.digitLabel),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: onScan,
+              icon: TaraIcon(TaraIcons.scan, size: 16, color: c.accentText),
+              label: Text(l.pickupScan),
+            ),
+          ),
+        ],
+      );
+    } else {
+      body = Row(
+        children: [
+          Expanded(
+            child: Semantics(
+              button: true,
+              child: Material(
+                color: Colors.transparent,
+                child: Ink(
+                  height: 48,
+                  decoration: BoxDecoration(gradient: TaraBrand.gradient, borderRadius: BorderRadius.circular(14)),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: onScan,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const TaraIcon(TaraIcons.scan, size: 18, color: TaraBrand.onBrand),
+                        const SizedBox(width: 6),
+                        Text(
+                          l.pickupScan,
+                          style: TaraText.label.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: TaraBrand.onBrand,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: onType,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                foregroundColor: c.textPrimary,
+                backgroundColor: c.textPrimary.withValues(alpha: .06),
+                side: BorderSide(color: c.textPrimary.withValues(alpha: .16)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              icon: TaraIcon(TaraIcons.keypad, size: 16, color: c.textPrimary),
+              label: Text(
+                l.pickupTypeDigits,
+                style: TaraText.label.copyWith(fontSize: 13, fontWeight: FontWeight.w800, color: c.textPrimary),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return CourseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Text(l.pickupCodeLabel, style: TaraText.bodyStrong.copyWith(fontSize: 14, color: c.textPrimary)),
+              ),
+              Text(
+                l.pickupCodeHint,
+                style: TaraText.small.copyWith(fontSize: 12, color: c.textPrimary.withValues(alpha: .66)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          body,
         ],
       ),
     );

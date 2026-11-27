@@ -1462,11 +1462,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickupCodeLabel => 'Pickup code';
 
   @override
-  String get pickupCodeDictate => 'Read these 4 digits to the rider when they arrive.';
+  String get pickupCodeDictate => 'Show this QR to the rider or read out the 4 digits. Tap to enlarge.';
 
   @override
   String get pickupCodeHelp =>
-      'Give it to the rider when they collect the parcel. Note it down: it won’t be shown again.';
+      'The rider scans this QR or types the 4 digits when collecting the parcel. Write the code down: it won’t be shown again.';
 
   @override
   String get searchingRider => 'Looking for a rider…';
@@ -2632,7 +2632,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickupCodeHelpBatch =>
-      'The same code for every rider who comes for a parcel. Write it down: it won\'t be shown again.';
+      'The same code for every rider collecting a parcel: they scan this QR or type the 4 digits. Write it down: it won’t be shown again.';
 
   @override
   String get writeNumbersTitle => 'Write its number on each parcel';

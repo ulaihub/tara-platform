@@ -2675,13 +2675,13 @@ abstract class AppLocalizations {
   /// No description provided for @pickupCodeDictate.
   ///
   /// In fr, this message translates to:
-  /// **'Dictez ces 4 chiffres au livreur à son arrivée.'**
+  /// **'Montrez ce QR au livreur ou dictez-lui les 4 chiffres. Touchez pour l’agrandir.'**
   String get pickupCodeDictate;
 
   /// No description provided for @pickupCodeHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez-le au livreur quand il récupère le colis. Notez-le : il ne sera plus affiché.'**
+  /// **'Le livreur scanne ce QR ou tape les 4 chiffres quand il récupère le colis. Notez le code : il ne sera plus affiché.'**
   String get pickupCodeHelp;
 
   /// No description provided for @searchingRider.
@@ -4631,7 +4631,7 @@ abstract class AppLocalizations {
   /// No description provided for @pickupCodeHelpBatch.
   ///
   /// In fr, this message translates to:
-  /// **'Le même code pour chaque livreur qui vient chercher un colis. Notez-le : il ne sera plus affiché.'**
+  /// **'Le même code pour chaque livreur qui vient chercher un colis : il scanne ce QR ou tape les 4 chiffres. Notez-le : il ne sera plus affiché.'**
   String get pickupCodeHelpBatch;
 
   /// No description provided for @writeNumbersTitle.

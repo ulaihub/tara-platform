@@ -2523,4 +2523,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get introSafetyPosition => 'Location shared during the job';
+
+  @override
+  String get scanTitlePickup => 'Pickup code';
+
+  @override
+  String get scanAimPickup => 'Aim at the shop’s pickup code';
+
+  @override
+  String get scanOk => 'Code OK!';
+
+  @override
+  String get scanHelperPickup =>
+      'The shop shows it in its app, on the “Order sent” screen or in tracking. It is not the receipt’s QR code: that one only checks a receipt.';
+
+  @override
+  String get scanTypeDigits => 'Type the 4 digits';
+
+  @override
+  String get scanVerified => 'Pickup code checked';
+
+  @override
+  String scanVerifiedParcels(int count) {
+    return 'Pickup code checked · $count parcels';
+  }
+
+  @override
+  String get scanContinue => 'Continue';
+
+  @override
+  String get scanWrongOrder => 'This QR is another order’s code. Ask for this order’s code.';
+
+  @override
+  String get scanNotTara => 'This is not a Tara pickup code (the receipt QR doesn’t work here).';
+
+  @override
+  String get scanNoCamera => 'Camera unavailable: allow it in the phone settings, or type the 4 digits.';
+
+  @override
+  String get scanTorch => 'Torch';
+
+  @override
+  String scanParcels(String numbers) {
+    return 'parcels no. $numbers';
+  }
+
+  @override
+  String get pickupScan => 'Scan';
+
+  @override
+  String get pickupTypeDigits => 'Type 4 digits';
+
+  @override
+  String get pickupCodeScanned => 'Code checked';
+
+  @override
+  String get pickupCodeTyped => 'Code entered';
+
+  @override
+  String get pickupCodeChange => 'Change';
+
+  @override
+  String listAnd(String first, String last) {
+    return '$first and $last';
+  }
+
+  @override
+  String get addressFacade => 'Front';
+
+  @override
+  String enRouteEta(int minutes, String distance, String time) {
+    return '$minutes min · $distance · arriving $time';
+  }
 }

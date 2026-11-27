@@ -4375,6 +4375,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Position partagée pendant la course'**
   String get introSafetyPosition;
+
+  /// No description provided for @scanTitlePickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d’enlèvement'**
+  String get scanTitlePickup;
+
+  /// No description provided for @scanAimPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visez le code d’enlèvement de la boutique'**
+  String get scanAimPickup;
+
+  /// No description provided for @scanOk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code bon !'**
+  String get scanOk;
+
+  /// No description provided for @scanHelperPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'La boutique l’affiche dans son app, sur l’écran « Commande envoyée » ou dans le suivi. Ce n’est pas le code QR du reçu : celui-là sert seulement à vérifier un reçu.'**
+  String get scanHelperPickup;
+
+  /// No description provided for @scanTypeDigits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taper les 4 chiffres'**
+  String get scanTypeDigits;
+
+  /// No description provided for @scanVerified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d’enlèvement vérifié'**
+  String get scanVerified;
+
+  /// No description provided for @scanVerifiedParcels.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d’enlèvement vérifié · {count} colis'**
+  String scanVerifiedParcels(int count);
+
+  /// No description provided for @scanContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get scanContinue;
+
+  /// No description provided for @scanWrongOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce QR est le code d’une autre course. Demandez celui de cette commande.'**
+  String get scanWrongOrder;
+
+  /// No description provided for @scanNotTara.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce n’est pas un code d’enlèvement Tara (le QR du reçu ne marche pas ici).'**
+  String get scanNotTara;
+
+  /// No description provided for @scanNoCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra indisponible : autorisez-la dans les réglages du téléphone, ou tapez les 4 chiffres.'**
+  String get scanNoCamera;
+
+  /// No description provided for @scanTorch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lampe'**
+  String get scanTorch;
+
+  /// No description provided for @scanParcels.
+  ///
+  /// In fr, this message translates to:
+  /// **'colis n° {numbers}'**
+  String scanParcels(String numbers);
+
+  /// No description provided for @pickupScan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner'**
+  String get pickupScan;
+
+  /// No description provided for @pickupTypeDigits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taper 4 chiffres'**
+  String get pickupTypeDigits;
+
+  /// No description provided for @pickupCodeScanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code vérifié'**
+  String get pickupCodeScanned;
+
+  /// No description provided for @pickupCodeTyped.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code saisi'**
+  String get pickupCodeTyped;
+
+  /// No description provided for @pickupCodeChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer'**
+  String get pickupCodeChange;
+
+  /// No description provided for @listAnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'{first} et {last}'**
+  String listAnd(String first, String last);
+
+  /// No description provided for @addressFacade.
+  ///
+  /// In fr, this message translates to:
+  /// **'Façade'**
+  String get addressFacade;
+
+  /// No description provided for @enRouteEta.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min · {distance} · arrivée {time}'**
+  String enRouteEta(int minutes, String distance, String time);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1823,5 +1823,63 @@
   "introSafetyBody": "Un appui long sur SOS prévient l'équipe Tara et votre proche. Pendant la course, l'équipe voit où vous êtes.",
   "introSafetyTeam": "Équipe Tara prévenue",
   "introSafetyContact": "Votre proche reçoit un SMS",
-  "introSafetyPosition": "Position partagée pendant la course"
+  "introSafetyPosition": "Position partagée pendant la course",
+  "scanTitlePickup": "Code d’enlèvement",
+  "scanAimPickup": "Visez le code d’enlèvement de la boutique",
+  "scanOk": "Code bon !",
+  "scanHelperPickup": "La boutique l’affiche dans son app, sur l’écran « Commande envoyée » ou dans le suivi. Ce n’est pas le code QR du reçu : celui-là sert seulement à vérifier un reçu.",
+  "scanTypeDigits": "Taper les 4 chiffres",
+  "scanVerified": "Code d’enlèvement vérifié",
+  "scanVerifiedParcels": "Code d’enlèvement vérifié · {count} colis",
+  "@scanVerifiedParcels": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanContinue": "Continuer",
+  "scanWrongOrder": "Ce QR est le code d’une autre course. Demandez celui de cette commande.",
+  "scanNotTara": "Ce n’est pas un code d’enlèvement Tara (le QR du reçu ne marche pas ici).",
+  "scanNoCamera": "Caméra indisponible : autorisez-la dans les réglages du téléphone, ou tapez les 4 chiffres.",
+  "scanTorch": "Lampe",
+  "scanParcels": "colis n° {numbers}",
+  "@scanParcels": {
+    "placeholders": {
+      "numbers": {
+        "type": "String"
+      }
+    }
+  },
+  "pickupScan": "Scanner",
+  "pickupTypeDigits": "Taper 4 chiffres",
+  "pickupCodeScanned": "Code vérifié",
+  "pickupCodeTyped": "Code saisi",
+  "pickupCodeChange": "Changer",
+  "listAnd": "{first} et {last}",
+  "@listAnd": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "addressFacade": "Façade",
+  "enRouteEta": "{minutes} min · {distance} · arrivée {time}",
+  "@enRouteEta": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

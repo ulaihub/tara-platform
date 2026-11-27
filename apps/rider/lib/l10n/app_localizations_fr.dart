@@ -2545,4 +2545,77 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get introSafetyPosition => 'Position partagée pendant la course';
+
+  @override
+  String get scanTitlePickup => 'Code d’enlèvement';
+
+  @override
+  String get scanAimPickup => 'Visez le code d’enlèvement de la boutique';
+
+  @override
+  String get scanOk => 'Code bon !';
+
+  @override
+  String get scanHelperPickup =>
+      'La boutique l’affiche dans son app, sur l’écran « Commande envoyée » ou dans le suivi. Ce n’est pas le code QR du reçu : celui-là sert seulement à vérifier un reçu.';
+
+  @override
+  String get scanTypeDigits => 'Taper les 4 chiffres';
+
+  @override
+  String get scanVerified => 'Code d’enlèvement vérifié';
+
+  @override
+  String scanVerifiedParcels(int count) {
+    return 'Code d’enlèvement vérifié · $count colis';
+  }
+
+  @override
+  String get scanContinue => 'Continuer';
+
+  @override
+  String get scanWrongOrder => 'Ce QR est le code d’une autre course. Demandez celui de cette commande.';
+
+  @override
+  String get scanNotTara => 'Ce n’est pas un code d’enlèvement Tara (le QR du reçu ne marche pas ici).';
+
+  @override
+  String get scanNoCamera =>
+      'Caméra indisponible : autorisez-la dans les réglages du téléphone, ou tapez les 4 chiffres.';
+
+  @override
+  String get scanTorch => 'Lampe';
+
+  @override
+  String scanParcels(String numbers) {
+    return 'colis n° $numbers';
+  }
+
+  @override
+  String get pickupScan => 'Scanner';
+
+  @override
+  String get pickupTypeDigits => 'Taper 4 chiffres';
+
+  @override
+  String get pickupCodeScanned => 'Code vérifié';
+
+  @override
+  String get pickupCodeTyped => 'Code saisi';
+
+  @override
+  String get pickupCodeChange => 'Changer';
+
+  @override
+  String listAnd(String first, String last) {
+    return '$first et $last';
+  }
+
+  @override
+  String get addressFacade => 'Façade';
+
+  @override
+  String enRouteEta(int minutes, String distance, String time) {
+    return '$minutes min · $distance · arrivée $time';
+  }
 }
