@@ -2595,4 +2595,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String enRouteEta(int minutes, String distance, String time) {
     return '$minutes min · $distance · arriving $time';
   }
+
+  @override
+  String get returnStepFeesDone => 'Return fees settled';
+
+  @override
+  String get returnStepFeesDoneSub => 'You can hand back the parcel.';
+
+  @override
+  String returnCodeEntered(String code) {
+    return 'Code $code entered';
+  }
+
+  @override
+  String get slideParcelReturned => 'Slide · Parcel returned';
 }

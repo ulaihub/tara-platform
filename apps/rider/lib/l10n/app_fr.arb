@@ -1881,5 +1881,16 @@
         "type": "String"
       }
     }
-  }
+  },
+  "returnStepFeesDone": "Frais de retour réglés",
+  "returnStepFeesDoneSub": "Vous pouvez rendre le colis.",
+  "returnCodeEntered": "Code {code} saisi",
+  "@returnCodeEntered": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "slideParcelReturned": "Glisser · Colis rendu"
 }

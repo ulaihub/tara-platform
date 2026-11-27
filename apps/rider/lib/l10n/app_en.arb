@@ -791,5 +791,9 @@
   "pickupCodeChange": "Change",
   "listAnd": "{first} and {last}",
   "addressFacade": "Front",
-  "enRouteEta": "{minutes} min · {distance} · arriving {time}"
+  "enRouteEta": "{minutes} min · {distance} · arriving {time}",
+  "returnStepFeesDone": "Return fees settled",
+  "returnStepFeesDoneSub": "You can hand back the parcel.",
+  "returnCodeEntered": "Code {code} entered",
+  "slideParcelReturned": "Slide · Parcel returned"
 }
