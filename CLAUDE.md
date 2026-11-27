@@ -1,6 +1,7 @@
 # Tara : consignes pour Claude
 
-Lu au début de chaque conversation. **À la fin de chaque lot, mettre à jour « État et suite »
+Lu au début de chaque conversation. Mémoire du projet : `docs/DECISIONS.md` (règles validées),
+`docs/HISTORIQUE.md` (tout ce qui a été fait, PR par PR), `docs/LOTS_A_VENIR.md` (la suite). **À la fin de chaque lot, mettre à jour « État et suite »
 ci-dessous (et le tableau d'avancement du README) dans la même branche que le lot.**
 Rester court : ce fichier est relu à chaque message.
 
@@ -26,6 +27,8 @@ Rester court : ce fichier est relu à chaque message.
 
 ## Fichiers à tenir à jour (dans la branche du lot qui les concerne)
 
+- `docs/HISTORIQUE.md` + `docs/historique/PR-NNN.md` : à chaque fusion, la ligne et le texte de la PR.
+- `docs/DECISIONS.md` : toute nouvelle décision du porteur (règle, montant, choix d'apparence).
 - `docs/LOTS_A_VENIR.md` : instructions détaillées de chaque lot à venir ; retirer un lot fini,
   ajouter toute nouvelle demande du porteur avec le même niveau de détail.
 - `CLAUDE.md` « État et suite » et le tableau du `README.md` : à chaque lot.
