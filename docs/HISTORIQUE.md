@@ -1,6 +1,6 @@
 # Historique du projet
 
-Chaque demande de fusion (PR) fusionnée, avec son texte complet dans `docs/historique/PR-NNN.md`
+Liste des tâches suivies : [historique/TACHES.md](historique/TACHES.md). Chaque demande de fusion (PR) fusionnée, avec son texte complet dans `docs/historique/PR-NNN.md`
 (ce qui a été fait, pourquoi, vérifications, points restés ouverts). Les règles et décisions
 qui en découlent sont résumées dans [DECISIONS.md](DECISIONS.md) ; les lots à venir dans
 [LOTS_A_VENIR.md](LOTS_A_VENIR.md).
