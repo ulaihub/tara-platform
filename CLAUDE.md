@@ -1,6 +1,7 @@
 # Tara : consignes pour Claude
 
-Lu au début de chaque conversation. **À la fin de chaque lot, mettre à jour « État et suite »
+Lu au début de chaque conversation. Mémoire du projet : `docs/DECISIONS.md` (règles validées),
+`docs/HISTORIQUE.md` (tout ce qui a été fait, PR par PR), `docs/LOTS_A_VENIR.md` (la suite). **À la fin de chaque lot, mettre à jour « État et suite »
 ci-dessous (et le tableau d'avancement du README) dans la même branche que le lot.**
 Rester court : ce fichier est relu à chaque message.
 
@@ -26,6 +27,10 @@ Rester court : ce fichier est relu à chaque message.
 
 ## Fichiers à tenir à jour (dans la branche du lot qui les concerne)
 
+- `docs/HISTORIQUE.md` + `docs/historique/PR-NNN.md` : à chaque fusion, la ligne et le texte de la PR.
+- `docs/DECISIONS.md` : toute nouvelle décision du porteur (règle, montant, choix d'apparence).
+- `docs/LOTS_A_VENIR.md` : instructions détaillées de chaque lot à venir ; retirer un lot fini,
+  ajouter toute nouvelle demande du porteur avec le même niveau de détail.
 - `CLAUDE.md` « État et suite » et le tableau du `README.md` : à chaque lot.
 - `docs/design/maquettes/INVENTAIRE.md` : écrans rendus fidèles, écarts restants.
 - `docs/API.md` (et `apps/api/openapi.json`) : toute route ajoutée ou changée.
@@ -57,7 +62,7 @@ Fait récemment : suivi Livré / Échec / Retour + profil (expéditeur), vraie c
 livraison renvoyable sur les pages web, app livreur lots A (scan QR d'enlèvement, en route) et
 B (livraison impossible, retour), maquettes et outils dans le dépôt.
 
-À faire, dans l'ordre proposé :
+À faire, dans l'ordre proposé (instructions complètes : `docs/LOTS_A_VENIR.md`) :
 
 1. **Retour du colis sans dette** (attend son accord sur 3 points : durée de garde au bureau,
    ce qui se passe après, adresse et horaires du bureau). Proposition : le vendeur paie avant
