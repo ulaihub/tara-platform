@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Livreur · pièces</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #FFB15C)}
+button{font-family:inherit}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes r-radar{0%{transform:scale(.3);opacity:.75}100%{transform:scale(3.2);opacity:0}}@keyframes r-dash{to{stroke-dashoffset:-28}}@keyframes r-blink{0%,100%{opacity:1}50%{opacity:.35}}@keyframes r-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}@keyframes r-turn{to{transform:rotate(360deg)}}@keyframes r-rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes r-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-up{from{transform:translateY(100%)}to{transform:translateY(0%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+<div style="position: absolute; inset: 0; overflow: hidden; pointer-events: none"><span class="tara-anim" style="position: absolute; left: -90px; top: 40px; width: 300px; height: 300px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.38; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out 0s infinite alternate, lq-drift 20s ease-in-out 0s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: 210px; top: 300px; width: 260px; height: 260px; background: radial-gradient(circle at 30% 30%, #FFD27A 0%, #FF8A00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -4s infinite alternate, lq-drift 20s ease-in-out -4s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: -40px; top: 600px; width: 240px; height: 240px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -9s infinite alternate, lq-drift 20s ease-in-out -9s infinite alternate" aria-hidden="true"></span></div>
+<div style="position: relative; padding: 18px 20px 0; display: flex; align-items: center; gap: 10px"><a href="Livreur-Inscription.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 14px; background: rgba(var(--fg-rgb),.07); border: 1px solid rgba(var(--fg-rgb),.12); display: flex; align-items: center; justify-content: center; color: var(--ink); box-sizing: border-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--accent)">ÉTAPE 2 SUR 2 · PIÈCES</span><b style="font-family: Sora, sans-serif; font-size: 18px">Vos pièces justificatives</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.70)">Chaque pièce en photo, bien à plat et lisible</span></span></div>
+<div style="position: absolute; left: 20px; right: 20px; top: 96px; bottom: 20px; display: flex; flex-direction: column; gap: 10px"><span style="display: block; height: 6px; border-radius: 3px; background: rgba(var(--fg-rgb),.10); overflow: hidden"><span class="tara-anim" style="display: block; height: 6px; width: {{progress}}; border-radius: 3px; background: linear-gradient(90deg, #FFB000, #FF6A00, #FF3D00, #FF6A00, #FFB000); background-size: 200% 100%; animation: lq-flow 2.6s linear infinite; transition: width .5s"></span></span><sc-for list="{{docs}}" as="d" hint-placeholder-count="5"><div style="padding: 10px 12px; border-radius: 18px; background: {{d.bg}}; border: 1px solid {{d.border}}; display: flex; align-items: center; gap: 12px"><span style="position: relative; width: 48px; height: 48px; flex-shrink: 0; border-radius: 12px; background: rgba(var(--fg-rgb),.07); overflow: hidden; display: flex; align-items: center; justify-content: center; color: {{d.iconInk}}"><sc-if value="{{d.sending}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; border-radius: 12px; overflow: hidden; pointer-events: none" aria-hidden="true"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; animation: lq-up 2.4s ease-in-out infinite"><span class="tara-anim" style="position: absolute; left: 0; top: -13px; width: 96px; height: 70px; animation: lq-move-r 8s linear infinite"><svg width="96" height="70" viewBox="0 0 96 70" style="display: block"><path d="M0 9.4 L3 9.6 L6 9.0 L9 7.8 L12 6.1 L15 4.2 L18 2.4 L21 1.0 L24 0.2 L27 0.0 L30 0.6 L33 1.8 L36 3.5 L39 5.4 L42 7.2 L45 8.6 L48 9.4 L51 9.6 L54 9.0 L57 7.8 L60 6.1 L63 4.2 L66 2.4 L69 1.0 L72 0.2 L75 0.0 L78 0.6 L81 1.8 L84 3.5 L87 5.4 L90 7.2 L93 8.6 L96 9.4 L96 70 L0 70 Z" style="fill: var(--lq-back, rgba(255,61,0,.5))"></path></svg></span><span class="tara-anim" style="position: absolute; left: 0; top: -4px; width: 96px; height: 70px; animation: lq-move 5s linear infinite"><svg width="96" height="70" viewBox="0 0 96 70" style="display: block"><defs><linearGradient id="lqDoc" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="96"><stop offset="0" stop-color="#FFB000"></stop><stop offset="0.18" stop-color="#FF6A00"></stop><stop offset="0.5" stop-color="#FF3D00"></stop></linearGradient></defs><path d="M0 4.0 L3 5.5 L6 6.8 L9 7.7 L12 8.0 L15 7.7 L18 6.8 L21 5.5 L24 4.0 L27 2.5 L30 1.2 L33 0.3 L36 0.0 L39 0.3 L42 1.2 L45 2.5 L48 4.0 L51 5.5 L54 6.8 L57 7.7 L60 8.0 L63 7.7 L66 6.8 L69 5.5 L72 4.0 L75 2.5 L78 1.2 L81 0.3 L84 0.0 L87 0.3 L90 1.2 L93 2.5 L96 4.0 L96 70 L0 70 Z" fill="url(#lqDoc)"></path></svg></span></span></span></sc-if><span style="position: relative; display: flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="11" r="2"></circle><path d="M14 10h4M14 14h3M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2"></path></svg></span></span><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{d.title}}</b><span style="font-size: 12px; color: {{d.subInk}}">{{d.sub}}</span></span><sc-if value="{{d.hasAction}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{d.act}}" style="min-height: 40px; padding: 0 12px; border-radius: 12px; border: 0; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); color: #140800; font-size: 12px; font-weight: 800; cursor: pointer">{{d.action}}</button></sc-if></div></sc-for><span style="font-size: 12px; line-height: 1.5; color: rgba(var(--fg-rgb),.66)">Vos documents sont chiffrés et vérifiés par l’équipe Tara. Vous êtes prévenu par SMS à la validation.</span><sc-if value="{{pending}}" hint-placeholder-val="{{ false }}"><div class="tara-anim" style="padding: 14px; border-radius: 20px; background: rgba(255,177,92,.12); border: 1px solid rgba(255,177,92,.4); display: flex; flex-direction: column; gap: 6px; animation: r-rise .4s ease-out both"><b style="font-size: 14px">Dossier en cours de vérification</b><span style="font-size: 13px; line-height: 1.45; color: rgba(var(--fg-rgb),.8)">Nous vérifions vos pièces, en général sous 48 h. Vous recevrez un SMS dès que vous pourrez prendre des courses.</span><a href="#" style="font-size: 13px; font-weight: 800">Appeler le support</a></div></sc-if></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "sombre"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { docs: ['ok', 'ok', 'refused', 'todo', 'sending'] };
+  }
+  vals() {
+    const st = this.state.docs;
+    const defs = [['CNI · recto'], ['CNI · verso'], ['Permis de conduire'], ['Carte grise'], ['Selfie avec la CNI']];
+    const docs = defs.map(([title], i) => {
+      const s = st[i];
+      const map = {
+        ok: ['Validée ✓', 'var(--ok)', 'rgba(74,222,155,.08)', 'rgba(74,222,155,.30)', ''],
+        refused: ['Refusée : photo floue, reprenez-la bien à plat', '#FF8A3D', 'rgba(255,138,61,.08)', 'rgba(255,138,61,.45)', 'Reprendre'],
+        todo: ['À envoyer', 'rgba(var(--fg-rgb),.62)', 'rgba(var(--fg-rgb),.05)', 'rgba(var(--fg-rgb),.12)', 'Prendre'],
+        sending: ['Envoi… 2,1 Mo', 'var(--accent)', 'rgba(255,177,92,.08)', 'rgba(255,177,92,.35)', 'Envoyé'],
+        sent: ['Envoyée · en vérification', 'var(--accent)', 'rgba(var(--fg-rgb),.05)', 'rgba(var(--fg-rgb),.12)', ''],
+      }[s];
+      return {
+        title, sub: map[0], subInk: map[1], bg: map[2], border: map[3], action: map[4], hasAction: map[4] !== '',
+        sending: s === 'sending', iconInk: s === 'ok' ? 'var(--ok)' : s === 'refused' ? '#FF8A3D' : 'var(--accent)',
+        act: () => this.setState({ docs: st.map((x, j) => (j === i ? (x === 'sending' ? 'sent' : 'sending') : x)) }),
+      };
+    });
+    const done = st.filter((s) => s === 'ok' || s === 'sent').length;
+    return { docs, progress: `${50 + (done / 5) * 50}%`, pending: done === 5 };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'sombre';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

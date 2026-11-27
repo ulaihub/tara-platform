@@ -1,0 +1,2005 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-19T12:10:00Z"
+ },
+ "title": "Tara · Portefeuille, tableau de bord et présentation",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "1 · Présentation : envoyer",
+   "is_interactive": true
+  },
+  "Presentation-2.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "2 · Présentation : suivre",
+   "is_interactive": true
+  },
+  "Presentation-3.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "3 · Présentation : encaisser",
+   "is_interactive": true
+  },
+  "Presentation-4.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "4 · Présentation : deux comptes",
+   "is_interactive": true
+  },
+  "Portefeuille.dc.html": {
+   "x": 0,
+   "y": 1290,
+   "w": 390,
+   "h": 844,
+   "title": "5 · Portefeuille : les ventes devant",
+   "is_interactive": true
+  },
+  "Portefeuille-Tara.dc.html": {
+   "x": 470,
+   "y": 1290,
+   "w": 390,
+   "h": 844,
+   "title": "6 · Portefeuille : après un glissement"
+  },
+  "Tableau-Boutique.dc.html": {
+   "x": 0,
+   "y": 2580,
+   "w": 390,
+   "h": 844,
+   "title": "7 · Boutique : mon activité",
+   "is_interactive": true
+  },
+  "Tableau-Livreur.dc.html": {
+   "x": 470,
+   "y": 2580,
+   "w": 390,
+   "h": 844,
+   "title": "8 · Livreur : mes gains",
+   "is_interactive": true
+  },
+  "Barre-Menu.dc.html": {
+   "x": 0,
+   "y": 3870,
+   "w": 1330,
+   "h": 820,
+   "title": "9 · Barres de menu et icônes",
+   "is_interactive": true
+  },
+  "Recu.dc.html": {
+   "x": 0,
+   "y": 5160,
+   "w": 390,
+   "h": 844,
+   "title": "10 · Commande envoyée : le reçu",
+   "is_interactive": true
+  },
+  "Recu-Lot.dc.html": {
+   "x": 470,
+   "y": 5160,
+   "w": 390,
+   "h": 844,
+   "title": "11 · Envoi de plusieurs colis : le reçu"
+  },
+  "Accueil.dc.html": {
+   "x": 0,
+   "y": 6450,
+   "w": 390,
+   "h": 844,
+   "title": "12 · Accueil (boutique)",
+   "is_interactive": true
+  },
+  "Commandes.dc.html": {
+   "x": 470,
+   "y": 6450,
+   "w": 390,
+   "h": 844,
+   "title": "13 · Commandes, un reçu par commande",
+   "is_interactive": true
+  },
+  "Profil.dc.html": {
+   "x": 940,
+   "y": 6450,
+   "w": 390,
+   "h": 844,
+   "title": "14 · Profil",
+   "is_interactive": true
+  },
+  "Recevoir.dc.html": {
+   "x": 0,
+   "y": 7740,
+   "w": 390,
+   "h": 844,
+   "title": "15 · Recevoir mes ventes",
+   "is_interactive": true
+  },
+  "Reserve.dc.html": {
+   "x": 470,
+   "y": 7740,
+   "w": 390,
+   "h": 844,
+   "title": "16 · Réserve pour mes livraisons",
+   "is_interactive": true
+  },
+  "Recu-Partage.dc.html": {
+   "x": 0,
+   "y": 9030,
+   "w": 390,
+   "h": 844,
+   "title": "17 · Partager le reçu",
+   "is_interactive": true
+  },
+  "Recu-Imprimable.dc.html": {
+   "x": 470,
+   "y": 9030,
+   "w": 560,
+   "h": 794,
+   "title": "18 · Reçu imprimable (PDF A5)"
+  },
+  "Scanner.dc.html": {
+   "x": 0,
+   "y": 10320,
+   "w": 390,
+   "h": 844,
+   "title": "19 · Livreur : scanner le code d'enlèvement",
+   "is_interactive": true
+  },
+  "Scanner-Livraison.dc.html": {
+   "x": 470,
+   "y": 10320,
+   "w": 390,
+   "h": 844,
+   "title": "20 · Livreur : scanner le code de livraison"
+  },
+  "Plan-Refonte.dc.html": {
+   "x": 2440,
+   "y": 0,
+   "w": 1900,
+   "h": 1380,
+   "title": "Plan de la refonte · toutes les pages",
+   "is_interactive": true
+  },
+  "Univers-3D.dc.html": {
+   "x": 0,
+   "y": 11610,
+   "w": 1330,
+   "h": 940,
+   "title": "21 · L'univers 3D de Tara",
+   "is_interactive": true
+  },
+  "Livreur-Hors-Ligne.dc.html": {
+   "x": 0,
+   "y": 12900,
+   "w": 390,
+   "h": 844,
+   "title": "22 · Livreur : accueil hors ligne",
+   "is_interactive": true
+  },
+  "Livreur-En-Ligne.dc.html": {
+   "x": 470,
+   "y": 12900,
+   "w": 390,
+   "h": 844,
+   "title": "23 · Livreur : en ligne, zones",
+   "is_interactive": true
+  },
+  "Livreur-Proposition.dc.html": {
+   "x": 940,
+   "y": 12900,
+   "w": 390,
+   "h": 844,
+   "title": "24 · Livreur : proposition de course",
+   "is_interactive": true
+  },
+  "Livreur-Proposition-Tournee.dc.html": {
+   "x": 1410,
+   "y": 12900,
+   "w": 390,
+   "h": 844,
+   "title": "25 · Livreur : proposition de tournée"
+  },
+  "Livreur-Enlevement.dc.html": {
+   "x": 1880,
+   "y": 12900,
+   "w": 390,
+   "h": 844,
+   "title": "26 · Livreur : enlèvement",
+   "is_interactive": true
+  },
+  "Livreur-Enlevement-Tournee.dc.html": {
+   "x": 2350,
+   "y": 12900,
+   "w": 390,
+   "h": 844,
+   "title": "27 · Livreur : enlèvement d’une tournée"
+  },
+  "Livreur-En-Route.dc.html": {
+   "x": 0,
+   "y": 14190,
+   "w": 390,
+   "h": 844,
+   "title": "28 · Livreur : en route vers le client",
+   "is_interactive": true
+  },
+  "Livreur-Encaissement.dc.html": {
+   "x": 470,
+   "y": 14190,
+   "w": 390,
+   "h": 844,
+   "title": "29 · Livreur : encaissement",
+   "is_interactive": true
+  },
+  "Livreur-Gain.dc.html": {
+   "x": 940,
+   "y": 14190,
+   "w": 390,
+   "h": 844,
+   "title": "30 · Livreur : gain de la course, célébration"
+  },
+  "Livreur-Noter.dc.html": {
+   "x": 1410,
+   "y": 14190,
+   "w": 390,
+   "h": 844,
+   "title": "31 · Livreur : noter l’expéditeur",
+   "is_interactive": true
+  },
+  "Livreur-Non-Conforme.dc.html": {
+   "x": 0,
+   "y": 15480,
+   "w": 390,
+   "h": 844,
+   "title": "32 · Livreur : colis non conforme",
+   "is_interactive": true
+  },
+  "Livreur-Expediteur-Absent.dc.html": {
+   "x": 470,
+   "y": 15480,
+   "w": 390,
+   "h": 844,
+   "title": "33 · Livreur : l’expéditeur ne vient pas",
+   "is_interactive": true
+  },
+  "Livreur-Echec.dc.html": {
+   "x": 940,
+   "y": 15480,
+   "w": 390,
+   "h": 844,
+   "title": "34 · Livreur : livraison impossible",
+   "is_interactive": true
+  },
+  "Livreur-Retour.dc.html": {
+   "x": 1410,
+   "y": 15480,
+   "w": 390,
+   "h": 844,
+   "title": "35 · Livreur : retour chez le vendeur",
+   "is_interactive": true
+  },
+  "Livreur-Hors-Ligne-Clair.dc.html": {
+   "x": 0,
+   "y": 17070,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : accueil hors ligne",
+   "is_interactive": true
+  },
+  "Livreur-En-Ligne-Clair.dc.html": {
+   "x": 470,
+   "y": 17070,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : en ligne, zones",
+   "is_interactive": true
+  },
+  "Livreur-Proposition-Clair.dc.html": {
+   "x": 940,
+   "y": 17070,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : proposition de course",
+   "is_interactive": true
+  },
+  "Livreur-Proposition-Tournee-Clair.dc.html": {
+   "x": 1410,
+   "y": 17070,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : proposition de tournée",
+   "is_interactive": true
+  },
+  "Livreur-Enlevement-Clair.dc.html": {
+   "x": 1880,
+   "y": 17070,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : enlèvement",
+   "is_interactive": true
+  },
+  "Livreur-Enlevement-Tournee-Clair.dc.html": {
+   "x": 2350,
+   "y": 17070,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : enlèvement d’une tournée",
+   "is_interactive": true
+  },
+  "Livreur-En-Route-Clair.dc.html": {
+   "x": 0,
+   "y": 18360,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : en route vers le client",
+   "is_interactive": true
+  },
+  "Livreur-Encaissement-Clair.dc.html": {
+   "x": 470,
+   "y": 18360,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : encaissement",
+   "is_interactive": true
+  },
+  "Livreur-Gain-Clair.dc.html": {
+   "x": 940,
+   "y": 18360,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : gain de la course",
+   "is_interactive": true
+  },
+  "Livreur-Noter-Clair.dc.html": {
+   "x": 1410,
+   "y": 18360,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : noter l’expéditeur",
+   "is_interactive": true
+  },
+  "Livreur-Non-Conforme-Clair.dc.html": {
+   "x": 0,
+   "y": 19650,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : colis non conforme",
+   "is_interactive": true
+  },
+  "Livreur-Expediteur-Absent-Clair.dc.html": {
+   "x": 470,
+   "y": 19650,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : l’expéditeur ne vient pas",
+   "is_interactive": true
+  },
+  "Livreur-Echec-Clair.dc.html": {
+   "x": 940,
+   "y": 19650,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : livraison impossible",
+   "is_interactive": true
+  },
+  "Livreur-Retour-Clair.dc.html": {
+   "x": 1410,
+   "y": 19650,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : retour chez le vendeur",
+   "is_interactive": true
+  },
+  "Livreur-Connexion.dc.html": {
+   "x": 0,
+   "y": 20940,
+   "w": 390,
+   "h": 844,
+   "title": "36 · Livreur : connexion et code",
+   "is_interactive": true
+  },
+  "Livreur-Connexion-Clair.dc.html": {
+   "x": 0,
+   "y": 23820,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : connexion et code",
+   "is_interactive": true
+  },
+  "Livreur-Conditions.dc.html": {
+   "x": 470,
+   "y": 20940,
+   "w": 390,
+   "h": 844,
+   "title": "37 · Livreur : conditions à accepter",
+   "is_interactive": true
+  },
+  "Livreur-Conditions-Clair.dc.html": {
+   "x": 470,
+   "y": 23820,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : conditions à accepter",
+   "is_interactive": true
+  },
+  "Livreur-Inscription.dc.html": {
+   "x": 940,
+   "y": 20940,
+   "w": 390,
+   "h": 844,
+   "title": "38 · Livreur : profil d’inscription",
+   "is_interactive": true
+  },
+  "Livreur-Inscription-Clair.dc.html": {
+   "x": 940,
+   "y": 23820,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : profil d’inscription",
+   "is_interactive": true
+  },
+  "Livreur-Pieces.dc.html": {
+   "x": 1410,
+   "y": 20940,
+   "w": 390,
+   "h": 844,
+   "title": "39 · Livreur : pièces, pièce refusée",
+   "is_interactive": true
+  },
+  "Livreur-Pieces-Clair.dc.html": {
+   "x": 1410,
+   "y": 23820,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : pièces, pièce refusée",
+   "is_interactive": true
+  },
+  "Livreur-Profil.dc.html": {
+   "x": 1880,
+   "y": 20940,
+   "w": 390,
+   "h": 844,
+   "title": "40 · Livreur : profil, thème, réglages",
+   "is_interactive": true
+  },
+  "Livreur-Profil-Clair.dc.html": {
+   "x": 1880,
+   "y": 23820,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : profil, thème, réglages",
+   "is_interactive": true
+  },
+  "Livreur-Support.dc.html": {
+   "x": 2350,
+   "y": 20940,
+   "w": 390,
+   "h": 844,
+   "title": "41 · Livreur : service client",
+   "is_interactive": true
+  },
+  "Livreur-Support-Clair.dc.html": {
+   "x": 2350,
+   "y": 23820,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : service client",
+   "is_interactive": true
+  },
+  "Livreur-Recharger.dc.html": {
+   "x": 0,
+   "y": 22230,
+   "w": 390,
+   "h": 844,
+   "title": "42 · Livreur : recharger le solde",
+   "is_interactive": true
+  },
+  "Livreur-Recharger-Clair.dc.html": {
+   "x": 0,
+   "y": 25110,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : recharger le solde",
+   "is_interactive": true
+  },
+  "Livreur-Reverser.dc.html": {
+   "x": 470,
+   "y": 22230,
+   "w": 390,
+   "h": 844,
+   "title": "43 · Livreur : reverser les espèces",
+   "is_interactive": true
+  },
+  "Livreur-Reverser-Clair.dc.html": {
+   "x": 470,
+   "y": 25110,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : reverser les espèces",
+   "is_interactive": true
+  },
+  "Livreur-Retirer.dc.html": {
+   "x": 940,
+   "y": 22230,
+   "w": 390,
+   "h": 844,
+   "title": "44 · Livreur : retirer",
+   "is_interactive": true
+  },
+  "Livreur-Retirer-Clair.dc.html": {
+   "x": 940,
+   "y": 25110,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : retirer",
+   "is_interactive": true
+  },
+  "Livreur-SOS.dc.html": {
+   "x": 1410,
+   "y": 22230,
+   "w": 390,
+   "h": 844,
+   "title": "45 · Livreur : SOS",
+   "is_interactive": true
+  },
+  "Livreur-SOS-Clair.dc.html": {
+   "x": 1410,
+   "y": 25110,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : SOS",
+   "is_interactive": true
+  },
+  "Livreur-Actions-Attente.dc.html": {
+   "x": 1880,
+   "y": 22230,
+   "w": 390,
+   "h": 844,
+   "title": "46 · Livreur : actions en attente",
+   "is_interactive": true
+  },
+  "Livreur-Actions-Attente-Clair.dc.html": {
+   "x": 1880,
+   "y": 25110,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : actions en attente",
+   "is_interactive": true
+  },
+  "Livreur-Fermer-Compte.dc.html": {
+   "x": 2350,
+   "y": 22230,
+   "w": 390,
+   "h": 844,
+   "title": "47 · Livreur : fermer mon compte",
+   "is_interactive": true
+  },
+  "Livreur-Fermer-Compte-Clair.dc.html": {
+   "x": 2350,
+   "y": 25110,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · Livreur : fermer mon compte",
+   "is_interactive": true
+  },
+  "Client-Demarrage.dc.html": {
+   "x": 0,
+   "y": 26700,
+   "w": 390,
+   "h": 844,
+   "title": "48 · Expéditeur : écran de démarrage",
+   "is_interactive": true
+  },
+  "Client-Demarrage-Sombre.dc.html": {
+   "x": 0,
+   "y": 29580,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : écran de démarrage",
+   "is_interactive": true
+  },
+  "Client-Connexion.dc.html": {
+   "x": 470,
+   "y": 26700,
+   "w": 390,
+   "h": 844,
+   "title": "49 · Expéditeur : connexion par numéro",
+   "is_interactive": true
+  },
+  "Client-Connexion-Sombre.dc.html": {
+   "x": 470,
+   "y": 29580,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : connexion par numéro",
+   "is_interactive": true
+  },
+  "Client-Code.dc.html": {
+   "x": 940,
+   "y": 26700,
+   "w": 390,
+   "h": 844,
+   "title": "50 · Expéditeur : code reçu",
+   "is_interactive": true
+  },
+  "Client-Code-Sombre.dc.html": {
+   "x": 940,
+   "y": 29580,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : code reçu",
+   "is_interactive": true
+  },
+  "Client-Conditions.dc.html": {
+   "x": 1410,
+   "y": 26700,
+   "w": 390,
+   "h": 844,
+   "title": "51 · Expéditeur : nouvelles conditions",
+   "is_interactive": true
+  },
+  "Client-Conditions-Sombre.dc.html": {
+   "x": 1410,
+   "y": 29580,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : nouvelles conditions",
+   "is_interactive": true
+  },
+  "Client-Bienvenue.dc.html": {
+   "x": 1880,
+   "y": 26700,
+   "w": 390,
+   "h": 844,
+   "title": "52 · Expéditeur : bienvenue : particulier ou boutique",
+   "is_interactive": true
+  },
+  "Client-Bienvenue-Sombre.dc.html": {
+   "x": 1880,
+   "y": 29580,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : bienvenue : particulier ou boutique",
+   "is_interactive": true
+  },
+  "Client-Code-Secret.dc.html": {
+   "x": 2350,
+   "y": 26700,
+   "w": 390,
+   "h": 844,
+   "title": "53 · Expéditeur : code secret et empreinte",
+   "is_interactive": true
+  },
+  "Client-Code-Secret-Sombre.dc.html": {
+   "x": 2350,
+   "y": 29580,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : code secret et empreinte",
+   "is_interactive": true
+  },
+  "Client-Demander-Adresse.dc.html": {
+   "x": 0,
+   "y": 27990,
+   "w": 390,
+   "h": 844,
+   "title": "54 · Expéditeur : demander l’adresse",
+   "is_interactive": true
+  },
+  "Client-Demander-Adresse-Sombre.dc.html": {
+   "x": 0,
+   "y": 30870,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : demander l’adresse",
+   "is_interactive": true
+  },
+  "Client-NL-Enlevement.dc.html": {
+   "x": 470,
+   "y": 27990,
+   "w": 390,
+   "h": 844,
+   "title": "55 · Expéditeur : nouvelle livraison · enlèvement",
+   "is_interactive": true
+  },
+  "Client-NL-Enlevement-Sombre.dc.html": {
+   "x": 470,
+   "y": 30870,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : nouvelle livraison · enlèvement",
+   "is_interactive": true
+  },
+  "Client-NL-Destinataire.dc.html": {
+   "x": 940,
+   "y": 27990,
+   "w": 390,
+   "h": 844,
+   "title": "56 · Expéditeur : nouvelle livraison · destinataire",
+   "is_interactive": true
+  },
+  "Client-NL-Destinataire-Sombre.dc.html": {
+   "x": 940,
+   "y": 30870,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : nouvelle livraison · destinataire",
+   "is_interactive": true
+  },
+  "Client-NL-Carte.dc.html": {
+   "x": 1410,
+   "y": 27990,
+   "w": 390,
+   "h": 844,
+   "title": "57 · Expéditeur : adresse sur la carte",
+   "is_interactive": true
+  },
+  "Client-NL-Carte-Sombre.dc.html": {
+   "x": 1410,
+   "y": 30870,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : adresse sur la carte",
+   "is_interactive": true
+  },
+  "Client-NL-Colis.dc.html": {
+   "x": 1880,
+   "y": 27990,
+   "w": 390,
+   "h": 844,
+   "title": "58 · Expéditeur : nouvelle livraison · colis",
+   "is_interactive": true
+  },
+  "Client-NL-Colis-Sombre.dc.html": {
+   "x": 1880,
+   "y": 30870,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : nouvelle livraison · colis",
+   "is_interactive": true
+  },
+  "Client-NL-Quand.dc.html": {
+   "x": 2350,
+   "y": 27990,
+   "w": 390,
+   "h": 844,
+   "title": "59 · Expéditeur : nouvelle livraison · quand",
+   "is_interactive": true
+  },
+  "Client-NL-Quand-Sombre.dc.html": {
+   "x": 2350,
+   "y": 30870,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : nouvelle livraison · quand",
+   "is_interactive": true
+  },
+  "Client-NL-Recap.dc.html": {
+   "x": 2820,
+   "y": 27990,
+   "w": 390,
+   "h": 844,
+   "title": "60 · Expéditeur : récapitulatif et paiement",
+   "is_interactive": true
+  },
+  "Client-NL-Recap-Sombre.dc.html": {
+   "x": 2820,
+   "y": 30870,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : récapitulatif et paiement",
+   "is_interactive": true
+  },
+  "Client-Liste-Envoi.dc.html": {
+   "x": 0,
+   "y": 32460,
+   "w": 390,
+   "h": 844,
+   "title": "61 · Expéditeur : liste d’envoi",
+   "is_interactive": true
+  },
+  "Client-Liste-Envoi-Sombre.dc.html": {
+   "x": 0,
+   "y": 35340,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : liste d’envoi",
+   "is_interactive": true
+  },
+  "Client-Coller-Liste.dc.html": {
+   "x": 470,
+   "y": 32460,
+   "w": 390,
+   "h": 844,
+   "title": "62 · Expéditeur : coller une liste",
+   "is_interactive": true
+  },
+  "Client-Coller-Liste-Sombre.dc.html": {
+   "x": 470,
+   "y": 35340,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : coller une liste",
+   "is_interactive": true
+  },
+  "Client-Contacts.dc.html": {
+   "x": 940,
+   "y": 32460,
+   "w": 390,
+   "h": 844,
+   "title": "63 · Expéditeur : choisir des clients",
+   "is_interactive": true
+  },
+  "Client-Contacts-Sombre.dc.html": {
+   "x": 940,
+   "y": 35340,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : choisir des clients",
+   "is_interactive": true
+  },
+  "Client-Verifier-Envoyer.dc.html": {
+   "x": 1410,
+   "y": 32460,
+   "w": 390,
+   "h": 844,
+   "title": "64 · Expéditeur : vérifier et envoyer",
+   "is_interactive": true
+  },
+  "Client-Verifier-Envoyer-Sombre.dc.html": {
+   "x": 1410,
+   "y": 35340,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : vérifier et envoyer",
+   "is_interactive": true
+  },
+  "Client-Colis-Attente.dc.html": {
+   "x": 1880,
+   "y": 32460,
+   "w": 390,
+   "h": 844,
+   "title": "65 · Expéditeur : colis en attente d’adresse",
+   "is_interactive": true
+  },
+  "Client-Colis-Attente-Sombre.dc.html": {
+   "x": 1880,
+   "y": 35340,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : colis en attente d’adresse",
+   "is_interactive": true
+  },
+  "Client-Suivi.dc.html": {
+   "x": 0,
+   "y": 33750,
+   "w": 390,
+   "h": 844,
+   "title": "66 · Expéditeur : suivi : livreur, en route",
+   "is_interactive": true
+  },
+  "Client-Suivi-Sombre.dc.html": {
+   "x": 0,
+   "y": 36630,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : suivi : livreur, en route",
+   "is_interactive": true
+  },
+  "Client-Suivi-Livre.dc.html": {
+   "x": 470,
+   "y": 33750,
+   "w": 390,
+   "h": 844,
+   "title": "67 · Expéditeur : suivi : livré, noter",
+   "is_interactive": true
+  },
+  "Client-Suivi-Livre-Sombre.dc.html": {
+   "x": 470,
+   "y": 36630,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : suivi : livré, noter",
+   "is_interactive": true
+  },
+  "Client-Suivi-Echec.dc.html": {
+   "x": 940,
+   "y": 33750,
+   "w": 390,
+   "h": 844,
+   "title": "68 · Expéditeur : suivi : livraison impossible",
+   "is_interactive": true
+  },
+  "Client-Suivi-Echec-Sombre.dc.html": {
+   "x": 940,
+   "y": 36630,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : suivi : livraison impossible",
+   "is_interactive": true
+  },
+  "Client-Suivi-Retour.dc.html": {
+   "x": 1410,
+   "y": 33750,
+   "w": 390,
+   "h": 844,
+   "title": "69 · Expéditeur : suivi : retour du colis",
+   "is_interactive": true
+  },
+  "Client-Suivi-Retour-Sombre.dc.html": {
+   "x": 1410,
+   "y": 36630,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : suivi : retour du colis",
+   "is_interactive": true
+  },
+  "Client-Paiement-Attente.dc.html": {
+   "x": 1880,
+   "y": 33750,
+   "w": 390,
+   "h": 844,
+   "title": "70 · Expéditeur : paiement Mobile Money en attente",
+   "is_interactive": true
+  },
+  "Client-Paiement-Attente-Sombre.dc.html": {
+   "x": 1880,
+   "y": 36630,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : paiement Mobile Money en attente",
+   "is_interactive": true
+  },
+  "Client-Recharger.dc.html": {
+   "x": 0,
+   "y": 37920,
+   "w": 390,
+   "h": 844,
+   "title": "71 · Expéditeur : recharger le Solde Tara",
+   "is_interactive": true
+  },
+  "Client-Recharger-Sombre.dc.html": {
+   "x": 0,
+   "y": 40800,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : recharger le Solde Tara",
+   "is_interactive": true
+  },
+  "Client-Retirer.dc.html": {
+   "x": 470,
+   "y": 37920,
+   "w": 390,
+   "h": 844,
+   "title": "72 · Expéditeur : retirer le Solde Tara",
+   "is_interactive": true
+  },
+  "Client-Retirer-Sombre.dc.html": {
+   "x": 470,
+   "y": 40800,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : retirer le Solde Tara",
+   "is_interactive": true
+  },
+  "Client-Releves.dc.html": {
+   "x": 940,
+   "y": 37920,
+   "w": 390,
+   "h": 844,
+   "title": "73 · Expéditeur : relevés du mois",
+   "is_interactive": true
+  },
+  "Client-Releves-Sombre.dc.html": {
+   "x": 940,
+   "y": 40800,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : relevés du mois",
+   "is_interactive": true
+  },
+  "Client-Adresses.dc.html": {
+   "x": 1410,
+   "y": 37920,
+   "w": 390,
+   "h": 844,
+   "title": "74 · Expéditeur : mes adresses",
+   "is_interactive": true
+  },
+  "Client-Adresses-Sombre.dc.html": {
+   "x": 1410,
+   "y": 40800,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : mes adresses",
+   "is_interactive": true
+  },
+  "Client-Reglages.dc.html": {
+   "x": 1880,
+   "y": 37920,
+   "w": 390,
+   "h": 844,
+   "title": "75 · Expéditeur : sécurité, affichage, langue",
+   "is_interactive": true
+  },
+  "Client-Reglages-Sombre.dc.html": {
+   "x": 1880,
+   "y": 40800,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : sécurité, affichage, langue",
+   "is_interactive": true
+  },
+  "Client-Notifications.dc.html": {
+   "x": 0,
+   "y": 39210,
+   "w": 390,
+   "h": 844,
+   "title": "76 · Expéditeur : notifications",
+   "is_interactive": true
+  },
+  "Client-Notifications-Sombre.dc.html": {
+   "x": 0,
+   "y": 42090,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : notifications",
+   "is_interactive": true
+  },
+  "Client-Support.dc.html": {
+   "x": 470,
+   "y": 39210,
+   "w": 390,
+   "h": 844,
+   "title": "77 · Expéditeur : service client",
+   "is_interactive": true
+  },
+  "Client-Support-Sombre.dc.html": {
+   "x": 470,
+   "y": 42090,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : service client",
+   "is_interactive": true
+  },
+  "Client-Supprimer-Compte.dc.html": {
+   "x": 940,
+   "y": 39210,
+   "w": 390,
+   "h": 844,
+   "title": "78 · Expéditeur : mon compte et mes données",
+   "is_interactive": true
+  },
+  "Client-Supprimer-Compte-Sombre.dc.html": {
+   "x": 940,
+   "y": 42090,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : mon compte et mes données",
+   "is_interactive": true
+  },
+  "Client-Textes-Legaux.dc.html": {
+   "x": 1410,
+   "y": 39210,
+   "w": 390,
+   "h": 844,
+   "title": "79 · Expéditeur : textes légaux",
+   "is_interactive": true
+  },
+  "Client-Textes-Legaux-Sombre.dc.html": {
+   "x": 1410,
+   "y": 42090,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : textes légaux",
+   "is_interactive": true
+  },
+  "Client-Hors-Connexion.dc.html": {
+   "x": 1880,
+   "y": 39210,
+   "w": 390,
+   "h": 844,
+   "title": "80 · Expéditeur : hors connexion",
+   "is_interactive": true
+  },
+  "Client-Hors-Connexion-Sombre.dc.html": {
+   "x": 1880,
+   "y": 42090,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Expéditeur : hors connexion",
+   "is_interactive": true
+  },
+  "Web-Suivi.dc.html": {
+   "x": 0,
+   "y": 43600,
+   "w": 390,
+   "h": 844,
+   "title": "81 · Web : suivi du destinataire",
+   "is_interactive": true
+  },
+  "Web-Suivi-Sombre.dc.html": {
+   "x": 1410,
+   "y": 43600,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Web : suivi du destinataire",
+   "is_interactive": true
+  },
+  "Web-Point.dc.html": {
+   "x": 470,
+   "y": 43600,
+   "w": 390,
+   "h": 844,
+   "title": "82 · Web : placer son point",
+   "is_interactive": true
+  },
+  "Web-Point-Sombre.dc.html": {
+   "x": 1880,
+   "y": 43600,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Web : placer son point",
+   "is_interactive": true
+  },
+  "Web-Verifier-Recu.dc.html": {
+   "x": 940,
+   "y": 43600,
+   "w": 390,
+   "h": 844,
+   "title": "83 · Web : vérifier un reçu",
+   "is_interactive": true
+  },
+  "Web-Verifier-Recu-Sombre.dc.html": {
+   "x": 2350,
+   "y": 43600,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · Web : vérifier un reçu",
+   "is_interactive": true
+  },
+  "BO-Connexion.dc.html": {
+   "x": 0,
+   "y": 45200,
+   "w": 1440,
+   "h": 900,
+   "title": "84 · Back-office : connexion, double authentification",
+   "is_interactive": true
+  },
+  "BO-Connexion-Sombre.dc.html": {
+   "x": 1520,
+   "y": 45200,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : connexion, double authentification",
+   "is_interactive": true
+  },
+  "BO-Accueil.dc.html": {
+   "x": 3040,
+   "y": 45200,
+   "w": 1440,
+   "h": 900,
+   "title": "85 · Back-office : accueil de l’équipe",
+   "is_interactive": true
+  },
+  "BO-Accueil-Sombre.dc.html": {
+   "x": 4560,
+   "y": 45200,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : accueil de l’équipe",
+   "is_interactive": true
+  },
+  "BO-Carte.dc.html": {
+   "x": 0,
+   "y": 46400,
+   "w": 1440,
+   "h": 900,
+   "title": "86 · Back-office : carte en direct et alertes",
+   "is_interactive": true
+  },
+  "BO-Carte-Sombre.dc.html": {
+   "x": 1520,
+   "y": 46400,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : carte en direct et alertes",
+   "is_interactive": true
+  },
+  "BO-Commandes.dc.html": {
+   "x": 3040,
+   "y": 46400,
+   "w": 1440,
+   "h": 900,
+   "title": "87 · Back-office : commandes",
+   "is_interactive": true
+  },
+  "BO-Commandes-Sombre.dc.html": {
+   "x": 4560,
+   "y": 46400,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : commandes",
+   "is_interactive": true
+  },
+  "BO-Livreurs.dc.html": {
+   "x": 0,
+   "y": 47600,
+   "w": 1440,
+   "h": 900,
+   "title": "88 · Back-office : livreurs",
+   "is_interactive": true
+  },
+  "BO-Livreurs-Sombre.dc.html": {
+   "x": 1520,
+   "y": 47600,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : livreurs",
+   "is_interactive": true
+  },
+  "BO-Boutiques.dc.html": {
+   "x": 3040,
+   "y": 47600,
+   "w": 1440,
+   "h": 900,
+   "title": "89 · Back-office : boutiques",
+   "is_interactive": true
+  },
+  "BO-Boutiques-Sombre.dc.html": {
+   "x": 4560,
+   "y": 47600,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : boutiques",
+   "is_interactive": true
+  },
+  "BO-Tarifs.dc.html": {
+   "x": 0,
+   "y": 48800,
+   "w": 1440,
+   "h": 900,
+   "title": "90 · Back-office : tarifs, promotions, zones",
+   "is_interactive": true
+  },
+  "BO-Tarifs-Sombre.dc.html": {
+   "x": 1520,
+   "y": 48800,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : tarifs, promotions, zones",
+   "is_interactive": true
+  },
+  "BO-Finance.dc.html": {
+   "x": 3040,
+   "y": 48800,
+   "w": 1440,
+   "h": 900,
+   "title": "91 · Back-office : finance et reversements",
+   "is_interactive": true
+  },
+  "BO-Finance-Sombre.dc.html": {
+   "x": 4560,
+   "y": 48800,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : finance et reversements",
+   "is_interactive": true
+  },
+  "BO-Controle.dc.html": {
+   "x": 0,
+   "y": 50000,
+   "w": 1440,
+   "h": 900,
+   "title": "92 · Back-office : contrôle des comptes",
+   "is_interactive": true
+  },
+  "BO-Controle-Sombre.dc.html": {
+   "x": 1520,
+   "y": 50000,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : contrôle des comptes",
+   "is_interactive": true
+  },
+  "BO-Support.dc.html": {
+   "x": 3040,
+   "y": 50000,
+   "w": 1440,
+   "h": 900,
+   "title": "93 · Back-office : support",
+   "is_interactive": true
+  },
+  "BO-Support-Sombre.dc.html": {
+   "x": 4560,
+   "y": 50000,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : support",
+   "is_interactive": true
+  },
+  "BO-Indicateurs.dc.html": {
+   "x": 0,
+   "y": 51200,
+   "w": 1440,
+   "h": 900,
+   "title": "94 · Back-office : indicateurs",
+   "is_interactive": true
+  },
+  "BO-Indicateurs-Sombre.dc.html": {
+   "x": 1520,
+   "y": 51200,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : indicateurs",
+   "is_interactive": true
+  },
+  "BO-Equipe.dc.html": {
+   "x": 3040,
+   "y": 51200,
+   "w": 1440,
+   "h": 900,
+   "title": "95 · Back-office : équipe et journal",
+   "is_interactive": true
+  },
+  "BO-Equipe-Sombre.dc.html": {
+   "x": 4560,
+   "y": 51200,
+   "w": 1440,
+   "h": 900,
+   "title": "Sombre · Back-office : équipe et journal",
+   "is_interactive": true
+  },
+  "Main-Clair.dc.html": {
+   "x": 0,
+   "y": 52700,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · 1 · Présentation : envoyer",
+   "is_interactive": true
+  },
+  "Presentation-2-Clair.dc.html": {
+   "x": 470,
+   "y": 52700,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · 2 · Présentation : suivre",
+   "is_interactive": true
+  },
+  "Presentation-3-Clair.dc.html": {
+   "x": 940,
+   "y": 52700,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · 3 · Présentation : encaisser",
+   "is_interactive": true
+  },
+  "Presentation-4-Clair.dc.html": {
+   "x": 1410,
+   "y": 52700,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · 4 · Présentation : deux comptes",
+   "is_interactive": true
+  },
+  "Portefeuille-Sombre.dc.html": {
+   "x": 1880,
+   "y": 52700,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 5 · Portefeuille : les ventes devant",
+   "is_interactive": true
+  },
+  "Portefeuille-Tara-Sombre.dc.html": {
+   "x": 2350,
+   "y": 52700,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 6 · Portefeuille : après un glissement",
+   "is_interactive": true
+  },
+  "Tableau-Boutique-Sombre.dc.html": {
+   "x": 0,
+   "y": 53990,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 7 · Boutique : mon activité",
+   "is_interactive": true
+  },
+  "Tableau-Livreur-Clair.dc.html": {
+   "x": 470,
+   "y": 53990,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · 8 · Livreur : mes gains",
+   "is_interactive": true
+  },
+  "Recu-Sombre.dc.html": {
+   "x": 940,
+   "y": 53990,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 10 · Commande envoyée : le reçu",
+   "is_interactive": true
+  },
+  "Recu-Lot-Sombre.dc.html": {
+   "x": 1410,
+   "y": 53990,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 11 · Envoi de plusieurs colis : le reçu",
+   "is_interactive": true
+  },
+  "Accueil-Sombre.dc.html": {
+   "x": 1880,
+   "y": 53990,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 12 · Accueil (boutique)",
+   "is_interactive": true
+  },
+  "Commandes-Sombre.dc.html": {
+   "x": 2350,
+   "y": 53990,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 13 · Commandes, un reçu par commande",
+   "is_interactive": true
+  },
+  "Profil-Sombre.dc.html": {
+   "x": 0,
+   "y": 55280,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 14 · Profil",
+   "is_interactive": true
+  },
+  "Recevoir-Sombre.dc.html": {
+   "x": 470,
+   "y": 55280,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 15 · Recevoir mes ventes",
+   "is_interactive": true
+  },
+  "Reserve-Sombre.dc.html": {
+   "x": 940,
+   "y": 55280,
+   "w": 390,
+   "h": 844,
+   "title": "Sombre · 16 · Réserve pour mes livraisons",
+   "is_interactive": true
+  },
+  "Recu-Partage-Clair.dc.html": {
+   "x": 1410,
+   "y": 55280,
+   "w": 390,
+   "h": 844,
+   "title": "Clair · 17 · Partager le reçu",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Presentation-2.dc.html",
+  "Presentation-3.dc.html",
+  "Presentation-4.dc.html",
+  "Portefeuille.dc.html",
+  "Portefeuille-Tara.dc.html",
+  "Tableau-Boutique.dc.html",
+  "Tableau-Livreur.dc.html",
+  "Barre-Menu.dc.html",
+  "Recu.dc.html",
+  "Recu-Lot.dc.html",
+  "Accueil.dc.html",
+  "Commandes.dc.html",
+  "Profil.dc.html",
+  "Recevoir.dc.html",
+  "Reserve.dc.html",
+  "Recu-Partage.dc.html",
+  "Recu-Imprimable.dc.html",
+  "Scanner.dc.html",
+  "Scanner-Livraison.dc.html",
+  "Univers-3D.dc.html",
+  "Livreur-Hors-Ligne.dc.html",
+  "Livreur-En-Ligne.dc.html",
+  "Livreur-Proposition.dc.html",
+  "Livreur-Proposition-Tournee.dc.html",
+  "Livreur-Enlevement.dc.html",
+  "Livreur-Enlevement-Tournee.dc.html",
+  "Livreur-En-Route.dc.html",
+  "Livreur-Encaissement.dc.html",
+  "Livreur-Gain.dc.html",
+  "Livreur-Noter.dc.html",
+  "Livreur-Non-Conforme.dc.html",
+  "Livreur-Expediteur-Absent.dc.html",
+  "Livreur-Echec.dc.html",
+  "Livreur-Retour.dc.html",
+  "Livreur-Hors-Ligne-Clair.dc.html",
+  "Livreur-En-Ligne-Clair.dc.html",
+  "Livreur-Proposition-Clair.dc.html",
+  "Livreur-Proposition-Tournee-Clair.dc.html",
+  "Livreur-Enlevement-Clair.dc.html",
+  "Livreur-Enlevement-Tournee-Clair.dc.html",
+  "Livreur-En-Route-Clair.dc.html",
+  "Livreur-Encaissement-Clair.dc.html",
+  "Livreur-Gain-Clair.dc.html",
+  "Livreur-Noter-Clair.dc.html",
+  "Livreur-Non-Conforme-Clair.dc.html",
+  "Livreur-Expediteur-Absent-Clair.dc.html",
+  "Livreur-Echec-Clair.dc.html",
+  "Livreur-Retour-Clair.dc.html",
+  "Livreur-Connexion.dc.html",
+  "Livreur-Connexion-Clair.dc.html",
+  "Livreur-Conditions.dc.html",
+  "Livreur-Conditions-Clair.dc.html",
+  "Livreur-Inscription.dc.html",
+  "Livreur-Inscription-Clair.dc.html",
+  "Livreur-Pieces.dc.html",
+  "Livreur-Pieces-Clair.dc.html",
+  "Livreur-Profil.dc.html",
+  "Livreur-Profil-Clair.dc.html",
+  "Livreur-Support.dc.html",
+  "Livreur-Support-Clair.dc.html",
+  "Livreur-Recharger.dc.html",
+  "Livreur-Recharger-Clair.dc.html",
+  "Livreur-Reverser.dc.html",
+  "Livreur-Reverser-Clair.dc.html",
+  "Livreur-Retirer.dc.html",
+  "Livreur-Retirer-Clair.dc.html",
+  "Livreur-SOS.dc.html",
+  "Livreur-SOS-Clair.dc.html",
+  "Livreur-Actions-Attente.dc.html",
+  "Livreur-Actions-Attente-Clair.dc.html",
+  "Livreur-Fermer-Compte.dc.html",
+  "Livreur-Fermer-Compte-Clair.dc.html",
+  "Client-Demarrage.dc.html",
+  "Client-Demarrage-Sombre.dc.html",
+  "Client-Connexion.dc.html",
+  "Client-Connexion-Sombre.dc.html",
+  "Client-Code.dc.html",
+  "Client-Code-Sombre.dc.html",
+  "Client-Conditions.dc.html",
+  "Client-Conditions-Sombre.dc.html",
+  "Client-Bienvenue.dc.html",
+  "Client-Bienvenue-Sombre.dc.html",
+  "Client-Code-Secret.dc.html",
+  "Client-Code-Secret-Sombre.dc.html",
+  "Client-Demander-Adresse.dc.html",
+  "Client-Demander-Adresse-Sombre.dc.html",
+  "Client-NL-Enlevement.dc.html",
+  "Client-NL-Enlevement-Sombre.dc.html",
+  "Client-NL-Destinataire.dc.html",
+  "Client-NL-Destinataire-Sombre.dc.html",
+  "Client-NL-Carte.dc.html",
+  "Client-NL-Carte-Sombre.dc.html",
+  "Client-NL-Colis.dc.html",
+  "Client-NL-Colis-Sombre.dc.html",
+  "Client-NL-Quand.dc.html",
+  "Client-NL-Quand-Sombre.dc.html",
+  "Client-NL-Recap.dc.html",
+  "Client-NL-Recap-Sombre.dc.html",
+  "Client-Liste-Envoi.dc.html",
+  "Client-Liste-Envoi-Sombre.dc.html",
+  "Client-Coller-Liste.dc.html",
+  "Client-Coller-Liste-Sombre.dc.html",
+  "Client-Contacts.dc.html",
+  "Client-Contacts-Sombre.dc.html",
+  "Client-Verifier-Envoyer.dc.html",
+  "Client-Verifier-Envoyer-Sombre.dc.html",
+  "Client-Colis-Attente.dc.html",
+  "Client-Colis-Attente-Sombre.dc.html",
+  "Client-Suivi.dc.html",
+  "Client-Suivi-Sombre.dc.html",
+  "Client-Suivi-Livre.dc.html",
+  "Client-Suivi-Livre-Sombre.dc.html",
+  "Client-Suivi-Echec.dc.html",
+  "Client-Suivi-Echec-Sombre.dc.html",
+  "Client-Suivi-Retour.dc.html",
+  "Client-Suivi-Retour-Sombre.dc.html",
+  "Client-Paiement-Attente.dc.html",
+  "Client-Paiement-Attente-Sombre.dc.html",
+  "Client-Recharger.dc.html",
+  "Client-Recharger-Sombre.dc.html",
+  "Client-Retirer.dc.html",
+  "Client-Retirer-Sombre.dc.html",
+  "Client-Releves.dc.html",
+  "Client-Releves-Sombre.dc.html",
+  "Client-Adresses.dc.html",
+  "Client-Adresses-Sombre.dc.html",
+  "Client-Reglages.dc.html",
+  "Client-Reglages-Sombre.dc.html",
+  "Client-Notifications.dc.html",
+  "Client-Notifications-Sombre.dc.html",
+  "Client-Support.dc.html",
+  "Client-Support-Sombre.dc.html",
+  "Client-Supprimer-Compte.dc.html",
+  "Client-Supprimer-Compte-Sombre.dc.html",
+  "Client-Textes-Legaux.dc.html",
+  "Client-Textes-Legaux-Sombre.dc.html",
+  "Client-Hors-Connexion.dc.html",
+  "Client-Hors-Connexion-Sombre.dc.html",
+  "Web-Suivi.dc.html",
+  "Web-Suivi-Sombre.dc.html",
+  "Web-Point.dc.html",
+  "Web-Point-Sombre.dc.html",
+  "Web-Verifier-Recu.dc.html",
+  "Web-Verifier-Recu-Sombre.dc.html",
+  "BO-Connexion.dc.html",
+  "BO-Connexion-Sombre.dc.html",
+  "BO-Accueil.dc.html",
+  "BO-Accueil-Sombre.dc.html",
+  "BO-Carte.dc.html",
+  "BO-Carte-Sombre.dc.html",
+  "BO-Commandes.dc.html",
+  "BO-Commandes-Sombre.dc.html",
+  "BO-Livreurs.dc.html",
+  "BO-Livreurs-Sombre.dc.html",
+  "BO-Boutiques.dc.html",
+  "BO-Boutiques-Sombre.dc.html",
+  "BO-Tarifs.dc.html",
+  "BO-Tarifs-Sombre.dc.html",
+  "BO-Finance.dc.html",
+  "BO-Finance-Sombre.dc.html",
+  "BO-Controle.dc.html",
+  "BO-Controle-Sombre.dc.html",
+  "BO-Support.dc.html",
+  "BO-Support-Sombre.dc.html",
+  "BO-Indicateurs.dc.html",
+  "BO-Indicateurs-Sombre.dc.html",
+  "BO-Equipe.dc.html",
+  "BO-Equipe-Sombre.dc.html",
+  "Main-Clair.dc.html",
+  "Presentation-2-Clair.dc.html",
+  "Presentation-3-Clair.dc.html",
+  "Presentation-4-Clair.dc.html",
+  "Portefeuille-Sombre.dc.html",
+  "Portefeuille-Tara-Sombre.dc.html",
+  "Tableau-Boutique-Sombre.dc.html",
+  "Tableau-Livreur-Clair.dc.html",
+  "Recu-Sombre.dc.html",
+  "Recu-Lot-Sombre.dc.html",
+  "Accueil-Sombre.dc.html",
+  "Commandes-Sombre.dc.html",
+  "Profil-Sombre.dc.html",
+  "Recevoir-Sombre.dc.html",
+  "Reserve-Sombre.dc.html",
+  "Recu-Partage-Clair.dc.html",
+  "Plan-Refonte.dc.html"
+ ],
+ "notes": {
+  "titrePresentation": {
+   "x": 0,
+   "y": -300,
+   "text": "Présentation au premier lancement · une animation par écran",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titrePortefeuille": {
+   "x": 0,
+   "y": 990,
+   "text": "Portefeuille · deux comptes, des cartes qui glissent",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titreTableau": {
+   "x": 0,
+   "y": 2280,
+   "text": "Tableaux de bord animés",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titreMenu": {
+   "x": 0,
+   "y": 3570,
+   "text": "Barres de menu affinées",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titreRecu": {
+   "x": 0,
+   "y": 4860,
+   "text": "Commande envoyée · un reçu qui s'imprime",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titreOnglets": {
+   "x": 0,
+   "y": 6150,
+   "text": "Refonte des onglets · Accueil, Commandes, Profil",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titreArgent": {
+   "x": 0,
+   "y": 7440,
+   "text": "Recevoir et réserve · taper, glisser, c'est envoyé",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titrePartage": {
+   "x": 0,
+   "y": 8730,
+   "text": "Le reçu · partager, télécharger, imprimer",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titreScanner": {
+   "x": 0,
+   "y": 10020,
+   "text": "Codes à scanner · enlèvement et livraison",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "titrePlan": {
+   "x": 2440,
+   "y": -300,
+   "text": "Plan de la refonte",
+   "kind": "title1",
+   "maxW": 1900
+  },
+  "scanner": {
+   "x": 940,
+   "y": 10320,
+   "w": 420,
+   "size": "m",
+   "fill": "orange",
+   "text": "Deux sortes de codes QR, à ne jamais confondre\n\n• Code d'enlèvement (coins orange, icône de scan) : affiché seulement dans l'app de la boutique, écran « Commande envoyée » et suivi. Le livreur le scanne pour prendre le colis.\n• Code de livraison : affiché dans le lien de suivi du client (SMS). Le livreur le scanne à la porte.\n• Reçu vérifiable (bouclier vert) : sur le reçu partagé, téléchargé ou imprimé. Il sert seulement à vérifier que le reçu vient de Tara ; il ne permet jamais de retirer un colis.\n• Le code d'enlèvement n'apparaît jamais sur le reçu partagé ou imprimé.\n• Sans réseau, mauvaise caméra ou écran cassé : « Taper les 4 chiffres » reste toujours là.\n• Touchez le cadre pour simuler la lecture dans la maquette."
+  },
+  "argent": {
+   "x": 940,
+   "y": 7740,
+   "w": 420,
+   "size": "m",
+   "fill": "orange",
+   "text": "Recevoir et réserve\n\n• Le montant se tape en grand avec le clavier de l'app (tout le solde par défaut).\n• « Glisser pour recevoir » comme pour accepter une course ; pendant l'envoi, des pièces Tara filent vers le numéro, puis « Envoyé » et une notification « Voir le reçu ».\n• Sous 30 000 F (minimum de Sebpay), le bouton reste fermé et le dit.\n• Recevoir une partie seulement des ventes demande un petit ajout au serveur (aujourd'hui, tout part).\n• Réserve : la barre montre ce soir ce qui reste sur le Solde Tara et ce qui part sur Mobile Money ; un montant conseillé vient de vos dépenses de livraison.\n• Orange Money et MTN MoMo sont reconnaissables à leur logo (portefeuille, recevoir, réserve, encaissement). Dans l’app, on utilisera les fichiers officiels fournis par les opérateurs ou par Sebpay, en respectant leurs règles d’usage ; la maquette utilise les logos que vous avez envoyés.\n• Règle : partout où l’on choisit un montant parmi des propositions, il y a aussi « Autre », qui ouvre le clavier de l’app pour taper le montant exact (encaissement, réserve, recharge, retrait)."
+  },
+  "partage": {
+   "x": 1110,
+   "y": 9030,
+   "w": 420,
+   "size": "m",
+   "fill": "orange",
+   "text": "Un reçu pour chaque commande\n\n• Ouvert depuis le reçu, le suivi ou la liste des commandes (icône ticket sur chaque ligne).\n• Partager : WhatsApp (message prêt à envoyer avec le lien), PDF à télécharger, image, impression.\n• Le PDF A5 s'imprime aussi sur une imprimante de bureau ; son code QR permet au client de vérifier le reçu en ligne.\n• À compléter avant le lancement : raison sociale, RCCM, NIU, régime de TVA (mentions d'une facture)."
+  },
+  "recu": {
+   "x": 940,
+   "y": 5160,
+   "w": 420,
+   "size": "m",
+   "fill": "orange",
+   "text": "Le reçu remplace l'écran « Commande envoyée ».\n\n• Il sort de la fente en 2,6 s, une seule fois (le bouton en haut à droite le réimprime dans la maquette).\n• Tout y est : trajet, prix, garantie, argent à encaisser, et en bas le code d'enlèvement, comme sur un ticket.\n• « Partager » envoie le reçu en image (WhatsApp, etc.) ; « Suivre » ouvre le suivi.\n• Pour un envoi de plusieurs colis : un reçu plus long, une ligne par numéro de colis, le même code."
+  },
+  "decisions": {
+   "x": 1880,
+   "y": 0,
+   "w": 460,
+   "size": "m",
+   "fill": "orange",
+   "text": "À valider avant de coder\n\n1. Fil conducteur « l'argent voyage comme un colis » : les traits de vitesse du logo, le trajet en pointillés et le dégradé ambre, orange, rouge reviennent partout, avec parcimonie.\n\n2. Présentation : 4 écrans, montrée une seule fois, « Passer » toujours visible, retrouvable dans Profil. Les animations sont dessinées dans l'app (vectorielles) plutôt que des vidéos : quelques Ko au lieu de plusieurs Mo, nettes sur tout écran, sans réseau, en clair et en sombre. Elles s'arrêtent si le téléphone demande moins d'animations.\n\n3. Portefeuille : les ventes et le Solde Tara deviennent deux cartes qu'on fait glisser ; un particulier n'a que la carte Solde Tara.\n\n4. Barre de menu : passer à 5 places avec un bouton central « Envoyer » et un onglet Portefeuille (appli expéditeur).\n\n5. Tableaux de bord : chiffres réels du serveur (livraisons, encaissé, réussite, délai, quartiers ; gains, heures, objectif du livreur). Les chiffres affichés ici sont fictifs."
+  },
+  "jouer": {
+   "x": 1880,
+   "y": 1290,
+   "w": 400,
+   "size": "m",
+   "fill": "teal",
+   "text": "Jouez les écrans (bouton Play) : touchez la carte de derrière ou les flèches pour faire glisser les comptes, la période et les jours du graphique, et les onglets des barres de menu."
+  },
+  "titre3D": {
+   "x": 0,
+   "y": 11310,
+   "text": "Le relief · quatre éléments 3D qui reviennent partout",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "relief": {
+   "x": 1410,
+   "y": 11610,
+   "w": 420,
+   "size": "m",
+   "fill": "orange",
+   "text": "La 3D dans les apps\n\n• Quatre éléments en relief : le colis Tara, les cartes en relief, Douala en 3D, les colonnes des tableaux de bord. Pas de pièce ni de jeton.\n• Où ils sont : présentation (colis qui roule, ville 3D, cartes qui basculent) ; portefeuille (cartes qui pivotent et suivent la main) ; tableaux de bord (colonnes en relief) ; accueil (carte en relief, colis) ; commandes (pile de colis) ; reçu (sort de l'imprimante en se déroulant) ; partage (Douala en 3D) ; scanner (téléphone incliné, coche qui se retourne) ; barre de menu (bouton Envoyer en relief).\n• Dessinés par l'app (pas de vidéo ni de modèle à télécharger) : légers et nets.\n• Jamais derrière un texte à lire ; tout s'arrête si le téléphone demande moins d'animations ou si la batterie est faible."
+  },
+  "titreLivreur": {
+   "x": 0,
+   "y": 12600,
+   "text": "App livreur · la course, du « en ligne » à l’encaissement",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "livreur": {
+   "x": 2820,
+   "y": 12900,
+   "w": 440,
+   "size": "m",
+   "fill": "orange",
+   "text": "La course du livreur, écran par écran\n\n• Hors ligne : la ville dort (grisée) ; un gros bouton « Passer en ligne ». Gains du jour et solde prépayé visibles.\n• En ligne : Douala en 3D autour du livreur, zones de renfort (prime en plus) et zones interdites dessinées sur la carte. SOS toujours à portée de pouce.\n• Proposition : 30 s pour accepter (anneau qui se vide), gain en grand avec la prime d’approche, trajet A → B en 3D. Variante tournée : 3 arrêts numérotés.\n• Enlèvement : attente gratuite qui se décompte, photo du colis, code à scanner ou à taper, colis à cocher pour une tournée. Le bouton à glisser ne s’ouvre que quand tout est fait.\n• En route : consigne de navigation en haut, façade et note vocale du client, montant à encaisser.\n• Encaissement : espèces (monnaie à rendre calculée) ou Mobile Money (demande, attente, payé).\n\nJouez les écrans : boutons, onglets et curseurs réagissent."
+  },
+  "titreLivreurSouci": {
+   "x": 0,
+   "y": 15180,
+   "text": "App livreur · quand la course se passe mal",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "livreurSouci": {
+   "x": 1880,
+   "y": 15480,
+   "w": 440,
+   "size": "m",
+   "fill": "orange",
+   "text": "Les cas difficiles, toujours avec une preuve\n\n• Colis non conforme : un motif + une photo obligatoire ; le déplacement du livreur est payé.\n• Expéditeur absent : anneau des 30 minutes, 2 appels obligatoires, puis départ avec 480 F pour le livreur (touchez deux fois pour confirmer). Le bouton « Maquette » avance le temps.\n• Livraison impossible : motif, photo du lieu (ou du colis abîmé), précision ; l’expéditeur choisit nouvelle tentative ou retour. Le livreur garde le colis.\n• Retour : 4 étapes à cocher (arrivée, frais de retour, code du vendeur, photo), puis glisser « Colis rendu »."
+  },
+  "livreurFin": {
+   "x": 1880,
+   "y": 14190,
+   "w": 420,
+   "size": "m",
+   "fill": "teal",
+   "text": "Fin de course : le colis 3D saute, « +1 050 F » s’envole vers les gains du jour, confettis en 3D à la 5ᵉ et à la 10ᵉ course. Puis l’étoile de la note se retourne quand on la touche."
+  },
+  "liquide": {
+   "x": 1880,
+   "y": 11610,
+   "w": 440,
+   "size": "m",
+   "fill": "teal",
+   "text": "Les effets liquides (repris de nos apps)\n\n• Double liquide : devant, un dégradé vif ambre → orange → rouge ; derrière, un orange vif translucide un peu plus haut. Les deux ondulent ensemble, en sens inverse.\n• Le niveau dit le temps ou la progression : 30 s pour accepter (il se vide), attente de l’expéditeur (il monte), envois, paiements, SOS (rouge vif).\n• Liquide qui avance : boutons à glisser, envoi d’argent, demandes Mobile Money, aussi en double couche.\n• Onglets : pastille orange avec un petit rebond. Barres : dégradé qui coule. Fond : formes chaudes qui ondulent derrière le verre.\n• Tout se fige si le téléphone demande moins d’animations."
+  },
+  "titreLivreurClair": {
+   "x": 0,
+   "y": 16770,
+   "text": "App livreur · thème clair (même dessin, couleurs du thème clair)",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "themes": {
+   "x": 2820,
+   "y": 17070,
+   "w": 440,
+   "size": "m",
+   "fill": "teal",
+   "text": "Clair et sombre\n\n• Chaque écran est dessiné une seule fois ; ses couleurs viennent du thème (fond, texte, cartes, carte de la ville, accents).\n• Le livreur choisit dans Profil : Clair, Sombre ou Automatique (comme le téléphone).\n• Ce qui ne change pas : le dégradé Tara, les boutons orange, la carte « à encaisser » sombre, le bouton SOS rouge, les logos des opérateurs.\n• Dans la maquette, chaque écran a aussi un réglage « theme » (sombre / clair) dans ses propriétés."
+  },
+  "titreLivreurCompte": {
+   "x": 0,
+   "y": 20640,
+   "text": "App livreur · compte, argent et sécurité (sombre)",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "titreLivreurCompteClair": {
+   "x": 0,
+   "y": 23520,
+   "text": "App livreur · compte, argent et sécurité (clair)",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "livreurCompte": {
+   "x": 2820,
+   "y": 20940,
+   "w": 440,
+   "size": "m",
+   "fill": "orange",
+   "text": "Compte, argent et sécurité\n\n• Connexion : code sur WhatsApp (ou SMS), lecture automatique du code.\n• Conditions : il faut lire jusqu’en bas (la barre coule), puis cocher.\n• Pièces : une pièce refusée dit pourquoi ; l’envoi se remplit de liquide.\n• Profil : Clair / Sombre / Automatique change l’écran en direct ; animations Toutes / Réduites.\n• Recharger, reverser, retirer : logos Orange Money et MTN, « Autre » montant, demande Mobile Money qui coule ; retrait avec le code secret (ou l’empreinte), à partir de 30 000 F.\n• SOS : le bouton se remplit de liquide rouge pendant les 3 secondes ; appels Tara, police 117, pompiers 118, SAMU 119.\n• Actions en attente : ce qui part dès que le réseau revient ; une action refusée explique quoi faire."
+  },
+  "titreClient1": {
+   "x": 0,
+   "y": 26400,
+   "text": "App expéditeur · démarrage et nouvelle livraison (clair)",
+   "kind": "title1",
+   "maxW": 3210
+  },
+  "titreClient1Sombre": {
+   "x": 0,
+   "y": 29280,
+   "text": "App expéditeur · démarrage et nouvelle livraison (sombre)",
+   "kind": "title1",
+   "maxW": 3210
+  },
+  "client1": {
+   "x": 2820,
+   "y": 26700,
+   "w": 440,
+   "size": "m",
+   "fill": "orange",
+   "text": "Démarrage et nouvelle livraison\n\n• Démarrage : le colis 3D tourne pendant le chargement (barre liquide).\n• Connexion et code : code sur WhatsApp, lecture automatique.\n• Bienvenue : « Pour moi » ou « Pour ma boutique » (onglet élastique) ; une boutique donne son numéro Mobile Money de reversement.\n• Code secret : choisir puis confirmer 4 chiffres (jouez-le), empreinte en option.\n• Nouvelle livraison en 5 étapes, barre liquide en haut : enlèvement, destinataire (adresse connue, carte ou lien au client), colis (photo analysée, tailles en 3D, nature, valeur, objets interdits), quand (maintenant ou programmé), récapitulatif (qui paie, moyen de paiement avec logos, glisser pour commander)."
+  },
+  "titreClient2": {
+   "x": 0,
+   "y": 32160,
+   "text": "App expéditeur · plusieurs colis et suivi (clair)",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "titreClient2Sombre": {
+   "x": 0,
+   "y": 35040,
+   "text": "App expéditeur · plusieurs colis et suivi (sombre)",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "client2": {
+   "x": 2350,
+   "y": 32460,
+   "w": 440,
+   "size": "m",
+   "fill": "orange",
+   "text": "Plusieurs colis et suivi\n\n• Liste d’envoi : jusqu’à 100 clients ; chaque ligne dit si l’adresse est connue, si Tara enverra un lien, ou ce qu’il faut compléter.\n• Coller une liste : Tara lit la liste WhatsApp sur le téléphone et montre ce qu’il a compris (5 sur 6).\n• Contacts : clients déjà connus d’abord, puis contacts du téléphone à cocher.\n• Vérifier et envoyer : prêts, en attente de point, à compléter ; glisser pour envoyer.\n• Colis en attente d’adresse : le liquide montre le temps avant l’expiration du lien.\n• Suivi : étapes Commande → Livreur → Récupéré → Livré (barre liquide), code d’enlèvement à scanner (coins orange), carte 3D.\n• Livré : coche verte en liquide, note du livreur. Impossible : 12 min pour choisir (le liquide se vide), nouvelle tentative ou retour. Retour : code de retour à donner au livreur."
+  },
+  "titreClient3": {
+   "x": 0,
+   "y": 37620,
+   "text": "App expéditeur · argent, profil et aide (clair)",
+   "kind": "title1",
+   "maxW": 2270
+  },
+  "titreClient3Sombre": {
+   "x": 0,
+   "y": 40500,
+   "text": "App expéditeur · argent, profil et aide (sombre)",
+   "kind": "title1",
+   "maxW": 2270
+  },
+  "client3": {
+   "x": 2350,
+   "y": 37920,
+   "w": 440,
+   "size": "m",
+   "fill": "orange",
+   "text": "Argent, profil et aide\n\n• Recharger : montants + « Autre », logos Orange Money et MTN, frais de l’opérateur affichés, attente en double liquide.\n• Retirer : tout le solde d’un coup, à partir de 30 000 F, avec le code secret ou l’empreinte.\n• Relevés : colonnes en relief des 6 derniers mois, un PDF par mois.\n• Réglages : code secret, empreinte, montants masqués, thème Clair / Sombre / Automatique (change l’écran en direct), animations, langue.\n• Notifications, service client (signaler un problème sur une commande), données et suppression du compte, textes légaux, hors connexion."
+  },
+  "titreWeb": {
+   "x": 0,
+   "y": 43300,
+   "text": "Pages web · pour le destinataire (clair puis sombre)",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "titreBO": {
+   "x": 0,
+   "y": 44900,
+   "text": "Back-office · l’équipe Tara sur ordinateur (clair et sombre côte à côte)",
+   "kind": "title1",
+   "maxW": 5960
+  },
+  "bo": {
+   "x": 6080,
+   "y": 45200,
+   "w": 460,
+   "size": "m",
+   "fill": "orange",
+   "text": "Back-office\n\n• Même univers que les apps : verre dépoli, formes liquides en fond, dégradé Tara pour la page active, colonnes en relief, Douala en 3D pour la carte.\n• Connexion avec double authentification (le liquide montre les 30 s du code).\n• Carte en direct : livreurs qui roulent, zones de renfort et interdites, SOS en rouge avec actions (rappeler, police 117, prise en charge) ; alertes avec une jauge liquide d’urgence.\n• Commandes, livreurs, boutiques, support : liste à gauche, fiche à droite (touchez une ligne).\n• Finance : reversements à valider au-dessus de 250 000 F, lancement des reversements de 18 h en liquide qui avance.\n• Contrôle des comptes : grand livre, solde Sebpay, espèces, écarts, exports.\n• Les données sont fictives."
+  },
+  "titreThemes": {
+   "x": 0,
+   "y": 52400,
+   "text": "Premiers écrans · l’autre thème (sombre pour l’app expéditeur, clair pour la présentation et le livreur)",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "themes2": {
+   "x": 2820,
+   "y": 52700,
+   "w": 440,
+   "size": "m",
+   "fill": "teal",
+   "text": "Toutes les pages ont maintenant leurs deux thèmes.\n\n• Ce qui ne change jamais : la carte sombre « ventes à recevoir », la carte claire « Solde Tara », le papier blanc du reçu, les boutons orange, les logos.\n• Les pastilles choisies (montants, réserve) s’inversent : noires en clair, blanches en sombre.\n• Le scanner reste sombre dans les deux thèmes (c’est l’image de la caméra) ; le reçu imprimable est du papier.\n\n• Transparence des barres : réglable dans Profil (livreur) et dans Sécurité, affichage, langue (expéditeur) : Verre, Équilibré (par défaut), Opaque. Elle s’applique aux barres de menu, aux pieds de page en verre et au menu du back-office.\n• Les montants ne se coupent jamais (« 42 500 F » reste sur une ligne).\n\n• Verre dépoli : les barres de menu et les bas de page fixes sont en verre. Le fond est transparent, le flou fort (le texte derrière est flouté, pas lisible), avec un reflet clair en haut et une ombre douce. Le réglage Verre / Équilibré / Opaque change seulement la transparence ; Équilibré est le réglage par défaut."
+  }
+ },
+ "designSystems": []
+}

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Plan de la refonte</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#C2410C}a:hover{color:#9A3412}
+</style>
+</helmet>
+<div style="width: 1900px; height: 1380px; box-sizing: border-box; padding: 44px 48px; background: #F6F2EC; color: #16120E; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; gap: 22px">
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="margin: 0; font-family: Sora, sans-serif; font-size: 40px; font-weight: 700; letter-spacing: -0.02em">Plan de la refonte · toutes les pages</h1>
+      <p style="margin: 0; font-size: 16px; color: rgba(22,18,14,.72)">Chaque page des deux apps, des pages web et du back-office. Une page dessinée s'ouvre d'un clic ; les autres restent à dessiner.</p>
+    </div>
+    <div style="min-width: 420px; display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 800"><span>{{doneLabel}}</span><span style="color: #C2410C">{{percent}}</span></div>
+      <div style="height: 12px; border-radius: 6px; background: rgba(22,18,14,.08); overflow: hidden"><span style="display: block; height: 12px; width: {{percent}}; border-radius: 6px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)"></span></div>
+      <div style="display: flex; gap: 18px; font-size: 13px; font-weight: 700; color: rgba(22,18,14,.70)">
+        <span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #10A06E"></span>Dessinée</span>
+        <span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 50%; border: 2px solid #FF6A00; box-sizing: border-box"></span>À dessiner</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; min-height: 0">
+    <sc-for list="{{columns}}" as="col" hint-placeholder-count="4">
+      <div style="display: flex; flex-direction: column; gap: 14px; min-width: 0">
+        <span style="font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #C2410C">{{col.title}}</span>
+        <sc-for list="{{col.groups}}" as="g" hint-placeholder-count="3">
+          <div style="border-radius: 20px; background: rgba(255,255,255,.82); border: 1px solid #FFFFFF; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px">
+            <span style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px"><b style="font-family: Sora, sans-serif; font-size: 16px">{{g.title}}</b><span style="font-size: 12px; font-weight: 700; color: rgba(22,18,14,.62)">{{g.count}}</span></span>
+            <sc-for list="{{g.items}}" as="it" hint-placeholder-count="5">
+              <div style="min-height: 28px; display: flex; align-items: center; gap: 10px">
+                <span style="width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: {{it.dotBg}}; border: {{it.dotBorder}}; box-sizing: border-box"></span>
+                <span style="flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: {{it.ink}}">{{it.name}}</span>
+                <sc-if value="{{it.done}}" hint-placeholder-val="{{ false }}"><a href="{{it.href}}" style="font-size: 13px; font-weight: 800; text-decoration: none">Voir</a></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1900,"height":1380}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const t = (name, board) => ({ name, board });
+    const columns = [
+      {
+        title: 'App expéditeur · 1/2',
+        groups: [
+          { title: 'Démarrage et compte', items: [t('Écran de démarrage', 'Client-Demarrage'), t('Présentation (4 écrans)', 'Main'), t('Connexion par numéro', 'Client-Connexion'), t('Code reçu par WhatsApp ou SMS', 'Client-Code'), t('Conditions à accepter, nouvelle version', 'Client-Conditions'), t('Bienvenue : particulier ou boutique', 'Client-Bienvenue'), t('Code secret et empreinte', 'Client-Code-Secret')] },
+          { title: 'Accueil et envoi', items: [t('Accueil', 'Accueil'), t('Demander l’adresse au destinataire', 'Client-Demander-Adresse'), t('Nouvelle livraison · enlèvement', 'Client-NL-Enlevement'), t('Nouvelle livraison · destinataire', 'Client-NL-Destinataire'), t('Adresse sur la carte, photo, note vocale', 'Client-NL-Carte'), t('Nouvelle livraison · colis, photo, interdits', 'Client-NL-Colis'), t('Nouvelle livraison · quand', 'Client-NL-Quand'), t('Récapitulatif et paiement', 'Client-NL-Recap'), t('Commande envoyée : le reçu', 'Recu')] },
+          { title: 'Plusieurs colis', items: [t('Liste d’envoi', 'Client-Liste-Envoi'), t('Coller une liste', 'Client-Coller-Liste'), t('Choisir des contacts', 'Client-Contacts'), t('Vérifier et envoyer', 'Client-Verifier-Envoyer'), t('Envoi parti : le reçu', 'Recu-Lot'), t('Colis en attente d’adresse', 'Client-Colis-Attente')] },
+        ],
+      },
+      {
+        title: 'App expéditeur · 2/2',
+        groups: [
+          { title: 'Commandes et suivi', items: [t('Commandes', 'Commandes'), t('Suivi : recherche du livreur, en route', 'Client-Suivi'), t('Suivi : livré, noter le livreur', 'Client-Suivi-Livre'), t('Suivi : livraison impossible, décision', 'Client-Suivi-Echec'), t('Suivi : retour du colis', 'Client-Suivi-Retour'), t('Paiement Mobile Money en attente', 'Client-Paiement-Attente'), t('Partager le reçu', 'Recu-Partage'), t('Reçu imprimable (PDF)', 'Recu-Imprimable')] },
+          { title: 'Argent', items: [t('Portefeuille, deux cartes', 'Portefeuille'), t('Recevoir mes ventes', 'Recevoir'), t('Réserve pour mes livraisons', 'Reserve'), t('Recharger le Solde Tara', 'Client-Recharger'), t('Retirer le Solde Tara', 'Client-Retirer'), t('Relevés du mois', 'Client-Releves'), t('Mon activité', 'Tableau-Boutique')] },
+          { title: 'Profil et aide', items: [t('Profil', 'Profil'), t('Mes adresses', 'Client-Adresses'), t('Sécurité, affichage, langue', 'Client-Reglages'), t('Notifications', 'Client-Notifications'), t('Service client : signaler, mes demandes', 'Client-Support'), t('Supprimer mon compte, mes données', 'Client-Supprimer-Compte'), t('Textes légaux', 'Client-Textes-Legaux'), t('Hors connexion', 'Client-Hors-Connexion'), t('Barre de menu', 'Barre-Menu')] },
+        ],
+      },
+      {
+        title: 'App livreur',
+        groups: [
+          { title: 'Compte', items: [t('Démarrage, connexion, code', 'Livreur-Connexion'), t('Conditions à accepter', 'Livreur-Conditions'), t('Profil d’inscription', 'Livreur-Inscription'), t('Pièces d’identité, pièce refusée', 'Livreur-Pieces')] },
+          { title: 'La course', items: [t('Accueil hors ligne', 'Livreur-Hors-Ligne'), t('Accueil en ligne : carte, zones interdites', 'Livreur-En-Ligne'), t('Proposition de course, tournée', 'Livreur-Proposition'), t('Enlèvement : photo, colis à cocher', 'Livreur-Enlevement'), t('Scanner le code d’enlèvement', 'Scanner'), t('Colis non conforme', 'Livreur-Non-Conforme'), t('L’expéditeur ne vient pas', 'Livreur-Expediteur-Absent'), t('En route vers le client', 'Livreur-En-Route'), t('Scanner le code de livraison', 'Scanner-Livraison'), t('Encaissement : espèces, Mobile Money', 'Livreur-Encaissement'), t('Livraison impossible', 'Livreur-Echec'), t('Retour chez le vendeur', 'Livreur-Retour'), t('Gain de la course, célébration', 'Livreur-Gain'), t('Noter l’expéditeur', 'Livreur-Noter')] },
+          { title: 'Argent et sécurité', items: [t('Mes gains', 'Tableau-Livreur'), t('Recharger le solde', 'Livreur-Recharger'), t('Déposer les espèces', 'Livreur-Reverser'), t('Retirer', 'Livreur-Retirer'), t('SOS', 'Livreur-SOS'), t('Actions en attente, sans réseau', 'Livreur-Actions-Attente'), t('Profil, contact d’urgence', 'Livreur-Profil'), t('Fermer mon compte', 'Livreur-Fermer-Compte'), t('Service client', 'Livreur-Support'), t('Barre de menu', 'Barre-Menu')] },
+        ],
+      },
+      {
+        title: 'Web et back-office',
+        groups: [
+          { title: 'Pages web', items: [t('Suivi du destinataire, code de livraison', 'Web-Suivi'), t('Placer son point (lien de localisation)', 'Web-Point'), t('Vérifier un reçu (code QR)', 'Web-Verifier-Recu')] },
+          { title: 'Back-office', items: [t('Connexion, double authentification', 'BO-Connexion'), t('Accueil de l’équipe', 'BO-Accueil'), t('Carte en direct et alertes', 'BO-Carte'), t('Commandes : liste et détail', 'BO-Commandes'), t('Livreurs : liste et fiche', 'BO-Livreurs'), t('Boutiques : liste et fiche', 'BO-Boutiques'), t('Tarifs, promotions, zones', 'BO-Tarifs'), t('Finance : vue d’ensemble, reversements', 'BO-Finance'), t('Finance : contrôle des comptes', 'BO-Controle'), t('Support : demandes, détail, nouvelle', 'BO-Support'), t('Indicateurs', 'BO-Indicateurs'), t('Équipe et journal', 'BO-Equipe')] },
+        ],
+      },
+    ];
+    let total = 0;
+    let done = 0;
+    const cols = columns.map((col) => ({
+      title: col.title,
+      groups: col.groups.map((g) => {
+        const drawn = g.items.filter((i) => i.board).length;
+        total += g.items.length;
+        done += drawn;
+        return {
+          title: g.title,
+          count: `${drawn} / ${g.items.length}`,
+          items: g.items.map((i) => ({
+            name: i.name,
+            done: Boolean(i.board),
+            href: i.board ? `${i.board}.dc.html` : '#',
+            dotBg: i.board ? '#10A06E' : 'transparent',
+            dotBorder: i.board ? '0' : '2px solid #FF6A00',
+            ink: i.board ? '#16120E' : 'rgba(22,18,14,.78)',
+          })),
+        };
+      }),
+    }));
+    return {
+      columns: cols,
+      doneLabel: `${done} pages dessinées sur ${total}`,
+      percent: `${Math.round((done / total) * 100)}%`,
+    };
+  }
+}
+</script>
+</body>
+</html>

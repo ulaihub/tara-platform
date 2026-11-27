@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Livreur · retirer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #FFB15C)}
+button{font-family:inherit}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes r-radar{0%{transform:scale(.3);opacity:.75}100%{transform:scale(3.2);opacity:0}}@keyframes r-dash{to{stroke-dashoffset:-28}}@keyframes r-blink{0%,100%{opacity:1}50%{opacity:.35}}@keyframes r-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}@keyframes r-turn{to{transform:rotate(360deg)}}@keyframes r-rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes r-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-up{from{transform:translateY(100%)}to{transform:translateY(0%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@keyframes am-rise{0%{transform:translateY(40px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes am-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+<div style="position: absolute; inset: 0; overflow: hidden; pointer-events: none"><span class="tara-anim" style="position: absolute; left: -90px; top: 40px; width: 300px; height: 300px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.38; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out 0s infinite alternate, lq-drift 20s ease-in-out 0s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: 210px; top: 300px; width: 260px; height: 260px; background: radial-gradient(circle at 30% 30%, #FFD27A 0%, #FF8A00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -4s infinite alternate, lq-drift 20s ease-in-out -4s infinite alternate" aria-hidden="true"></span><span class="tara-anim" style="position: absolute; left: -40px; top: 600px; width: 240px; height: 240px; background: radial-gradient(circle at 30% 30%, #FF8A00 0%, #FF3D00 100%); filter: blur(46px); opacity: 0.22; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; animation: lq-morph 14s ease-in-out -9s infinite alternate, lq-drift 20s ease-in-out -9s infinite alternate" aria-hidden="true"></span></div>
+<div style="position: relative; padding: 18px 20px 0; display: flex; align-items: center; gap: 10px"><a href="Tableau-Livreur.dc.html" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 14px; background: rgba(var(--fg-rgb),.07); border: 1px solid rgba(var(--fg-rgb),.12); display: flex; align-items: center; justify-content: center; color: var(--ink); box-sizing: border-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--accent)">MES GAINS</span><b style="font-family: Sora, sans-serif; font-size: 18px">Retirer vers Mobile Money</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.70)">Vers votre numéro enregistré</span></span></div>
+<div style="position: absolute; left: 20px; right: 20px; top: 96px; bottom: 20px; display: flex; flex-direction: column; gap: 12px"><div style="perspective: 900px"><div style="position: relative; overflow: hidden; padding: 18px; border-radius: 26px; background: linear-gradient(150deg, #2A170A 0%, #16120E 62%); border: 1px solid rgba(255, 177, 92, .3); color: #FFF; box-shadow: 0 24px 44px rgba(0,0,0,.4); transform: rotateX(8deg); transform-origin: 50% 100%; display: flex; flex-direction: column; gap: 4px"><span class="tara-anim" style="position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, .14) 48%, rgba(255, 255, 255, 0) 60%); background-size: 260% 100%; animation: t3-sheen 5s ease-in-out infinite" aria-hidden="true"></span><span style="position: relative; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, .74)">{{cardLabel}}</span><b style="position: relative; font-family: Sora, sans-serif; font-size: 38px; letter-spacing: -0.02em; transition: all .4s">{{cardAmount}}</b><span style="position: relative; font-size: 12px; color: rgba(255, 255, 255, .72)">{{cardSub}}</span></div></div><sc-if value="{{canWithdraw}}" hint-placeholder-val="{{ true }}"><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px"><sc-for list="{{chips}}" as="c" hint-placeholder-count="3"><button type="button" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="min-height: 46px; border-radius: 14px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: inherit; font-size: 13px; font-weight: 800; cursor: pointer">{{c.label}}</button></sc-for></div><div style="padding: 12px 14px; border-radius: 22px; background: var(--card); border: 1px solid var(--card-border); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); display: flex; align-items: center; gap: 12px"><img src="/_blob/3ffe4daee82fbc623f2a1fe2a7a6a74a" alt="Orange Money" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; background: #FFFFFF; object-fit: cover; box-shadow: 0 0 0 1px rgba(22,18,14,.08); display: inline-block"><span style="flex: 1; font-size: 12px; line-height: 1.45; color: rgba(var(--fg-rgb),.78)">Envoyé sur votre numéro <b>6 77 •• •• 56</b>, le seul permis pour un retrait.</span></div><div style="padding: 12px 14px; border-radius: 22px; background: var(--card); border: 1px solid var(--card-border); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); display: flex; justify-content: space-between; align-items: center"><span style="display: flex; flex-direction: column"><b style="font-size: 14px">Vous recevez</b><span style="font-size: 12px; color: var(--ok)">Retrait gratuit : Tara paie les frais Mobile Money.</span></span><b style="font-family: Sora, sans-serif; font-size: 22px">{{receive}}</b></div></sc-if><sc-if value="{{tooLow}}" hint-placeholder-val="{{ false }}"><div style="padding: 14px; border-radius: 20px; background: rgba(255,177,92,.12); border: 1px solid rgba(255,177,92,.4); font-size: 13px; line-height: 1.5">Le retrait vers Mobile Money est possible à partir de <b>30 000 F</b>. Il vous manque encore <b>{{missing}}</b> : votre solde reste en sécurité chez Tara en attendant.</div></sc-if><sc-if value="{{processing}}" hint-placeholder-val="{{ false }}"><div style="position: relative; overflow: hidden; padding: 14px; border-radius: 20px; background: rgba(var(--fg-rgb),.06); border: 1px solid rgba(255,177,92,.4)"><span style="position: absolute; inset: 0; border-radius: 20px; overflow: hidden; pointer-events: none" aria-hidden="true"><span class="tara-anim" style="position: absolute; left: -10px; top: 0; bottom: 0; animation: lq-fill-x 5s ease-in-out infinite; animation-delay: -0.35s; background: var(--lq-back, rgba(255,61,0,.5))"><span style="position: absolute; left: 100%; top: 0; width: 10px; height: 100%; overflow: hidden"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 10px; height: 160px; animation: lq-move-y 2.2s linear infinite; animation-direction: reverse; "><svg width="10" height="160" viewBox="0 0 10 160" style="display: block"><path d="M0 0 L5.0 0 L6.2 3 L7.3 6 L8.2 9 L9.0 12 L9.6 15 L9.9 18 L10.0 21 L9.8 24 L9.3 27 L8.5 30 L7.6 33 L6.5 36 L5.4 39 L4.2 42 L3.1 45 L2.1 48 L1.2 51 L0.5 54 L0.1 57 L0.0 60 L0.1 63 L0.5 66 L1.2 69 L2.1 72 L3.1 75 L4.2 78 L5.4 81 L6.5 84 L7.6 87 L8.5 90 L9.3 93 L9.8 96 L10.0 99 L9.9 102 L9.6 105 L9.0 108 L8.2 111 L7.3 114 L6.2 117 L5.0 120 L3.8 123 L2.7 126 L1.8 129 L1.0 132 L0.4 135 L0.1 138 L0.0 141 L0.2 144 L0.7 147 L1.5 150 L2.4 153 L3.5 156 L4.6 159 L0 160 Z" style="fill: var(--lq-back, rgba(255,61,0,.5))"></path></svg></span></span></span><span class="tara-anim" style="position: absolute; left: -10px; top: 0; bottom: 0; animation: lq-fill-x 5s ease-in-out infinite; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)"><span style="position: absolute; left: 100%; top: 0; width: 10px; height: 100%; overflow: hidden"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 10px; height: 160px; animation: lq-move-y 1.4s linear infinite; "><svg width="10" height="160" viewBox="0 0 10 160" style="display: block"><path d="M0 0 L5.0 0 L6.2 3 L7.3 6 L8.2 9 L9.0 12 L9.6 15 L9.9 18 L10.0 21 L9.8 24 L9.3 27 L8.5 30 L7.6 33 L6.5 36 L5.4 39 L4.2 42 L3.1 45 L2.1 48 L1.2 51 L0.5 54 L0.1 57 L0.0 60 L0.1 63 L0.5 66 L1.2 69 L2.1 72 L3.1 75 L4.2 78 L5.4 81 L6.5 84 L7.6 87 L8.5 90 L9.3 93 L9.8 96 L10.0 99 L9.9 102 L9.6 105 L9.0 108 L8.2 111 L7.3 114 L6.2 117 L5.0 120 L3.8 123 L2.7 126 L1.8 129 L1.0 132 L0.4 135 L0.1 138 L0.0 141 L0.2 144 L0.7 147 L1.5 150 L2.4 153 L3.5 156 L4.6 159 L0 160 Z" style="fill: #FF3D00"></path></svg></span></span></span></span><span style="position: relative; font-size: 13px; line-height: 1.5">Retrait demandé : <b>{{receive}}</b> arrivent sur votre Mobile Money dans quelques minutes. Une notification vous préviendra.</span></div></sc-if><div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px"><button type="button" onClick="{{ask}}" style="width: 100%; min-height: 58px; border-radius: 20px; border: 0; background: {{askBg}}; color: {{askInk}}; font-size: 16px; font-weight: 800; cursor: pointer">{{askLabel}}</button><button type="button" onClick="{{toggleLow}}" style="min-height: 34px; border: 0; background: transparent; color: rgba(var(--fg-rgb),.55); font-size: 12px; font-weight: 700; cursor: pointer">Maquette : {{lowLabel}}</button></div></div>
+<div style="position: absolute; inset: 0; z-index: 20; display: {{sheetShow}}"><button type="button" aria-label="Fermer" onClick="{{sheetClose}}" style="position: absolute; inset: 0; border: 0; background: rgba(var(--bg-rgb),.55); cursor: pointer"></button><div role="dialog" aria-label="{{sheetTitle}}" class="tara-anim" style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 20px 22px; border-radius: 28px 28px 0 0; background: var(--sheet); color: var(--ink); box-shadow: 0 -20px 40px rgba(0,0,0,.35); display: flex; flex-direction: column; gap: 12px; animation: am-rise .35s ease-out both"><span style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: rgba(var(--fg-rgb),.22)"></span><b style="font-size: 16px">{{sheetTitle}}</b><div style="height: 66px; border-radius: 18px; border: 2px solid #FF8A00; display: flex; align-items: center; justify-content: center; gap: 4px"><b style="font-family: Sora, sans-serif; font-size: 34px; letter-spacing: -0.02em">{{sheetAmount}}</b><span class="tara-anim" style="width: 3px; height: 34px; border-radius: 2px; background: #FF6A00; animation: am-blink 1s steps(1) infinite"></span><span style="font-family: Sora, sans-serif; font-size: 20px; font-weight: 700; opacity: .55; margin-left: 4px">F</span></div><span style="font-size: 12px; font-weight: 700; color: {{sheetHintInk}}">{{sheetHint}}</span><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px"><sc-for list="{{keys}}" as="k" hint-placeholder-count="12"><button type="button" aria-label="{{k.aria}}" onClick="{{k.press}}" style="height: 48px; border-radius: 14px; border: 1px solid rgba(var(--fg-rgb),.10); background: rgba(var(--fg-rgb),.07); color: var(--ink); font: 700 20px Sora, sans-serif; cursor: pointer">{{k.label}}</button></sc-for></div><button type="button" onClick="{{sheetOk}}" style="height: 56px; border: 0; border-radius: 18px; background: {{sheetOkBg}}; color: {{sheetOkInk}}; font-size: 16px; font-weight: 800; cursor: pointer">Valider</button></div></div><div style="position: absolute; inset: 0; z-index: 20; display: {{pinShow}}"><button type="button" aria-label="Fermer" onClick="{{pinClose}}" style="position: absolute; inset: 0; border: 0; background: rgba(var(--bg-rgb),.55); cursor: pointer"></button><div role="dialog" aria-label="Code secret" class="tara-anim" style="position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 20px 24px; border-radius: 28px 28px 0 0; background: var(--sheet); display: flex; flex-direction: column; gap: 14px; animation: am-rise .35s ease-out both"><span style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: rgba(var(--fg-rgb),.22)"></span><b style="font-size: 17px; text-align: center">Code secret</b><span style="text-align: center; font-size: 13px; color: rgba(var(--fg-rgb),.72)">{{pinReason}}</span><div style="display: flex; justify-content: center; gap: 14px"><sc-for list="{{dots}}" as="d" hint-placeholder-count="4"><span style="width: 16px; height: 16px; border-radius: 50%; border: 2px solid #FF8A00; background: {{d.fill}}; transition: background .2s"></span></sc-for></div><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px"><sc-for list="{{pinKeys}}" as="k" hint-placeholder-count="12"><button type="button" aria-label="{{k.aria}}" onClick="{{k.press}}" style="height: 52px; border-radius: 14px; border: 1px solid rgba(var(--fg-rgb),.10); background: rgba(var(--fg-rgb),.07); color: inherit; font: 700 20px Sora, sans-serif; cursor: pointer">{{k.label}}</button></sc-for></div></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "sombre"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { low: false, amount: null, custom: false, sheet: false, typed: '', pin: '', pinOpen: false, processing: false };
+  }
+  vals() {
+
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+    const typed = this.state.typed;
+    const sheetVals = (title, check, onOk) => {
+      const value = Number(typed || 0);
+      const { ok, hint, warn } = check(value);
+      return {
+        sheetShow: this.state.sheet ? 'block' : 'none',
+        sheetTitle: title,
+        sheetAmount: typed ? fmt(value) : '0',
+        sheetHint: hint,
+        sheetHintInk: warn ? '#FF8A3D' : 'rgba(var(--fg-rgb),.66)',
+        sheetClose: () => this.setState({ sheet: false }),
+        sheetOk: () => { if (ok) onOk(value); },
+        sheetOkBg: ok ? 'linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)' : 'rgba(var(--fg-rgb),.08)',
+        sheetOkInk: ok ? '#140800' : 'rgba(var(--fg-rgb),.42)',
+        keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '⌫'].map((k) => ({
+          label: k,
+          aria: k === '⌫' ? 'Effacer' : k,
+          press: () => {
+            if (k === '⌫') this.setState({ typed: typed.slice(0, -1) });
+            else {
+              const next = (typed + k).replace(/^0+/, '');
+              if (next.length <= 7) this.setState({ typed: next });
+            }
+          },
+        })),
+      };
+    };
+    const chip = (label, on, pick) => ({ label, pressed: on ? 'true' : 'false', pick, bg: on ? 'rgba(255,138,0,.16)' : 'rgba(var(--fg-rgb),.06)', border: on ? '#FF8A00' : 'rgba(var(--fg-rgb),.14)' });
+    const { low, amount, custom, pin, pinOpen, processing } = this.state;
+    const balance = low ? 19200 : 42500;
+    const value = Math.min(amount ?? balance, balance);
+    const can = balance >= 30000;
+    const fingerprint = '◉';
+    return {
+      cardLabel: 'Solde disponible', cardAmount: `${fmt(balance)} F`, cardSub: 'Gains et primes de la semaine',
+      canWithdraw: can && !processing, tooLow: !can, processing,
+      missing: `${fmt(30000 - balance)} F`,
+      chips: [
+        chip(`Tout · ${fmt(balance)}`, !custom && (amount === null || amount === balance), () => this.setState({ amount: null, custom: false })),
+        chip('30 000', !custom && amount === 30000, () => this.setState({ amount: 30000, custom: false })),
+        chip(custom ? `${fmt(value)} ✎` : 'Autre', custom, () => this.setState({ sheet: true, typed: '' })),
+      ],
+      receive: `${fmt(value)} F`,
+      ask: () => { if (can && !processing) this.setState({ pinOpen: true, pin: '' }); },
+      askLabel: processing ? 'Retrait en cours…' : `Recevoir ${fmt(value)} F`,
+      askBg: can && !processing ? 'linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)' : 'rgba(var(--fg-rgb),.08)',
+      askInk: can && !processing ? '#140800' : 'rgba(var(--fg-rgb),.42)',
+      toggleLow: () => this.setState({ low: !low, amount: null, custom: false, processing: false }),
+      lowLabel: low ? 'solde de 42 500 F' : 'solde sous 30 000 F',
+      ...sheetVals('Autre montant à retirer', (v) => (
+        v < 30000 ? { ok: false, hint: 'À partir de 30 000 F (minimum Mobile Money).', warn: v > 0 }
+          : v > balance ? { ok: false, hint: `Au plus ${fmt(balance)} F, votre solde.`, warn: true }
+            : { ok: true, hint: `Vous recevez ${fmt(v)} F.`, warn: false }
+      ), (v) => this.setState({ amount: v, custom: true, sheet: false })),
+      pinShow: pinOpen ? 'block' : 'none',
+      pinClose: () => this.setState({ pinOpen: false }),
+      pinReason: `Pour retirer ${fmt(value)} F`,
+      dots: [0, 1, 2, 3].map((i) => ({ fill: i < pin.length ? '#FF8A00' : 'transparent' })),
+      pinKeys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', fingerprint, '0', '⌫'].map((k) => ({
+        label: k, aria: k === '⌫' ? 'Effacer' : k === fingerprint ? 'Empreinte digitale' : k,
+        press: () => {
+          if (k === '⌫') return this.setState({ pin: pin.slice(0, -1) });
+          const next = k === fingerprint ? '0000' : (pin + k).slice(0, 4);
+          if (next.length === 4) this.setState({ pin: next, pinOpen: false, processing: true });
+          else this.setState({ pin: next });
+        },
+      })),
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'sombre';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

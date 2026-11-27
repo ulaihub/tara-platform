@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Recevoir mes ventes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #C2410C)}a:hover{color:var(--accent-2, #9A3412)}
+@keyframes tara-caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes tara-fill{0%{width:56px}100%{width:100%}}
+@keyframes tara-coin{0%{transform:translate(0,0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translate(250px,-6px) scale(1);opacity:0}}
+@keyframes tara-banner{0%{transform:translateY(-130%)}100%{transform:translateY(0)}}
+@keyframes tara-pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes tara-chev{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+  <div style="position: relative; padding: 20px 20px 0; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center">
+    <a href="Portefeuille.dc.html" aria-label="Retour" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: var(--ink)"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 style="margin: 0; text-align: center; font-size: 16px; font-weight: 800">Recevoir mes ventes</h1>
+    <button type="button" aria-label="Comment ça marche" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: var(--ink)"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.3M12 17v.5"></path></svg></button>
+  </div>
+
+  <div style="position: relative; margin-top: 26px; display: flex; flex-direction: column; align-items: center; gap: 6px">
+    <div style="display: flex; align-items: baseline; gap: 6px; opacity: {{amountOpacity}}; transition: opacity .3s">
+      <span style="font-family: Sora, sans-serif; font-size: 56px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">{{amountText}}</span>
+      <sc-if value="{{typing}}" hint-placeholder-val="{{ true }}"><span class="tara-anim" style="width: 3px; height: 50px; border-radius: 2px; background: #FF6A00; align-self: center; animation: tara-caret 1s steps(1) infinite"></span></sc-if>
+      <span style="font-family: Sora, sans-serif; font-size: 24px; font-weight: 700; color: rgba(var(--fg-rgb),.45)">F</span>
+    </div>
+    <span style="font-size: 13px; font-weight: 600; color: {{hintColor}}">{{hint}}</span>
+  </div>
+
+  <div style="position: relative; margin: 14px 20px 0; display: flex; gap: 6px; justify-content: center">
+    <sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
+      <button type="button" onClick="{{c.pick}}" style="height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid {{c.border}}; background: {{c.bg}}; font-family: inherit; font-size: 12px; font-weight: 800; color: {{c.ink}}; cursor: pointer">{{c.label}}</button>
+    </sc-for>
+  </div>
+
+  <div style="position: relative; margin: 16px 20px 0; padding: 14px; border-radius: 26px; background: var(--sheet); box-shadow: 0 16px 34px rgba(140,70,10,.10); display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: rgba(var(--fg-rgb),.62)"><span>Vers</span><span>Arrive en quelques minutes</span></div>
+    <div style="display: flex; align-items: center; gap: 12px">
+      <img src="/_blob/3ffe4daee82fbc623f2a1fe2a7a6a74a" alt="Orange Money" style="width: 46px; height: 46px; flex-shrink: 0; border-radius: 14px; background: var(--sheet); object-fit: cover; box-shadow: 0 0 0 1px rgba(var(--fg-rgb),.08); display: inline-block">
+      <span style="flex: 1; display: flex; flex-direction: column"><b style="font-size: 15px">Orange Money · ••56</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.66)">Votre numéro de reversement</span></span>
+      <span style="font-size: 12px; font-weight: 800; color: var(--ok)">{{feeShort}}</span>
+    </div>
+
+    <button type="button" onClick="{{slide}}" aria-label="{{slideLabel}}" style="position: relative; height: 58px; border: 0; padding: 0; border-radius: 20px; background: {{trackBg}}; overflow: hidden; cursor: pointer; font-family: inherit">
+      <sc-if value="{{sending}}" hint-placeholder-val="{{ false }}">
+        <span style="position: absolute; inset: 0; border-radius: 20px; overflow: hidden; pointer-events: none" aria-hidden="true"><span class="tara-anim" style="position: absolute; left: -10px; top: 0; bottom: 0; animation: tara-fill 2.4s cubic-bezier(.4,0,.2,1) both; animation-delay: -0.35s; background: var(--lq-back, rgba(255,61,0,.5))"><span style="position: absolute; left: 100%; top: 0; width: 10px; height: 100%; overflow: hidden"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 10px; height: 116px; animation: lq-move-y 2.2s linear infinite; animation-direction: reverse; "><svg width="10" height="116" viewBox="0 0 10 116" style="display: block"><path d="M0 0 L5.0 0 L6.6 3 L8.0 6 L9.1 9 L9.8 12 L10.0 15 L9.6 18 L8.8 21 L7.6 24 L6.1 27 L4.5 30 L2.9 33 L1.6 36 L0.6 39 L0.1 42 L0.1 45 L0.6 48 L1.6 51 L2.9 54 L4.5 57 L6.1 60 L7.6 63 L8.8 66 L9.6 69 L10.0 72 L9.8 75 L9.1 78 L8.0 81 L6.6 84 L5.0 87 L3.4 90 L2.0 93 L0.9 96 L0.2 99 L0.0 102 L0.4 105 L1.2 108 L2.4 111 L3.9 114 L0 116 Z" style="fill: var(--lq-back, rgba(255,61,0,.5))"></path></svg></span></span></span><span class="tara-anim" style="position: absolute; left: -10px; top: 0; bottom: 0; animation: tara-fill 2.4s cubic-bezier(.4,0,.2,1) both; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)"><span style="position: absolute; left: 100%; top: 0; width: 10px; height: 100%; overflow: hidden"><span class="tara-anim" style="position: absolute; left: 0; top: 0; width: 10px; height: 116px; animation: lq-move-y 1.4s linear infinite; "><svg width="10" height="116" viewBox="0 0 10 116" style="display: block"><path d="M0 0 L5.0 0 L6.6 3 L8.0 6 L9.1 9 L9.8 12 L10.0 15 L9.6 18 L8.8 21 L7.6 24 L6.1 27 L4.5 30 L2.9 33 L1.6 36 L0.6 39 L0.1 42 L0.1 45 L0.6 48 L1.6 51 L2.9 54 L4.5 57 L6.1 60 L7.6 63 L8.8 66 L9.6 69 L10.0 72 L9.8 75 L9.1 78 L8.0 81 L6.6 84 L5.0 87 L3.4 90 L2.0 93 L0.9 96 L0.2 99 L0.0 102 L0.4 105 L1.2 108 L2.4 111 L3.9 114 L0 116 Z" style="fill: #FF3D00"></path></svg></span></span></span></span>
+        <span class="tara-anim" style="position: absolute; left: 30px; top: 22px; width: 16px; height: 16px; border-radius: 50%; background: #FFD36B; border: 2px solid var(--card-border); box-sizing: border-box; animation: tara-coin 1s ease-in infinite"></span>
+        <span class="tara-anim" style="position: absolute; left: 30px; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: #FFD36B; border: 2px solid var(--card-border); box-sizing: border-box; animation: tara-coin 1s ease-in .35s infinite"></span>
+        <span class="tara-anim" style="position: absolute; left: 30px; top: 30px; width: 10px; height: 10px; border-radius: 50%; background: #FFD36B; border: 2px solid var(--card-border); box-sizing: border-box; animation: tara-coin 1s ease-in .7s infinite"></span>
+      </sc-if>
+      <span style="position: absolute; top: 4px; left: {{knobLeft}}; width: 50px; height: 50px; border-radius: 16px; background: {{knobBg}}; display: flex; align-items: center; justify-content: center; transition: left .5s cubic-bezier(.4,0,.2,1)">
+        <sc-if value="{{done}}" hint-placeholder-val="{{ false }}"><svg class="tara-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="animation: tara-pop .45s ease-out both"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+        <sc-if value="{{notDone}}" hint-placeholder-val="{{ true }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: {{knobInk}}"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></sc-if>
+      </span>
+      <span style="position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; padding-left: {{labelPad}}; font-size: 15px; font-weight: 800; color: {{trackInk}}">{{trackLabel}}<sc-if value="{{ready}}" hint-placeholder-val="{{ true }}"><span class="tara-anim" style="letter-spacing: -2px; color: #FFB15C; animation: tara-chev 1.2s ease-in-out infinite">›››</span></sc-if></span>
+    </button>
+  </div>
+
+  <div style="position: absolute; left: 24px; right: 24px; bottom: 26px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 4px">
+    <sc-for list="{{keys}}" as="k" hint-placeholder-count="12">
+      <button type="button" aria-label="{{k.aria}}" onClick="{{k.press}}" style="height: 62px; border: 0; background: transparent; font-family: Sora, sans-serif; font-size: 26px; font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <sc-if value="{{k.isBack}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: var(--ink)"><path d="M9 5h11v14H9l-6-7zM12.5 9.5l5 5M17.5 9.5l-5 5"></path></svg></sc-if>
+        <sc-if value="{{k.isDigit}}" hint-placeholder-val="{{ true }}">{{k.label}}</sc-if>
+      </button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+    <a href="#" class="tara-anim" style="position: absolute; left: 12px; right: 12px; top: 10px; padding: 12px 14px; border-radius: 22px; background: var(--card); box-shadow: 0 18px 40px rgba(60,25,0,.18); display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); animation: tara-banner .55s cubic-bezier(.2,.8,.2,1) .2s both">
+      <img src="/_blob/7a49380faa2112b2a8f70b2ded048c4f" alt="" style="width: 40px; height: 28px; object-fit: contain">
+      <span style="flex: 1; display: flex; flex-direction: column"><b style="font-size: 14px">Reversement envoyé</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.70)">{{bannerText}} <span style="color: var(--accent); font-weight: 800">Voir le reçu</span></span></span>
+      <span style="font-size: 11px; font-weight: 700; color: rgba(var(--fg-rgb),.55)">à l'instant</span>
+    </a>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "clair"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { amount: '128500', stage: 'saisie' };
+  }
+  componentWillUnmount() {
+    clearTimeout(this.timer);
+  }
+  vals() {
+    const nb = ' ';
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, nb);
+    const available = 128500;
+    const minimum = 30000;
+    const freeFrom = 50000;
+    const { stage } = this.state;
+    const amount = Number(this.state.amount || '0');
+    const fee = amount > 0 && amount < freeFrom ? Math.round(amount * 0.0125) : 0;
+    const tooMuch = amount > available;
+    const tooSmall = amount < minimum;
+    const ready = stage === 'saisie' && !tooMuch && !tooSmall;
+    const sending = stage === 'envoi';
+    const done = stage === 'fait';
+    const setAmount = (value) => {
+      if (stage !== 'saisie') return;
+      this.setState({ amount: value });
+    };
+    const press = (d) => () => {
+      if (stage !== 'saisie') return;
+      const cur = this.state.amount === '0' ? '' : this.state.amount;
+      const next = `${cur}${d}`.replace(/^0+/, '').slice(0, 7);
+      this.setState({ amount: next || '0' });
+    };
+    const back = () => {
+      if (stage !== 'saisie') return;
+      this.setState({ amount: this.state.amount.slice(0, -1) || '0' });
+    };
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', 'back'].map((k) => ({
+      label: k,
+      aria: k === 'back' ? 'Effacer' : k,
+      isBack: k === 'back',
+      isDigit: k !== 'back',
+      press: k === 'back' ? back : press(k),
+    }));
+    const chips = [
+      ['Tout', available],
+      ['100 000', 100000],
+      ['50 000', 50000],
+      ['30 000', 30000],
+    ].map(([label, value]) => ({
+      label,
+      pick: () => setAmount(String(value)),
+      bg: amount === value ? 'var(--inv)' : 'transparent',
+      border: amount === value ? 'var(--inv)' : 'rgba(var(--fg-rgb),.16)',
+    }));
+    let hint = `Disponible ${fmt(available)} F · gratuit dès ${fmt(freeFrom)} F`;
+    let hintColor = 'rgba(var(--fg-rgb),.62)';
+    if (tooMuch) {
+      hint = `Plus que vos ventes (${fmt(available)} F)`;
+      hintColor = 'var(--danger)';
+    } else if (tooSmall) {
+      hint = `Mobile Money n’envoie pas moins de ${fmt(minimum)} F`;
+      hintColor = 'var(--danger)';
+    } else if (fee > 0) {
+      hint = `Frais 1,25 % : ${fmt(fee)} F · vous recevez ${fmt(amount - fee)} F`;
+    }
+    const chipInk = chips.map((c) => c);
+    return {
+      amountText: fmt(amount),
+      typing: stage === 'saisie',
+      amountOpacity: done ? 0.55 : 1,
+      hint,
+      hintColor,
+      chips: chipInk.map((c) => ({ ...c, ink: c.bg === 'var(--inv)' ? 'var(--inv-ink)' : 'var(--ink)' })),
+      feeShort: fee > 0 ? `${fmt(fee)} F de frais` : 'Gratuit',
+      ready,
+      sending,
+      done,
+      notDone: !done,
+      trackBg: ready || sending ? '#16120E' : done ? '#0E7F57' : 'rgba(var(--fg-rgb),.08)',
+      trackInk: ready || sending || done ? 'var(--sheet)' : 'rgba(var(--fg-rgb),.50)',
+      knobBg: ready ? 'linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)' : sending ? 'var(--sheet)' : done ? 'rgba(255,255,255,.18)' : 'var(--sheet)',
+      knobInk: ready ? '#140800' : sending ? '#FF6A00' : 'rgba(var(--fg-rgb),.40)',
+      knobLeft: sending || done ? 'calc(100% - 54px)' : '4px',
+      labelPad: sending || done ? '0' : '40px',
+      trackLabel: sending
+        ? 'Envoi vers ••56…'
+        : done
+          ? `Envoyé sur ••56`
+          : tooSmall || tooMuch
+            ? 'Montant à corriger'
+            : `Glisser pour recevoir ${fmt(amount - fee)} F`,
+      slideLabel: done ? 'Recommencer la démonstration' : `Glisser pour recevoir ${fmt(amount - fee)} F`,
+      slide: () => {
+        if (done) {
+          this.setState({ stage: 'saisie' });
+          return;
+        }
+        if (!ready) return;
+        this.setState({ stage: 'envoi' });
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => this.setState({ stage: 'fait' }), 2500);
+      },
+      bannerText: `${fmt(amount - fee)} F arrivent sur votre Orange Money ••56.`,
+      keys,
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'clair';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

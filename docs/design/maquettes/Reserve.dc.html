@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Réserve pour mes livraisons</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #C2410C)}a:hover{color:var(--accent-2, #9A3412)}
+@keyframes tara-stripes{0%{background-position:0 0}100%{background-position:28px 0}}
+@keyframes tara-toast{0%{transform:translateY(20px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes tara-bump{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+@keyframes am-rise{0%{transform:translateY(40px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes am-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+  <div class="tara-anim" style="position: absolute; right: -150px; top: 140px; width: 400px; height: 400px; border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; background: radial-gradient(circle, rgba(255,176,0,.20) 0%, rgba(255,176,0,0) 68%); animation: lq-morph 14s ease-in-out infinite alternate, lq-drift 20s ease-in-out infinite alternate" aria-hidden="true"></div>
+
+  <div style="position: relative; padding: 20px 20px 0; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center">
+    <a href="Portefeuille.dc.html" aria-label="Retour" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: var(--ink)"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 style="margin: 0; text-align: center; font-size: 16px; font-weight: 800">Réserve pour mes livraisons</h1>
+    <span></span></span>
+  </div>
+
+  <p style="position: relative; margin: 14px 28px 0; font-size: 14px; line-height: 1.5; color: rgba(var(--fg-rgb),.72); text-align: center; text-wrap: pretty">Chaque soir à 18 h, ce montant reste sur votre Solde Tara pour payer les livraisons du lendemain. Le reste de vos ventes part sur votre Mobile Money.</p>
+
+  <div style="position: relative; margin-top: 22px; display: flex; align-items: center; justify-content: center; gap: 18px">
+    <button type="button" aria-label="Moins 1 000 F" onClick="{{minus}}" style="width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--sheet); box-shadow: 0 8px 20px rgba(140,70,10,.10); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="stroke: var(--ink)"><path d="M5 12h14"></path></svg></button>
+    <span class="tara-anim" style="min-width: 190px; display: flex; align-items: baseline; justify-content: center; gap: 6px; animation: tara-bump .3s ease-out"><b style="font-family: Sora, sans-serif; font-size: 48px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">{{amountText}}</b><span style="font-family: Sora, sans-serif; font-size: 22px; font-weight: 700; color: rgba(var(--fg-rgb),.45)">F</span></span>
+    <button type="button" aria-label="Plus 1 000 F" onClick="{{plus}}" style="width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--sheet); box-shadow: 0 8px 20px rgba(140,70,10,.10); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="stroke: var(--ink)"><path d="M12 5v14M5 12h14"></path></svg></button>
+  </div>
+  <span style="position: relative; display: block; margin-top: 8px; text-align: center; font-size: 13px; font-weight: 600; color: rgba(var(--fg-rgb),.66)">{{coverage}}</span>
+
+  <div style="position: relative; margin: 14px 20px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px">
+    <sc-for list="{{chips}}" as="c" hint-placeholder-count="5">
+      <button type="button" onClick="{{c.pick}}" style="height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid {{c.border}}; background: {{c.bg}}; font-family: inherit; font-size: 12px; font-weight: 800; color: {{c.ink}}; cursor: pointer">{{c.label}}</button>
+    </sc-for>
+  </div>
+
+  <button type="button" onClick="{{useAdvice}}" style="position: relative; margin: 12px 20px 0; width: calc(100% - 40px); min-height: 52px; padding: 8px 14px; border: 1.5px dashed rgba(194,65,12,.40); border-radius: 18px; background: rgba(255,138,0,.08); display: flex; align-items: center; gap: 10px; font-family: inherit; text-align: left; cursor: pointer">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke: var(--accent)"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"></path></svg>
+    <span style="flex: 1; display: flex; flex-direction: column"><b style="font-size: 13px; color: var(--accent-2)">Conseillé : 7 000 F</b><span style="font-size: 12px; color: rgba(var(--fg-rgb),.70)">Vos livraisons vous coûtent environ 6 200 F par jour.</span></span>
+  </button>
+
+  <div style="position: relative; margin: 16px 20px 0; padding: 14px; border-radius: 24px; background: var(--sheet); box-shadow: 0 16px 34px rgba(140,70,10,.10); display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline"><b style="font-size: 14px">Ce soir à 18 h</b><span style="font-size: 12px; font-weight: 700; color: rgba(var(--fg-rgb),.66)">128 500 F de ventes</span></div>
+    <div style="color: #FFF; position: relative; height: 22px; border-radius: 11px; background: #16120E; overflow: hidden; display: flex">
+      <span class="tara-anim" style="width: {{keptWidth}}; height: 22px; background-color: #FFB000; background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.35) 0 7px, rgba(255,255,255,0) 7px 14px); animation: tara-stripes 1s linear infinite; transition: width .6s cubic-bezier(.6,-.35,.3,1.45)"></span>
+      <span style="flex: 1; height: 22px; background: linear-gradient(100deg, #FF6A00 0%, #FF3D00 100%)"></span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <span style="display: flex; flex-direction: column; gap: 2px"><span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: rgba(var(--fg-rgb),.70)"><span style="width: 10px; height: 10px; border-radius: 3px; background: #FFB000"></span>Gardé · Solde Tara</span><b style="font-size: 16px">{{keptText}}</b><span style="font-size: 11px; color: rgba(var(--fg-rgb),.62)">{{keptNote}}</span></span>
+      <span style="display: flex; flex-direction: column; gap: 2px; align-items: flex-end; text-align: right"><span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: rgba(var(--fg-rgb),.70)"><span style="width: 10px; height: 10px; border-radius: 3px; background: #FF3D00"></span>Reversé · <img src="/_blob/3ffe4daee82fbc623f2a1fe2a7a6a74a" alt="Orange Money" style="width: 14px; height: 14px; flex-shrink: 0; border-radius: 3px; background: var(--sheet); object-fit: cover; box-shadow: 0 0 0 1px rgba(var(--fg-rgb),.08); display: inline-block"> ••56</span><b style="font-size: 16px">{{paidText}}</b><span style="font-size: 11px; color: rgba(var(--fg-rgb),.62)">sur votre Orange Money</span></span>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 24px; display: flex; flex-direction: column; gap: 10px">
+    <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}">
+      <span class="tara-anim" style="align-self: center; padding: 8px 14px; border-radius: 999px; background: #16120E; color: #FFFFFF; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; animation: tara-toast .4s ease-out both"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE9B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{savedText}}</span>
+    </sc-if>
+    <button type="button" onClick="{{save}}" style="height: 58px; border: 0; border-radius: 20px; background: linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%); box-shadow: 0 14px 30px rgba(255,90,0,.30); font-family: inherit; font-size: 17px; font-weight: 800; color: #140800; cursor: pointer">Enregistrer la réserve</button>
+  </div>
+<div style="position: absolute; inset: 0; z-index: 20; display: {{sheetShow}}"><button type="button" aria-label="Fermer" onClick="{{sheetClose}}" style="position: absolute; inset: 0; border: 0; background: rgba(10,10,15,.55); cursor: pointer"></button><div role="dialog" aria-label="{{sheetTitle}}" class="tara-anim" style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 20px 22px; border-radius: 28px 28px 0 0; background: var(--sheet); color: var(--ink); box-shadow: 0 -20px 40px rgba(0,0,0,.35); display: flex; flex-direction: column; gap: 12px; animation: am-rise .35s ease-out both"><span style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: rgba(var(--fg-rgb),.18)"></span><b style="font-size: 16px">{{sheetTitle}}</b><div style="height: 66px; border-radius: 18px; border: 2px solid #FF8A00; display: flex; align-items: center; justify-content: center; gap: 4px"><b style="font-family: Sora, sans-serif; font-size: 34px; letter-spacing: -0.02em">{{sheetAmount}}</b><span class="tara-anim" style="width: 3px; height: 34px; border-radius: 2px; background: #FF6A00; animation: am-blink 1s steps(1) infinite"></span><span style="font-family: Sora, sans-serif; font-size: 20px; font-weight: 700; opacity: .55; margin-left: 4px">F</span></div><span style="font-size: 12px; font-weight: 700; color: {{sheetHintInk}}">{{sheetHint}}</span><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px"><sc-for list="{{keys}}" as="k" hint-placeholder-count="12"><button type="button" aria-label="{{k.aria}}" onClick="{{k.press}}" style="height: 48px; border-radius: 14px; border: 1px solid rgba(var(--fg-rgb),.08); background: rgba(var(--fg-rgb),.05); color: var(--ink); font: 700 20px Sora, sans-serif; cursor: pointer">{{k.label}}</button></sc-for></div><button type="button" onClick="{{sheetOk}}" style="height: 56px; border: 0; border-radius: 18px; background: {{sheetOkBg}}; color: {{sheetOkInk}}; font-size: 16px; font-weight: 800; cursor: pointer">Valider</button></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "clair"}, "glass": {"editor": "enum", "options": ["verre", "equilibre", "opaque"], "default": "equilibre"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { reserve: 10000, saved: false, sheet: false, typed: '' };
+  }
+  vals() {
+    const nb = ' ';
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, nb);
+    const sales = 128500;
+    const balance = 3500;
+    const perDay = 6200;
+    const reserve = this.state.reserve;
+    const set = (value) => this.setState({ reserve: Math.max(0, Math.min(100000, value)), saved: false });
+    const typed = this.state.typed;
+    const sheetVals = (title, check, onOk) => {
+      const value = Number(typed || 0);
+      const { ok, hint, warn } = check(value);
+      return {
+        sheetShow: this.state.sheet ? 'block' : 'none',
+        sheetTitle: title,
+        sheetAmount: typed ? fmt(value) : '0',
+        sheetHint: hint,
+        sheetHintInk: warn ? '#FF8A3D' : 'rgba(var(--fg-rgb),.62)',
+        sheetClose: () => this.setState({ sheet: false }),
+        sheetOk: () => { if (ok) onOk(value); },
+        sheetOkBg: ok ? 'linear-gradient(100deg, #FFB000 0%, #FF6A00 55%, #FF3D00 100%)' : 'rgba(var(--fg-rgb),.08)',
+        sheetOkInk: ok ? '#140800' : 'rgba(var(--fg-rgb),.40)',
+        keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '⌫'].map((k) => ({
+          label: k,
+          aria: k === '⌫' ? 'Effacer' : k,
+          press: () => {
+            if (k === '⌫') this.setState({ typed: typed.slice(0, -1) });
+            else {
+              const next = (typed + k).replace(/^0+/, '');
+              if (next.length <= 7) this.setState({ typed: next });
+            }
+          },
+        })),
+      };
+    };
+    const kept = Math.max(0, Math.min(sales, reserve - balance));
+    const paid = sales - kept;
+    const days = reserve / perDay;
+    const coverage =
+      reserve === 0
+        ? 'Pas de réserve : toutes vos ventes vous sont reversées'
+        : `Couvre environ ${days.toFixed(1).replace('.', ',')} jour${days >= 2 ? 's' : ''} de livraisons`;
+    return {
+      amountText: fmt(reserve),
+      coverage,
+      minus: () => set(reserve - 1000),
+      plus: () => set(reserve + 1000),
+      useAdvice: () => set(7000),
+      chips: [
+        ...[0, 5000, 10000, 50000].map((value) => ({
+          label: value === 0 ? 'Aucune' : `${fmt(value)} F`,
+          pick: () => set(value),
+          bg: value === reserve ? 'var(--inv)' : 'transparent',
+          border: value === reserve ? 'var(--inv)' : 'rgba(var(--fg-rgb),.16)',
+          ink: value === reserve ? 'var(--inv-ink)' : 'var(--ink)',
+        })),
+        (() => {
+          const custom = ![0, 5000, 10000, 50000].includes(reserve);
+          return {
+            label: custom ? `${fmt(reserve)} F ✎` : 'Autre',
+            pick: () => this.setState({ sheet: true, typed: '' }),
+            bg: custom ? 'var(--inv)' : 'transparent',
+            border: custom ? 'var(--inv)' : 'rgba(var(--fg-rgb),.16)',
+            ink: custom ? 'var(--inv-ink)' : 'var(--ink)',
+          };
+        })(),
+      ],
+      ...sheetVals('Autre montant de réserve', (v) => (
+        v > 100000 ? { ok: false, hint: 'La réserve va jusqu’à 100 000 F.', warn: true }
+          : { ok: true, hint: v === 0 ? 'Aucune réserve : toutes vos ventes vous sont reversées.' : `Couvre environ ${(v / perDay).toFixed(1).replace('.', ',')} jours de livraisons.`, warn: false }
+      ), (v) => this.setState({ reserve: v, saved: false, sheet: false })),
+      keptWidth: `${Math.max(kept > 0 ? 3 : 0, (kept / sales) * 100)}%`,
+      keptText: `${fmt(kept)} F`,
+      keptNote: kept > 0 ? `votre Solde Tara passe à ${fmt(balance + kept)} F` : `votre Solde Tara a déjà ${fmt(balance)} F`,
+      paidText: `${fmt(paid)} F`,
+      saved: this.state.saved,
+      savedText: `Réserve enregistrée : ${fmt(reserve)} F`,
+      save: () => this.setState({ saved: true }),
+    };
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const pick = (this.state && this.state.themeOverride) || this.props.theme || 'clair';
+    const t = pick === 'clair' ? 'clair' : 'sombre';
+    const G = { verre: '.38', equilibre: '.62', opaque: '.9' };
+    const g = G[(this.state && this.state.glass) || this.props.glass || 'equilibre'] || '.62';
+    return { ...this.vals(), themeVars: THEMES[t] + `; --glass-a: ${g}` };
+  }
+}
+</script>
+</body>
+</html>

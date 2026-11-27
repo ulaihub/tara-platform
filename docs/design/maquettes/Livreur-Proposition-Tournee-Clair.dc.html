@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Livreur · proposition de tournée (clair)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Sora:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--accent, #FFB15C)}
+button{font-family:inherit}
+@keyframes t3-spin{0%{transform:rotateX(-22deg) rotateY(0deg)}100%{transform:rotateX(-22deg) rotateY(360deg)}}@keyframes t3-coin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}@keyframes t3-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes t3-shadow{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(.82);opacity:.22}}@keyframes t3-floor{0%{background-position:0 0}100%{background-position:0 44px}}@keyframes t3-orbit{0%,100%{transform:rotateX(55deg) rotateZ(-35deg)}50%{transform:rotateX(55deg) rotateZ(-27deg)}}@keyframes t3-tilt{0%,100%{transform:perspective(800px) rotateX(9deg) rotateY(-12deg)}50%{transform:perspective(800px) rotateX(4deg) rotateY(9deg)}}@keyframes t3-sheen{0%,30%{background-position:120% 0}70%,100%{background-position:-120% 0}}@keyframes t3-ride{0%{offset-distance:0%}100%{offset-distance:100%}}@keyframes t3-ping{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes r-radar{0%{transform:scale(.3);opacity:.75}100%{transform:scale(3.2);opacity:0}}@keyframes r-dash{to{stroke-dashoffset:-28}}@keyframes r-blink{0%,100%{opacity:1}50%{opacity:.35}}@keyframes r-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}@keyframes r-turn{to{transform:rotate(360deg)}}@keyframes r-rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes r-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes lq-move{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes lq-move-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}@keyframes lq-move-y{from{transform:translateY(0)}to{transform:translateY(-50%)}}@keyframes lq-drain{from{transform:translateY(0%)}to{transform:translateY(100%)}}@keyframes lq-fill-x{0%{width:0%}85%,100%{width:100%}}@keyframes lq-flow{from{background-position:0% 0}to{background-position:-200% 0}}@keyframes lq-morph{0%{border-radius:42% 58% 70% 30% / 45% 45% 55% 55%}50%{border-radius:70% 30% 46% 54% / 30% 39% 61% 70%}100%{border-radius:100% 60% 60% 100% / 100% 100% 60% 60%}}@keyframes lq-drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(28px,-22px) rotate(110deg)}100%{transform:translate(-22px,26px) rotate(220deg)}}
+
+@media (prefers-reduced-motion: reduce){.tara-anim{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; {{themeVars}}">
+<dc-import name="Livreur-Proposition" theme="clair" variant="tournée" hint-size="390px,844px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme": {"editor": "enum", "options": ["sombre", "clair"], "default": "clair"}, "$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  vals() {
+return {};
+  }
+  renderVals() {
+    const THEMES = {"sombre": "--bg: #0A0A0F; --bg-rgb: 10,10,15; --ink: #FFFFFF; --fg-rgb: 255,255,255; --sheet: #16161E; --panel-rgb: 22,22,30; --lq-back: rgba(255,61,0,.5); --glass-hi: rgba(255,255,255,.10); --glass-edge: rgba(255,255,255,.14); --inv: #FFFFFF; --inv-ink: #16120E; --card: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.10); --accent: #FFB15C; --accent-2: #FFC283; --ok: #4ADE9B; --danger: #FF4D5A; --danger-rgb: 255,77,90; --sleep: saturate(.35) brightness(.55); --map-bg: #0D0E13; --map-rgb: 13,14,19; --map-ground: #111219; --road-1: #252833; --road-2: #1E2029; --water: #0F1922; --b1: #1B1D25; --b2: #15161D; --b3: #20222C; --b4: #17181F; --b5: #272A35", "clair": "--bg: #F6F2EC; --bg-rgb: 246,242,236; --ink: #16120E; --fg-rgb: 22,18,14; --sheet: #FFFFFF; --panel-rgb: 255,255,255; --lq-back: rgba(255,106,0,.35); --glass-hi: rgba(255,255,255,.55); --glass-edge: rgba(255,255,255,.9); --inv: #16120E; --inv-ink: #FFFFFF; --card: rgba(255,255,255,.84); --card-border: #FFFFFF; --accent: #C2410C; --accent-2: #9A3412; --ok: #0E7F57; --danger: #E5252F; --danger-rgb: 229,37,47; --sleep: saturate(.25) brightness(1.02) contrast(.92); --map-bg: #EFE8DE; --map-rgb: 239,232,222; --map-ground: #E7DED2; --road-1: #FFFFFF; --road-2: #FBF7F1; --water: #BCD7E4; --b1: #E6D9CA; --b2: #DCCDBC; --b3: #EFE4D7; --b4: #D6C6B4; --b5: #FFFFFF"};
+    const t = (this.props.theme ?? 'clair') === 'clair' ? 'clair' : 'sombre';
+    return { ...this.vals(), themeVars: THEMES[t] };
+  }
+}
+</script>
+</body>
+</html>
