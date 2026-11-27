@@ -88,12 +88,18 @@ describe('page de suivi du destinataire (F2)', () => {
       [['DELIVERED'], 'Colis livré'],
       [['RETURNED'], 'Colis rendu à l’expéditeur'],
       [['CANCELLED'], 'Livraison annulée'],
+      // Retour non payé : colis rapporté au bureau Tara, sans un mot sur l'argent.
+      [['DELIVERY_FAILED', { failureDecision: 'OFFICE' }], 'Le colis est rapporté chez Tara'],
+      [['HELD_AT_OFFICE'], 'Colis rapporté chez Tara'],
+      [['UNCLAIMED'], 'Colis rapporté chez Tara'],
     ];
     for (const [args, title] of titles) {
       const { app } = setup(new FakeApi(tracking(...args)));
       const { html } = await page(app);
       expect(text(html), title).toContain(title);
-      const final = ['DELIVERED', 'RETURNED', 'CANCELLED'].includes(args[0]);
+      const final = ['DELIVERED', 'RETURNED', 'CANCELLED', 'HELD_AT_OFFICE', 'UNCLAIMED'].includes(
+        args[0],
+      );
       expect(html.includes('<script'), title).toBe(!final);
     }
     const { app } = setup(new FakeApi(tracking('DELIVERED')));

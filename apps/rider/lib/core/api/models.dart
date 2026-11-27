@@ -755,6 +755,7 @@ class RiderOrder {
     'failureReason',
     'failedAt',
     'failureDecisionDueAt',
+    'office',
     'awaitingSupportValidation',
     'completedAt',
     'collected',
@@ -805,8 +806,15 @@ class RiderOrder {
   final String? googleMapsUrl;
   final String? wazeUrl;
 
-  /// Choix de l'expéditeur après un échec : RETRY (nouvelle tentative) ou RETURN (retour).
+  /// Choix de l'expéditeur après un échec : RETRY (nouvelle tentative), RETURN (retour payé
+  /// d'avance) ou OFFICE (retour non payé à temps : colis à déposer au bureau Tara).
   final String? failureDecision;
+
+  /// Retour non payé : bureau Tara où déposer le colis (null sinon).
+  RiderOffice? get office => switch (raw['office']) {
+    final Json json => RiderOffice.fromJson(json),
+    _ => null,
+  };
 
   /// Motif du dernier échec (RECIPIENT_ABSENT, RECIPIENT_UNREACHABLE, ADDRESS_NOT_FOUND,
   /// REFUSED, DAMAGED, PAYMENT_REFUSED, OTHER) et son heure.
@@ -850,6 +858,36 @@ class RiderOrder {
   bool get bulky => packageSize == 'BULKY';
 }
 
+/// Bureau Tara : adresse, horaires (français et anglais) et position.
+@immutable
+class RiderOffice {
+  const RiderOffice({
+    required this.address,
+    required this.hours,
+    required this.hoursEn,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  factory RiderOffice.fromJson(Json json) => RiderOffice(
+    address: _field(json, 'address'),
+    hours: _field(json, 'hours'),
+    hoursEn: json['hoursEn'] as String? ?? _field(json, 'hours'),
+    latitude: _field<num>(json, 'latitude').toDouble(),
+    longitude: _field<num>(json, 'longitude').toDouble(),
+  );
+
+  static const fields = ['address', 'hours', 'hoursEn', 'latitude', 'longitude'];
+
+  final String address;
+  final String hours;
+  final String hoursEn;
+  final double latitude;
+  final double longitude;
+
+  String hoursFor(String languageCode) => languageCode == 'en' ? hoursEn : hours;
+}
+
 /// Itinéraire vers la prochaine étape de la course, à dessiner sur la carte.
 @immutable
 class RiderRoute {
@@ -874,7 +912,7 @@ class RiderRoute {
 
   static const fields = ['stop', 'meters', 'seconds', 'source', 'path'];
 
-  /// PICKUP (vendeur) ou DROPOFF (destinataire).
+  /// PICKUP (vendeur), DROPOFF (destinataire) ou OFFICE (bureau Tara).
   final String stop;
   final int meters;
   final int? seconds;

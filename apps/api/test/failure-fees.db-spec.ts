@@ -26,8 +26,8 @@ const HERE = nearAkwa(0.001);
 
 /**
  * Frais d'échec (E6) : nouvelle tentative (500 F) et retour (moitié du prix de base), figés à
- * la commande, pris sur le solde de l'expéditeur jusqu'à son plafond de dette ; au-delà, la
- * tentative se paie d'avance et le colis retourné n'est rendu que contre paiement.
+ * la commande. La tentative est prise sur le solde jusqu'au plafond de dette, au-delà elle se
+ * paie d'avance ; le retour se paie toujours d'avance, sans dette (voir office-returns).
  */
 describe('Frais de nouvelle tentative et de retour (E6)', () => {
   let ctx: TestContext;
@@ -91,7 +91,7 @@ describe('Frais de nouvelle tentative et de retour (E6)', () => {
       .expect(200);
   }
 
-  it('particulier : frais annoncés, tentative payée d’avance, une seule, retour contre paiement', async () => {
+  it('particulier : frais annoncés, tentative payée d’avance, une seule, retour payé d’avance', async () => {
     const sender = await customer();
     const rider = await activeRider(ctx);
     const placed = await placeOrder(ctx, sender);
@@ -136,35 +136,40 @@ describe('Frais de nouvelle tentative et de retour (E6)', () => {
     expect(second.body.failure).toMatchObject({ retryAllowed: false });
     const limit = await decide(sender, placed, 'RETRY').expect(409);
     expect(limit.body.error.code).toBe('RETRY_LIMIT_REACHED');
+    // Retour sans dette : solde vide, le retour se paie d'abord (rien n'est enregistré).
+    const unpaid = await decide(sender, placed, 'RETURN').expect(422);
+    expect(unpaid.body.error).toMatchObject({
+      code: 'RETURN_PAYMENT_REQUIRED',
+      details: { amount: returnFee, fee: returnFee, fromBalance: 0 },
+    });
+    const returnTopUp = await request(ctx.http)
+      .post('/v1/me/wallet/topup')
+      .set(sender.auth)
+      .set('Idempotency-Key', randomUUID())
+      .send({ amount: returnFee, phone: sender.phone, operator: 'MTN' })
+      .expect(201);
+    await settle(returnTopUp.body.id);
     await decide(sender, placed, 'RETURN').expect(204);
+    expect(await ledger.balance(customerWallet(sender.userId))).toBe(0);
 
-    // Pas de paiement, pas de colis : les frais de retour sont encaissés avant la remise.
+    // Payé d'avance : rien à encaisser à la porte de l'expéditeur.
     const code = returnCode(sender);
-    const blocked = await request(ctx.http)
-      .post(`/v1/rider/orders/${placed.id}/return`)
-      .set(rider.auth)
-      .send({ senderCode: code, ...HERE })
-      .expect(409);
-    expect(blocked.body.error).toMatchObject({ code: 'RETURN_COLLECTION_REQUIRED' });
     const due = await request(ctx.http)
       .get(`/v1/rider/orders/${placed.id}/collection`)
       .set(rider.auth)
       .expect(200);
-    expect(due.body).toMatchObject({
-      reason: 'RETURN',
-      complete: false,
-      due: { total: returnFee },
-    });
+    expect(due.body).toMatchObject({ reason: 'RETURN', complete: true, due: { total: 0 } });
+    const nothing = await request(ctx.http)
+      .post(`/v1/rider/orders/${placed.id}/collect`)
+      .set(rider.auth)
+      .send({ method: 'CASH' })
+      .expect(409);
+    expect(nothing.body.error.code).toBe('COLLECTION_NOT_EXPECTED');
     // Le destinataire ne voit jamais ces frais.
     const token = (seen.body.trackingUrl as string).split('/t/')[1];
     const page = await request(ctx.http).get(`/v1/public/tracking/${token}`).expect(200);
     expect(page.body.due).toEqual({ fee: 0, cod: 0, total: 0 });
 
-    await request(ctx.http)
-      .post(`/v1/rider/orders/${placed.id}/collect`)
-      .set(rider.auth)
-      .send({ method: 'CASH' })
-      .expect(200);
     const returned = await request(ctx.http)
       .post(`/v1/rider/orders/${placed.id}/return`)
       .set(rider.auth)
@@ -190,7 +195,7 @@ describe('Frais de nouvelle tentative et de retour (E6)', () => {
     expect(earnings.body.earnings).toBe(stored.riderEarning - (riderPart?.amount ?? 0));
   });
 
-  it('boutique : frais pris sur son portefeuille jusqu’au plafond, sans encaissement au retour', async () => {
+  it('boutique : tentative prise jusqu’au plafond, mais le retour ne crée pas de dette', async () => {
     const shop = await merchant(ctx);
     const profile = await ctx.prisma.merchantProfile.findUniqueOrThrow({
       where: { userId: shop.userId },
@@ -204,12 +209,24 @@ describe('Frais de nouvelle tentative et de retour (E6)', () => {
     expect(await ledger.balance(merchantPayable(profile.id))).toBe(-500);
     await go(placed, 'IN_DELIVERY');
     await go(placed, 'DELIVERY_FAILED', { failureReason: 'RECIPIENT_ABSENT' });
+    // Le plafond de dette ne sert plus pour un retour : il se paie d'avance.
+    const unpaid = await decide(shop, placed, 'RETURN').expect(422);
+    expect(unpaid.body.error.details).toMatchObject({ amount: stored.returnFee });
+    const topUp = await request(ctx.http)
+      .post('/v1/me/wallet/topup')
+      .set(shop.auth)
+      .set('Idempotency-Key', randomUUID())
+      .send({ amount: stored.returnFee, phone: shop.phone, operator: 'MTN' })
+      .expect(201);
+    await settle(topUp.body.id);
     await decide(shop, placed, 'RETURN').expect(204);
     await request(ctx.http)
       .post(`/v1/rider/orders/${placed.id}/return`)
       .set(rider.auth)
       .send({ senderCode: returnCode(shop), ...HERE })
       .expect(200);
-    expect(await ledger.balance(merchantPayable(profile.id))).toBe(-(500 + stored.returnFee));
+    // La dette d'avant (la tentative) reste la même : le retour n'y a rien ajouté.
+    expect(await ledger.balance(merchantPayable(profile.id))).toBe(-500);
+    expect(await ledger.balance(customerWallet(shop.userId))).toBe(0);
   });
 });

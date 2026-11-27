@@ -21,6 +21,8 @@ payer à la porte et demande Mobile Money en cours, confirmation de disponibilit
 - **Code de livraison** : jamais affiché (le lien peut circuler) ; la page dit à quel numéro
   (masqué) et à quelle heure il est parti, et « Je n'ai pas reçu le code » en renvoie un
   nouveau au même numéro (3 fois au plus, 2 minutes d'écart ; l'ancien ne marche plus).
+- **Retour non payé** : « Colis rapporté chez Tara » (sans montant : les frais ne regardent que
+  l'expéditeur).
 - **Thème clair ou sombre** selon le téléphone ; français ou anglais selon le navigateur,
   ou `?lang=fr|en`.
 - **Sécurité** : CSP stricte à nonce, `Referrer-Policy: no-referrer` (le jeton est dans

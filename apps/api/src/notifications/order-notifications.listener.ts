@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationService } from './notification.service.js';
 import type { PushTemplate } from './push-templates.js';
 import { waitingFeeMax } from '../orders/waiting-fee.js';
+import { shortDate } from '../common/time.js';
 
 /** Prénom du destinataire, pour dire à l'expéditeur quel colis donner. */
 function firstName(name: string): string {
@@ -21,6 +22,8 @@ const SENDER_PUSH: Partial<Record<OrderChange['to'], PushTemplate>> = {
   DELIVERY_FAILED: 'ORDER_DELIVERY_FAILED',
   RETURNED: 'ORDER_RETURNED',
   CANCELLED: 'ORDER_CANCELLED',
+  HELD_AT_OFFICE: 'ORDER_HELD_AT_OFFICE',
+  UNCLAIMED: 'ORDER_UNCLAIMED',
 };
 
 /**
@@ -100,6 +103,23 @@ export class OrderNotificationsListener implements OnModuleInit {
             smsOnly: true,
           });
         }
+        break;
+      case 'HELD_AT_OFFICE':
+        // Retour non payé : l'expéditeur apprend où est son colis et comment le récupérer.
+        await this.notifications.toPhone({
+          phone: full.sender.phone,
+          locale: full.sender.locale === 'EN' ? 'en' : 'fr',
+          userId: order.senderId,
+          orderId: order.id,
+          template: 'OFFICE_HELD',
+          params: {
+            reference: order.reference,
+            address: this.env.OFFICE_ADDRESS,
+            hours: full.sender.locale === 'EN' ? this.env.OFFICE_HOURS_EN : this.env.OFFICE_HOURS,
+            amount: String(order.officeDue),
+            until: order.officeUntil ? shortDate(order.officeUntil) : '',
+          },
+        });
         break;
       case 'DELIVERED':
         await this.notifications.toPhone({
@@ -203,6 +223,8 @@ export class OrderNotificationsListener implements OnModuleInit {
           count: numbers.length,
           numbers: numbers.slice(0, -1).join(', '),
           last: numbers.at(-1) ?? '',
+          amount: order.officeDue,
+          until: order.officeUntil ? shortDate(order.officeUntil) : '',
         },
         data: { type: 'order.status', orderId: order.id, status: to },
         orderId: order.id,

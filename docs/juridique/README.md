@@ -134,3 +134,15 @@ consommateur et de l'Acte uniforme OHADA portant organisation des sûretés (201
     acceptable pour un mandataire, et absence de requalification en réception de fonds du public
     (réglementation COBAC / BEAC des services de paiement). Restitution à la fermeture d'un compte
     par le service client.
+14. Retour du colis sans dette (version 2026-11.12) : le retour se paie d'avance (solde Tara,
+    puis Mobile Money dans l'app) ; plus aucun encaissement à la porte. Non payé dans les 15
+    minutes : colis déposé au bureau Tara (adresse provisoire à Bonabéri, lundi au vendredi
+    8 h - 17 h), gardé 30 jours sans frais, rendu contre paiement (app ou espèces) ; rappels
+    au dépôt puis à J+1, J+7, J+25 et à la fin de la garde. Après 30 jours : don à une
+    association, ou destruction s'il est périssable, dangereux ou sans valeur ; **jamais de
+    vente** ; frais abandonnés, aucune dette. **À faire valider par l'avocat** : ce que Tara
+    peut faire d'un bien non réclamé (droit de rétention du transporteur et sort des
+    marchandises en souffrance, Acte uniforme OHADA relatif aux contrats de transport de
+    marchandises par route ; règles du dépôt), durée et forme des mises en demeure (SMS et
+    notification suffisent-ils ?), preuve du dépôt (photo, journal), et adresse définitive du
+    bureau à inscrire dans les conditions.

@@ -1685,7 +1685,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get failureDueBody => 'No answer by then: the parcel is brought back to you.';
+  String get failureDueBody => 'Without an answer or payment by then, the parcel goes to the Tara office.';
 
   @override
   String get failureRetryTitle => 'Try again';
@@ -1834,7 +1834,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String returnFeeHint(String amount) {
-    return 'Return fee: $amount, taken from your Tara balance. If it isn’t enough, you pay the rest to the rider when the parcel is handed back (cash or Mobile Money).';
+    return 'Return fees: $amount, already paid. Nothing to pay the rider.';
   }
 
   @override
@@ -3336,7 +3336,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String failureCountdown(int minutes) {
-    return 'Choose what happens next. Without an answer within $minutes min, the parcel comes back to you.';
+    return 'Choose what happens next. Without an answer or payment within $minutes min, the parcel goes to the Tara office.';
   }
 
   @override
@@ -3367,7 +3367,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failureOnceNote =>
-      'Only one new attempt is possible: after that, the parcel comes back to you. The fees were set when you ordered.';
+      'Only one new attempt is possible: after that, it is the return. The fees were set when you ordered.';
 
   @override
   String get failureGoRetry => 'Restart the delivery';
@@ -3397,4 +3397,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileReplayIntro => 'See the introduction again';
+
+  @override
+  String get statusToOffice => 'To the Tara office';
+
+  @override
+  String get statusAtOffice => 'At the Tara office';
+
+  @override
+  String get statusUnclaimed => 'Not collected';
+
+  @override
+  String returnQuoteLine(String fee, String fromBalance, String toPay) {
+    return 'Return fees $fee. Your balance pays $fromBalance. Left to pay now: $toPay.';
+  }
+
+  @override
+  String returnQuoteCovered(String fee) {
+    return 'Return fees $fee, paid from your Tara balance. Nothing to pay the rider.';
+  }
+
+  @override
+  String returnPayTitle(String amount) {
+    return 'Pay $amount for the return';
+  }
+
+  @override
+  String get returnPayBody =>
+      'Your balance does not cover the whole return. Pay by Mobile Money: the rider brings the parcel back as soon as the payment is confirmed. Without payment before the countdown ends, the parcel goes to the Tara office.';
+
+  @override
+  String get trackToOffice => 'Parcel on its way to the Tara office';
+
+  @override
+  String trackToOfficeBody(String rider, String amount) {
+    return 'Return not paid in time: $rider drops the parcel at the Tara office. You will pay $amount to collect it.';
+  }
+
+  @override
+  String get trackAtOffice => 'Parcel kept at the Tara office';
+
+  @override
+  String trackAtOfficeBody(String amount) {
+    return 'Pay $amount (in the app or at the office) to collect it.';
+  }
+
+  @override
+  String officeDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'You have $days days left.',
+      one: 'You have 1 day left.',
+      zero: 'The holding period is over.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trackAtOfficePaid => 'Fees paid. At the office, give your pickup code to collect the parcel.';
+
+  @override
+  String get trackUnclaimed => 'Parcel not collected';
+
+  @override
+  String get trackUnclaimedBody =>
+      'The holding period is over: Tara disposes of the parcel under the terms. Nothing is owed anymore.';
+
+  @override
+  String get officeTitle => 'Tara office';
+
+  @override
+  String officeKeptUntil(String date) {
+    return 'Kept free of charge until $date.';
+  }
+
+  @override
+  String officePayTitle(String amount) {
+    return 'Pay $amount to collect the parcel';
+  }
+
+  @override
+  String get officePayBody =>
+      'Your balance does not cover the fees. Pay by Mobile Money: your pickup code arrives by SMS as soon as the payment is confirmed.';
+
+  @override
+  String officePayNow(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String get officeCodeTitle => 'Pickup code';
+
+  @override
+  String get officeCodeGive => 'At the Tara office, give this code to collect your parcel.';
+
+  @override
+  String get officeCodeSent => 'Your pickup code was sent to you by SMS.';
+
+  @override
+  String get newOfficeCode => 'Show a new pickup code';
+
+  @override
+  String get stepAtOffice => 'At the Tara office';
+
+  @override
+  String get stepUnclaimed => 'Not collected';
+
+  @override
+  String trackHeaderOffice(String reference) {
+    return '$reference · Tara office';
+  }
 }

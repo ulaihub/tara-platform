@@ -512,6 +512,26 @@ class FakeClientApi extends ClientApi {
     return given;
   }
 
+  /// Retour sans dette : prix annoncé (null : serveur d'avant, rien d'affiché).
+  ReturnQuote? returnPrice;
+
+  @override
+  Future<ReturnQuote> returnQuote(String orderId) async =>
+      returnPrice ?? (throw const ApiException(code: 'NOT_FOUND', message: 'Introuvable', status: 404));
+
+  /// Paiements du bureau demandés, et erreur renvoyée au prochain (solde insuffisant…).
+  final officePayments = <String>[];
+  Object? officeError;
+
+  @override
+  Future<void> payOffice(String orderId) async {
+    if (officeError case final error?) {
+      officeError = null;
+      throw error;
+    }
+    officePayments.add(orderId);
+  }
+
   /// Choix après un échec : (commande, RETRY ou RETURN).
   final decisions = <(String, String)>[];
 

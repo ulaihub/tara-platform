@@ -40,6 +40,15 @@ export const SECTIONS: readonly Section[] = [
     ready: true,
   },
   {
+    href: '/bureau',
+    label: 'Bureau Tara',
+    icon: 'returnArrow',
+    requirement: 'E6',
+    description: 'Colis gardés au bureau (retour non payé) : jours restants, montant dû, remise.',
+    roles: OPS_ROLES,
+    ready: true,
+  },
+  {
     href: '/livreurs',
     label: 'Livreurs',
     icon: 'moto',

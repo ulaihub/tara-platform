@@ -1692,7 +1692,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get failureDueBody => 'Sans réponse d’ici là, le colis vous est rapporté.';
+  String get failureDueBody => 'Sans réponse ni paiement d’ici là, le colis part au bureau Tara.';
 
   @override
   String get failureRetryTitle => 'Nouvelle tentative';
@@ -1841,7 +1841,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String returnFeeHint(String amount) {
-    return 'Frais de retour : $amount, pris sur votre solde Tara. S’il ne suffit pas, vous réglez le reste au livreur à la remise du colis (espèces ou Mobile Money).';
+    return 'Frais de retour : $amount, déjà payés. Rien à régler au livreur.';
   }
 
   @override
@@ -3344,7 +3344,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String failureCountdown(int minutes) {
-    return 'Choisissez la suite. Sans réponse dans $minutes min, le colis vous est rapporté.';
+    return 'Choisissez la suite. Sans réponse ni paiement dans $minutes min, le colis part au bureau Tara.';
   }
 
   @override
@@ -3375,7 +3375,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get failureOnceNote =>
-      'Une seule nouvelle tentative est possible : ensuite, le colis vous est rapporté. Les frais ont été fixés à la commande.';
+      'Une seule nouvelle tentative est possible : ensuite, c’est le retour. Les frais ont été fixés à la commande.';
 
   @override
   String get failureGoRetry => 'Relancer la livraison';
@@ -3406,4 +3406,115 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profileReplayIntro => 'Revoir la présentation';
+
+  @override
+  String get statusToOffice => 'Vers le bureau Tara';
+
+  @override
+  String get statusAtOffice => 'Au bureau Tara';
+
+  @override
+  String get statusUnclaimed => 'Non réclamé';
+
+  @override
+  String returnQuoteLine(String fee, String fromBalance, String toPay) {
+    return 'Frais de retour $fee. Votre solde paie $fromBalance. Reste à payer maintenant : $toPay.';
+  }
+
+  @override
+  String returnQuoteCovered(String fee) {
+    return 'Frais de retour $fee, payés par votre solde Tara. Rien à régler au livreur.';
+  }
+
+  @override
+  String returnPayTitle(String amount) {
+    return 'Payez $amount pour le retour';
+  }
+
+  @override
+  String get returnPayBody =>
+      'Votre solde ne couvre pas tout le retour. Payez par Mobile Money : le livreur vous rapporte le colis dès le paiement validé. Sans paiement avant la fin du compte à rebours, le colis part au bureau Tara.';
+
+  @override
+  String get trackToOffice => 'Colis en route vers le bureau Tara';
+
+  @override
+  String trackToOfficeBody(String rider, String amount) {
+    return 'Retour non payé à temps : $rider dépose le colis au bureau Tara. Vous paierez $amount pour le récupérer.';
+  }
+
+  @override
+  String get trackAtOffice => 'Colis gardé au bureau Tara';
+
+  @override
+  String trackAtOfficeBody(String amount) {
+    return 'Payez $amount (dans l’app ou au bureau) pour le récupérer.';
+  }
+
+  @override
+  String officeDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Il vous reste $days jours.',
+      one: 'Il vous reste 1 jour.',
+      zero: 'Le délai de garde est fini.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trackAtOfficePaid => 'Frais payés. Au bureau, donnez votre code de retrait pour récupérer le colis.';
+
+  @override
+  String get trackUnclaimed => 'Colis non réclamé';
+
+  @override
+  String get trackUnclaimedBody =>
+      'Le délai de garde est fini : Tara dispose du colis selon les conditions. Plus rien n’est dû.';
+
+  @override
+  String get officeTitle => 'Bureau Tara';
+
+  @override
+  String officeKeptUntil(String date) {
+    return 'Gardé sans frais jusqu’au $date.';
+  }
+
+  @override
+  String officePayTitle(String amount) {
+    return 'Payez $amount pour récupérer le colis';
+  }
+
+  @override
+  String get officePayBody =>
+      'Votre solde ne couvre pas les frais. Payez par Mobile Money : votre code de retrait arrive par SMS dès le paiement validé.';
+
+  @override
+  String officePayNow(String amount) {
+    return 'Payer $amount';
+  }
+
+  @override
+  String get officeCodeTitle => 'Code de retrait';
+
+  @override
+  String get officeCodeGive => 'Au bureau Tara, donnez ce code pour récupérer votre colis.';
+
+  @override
+  String get officeCodeSent => 'Votre code de retrait vous a été envoyé par SMS.';
+
+  @override
+  String get newOfficeCode => 'Afficher un nouveau code de retrait';
+
+  @override
+  String get stepAtOffice => 'Au bureau Tara';
+
+  @override
+  String get stepUnclaimed => 'Non réclamé';
+
+  @override
+  String trackHeaderOffice(String reference) {
+    return '$reference · bureau Tara';
+  }
 }

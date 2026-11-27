@@ -37,8 +37,14 @@ décision est dans la PR citée (`docs/historique/PR-NNN.md`).
   livreur.
 - **Échec de livraison** : frais de nouvelle tentative et de retour annoncés et figés à la
   commande ; au moins 2 appels au destinataire espacés de 5 min avant de déclarer l'échec ;
-  l'expéditeur a 15 min pour choisir nouvelle tentative ou retour, sinon retour.
-  (Refonte du retour sans dette en cours : voir `LOTS_A_VENIR.md`.)
+  l'expéditeur a 15 min pour choisir nouvelle tentative ou retour.
+- **Retour sans dette** (27/11, PR 94) : le retour se paie **avant** de partir (solde Tara,
+  puis Mobile Money dans l'app) ; **rien n'est encaissé à la porte**. Sans paiement dans les
+  15 min : colis déposé au **bureau Tara** (provisoire : Bonabéri, Douala, lundi-vendredi
+  8 h - 17 h), gardé **30 jours sans frais**, rendu contre paiement (app ou espèces, code de
+  retrait). Rappels à J+1, J+7, J+25 et à la fin. Après 30 jours : **don à une association**,
+  ou destruction s'il est périssable, dangereux ou sans valeur ; **jamais de vente** ; frais
+  abandonnés. Un retour ne crée jamais de dette. Point juridique à faire valider par l'avocat.
 - Frais Mobile Money payés par le client ; retraits gratuits au-dessus d'un seuil (50 000 F),
   sinon frais partagés.
 - Reversements : rien ne part sous le minimum du prestataire (Sebpay 30 000 F) ; on le dit avant
@@ -48,7 +54,7 @@ décision est dans la PR citée (`docs/historique/PR-NNN.md`).
 
 - Boutiques : solde Tara rechargeable, utilisé avant les ventes, réserve du soir (PR 45).
 - Plafond de dette d'une boutique : 3 000 F ; un particulier ne peut pas commander en dette
-  (PR 11, 35).
+  (PR 11, 35). Un retour de colis n'entre plus dans la dette (PR 94).
 - Livreurs (PR 6) : solde prépayé (remplace le dépôt des espèces) ; espèces encaissées à reverser sous
   24 h, suspension après 72 h, garant, plafond progressif ; retraits gelés si suspendu.
 - Suppression de compte protégée tant qu'un solde ou une dette existe ; données téléchargeables.

@@ -333,6 +333,15 @@ class ClientApi {
   /// Relevé mensuel PDF de la boutique (G7), [month] au format AAAA-MM.
   Future<Uint8List> statement(String month) => _api.getBytes('/me/merchant/statements/$month');
 
+  /// Retour sans dette : frais du retour, part payée par le solde et reste à payer (après un
+  /// échec, ou colis gardé au bureau Tara).
+  Future<ReturnQuote> returnQuote(String orderId) async =>
+      ReturnQuote.fromJson(await _api.get('/orders/$orderId/return-quote') as Json);
+
+  /// Colis gardé au bureau Tara : frais payés avec le solde (erreur `RETURN_PAYMENT_REQUIRED`
+  /// et le montant à recharger s'il ne suffit pas) ; le code de retrait part par SMS.
+  Future<void> payOffice(String orderId) => _api.post('/orders/$orderId/office-payment');
+
   /// Après un échec de livraison (E6) : `RETRY` (nouvelle tentative) ou `RETURN` (retour).
   Future<void> failureDecision(String orderId, String decision) =>
       _api.post('/orders/$orderId/failure-decision', body: {'decision': decision});

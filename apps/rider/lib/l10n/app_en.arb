@@ -795,5 +795,16 @@
   "returnStepFeesDone": "Return fees settled",
   "returnStepFeesDoneSub": "You can hand back the parcel.",
   "returnCodeEntered": "Code {code} entered",
-  "slideParcelReturned": "Slide · Parcel returned"
+  "slideParcelReturned": "Slide · Parcel returned",
+  "returnPaidAhead": "Return fees paid in advance by the seller: nothing to collect.",
+  "officeDropTitle": "Drop at the Tara office",
+  "officeDropWhy": "The seller did not pay for the return in time: the parcel is kept at the Tara office. You are paid as for a return.",
+  "officeStepGo": "Go to the Tara office",
+  "officeStepPhoto": "Photograph the dropped parcel",
+  "officeStepPhotoHint": "Parcel at the office, label visible",
+  "officeStepPhotoTaken": "Drop photo · taken at {time}",
+  "slideOfficeDropped": "Slide · Parcel dropped",
+  "officeDropped": "Parcel dropped at the office",
+  "queuedOfficeDrop": "Drop at the Tara office",
+  "statusAtOffice": "Dropped at the Tara office"
 }

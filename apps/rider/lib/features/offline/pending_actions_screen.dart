@@ -232,6 +232,7 @@ class _ActionRow extends StatelessWidget {
       'deliver' => (l.queuedDeliver, TaraIcons.check),
       'fail' => (l.queuedFail, TaraIcons.alertCircle),
       'retry' => (l.queuedRetry, TaraIcons.refresh),
+      'office-drop' => (l.queuedOfficeDrop, TaraIcons.returnArrow),
       _ => (l.queuedReturn, TaraIcons.returnArrow),
     };
     final details = <String>[
@@ -306,7 +307,7 @@ class _ActionRow extends StatelessWidget {
       case 'collect':
         final amount = order?.collectAtDelivery;
         return amount == null || amount == 0 ? null : '${formatAmount(amount)} F';
-      case 'fail' || 'refuse-parcel':
+      case 'fail' || 'refuse-parcel' || 'office-drop':
         if (photo == null) return null;
         try {
           final mo = File(photo).lengthSync() / (1024 * 1024);

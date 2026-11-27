@@ -2632,4 +2632,40 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get slideParcelReturned => 'Glisser · Colis rendu';
+
+  @override
+  String get returnPaidAhead => 'Frais de retour payés d’avance par le vendeur : rien à encaisser.';
+
+  @override
+  String get officeDropTitle => 'Déposer au bureau Tara';
+
+  @override
+  String get officeDropWhy =>
+      'Le vendeur n’a pas payé le retour à temps : le colis est gardé au bureau Tara. Vous êtes payé comme pour un retour.';
+
+  @override
+  String get officeStepGo => 'Aller au bureau Tara';
+
+  @override
+  String get officeStepPhoto => 'Photographier le colis déposé';
+
+  @override
+  String get officeStepPhotoHint => 'Colis posé au bureau, étiquette visible';
+
+  @override
+  String officeStepPhotoTaken(String time) {
+    return 'Photo du dépôt · prise à $time';
+  }
+
+  @override
+  String get slideOfficeDropped => 'Glisser · Colis déposé';
+
+  @override
+  String get officeDropped => 'Colis déposé au bureau';
+
+  @override
+  String get queuedOfficeDrop => 'Dépôt au bureau Tara';
+
+  @override
+  String get statusAtOffice => 'Déposé au bureau Tara';
 }

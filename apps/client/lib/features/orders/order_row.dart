@@ -54,10 +54,14 @@ class OrderRow extends StatelessWidget {
       'DELIVERY_FAILED' => switch (order.failureDecision) {
         'RETRY' => (TaraIcons.refresh, TintTone.accent, l.statusRetrying),
         'RETURN' => (TaraIcons.returnArrow, TintTone.accent, l.statusReturning),
+        'OFFICE' => (TaraIcons.returnArrow, TintTone.accent, l.statusToOffice),
         _ => (TaraIcons.alertCircle, TintTone.danger, l.statusFailed),
       },
       'DELIVERED' => (TaraIcons.check, TintTone.success, l.statusDelivered(_day(l, order.createdAt.toLocal(), now))),
       'RETURNED' => (TaraIcons.returnArrow, TintTone.accent, l.statusReturned),
+      // Retour non payé : colis gardé au bureau Tara, à payer et à récupérer.
+      'HELD_AT_OFFICE' => (TaraIcons.package, TintTone.danger, l.statusAtOffice),
+      'UNCLAIMED' => (TaraIcons.close, TintTone.danger, l.statusUnclaimed),
       'CANCELLED' => (TaraIcons.close, TintTone.danger, l.statusCancelled),
       _ => (TaraIcons.package, TintTone.accent, order.status),
     };

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  FailureDecisionEnum,
   FailureReasonEnum,
   FeePayerEnum,
   OrderStatusEnum,
@@ -173,7 +174,7 @@ export const AdminOrderDto = z
       .object({
         reason: FailureReasonEnum.nullable(),
         at: z.iso.datetime().nullable(),
-        decision: z.enum(['RETRY', 'RETURN']).nullable(),
+        decision: FailureDecisionEnum.nullable(),
       })
       .nullable(),
     cancelReason: z.string().nullable(),

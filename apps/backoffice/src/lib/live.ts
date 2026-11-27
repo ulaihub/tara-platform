@@ -14,6 +14,8 @@ export const STATUS_LABELS: Record<OrderStatus, string> = {
   DELIVERY_FAILED: 'Échec de livraison',
   RETURNED: 'Retournée',
   CANCELLED: 'Annulée',
+  HELD_AT_OFFICE: 'Au bureau Tara',
+  UNCLAIMED: 'Non réclamée',
 };
 
 export const RIDER_STATE_LABELS: Record<LiveRider['state'], string> = {

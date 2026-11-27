@@ -105,7 +105,7 @@ export class AdminOrdersService {
         and.push({ status: 'DELIVERED' });
         break;
       case 'cancelled':
-        and.push({ status: { in: ['CANCELLED', 'RETURNED'] } });
+        and.push({ status: { in: ['CANCELLED', 'RETURNED', 'HELD_AT_OFFICE', 'UNCLAIMED'] } });
         break;
       case 'problems':
         and.push({ OR: await this.problemFilters(now) });

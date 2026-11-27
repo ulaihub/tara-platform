@@ -30,9 +30,13 @@ const fr: Strings = {
     DELIVERED: 'Colis livré',
     RETURNED: 'Colis rendu à l’expéditeur',
     CANCELLED: 'Livraison annulée',
+    HELD_AT_OFFICE: 'Colis rapporté chez Tara',
+    UNCLAIMED: 'Colis rapporté chez Tara',
   },
   retrying: 'Le livreur repasse vous livrer',
   returning: 'Le colis retourne chez l’expéditeur',
+  toOffice: 'Le colis est rapporté chez Tara',
+  officeBody: 'Le colis est gardé au bureau Tara, l’expéditeur viendra le chercher.',
   scheduledFor: (when: string) => `Livraison prévue ${when}`,
   today: 'aujourd’hui',
   tomorrow: 'demain',
@@ -49,6 +53,7 @@ const fr: Strings = {
   steps: ['Commande', 'Livreur', 'Récupéré', 'Livré'],
   stepFailed: 'Échec',
   stepReturned: 'Rendu',
+  stepOffice: 'Chez Tara',
   vehicle: { MOTORBIKE: 'Moto', TRICYCLE: 'Tricycle', CAR: 'Voiture' },
   callName: (first: string) => `Appeler ${first}`,
   callLabel: (name: string) => `Appeler ${name}, votre livreur`,
@@ -183,10 +188,14 @@ const en: Strings = {
     DELIVERY_FAILED: 'The rider couldn’t deliver',
     DELIVERED: 'Parcel delivered',
     RETURNED: 'Parcel returned to the sender',
+    HELD_AT_OFFICE: 'Parcel brought back to Tara',
+    UNCLAIMED: 'Parcel brought back to Tara',
     CANCELLED: 'Delivery cancelled',
   },
   retrying: 'The rider is coming back to deliver',
   returning: 'The parcel is going back to the sender',
+  toOffice: 'The parcel is being brought back to Tara',
+  officeBody: 'The parcel is kept at the Tara office, the sender will collect it.',
   scheduledFor: (when: string) => `Delivery planned ${when}`,
   today: 'today',
   tomorrow: 'tomorrow',
@@ -203,6 +212,7 @@ const en: Strings = {
   steps: ['Ordered', 'Rider', 'Picked up', 'Delivered'],
   stepFailed: 'Failed',
   stepReturned: 'Returned',
+  stepOffice: 'At Tara',
   vehicle: { MOTORBIKE: 'Motorbike', TRICYCLE: 'Tricycle', CAR: 'Car' },
   callName: (first: string) => `Call ${first}`,
   callLabel: (name: string) => `Call ${name}, your rider`,
@@ -335,6 +345,8 @@ export interface Strings {
   status: Record<OrderStatus, Text>;
   retrying: Text;
   returning: Text;
+  toOffice: Text;
+  officeBody: Text;
   scheduledFor: Template;
   today: Text;
   tomorrow: Text;
@@ -351,6 +363,7 @@ export interface Strings {
   steps: [Text, Text, Text, Text];
   stepFailed: Text;
   stepReturned: Text;
+  stepOffice: Text;
   vehicle: Record<'MOTORBIKE' | 'TRICYCLE' | 'CAR', Text>;
   callName: Template;
   callLabel: Template;

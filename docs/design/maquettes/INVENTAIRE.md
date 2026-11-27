@@ -17,6 +17,11 @@ Décisions à garder (prises par l'utilisateur, différentes des maquettes) :
 - Pages web : vraie carte, code de livraison : PR 88 (le reste des pages web et le back-office ne sont pas refaits : choix du porteur)
 - Livreur lot A : enlèvement (scan QR + 4 chiffres), en route : PR 89
 - Livreur lot B : livraison impossible, retour du colis : PR 90
+- Retour sans dette (PR 94), écrans **sans maquette**, dans le style des écrans Échec et Retour :
+  expéditeur `06_suivi_retour_a_payer`, `06_suivi_vers_bureau`, `06_suivi_bureau`,
+  `06_suivi_bureau_paye`, `06_suivi_non_reclame` ; livreur `11_depot_bureau` (l'étape « frais à
+  encaisser » de `11_retour` est retirée) ; back-office « Bureau Tara ». À comparer si une
+  maquette est dessinée plus tard.
 
 ## Reste à comparer
 - Livreur lot C : Recharger, Retirer, Reverser, Pièces, Profil

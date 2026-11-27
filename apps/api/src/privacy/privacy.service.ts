@@ -8,7 +8,7 @@ import { TokenService } from '../auth/token.service.js';
 import { AppError } from '../common/errors/app-error.js';
 import type { AppLocale } from '../common/i18n/locale.js';
 import { Prisma } from '../generated/prisma/client.js';
-import { TERMINAL_STATUSES } from '../orders/order-state-machine.js';
+import { RIDER_DONE_STATUSES, TERMINAL_STATUSES } from '../orders/order-state-machine.js';
 import {
   customerWallet,
   merchantPayable,
@@ -390,7 +390,7 @@ export class PrivacyService {
       throw new AppError('ACCOUNT_DELETION_NOT_ALLOWED', HttpStatus.UNPROCESSABLE_ENTITY);
     }
     const active = await this.prisma.order.count({
-      where: { riderId, status: { notIn: TERMINAL_STATUSES } },
+      where: { riderId, status: { notIn: RIDER_DONE_STATUSES } },
     });
     if (active > 0) throw AppError.unprocessable('ACCOUNT_HAS_ACTIVE_ORDERS');
     const balances = await this.ledger.balances([riderPayable(riderId), riderCashHeld(riderId)]);

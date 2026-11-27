@@ -87,6 +87,16 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   /// Nouvelle tentative que le solde ne couvre pas (E6) : montant à recharger d'abord, puis
   /// la tentative est confirmée dès le paiement validé.
   int? _topUp;
+
+  /// Ce que la recharge paie : RETRY (nouvelle tentative), RETURN (retour sans dette) ou
+  /// OFFICE (frais du colis gardé au bureau Tara).
+  String _topUpFor = 'RETRY';
+
+  /// Retour sans dette : frais, part du solde et reste à payer (échec, colis au bureau).
+  ReturnQuote? _quote;
+
+  /// Frais du bureau payés pendant cette visite : le code de retrait est parti par SMS.
+  bool _officeCodeSent = false;
   String _topUpOperator = 'MTN';
   final _topUpPhone = TextEditingController();
   String? _topUpPayment;
@@ -179,6 +189,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       if (before != null && before != order.status) _announce(order.status);
       unawaited(_loadRiderPhoto(order));
       unawaited(_loadProofPhoto(order));
+      unawaited(_loadQuote(order));
       // Colis parti (ou commande finie) : le code d'enlèvement ne sert plus.
       if (!const ['CREATED', 'SEARCHING_RIDER', 'ASSIGNED'].contains(order.status) && _storedCode != null) {
         unawaited(PickupCodes(ref.read(keyValueStoreProvider)).forget(widget.orderId));
@@ -186,6 +197,51 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       }
     } catch (error) {
       if (mounted && _order == null) setState(() => _error = errorMessage(context, error));
+    }
+  }
+
+  /// Retour sans dette : le prix du retour est annoncé avant de choisir, puis au bureau.
+  Future<void> _loadQuote(TrackedOrder order) async {
+    final wanted =
+        (order.status == 'DELIVERY_FAILED' && order.failure?.decision == null) ||
+        (order.status == 'HELD_AT_OFFICE' && order.office?.paidAt == null);
+    if (!wanted) {
+      if (_quote != null && mounted) setState(() => _quote = null);
+      return;
+    }
+    try {
+      final quote = await ref.read(clientApiProvider).returnQuote(order.id);
+      if (mounted) setState(() => _quote = quote);
+    } catch (_) {
+      // Serveur d'avant ou réseau : les frais figés à la commande restent affichés.
+    }
+  }
+
+  /// Colis gardé au bureau Tara : frais payés avec le solde ; s'il ne suffit pas, la
+  /// recharge du reste est proposée, puis le paiement repart tout seul.
+  Future<void> _payOffice() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await ref.read(clientApiProvider).payOffice(widget.orderId);
+      if (!mounted) return;
+      TaraFeedback.play(context, TaraSound.sent);
+      setState(() => _officeCodeSent = true);
+      ref
+        ..invalidate(activeOrdersProvider)
+        ..invalidate(walletProvider);
+      await _load();
+    } catch (error) {
+      if (!mounted) return;
+      if (error is ApiException && error.code == 'RETURN_PAYMENT_REQUIRED') {
+        _askTopUp((error.details['amount'] as num?)?.toInt() ?? _quote?.toPay ?? 0, 'OFFICE');
+        return;
+      }
+      setState(() => _error = errorMessage(context, error));
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -363,7 +419,12 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     } catch (error) {
       if (!mounted) return;
       if (error is ApiException && error.code == 'RETRY_PAYMENT_REQUIRED') {
-        _askTopUp((error.details['amount'] as num?)?.toInt() ?? _order?.retryFee ?? 0);
+        _askTopUp((error.details['amount'] as num?)?.toInt() ?? _order?.retryFee ?? 0, 'RETRY');
+        return;
+      }
+      // Retour sans dette : le solde ne couvre pas tout, le reste se paie d'abord.
+      if (error is ApiException && error.code == 'RETURN_PAYMENT_REQUIRED') {
+        _askTopUp((error.details['amount'] as num?)?.toInt() ?? _quote?.toPay ?? 0, 'RETURN');
         return;
       }
       final message = errorMessage(context, error);
@@ -440,9 +501,10 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     }
   }
 
-  void _askTopUp(int amount) {
+  void _askTopUp(int amount, String purpose) {
     _prefillPhone(_topUpPhone);
     setState(() {
+      _topUpFor = purpose;
       _topUp = amount;
       _topUpFailed = false;
       _error = null;
@@ -480,7 +542,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     }
   }
 
-  /// Recharge validée : la nouvelle tentative est confirmée dans la foulée.
+  /// Recharge validée : la nouvelle tentative, le retour ou le paiement du bureau est
+  /// confirmé dans la foulée.
   Future<void> _checkTopUp() async {
     final id = _topUpPayment;
     if (id == null) return;
@@ -494,12 +557,17 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     switch (payment.status) {
       case 'SUCCEEDED':
         _topUpPoll?.cancel();
+        final purpose = _topUpFor;
         setState(() {
           _topUp = null;
           _topUpPayment = null;
-          _choice = 'RETRY';
+          if (purpose != 'OFFICE') _choice = purpose;
         });
-        await _decide();
+        if (purpose == 'OFFICE') {
+          await _payOffice();
+        } else {
+          await _decide();
+        }
       case 'FAILED' || 'CANCELLED':
         _topUpPoll?.cancel();
         setState(() {
@@ -515,7 +583,12 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
       _topUp = null;
       _topUpPayment = null;
       _topUpFailed = false;
-      _choice = 'RETURN';
+      // Tentative trop chère : le retour est proposé à la place.
+      _choice = switch (_topUpFor) {
+        'RETRY' => 'RETURN',
+        'RETURN' => null,
+        _ => _choice,
+      };
     });
   }
 
@@ -587,10 +660,12 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
     final height = MediaQuery.sizeOf(context).height;
     final delivered = order?.status == 'DELIVERED';
     final deciding = order != null && _deciding(order);
+    // Colis gardé au bureau Tara (ou non réclamé) : page entière, comme l'échec.
+    final atOffice = order != null && const ['HELD_AT_OFFICE', 'UNCLAIMED'].contains(order.status);
     final panel = height * (delivered ? .66 : (deciding ? .62 : .48));
     final top = MediaQuery.paddingOf(context).top + 72;
     // Livré, ou livraison impossible à trancher : page entière sans carte (maquettes).
-    if (order != null && (delivered || deciding)) {
+    if (order != null && (delivered || deciding || atOffice)) {
       return PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
@@ -616,7 +691,23 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                     ),
                   ),
                   Expanded(
-                    child: delivered
+                    child: atOffice
+                        ? _OfficePage(
+                            order: order,
+                            now: _now,
+                            quote: _quote,
+                            busy: _busy,
+                            error: _error,
+                            topUp: _topUpState(),
+                            code: _pickupCode,
+                            codeSent: _officeCodeSent,
+                            onPay: () => unawaited(_payOffice()),
+                            onNewCode: () => unawaited(_newPickupCode()),
+                            onReport: () => unawaited(
+                              reportProblem(context, ref, orderId: order.id, orderReference: order.reference),
+                            ),
+                          )
+                        : delivered
                         ? _DeliveredPage(
                             order: order,
                             now: _now,
@@ -639,6 +730,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
                             onChoose: (choice) => setState(() => _choice = choice),
                             onDecide: () => unawaited(_decide()),
                             topUp: _topUpState(),
+                            quote: _quote,
                             onCallRecipient: () =>
                                 unawaited(ref.read(launcherProvider)(Uri(scheme: 'tel', path: order.recipientPhone))),
                           ),
@@ -756,6 +848,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   _TopUpState? _topUpState() => _topUp == null
       ? null
       : _TopUpState(
+          purpose: _topUpFor,
           amount: _topUp!,
           operator: _topUpOperator,
           phone: _topUpPhone,
@@ -920,6 +1013,11 @@ class _Panel extends StatelessWidget {
         l.trackRetryingBody(riderName, recipientFirst),
       ),
       'DELIVERY_FAILED' when returning => (l.trackReturning, l.trackReturningBody(riderName)),
+      // Retour non payé à temps : le colis part au bureau Tara.
+      'DELIVERY_FAILED' when failure?.decision == 'OFFICE' => (
+        l.trackToOffice,
+        l.trackToOfficeBody(riderName, '${formatAmount(o.office?.due ?? o.returnFee)}\u00a0F'),
+      ),
       'DELIVERY_FAILED' when failure != null => (
         l.trackFailed,
         l.failureReported(_reason(l, failure.reason), riderName, formatClock(failure.at)),
@@ -993,6 +1091,10 @@ class _Panel extends StatelessWidget {
       // Livré : le récapitulatif reprend les heures, la frise laisse la place à la note.
       // Échec, retour : la frise avec les heures, sous le titre.
       if (!flowing && !returning) ...[_Steps(order: o), const SizedBox(height: 16)],
+      if (failure?.decision == 'OFFICE' && o.office != null) ...[
+        _OfficeCard(office: o.office!, now: now),
+        const SizedBox(height: 12),
+      ],
       if (o.awaitingPayment && pay != null) ...[
         _PayCard(state: pay!, operator: o.feePaymentMethod == 'MOMO_ORANGE' ? l.payOrange : l.payMtn),
         const SizedBox(height: 16),
@@ -1169,10 +1271,12 @@ class _Steps extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     // Échec ou retour : la dernière étape le dit, en rouge tant que rien n'est décidé.
-    final failed = order.status == 'DELIVERY_FAILED';
+    final failed = order.status == 'DELIVERY_FAILED' || order.status == 'UNCLAIMED';
     final last = switch (order.status) {
       'DELIVERY_FAILED' => (l.stepFailed, order.failure?.at ?? order.timeline.lastOrNull?.at),
       'RETURNED' => (l.stepReturned, order.reachedAt('RETURNED')),
+      'HELD_AT_OFFICE' => (l.stepAtOffice, order.reachedAt('HELD_AT_OFFICE')),
+      'UNCLAIMED' => (l.stepUnclaimed, order.reachedAt('UNCLAIMED')),
       _ => (l.stepDelivered, order.reachedAt('DELIVERED')),
     };
     final steps = [
@@ -1727,6 +1831,7 @@ class _PayCard extends StatelessWidget {
 /// Recharge Mobile Money demandée avant une nouvelle tentative (solde insuffisant).
 class _TopUpState {
   const _TopUpState({
+    required this.purpose,
     required this.amount,
     required this.operator,
     required this.phone,
@@ -1737,6 +1842,8 @@ class _TopUpState {
     required this.onCancel,
   });
 
+  /// RETRY, RETURN ou OFFICE : ce que paie la recharge (titre et explication).
+  final String purpose;
   final int amount;
   final String operator;
   final TextEditingController phone;
@@ -1768,9 +1875,17 @@ class _TopUpCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l.topUpTitle(amount), style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
+          Text(switch (state.purpose) {
+            'RETURN' => l.returnPayTitle(amount),
+            'OFFICE' => l.officePayTitle(amount),
+            _ => l.topUpTitle(amount),
+          }, style: TaraText.cardTitle.copyWith(color: c.textPrimary)),
           const SizedBox(height: 4),
-          Text(l.topUpBody, style: TaraText.small.copyWith(color: c.textSecondary)),
+          Text(switch (state.purpose) {
+            'RETURN' => l.returnPayBody,
+            'OFFICE' => l.officePayBody,
+            _ => l.topUpBody,
+          }, style: TaraText.small.copyWith(color: c.textSecondary)),
           const SizedBox(height: 12),
           ChoiceChips<String>(
             options: [operatorChoice('MTN', l.payMtn), operatorChoice('ORANGE', l.payOrange)],
@@ -1829,6 +1944,9 @@ class _Header extends StatelessWidget {
       'DELIVERY_FAILED' when decision == null => (l.trackHeaderDeciding(reference), l.trackFailed),
       // Retour : le colis repart vers l'enlèvement.
       'DELIVERY_FAILED' when decision == 'RETURN' => (l.trackHeaderReturning(reference), '$to → $from'),
+      'DELIVERY_FAILED' when decision == 'OFFICE' => (l.trackHeaderOffice(reference), l.statusToOffice),
+      'HELD_AT_OFFICE' => (l.trackHeaderOffice(reference), l.statusAtOffice),
+      'UNCLAIMED' => (l.trackHeaderOffice(reference), l.statusUnclaimed),
       _ => (reference, '$from → $to'),
     };
     return MergeSemantics(
@@ -2103,12 +2221,16 @@ class _DecidePage extends StatelessWidget {
     required this.onDecide,
     required this.topUp,
     required this.onCallRecipient,
+    this.quote,
   });
 
   final TrackedOrder order;
   final DateTime now;
   final Uint8List? photo;
   final String? choice;
+
+  /// Retour sans dette : frais, part payée par le solde, reste à payer (null : pas encore lu).
+  final ReturnQuote? quote;
   final bool busy;
   final String? error;
   final ValueChanged<String> onChoose;
@@ -2283,6 +2405,23 @@ class _DecidePage extends StatelessWidget {
           selected: choice == 'RETURN',
           onTap: () => onChoose('RETURN'),
         ),
+        // Le prix du retour, annoncé avant de choisir : ce que le solde paie, le reste.
+        if (quote case final q? when q.fee > 0) ...[
+          const SizedBox(height: 8),
+          TintBox(
+            tone: q.toPay > 0 ? TintTone.accent : TintTone.success,
+            child: Text(
+              q.toPay > 0
+                  ? l.returnQuoteLine(
+                      '${formatAmount(q.fee)}\u00a0F',
+                      '${formatAmount(q.fromBalance)}\u00a0F',
+                      '${formatAmount(q.toPay)}\u00a0F',
+                    )
+                  : l.returnQuoteCovered('${formatAmount(q.fee)}\u00a0F'),
+              style: TaraText.small.copyWith(color: c.textPrimary, height: 1.4),
+            ),
+          ),
+        ],
         if (failure?.retryAllowed ?? true) ...[
           const SizedBox(height: 12),
           Text(
@@ -2320,17 +2459,22 @@ class _DecidePage extends StatelessWidget {
 
 /// Code de retour (maquette) : à donner au livreur quand il rend le colis.
 class _ReturnCodeCard extends StatelessWidget {
-  const _ReturnCodeCard({required this.code});
+  const _ReturnCodeCard({required this.code, this.office = false});
 
   final String code;
+
+  /// Colis au bureau Tara : code de retrait, à donner au bureau.
+  final bool office;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = TaraColors.of(context);
     final spaced = code.split('').join(' ');
+    final title = office ? l.officeCodeTitle : l.returnCodeTitle;
+    final give = office ? l.officeCodeGive : l.returnCodeGive;
     return Semantics(
-      label: '${l.returnCodeTitle} : $spaced. ${l.returnCodeGive}',
+      label: '$title : $spaced. $give',
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
@@ -2343,7 +2487,7 @@ class _ReturnCodeCard extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              l.returnCodeTitle.toUpperCase(),
+              title.toUpperCase(),
               style: TaraText.small.copyWith(
                 color: c.accentText,
                 fontSize: 11,
@@ -2355,13 +2499,226 @@ class _ReturnCodeCard extends StatelessWidget {
             Text(spaced, style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 34, letterSpacing: 10)),
             const SizedBox(height: 6),
             Text(
-              l.returnCodeGive,
+              give,
               textAlign: TextAlign.center,
               style: TaraText.small.copyWith(color: c.textPrimary.withValues(alpha: .7), fontSize: 12, height: 1.4),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Bureau Tara : adresse, horaires et fin de la garde sans frais.
+class _OfficeCard extends StatelessWidget {
+  const _OfficeCard({required this.office, required this.now});
+
+  final OrderOffice office;
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final until = office.until;
+    return GlassCard(
+      radius: 22,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const IconTile(icon: TaraIcons.mapPin, size: 40),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.officeTitle,
+                  style: TaraText.label.copyWith(color: c.textPrimary, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 2),
+                Text(office.address, style: TaraText.small.copyWith(color: c.textPrimary)),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    TaraIcon(TaraIcons.clock, size: 14, color: c.textSecondary),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        office.hoursFor(Localizations.localeOf(context).languageCode),
+                        style: TaraText.small.copyWith(color: c.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                if (until != null) ...[
+                  const SizedBox(height: 2),
+                  Text(l.officeKeptUntil(_date(until)), style: TaraText.small.copyWith(color: c.textSecondary)),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _date(DateTime at) =>
+      '${at.day.toString().padLeft(2, '0')}/${at.month.toString().padLeft(2, '0')}/${at.year}';
+}
+
+/// Colis gardé au bureau Tara (retour non payé à temps) : où il est, ce qu'il reste à payer
+/// et combien de jours ; une fois payé, le code de retrait. Non réclamé : plus rien n'est dû.
+class _OfficePage extends StatelessWidget {
+  const _OfficePage({
+    required this.order,
+    required this.now,
+    required this.quote,
+    required this.busy,
+    required this.error,
+    required this.topUp,
+    required this.code,
+    required this.codeSent,
+    required this.onPay,
+    required this.onNewCode,
+    required this.onReport,
+  });
+
+  final TrackedOrder order;
+  final DateTime now;
+  final ReturnQuote? quote;
+  final bool busy;
+  final String? error;
+  final _TopUpState? topUp;
+
+  /// Nouveau code de retrait demandé dans l'app (sinon celui reçu par SMS).
+  final String? code;
+  final bool codeSent;
+  final VoidCallback onPay;
+  final VoidCallback onNewCode;
+  final VoidCallback onReport;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = TaraColors.of(context);
+    final office = order.office;
+    final unclaimed = order.status == 'UNCLAIMED';
+    final paid = office?.paidAt != null;
+    final due = quote?.fee ?? office?.due ?? 0;
+    final toPay = quote?.toPay ?? due;
+    final amount = '${formatAmount(due)}\u00a0F';
+    final days = office?.daysLeft(now) ?? 0;
+    final content = <Widget>[
+      Row(
+        children: [
+          IconTile(
+            icon: unclaimed ? TaraIcons.alertCircle : TaraIcons.package,
+            size: 56,
+            tone: unclaimed ? TintTone.danger : TintTone.accent,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(
+                  header: true,
+                  liveRegion: true,
+                  child: Text(
+                    unclaimed ? l.trackUnclaimed : l.trackAtOffice,
+                    style: TaraText.titlePanel.copyWith(color: c.textPrimary, fontSize: 19),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  unclaimed
+                      ? l.trackUnclaimedBody
+                      : paid
+                      ? l.trackAtOfficePaid
+                      : '${l.trackAtOfficeBody(amount)} ${l.officeDaysLeft(days)}',
+                  style: TaraText.label.copyWith(
+                    color: c.textPrimary.withValues(alpha: .74),
+                    fontSize: 13,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
+      _Steps(order: order),
+      const SizedBox(height: 16),
+      if (office != null && !unclaimed) ...[_OfficeCard(office: office, now: now), const SizedBox(height: 12)],
+      if (!unclaimed && !paid) ...[
+        if (topUp != null)
+          _TopUpCard(state: topUp!)
+        else if (quote case final q? when q.fee > 0)
+          TintBox(
+            tone: TintTone.accent,
+            child: Text(
+              q.toPay > 0
+                  ? l.returnQuoteLine(
+                      '${formatAmount(q.fee)}\u00a0F',
+                      '${formatAmount(q.fromBalance)}\u00a0F',
+                      '${formatAmount(q.toPay)}\u00a0F',
+                    )
+                  : l.returnQuoteCovered('${formatAmount(q.fee)}\u00a0F'),
+              style: TaraText.small.copyWith(color: c.textPrimary, height: 1.4),
+            ),
+          ),
+        const SizedBox(height: 12),
+      ],
+      if (paid && !unclaimed) ...[
+        if (code != null)
+          _ReturnCodeCard(code: code!, office: true)
+        else
+          TintBox(
+            tone: TintTone.success,
+            child: Text(
+              codeSent ? l.officeCodeSent : l.officeCodeGive,
+              style: TaraText.label.copyWith(color: c.textPrimary),
+            ),
+          ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TaraLink(label: l.newOfficeCode, onPressed: busy ? null : onNewCode),
+        ),
+      ],
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TaraLink(label: l.reportProblem, onPressed: onReport),
+      ),
+      if (error != null) ...[const SizedBox(height: 8), ErrorLine(error!)],
+    ];
+    final state = topUp;
+    if (unclaimed || paid) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(20, 30, 20, 20 + MediaQuery.paddingOf(context).bottom),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: content),
+      );
+    }
+    return ScrollWithFooter(
+      horizontal: 20,
+      top: 30,
+      content: content,
+      footer: state != null
+          ? PrimaryButton(
+              label: l.topUpPay('${formatAmount(state.amount)} F'),
+              icon: TaraIcons.phone,
+              loading: busy || state.pending,
+              onPressed: busy || state.pending ? null : state.onPay,
+            )
+          : PrimaryButton(
+              label: l.officePayNow('${formatAmount(toPay > 0 ? toPay : due)}\u00a0F'),
+              icon: toPay > 0 ? TaraIcons.phone : null,
+              loading: busy,
+              onPressed: busy ? null : onPay,
+            ),
     );
   }
 }

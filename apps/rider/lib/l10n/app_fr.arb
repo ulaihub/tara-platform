@@ -1892,5 +1892,23 @@
       }
     }
   },
-  "slideParcelReturned": "Glisser · Colis rendu"
+  "slideParcelReturned": "Glisser · Colis rendu",
+  "returnPaidAhead": "Frais de retour payés d’avance par le vendeur : rien à encaisser.",
+  "officeDropTitle": "Déposer au bureau Tara",
+  "officeDropWhy": "Le vendeur n’a pas payé le retour à temps : le colis est gardé au bureau Tara. Vous êtes payé comme pour un retour.",
+  "officeStepGo": "Aller au bureau Tara",
+  "officeStepPhoto": "Photographier le colis déposé",
+  "officeStepPhotoHint": "Colis posé au bureau, étiquette visible",
+  "officeStepPhotoTaken": "Photo du dépôt · prise à {time}",
+  "@officeStepPhotoTaken": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "slideOfficeDropped": "Glisser · Colis déposé",
+  "officeDropped": "Colis déposé au bureau",
+  "queuedOfficeDrop": "Dépôt au bureau Tara",
+  "statusAtOffice": "Déposé au bureau Tara"
 }

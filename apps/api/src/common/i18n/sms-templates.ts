@@ -95,6 +95,23 @@ const TEMPLATES = {
     fr: 'Tara : votre piece "{document}" expire le {date}. Envoyez la nouvelle dans l app pour continuer a recevoir des courses.',
     en: 'Tara: your document "{document}" expires on {date}. Upload the new one in the app to keep receiving jobs.',
   },
+  // Retour sans dette : colis non payé gardé au bureau Tara.
+  OFFICE_HELD: {
+    fr: 'Tara : votre colis {reference} est garde au bureau Tara ({address}, {hours}). Payez {amount} FCFA dans l app ou au bureau pour le recuperer, avant le {until}.',
+    en: 'Tara: your parcel {reference} is kept at the Tara office ({address}, {hours}). Pay {amount} XAF in the app or at the office to collect it, before {until}.',
+  },
+  OFFICE_REMINDER: {
+    fr: 'Tara : votre colis {reference} vous attend au bureau Tara ({address}, {hours}). Il vous reste {days} jours pour payer {amount} FCFA et le recuperer.',
+    en: 'Tara: your parcel {reference} is waiting at the Tara office ({address}, {hours}). You have {days} days left to pay {amount} XAF and collect it.',
+  },
+  OFFICE_HOLD_OVER: {
+    fr: 'Tara : le delai de garde de votre colis {reference} est fini. Selon nos conditions, Tara peut en disposer. Contactez Tara au plus vite.',
+    en: 'Tara: the holding period of your parcel {reference} is over. Under our terms, Tara may now dispose of it. Contact Tara as soon as possible.',
+  },
+  OFFICE_PICKUP_CODE: {
+    fr: 'Tara : frais payes pour {reference}. Au bureau Tara ({address}, {hours}), donnez ce code pour recuperer votre colis : {code}.',
+    en: 'Tara: fees paid for {reference}. At the Tara office ({address}, {hours}), give this code to collect your parcel: {code}.',
+  },
 } as const satisfies Record<string, Record<AppLocale, string>>;
 
 export type SmsTemplate = keyof typeof TEMPLATES;

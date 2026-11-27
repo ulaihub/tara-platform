@@ -39,7 +39,7 @@ export function tracking(status: OrderStatus, patch: Partial<PublicTracking> = {
     .map((s) => ({ status: s, at: times[s] ?? at('09:02') }));
   if (status === 'DELIVERY_FAILED') timeline.push({ status, at: at('09:18') });
   if (status === 'DELIVERED') timeline.push({ status, at: at('09:35') });
-  if (status === 'RETURNED')
+  if (status === 'RETURNED' || status === 'HELD_AT_OFFICE' || status === 'UNCLAIMED')
     timeline.push({ status: 'DELIVERY_FAILED', at: at('09:18') }, { status, at: at('09:50') });
   const withRider = !['CREATED', 'SEARCHING_RIDER', 'CANCELLED'].includes(status);
   const coming = ['PICKED_UP', 'IN_DELIVERY', 'DELIVERY_FAILED'].includes(status);

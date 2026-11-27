@@ -58,21 +58,20 @@ Rester court : ce fichier est relu à chaque message.
 
 ## État et suite (mis à jour le 27/11/2026)
 
-Fait récemment : suivi Livré / Échec / Retour + profil (expéditeur), vraie carte et code de
-livraison renvoyable sur les pages web, app livreur lots A (scan QR d'enlèvement, en route) et
-B (livraison impossible, retour), maquettes et outils dans le dépôt.
+Fait récemment : **retour du colis sans dette** (PR 94 : payé d'avance, sinon gardé 30 jours au
+bureau Tara de Bonabéri, rendu contre paiement, jamais vendu), suivi Livré / Échec / Retour +
+profil (expéditeur), vraie carte et code de livraison renvoyable sur les pages web, app livreur
+lots A et B, maquettes et outils dans le dépôt.
 
 À faire, dans l'ordre proposé (instructions complètes : `docs/LOTS_A_VENIR.md`) :
 
-1. **Retour du colis sans dette** (attend son accord sur 3 points : durée de garde au bureau,
-   ce qui se passe après, adresse et horaires du bureau). Proposition : le vendeur paie avant
-   le retour (solde Tara d'abord, puis Mobile Money dans l'app) ; sinon le colis part au bureau
-   Tara, il paie pour le récupérer ; prévenu à chaque étape (app, notification, page web) ;
-   pas d'argent encaissé à la porte ; nouvelle version des conditions.
-2. App livreur lot C : Recharger, Retirer, Reverser, Pièces, Profil (fidèles aux maquettes).
+1. App livreur lot C : Recharger, Retirer, Reverser, Pièces, Profil (fidèles aux maquettes).
+2. App expéditeur : écrans pas encore comparés (envoi en masse d'abord).
 3. Repères de Douala : le téléchargement OpenStreetMap échouait depuis le cloud ; réessayer
    depuis son ordinateur, ou liste « à vérifier » confirmée par les livreurs.
 4. Décision en attente : scanner le code de livraison en QR (recommandé : non, SMS seulement).
 
-À lui rappeler : recharger GitHub Actions (la CI ne démarre plus), vérifier le compte Meta
-puis brancher le webhook WhatsApp, lancer `tara update` et `tara apk` après les fusions.
+À lui rappeler : faire relire par l'avocat les conditions 2026-11.12 (bureau, colis non
+réclamé) et donner l'adresse définitive du bureau ; recharger GitHub Actions (la CI ne démarre
+plus), vérifier le compte Meta puis brancher le webhook WhatsApp, lancer `tara update` et
+`tara apk` après les fusions.

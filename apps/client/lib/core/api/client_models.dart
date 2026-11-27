@@ -1005,6 +1005,7 @@ class TrackedOrder {
     required this.timeline,
     required this.createdAt,
     this.failure,
+    this.office,
     this.delivery,
     this.rating,
     this.retryFee = 0,
@@ -1026,6 +1027,7 @@ class TrackedOrder {
     final pricing = _field<Json>(json, 'pricing');
     final rider = json['rider'] as Json?;
     final failure = json['failure'] as Json?;
+    final office = json['office'] as Json?;
     final delivery = json['delivery'] as Json?;
     final rating = json['rating'] as Json?;
     final scheduled = json['scheduledFor'] as String?;
@@ -1064,6 +1066,7 @@ class TrackedOrder {
       ],
       createdAt: DateTime.parse(_field(json, 'createdAt')),
       failure: failure == null ? null : OrderFailure.fromJson(failure),
+      office: office == null ? null : OrderOffice.fromJson(office),
       delivery: delivery == null ? null : OrderDelivery.fromJson(delivery),
       rating: rating == null ? null : OrderRating.fromJson(rating),
       refusalReason: refused && !absent ? (json['cancelReason'] as String? ?? '') : null,
@@ -1093,6 +1096,7 @@ class TrackedOrder {
     'pricing',
     'rider',
     'failure',
+    'office',
     'delivery',
     'cancelReason',
     'rating',
@@ -1121,6 +1125,9 @@ class TrackedOrder {
 
   /// Livraison impossible (E6) : motif, choix et heure limite ; null hors de cet état.
   final OrderFailure? failure;
+
+  /// Retour non payé : colis en route vers le bureau Tara, puis gardé là ; null sinon.
+  final OrderOffice? office;
 
   /// Colis livré : photo de remise et code vérifié ; null avant la livraison.
   final OrderDelivery? delivery;
@@ -1189,6 +1196,7 @@ class TrackedOrder {
     timeline: timeline,
     createdAt: createdAt,
     failure: status == null ? this.failure : failure,
+    office: office,
     delivery: delivery,
     rating: rating ?? this.rating,
     retryFee: retryFee,
@@ -1204,6 +1212,87 @@ class TrackedOrder {
     batchSize: batchSize,
     tourNumbers: tourNumbers,
   );
+}
+
+/// Bureau Tara où est gardé un colis dont le retour n'a pas été payé à temps : rendu contre
+/// paiement de [due] (dans l'app ou au bureau), jusqu'à [until] ; après, Tara en dispose.
+@immutable
+class OrderOffice {
+  const OrderOffice({
+    required this.address,
+    required this.hours,
+    required this.hoursEn,
+    required this.latitude,
+    required this.longitude,
+    required this.heldSince,
+    required this.until,
+    required this.due,
+    required this.paidAt,
+  });
+
+  factory OrderOffice.fromJson(Json json) {
+    DateTime? at(String key) => switch (json[key]) {
+      final String value => DateTime.parse(value).toLocal(),
+      _ => null,
+    };
+    return OrderOffice(
+      address: _field(json, 'address'),
+      hours: _field(json, 'hours'),
+      hoursEn: json['hoursEn'] as String? ?? _field(json, 'hours'),
+      latitude: _field<num>(json, 'latitude').toDouble(),
+      longitude: _field<num>(json, 'longitude').toDouble(),
+      heldSince: at('heldSince'),
+      until: at('until'),
+      due: _field<num>(json, 'due').toInt(),
+      paidAt: at('paidAt'),
+    );
+  }
+
+  static const fields = ['address', 'hours', 'hoursEn', 'latitude', 'longitude', 'heldSince', 'until', 'due', 'paidAt'];
+
+  final String address;
+  final String hours;
+  final String hoursEn;
+  final double latitude;
+  final double longitude;
+
+  /// Déposé au bureau (null tant que le livreur y va).
+  final DateTime? heldSince;
+
+  /// Fin de la garde sans frais.
+  final DateTime? until;
+
+  /// Frais à payer pour récupérer le colis (0 une fois payés).
+  final int due;
+  final DateTime? paidAt;
+
+  String hoursFor(String languageCode) => languageCode == 'en' ? hoursEn : hours;
+
+  /// Jours de garde restants (arrondis au jour supérieur, 0 : délai fini).
+  int daysLeft(DateTime now) {
+    final end = until;
+    if (end == null) return 0;
+    final hours = end.difference(now).inHours;
+    return hours <= 0 ? 0 : (hours / 24).ceil();
+  }
+}
+
+/// Retour sans dette : frais du retour, part prise sur le solde, reste à payer maintenant.
+@immutable
+class ReturnQuote {
+  const ReturnQuote({required this.fee, required this.fromBalance, required this.toPay});
+
+  factory ReturnQuote.fromJson(Json json) => ReturnQuote(
+    fee: _field<num>(json, 'fee').toInt(),
+    fromBalance: _field<num>(json, 'fromBalance').toInt(),
+    toPay: _field<num>(json, 'toPay').toInt(),
+  );
+
+  static const fields = ['fee', 'fromBalance', 'toPay'];
+
+  final int fee;
+  final int fromBalance;
+  final int toPay;
 }
 
 /// Note donnée après une course (F4) : 1 à 5 étoiles, mot facultatif pour l'équipe.

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { PageQuery } from '../common/pagination.js';
 import { AddressDto, Latitude, Longitude } from '../geo/geo.schemas.js';
 import {
+  FailureDecisionEnum,
   FailureReasonEnum,
   OrderStatusEnum,
   PackageContentsEnum,
@@ -125,6 +126,24 @@ export const ReturnBody = z.object({
   ...ActionContext,
 });
 
+/** Retour non payé : dépôt du colis au bureau Tara, avec la photo du colis déposé. */
+export const OfficeDropBody = z.object({
+  photoKey: MediaKey,
+  ...ActionContext,
+});
+
+/** Bureau Tara où sont gardés les colis dont le retour n'est pas payé. */
+export const OfficeDto = z
+  .object({
+    address: z.string(),
+    /** Jours et heures d'ouverture, en français et en anglais. */
+    hours: z.string(),
+    hoursEn: z.string(),
+    latitude: z.number(),
+    longitude: z.number(),
+  })
+  .meta({ id: 'Office' });
+
 export const ReleaseBody = z.object({ reason: z.string().trim().min(3).max(300) });
 
 export const SafetyAlertBody = z.object({
@@ -148,7 +167,7 @@ export const RouteQuery = z.object({
 export const RiderRouteDto = z
   .object({
     /** Étape visée : le vendeur (enlèvement ou retour) ou le destinataire. */
-    stop: z.enum(['PICKUP', 'DROPOFF']),
+    stop: z.enum(['PICKUP', 'DROPOFF', 'OFFICE']),
     meters: z.int(),
     seconds: z.int().nullable(),
     /** « osrm » : tracé routier ; « estimate » : ligne droite, distance estimée. */
@@ -196,12 +215,14 @@ export const RiderOrderDto = z
     collectAtDelivery: z.int(),
     /** Liens d'itinéraire vers la prochaine étape (E2). */
     navigation: z.object({ googleMaps: z.url(), waze: z.url() }).nullable(),
-    failureDecision: z.enum(['RETRY', 'RETURN']).nullable(),
+    failureDecision: FailureDecisionEnum.nullable(),
     /** Dernier échec de livraison : motif et heure (E6). */
     failureReason: FailureReasonEnum.nullable(),
     failedAt: z.iso.datetime().nullable(),
     /** Échec sans décision de l'expéditeur : heure du retour automatique. */
     failureDecisionDueAt: z.iso.datetime().nullable(),
+    /** Retour non payé (OFFICE) : déposer le colis à ce bureau, pas chez l'expéditeur. */
+    office: OfficeDto.nullable(),
     /** Livraison sans code déclarée, en attente de la validation du support (E4). */
     awaitingSupportValidation: z.boolean(),
     assignedAt: z.iso.datetime().nullable(),
@@ -282,6 +303,8 @@ export const PoliceCalledBody = z.object({
 });
 export const ValidateDeliveryBody = z.object({ note: z.string().trim().min(3).max(300) });
 export const FailureDecisionBody = z.object({ decision: z.enum(['RETRY', 'RETURN']) });
+/** Le support peut aussi envoyer directement le colis au bureau Tara. */
+export const SupportFailureDecisionBody = z.object({ decision: FailureDecisionEnum });
 
 /** Réglages de l'app livreur venant du serveur : rien de propre au pays n'est codé dans l'app. */
 export const RiderConfigDto = z

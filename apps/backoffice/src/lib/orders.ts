@@ -26,6 +26,8 @@ export const STATUS_TONE: Record<OrderStatus, string> = {
   DELIVERY_FAILED: 'bg-danger-bg text-danger',
   RETURNED: 'bg-track text-muted',
   CANCELLED: 'bg-track text-muted',
+  HELD_AT_OFFICE: 'bg-warn-bg text-warn',
+  UNCLAIMED: 'bg-track text-muted',
 };
 
 export const PAYMENT_LABELS: Record<AdminOrder['price']['feePaymentMethod'], string> = {
@@ -112,6 +114,8 @@ export const EVENT_LABELS: Record<OrderStatus, string> = {
   DELIVERY_FAILED: 'Échec de livraison',
   RETURNED: 'Rendue à l’expéditeur',
   CANCELLED: 'Annulée',
+  HELD_AT_OFFICE: 'Déposée au bureau Tara',
+  UNCLAIMED: 'Non réclamée au bureau',
 };
 
 /**

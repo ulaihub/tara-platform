@@ -229,6 +229,11 @@ enum OrderStatus {
   DELIVERY_FAILED
   RETURNED
   CANCELLED
+  /// Retour non payé : colis déposé et gardé au bureau Tara (OFFICE_HOLD_DAYS jours), rendu
+  /// à l'expéditeur contre paiement.
+  HELD_AT_OFFICE
+  /// Colis gardé au bureau et jamais réclamé dans le délai : Tara en dispose (conditions).
+  UNCLAIMED
 
   @@map("order_status")
 }
@@ -261,7 +266,10 @@ enum FailureReason {
 /// Choix de l'expéditeur après un échec de livraison.
 enum FailureDecision {
   RETRY
+  /// Retour chez l'expéditeur, frais réglés d'avance (solde ou Mobile Money).
   RETURN
+  /// Retour non réglé dans le délai : le colis part au bureau Tara.
+  OFFICE
 
   @@map("failure_decision")
 }
@@ -275,6 +283,8 @@ enum ProofKind {
   PICKUP_REFUSED
   /// Expéditeur absent après l'attente maximale : position et appels du livreur.
   SENDER_ABSENT
+  /// Colis déposé au bureau Tara par le livreur (retour non payé) : photo du dépôt.
+  OFFICE_DROP
 
   @@map("proof_kind")
 }
@@ -393,6 +403,10 @@ enum JournalEntryKind {
   CANCELLATION_FEE_CHARGED
   /// Attente du livreur au point d'enlèvement au-delà du temps gratuit.
   WAITING_FEE_CHARGED
+  /// Colis gardé au bureau Tara : frais de retour réglés pour le récupérer.
+  OFFICE_RETURN_PAID
+  /// Colis jamais réclamé : frais de retour abandonnés (aucune dette).
+  OFFICE_RETURN_WRITTEN_OFF
 
   @@map("journal_entry_kind")
 }
@@ -1088,6 +1102,16 @@ model Order {
   deliveredAt          DateTime?        @map("delivered_at") @db.Timestamptz(3)
   /// Colis rendu à l'expéditeur après un échec (E6).
   returnedAt           DateTime?        @map("returned_at") @db.Timestamptz(3)
+  /// Retour sans dette : frais du retour pris d'avance (solde, puis Mobile Money).
+  returnPaidAt         DateTime?        @map("return_paid_at") @db.Timestamptz(3)
+  /// Colis gardé au bureau Tara : dépôt, fin de la garde, rappels envoyés, montant à payer
+  /// pour le récupérer, paiement, fin (rendu ou non réclamé).
+  officeAt             DateTime?        @map("office_at") @db.Timestamptz(3)
+  officeUntil          DateTime?        @map("office_until") @db.Timestamptz(3)
+  officeReminders      Int              @default(0) @map("office_reminders")
+  officeDue            Int              @default(0) @map("office_due")
+  officePaidAt         DateTime?        @map("office_paid_at") @db.Timestamptz(3)
+  unclaimedAt          DateTime?        @map("unclaimed_at") @db.Timestamptz(3)
   cancelledAt          DateTime?        @map("cancelled_at") @db.Timestamptz(3)
 
   sender          User               @relation(fields: [senderId], references: [id])
@@ -1123,6 +1147,7 @@ model Order {
   @@index([merchantId, createdAt])
   @@index([recipientPhone])
   @@index([tourId])
+  @@index([status, officeUntil])
   @@map("orders")
 }
 

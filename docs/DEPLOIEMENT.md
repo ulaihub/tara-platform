@@ -125,6 +125,27 @@ l'arrêt se répète.
 
 **Sauvegardes** : base et fichiers dans `/opt/tara/backups`, deux semaines gardées. Activer aussi les instantanés automatiques du VPS dans Hostinger, et copier de temps en temps une sauvegarde hors du serveur. Sans la clé `STORAGE_ENCRYPTION_KEY` (dans `/opt/tara/api.env`), les pièces d'identité sauvegardées sont illisibles : la garder en lieu sûr, hors du serveur.
 
+## Bureau Tara (retour non payé)
+
+Les colis dont le retour n'est pas payé sont gardés au bureau Tara. Adresse, horaires et
+position sont réglables dans `/opt/tara/api.env`, puis `tara update` (valeurs par défaut
+provisoires) :
+
+| Variable               | Défaut                                             | Rôle                                 |
+| ---------------------- | -------------------------------------------------- | ------------------------------------ |
+| `OFFICE_ADDRESS`       | Bureau Tara, Bonabéri, Douala (adresse provisoire) | adresse montrée aux apps et dans SMS |
+| `OFFICE_HOURS`         | Lundi au vendredi, 8 h - 17 h                      | horaires en français                 |
+| `OFFICE_HOURS_EN`      | Monday to Friday, 8 am - 5 pm                      | horaires en anglais                  |
+| `OFFICE_LATITUDE`      | 4.0717                                             | position du bureau (itinéraire)      |
+| `OFFICE_LONGITUDE`     | 9.6625                                             |                                      |
+| `OFFICE_HOLD_DAYS`     | 30                                                 | garde sans frais, en jours           |
+| `OFFICE_REMINDER_DAYS` | 1,7,25                                             | jours des rappels après le dépôt     |
+
+Quand l'adresse définitive est connue : la mettre ici **et** dans les conditions
+(`docs/juridique/conditions-expediteurs.md`, article 8), puis `pnpm --filter @tara/api legal`.
+Les messages du bureau partent par SMS ; pour WhatsApp, des modèles Meta seront à faire
+approuver (`OFFICE_HELD`, `OFFICE_REMINDER`, `OFFICE_HOLD_OVER`).
+
 ## Ce qui tourne sur le serveur
 
 | Service                    | Rôle                                                                              |

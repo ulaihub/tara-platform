@@ -292,6 +292,7 @@ export class OrdersService implements OnModuleInit {
         : null,
       attemptCount: order.attemptCount,
       failure: this.failureOf(order),
+      office: this.officeOf(order),
       delivery: this.deliveryOf(order),
       cancelReason: order.cancelReason,
       rating: ratingDto(order.ratings.find((r) => r.raterId === order.senderId)),
@@ -333,6 +334,27 @@ export class OrdersService implements OnModuleInit {
         : new Date(
             order.failedAt.getTime() + this.env.FAILURE_DECISION_TIMEOUT_MINUTES * 60_000,
           ).toISOString(),
+    };
+  }
+
+  /** Retour non payé : bureau Tara, garde et montant à payer pour récupérer le colis. */
+  private officeOf(order: OrderFull): z.output<typeof OrderDto>['office'] {
+    const toOffice = order.status === 'DELIVERY_FAILED' && order.failureDecision === 'OFFICE';
+    if (!toOffice && order.status !== 'HELD_AT_OFFICE' && order.status !== 'UNCLAIMED') return null;
+    return {
+      address: this.env.OFFICE_ADDRESS,
+      hours: this.env.OFFICE_HOURS,
+      hoursEn: this.env.OFFICE_HOURS_EN,
+      latitude: this.env.OFFICE_LATITUDE,
+      longitude: this.env.OFFICE_LONGITUDE,
+      heldSince: order.officeAt?.toISOString() ?? null,
+      until: order.officeUntil?.toISOString() ?? null,
+      due: toOffice
+        ? order.returnFee + (order.feePaidAt ? 0 : order.totalPrice)
+        : order.officePaidAt
+          ? 0
+          : order.officeDue,
+      paidAt: order.officePaidAt?.toISOString() ?? null,
     };
   }
 
@@ -1045,7 +1067,13 @@ export class OrdersService implements OnModuleInit {
   async regeneratePickupCode(user: AuthUser, id: string): Promise<{ pickupCode: string }> {
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order || order.senderId !== user.id) throw AppError.notFound('ORDER_NOT_FOUND');
-    const returning = order.status === 'DELIVERY_FAILED';
+    // Retour : nouveau code de retour ; colis au bureau, payé : nouveau code de retrait.
+    const returning =
+      order.status === 'DELIVERY_FAILED' ||
+      (order.status === 'HELD_AT_OFFICE' && order.officePaidAt !== null);
+    if (order.status === 'HELD_AT_OFFICE' && !order.officePaidAt) {
+      throw AppError.conflict('OFFICE_PAYMENT_REQUIRED', { amount: order.officeDue });
+    }
     if (!returning && !BEFORE_PICKUP.includes(order.status)) {
       throw AppError.conflict('PICKUP_ALREADY_DONE');
     }

@@ -42,6 +42,7 @@ void main() {
     'CreatedBatch': Placement.batchFields,
     'Payment': Payment.fields,
     'Rating': OrderRating.fields,
+    'ReturnQuote': ReturnQuote.fields,
     'LegalDocument': LegalDocument.fields,
     'Ticket': SupportTicket.fields,
     'WalletLine': WalletLine.fields,
@@ -60,6 +61,14 @@ void main() {
       for (final v in variants) ...((v['properties'] ?? <String, Object?>{}) as Map).keys.cast<String>(),
     };
     expect(properties, containsAll(OrderFailure.fields));
+    final office = Map<String, Object?>.from(((schemas['Order']! as Map)['properties']! as Map)['office']! as Map);
+    final officeVariants = [
+      office,
+      ...((office['anyOf'] ?? office['oneOf'] ?? <Object?>[]) as List).cast<Map<String, Object?>>(),
+    ];
+    expect({
+      for (final v in officeVariants) ...((v['properties'] ?? <String, Object?>{}) as Map).keys.cast<String>(),
+    }, containsAll(OrderOffice.fields));
   });
 
   test('portefeuille : champs de la boutique lus par l’app', () {
