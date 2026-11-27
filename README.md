@@ -14,12 +14,14 @@ Lancement prévu à Douala (Cameroun) : réseau 2G/3G instable, téléphones And
 
 ## Démarrage rapide
 
-Prérequis : Node 22, pnpm 10, Docker.
+Prérequis : Node 22 (22.12 ou plus), pnpm 10, Docker. Sous Windows : arrêter un éventuel
+PostgreSQL déjà installé (il occupe le port 5432) et utiliser `Copy-Item` au lieu de `cp`.
 
 ```bash
 pnpm install
 pnpm infra:up
 cp apps/api/.env.example apps/api/.env
+pnpm --filter @tara/api generate   # client de la base (à refaire après chaque changement du schéma)
 pnpm db:migrate
 pnpm --filter @tara/api db:seed   # zone de Douala, tarif de lancement, offre BIENVENUE
 pnpm dev
