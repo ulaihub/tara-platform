@@ -24,6 +24,20 @@ Rester court : ce fichier est relu à chaque message.
 - Le **code de livraison** n'est jamais affiché (le lien de suivi peut circuler) : envoyé par SMS seulement.
 - Commits et PR : pas de nom de modèle d'IA.
 
+## Fichiers à tenir à jour (dans la branche du lot qui les concerne)
+
+- `CLAUDE.md` « État et suite » et le tableau du `README.md` : à chaque lot.
+- `docs/design/maquettes/INVENTAIRE.md` : écrans rendus fidèles, écarts restants.
+- `docs/API.md` (et `apps/api/openapi.json`) : toute route ajoutée ou changée.
+- `docs/juridique/*.md` : toute règle d'argent ou de responsabilité (nouvelle version des
+  conditions, à faire relire par l'avocat).
+- `docs/SECURITE.md` : nouvelle protection, nouveau secret ou nouvelle donnée personnelle
+  (et `docs/juridique/registre-des-traitements.md`).
+- `docs/DEPLOIEMENT.md` : nouvelle variable de configuration ou étape sur le serveur.
+- `docs/ARCHITECTURE.md` : nouveau composant ou décision technique.
+- `docs/PLAN_DES_PHASES.md` : phase terminée ou ajoutée.
+- README de l'app ou du paquet touché (`apps/*/README.md`, `packages/*/README.md`, `tools/design/README.md`).
+
 ## Commandes utiles
 
 - Installation : voir « Démarrage rapide » du README (`pnpm install`, `pnpm infra:up`, …).
